@@ -1,0 +1,47 @@
+## Emacs Backup Files
+*~
+\#*\#
+
+## Vim Temp Files
+*.swp
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Temporary directories
+**/.dep/**
+**/build/**
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables/Binaries
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+*.bin
+*.dfu
+
+# Debug files
+*.dSYM/
+*.su
+
