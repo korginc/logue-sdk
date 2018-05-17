@@ -1,0 +1,21 @@
+{
+    "header" : 
+    {
+        "platform" : "prologue",
+        "module" : "osc",
+        "api" : "1.0-0",
+        "dev_id" : 0,
+        "prg_id" : 0,
+        "version" : "1.0-0",
+        "name" : "waves",
+        "num_param" : 6,
+        "params" : [
+            ["Wave A",      0,  45,  ""],
+            ["Wave B",      0,  43,  ""],
+            ["Sub Wave",    0,  15,  ""],
+            ["Sub Mix",     0, 100, "%"],
+            ["Ring Mix",    0, 100, "%"],
+            ["Bit Crush",   0, 100, "%"]
+          ]
+    }
+}
