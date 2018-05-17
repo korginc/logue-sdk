@@ -12,7 +12,7 @@ This repository contains all the files and tools needed to build custom oscillat
 
 ### Building Projects
 
-**Note: Make sure submodules are initialized and updated.**
+**Note: Make sure git submodules are initialized and updated.**
 
 **Note: Make sure the necessary toolchain is properly installed. Refer to [tools/](tools/) for installation instructions.**
 
