@@ -57,8 +57,8 @@ Note: The values for these messages are not scaled to fit the parameter's type a
 ## Firmware Update
 
 **v1.13 beta**
-* *Windows* : [prologue-devboard-rev_a-system-v1.13b.zip]()
-* *OSX* : [prologue-devboard-rev_a-system-v1.13b.dmg]()
+* *Windows* : [prologue-devboard-rev_a-system-v1.13b.zip](http://cdn.storage.korg.com/korg_SDK/prologue-devboard-rev_a-system-v1.13b.zip) (SHA1: 64ef457e892876c3d083c213d1678b522df81906)
+* *OSX* : [prologue-devboard-rev_a-system-v1.13b.dmg](http://cdn.storage.korg.com/korg_SDK/prologue-devboard-rev_a-system-v1.13b.dmg) (SHA1: a0cdc7f3c10af8e2053aee835627aa61c1fc6f3f)
 
 See the included README.md file for update instructions.
 
