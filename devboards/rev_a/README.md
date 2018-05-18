@@ -4,6 +4,8 @@ This board consists of a single digital voice of the [prologue synthesizer](http
 
 **Note: The analog VCAs of the prologue were not included on this board. Enveloppes are simulated in software on the voice microcontroller and as of the latest firmware version are causing some unwanted sonic artefacts. This platform is aimed for testing only and may not be suitable to be used as full blown instrument.**
 
+**Note: If you received a board during Superbooth 18, please update the firmware by following the steps below before loading custom oscillators and effects**
+
 ## Specs
 
 * STM32F4 series microcontrollers
