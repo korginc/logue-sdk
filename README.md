@@ -54,6 +54,9 @@ They can be loaded onto a [prologue](http://korg.com/prologue) (or [development 
 
 Waves is a morphing wavetable oscillator that uses the wavetables provided by the custom oscillator API. It is a good example of how to use API functions, declare edit menu parameters and use parameter values of various types. See [platform/prologue/demos/waves/](platform/prologue/demos/waves/) for code and details.
 
+## Sharing your Oscillators/Effects with us
+
+To show us your work please reach out to *logue-sdk@korg.co.jp*.
 
 ## Support
 
