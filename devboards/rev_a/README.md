@@ -6,6 +6,8 @@ This board consists of a single digital voice of the [prologue synthesizer](http
 
 **Note: If you received a board during Superbooth 18, please update the firmware by following the steps below before loading custom oscillators and effects**
 
+**Warning: A problem has been found with the reset switch. When pressed multiple times, the main microcontroller goes into full read protection mode, preventing normal operation. The chip is however recoverable by using ST's DeFuse Demo tool and the recovery DFU system. (See Last Resort Recovery section)**
+
 ## Specs
 
 * STM32F4 series microcontrollers
@@ -62,10 +64,12 @@ Note: The values for these messages are not scaled to fit the parameter's type a
 * *Windows* : [prologue-devboard-rev_a-system-v1.13b.zip](http://cdn.storage.korg.com/korg_SDK/prologue-devboard-rev_a-system-v1.13b.zip) (SHA1: 64ef457e892876c3d083c213d1678b522df81906)
 * *OSX* : [prologue-devboard-rev_a-system-v1.13b.dmg](http://cdn.storage.korg.com/korg_SDK/prologue-devboard-rev_a-system-v1.13b.dmg) (SHA1: a0cdc7f3c10af8e2053aee835627aa61c1fc6f3f)
 
+**Note: there is currently an issue with the DMG image for OSX. We are working on replacing it.*
+
 See the included README.md file for update instructions.
 
 ### Last Resort Recovery
 
 A DFU file is bundled with the system. It is formated for use with ST Microelectronics DefuSeDemo tool.
-In order to boot the board in DFU mode. Connect the board via USB to your computer and short pads 1 and 2 of the serial connector next to C97 (close to the power connector) while tapping the reset switch. The board should then be visible to the DefuseDemo tool.
+In order to boot the board in DFU mode. Connect the board via USB to your computer and short pads 2 and 5 of the serial connector next to C97 (close to the power connector) while tapping the reset switch. The board should then be visible to the [DefuseDemo tool](http://www.st.com/en/development-tools/stsw-stm32080.html).
 
