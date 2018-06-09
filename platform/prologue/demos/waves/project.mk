@@ -10,7 +10,7 @@ UCXXSRC = waves.cpp
 
 UINCDIR =
 
-UDEFS =
+UDEFS = -o0 
 
 ULIB = 
 

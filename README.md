@@ -8,16 +8,26 @@ This repository contains all the files and tools needed to build custom oscillat
 * [tools/](tools/) : Installation location and documentation for tools required to build projects and manipulate built products.
 * [devboards/](devboards/) : Information and files related to limited edition development boards.
 
-## Quick Start
+## Quick Start 
+
+### Install and Env Setup
+$ git clone https://github.com/korginc/logue-sdk.git
+$ cd logue-sdk
 
 ### Building Projects
 
 **Note: Make sure git submodules are initialized and updated.**
+$ git submodule update --init --recursive
 
 **Note: Make sure the necessary toolchain is properly installed. Refer to [tools/](tools/) for installation instructions.**
+$ cd tools
+$ # cd <TOOLDIR> && cat README.md
 
  1. move into a project directory.
+$ cd [platform/prologue/demos/waves/](platform/prologue/demos/waves/)
+
  2. type `make` to build the project.
+$ make
 
 ```
 $ make

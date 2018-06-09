@@ -28,7 +28,9 @@ ZIP_ARGS = -r -m -q
 
 ifeq ($(OS),Windows_NT)
 ifneq ($(MSYSTEM), MSYS)
-  ZIP = $(TOOLSDIR)/zip/bin/zip
+    ifneq ($(MSYSTEM), MINGW64)
+        ZIP = $(TOOLSDIR)/zip/bin/zip
+    endif
 endif
 endif
 
@@ -48,6 +50,7 @@ GCC_TARGET = arm-none-eabi-
 GCC_BIN_PATH = $(TOOLSDIR)/gcc/gcc-arm-none-eabi-5_4-2016q3/bin
 
 CC   = $(GCC_BIN_PATH)/$(GCC_TARGET)gcc
+CXX  = $(GCC_BIN_PATH)/$(GCC_TARGET)g++
 CXXC = $(GCC_BIN_PATH)/$(GCC_TARGET)g++
 LD   = $(GCC_BIN_PATH)/$(GCC_TARGET)gcc
 #LD  = $(GCC_BIN_PATH)/$(GCC_TARGET)g++

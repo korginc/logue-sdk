@@ -15,6 +15,10 @@
 **/.dep/**
 **/build/**
 
+# Tool install files
+tools/**/EULA.md
+tools/**/**
+
 # Precompiled Headers
 *.gch
 *.pch
