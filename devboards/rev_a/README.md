@@ -6,7 +6,7 @@ This board consists of a single digital voice of the [prologue synthesizer](http
 
 **Note: If you received a board during Superbooth 18, please update the firmware by following the steps below before loading custom oscillators and effects**
 
-**Warning: A problem has been found with the reset switch. When pressed multiple times, the main microcontroller goes into full read protection mode, preventing normal operation. The chip is however recoverable by using ST's DeFuse Demo tool and the recovery DFU system. (See Last Resort Recovery section)**
+**Warning: A problem has been found with the reset switch. When pressed multiple times, the main microcontroller goes into full read protection mode, preventing normal operation. The chip is however recoverable by using ST's DeFuse Demo tool and the recovery DFU system. (See Last Resort Recovery section). System 1.17 and up prevents this issue.**
 
 ## Specs
 
@@ -60,11 +60,9 @@ Note: The values for these messages are not scaled to fit the parameter's type a
 
 ## Firmware Update
 
-**v1.13 beta**
-* *Windows* : [prologue-devboard-rev_a-system-v1.13b.zip](http://cdn.storage.korg.com/korg_SDK/prologue-devboard-rev_a-system-v1.13b.zip) (SHA1: 64ef457e892876c3d083c213d1678b522df81906)
-* *OSX* : [prologue-devboard-rev_a-system-v1.13b.dmg](http://cdn.storage.korg.com/korg_SDK/prologue-devboard-rev_a-system-v1.13b.dmg) (SHA1: a0cdc7f3c10af8e2053aee835627aa61c1fc6f3f)
-
-**Note: there is currently an issue with the DMG image for OSX. We are working on replacing it.*
+**v1.17 beta**
+* *Windows* : [prologue-devboard-rev_a-system-v1.17b.zip](http://cdn.storage.korg.com/korg_SDK/prologue-devboard-rev_a-system-v1.17b.zip) (SHA1: a5f1c7ca61871c348f339ead72b457d16ca3ee7f)
+* *OSX* : [prologue-devboard-rev_a-system-v1.17b.dmg](http://cdn.storage.korg.com/korg_SDK/prologue-devboard-rev_a-system-v1.17b.dmg) (SHA1: 37c7add3338b2c1edcdf6907beb356cdb1af0363)
 
 See the included README.md file for update instructions.
 
