@@ -42,9 +42,9 @@ ARCHIVE_SHA1="e87bbefaccbb43d30c084faeb945f4e96e7ec780"
 ARCHIVE_NAME="gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2"
 
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-    echo ">> Assuming Linux 32 bit platform."
+    echo ">> Assuming Linux on intel 32 bit platform."
 else
-    echo ">> This script is meant for Linux."
+    echo ">> This script is meant for Linux (intel 32 bit)."
     popd 2>&1 > /dev/null
     exit 1
 fi
