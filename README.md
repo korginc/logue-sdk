@@ -46,10 +46,6 @@ Done
 *.prlgunit* files are simple zip files containing the binary payload for the custom oscillator or effect and a metadata file.
 They can be loaded onto a [prologue](http://korg.com/prologue) (or [development board](devboards/)) using the [logue-cli utility](tools/logue-cli/) or the [Librarian application (to be released)](http://korg.com/prologue).
 
-**Note: The prologue firmware currently does not support the custom oscillator and effects, the feature will be provided in an update planned for June 2018. Currently the feature is only available on the development board**
-
-## Demo Code
-
 ### Waves
 
 Waves is a morphing wavetable oscillator that uses the wavetables provided by the custom oscillator API. It is a good example of how to use API functions, declare edit menu parameters and use parameter values of various types. See [platform/prologue/demos/waves/](platform/prologue/demos/waves/) for code and details.
