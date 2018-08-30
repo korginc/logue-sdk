@@ -28,7 +28,9 @@ ZIP_ARGS = -r -m -q
 
 ifeq ($(OS),Windows_NT)
 ifneq ($(MSYSTEM), MSYS)
+ifneq ($(MSYSTEM), MINGW64)
   ZIP = $(TOOLSDIR)/zip/bin/zip
+endif
 endif
 endif
 
@@ -230,3 +232,4 @@ package:
 	@mv $(PROJECT).zip $(PKGARCH)
 	@echo
 	@echo Done
+
