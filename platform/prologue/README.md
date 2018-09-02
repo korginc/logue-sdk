@@ -48,8 +48,6 @@ Done
 *.prlgunit* files are simple zip files containing the binary payload for the custom oscillator or effect and a metadata file.
 They can be loaded onto a [prologue](http://korg.com/prologue) (or [development board](../../devboards/)) using the [logue-cli utility](../../tools/logue-cli/) or the [Librarian application (to be released)](http://korg.com/prologue).
 
-**Note: The prologue firmware currently does not support the custom oscillator and effects, the feature will be provided in an update planned for June 2018. Currently the feature is only available on the development board**
-
 ## Demo Code
 
 ### Waves
