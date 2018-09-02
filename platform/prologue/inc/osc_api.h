@@ -762,7 +762,7 @@ extern "C" {
    */
   float _osc_white(void);
 
-  __fast_inline uint32_t osc_white(void) {
+  __fast_inline float osc_white(void) {
     return _osc_white();
   }
   

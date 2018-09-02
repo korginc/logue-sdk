@@ -379,7 +379,7 @@ extern "C" {
    */
   float _fx_white(void);
 
-  __fast_inline uint32_t fx_white(void) {
+  __fast_inline float fx_white(void) {
     return _fx_white();
   }
   
