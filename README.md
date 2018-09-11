@@ -37,7 +37,7 @@ Packaging to ./waves.prlgunit
 
 Done
 ```
- 3. As the *Packaging...* line indicates, a *.prlgunit* file will be generated.
+ 5. As the *Packaging...* line indicates, a *.prlgunit* file will be generated.
  
 ### Manipulating/Using *.prlgunit* Files
 
