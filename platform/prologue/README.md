@@ -2,7 +2,7 @@
 
 ### Overview
 
-All source files needed to build custom oscillators and effects for the [prologue synthesizer](http://korg.com/prologue) exist under this directory.
+All source files needed to build custom oscillators and effects for the [prologue synthesizer](https://www.korg.com/products/synthesizers/prologue) exist under this directory.
 
 #### Overall Structure:
  * [inc/](inc/) : Common headers.
@@ -14,12 +14,10 @@ All source files needed to build custom oscillators and effects for the [prologu
 
 ### Building a Project
 
-**Note: Make sure submodules are initialized and updated.**
-
-**Note: Make sure the necessary toolchain is properly installed. Refer to [tools/](../../tools/) for installation instructions.**
-
- 1. move into a project directory.
- 2. type `make` to build the project.
+ 1. Clone this repository and make sure submodules are initialized and updated.
+ 2. Make sure the necessary toolchain is properly installed. **Refer to [tools/](../../tools/) for installation instructions.**
+ 3. move into a project directory.
+ 4. type `make` to build the project.
 
 ```
 $ make
@@ -46,7 +44,7 @@ Done
 ### Manipulating/Using *.prlgunit* Files
 
 *.prlgunit* files are simple zip files containing the binary payload for the custom oscillator or effect and a metadata file.
-They can be loaded onto a [prologue](http://korg.com/prologue) (or [development board](../../devboards/)) using the [logue-cli utility](../../tools/logue-cli/) or the [Librarian application (to be released)](http://korg.com/prologue).
+They can be loaded onto a [prologue](https://www.korg.com/products/synthesizers/prologue) (or [development board](../../devboards/)) using the [logue-cli utility](../../tools/logue-cli/) or the [Librarian application](https://www.korg.com/products/synthesizers/prologue/librarian_contents.php).
 
 ## Demo Code
 
