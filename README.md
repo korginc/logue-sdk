@@ -13,7 +13,7 @@ This repository contains all the files and tools needed to build custom oscillat
 ### Building Projects
 
  1. Clone this repository and make sure submodules are initialized and updated.
- 2. Make sure the necessary toolchain is properly installed. **Refer to [tools/](../../tools/) for installation instructions.**
+ 2. Make sure the necessary toolchain is properly installed. **Refer to [tools/](tools/) for installation instructions.**
  3. move into a project directory.
  4. type `make` to build the project.
 
