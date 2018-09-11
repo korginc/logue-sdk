@@ -42,7 +42,7 @@ Done
 ### Manipulating/Using *.prlgunit* Files
 
 *.prlgunit* files are simple zip files containing the binary payload for the custom oscillator or effect and a metadata file.
-They can be loaded onto a [prologue](https://www.korg.com/products/synthesizers/prologue) (or [development board](devboards/)) using the [logue-cli utility](tools/logue-cli/) or the [Librarian application (to be released)](https://www.korg.com/products/synthesizers/prologue).
+They can be loaded onto a [prologue](https://www.korg.com/products/synthesizers/prologue) (or [development board](devboards/)) using the [logue-cli utility](tools/logue-cli/) or the [Librarian application](https://www.korg.com/products/synthesizers/prologue).
 
 ## Demo Code
 
