@@ -88,7 +88,7 @@ extern "C" {
   ((((api) & USER_API_MAJOR_MASK) == (USER_API_VERSION & USER_API_MAJOR_MASK)) \
    && (((api) & USER_API_MINOR_MASK) <= (USER_API_VERSION & USER_API_MINOR_MASK)))
   
-#define USER_PRG_HEADER_SIZE (0x400) // 1KB - TODO: figure out exact size, can be smaller, fix info about parameters
+#define USER_PRG_HEADER_SIZE (0x400) // 1KB
 #define USER_PRG_SIG_SIZE    (0x84) // 132B - can fit ECDSA sig using secp521r1 
 
 #define USER_PRG_MAX_PARAM_COUNT (6)
