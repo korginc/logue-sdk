@@ -1,4 +1,4 @@
-## Prologue SDK Source and Template Projects
+## prologue SDK Source and Template Projects
 
 ### Overview
 
@@ -66,7 +66,7 @@ Waves is a morphing wavetable oscillator that uses the wavetables provided by th
 
 The manifest file consists essentially of a json dictionary with the following fields:
 
-* platform (string) : Name of the target platform, should always be *prologue*
+* platform (string) : Name of the target platform, should be set to *prologue*
 * module (string) : Keyword for the module targetted, should be one of the following: *osc*, *modfx*, *delfx*, *revfx*
 * api (string) : API version used. (format: MAJOR.MINOR-PATCH)
 * dev_id (int) : Developer ID, currently unused, set to 0
