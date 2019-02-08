@@ -228,7 +228,7 @@ extern "C" {
       x1 = x0 - 1;
       sign = -1.f;
     }
-    const float *wt = wt_saw_lut_f + (((uint8_t)idx)<<k_wt_saw_size_exp);
+    const float *wt = &wt_saw_lut_f[idx*k_wt_saw_lut_size];
     const float y0 = linintf(x0f - x0p, wt[x0], wt[x1]);
     return sign*y0;
   }
@@ -253,11 +253,11 @@ extern "C" {
       x1 = x0 - 1;
       sign = -1.f;
     }
-    const float *wt = wt_saw_lut_f + (((uint8_t)idx)<<k_wt_saw_size_exp);
+    const float *wt = &wt_saw_lut_f[(uint16_t)idx*k_wt_saw_lut_size];
     const float fr = x0f - x0p;
     const float y0 = sign * linintf(fr, wt[x0], wt[x1]);
 
-    wt += k_wt_saw_size;
+    wt += k_wt_saw_lut_size;
     const float y1 = sign * linintf(fr, wt[x0], wt[x1]);
     
     return linintf((idx - (uint8_t)idx), y0, y1);
@@ -342,7 +342,7 @@ extern "C" {
       x1 = x0 - 1;
       sign = -1.f;
     }
-    const float *wt = wt_sqr_lut_f + (((uint8_t)idx)<<k_wt_sqr_size_exp);
+    const float *wt = &wt_sqr_lut_f[idx*k_wt_sqr_lut_size];
     const float y0 = linintf(x0f - x0p, wt[x0], wt[x1]);
     return sign*y0;
   }
@@ -368,11 +368,11 @@ extern "C" {
       x1 = x0 - 1;
       sign = -1.f;
     }
-    const float *wt = wt_sqr_lut_f + (((uint8_t)idx)<<k_wt_sqr_size_exp);
+    const float *wt = &wt_sqr_lut_f[(uint16_t)idx*k_wt_sqr_lut_size];
     const float fr = x0f - x0p;
     const float y0 = sign * linintf(fr, wt[x0], wt[x1]);
 
-    wt += k_wt_sqr_size;
+    wt += k_wt_sqr_lut_size;
     const float y1 = sign * linintf(fr, wt[x0], wt[x1]);
     
     return linintf((idx - (uint8_t)idx), y0, y1);
@@ -447,7 +447,7 @@ extern "C" {
     const uint32_t x0 = (x0p<=k_wt_par_size) ? x0p : (k_wt_par_size - (x0p & k_wt_par_mask));
     const uint32_t x1 = (x0p<(k_wt_par_size-1)) ? (x0 + 1) & k_wt_par_mask : (x0p >= k_wt_par_size) ? (x0 - 1) & k_wt_par_mask : (x0 + 1);
 
-    const float *wt = wt_par_lut_f + (idx<<k_wt_par_size_exp);
+    const float *wt = &wt_par_lut_f[idx*k_wt_par_lut_size];
     const float y0 = linintf(x0f - x0p, wt[x0], wt[x1]);
     return y0;
   }
@@ -469,11 +469,11 @@ extern "C" {
     uint32_t x0 = (x0p<=k_wt_par_size) ? x0p : (k_wt_par_size - (x0p & k_wt_par_mask));
     uint32_t x1 = (x0p<(k_wt_par_size-1)) ? (x0 + 1) & k_wt_par_mask : (x0p >= k_wt_par_size) ? (x0 - 1) & k_wt_par_mask : (x0 + 1);
 
-    const float *wt = wt_par_lut_f + (((uint8_t)idx)<<k_wt_par_size_exp);
+    const float *wt = &wt_par_lut_f[(uint16_t)idx*k_wt_par_lut_size];
     const float fr = x0f - x0p;
     const float y0 = linintf(fr, wt[x0], wt[x1]);
 
-    wt += k_wt_par_size;
+    wt += k_wt_par_lut_size;
     
     const float y1 = linintf(fr, wt[x0], wt[x1]);
 
