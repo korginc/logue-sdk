@@ -4,7 +4,7 @@ This project can be used as a basis for custom modulation effects. **Refer to [p
 
 ### FAQ
 
-#### Why does MODFX_PROCESS() has *main* and *sub* inputs and outputs?
+#### Why does MODFX_PROCESS() have *main* and *sub* inputs and outputs?
 
 The modulation effect API was originally designed for the prologue synthesizer which allows each *main* and *sub* timbre audio to be processed independently by the modulation effect section.
 This interface was maintained in order to preserve API compatibility between the minilogue xd and prologue. 
