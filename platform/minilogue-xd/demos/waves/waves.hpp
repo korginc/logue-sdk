@@ -65,6 +65,7 @@ struct Waves {
     uint8_t  subwave;
     uint8_t  padding;
     
+    // constructor
     Params(void) :
       submix(0.05f),
       ringmix(0.f),
@@ -77,6 +78,7 @@ struct Waves {
     { }
   };
   
+  // keep the state of the oscillator (phase accumulators, wave pointers, etc)
   struct State {
     const float   *wave0;
     const float   *wave1;
@@ -95,6 +97,7 @@ struct Waves {
           float    imperfection;
           uint32_t flags:8;
     
+    // constructor
     State(void) :
       wave0(wavesA[0]),
       wave1(wavesD[0]),
@@ -110,18 +113,22 @@ struct Waves {
       flags(k_flags_none)
     {
       reset();
+      // this is a random value used for detuning the individual voices (4) of the synth
       imperfection = osc_white() * 1.0417e-006f; // +/- 0.05Hz@48KHz
     }
     
+    // reset the phases of all waves
     inline void reset(void)
     {
       phi0 = 0;
       phi1 = 0;
       phisub = 0;
-      lfo = lfoz;
+      // the LFO only resets if specified in lfoz, probably handling free vs sync LFO
+      lfo = lfoz; 
     }
   };
 
+  // constructor
   Waves(void) {
     init();
   }
@@ -129,21 +136,32 @@ struct Waves {
   void init(void) {
     state = State();
     params = Params();
+
+    // filters for applying bit crush
     prelpf.mCoeffs.setPoleLP(0.8f);
     postlpf.mCoeffs.setFOLP(osc_tanpif(0.45f));
   }
   
+  // w0 is the phase increment
   inline void updatePitch(float w0) {
+    // since this struct is initiated 4 times (1 for every voice)
+    // imperfection will get 4 different values so that all voices are slightly detuned
     w0 += state.imperfection;
+
+    // the other waves of the voice are then detuned by SHIFT+SHAPE amount
     const float drift = params.shiftshape;
-    state.w00 = w0;
-    // Alt osc with slight drift (0.25Hz@48KHz)
-    state.w01 = w0 + drift * 5.20833333333333e-006f;
-    // Sub one octave and a phase drift (0.15Hz@48KHz)
-    state.w0sub = 0.5f * w0 + drift * 3.125e-006f;
+    state.w00 = w0; // phase increment for wave 1
+    // second wave osc additionally with slight drift (0.25Hz@48KHz) depending on SHIFT+SHAPE
+    state.w01 = w0 + drift * 5.20833333333333e-006f;  // phase increment for wave 2
+    // Sub wave octave and additionally a phase drift (0.15Hz@48KHz) depending on SHIFT+SHAPE
+    state.w0sub = 0.5f * w0 + drift * 3.125e-006f; // 0.5f means one octave lower
+    // phase increment for sub wave
   }
     
+  // this method checks the which waves the user has changed and selects the corresponding
+  // waves from the wave tables
   inline void updateWaves(const uint16_t flags) {
+    // check flags for any wave change requests from corresponding parameter changes in OSC_PARAM
     if (flags & k_flag_wave0) {
       static const uint8_t k_a_thr = k_waves_a_cnt;
       static const uint8_t k_b_thr = k_a_thr + k_waves_b_cnt;
@@ -193,6 +211,7 @@ struct Waves {
     }
   }
 
+  // Waves struct aggregates state, params and filters
   State       state;
   Params      params;
   dsp::BiQuad prelpf, postlpf;
