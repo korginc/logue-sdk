@@ -450,8 +450,8 @@ namespace dsp {
     /*=====================================================================*/
       
     BiQuad::Coeffs mCoeffs;
-    float mD0, mD1, mW0, mW1;
     float mZ1, mZ2;
+    float mD0, mD1, mW0, mW1;
   };    
 }
 

@@ -50,6 +50,8 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   // create the struct
   // hopefully the synth is dealing with the clean-up correctly...
   s_waves = Waves();
+  (void)platform;
+  (void)api;
 }
 
 // cycle event, called (48k divided by number frames) times per second
@@ -110,11 +112,10 @@ void OSC_CYCLE(const user_osc_param_t * const params,
   // lfo increment per sample
   const float lfo_inc = (s.lfo - lfoz) / frames;  
   
-  const float ditheramt = p.bitcrush * 2e-008f;
+  // const float ditheramt = p.bitcrush * 2e-008f;
   
-  const float bitres = osc_bitresf(p.bitcrush);
-  // recip stands for reciprocal
-  const float bitres_recip = 1.f / bitres; 
+  // const float bitres = osc_bitresf(p.bitcrush);
+  // const float bitres_recip = 1.f / bitres; 
 
   // mix amount of sub oscillator from the program edit
   const float submix = p.submix;    
@@ -181,6 +182,7 @@ void OSC_CYCLE(const user_osc_param_t * const params,
   s.phi1 = phi1;
   s.phisub = phisub;
   s.lfoz = lfoz;
+  (void)params;
 }
 
 // note on event, so reset the wave phases to 0
@@ -188,6 +190,7 @@ void OSC_NOTEON(const user_osc_param_t * const params)
 {
   // change the flag to reset the waves at next cycle, but keep other state changes (flags)
   s_waves.state.flags |= Waves::k_flag_reset;
+  (void)params;
 }
 
 // note off event

@@ -165,7 +165,7 @@ struct Waves {
     if (flags & k_flag_wave0) {
       static const uint8_t k_a_thr = k_waves_a_cnt;
       static const uint8_t k_b_thr = k_a_thr + k_waves_b_cnt;
-      static const uint8_t k_c_thr = k_b_thr + k_waves_c_cnt;
+      // static const uint8_t k_c_thr = k_b_thr + k_waves_c_cnt;
       
       uint8_t idx = params.wave0;
       const float * const * table;
@@ -186,7 +186,7 @@ struct Waves {
     if (flags & k_flag_wave1) {
       static const uint8_t k_d_thr = k_waves_d_cnt;
       static const uint8_t k_e_thr = k_d_thr + k_waves_e_cnt;
-      static const uint8_t k_f_thr = k_e_thr + k_waves_f_cnt;
+      // static const uint8_t k_f_thr = k_e_thr + k_waves_f_cnt;
       
       uint8_t idx = params.wave1;
       const float * const * table;
@@ -206,7 +206,7 @@ struct Waves {
       state.wave1 = table[idx];
     }
     if (flags & k_flag_subwave) {
-      const uint8_t idx = params.subwave;
+      // const uint8_t idx = params.subwave;
       state.subwave = wavesA[params.subwave];
     }
   }
