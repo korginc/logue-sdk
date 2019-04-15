@@ -74,7 +74,7 @@ CXXOPT = -std=c++11 -fno-rtti -fno-exceptions -fno-non-call-exceptions
 LDOPT = -Xlinker --just-symbols=$(LDDIR)/osc_api.syms
 
 CWARN = -W -Wall -Wextra
-CXXWARN =
+CXXWARN = -W -Wall -Wextra -Wdouble-promotion -Wfloat-conversion -Werror
 
 FPU_OPTS = -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -fcheck-new
 
@@ -188,7 +188,7 @@ $(COBJS) : $(OBJDIR)/%.o : %.c Makefile
 	@echo Compiling $(<F)
 	@$(CC) -c $(CFLAGS) -I. $(INCDIR) $< -o $@
 
-$(CXXOBJS) : $(OBJDIR)/%.o : %.cpp Makefile
+$(CXXOBJS) : $(OBJDIR)/%.o : %.cpp %.hpp Makefile
 	@echo Compiling $(<F)
 	@$(CXXC) -c $(CXXFLAGS) -I. $(INCDIR) $< -o $@
 
