@@ -129,7 +129,11 @@ The following variables are declared:
 
 The *tests/* directory contains very simple code that illustrates how to write oscillators and effects. They are not meant to do anything useful, nor claim to be optimized. You can refer to these as examples of how to use the different interfaces and test your setup.
 
-<!-- ## Troubleshooting -->
+### Troubleshooting
+
+#### Can't compile, missing CMSIS arm_math.h
+
+The CMSIS submodule is likely not initialized or up to date. Make sure to run `git submodule update --init` to initialize and update all submodules.
 
 ## TODO
 
