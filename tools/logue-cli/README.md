@@ -42,5 +42,10 @@ Commands:
 Use -h/--help along with a command to obtain detailed usage information.
 ```
 
- 
+### Troubleshooting
+
+#### Device's MIDI ports are not auto detected
+
+The MIDI ports to use for the SYSEX communication can be specified via command line options, but care must be taken to choose the right ports.
+In the case of prologue and minilogue xd, the ports ending with `KBD/KNOB` and `SOUND` must be selected. The other ports refer to the legacy MIDI connectors on the back of the device.
 
