@@ -35,11 +35,11 @@ SCRIPT_DIR="$(pwd)/$(dirname $0)"
 pushd ${SCRIPT_DIR} 2>&1 > /dev/null
 
 PKGNAME="logue-cli"
-VERSION="0.03-0b"
+VERSION="0.06-0b"
 
-ARCHIVE_URL="http://cdn.storage.korg.com/korg_SDK/logue-cli-osx-0.03-0b.zip"
-ARCHIVE_SHA1="c04267b9ce5f784aaf73ec801ad3eaf994c38709"
-ARCHIVE_NAME="logue-cli-osx-0.03-0b.zip"
+ARCHIVE_URL="http://cdn.storage.korg.com/korg_SDK/logue-cli-osx-0.06-0b.zip"
+ARCHIVE_SHA1="3def5079120b309350a11a16b16b065f34d0c87e"
+ARCHIVE_NAME="logue-cli-osx-0.06-0b.zip"
 
 if [[ "${OSTYPE}" == "darwin"* ]]; then
     echo ">> Assuming OSX 64 bit platform."

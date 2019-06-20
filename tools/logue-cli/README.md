@@ -18,9 +18,9 @@ Currently unsupported. Builds will be provided at a later time.
 
 Download the appropriate version below according to your system.
 
-##### Version 0.01-0b
-* 32bit : [logue-cli-win32-0.03-0b.zip](http://cdn.storage.korg.com/korg_SDK/logue-cli-win32-0.03-0b.zip) (SHA1: cfe6e6e774ab03ffc76e99dcff675feb1ca9db29)
-* 64bit : [logue-cli-win64-0.03-0b.zip](http://cdn.storage.korg.com/korg_SDK/logue-cli-win64-0.03-0b.zip) (SHA1: a4106fa2fdc75d68952056dea0a8f9915bcfdbeb)
+##### Version 0.06-0b
+* 32bit : [logue-cli-win32-0.06-0b.zip](http://cdn.storage.korg.com/korg_SDK/logue-cli-win32-0.06-0b.zip) (SHA1: 5e349adb70b9109a8d174dbb84a39612ad8f30f3)
+* 64bit : [logue-cli-win64-0.06-0b.zip](http://cdn.storage.korg.com/korg_SDK/logue-cli-win64-0.06-0b.zip) (SHA1: a6b764a06da87010dbde28b11a2b917cd9fc14c1)
 
 #### MSYS
 
