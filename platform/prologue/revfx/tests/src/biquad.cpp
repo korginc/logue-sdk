@@ -1,7 +1,7 @@
 /*
  * File: biquad.cpp
  *
- * Test SDK Bi-Quad
+ * Simple execution environment test using provided biquad filters.
  *
  * 
  * 
@@ -27,8 +27,6 @@ enum {
   k_sobp,
   k_sobr,
   k_soap1,
-  // k_soap2,
-  // k_soap3,
   k_type_count
 };
 
@@ -129,11 +127,15 @@ void REVFX_PARAM(uint8_t index, int32_t value)
 {
   const float valf = q31_to_f32(value);
   switch (index) {
-  case 0:
+  case k_user_revfx_param_time:
     s_type = si_roundf(valf * (k_type_count - 1));
     break;
-  case 1:
+  case k_user_revfx_param_depth:
     s_wc = valf * valf * 0.49f;
+    break;
+  case k_user_revfx_param_shift_depth:
+    // Align neutral resonance at 0.5
+    s_q = (valf <= 0.5f) ? 0.1f + 0.6071f * 2 * (valf) : 0.7071 + 1.2929f * 2 * (valf - 0.5f);
     break;
   default:
     break;

@@ -55,6 +55,11 @@ extern "C" {
   /*===========================================================================*/
   /* General API                                                               */
   /*===========================================================================*/
+
+  /**
+   * Current platform
+   */
+  extern const uint32_t k_fx_api_platform;
   
   /**
    * Current API version
@@ -72,6 +77,28 @@ extern "C" {
     return _fx_mcu_hash();
   }
 
+  /**
+   * Get current tempo as beats per minute as integer
+   *
+   * @return  Current integer BPM, multiplied by 10 to allow 1 decimal precision 
+   */
+  uint16_t _fx_get_bpm(void);
+
+  __fast_inline uint16_t fx_get_bpm(void) {
+    return _fx_get_bpm();
+  }
+
+  /**
+   * Get current tempo as beats per minute as floating point
+   *
+   * @return  Current floating point BPM
+   */
+  float _fx_get_bpmf(void);
+
+  __fast_inline float fx_get_bpmf(void) {
+    return _fx_get_bpmf();
+  }
+  
   /*===========================================================================*/
   /* Lookup tables                                                             */
   /*===========================================================================*/

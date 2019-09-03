@@ -1,7 +1,7 @@
 /*
  * File: biquad.cpp
  *
- * Test SDK Bi-Quad
+ * Simple execution environment test using provided biquad filters.
  *
  * 
  * 
@@ -28,8 +28,6 @@ enum {
   k_sobp,
   k_sobr,
   k_soap1,
-  // k_soap2,
-  // k_soap3,
   k_type_count
 };
 
@@ -143,10 +141,10 @@ void MODFX_PARAM(uint8_t index, int32_t value)
 {
   const float valf = q31_to_f32(value);
   switch (index) {
-  case 0:
+  case k_user_modfx_param_time:
     s_type = si_roundf(valf * (k_type_count - 1));
     break;
-  case 1:
+  case k_user_modfx_param_depth:
     s_wc = valf * valf * 0.49f;
     break;
   default:

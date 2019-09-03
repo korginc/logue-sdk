@@ -215,7 +215,7 @@ $(BUILDDIR)/%.elf: $(OBJS) $(LDSCRIPT)
 
 %.list: %.elf
 	@echo Creating $@
-	@$(OD) -S $< > $@
+	@$(OD) -Ss $< > $@
 
 clean:
 	@echo Cleaning

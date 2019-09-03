@@ -122,17 +122,17 @@ void OSC_PARAM(uint16_t index, uint16_t value)
   const float valf = param_val_to_f32(value);
   
   switch (index) {
-  case k_osc_param_id1:
-  case k_osc_param_id2:
-  case k_osc_param_id3:
-  case k_osc_param_id4:
-  case k_osc_param_id5:
-  case k_osc_param_id6:
+  case k_user_osc_param_id1:
+  case k_user_osc_param_id2:
+  case k_user_osc_param_id3:
+  case k_user_osc_param_id4:
+  case k_user_osc_param_id5:
+  case k_user_osc_param_id6:
     break;
-  case k_osc_param_shape:
+  case k_user_osc_param_shape:
     s_state.dist = 0.3f * valf;
     break;
-  case k_osc_param_shiftshape:
+  case k_user_osc_param_shiftshape:
     s_state.drive = 1.f + valf; 
     break;
   default:

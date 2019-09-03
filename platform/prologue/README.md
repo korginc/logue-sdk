@@ -93,7 +93,7 @@ Here is an example of a manifest file:
     {
         "platform" : "prologue",
         "module" : "osc",
-        "api" : "1.0-0",
+        "api" : "1.1-0",
         "dev_id" : 0,
         "prg_id" : 0,
         "version" : "1.0-0",

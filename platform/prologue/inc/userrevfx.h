@@ -32,15 +32,15 @@
 //*/
 
 /**
- * @file    usermodfx.h
- * @brief   C interface header for user modulation fx.
+ * @file    userrevfx.h
+ * @brief   C interface header for user reverb fx.
  *
  * @addtogroup api
  * @{
  */
 
-#ifndef __usermodfx_h
-#define __usermodfx_h
+#ifndef __userrevfx_h
+#define __userrevfx_h
 
 #include <stdint.h>
 
@@ -53,45 +53,55 @@ extern "C" {
 
 #define __sdram __attribute__((section(".sdram")))
 
-  typedef void (*UserModFXFuncInit)(uint32_t platform, uint32_t api);
-  typedef void (*UserModFXFuncProcess)(const float *main_xn, float *main_yn,
-                                       const float *sub_xn,  float *sub_yn,
-                                       uint32_t frames);
-  typedef void (*UserModFXSuspend)(void);
-  typedef void (*UserModFXResume)(void);
-  typedef void (*UserModFXFuncParam)(uint8_t index, int32_t value);
+  typedef enum {
+    k_user_revfx_param_time = 0,
+    k_user_revfx_param_depth,
+    k_user_revfx_param_reserved0,
+    k_user_revfx_param_shift_depth,
+    k_num_user_revfx_param_id
+  } user_revfx_param_id_t;
+
+  typedef void (*UserRevFXFuncEntry)(uint32_t platform, uint32_t api);
+  typedef void (*UserRevFXFuncInit)(uint32_t platform, uint32_t api);
+  typedef void (*UserRevFXFuncProcess)(float *xn, uint32_t frames);
+  typedef void (*UserRevFXSuspend)(void);
+  typedef void (*UserRevFXResume)(void);
+  typedef void (*UserRevFXFuncParam)(uint8_t index, int32_t value);
+  typedef void (*UserRevFXFuncDummy)(void);
   
 #pragma pack(push, 1)
-  typedef struct user_modfx_hook_table {
+  typedef struct user_revfx_hook_table {
     uint8_t              magic[4];
-    uint8_t              padding[12];
-    UserModFXFuncInit    func_init;
-    UserModFXFuncProcess func_process;
-    UserModFXSuspend     func_suspend;
-    UserModFXResume      func_resume;
-    UserModFXFuncParam   func_param;
-  } user_modfx_hook_table_t;
+    uint32_t             api;
+    uint8_t              platform;
+    uint8_t              reserved0[7];
+    
+    UserRevFXFuncInit    func_entry;
+    UserRevFXFuncProcess func_process;
+    UserRevFXSuspend     func_suspend;
+    UserRevFXResume      func_resume;
+    UserRevFXFuncParam   func_param;
+    UserRevFXFuncDummy   reserved1[7];
+  } user_revfx_hook_table_t;
 #pragma pack(pop)
-  
+
 #pragma pack(push, 1)
-  typedef struct user_modfx_data {
+  typedef struct user_revfx_data {
     user_prg_header_t       header;
-    user_modfx_hook_table_t hooks;
+    user_revfx_hook_table_t hooks;
     // code bytes following
-    // user_prg_sig_t data located load_size bytes after header
-  } user_modfx_data_t;
+  } user_revfx_data_t;
 #pragma pack(pop)
 
-#define MODFX_INIT    __attribute__((used)) _hook_init 
-#define MODFX_PROCESS __attribute__((used)) _hook_process
-#define MODFX_SUSPEND __attribute__((used)) _hook_suspend
-#define MODFX_RESUME  __attribute__((used)) _hook_resume
-#define MODFX_PARAM   __attribute__((used)) _hook_param
+#define REVFX_INIT    __attribute__((used)) _hook_init 
+#define REVFX_PROCESS __attribute__((used)) _hook_process
+#define REVFX_SUSPEND __attribute__((used)) _hook_suspend
+#define REVFX_RESUME  __attribute__((used)) _hook_resume
+#define REVFX_PARAM   __attribute__((used)) _hook_param
 
+  void _entry(uint32_t platform, uint32_t api);
   void _hook_init(uint32_t platform, uint32_t api);
-  void _hook_process(const float *main_xn, float *main_yn,
-                     const float *sub_xn, float *sub_yn,
-                     uint32_t frames);
+  void _hook_process(float *xn, uint32_t frames);
   void _hook_suspend(void);
   void _hook_resume(void);
   void _hook_param(uint8_t index, int32_t value);
@@ -99,6 +109,7 @@ extern "C" {
 #ifdef __cplusplus
 } // extern "C"
 #endif
+  
+#endif // __userrevfx_h
 
-#endif // __usermodfx_h
-
+/** @} */

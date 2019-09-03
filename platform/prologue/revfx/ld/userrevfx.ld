@@ -38,7 +38,7 @@
  */
 
 /* Entry Point */
-ENTRY(_hook_init) 
+ENTRY(_entry) 
 
 /* Specify the memory areas */
 MEMORY

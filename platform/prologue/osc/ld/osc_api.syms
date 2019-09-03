@@ -1,4 +1,5 @@
 k_osc_api_version = 0x0800f000;
+k_osc_api_platform = 0x0800f004;
 midi_to_hz_lut_f = 0x0800f100;
 sqrtm2log_lut_f = 0x0800f360;
 tanpi_lut_f = 0x0800f764;
