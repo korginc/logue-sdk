@@ -32,9 +32,9 @@
 //*/
 
 /*
- * File: square.cpp
+ * File: bipolar.cpp
  *
- * Naive square oscillator test
+ * Dummy oscillator to test bipolar percent type edit parameters.
  *
  */
 
@@ -43,25 +43,25 @@
 typedef struct State {
   float w0;
   float phase;
-  float duty;
-  float angle;
+  float drive;
+  float dist;
   float lfo, lfoz;
   uint8_t flags;
 } State;
+
+static State s_state;
 
 enum {
   k_flags_none = 0,
   k_flag_reset = 1<<0,
 };
 
-static State s_state;
-
 void OSC_INIT(uint32_t platform, uint32_t api)
 {
   s_state.w0    = 0.f;
   s_state.phase = 0.f;
-  s_state.duty  = 0.1f;
-  s_state.angle = 0.f;
+  s_state.drive = 1.f;
+  s_state.dist  = 0.f;
   s_state.lfo = s_state.lfoz = 0.f;
   s_state.flags = k_flags_none;
 }
@@ -69,15 +69,15 @@ void OSC_INIT(uint32_t platform, uint32_t api)
 void OSC_CYCLE(const user_osc_param_t * const params,
                int32_t *yn,
                const uint32_t frames)
-{
+{  
   const uint8_t flags = s_state.flags;
   s_state.flags = k_flags_none;
-    
+  
   const float w0 = s_state.w0 = osc_w0f_for_note((params->pitch)>>8, params->pitch & 0xFF);
   float phase = (flags & k_flag_reset) ? 0.f : s_state.phase;
   
-  const float duty = s_state.duty;
-  const float angle = s_state.angle;
+  const float drive = s_state.drive;
+  const float dist  = s_state.dist;
 
   const float lfo = s_state.lfo = q31_to_f32(params->shape_lfo);
   float lfoz = (flags & k_flag_reset) ? lfo : s_state.lfoz;
@@ -87,14 +87,16 @@ void OSC_CYCLE(const user_osc_param_t * const params,
   const q31_t * y_e = y + frames;
   
   for (; y != y_e; ) {
-    const float pwm = clipminmaxf(0.1f, duty + lfoz, 0.9f);
+    const float dist_mod = dist + lfoz * dist;
+    
+    // Phase distortion
+    float p = phase + linintf(dist_mod, 0.f, dist_mod * osc_sinf(phase));
+    p = (p <= 0) ? 1.f - p : p - (uint32_t)p;
 
-    float sig = (phase - pwm <= 0.f) ? 1.f : -1.f;
-
-    sig *= 1.f - (angle * phase);
-
+    // Main signal
+    const float sig  = osc_softclipf(0.05f, drive * osc_sinf(p));
     *(y++) = f32_to_q31(sig);
-
+    
     phase += w0;
     phase -= (uint32_t)phase;
 
@@ -128,10 +130,10 @@ void OSC_PARAM(uint16_t index, uint16_t value)
   case k_user_osc_param_id6:
     break;
   case k_user_osc_param_shape:
-    s_state.duty = 0.1f + valf * 0.8f;
+    s_state.dist = 0.3f * valf;
     break;
-  case k_user_osc_param_shiftshape:
-    s_state.angle = 0.8f * valf;
+  case k_user_osc_param_shift_shape:
+    s_state.drive = 1.f + valf; 
     break;
   default:
     break;

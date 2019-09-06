@@ -1,7 +1,7 @@
 /*
  * File: lfo.cpp
  *
- * Test SDK LFO
+ * Simple runtime test using LFO class as audio rate oscillator
  *
  * 
  * 
@@ -122,11 +122,14 @@ void DELFX_PARAM(uint8_t index, int32_t value)
 {
   const float valf = q31_to_f32(value);
   switch (index) {
-  case 0:
+  case k_user_delfx_param_time:
     s_lfo_wave = si_roundf(valf * (k_wave_count - 1));
     break;
-  case 1:
+  case k_user_delfx_param_depth:
     s_param = valf;
+    break;
+  case k_user_delfx_param_shift_depth:
+    s_lfo.setF0(20.f + 420.f * valf, s_fs_recip);
     break;
   default:
     break;

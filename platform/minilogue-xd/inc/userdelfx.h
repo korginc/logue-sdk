@@ -53,21 +53,35 @@ extern "C" {
 
 #define __sdram __attribute__((section(".sdram")))
 
+  typedef enum {
+    k_user_delfx_param_time = 0,
+    k_user_delfx_param_depth,
+    k_user_delfx_param_reserved0,
+    k_user_delfx_param_shift_depth,
+    k_num_user_delfx_param_id
+  } user_delfx_param_id_t;
+
+  typedef void (*UserDelFXFuncEntry)(uint32_t platform, uint32_t api);
   typedef void (*UserDelFXFuncInit)(uint32_t platform, uint32_t api);
   typedef void (*UserDelFXFuncProcess)(float *xn, uint32_t frames);
   typedef void (*UserDelFXSuspend)(void);
   typedef void (*UserDelFXResume)(void);
   typedef void (*UserDelFXFuncParam)(uint8_t index, int32_t value);
-
+  typedef void (*UserDelFXFuncDummy)(void);
+  
 #pragma pack(push, 1)
   typedef struct user_delfx_hook_table {
     uint8_t              magic[4];
-    uint8_t              padding[12];
-    UserDelFXFuncInit    func_init;
+    uint32_t             api;
+    uint8_t              platform;
+    uint8_t              reserved0[7];
+    
+    UserDelFXFuncEntry   func_entry;
     UserDelFXFuncProcess func_process;
     UserDelFXSuspend     func_suspend;
     UserDelFXResume      func_resume;
     UserDelFXFuncParam   func_param;
+    UserDelFXFuncDummy   reserved1[7];
   } user_delfx_hook_table_t;
 #pragma pack(pop)
   
@@ -85,6 +99,7 @@ extern "C" {
 #define DELFX_RESUME  __attribute__((used)) _hook_resume
 #define DELFX_PARAM   __attribute__((used)) _hook_param
 
+  void _entry(uint32_t platform, uint32_t api);
   void _hook_init(uint32_t platform, uint32_t api);
   void _hook_process(float *xn, uint32_t frames);
   void _hook_suspend(void);

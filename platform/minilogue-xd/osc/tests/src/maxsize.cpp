@@ -32,36 +32,60 @@
 //*/
 
 /*
- * File: square.cpp
+ * File: maxsize.cpp
  *
- * Naive square oscillator test
+ * Maximum binary size oscillator test
  *
  */
 
 #include "userosc.h"
 
+#define k_pad_size 0x1f3e
+
 typedef struct State {
   float w0;
   float phase;
-  float duty;
-  float angle;
+  float drive;
+  float dist;
   float lfo, lfoz;
   uint8_t flags;
 } State;
+
+#define DUMMY(x)   (x), (x)+1, (x)+2, (x)+3, (x)+4, (x)+5, (x)+6, (x)+7
+#define DUMMY4(x)  DUMMY(x), DUMMY((x)+8), DUMMY((x)+16), DUMMY((x)+24)
+#define DUMMY8(x)  DUMMY4(x), DUMMY4((x)+32), DUMMY4((x)+64), DUMMY4((x)+96)
+#define DUMMY16(x) DUMMY8(x), DUMMY8((x)+128), DUMMY8((x)+256), DUMMY8((x)+384)
+#define DUMMY32(x) DUMMY16(x), DUMMY16((x)+512), DUMMY16((x)+1024), DUMMY16((x)+1536)
+
+static State s_state;
+
+static const uint32_t k_pad_data[k_pad_size] __attribute__((used)) = {
+    DUMMY32(0), 
+    DUMMY32(2048),
+    DUMMY32(2*2048),
+    DUMMY16(3*2048),
+    DUMMY16(3*2048+512),
+    DUMMY16(3*2048+2*512),
+    DUMMY8(3*2048+3*512),
+    DUMMY8(3*2048+3*512+128),
+    DUMMY4(3*2048+3*512+2*128),
+    DUMMY(3*2048+3*512+2*128+32),
+    DUMMY(3*2048+3*512+2*128+32+8),
+    DUMMY(3*2048+3*512+2*128+32+2*8),
+    0, 1, 2, 3, 4, 5
+};
 
 enum {
   k_flags_none = 0,
   k_flag_reset = 1<<0,
 };
 
-static State s_state;
-
 void OSC_INIT(uint32_t platform, uint32_t api)
 {
   s_state.w0    = 0.f;
   s_state.phase = 0.f;
-  s_state.duty  = 0.1f;
-  s_state.angle = 0.f;
+  s_state.drive = 1.f;
+  s_state.dist  = 0.f;
   s_state.lfo = s_state.lfoz = 0.f;
   s_state.flags = k_flags_none;
 }
@@ -69,15 +93,15 @@ void OSC_INIT(uint32_t platform, uint32_t api)
 void OSC_CYCLE(const user_osc_param_t * const params,
                int32_t *yn,
                const uint32_t frames)
-{
+{  
   const uint8_t flags = s_state.flags;
   s_state.flags = k_flags_none;
-    
+  
   const float w0 = s_state.w0 = osc_w0f_for_note((params->pitch)>>8, params->pitch & 0xFF);
   float phase = (flags & k_flag_reset) ? 0.f : s_state.phase;
   
-  const float duty = s_state.duty;
-  const float angle = s_state.angle;
+  const float drive = s_state.drive;
+  const float dist  = s_state.dist;
 
   const float lfo = s_state.lfo = q31_to_f32(params->shape_lfo);
   float lfoz = (flags & k_flag_reset) ? lfo : s_state.lfoz;
@@ -87,14 +111,16 @@ void OSC_CYCLE(const user_osc_param_t * const params,
   const q31_t * y_e = y + frames;
   
   for (; y != y_e; ) {
-    const float pwm = clipminmaxf(0.1f, duty + lfoz, 0.9f);
+    const float dist_mod = dist + lfoz * dist;
+    
+    // Phase distortion
+    float p = phase + linintf(dist_mod, 0.f, dist_mod * osc_sinf(phase));
+    p = (p <= 0) ? 1.f - p : p - (uint32_t)p;
 
-    float sig = (phase - pwm <= 0.f) ? 1.f : -1.f;
-
-    sig *= 1.f - (angle * phase);
-
+    // Main signal
+    const float sig  = osc_softclipf(0.05f, drive * osc_sinf(p));
     *(y++) = f32_to_q31(sig);
-
+    
     phase += w0;
     phase -= (uint32_t)phase;
 
@@ -120,18 +146,18 @@ void OSC_PARAM(uint16_t index, uint16_t value)
   const float valf = param_val_to_f32(value);
   
   switch (index) {
-  case k_user_osc_param_id1:
-  case k_user_osc_param_id2:
-  case k_user_osc_param_id3:
-  case k_user_osc_param_id4:
-  case k_user_osc_param_id5:
-  case k_user_osc_param_id6:
+  case k_osc_param_id1:
+  case k_osc_param_id2:
+  case k_osc_param_id3:
+  case k_osc_param_id4:
+  case k_osc_param_id5:
+  case k_osc_param_id6:
     break;
-  case k_user_osc_param_shape:
-    s_state.duty = 0.1f + valf * 0.8f;
+  case k_osc_param_shape:
+    s_state.dist = 0.3f * valf;
     break;
-  case k_user_osc_param_shiftshape:
-    s_state.angle = 0.8f * valf;
+  case k_osc_param_shiftshape:
+    s_state.drive = 1.f + valf; 
     break;
   default:
     break;

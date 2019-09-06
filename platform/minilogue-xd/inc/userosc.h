@@ -53,45 +53,51 @@ extern "C" {
 
   typedef struct user_osc_param {
     int32_t  shape_lfo;
-    uint16_t pitch;	// 0x0000 ~ 0x9000?
-    uint16_t cutoff;	// 0x0000 ~ 0x1fff
-    uint16_t resonance;	// 0x0000 ~ 0x1fff	
-    uint16_t padding[3];
+    uint16_t pitch;	// high byte: note number, low byte: mod (0-255)
+    uint16_t cutoff;	// 0x0000-0x1fff
+    uint16_t resonance;	// 0x0000-0x1fff	
+    uint16_t reserved0[3];
   } user_osc_param_t;
-
-  //TODO: would be much better to have shape/shiftshape first and then macros so that we can add more later
+  
   typedef enum {
-    k_osc_param_id1 = 0,
-    k_osc_param_id2,
-    k_osc_param_id3,
-    k_osc_param_id4,
-    k_osc_param_id5,
-    k_osc_param_id6,
-    k_osc_param_shape,
-    k_osc_param_shiftshape,
+    k_user_osc_param_id1 = 0,
+    k_user_osc_param_id2,
+    k_user_osc_param_id3,
+    k_user_osc_param_id4,
+    k_user_osc_param_id5,
+    k_user_osc_param_id6,
+    k_user_osc_param_shape,
+    k_user_osc_param_shiftshape,
+    k_num_user_osc_param_id
   } user_osc_param_id_t;
 
 #define param_val_to_f32(val) ((uint16_t)val * 9.77517106549365e-004f)
 
+  typedef void (*UserOscFuncEntry)(uint32_t platform, uint32_t api);
   typedef void (*UserOscFuncInit)(uint32_t platform, uint32_t api);
   typedef void (*UserOscFuncCycle)(const user_osc_param_t * const params, int32_t *buf, const uint32_t frames);
   typedef void (*UserOscFuncOn)(const user_osc_param_t * const params);
   typedef void (*UserOscFuncOff)(const user_osc_param_t * const params);
   typedef void (*UserOscFuncMute)(const user_osc_param_t * const params);
   typedef void (*UserOscFuncValue)(uint16_t value);
-  typedef void (*UserOscFuncParam)(uint16_t idx, uint16_t value); //TODO: change to 8bit + 32bit
-
+  typedef void (*UserOscFuncParam)(uint16_t idx, uint16_t value);
+  typedef void (*UserOscFuncDummy)(void);
+  
 #pragma pack(push, 1)
   typedef struct user_osc_hook_table {
     uint8_t          magic[4];
-    uint8_t          padding[12];
-    UserOscFuncInit  func_init;
+    uint32_t         api;
+    uint8_t          platform;
+    uint8_t          reserved0[7];
+    
+    UserOscFuncInit  func_entry;
     UserOscFuncCycle func_cycle;
     UserOscFuncOn    func_on;
     UserOscFuncOff   func_off;
     UserOscFuncMute  func_mute;
     UserOscFuncValue func_value;
     UserOscFuncParam func_param;
+    UserOscFuncDummy reserved1[5];
   } user_osc_hook_table_t;
 #pragma pack(pop)
 
@@ -111,6 +117,7 @@ extern "C" {
 #define OSC_VALUE   __attribute__((used)) _hook_value
 #define OSC_PARAM   __attribute__((used)) _hook_param
 
+  void _entry(uint32_t platform, uint32_t api);
   void _hook_init(uint32_t platform, uint32_t api);
   void _hook_cycle(const user_osc_param_t * const params, int32_t *yn, const uint32_t frames);
   void _hook_on(const user_osc_param_t * const params);

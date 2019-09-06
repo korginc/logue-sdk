@@ -1,7 +1,7 @@
 /*
  * File: biquad.cpp
  *
- * Test SDK Bi-Quad
+ * Test SDRAM memory i/o for delay lines
  *
  * 
  * 
@@ -23,7 +23,7 @@ static const float s_fs_recip = 1.f / 48000.f;
 void MODFX_INIT(uint32_t platform, uint32_t api)
 {
   s_delay.setMemory(s_delay_ram, 8192);  
-  s_len = s_len_z = 1;
+  s_len = s_len_z = 1.f;
 }
 
 void MODFX_PROCESS(const float *main_xn, float *main_yn,
@@ -62,9 +62,9 @@ void MODFX_PARAM(uint8_t index, int32_t value)
 {
   const float valf = q31_to_f32(value);
   switch (index) {
-  case 0:
+  case k_user_modfx_param_time:
     break;
-  case 1:
+  case k_user_modfx_param_depth:
     s_len = 1 + valf * valf * 0.1f * 48000.f; // up to 100ms delay
     break;
   default:

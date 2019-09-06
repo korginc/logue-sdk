@@ -53,16 +53,6 @@ SECTIONS
   } > SRAM
   
   /* Constructors */
-  .preinit_array : ALIGN(4) SUBALIGN(4)
-  {
-    . = ALIGN(4);
-    PROVIDE(__preinit_array_start = .);
-    KEEP(*(.preinit_array*))
-    . = ALIGN(4);
-    PROVIDE(__preinit_array_end = .);
-  } > SRAM
-
-  /* Constructors */
   .init_array : ALIGN(4) SUBALIGN(4)
   {
     . = ALIGN(4);
@@ -72,18 +62,7 @@ SECTIONS
     . = ALIGN(4);
     PROVIDE(__init_array_end = .);
   } > SRAM
-
-  /* Destructors */
-  .fini_array : ALIGN(4) SUBALIGN(4)
-  {
-    . = ALIGN(4);
-    PROVIDE(__fini_array_start = .);
-    KEEP(*(SORT(.fini_array.*)))
-    KEEP(*(.fini_array*))
-    . = ALIGN(4);
-    PROVIDE(__fini_array_end = .);
-  } > SRAM
-  
+    
   /* Common Code */
   .text : ALIGN(4) SUBALIGN(4)
   {

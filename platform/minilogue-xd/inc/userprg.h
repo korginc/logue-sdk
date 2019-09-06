@@ -73,6 +73,15 @@ extern "C" {
     k_user_target_miniloguexd_revfx  = (2U<<8) | k_user_module_revfx,
     k_user_target_miniloguexd_osc    = (2U<<8) | k_user_module_osc,
   };
+
+  enum {
+    k_user_target_nutektdigital        = (3U<<8),
+    k_user_target_nutektdigital_global = (3U<<8) | k_user_module_global,
+    k_user_target_nutektdigital_modfx  = (3U<<8) | k_user_module_modfx,
+    k_user_target_nutektdigital_delfx  = (3U<<8) | k_user_module_delfx,
+    k_user_target_nutektdigital_revfx  = (3U<<8) | k_user_module_revfx,
+    k_user_target_nutektdigital_osc    = (3U<<8) | k_user_module_osc,
+  };
   
 #define USER_TARGET_PLATFORM      (k_user_target_miniloguexd)
 #define USER_TARGET_PLATFORM_MASK (0x7F<<8)
@@ -80,16 +89,18 @@ extern "C" {
 
 #define USER_TARGET_PLATFORM_IS_COMPAT(tgt)                             \
   ((((tgt)&USER_TARGET_PLATFORM_MASK)==k_user_target_prologue)          \
-   || (((tgt)&USER_TARGET_PLATFORM_MASK)==k_user_target_miniloguexd))
+   || (((tgt)&USER_TARGET_PLATFORM_MASK)==k_user_target_miniloguexd)    \
+   || (((tgt)&USER_TARGET_PLATFORM_MASK)==k_user_target_nutektdigital))
   
   // Major: breaking changes (7bits, cap to 99)
   // Minor: additions only   (7bits, cap to 99)
   // Sub:   bugfixes only    (7bits, cap to 99)
   enum {
-    k_user_api_1_0_0 = ((1U<<16) | (0U<<8) | (0U))
+    k_user_api_1_0_0 = ((1U<<16) | (0U<<8) | (0U)),
+    k_user_api_1_1_0 = ((1U<<16) | (1U<<8) | (0U))
   };
 
-#define USER_API_VERSION    (k_user_api_1_0_0)
+#define USER_API_VERSION    (k_user_api_1_1_0)
 #define USER_API_MAJOR_MASK (0x7F<<16)
 #define USER_API_MINOR_MASK (0x7F<<8)
 #define USER_API_PATCH_MASK (0x7F)
@@ -155,3 +166,4 @@ extern "C" {
   
 #endif // __userprg_h
 
+/** @} */
