@@ -37,17 +37,23 @@ pushd ${SCRIPT_DIR} 2>&1 > /dev/null
 PKGNAME="logue-cli"
 VERSION="0.07-2b"
 
-ARCHIVE_URL="http://cdn.storage.korg.com/korg_SDK/logue-cli-win32-0.07-2b.zip"
-ARCHIVE_SHA1="a5bb27d2493728900569881c2a9fe366cce1e943"
-ARCHIVE_NAME="logue-cli-win32-0.07-2b.zip"
+ARCHIVE_URL="http://cdn.storage.korg.com/korg_SDK/logue-cli-linux64-0.07-2b.tar.gz"
+ARCHIVE_SHA1="50af8cad47635f26c8a5c35dcb20f3bbad4f2f2d"
+ARCHIVE_NAME="logue-cli-linux64-0.07-2b.tar.gz"
 
-if [[ "${OSTYPE}" == "msys" ]]; then
-    echo ">> Assuming msys platform."
+if [[ "${OSTYPE}" == "linux-gnu"* ]]; then
+    echo ">> Assuming Linux 64 bit platform."
 else
-    echo ">> This script is meant for msys."
+    echo ">> This script is meant for Linux."
     popd 2>&1 > /dev/null
     exit 1
 fi
+
+# assert_command(name, exec_path)
+assert_command() {
+    [[ ! -x "$2" ]] && echo "Error: Could not find '$1' command at path '$2'"
+    echo "$2"
+}
 
 # assert_success(fail_msg)
 assert_success() {
@@ -57,13 +63,13 @@ assert_success() {
     return 1
 }
 
-AWK=$(which awk) || assert_success "dependency not found..." || exit $?
+AWK=$(which awk) || assert_success "dependency not found..." || exit
 
-CURL=$(which curl) || assert_success "dependency not found..." || exit $?
+CURL=$(which curl) || assert_success "dependency not found..." || exit
 
-UNZIP=$(which unzip) || assert_success "dependency not found..." || exit $?
+TAR=$(which tar) || assert_success "dependency not found..." || exit $?
 
-SHA1SUM=$(which sha1sum) || assert_success "dependency not found..." || exit $?
+SHA1SUM=$(which sha1sum) || assert_success "dependency not found..." || exit
 
 # test_sha1sum(sha1, path_to_file)
 test_sha1sum() {
@@ -82,7 +88,7 @@ test_sha1sum "${ARCHIVE_SHA1}" "${ARCHIVE_NAME}"
 assert_success "SHA1 mismatch. Try redownloading the archive..." || exit $?
 
 echo ">> Unpacking..."
-${UNZIP} -u -q "${ARCHIVE_NAME}"
+${TAR} -zxvf "${ARCHIVE_NAME}"
 assert_success "Could not unpack archive..." || exit $?
 
 echo ">> Cleaning up..."
