@@ -4,6 +4,10 @@
 
 All source files needed to build custom oscillators and effects for the [minilogue xd synthesizer](https://www.korg.com/products/synthesizers/minilogue_xd) exist under this directory.
 
+#### Compatibility Notes
+
+Firmware version >= 2.00 (to be announced) is required to run user units built with SDK version 1.1-0.
+
 #### Overall Structure:
  * [inc/](inc/) : Common headers.
  * [osc/](osc/) : Custom oscillator project template.

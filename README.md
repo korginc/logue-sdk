@@ -2,6 +2,13 @@
 
 This repository contains all the files and tools needed to build custom oscillators and effects for the [prologue](https://www.korg.com/products/synthesizers/prologue) and [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd) synthesizers.
 
+#### Compatibility Notes
+
+In order to run user units built with SDK version 1.1-0, the following firmware versions are required:
+* prologue: >= v2.00
+* minilogue xd: >= v2.00 (to be announced)
+* Nu:Tekt NTS-1 digital: >= v1.02
+
 #### Overall Structure:
 * [platform/prologue/](platform/prologue/) : prologue specific files, templates and demo projects.
 * [platform/minilogue-xd/](platform/minilogue-xd/) : minilogue xd specific files, templates and demo projects.

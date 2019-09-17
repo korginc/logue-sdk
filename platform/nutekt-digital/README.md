@@ -4,6 +4,10 @@
 
 All source files needed to build custom oscillators and effects for the [NuTekt NTS-1 digital](https://www.korg.com/products/dj/nts_1) exist under this directory.
 
+#### Compatibility Notes
+
+Firmware version >= 1.02 is required to run user units built with SDK version 1.1-0.
+
 #### Overall Structure:
  * [inc/](inc/) : Common headers.
  * [osc/](osc/) : Custom oscillator project template.
