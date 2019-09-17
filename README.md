@@ -12,7 +12,7 @@ In order to run user units built with SDK version 1.1-0, the following firmware 
 #### Overall Structure:
 * [platform/prologue/](platform/prologue/) : prologue specific files, templates and demo projects.
 * [platform/minilogue-xd/](platform/minilogue-xd/) : minilogue xd specific files, templates and demo projects.
-* [platform/nutekt-digita/](platform/nutekt-digital/) : Nu:Tekt NTS-1 digital specific files, templates and demo projects.
+* [platform/nutekt-digital/](platform/nutekt-digital/) : Nu:Tekt NTS-1 digital specific files, templates and demo projects.
 * [platform/ext/](platform/ext/) : External dependencies and submodules.
 * [tools/](tools/) : Installation location and documentation for tools required to build projects and manipulate built products.
 * [devboards/](devboards/) : Information and files related to limited edition development boards.
