@@ -2,6 +2,8 @@
 # Prologue Oscillator Makefile
 # #############################################################################
 
+BUILD_TYPE = CROSS
+
 ifeq ($(OS),Windows_NT)
 ifeq ($(MSYSTEM), MSYS)
     detected_OS := $(shell uname -s)
@@ -158,16 +160,22 @@ OUTFILES := $(BUILDDIR)/$(PROJECT).elf \
 # targets
 ###############################################################################
 
-all: PRE_ALL $(OBJS) $(OUTFILES) POST_ALL
+cross: PRE_CROSS $(OBJS) $(OUTFILES) package
+
+PRE_CROSS: 
+	@echo "--- Cross-compiling for target device -----"
+	@echo
+
+all: PRE_ALL cross wasm POST_ALL
 
 PRE_ALL:
 
-POST_ALL: package
+POST_ALL: 
 
 $(OBJS): | $(BUILDDIR) $(OBJDIR) $(LSTDIR)
 
 $(BUILDDIR):
-	@echo Compiler Options
+	@echo "- Compiler Options:"
 	@echo $(CC) -c $(CFLAGS) -I. $(INCDIR)
 	@echo
 	@mkdir -p $(BUILDDIR)
@@ -179,56 +187,82 @@ $(LSTDIR):
 	@mkdir -p $(LSTDIR)
 
 $(ASMOBJS) : $(OBJDIR)/%.o : %.s Makefile
-	@echo Assembling $(<F)
+	@echo "- Assembling $(<F)"
 	@$(AS) -c $(ASFLAGS) -I. $(INCDIR) $< -o $@
 
 $(ASMXOBJS) : $(OBJDIR)/%.o : %.S Makefile
-	@echo Assembling $(<F)
+	@echo "- Assembling $(<F)"
 	@$(CC) -c $(ASXFLAGS) -I. $(INCDIR) $< -o $@
 
 $(COBJS) : $(OBJDIR)/%.o : %.c Makefile
-	@echo Compiling $(<F)
+	@echo "- Compiling $(<F)"
 	@$(CC) -c $(CFLAGS) -I. $(INCDIR) $< -o $@
 
 $(CXXOBJS) : $(OBJDIR)/%.o : %.cpp Makefile
-	@echo Compiling $(<F)
+	@echo "- Compiling $(<F)"
 	@$(CXXC) -c $(CXXFLAGS) -I. $(INCDIR) $< -o $@
 
 $(BUILDDIR)/%.elf: $(OBJS) $(LDSCRIPT)
-	@echo Linking $@
+	@echo "- Linking $@"
 	@$(LD) $(OBJS) $(LDFLAGS) $(LIBS) -o $@
 
 %.hex: %.elf
-	@echo Creating $@
+	@echo "- Creating $@"
 	@$(HEX) $< $@
 
 %.bin: %.elf
-	@echo Creating $@
+	@echo "- Creating $@"
 	@$(BIN) $< $@
 
 %.dmp: %.elf
-	@echo Creating $@
+	@echo "- Creating $@"
 	@$(OD) $(ODFLAGS) $< > $@
 	@echo
 	@$(SZ) $<
 	@echo
 
 %.list: %.elf
-	@echo Creating $@
-	@$(OD) -Ss $< > $@
+	@echo "- Creating $@"
+	@$(OD) -S $< > $@
 
 clean:
-	@echo Cleaning
+	@echo "--- Cleaning cross-compile products -------"
+	-rm -fR .dep $(OBJDIR) $(LSTDIR) $(BUILDDIR)/$(PROJECT).map $(OUTFILES) $(PKGARCH)
+	@echo
+
+clean-all:
+	@echo "--- Cleaning all build products -----------"
 	-rm -fR .dep $(BUILDDIR) $(PKGARCH)
 	@echo
-	@echo Done
 
 package:
-	@echo Packaging to ./$(PKGARCH)
+	@echo "- Packaging to ./$(PKGARCH)"
 	@mkdir -p $(PKGDIR)
 	@cp -a $(MANIFEST) $(PKGDIR)/
 	@cp -a $(BUILDDIR)/$(PROJECT).bin $(PKGDIR)/$(PAYLOAD)
 	@$(ZIP) $(ZIP_ARGS) $(PROJECT).zip $(PKGDIR)
 	@mv $(PROJECT).zip $(PKGARCH)
 	@echo
-	@echo Done
+
+wasm:
+	@echo "--- Building for Web Assembly -------------"
+	@echo "    !! Requires Emscripten !!"
+	@echo
+	-emmake make -f WASM.mak
+
+wasm-clean:
+	@echo "--- Cleaning Web Assembly build -----------"
+	@echo "    !! Requires Emscripten !!"
+	@echo
+	-emmake make -f WASM.mak clean
+
+help:
+	@echo "Usage: make [target]"
+	@echo
+	@echo " <default>: Cross-compile and package for target device."
+	@echo "     clean: Clean default build products."
+	@echo "      wasm: Build for Web Assembly using Emscripten."
+	@echo "wasm-clean: Clean Web Assembly build products."
+	@echo "       all: Perform both default and wasm targets."
+	@echo " clean-all: Clean all build products."
+	@echo

@@ -44,9 +44,11 @@
 
 #include <stdint.h>
 
-#include "cortexm4.h"
-
-// TODO: add fill-in implementations for intel builds
+#if defined(ARM_MATH_CM4)
+#include "cortexm4.h" // assuming cortex-m4 
+#else
+#include "compat.h"
+#endif
 
 /*===========================================================================*/
 /* Data Types and Conversions.                                               */
@@ -136,7 +138,7 @@ typedef uint64_t uq64_0_t;
 #define q31_to_f32(q) ((float)(q) * q31_to_f32_c)
 
 #define f32_to_q15(f)   ((q15_t)ssat((q31_t)((float)(f) * ((1<<15)-1)),16))
-#define f32_to_q31(f)   ((q31_t)((float)(f) * (float)0x7FFFFFFF))
+#define f32_to_q31(f)   ((q31_t)((float)(f) * (float)0x7FFFFFBF))
 
 /** @} */
 
@@ -190,14 +192,22 @@ typedef uint64_t uq64_0_t;
 
 static inline __attribute__((optimize("Ofast"),always_inline))
 q15_t q15max(q15_t a, q15_t b) {
+#if defined(COMPAT_INTRINSICS)
+  return (a > b) ? a : b; 
+#else
   qsub16(a,b);
   return sel(a,b);
+#endif
 }
 
 static inline __attribute__((optimize("Ofast"),always_inline))
 q15_t q15min(q15_t a, q15_t b) {
+#if defined(COMPAT_INTRINSICS)
+  return (a > b) ? b : a; 
+#else
   qsub16(b,a);
   return sel(a,b);
+#endif
 }
 
 /* static inline __attribute__((optimize("Ofast"),always_inline)) */
@@ -211,13 +221,29 @@ q15_t q15min(q15_t a, q15_t b) {
 
 static inline __attribute__((optimize("Ofast"),always_inline))
 simd32_t q15maxp(simd32_t a, simd32_t b) {
+#if defined(COMPAT_INTRINSICS)
+  simd32_t r = ((a & 0xFFFF) > (b & 0xFFFF)) ? a & 0xFFFF : b & 0xFFFF;
+  a >>= 16;
+  b >>= 16;
+  r |= ((a > b) ? a : b)<<16;
+  return r;
+#else  
   qsub16(a,b);
   return sel(a,b);
+#endif
 }
 static inline __attribute__((optimize("Ofast"),always_inline))
 simd32_t q15minp(simd32_t a, simd32_t b) {
+#if defined(COMPAT_INTRINSICS)
+  simd32_t r = ((a & 0xFFFF) > (b & 0xFFFF)) ? b & 0xFFFF : a & 0xFFFF;
+  a >>= 16;
+  b >>= 16;
+  r |= ((a > b) ? b : a)<<16;
+  return r;
+#else
   qsub16(b,a);
   return sel(a,b);
+#endif
 }
 
 /** @} */
@@ -236,14 +262,22 @@ simd32_t q15minp(simd32_t a, simd32_t b) {
 
 static inline __attribute__((optimize("Ofast"),always_inline))
 q31_t q31max(q31_t a, q31_t b) {
+#if defined(COMPAT_INTRINSICS)
+  return (a > b) ? a : b; 
+#else
   qsub(a,b);
   return sel(a,b);
+#endif
 }
 
 static inline __attribute__((optimize("Ofast"),always_inline))
 q31_t q31min(q31_t a, q31_t b) {
+#if defined(COMPAT_INTRINSICS)
+  return (a > b) ? b : a; 
+#else
   qsub(b,a);
   return sel(a,b);
+#endif
 }
 
 /** @} */
