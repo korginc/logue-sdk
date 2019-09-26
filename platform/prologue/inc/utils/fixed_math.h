@@ -44,8 +44,8 @@
 
 #include <stdint.h>
 
-#if defined(ARM_MATH_CM4)
-#include "cortexm4.h" // assuming cortex-m4 
+#if defined(TARGET_CORTEX_M4)
+#include "cortexm4.h"
 #else
 #include "compat.h"
 #endif
