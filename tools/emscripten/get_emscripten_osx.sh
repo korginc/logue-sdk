@@ -77,11 +77,11 @@ if [[ -d "${REPO_NAME}" ]]; then
         exit 1
     fi
 
-    # Install
+    echo ">> Installing version ${EMSDK_VERSION}..."
     ./emsdk install "${EMSDK_VERSION}"
     assert_success "Failed to install..." || exit $?
 
-    # Activate 
+    echo ">> Activating version ${EMSDK_VERSION}"
     ./emsdk activate "${EMSDK_VERSION}"
     assert_success "Failed to activate..." || exit $?
     
