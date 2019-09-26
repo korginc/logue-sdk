@@ -40,6 +40,13 @@ namespace KORG {
     _hook_param(ikey, value);
   }
 
+  void setProp (uint32_t iprop, void* data, uint32_t byteLength)
+  {
+    (void)iprop;
+    (void)data;
+    (void)byteLength;
+  }
+  
   // ----------------------------------------------------------------------------
   // LogueOscillator
   // ----------------------------------------------------------------------------
