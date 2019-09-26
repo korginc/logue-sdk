@@ -1,0 +1,22 @@
+<!-- wab-svgknob skin for logue -->
+<!-- Jari Kleimola 2019 (jari@webaudiomodules.org) -->
+
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="60" height="95">
+  <style>
+    #back { fill:#111; }
+    #front { fill:#2a2a2a; stroke:#000; cursor:pointer; }
+    #ind { stroke:#eee; stroke-width:5px; stroke-linecap:round; pointer-events:none; }
+    #label { font-weight:600; }
+    #value { font-weight:100; }
+    #knob { transform:rotate(-150deg); transform-origin:30px 30px; }
+    text { fill:#ccc; text-anchor:middle; font-size:11px; font-family:sans-serif; }
+  </style>
+  <circle id="back" r="30" cx="30" cy="30"></circle>
+  <g id="knob">
+    <circle id="front" r="27" cx="30" cy="30"></circle>
+    <line id="ind" x1="30" y1="25" x2="30" y2="7"></line>
+  </g>
+  <text id="label" dominant-baseline="mathematical" x="30" y="70"></text>
+  <text id="value" dominant-baseline="mathematical" x="30" y="85">0</text>
+</svg>
