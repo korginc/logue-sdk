@@ -248,20 +248,20 @@ namespace dsp {
       
     inline __attribute__((optimize("Ofast"),always_inline))
     float process_so(const float xn) {
-      float acc = mCoeffs.ff0 * xn + mZ1;
-      mZ1 = mCoeffs.ff1 * xn + mZ2;
+      float acc = mCoeffs.ff0 * xn + f32_denorm(mZ1);
+      mZ1 = mCoeffs.ff1 * xn + f32_denorm(mZ2);
       mZ2 = mCoeffs.ff2 * xn;
       mZ1 -= mCoeffs.fb1 * acc;
       mZ2 -= mCoeffs.fb2 * acc;
-      return acc;
+      return f32_denorm(acc);
     }
 
     inline __attribute__((optimize("Ofast"),always_inline))
     float process_fo(const float xn) {
-      float acc = mCoeffs.ff0 * xn + mZ1;
+      float acc = mCoeffs.ff0 * xn + f32_denorm(mZ1);
       mZ1 = mCoeffs.ff1 * xn;
       mZ1 -= mCoeffs.fb1 * acc;
-      return acc;
+      return f32_denorm(acc);
     }
       
     inline __attribute__((optimize("Ofast"),always_inline))
@@ -305,20 +305,20 @@ namespace dsp {
       
     inline __attribute__((optimize("Ofast"),always_inline))
     float process_so(const float xn) {
-      float acc = mCoeffs.ff0 * xn + mZ1;
-      mZ1 = mCoeffs.ff1 * xn + mZ2;
+      float acc = mCoeffs.ff0 * xn + f32_denorm(mZ1);
+      mZ1 = mCoeffs.ff1 * xn + f32_denorm(mZ2);
       mZ2 = mCoeffs.ff2 * xn;
       mZ1 -= mCoeffs.fb1 * acc;
       mZ2 -= mCoeffs.fb2 * acc;
-      return mW1 * (mW0 * acc + mD0 * xn) + mD1 * xn;
+      return f32_denorm(mW1 * (mW0 * acc + mD0 * xn) + mD1 * xn);
     }
 
     inline __attribute__((optimize("Ofast"),always_inline))
     float process_fo(const float xn) {
-      float acc = mCoeffs.ff0 * xn + mZ1;
+      float acc = mCoeffs.ff0 * xn + f32_denorm(mZ1);
       mZ1 = mCoeffs.ff1 * xn;
       mZ1 -= mCoeffs.fb1 * acc;
-      return mW1 * (mW0 * acc + mD0 * xn) + mD1 * xn;
+      return f32_denorm(mW1 * (mW0 * acc + mD0 * xn) + mD1 * xn);
     }
 
     inline __attribute__((optimize("Ofast"),always_inline))

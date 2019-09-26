@@ -4,7 +4,7 @@
 # usage: emmake make -f WASM.mak
 # or via main Makefile wasm target
 
-BUILD_TYPE = WASM
+BUILD_TARGET = TARGET_WASM
 
 PLATFORMDIR = ..
 PROJECTDIR = .
@@ -31,6 +31,8 @@ LDOPT =
 
 EMFLAGS =  -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s BINARYEN_ASYNC_COMPILATION=0 --bind
 EMFLAGS += -s EXPORT_NAME="'WABModule'" -s SINGLE_FILE=1
+
+DDEFS = -D$(BUILD_TARGET) -DFORCE_FTZ
 
 OPT =  -O2
 CWARN = -W -Wall -Wextra -Wno-unknown-attributes

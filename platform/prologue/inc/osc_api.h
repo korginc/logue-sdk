@@ -144,7 +144,7 @@ extern "C" {
    * @return     Result of sin(2*pi*x).
    */
   __fast_inline float osc_sinf(float x) {
-    const float p = x - (uint32_t)x;
+    const float p = f32_denorm(x - (uint32_t)x);
     
     // half period stored -- wrap around and invert
     const float x0f = 2.f * p * k_wt_sine_size;
@@ -196,7 +196,7 @@ extern "C" {
    * @return     Wave sample.
    */
   __fast_inline float osc_sawf(float x) {
-    const float p = x - (uint32_t)x;
+    const float p = f32_denorm(x - (uint32_t)x);
     
     const float x0f = 2.f * p * k_wt_saw_size;
     const uint32_t x0p = (uint32_t)x0f;
@@ -221,7 +221,7 @@ extern "C" {
    * @return        Wave sample.
    */
   __fast_inline float osc_bl_sawf(float x, uint8_t idx) {
-    const float p = x - (uint32_t)x;
+    const float p = f32_denorm(x - (uint32_t)x);
     
     const float x0f = 2.f * p * k_wt_saw_size;
     const uint32_t x0p = (uint32_t)x0f;
@@ -246,7 +246,7 @@ extern "C" {
    * @return        Wave sample.
    */
   __fast_inline float osc_bl2_sawf(float x, float idx) {
-    const float p = x - (uint32_t)x;
+    const float p = f32_denorm(x - (uint32_t)x);
     
     const float x0f = 2.f * p * k_wt_saw_size;
     const uint32_t x0p = (uint32_t)x0f;
@@ -309,7 +309,7 @@ extern "C" {
    * @note Not checking input, caller responsible for bounding x.
    */
   __fast_inline float osc_sqrf(float x) {
-    const float p = x - (uint32_t)x;
+    const float p = f32_denorm(x - (uint32_t)x);
     
     const float x0f = 2.f * p * k_wt_sqr_size;
     const uint32_t x0p = (uint32_t)x0f;
@@ -361,7 +361,7 @@ extern "C" {
    * @note Not checking input, caller responsible for bounding x and idx.
    */
   __fast_inline float osc_bl2_sqrf(float x, float idx) {
-    const float p = x - (uint32_t)x;
+    const float p = f32_denorm(x - (uint32_t)x);
     
     const float x0f = 2.f * p * k_wt_sqr_size;
     const uint32_t x0p = (uint32_t)x0f;
@@ -424,7 +424,7 @@ extern "C" {
    * @note Not checking input, caller responsible for bounding x.
    */
   __fast_inline float osc_parf(float x) {
-    const float p = x - (uint32_t)x;
+    const float p = f32_denorm(x - (uint32_t)x);
 
     const float x0f = 2.f * p * k_wt_par_size;
     const uint32_t x0p = (uint32_t)x0f;
@@ -444,7 +444,7 @@ extern "C" {
    * @note Not checking input, caller responsible for bounding x and idx.
    */
   __fast_inline float osc_bl_parf(float x, uint8_t idx) {
-    const float p = x - (uint32_t)x;
+    const float p = f32_denorm(x - (uint32_t)x);
 
     const float x0f = 2.f * p * k_wt_par_size;
     const uint32_t x0p = (uint32_t)x0f;
@@ -466,7 +466,7 @@ extern "C" {
    * @note Not checking input, caller responsible for bounding x and idx.
    */
   __fast_inline float osc_bl2_parf(float x, float idx) {
-    const float p = x - (uint32_t)x;
+    const float p = f32_denorm(x - (uint32_t)x);
 
     const float x0f = 2.f * p * k_wt_par_size;
     const uint32_t x0p = (uint32_t)x0f;
@@ -544,7 +544,7 @@ extern "C" {
   
   static inline __attribute__((always_inline, optimize("Ofast")))
   float osc_wave_scanf(const float *w, float x) {
-    const float p = x - (uint32_t)x;
+    const float p = f32_denorm(x - (uint32_t)x);
     const float x0f = p * k_waves_size;
     const uint32_t x0 = ((uint32_t)x0f) & k_waves_mask;
     const uint32_t x1 = (x0 + 1) & k_waves_mask;
@@ -586,7 +586,7 @@ extern "C" {
    * @note Not checking input, caller responsible for bounding x.
    */
   __fast_inline float osc_logf(float x) {
-    const float idxf = x * k_log_size;
+    const float idxf = f32_denorm(x) * k_log_size;
     const uint32_t idx = (uint32_t)idxf;
     const float y0 = log_lut_f[idx];
     const float y1 = log_lut_f[idx+1];
@@ -633,7 +633,7 @@ extern "C" {
    * @note Not checking input, caller responsible for bounding x.
    */
   __fast_inline float osc_sqrtm2logf(float x) {
-    const float idxf = (x-k_sqrtm2log_base) * k_sqrtm2log_range_recip * k_sqrtm2log_size;
+    const float idxf = f32_denorm(x-k_sqrtm2log_base) * k_sqrtm2log_range_recip * k_sqrtm2log_size;
     const uint32_t idx = (uint32_t)idxf;
     const float y0 = sqrtm2log_lut_f[idx];
     const float y1 = sqrtm2log_lut_f[idx+1];
@@ -679,7 +679,7 @@ extern "C" {
    * @return     Cubic curve above 0.42264973081, gain: 1.2383127573
    */
   __fast_inline float osc_sat_cubicf(float x) {
-    const float xf = si_fabsf(clip1f(x)) * k_cubicsat_size;
+    const float xf = si_fabsf(clip1f(f32_denorm(x))) * k_cubicsat_size;
     const uint32_t xi = (uint32_t)x;
     const float y0 = cubicsat_lut_f[xi];
     const float y1 = cubicsat_lut_f[xi+1];
@@ -700,7 +700,7 @@ extern "C" {
    * @return     Saturated value.
    */
   __fast_inline float osc_sat_schetzenf(float x) {
-    const float xf = si_fabsf(clip1f(x)) * k_schetzen_size;
+    const float xf = si_fabsf(clip1f(f32_denorm(x))) * k_schetzen_size;
     const uint32_t xi = (uint32_t)x;
     const float y0 = schetzen_lut_f[xi];
     const float y1 = schetzen_lut_f[xi+1];
@@ -730,7 +730,7 @@ extern "C" {
    * @note       Fractional bit depth, exponentially mapped, 1 to 24 bits.
    */
   __fast_inline float osc_bitresf(float x) {
-    const float xf = x * k_bitres_size;
+    const float xf = f32_denorm(x) * k_bitres_size;
     const uint32_t xi = (uint32_t)xf;
     const float y0 = bitres_lut_f[xi];
     const float y1 = bitres_lut_f[xi+1];

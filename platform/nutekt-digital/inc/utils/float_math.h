@@ -143,6 +143,21 @@
 #define f32_exp_bits(f)  ((f) & F32_EXP_MASK)
 #define f32_sign_bit(f)  ((f) & F32_SIGN_MASK)
 
+#if defined(FORCE_FTZ) || defined(FORCE_DAZ)
+
+static inline __attribute__((always_inline)) float f32_denorm(float f) {
+#if defined(FORCE_DAZ)
+  return (isnormal(f)) ? f : 0.f;
+#else
+   return (fpclassify(f) == FP_SUBNORMAL) ? 0.f : f;
+#endif
+}
+
+#else
+#define f32_denorm(f) (f)
+
+#endif // defined(FORCE_FTZ) || defined(FORCE_DAZ)
+
 /** @} */
 
 /*===========================================================================*/
@@ -555,13 +570,13 @@ float dbampf(const float db) {
 
 static inline __attribute__((optimize("Ofast"), always_inline))
 float linintf(const float fr, const float x0, const float x1) {
-  return x0 + fr * (x1 - x0);
+  return x0 + f32_denorm(fr * f32_denorm(x1 - x0));
 }
 
 static inline __attribute__((optimize("Ofast"), always_inline))
 float cosintf(const float fr, const float x0, const float x1) {
   const float tmp = (1.f - fastercosfullf(fr * M_PI)) * 0.5f;
-  return x0 + tmp * (x1 - x0);
+  return x0 + f32_denorm(tmp * f32_denorm(x1 - x0));
 }
 
 /** @} */
