@@ -1,5 +1,5 @@
 # #############################################################################
-# Prologue Oscillator WASM Makefile
+# Oscillator WASM Makefile
 # #############################################################################
 # usage: emmake make -f WASM.mak
 # or via main Makefile wasm target

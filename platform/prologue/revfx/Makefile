@@ -1,6 +1,8 @@
 # #############################################################################
-# Prologue Reverb FX Makefile
+# Reverb FX Makefile
 # #############################################################################
+
+BUILD_TARGET = TARGET_CORTEX_M4
 
 ifeq ($(OS),Windows_NT)
 ifeq ($(MSYSTEM), MSYS)
@@ -67,8 +69,8 @@ RULESPATH = $(LDDIR)
 LDSCRIPT = $(LDDIR)/userrevfx.ld
 DLIBS = -lm
 
-DADEFS = -DSTM32F446xE -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4
-DDEFS = -DSTM32F446xE -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT
+DADEFS = -DSTM32F446xE -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D$(BUILD_TARGET)
+DDEFS = -DSTM32F446xE -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -D$(BUILD_TARGET)
 
 COPT = -std=c11 -mstructure-size-boundary=8
 CXXOPT = -std=c++11 -fno-rtti -fno-exceptions -fno-non-call-exceptions

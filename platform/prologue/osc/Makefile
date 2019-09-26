@@ -1,8 +1,8 @@
 # #############################################################################
-# Prologue Oscillator Makefile
+# Oscillator Makefile
 # #############################################################################
 
-BUILD_TARGET = TARGET_WASM
+BUILD_TARGET = TARGET_CORTEX_M4
 
 ifeq ($(OS),Windows_NT)
 ifeq ($(MSYSTEM), MSYS)
