@@ -1,0 +1,41 @@
+* { user-select:none; box-sizing:border-box; }
+body.dragging, body.dragging * { cursor:pointer; }
+body { font-family:sans-serif; font-weight:100; padding:10px; }
+h1 { font-weight:100; margin:0; }
+h2 { font-weight:100; margin:0 0 15px 0; font-size:16px; }
+#container { background:url(res/back.png); border:5px solid #000; width:650px; height:348px; position:relative; }
+
+#topbar { color:#aaa; position:relative; border-bottom:5px solid #000; display:flex; align-items: center; padding:5px; }
+#oscreload { cursor:pointer; }
+#oscreload:hover { color:lightskyblue; }
+label { font-size:12px; margin:1px 5px 0 2px; }
+select, #keys li { cursor:pointer; }
+select { background:#1a1a1a; color:#eee; border:1px solid #888; }
+input { cursor:pointer; }
+#osc { margin-right:10px; }
+#topbar div.right { position:absolute; right:10px; }
+#hold { margin:1px 40px 0 2px; }
+#hold.active { color:lightskyblue; }
+
+#frontpanel { border-bottom:4px solid darkred; padding:10px; }
+#plots { margin-bottom:10px; display:flex; }
+.plot { background:#1a1a1a; width:300px; height:100px; padding:5px; }
+canvas { border: 1px solid #555; }
+#spectscale { displat:flex; flex-direction:column; color:#777; margin-top:6px; }
+.toggle { font-size:12px; width:20px; text-align:center; margin-bottom:7px;
+  height:17px; line-height:17px; cursor:pointer; }
+.toggle.active { color:#ccc; }
+
+#knobs { display:flex; position:relative; }
+wab-svgknob { margin-right:15px; }
+#shape { margin-right:30px; }
+#lfo { position:absolute; right:0; margin-right:0; }
+
+#overlay { width:640px; height:342px; position:absolute; top:0; cursor:pointer;
+  font-size:24px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:rgba(0,0,0,0.85); color:lightskyblue; transition: opacity 1s; }
+#overlay.fadeout { opacity:0; }
+#overlay div.note { font-size:14px; margin-top:10px; }
+
+#bottomline { display:flex; color:#888; font-size:12px; margin-top:3px; width:650px; position:relative; }
+.credit { text-align:right; position:absolute; right:0; }
