@@ -21,6 +21,8 @@ EXTDIR = $(PLATFORMDIR)/../ext
 
 CMSISDIR = $(EXTDIR)/CMSIS/CMSIS
 
+EMMAKE = $(TOOLSDIR)/emscripten/emsdk/fastcomp/emscripten/emmake
+
 # #############################################################################
 # configure archive utility
 # #############################################################################
@@ -246,15 +248,15 @@ package:
 
 wasm:
 	@echo "--- Building for Web Assembly -------------"
-	@echo "    !! Requires Emscripten !!"
+	@echo " !! Requires tools/emscripten !!"
 	@echo
-	-emmake make -f WASM.mak
+	-$(EMMAKE) make -f WASM.mak
 
 wasm-clean:
 	@echo "--- Cleaning Web Assembly build -----------"
-	@echo "    !! Requires Emscripten !!"
+	@echo " !! Requires tools/emscripten !!"
 	@echo
-	-emmake make -f WASM.mak clean
+	-$(EMMAKE) make -f WASM.mak clean
 
 help:
 	@echo "Usage: make [target]"
