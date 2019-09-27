@@ -105,10 +105,10 @@ struct Waves {
       lfo(0.f),
       lfoz(0.f),
       dither(0.f),
-      bitres(1.f),
-      bitresrcp(1.f),
+      bitres(bitres_lut_f[0]),
       flags(k_flags_none)
     {
+      bitresrcp = 1.f / bitres;
       reset();
       imperfection = osc_white() * 1.0417e-006f; // +/- 0.05Hz@48KHz
     }
