@@ -27,9 +27,9 @@ Firmware version >= 2.00 is required to run user units built with SDK version 1.
  ```
  2. Install toolchain: [GNU Arm Embedded Toolchain](../../tools/gcc)
  3. Install other utilties:
-    3.1 [GNU Make](../../tools/make)
-    3.2 [Info-ZIP](../../tools/zip)
-    3.3 [logue-cli](../../tools/logue-cli) (optional)
+    1. [GNU Make](../../tools/make)
+    2. [Info-ZIP](../../tools/zip)
+    3. [logue-cli](../../tools/logue-cli) (optional)
 
 ### Building a Project
 
