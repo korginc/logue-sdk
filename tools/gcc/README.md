@@ -2,7 +2,7 @@
 
 Prebuilt binaries are available [here](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads).
 
-Required version: 5-2016-q3-update
+_Required version: 5-2016-q3-update_
 
 ### OSX
 
@@ -21,7 +21,15 @@ A possibility is to obtain the source package from the link above and manually b
 
 ### Windows
 
-#### Standard Procedure
+#### MSYS2
+
+If you have MSYS2 installed you can run `./get_gcc_msys.sh` to download and unpack gcc automatically.
+
+_Note 1: MSYS2 installers for Windows can be found at [https://www.msys2.org/](https://www.msys2.org/)_
+
+_Note 2: The install script requires the unzip package. It can be installed by running: `pacman -S unzip`_
+
+#### Manual Procedure
 
 Download version 5-2016-q3-update in *ZIP format* from the link above and unpack it in this directory under the name "gcc-arm-none-eabi-5_4-2016q3".
 
@@ -38,7 +46,3 @@ gcc-arm-none-eabi-5_4-2016q3/
    |
    +-- share/
 ```
-
-#### MSYS
-
-If you have msys installed you can run `./get_gcc_msys.sh` to download and unpack gcc automatically.

@@ -13,14 +13,17 @@ An appropriate GNU Make version is likely already installed. If not, install the
 
 ### Windows
 
-#### MSYS
+#### MSYS2
 
-MSYS provides recent GNU Make packages appropriate for building SDK projects.
-Install GNU Make by running `pacman -S make`.
+MSYS2 provides recent GNU Make packages appropriate for building logue SDK projects.
 
-#### GnuWin
+Install GNU Make by running: `pacman -S make`.
+
+_Note: MSYS2 installers for Windows can be found at [https://www.msys2.org/](https://www.msys2.org/)_
+
+#### Manaual Procedure: GnuWin
 
 A Windows build of GNU Make (albeit a bit old) is also available from [GnuWin's sourceforge page](https://sourceforge.net/projects/gnuwin32/files/make/3.81/).
-
+Once installed you will have to add it manually to your environment's path.
 
 
