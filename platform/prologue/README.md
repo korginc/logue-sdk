@@ -16,13 +16,31 @@ Firmware version >= 2.00 is required to run user units built with SDK version 1.
  * [revfx/](revfx/) : Custom reverb effect project template.
  * [demos/](demos/) : Demo projects.
 
+### Setting up the Development Environment
+
+ 1. Clone this repository and initialize/update submodules.
+
+```
+ $ git clone https://github.com/korginc/logue-sdk.git
+ $ cd logue-sdk
+ $ git submodule update --init
+ ```
+ 2. Install toolchain: [GNU Arm Embedded Toolchain](../../tools/gcc)
+ 3. Install other utilties:
+    3.1 [GNU Make](../../tools/make)
+    3.2 [Info-ZIP](../../tools/zip)
+    3.3 [logue-cli](../../tools/logue-cli) (optional)
+
 ### Building a Project
 
- 1. Clone this repository and make sure submodules are initialized and updated.
- 2. Make sure the necessary toolchain is properly installed. **Refer to [tools/](../../tools/) for installation instructions.**
- 3. move into a project directory.
- 4. type `make` to build the project.
+ 1. move into a project directory.
+ 
 
+```
+$ cd logue-sdk/platform/prologue/demos/waves/
+```
+ 2. type `make` to build the project.
+ 
 ```
 $ make
 Compiler Options
