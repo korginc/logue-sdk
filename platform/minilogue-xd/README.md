@@ -16,12 +16,6 @@ Firmware version >= 2.00 is required to run user units built with SDK version 1.
  * [revfx/](revfx/) : Custom reverb effect project template.
  * [demos/](demos/) : Demo projects.
 
-### Building a Project
-
- 1. Clone this repository and make sure submodules are initialized and updated.
- 2. Make sure the necessary toolchain is properly installed. **Refer to [tools/](../../tools/) for installation instructions.**
- 3. move into a project directory.
- 4. type `make` to build the project.
 ### Setting up the Development Environment
 
  1. Clone this repository and initialize/update submodules.
