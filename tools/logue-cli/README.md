@@ -26,7 +26,7 @@ Download the appropriate version below according to your system.
 
 ##### Version 0.07-2b
 * 32bit : [logue-cli-win32-0.07-2b.zip](http://cdn.storage.korg.com/korg_SDK/logue-cli-win32-0.07-2b.zip) (SHA1: a5bb27d2493728900569881c2a9fe366cce1e943)
-* 64bit : [logue-cli-win64-0.06-0b.zip](http://cdn.storage.korg.com/korg_SDK/logue-cli-win64-0.07-2b.zip) (SHA1: 3ee94cebce383fb1319425aaa7abf4b30b1c1269)
+* 64bit : [logue-cli-win64-0.07-2b.zip](http://cdn.storage.korg.com/korg_SDK/logue-cli-win64-0.07-2b.zip) (SHA1: 3ee94cebce383fb1319425aaa7abf4b30b1c1269)
 
 
 ## Basic Usage
