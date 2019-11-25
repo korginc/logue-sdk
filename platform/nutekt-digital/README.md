@@ -48,7 +48,7 @@ Firmware version >= 1.02 is required to run user units built with SDK version 1.
  1. move into a project directory.
  
 ```
-$ cd logue-sdk/platform/minilogue-xd/demos/waves/
+$ cd logue-sdk/platform/nutekt-digital/demos/waves/
 ```
  2. type `make` to build the project.
 
