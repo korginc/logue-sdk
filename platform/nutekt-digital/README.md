@@ -150,16 +150,13 @@ The following variables are declared:
 
 The *tests/* directory contains very simple code that illustrates how to write oscillators and effects. They are not meant to do anything useful, nor claim to be optimized. You can refer to these as examples of how to use the different interfaces and test your setup.
 
-### Troubleshooting
+## Web Assembly Builds _(experimental)_
 
-#### Can't compile, missing CMSIS arm_math.h
+Emscripten builds for oscillators and a Web Audio player are available in the alpha/wasm-builds branch. This is still an experimental feature so some code may not work as expected.
+
+## Troubleshooting
+
+### Can't compile, missing CMSIS arm_math.h
 
 The CMSIS submodule is likely not initialized or up to date. Make sure to run `git submodule update --init` to initialize and update all submodules.
-
-## TODO
-
-* clean up doxygen documentation and generate.
-* remove hard dependency on Cortex-M4 primitives from CMSIS headers. allow intel native builds.
-* emscripten builds.
-* Native Intel simulator runtime for better development workflows.
 
