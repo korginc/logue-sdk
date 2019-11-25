@@ -1,6 +1,6 @@
 # *logue-cli* Command Line Utility 
 
-This utility allows to manipulate *.prlgunit* files and communicate with the [prologue synthesizer](http://korg.com/prologue) (or [development board](../../devboards/)).
+This utility allows to manipulate unit (*.prlgunit*, *.mnlgxdunit*, *.ntkdigunit*) files and communicate with the [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd) and [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/synthesizers/nts_1) synthesizers.
 
 ## Installation
 
