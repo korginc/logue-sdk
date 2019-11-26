@@ -14,6 +14,8 @@
 # Temporary directories
 **/.dep/**
 **/build/**
+tools/gcc/gcc-arm-none-eabi-*
+tools/emscripten/emsdk
 
 # Precompiled Headers
 *.gch
@@ -41,6 +43,8 @@
 *.bin
 *.dfu
 *.prlgunit
+*.mnlgxdunit
+*.ntkdigunit
 
 # Debug files
 *.dSYM/
