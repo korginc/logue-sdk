@@ -34,7 +34,10 @@
  * @file    osc_api.h
  * @brief   Oscillator runtime API.
  *
- * @addtogroup api
+ * @addtogroup osc Oscillator
+ * @{
+ *
+ * @addtogroup osc_api Runtime API
  * @{
  */
 
@@ -54,6 +57,11 @@ extern "C" {
   /*===========================================================================*/
   /* General                                                                   */
   /*===========================================================================*/
+
+  /**
+   * Current platform
+   */
+  extern const uint32_t k_osc_api_platform;
   
   /**
    * Current API version
@@ -777,4 +785,4 @@ extern "C" {
 
 #endif // __osc_api_h
 
-/** @} */
+/** @} @} */
