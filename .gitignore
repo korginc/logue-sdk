@@ -17,6 +17,11 @@
 tools/gcc/gcc-arm-none-eabi-*
 tools/emscripten/emsdk
 
+# Doxygen documentation
+**/docs/html
+**/docs/latex
+**/docs/doxygen*
+
 # Precompiled Headers
 *.gch
 *.pch
