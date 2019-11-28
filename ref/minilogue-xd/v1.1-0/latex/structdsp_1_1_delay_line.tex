@@ -1,0 +1,256 @@
+\hypertarget{structdsp_1_1_delay_line}{}\doxysection{dsp\+::Delay\+Line Struct Reference}
+\label{structdsp_1_1_delay_line}\index{dsp::DelayLine@{dsp::DelayLine}}
+
+
+Basic delay line abstraction.  
+
+
+
+
+{\ttfamily \#include $<$delayline.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_delay_line_afa6114650307f0f4e86e22645c723422}\label{structdsp_1_1_delay_line_afa6114650307f0f4e86e22645c723422}} 
+\mbox{\hyperlink{structdsp_1_1_delay_line_afa6114650307f0f4e86e22645c723422}{Delay\+Line}} (void)
+\begin{DoxyCompactList}\small\item\em Default constructor. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structdsp_1_1_delay_line_a3d7864d113f49f92591902344328f66f}{Delay\+Line}} (float $\ast$ram, size\+\_\+t line\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Constructor with explicit memory area to use as backing buffer for delay line. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_delay_line_a8157e7975d9dc6e2faa2ea3d36e9aa7d}\label{structdsp_1_1_delay_line_a8157e7975d9dc6e2faa2ea3d36e9aa7d}} 
+void \mbox{\hyperlink{structdsp_1_1_delay_line_a8157e7975d9dc6e2faa2ea3d36e9aa7d}{clear}} (void)
+\begin{DoxyCompactList}\small\item\em Zero clear the whole delay line. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_delay_line_a9540daad297be26fc5043faf52f0a788}{set\+Memory}} (float $\ast$ram, size\+\_\+t line\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Set the memory area to use as backing buffer for the delay line. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_delay_line_ac02dfceb1e8d5314bebe3883afce52e8}{write}} (const float s)
+\begin{DoxyCompactList}\small\item\em Write a single sample to the head of the delay line. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_delay_line_a2dcb06d3d87ff1f31f52b9a9ec2dbc70}{read}} (const uint32\+\_\+t pos)
+\begin{DoxyCompactList}\small\item\em Read a single sample from the delay line at given position from current write index. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_delay_line_adfefb5fa86ae9444dc06d3003d425df9}{read\+Frac}} (const float pos)
+\begin{DoxyCompactList}\small\item\em Read a sample from the delay line at a fractional position from current write index. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_delay_line_aa5e3edd9471fa31acb5d3f97cea738f4}{read\+Fracz}} (const uint32\+\_\+t pos, const float frac)
+\begin{DoxyCompactList}\small\item\em Read a sample from the delay line at a position from current write index with interpolation from last read. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_delay_line_a4e980093c54612d14c7b8735ab1dfadf}\label{structdsp_1_1_delay_line_a4e980093c54612d14c7b8735ab1dfadf}} 
+float $\ast$ {\bfseries m\+Line}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_delay_line_a3a0fdc6183dbe0538744fa036a8a22cb}\label{structdsp_1_1_delay_line_a3a0fdc6183dbe0538744fa036a8a22cb}} 
+float {\bfseries m\+FracZ}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_delay_line_a6e9db4cd1fa07cb7508d2fde6cd21165}\label{structdsp_1_1_delay_line_a6e9db4cd1fa07cb7508d2fde6cd21165}} 
+size\+\_\+t {\bfseries m\+Size}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_delay_line_a285c4337374b52bd5b829e7a0f8092e6}\label{structdsp_1_1_delay_line_a285c4337374b52bd5b829e7a0f8092e6}} 
+size\+\_\+t {\bfseries m\+Mask}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_delay_line_ad0b5b445f66a13b076dcfa16492d1a23}\label{structdsp_1_1_delay_line_ad0b5b445f66a13b076dcfa16492d1a23}} 
+uint32\+\_\+t {\bfseries m\+Write\+Idx}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Basic delay line abstraction. 
+
+Definition at line 56 of file delayline.\+hpp.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{structdsp_1_1_delay_line_a3d7864d113f49f92591902344328f66f}\label{structdsp_1_1_delay_line_a3d7864d113f49f92591902344328f66f}} 
+\index{dsp::DelayLine@{dsp::DelayLine}!DelayLine@{DelayLine}}
+\index{DelayLine@{DelayLine}!dsp::DelayLine@{dsp::DelayLine}}
+\doxysubsubsection{\texorpdfstring{DelayLine()}{DelayLine()}}
+{\footnotesize\ttfamily dsp\+::\+Delay\+Line\+::\+Delay\+Line (\begin{DoxyParamCaption}\item[{float $\ast$}]{ram,  }\item[{size\+\_\+t}]{line\+\_\+size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Constructor with explicit memory area to use as backing buffer for delay line. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ram} & Pointer to memory buffer \\
+\hline
+{\em line\+\_\+size} & Size in float of memory buffer \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 84 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{84                                             :}
+\DoxyCodeLine{85       mLine(ram),}
+\DoxyCodeLine{86       mFracZ(0),}
+\DoxyCodeLine{87       mSize(line\_size),}
+\DoxyCodeLine{88       mMask(line\_size-\/1),}
+\DoxyCodeLine{89       mWriteIdx(0)}
+\DoxyCodeLine{90     \{ \}}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{structdsp_1_1_delay_line_a2dcb06d3d87ff1f31f52b9a9ec2dbc70}\label{structdsp_1_1_delay_line_a2dcb06d3d87ff1f31f52b9a9ec2dbc70}} 
+\index{dsp::DelayLine@{dsp::DelayLine}!read@{read}}
+\index{read@{read}!dsp::DelayLine@{dsp::DelayLine}}
+\doxysubsubsection{\texorpdfstring{read()}{read()}}
+{\footnotesize\ttfamily float dsp\+::\+Delay\+Line\+::read (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{pos }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Read a single sample from the delay line at given position from current write index. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & Offset from write index \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Sample at given position from write index 
+\end{DoxyReturn}
+
+
+Definition at line 137 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{137                                    \{}
+\DoxyCodeLine{138       \textcolor{keywordflow}{return} mLine[(mWriteIdx + pos) \& mMask];}
+\DoxyCodeLine{139     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_delay_line_adfefb5fa86ae9444dc06d3003d425df9}\label{structdsp_1_1_delay_line_adfefb5fa86ae9444dc06d3003d425df9}} 
+\index{dsp::DelayLine@{dsp::DelayLine}!readFrac@{readFrac}}
+\index{readFrac@{readFrac}!dsp::DelayLine@{dsp::DelayLine}}
+\doxysubsubsection{\texorpdfstring{readFrac()}{readFrac()}}
+{\footnotesize\ttfamily float dsp\+::\+Delay\+Line\+::read\+Frac (\begin{DoxyParamCaption}\item[{const float}]{pos }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Read a sample from the delay line at a fractional position from current write index. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & Offset from write index as floating point. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Interpolated sample at given fractional position from write index 
+\end{DoxyReturn}
+
+
+Definition at line 148 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{148                                     \{}
+\DoxyCodeLine{149       \textcolor{keyword}{const} uint32\_t base = (uint32\_t)pos;}
+\DoxyCodeLine{150       \textcolor{keyword}{const} \textcolor{keywordtype}{float} frac = pos -\/ base;}
+\DoxyCodeLine{151       \textcolor{keyword}{const} \textcolor{keywordtype}{float} s0 = \mbox{\hyperlink{structdsp_1_1_delay_line_a2dcb06d3d87ff1f31f52b9a9ec2dbc70}{read}}(base);}
+\DoxyCodeLine{152       \textcolor{keyword}{const} \textcolor{keywordtype}{float} s1 = \mbox{\hyperlink{structdsp_1_1_delay_line_a2dcb06d3d87ff1f31f52b9a9ec2dbc70}{read}}(base+1);}
+\DoxyCodeLine{153       \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(frac, s0, s1);}
+\DoxyCodeLine{154     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_delay_line_aa5e3edd9471fa31acb5d3f97cea738f4}\label{structdsp_1_1_delay_line_aa5e3edd9471fa31acb5d3f97cea738f4}} 
+\index{dsp::DelayLine@{dsp::DelayLine}!readFracz@{readFracz}}
+\index{readFracz@{readFracz}!dsp::DelayLine@{dsp::DelayLine}}
+\doxysubsubsection{\texorpdfstring{readFracz()}{readFracz()}}
+{\footnotesize\ttfamily float dsp\+::\+Delay\+Line\+::read\+Fracz (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{pos,  }\item[{const float}]{frac }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Read a sample from the delay line at a position from current write index with interpolation from last read. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & Offset from write index \\
+\hline
+{\em frac} & Interpolation from last read pair. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Interpolation of last read sample and sample at given position from write index. 
+\end{DoxyReturn}
+
+
+Definition at line 164 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{164                                                           \{}
+\DoxyCodeLine{165       \textcolor{keyword}{const} \textcolor{keywordtype}{float} s0 = \mbox{\hyperlink{structdsp_1_1_delay_line_a2dcb06d3d87ff1f31f52b9a9ec2dbc70}{read}}(pos);}
+\DoxyCodeLine{166       \textcolor{keyword}{const} \textcolor{keywordtype}{float} y = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(frac, s0, mFracZ);}
+\DoxyCodeLine{167       mFracZ = s0;}
+\DoxyCodeLine{168       \textcolor{keywordflow}{return} y;}
+\DoxyCodeLine{169     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_delay_line_a9540daad297be26fc5043faf52f0a788}\label{structdsp_1_1_delay_line_a9540daad297be26fc5043faf52f0a788}} 
+\index{dsp::DelayLine@{dsp::DelayLine}!setMemory@{setMemory}}
+\index{setMemory@{setMemory}!dsp::DelayLine@{dsp::DelayLine}}
+\doxysubsubsection{\texorpdfstring{setMemory()}{setMemory()}}
+{\footnotesize\ttfamily void dsp\+::\+Delay\+Line\+::set\+Memory (\begin{DoxyParamCaption}\item[{float $\ast$}]{ram,  }\item[{size\+\_\+t}]{line\+\_\+size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Set the memory area to use as backing buffer for the delay line. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ram} & Pointer to memory buffer \\
+\hline
+{\em line\+\_\+size} & Size in float of memory buffer\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Will round size to next power of two. 
+\end{DoxyNote}
+
+
+Definition at line 113 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{113                                                  \{}
+\DoxyCodeLine{114       mLine = ram;}
+\DoxyCodeLine{115       mSize = \mbox{\hyperlink{group__utils__int__math_gaead89cd443076420dfc53f83ece258f3}{nextpow2\_u32}}(line\_size); \textcolor{comment}{// must be power of 2}}
+\DoxyCodeLine{116       mMask = (mSize-\/1);}
+\DoxyCodeLine{117       mWriteIdx = 0;}
+\DoxyCodeLine{118     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_delay_line_ac02dfceb1e8d5314bebe3883afce52e8}\label{structdsp_1_1_delay_line_ac02dfceb1e8d5314bebe3883afce52e8}} 
+\index{dsp::DelayLine@{dsp::DelayLine}!write@{write}}
+\index{write@{write}!dsp::DelayLine@{dsp::DelayLine}}
+\doxysubsubsection{\texorpdfstring{write()}{write()}}
+{\footnotesize\ttfamily void dsp\+::\+Delay\+Line\+::write (\begin{DoxyParamCaption}\item[{const float}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Write a single sample to the head of the delay line. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em s} & Sample to write \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 126 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{126                               \{}
+\DoxyCodeLine{127       mLine[(mWriteIdx-\/-\/) \& mMask] = s;}
+\DoxyCodeLine{128     \}}
+
+\end{DoxyCode}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/etienne/\+Documents/\+\_\+projects/logue-\/sdk/logue-\/sdk-\/alt/platform/minilogue-\/xd/inc/dsp/\mbox{\hyperlink{delayline_8hpp}{delayline.\+hpp}}\end{DoxyCompactItemize}

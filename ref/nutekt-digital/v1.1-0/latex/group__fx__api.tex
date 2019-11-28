@@ -1,0 +1,80 @@
+\hypertarget{group__fx__api}{}\doxysection{Runtime A\+PI}
+\label{group__fx__api}\index{Runtime API@{Runtime API}}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__fx__api_gaef654e7194bae8dc60734599c0e79049}\label{group__fx__api_gaef654e7194bae8dc60734599c0e79049}} 
+\#define {\bfseries \+\_\+\+\_\+fast\+\_\+inline}~static inline \+\_\+\+\_\+attribute\+\_\+\+\_\+((always\+\_\+inline, optimize(\char`\"{}Ofast\char`\"{})))
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{group__fx__api_gaa0aef3048bbf0cae4ad49508c7c6bb5a}{\+\_\+fx\+\_\+mcu\+\_\+hash}} (void)
+\begin{DoxyCompactList}\small\item\em Get M\+CU hash. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__fx__api_ga0acdd737038d61b80f33782856fe8146}\label{group__fx__api_ga0acdd737038d61b80f33782856fe8146}} 
+\+\_\+\+\_\+fast\+\_\+inline uint32\+\_\+t {\bfseries fx\+\_\+mcu\+\_\+hash} (void)
+\item 
+uint16\+\_\+t \mbox{\hyperlink{group__fx__api_ga12b3a768d7ada99d395c3e9c783fec15}{\+\_\+fx\+\_\+get\+\_\+bpm}} (void)
+\begin{DoxyCompactList}\small\item\em Get current tempo as beats per minute as integer. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__fx__api_ga3361bc037da19ef2e30e37bb426a9e43}\label{group__fx__api_ga3361bc037da19ef2e30e37bb426a9e43}} 
+\+\_\+\+\_\+fast\+\_\+inline uint16\+\_\+t {\bfseries fx\+\_\+get\+\_\+bpm} (void)
+\item 
+float \mbox{\hyperlink{group__fx__api_gaa1da5a88b63e3b935bbeae35887d57c0}{\+\_\+fx\+\_\+get\+\_\+bpmf}} (void)
+\begin{DoxyCompactList}\small\item\em Get current tempo as beats per minute as floating point. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__fx__api_ga4a69828fff8dc8a580a6c9a5dff40578}\label{group__fx__api_ga4a69828fff8dc8a580a6c9a5dff40578}} 
+\+\_\+\+\_\+fast\+\_\+inline float {\bfseries fx\+\_\+get\+\_\+bpmf} (void)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__fx__api_ga4b1c8fc2cf05d06249f0f39434910cf6}\label{group__fx__api_ga4b1c8fc2cf05d06249f0f39434910cf6}} 
+const uint32\+\_\+t \mbox{\hyperlink{group__fx__api_ga4b1c8fc2cf05d06249f0f39434910cf6}{k\+\_\+fx\+\_\+api\+\_\+platform}}
+\begin{DoxyCompactList}\small\item\em Current platform. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__fx__api_ga4ea6410e6b63778e690af09a55ac3a2a}\label{group__fx__api_ga4ea6410e6b63778e690af09a55ac3a2a}} 
+const uint32\+\_\+t \mbox{\hyperlink{group__fx__api_ga4ea6410e6b63778e690af09a55ac3a2a}{k\+\_\+fx\+\_\+api\+\_\+version}}
+\begin{DoxyCompactList}\small\item\em Current A\+PI version. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{group__fx__api_ga12b3a768d7ada99d395c3e9c783fec15}\label{group__fx__api_ga12b3a768d7ada99d395c3e9c783fec15}} 
+\index{Runtime API@{Runtime API}!\_fx\_get\_bpm@{\_fx\_get\_bpm}}
+\index{\_fx\_get\_bpm@{\_fx\_get\_bpm}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{\_fx\_get\_bpm()}{\_fx\_get\_bpm()}}
+{\footnotesize\ttfamily uint16\+\_\+t \+\_\+fx\+\_\+get\+\_\+bpm (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Get current tempo as beats per minute as integer. 
+
+\begin{DoxyReturn}{Returns}
+Current integer B\+PM, multiplied by 10 to allow 1 decimal precision 
+\end{DoxyReturn}
+\mbox{\Hypertarget{group__fx__api_gaa1da5a88b63e3b935bbeae35887d57c0}\label{group__fx__api_gaa1da5a88b63e3b935bbeae35887d57c0}} 
+\index{Runtime API@{Runtime API}!\_fx\_get\_bpmf@{\_fx\_get\_bpmf}}
+\index{\_fx\_get\_bpmf@{\_fx\_get\_bpmf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{\_fx\_get\_bpmf()}{\_fx\_get\_bpmf()}}
+{\footnotesize\ttfamily float \+\_\+fx\+\_\+get\+\_\+bpmf (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Get current tempo as beats per minute as floating point. 
+
+\begin{DoxyReturn}{Returns}
+Current floating point B\+PM 
+\end{DoxyReturn}
+\mbox{\Hypertarget{group__fx__api_gaa0aef3048bbf0cae4ad49508c7c6bb5a}\label{group__fx__api_gaa0aef3048bbf0cae4ad49508c7c6bb5a}} 
+\index{Runtime API@{Runtime API}!\_fx\_mcu\_hash@{\_fx\_mcu\_hash}}
+\index{\_fx\_mcu\_hash@{\_fx\_mcu\_hash}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{\_fx\_mcu\_hash()}{\_fx\_mcu\_hash()}}
+{\footnotesize\ttfamily uint32\+\_\+t \+\_\+fx\+\_\+mcu\+\_\+hash (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Get M\+CU hash. 
+
+\begin{DoxyReturn}{Returns}
+A M\+CU specific \char`\"{}unique\char`\"{} hash. 
+\end{DoxyReturn}

@@ -1,0 +1,604 @@
+\hypertarget{structdsp_1_1_bi_quad_1_1_coeffs}{}\doxysection{dsp\+::Bi\+Quad\+::Coeffs Struct Reference}
+\label{structdsp_1_1_bi_quad_1_1_coeffs}\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+
+
+Filter coefficients.  
+
+
+
+
+{\ttfamily \#include $<$biquad.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_ab5562c997aebce5740e5fe15fb8a21f9}\label{structdsp_1_1_bi_quad_1_1_coeffs_ab5562c997aebce5740e5fe15fb8a21f9}} 
+\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_ab5562c997aebce5740e5fe15fb8a21f9}{Coeffs}} ()
+\begin{DoxyCompactList}\small\item\em Default constructor. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_ae0dbf7b88d1fc415507322835f31d0b9}{set\+Pole\+LP}} (const float pole)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for single pole low pass filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_a58ab727dbe6105944f60cccab9ecca73}{set\+Pole\+HP}} (const float pole)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for single pole high pass filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_ab728a7ef5d2461f42af60efc5724d6a5}{set\+F\+O\+DC}} (const float pole)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for single pole DC filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_ae2cdea17f17c4ce8533f7000ae09ee4e}{set\+F\+O\+LP}} (const float k)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for first order low pass filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_a6074341e5c6ebaae22ae540111ee2cb1}{set\+F\+O\+HP}} (const float k)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for first order high pass filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_ac4fa8fa646c429c80dfbd26977e1aabf}{set\+F\+O\+AP}} (const float k)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for first order all pass filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_a6f797f4663320fc775195b8ee8a6fec1}{set\+F\+O\+A\+P2}} (const float \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_af089c9b11ed38520c61806313c5355d5}{wc}})
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for first order all pass filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_afc3f5f22a2e316471782c95e7a076e49}{set\+S\+O\+DC}} (const float pole)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for second order DC filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_abe454541de91119843be3a53c114d7a7}{set\+S\+O\+LP}} (const float k, const float q)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for second order low pass filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_a2b918efddbaf8d04ae2383a8cf742970}{set\+S\+O\+HP}} (const float k, const float q)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for second order high pass filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_aca63ca38ea1c0016c850f07de7773ed3}{set\+S\+O\+BP}} (const float k, const float q)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for second order band pass filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_a3fd3a1df1d7f1e5c4c587d905e4f7869}{set\+S\+O\+BR}} (const float k, const float q)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for second order band reject filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_a28e2c3660d8b61f0584cef0d3baaae46}{set\+S\+O\+A\+P1}} (const float k, const float q)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for second order all pass filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_a3e5808456124c450d5a11f8995172eed}{set\+S\+O\+A\+P2}} (const float delta, const float gamma)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for second order all pass filter. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_ad4dcd2259b92bd034ff0340bf5577836}{set\+S\+O\+A\+P3}} (const float delta, const float radius)
+\begin{DoxyCompactList}\small\item\em Calculate coefficients for second order all pass filter. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static float \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_af089c9b11ed38520c61806313c5355d5}{wc}} (const float fc, const float fsrecip)
+\begin{DoxyCompactList}\small\item\em Convert Hz frequency to radians. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_a987a091763284f7c30e163dcb5e3b058}\label{structdsp_1_1_bi_quad_1_1_coeffs_a987a091763284f7c30e163dcb5e3b058}} 
+float {\bfseries ff0}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_a3df6a8420c737b17533a84303404e431}\label{structdsp_1_1_bi_quad_1_1_coeffs_a3df6a8420c737b17533a84303404e431}} 
+float {\bfseries ff1}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_a22b62425094b6c8216125317008dfc4a}\label{structdsp_1_1_bi_quad_1_1_coeffs_a22b62425094b6c8216125317008dfc4a}} 
+float {\bfseries ff2}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_a33bc9861ecbaf5ee4e440963dbef56d8}\label{structdsp_1_1_bi_quad_1_1_coeffs_a33bc9861ecbaf5ee4e440963dbef56d8}} 
+float {\bfseries fb1}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_a29cbb67efd0617f2786d6c5795cd7b44}\label{structdsp_1_1_bi_quad_1_1_coeffs_a29cbb67efd0617f2786d6c5795cd7b44}} 
+float {\bfseries fb2}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Filter coefficients. 
+
+Definition at line 65 of file biquad.\+hpp.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_ac4fa8fa646c429c80dfbd26977e1aabf}\label{structdsp_1_1_bi_quad_1_1_coeffs_ac4fa8fa646c429c80dfbd26977e1aabf}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setFOAP@{setFOAP}}
+\index{setFOAP@{setFOAP}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setFOAP()}{setFOAP()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+F\+O\+AP (\begin{DoxyParamCaption}\item[{const float}]{k }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for first order all pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em k} & Tangent of PI x cutoff frequency in radians\+: tan(pi$\ast$wc) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 168 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{168                                   \{}
+\DoxyCodeLine{169         \textcolor{comment}{// k = tan(pi*wc)}}
+\DoxyCodeLine{170         \textcolor{keyword}{const} \textcolor{keywordtype}{float} kp1 = k+1.f;}
+\DoxyCodeLine{171         \textcolor{keyword}{const} \textcolor{keywordtype}{float} km1 = k-\/1.f;}
+\DoxyCodeLine{172         ff0 = fb1 = km1 / kp1;}
+\DoxyCodeLine{173         ff1 = 1.f;}
+\DoxyCodeLine{174         fb2 = ff2 = 0.f;}
+\DoxyCodeLine{175       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_a6f797f4663320fc775195b8ee8a6fec1}\label{structdsp_1_1_bi_quad_1_1_coeffs_a6f797f4663320fc775195b8ee8a6fec1}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setFOAP2@{setFOAP2}}
+\index{setFOAP2@{setFOAP2}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setFOAP2()}{setFOAP2()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+F\+O\+A\+P2 (\begin{DoxyParamCaption}\item[{const float}]{wc }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for first order all pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em wc} & cutoff frequency in radians\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Alternative implementation with no tangeant lookup 
+\end{DoxyNote}
+
+
+Definition at line 185 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{185                                     \{}
+\DoxyCodeLine{186         \textcolor{comment}{// Note: alternative implementation for use in phasers}}
+\DoxyCodeLine{187         \textcolor{keyword}{const} \textcolor{keywordtype}{float} g1 = 1.f -\/ \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_af089c9b11ed38520c61806313c5355d5}{wc}};}
+\DoxyCodeLine{188         ff0 = g1;}
+\DoxyCodeLine{189         ff1 = -\/1;}
+\DoxyCodeLine{190         fb1 = -\/g1;}
+\DoxyCodeLine{191         fb2 = ff2 = 0.f;}
+\DoxyCodeLine{192       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_ab728a7ef5d2461f42af60efc5724d6a5}\label{structdsp_1_1_bi_quad_1_1_coeffs_ab728a7ef5d2461f42af60efc5724d6a5}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setFODC@{setFODC}}
+\index{setFODC@{setFODC}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setFODC()}{setFODC()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+F\+O\+DC (\begin{DoxyParamCaption}\item[{const float}]{pole }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for single pole DC filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pole} & Pole position in radians \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 125 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{125                                      \{}
+\DoxyCodeLine{126         ff0 = 1.f;}
+\DoxyCodeLine{127         ff1 = -\/1.f;}
+\DoxyCodeLine{128         fb1 = -\/pole;}
+\DoxyCodeLine{129         fb2 = ff2 = 0.f;}
+\DoxyCodeLine{130       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_a6074341e5c6ebaae22ae540111ee2cb1}\label{structdsp_1_1_bi_quad_1_1_coeffs_a6074341e5c6ebaae22ae540111ee2cb1}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setFOHP@{setFOHP}}
+\index{setFOHP@{setFOHP}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setFOHP()}{setFOHP()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+F\+O\+HP (\begin{DoxyParamCaption}\item[{const float}]{k }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for first order high pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em k} & Tangent of PI x cutoff frequency in radians\+: tan(pi$\ast$wc) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 152 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{152                                   \{}
+\DoxyCodeLine{153         \textcolor{comment}{// k = tan(pi*wc)}}
+\DoxyCodeLine{154         \textcolor{keyword}{const} \textcolor{keywordtype}{float} kp1 = k+1.f;}
+\DoxyCodeLine{155         \textcolor{keyword}{const} \textcolor{keywordtype}{float} km1 = k-\/1.f;}
+\DoxyCodeLine{156         ff0 = 1.f / kp1;}
+\DoxyCodeLine{157         ff1 = -\/ff0;}
+\DoxyCodeLine{158         fb1 = km1 / kp1;}
+\DoxyCodeLine{159         fb2 = ff2 = 0.f;}
+\DoxyCodeLine{160       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_ae2cdea17f17c4ce8533f7000ae09ee4e}\label{structdsp_1_1_bi_quad_1_1_coeffs_ae2cdea17f17c4ce8533f7000ae09ee4e}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setFOLP@{setFOLP}}
+\index{setFOLP@{setFOLP}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setFOLP()}{setFOLP()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+F\+O\+LP (\begin{DoxyParamCaption}\item[{const float}]{k }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for first order low pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em k} & Tangent of PI x cutoff frequency in radians\+: tan(pi$\ast$wc) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 138 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{138                                   \{}
+\DoxyCodeLine{139         \textcolor{keyword}{const} \textcolor{keywordtype}{float} kp1 = k+1.f;}
+\DoxyCodeLine{140         \textcolor{keyword}{const} \textcolor{keywordtype}{float} km1 = k-\/1.f;}
+\DoxyCodeLine{141         ff0 = ff1 = k / kp1;}
+\DoxyCodeLine{142         fb1 = km1 / kp1;}
+\DoxyCodeLine{143         fb2 = ff2 = 0.f;}
+\DoxyCodeLine{144       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_a58ab727dbe6105944f60cccab9ecca73}\label{structdsp_1_1_bi_quad_1_1_coeffs_a58ab727dbe6105944f60cccab9ecca73}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setPoleHP@{setPoleHP}}
+\index{setPoleHP@{setPoleHP}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setPoleHP()}{setPoleHP()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+Pole\+HP (\begin{DoxyParamCaption}\item[{const float}]{pole }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for single pole high pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pole} & Pole position in radians \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 113 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{113                                        \{}
+\DoxyCodeLine{114         ff0 = 1.f -\/ pole;}
+\DoxyCodeLine{115         fb1 = pole;}
+\DoxyCodeLine{116         fb2 = ff2 = ff1 = 0.f;}
+\DoxyCodeLine{117       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_ae0dbf7b88d1fc415507322835f31d0b9}\label{structdsp_1_1_bi_quad_1_1_coeffs_ae0dbf7b88d1fc415507322835f31d0b9}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setPoleLP@{setPoleLP}}
+\index{setPoleLP@{setPoleLP}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setPoleLP()}{setPoleLP()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+Pole\+LP (\begin{DoxyParamCaption}\item[{const float}]{pole }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for single pole low pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pole} & Pole position in radians \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 101 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{101                                        \{}
+\DoxyCodeLine{102         ff0 = 1.f -\/ pole;}
+\DoxyCodeLine{103         fb1 = -\/pole;}
+\DoxyCodeLine{104         fb2 = ff2 = ff1 = 0.f;}
+\DoxyCodeLine{105       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_a28e2c3660d8b61f0584cef0d3baaae46}\label{structdsp_1_1_bi_quad_1_1_coeffs_a28e2c3660d8b61f0584cef0d3baaae46}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setSOAP1@{setSOAP1}}
+\index{setSOAP1@{setSOAP1}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setSOAP1()}{setSOAP1()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+S\+O\+A\+P1 (\begin{DoxyParamCaption}\item[{const float}]{k,  }\item[{const float}]{q }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for second order all pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em k} & Tangent of PI x cutoff frequency in radians\+: tan(pi$\ast$wc) \\
+\hline
+{\em q} & Inverse of relative bandwidth (Fc / Fb) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 286 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{286                                                   \{}
+\DoxyCodeLine{287         \textcolor{comment}{// k = tan(pi*wc)}}
+\DoxyCodeLine{288         \textcolor{comment}{// q is inverse of relative bandwidth (Fc / Fb)}}
+\DoxyCodeLine{289         \textcolor{keyword}{const} \textcolor{keywordtype}{float} qk2 = q * k * k;}
+\DoxyCodeLine{290         \textcolor{keyword}{const} \textcolor{keywordtype}{float} qk2\_k\_q\_r = 1.f / (qk2 + k + q);}
+\DoxyCodeLine{291         ff0 = fb2 = (qk2 -\/ k + q) * qk2\_k\_q\_r;}
+\DoxyCodeLine{292         ff1 = fb1 = 2.f * (qk2 -\/ q) * qk2\_k\_q\_r;}
+\DoxyCodeLine{293         ff2 = 1.f;}
+\DoxyCodeLine{294       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_a3e5808456124c450d5a11f8995172eed}\label{structdsp_1_1_bi_quad_1_1_coeffs_a3e5808456124c450d5a11f8995172eed}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setSOAP2@{setSOAP2}}
+\index{setSOAP2@{setSOAP2}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setSOAP2()}{setSOAP2()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+S\+O\+A\+P2 (\begin{DoxyParamCaption}\item[{const float}]{delta,  }\item[{const float}]{gamma }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for second order all pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em delta} & cos(2pi$\ast$wc) \\
+\hline
+{\em gamma} & tan(pi $\ast$ wb)\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+q is inverse of relative bandwidth (wc / wb) 
+
+Alternative implementation, so called \char`\"{}tunable\char`\"{} in D\+A\+FX second edition. 
+\end{DoxyNote}
+
+
+Definition at line 306 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{306                                                           \{}
+\DoxyCodeLine{307         \textcolor{comment}{// Note: Alternative implementation .. so called "tunable" in DAFX.}}
+\DoxyCodeLine{308         \textcolor{comment}{// delta = cos(2pi*wc)}}
+\DoxyCodeLine{309         \textcolor{keyword}{const} \textcolor{keywordtype}{float} c = (gamma -\/ 1.f) / (gamma + 1.f);}
+\DoxyCodeLine{310         \textcolor{keyword}{const} \textcolor{keywordtype}{float} d = -\/delta;}
+\DoxyCodeLine{311         ff0 = fb2 = -\/c;}
+\DoxyCodeLine{312         ff1 = fb1 = d * (1.f -\/ c);}
+\DoxyCodeLine{313         ff2 = 1.f;}
+\DoxyCodeLine{314       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_ad4dcd2259b92bd034ff0340bf5577836}\label{structdsp_1_1_bi_quad_1_1_coeffs_ad4dcd2259b92bd034ff0340bf5577836}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setSOAP3@{setSOAP3}}
+\index{setSOAP3@{setSOAP3}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setSOAP3()}{setSOAP3()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+S\+O\+A\+P3 (\begin{DoxyParamCaption}\item[{const float}]{delta,  }\item[{const float}]{radius }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for second order all pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em delta} & cos(2pi$\ast$wc) \\
+\hline
+{\em radius} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Another alternative implementation. 
+\end{DoxyNote}
+
+
+Definition at line 325 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{325                                                            \{}
+\DoxyCodeLine{326         \textcolor{comment}{// Note: alternative implementation for use in phasers}}
+\DoxyCodeLine{327         \textcolor{comment}{// delta = cos(2pi * wc)}}
+\DoxyCodeLine{328         \textcolor{keyword}{const} \textcolor{keywordtype}{float} a1 = -\/2.f * radius * delta;}
+\DoxyCodeLine{329         \textcolor{keyword}{const} \textcolor{keywordtype}{float} a2 = radius * radius;}
+\DoxyCodeLine{330         ff0 = fb2 = a2;}
+\DoxyCodeLine{331         ff1 = fb1 = a1;}
+\DoxyCodeLine{332         ff2 = 1.f;}
+\DoxyCodeLine{333       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_aca63ca38ea1c0016c850f07de7773ed3}\label{structdsp_1_1_bi_quad_1_1_coeffs_aca63ca38ea1c0016c850f07de7773ed3}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setSOBP@{setSOBP}}
+\index{setSOBP@{setSOBP}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setSOBP()}{setSOBP()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+S\+O\+BP (\begin{DoxyParamCaption}\item[{const float}]{k,  }\item[{const float}]{q }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for second order band pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em k} & Tangent of PI x cutoff frequency in radians\+: tan(pi$\ast$wc) \\
+\hline
+{\em q} & Resonance with flat response at q = sqrt(2) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 250 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{250                                                  \{}
+\DoxyCodeLine{251         \textcolor{comment}{// k = tan(pi*wc)}}
+\DoxyCodeLine{252         \textcolor{comment}{// q is inverse of relative bandwidth (Fc / Fb)}}
+\DoxyCodeLine{253         \textcolor{keyword}{const} \textcolor{keywordtype}{float} qk2 = q * k * k;}
+\DoxyCodeLine{254         \textcolor{keyword}{const} \textcolor{keywordtype}{float} qk2\_k\_q\_r = 1.f / (qk2 + k + q);}
+\DoxyCodeLine{255         ff0 = k * qk2\_k\_q\_r;}
+\DoxyCodeLine{256         ff1 = 0.f;}
+\DoxyCodeLine{257         ff2 = -\/ff0;}
+\DoxyCodeLine{258         fb1 = 2.f * (qk2 -\/ q) * qk2\_k\_q\_r;}
+\DoxyCodeLine{259         fb2 = (qk2 -\/ k + q) * qk2\_k\_q\_r;}
+\DoxyCodeLine{260       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_a3fd3a1df1d7f1e5c4c587d905e4f7869}\label{structdsp_1_1_bi_quad_1_1_coeffs_a3fd3a1df1d7f1e5c4c587d905e4f7869}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setSOBR@{setSOBR}}
+\index{setSOBR@{setSOBR}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setSOBR()}{setSOBR()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+S\+O\+BR (\begin{DoxyParamCaption}\item[{const float}]{k,  }\item[{const float}]{q }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for second order band reject filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em k} & Tangent of PI x cutoff frequency in radians\+: tan(pi$\ast$wc) \\
+\hline
+{\em q} & Resonance with flat response at q = sqrt(2) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 269 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{269                                                  \{}
+\DoxyCodeLine{270         \textcolor{comment}{// k = tan(pi*wc)}}
+\DoxyCodeLine{271         \textcolor{comment}{// q is inverse of relative bandwidth (Fc / Fb)}}
+\DoxyCodeLine{272         \textcolor{keyword}{const} \textcolor{keywordtype}{float} qk2 = q * k * k;}
+\DoxyCodeLine{273         \textcolor{keyword}{const} \textcolor{keywordtype}{float} qk2\_k\_q\_r = 1.f / (qk2 + k + q);}
+\DoxyCodeLine{274         ff0 = ff2 = (qk2 + q) * qk2\_k\_q\_r;}
+\DoxyCodeLine{275         ff1 = fb1 = 2.f * (qk2 -\/ q) * qk2\_k\_q\_r;}
+\DoxyCodeLine{276         fb2 = (qk2 -\/ k + q) * qk2\_k\_q\_r;}
+\DoxyCodeLine{277       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_afc3f5f22a2e316471782c95e7a076e49}\label{structdsp_1_1_bi_quad_1_1_coeffs_afc3f5f22a2e316471782c95e7a076e49}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setSODC@{setSODC}}
+\index{setSODC@{setSODC}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setSODC()}{setSODC()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+S\+O\+DC (\begin{DoxyParamCaption}\item[{const float}]{pole }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for second order DC filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pole} & Pole position in radians \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 200 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{200                                      \{}
+\DoxyCodeLine{201         ff0 = ff2 = 1.f;}
+\DoxyCodeLine{202         ff1 = 2.f;}
+\DoxyCodeLine{203         fb1 = -\/2.f * pole;}
+\DoxyCodeLine{204         fb2 = pole * pole;}
+\DoxyCodeLine{205       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_a2b918efddbaf8d04ae2383a8cf742970}\label{structdsp_1_1_bi_quad_1_1_coeffs_a2b918efddbaf8d04ae2383a8cf742970}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setSOHP@{setSOHP}}
+\index{setSOHP@{setSOHP}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setSOHP()}{setSOHP()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+S\+O\+HP (\begin{DoxyParamCaption}\item[{const float}]{k,  }\item[{const float}]{q }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for second order high pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em k} & Tangent of PI x cutoff frequency in radians\+: tan(pi$\ast$wc) \\
+\hline
+{\em q} & Resonance with flat response at q = sqrt(2) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 232 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{232                                                  \{}
+\DoxyCodeLine{233         \textcolor{comment}{// k = tan(pi*wc)}}
+\DoxyCodeLine{234         \textcolor{comment}{// flat response at q = sqrt(2)}}
+\DoxyCodeLine{235         \textcolor{keyword}{const} \textcolor{keywordtype}{float} qk2 = q * k * k;}
+\DoxyCodeLine{236         \textcolor{keyword}{const} \textcolor{keywordtype}{float} qk2\_k\_q\_r = 1.f / (qk2 + k + q);}
+\DoxyCodeLine{237         ff0 = ff2 = q * qk2\_k\_q\_r;}
+\DoxyCodeLine{238         ff1 = -\/2.f * ff0;}
+\DoxyCodeLine{239         fb1 = 2.f * (qk2 -\/ q) * qk2\_k\_q\_r;}
+\DoxyCodeLine{240         fb2 = (qk2 -\/ k + q) * qk2\_k\_q\_r;}
+\DoxyCodeLine{241       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_abe454541de91119843be3a53c114d7a7}\label{structdsp_1_1_bi_quad_1_1_coeffs_abe454541de91119843be3a53c114d7a7}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!setSOLP@{setSOLP}}
+\index{setSOLP@{setSOLP}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{setSOLP()}{setSOLP()}}
+{\footnotesize\ttfamily void dsp\+::\+Bi\+Quad\+::\+Coeffs\+::set\+S\+O\+LP (\begin{DoxyParamCaption}\item[{const float}]{k,  }\item[{const float}]{q }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Calculate coefficients for second order low pass filter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em k} & Tangent of PI x cutoff frequency in radians\+: tan(pi$\ast$wc) \\
+\hline
+{\em q} & Resonance with flat response at q = sqrt(2) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 214 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{214                                                  \{}
+\DoxyCodeLine{215         \textcolor{comment}{// k = tan(pi*wc)}}
+\DoxyCodeLine{216         \textcolor{comment}{// flat response at q = sqrt(2)}}
+\DoxyCodeLine{217         \textcolor{keyword}{const} \textcolor{keywordtype}{float} qk2 = q * k * k;}
+\DoxyCodeLine{218         \textcolor{keyword}{const} \textcolor{keywordtype}{float} qk2\_k\_q\_r = 1.f / (qk2 + k + q);}
+\DoxyCodeLine{219         ff0 = ff2 = qk2 * qk2\_k\_q\_r;}
+\DoxyCodeLine{220         ff1 = 2.f * ff0;}
+\DoxyCodeLine{221         fb1 = 2.f * (qk2 -\/ q) * qk2\_k\_q\_r;}
+\DoxyCodeLine{222         fb2 = (qk2 -\/ k + q) * qk2\_k\_q\_r;}
+\DoxyCodeLine{223       \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_1_1_coeffs_af089c9b11ed38520c61806313c5355d5}\label{structdsp_1_1_bi_quad_1_1_coeffs_af089c9b11ed38520c61806313c5355d5}} 
+\index{dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}!wc@{wc}}
+\index{wc@{wc}!dsp::BiQuad::Coeffs@{dsp::BiQuad::Coeffs}}
+\doxysubsubsection{\texorpdfstring{wc()}{wc()}}
+{\footnotesize\ttfamily static float dsp\+::\+Bi\+Quad\+::\+Coeffs\+::wc (\begin{DoxyParamCaption}\item[{const float}]{fc,  }\item[{const float}]{fsrecip }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+Convert Hz frequency to radians. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em fc} & Frequency in Hz \\
+\hline
+{\em fsrecip} & Reciprocal of sampling frequency (1/\+Fs) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 89 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{89                                                     \{}
+\DoxyCodeLine{90         \textcolor{keywordflow}{return} fc * fsrecip;}
+\DoxyCodeLine{91       \}}
+
+\end{DoxyCode}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/etienne/\+Documents/\+\_\+projects/logue-\/sdk/logue-\/sdk-\/alt/platform/minilogue-\/xd/inc/dsp/\mbox{\hyperlink{biquad_8hpp}{biquad.\+hpp}}\end{DoxyCompactItemize}

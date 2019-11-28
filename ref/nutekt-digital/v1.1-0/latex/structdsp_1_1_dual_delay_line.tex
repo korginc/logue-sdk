@@ -1,0 +1,459 @@
+\hypertarget{structdsp_1_1_dual_delay_line}{}\doxysection{dsp\+::Dual\+Delay\+Line Struct Reference}
+\label{structdsp_1_1_dual_delay_line}\index{dsp::DualDelayLine@{dsp::DualDelayLine}}
+
+
+Dual channel delay line abstraction with interleaved samples.  
+
+
+
+
+{\ttfamily \#include $<$delayline.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a6f63b31b8975c8b2e970ac8eb78a4328}\label{structdsp_1_1_dual_delay_line_a6f63b31b8975c8b2e970ac8eb78a4328}} 
+\mbox{\hyperlink{structdsp_1_1_dual_delay_line_a6f63b31b8975c8b2e970ac8eb78a4328}{Dual\+Delay\+Line}} (void)
+\begin{DoxyCompactList}\small\item\em Default constructor. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structdsp_1_1_dual_delay_line_a04565cf3d7bb70df3347e09f53c2fe16}{Dual\+Delay\+Line}} (\mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} $\ast$ram, size\+\_\+t line\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Constructor with explicit memory area to use as backing buffer for delay line. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a294af6cdf0cd6483c8f46f917d3b6c3f}\label{structdsp_1_1_dual_delay_line_a294af6cdf0cd6483c8f46f917d3b6c3f}} 
+void \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a294af6cdf0cd6483c8f46f917d3b6c3f}{clear}} (void)
+\begin{DoxyCompactList}\small\item\em Zero clear the whole delay line. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_dual_delay_line_ab16113bb450fef7451a460aa62ac9419}{set\+Memory}} (\mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} $\ast$ram, size\+\_\+t line\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Set the memory area to use as backing buffer for the delay line. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a7ec8f93fdfe99442844d219e5a331902}{write}} (const \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} \&p)
+\begin{DoxyCompactList}\small\item\em Write a sample pair to the delay line. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a3fb5221b1d6cfd165831a2167625ec09}{read}} (const uint32\+\_\+t pos)
+\begin{DoxyCompactList}\small\item\em Read a sample pair from the delay line at given position from current write index. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a8b2a2fe9a87f4c486876a7841bacfc9b}{read\+Frac}} (const float pos)
+\begin{DoxyCompactList}\small\item\em Read a sample pair from the delay line at a fractional position from current write index. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a18b6e87e9f3b5e95a22fcd1491c81070}{read\+Fracz}} (const uint32\+\_\+t pos, const float frac)
+\begin{DoxyCompactList}\small\item\em Read a sample pair from the delay line at a position from current write index with interpolation from last read. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a86260b8a4d427ec2752745a0d7b2cbbf}{read0}} (const uint32\+\_\+t pos)
+\begin{DoxyCompactList}\small\item\em Read a single sample from the delay line\textquotesingle{}s primary channel at given position from current write index. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_dual_delay_line_aba0f97601e7dbbc7c961778a760eb721}{read1}} (const uint32\+\_\+t pos)
+\begin{DoxyCompactList}\small\item\em Read a single sample from the delay line\textquotesingle{}s secondary channel at given position from current write index. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a1fd66666a895534972f188d3f9d0aaaa}{read0\+Frac}} (const float pos)
+\begin{DoxyCompactList}\small\item\em Read a single sample from the delay line\textquotesingle{}s primary channel at a fractional position from current write index. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_dual_delay_line_acde1ac285bf01b607612bcc7391377dc}{read0\+Fracz}} (const uint32\+\_\+t pos, const float frac)
+\begin{DoxyCompactList}\small\item\em Read a single sample from the delay line\textquotesingle{}s primary channel at a position from current write index with interpolation from last read. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a9bc2b591b1e8630516e4bc50f1f86893}{read1\+Frac}} (const float pos)
+\begin{DoxyCompactList}\small\item\em Read a single sample from the delay line\textquotesingle{}s secondary channel at a fractional position from current write index. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a9b125e8c0ae409bd44697c3397b0b66c}{read1\+Fracz}} (const uint32\+\_\+t pos, const float frac)
+\begin{DoxyCompactList}\small\item\em Read a single sample from the delay line\textquotesingle{}s secondary channel at a position from current write index with interpolation from last read. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a944ab2023070ec356c126b183c4a84bd}\label{structdsp_1_1_dual_delay_line_a944ab2023070ec356c126b183c4a84bd}} 
+\mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} $\ast$ {\bfseries m\+Line}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a257352edcd764de108c6d92315d628d9}\label{structdsp_1_1_dual_delay_line_a257352edcd764de108c6d92315d628d9}} 
+\mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} {\bfseries m\+FracZ}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_adfa876d689d12adf9bda94fa3b158883}\label{structdsp_1_1_dual_delay_line_adfa876d689d12adf9bda94fa3b158883}} 
+size\+\_\+t {\bfseries m\+Size}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_af4a7280d363e716bcd500f38c03f9869}\label{structdsp_1_1_dual_delay_line_af4a7280d363e716bcd500f38c03f9869}} 
+size\+\_\+t {\bfseries m\+Mask}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a4e4061bbb510672e24571812c21723e5}\label{structdsp_1_1_dual_delay_line_a4e4061bbb510672e24571812c21723e5}} 
+uint32\+\_\+t {\bfseries m\+Write\+Idx}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Dual channel delay line abstraction with interleaved samples. 
+
+Definition at line 187 of file delayline.\+hpp.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a04565cf3d7bb70df3347e09f53c2fe16}\label{structdsp_1_1_dual_delay_line_a04565cf3d7bb70df3347e09f53c2fe16}} 
+\index{dsp::DualDelayLine@{dsp::DualDelayLine}!DualDelayLine@{DualDelayLine}}
+\index{DualDelayLine@{DualDelayLine}!dsp::DualDelayLine@{dsp::DualDelayLine}}
+\doxysubsubsection{\texorpdfstring{DualDelayLine()}{DualDelayLine()}}
+{\footnotesize\ttfamily dsp\+::\+Dual\+Delay\+Line\+::\+Dual\+Delay\+Line (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} $\ast$}]{ram,  }\item[{size\+\_\+t}]{line\+\_\+size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Constructor with explicit memory area to use as backing buffer for delay line. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ram} & Pointer to memory buffer \\
+\hline
+{\em line\+\_\+size} & Size in float pairs of memory buffer \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 215 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{215                                                     :}
+\DoxyCodeLine{216       mWriteIdx(0)}
+\DoxyCodeLine{217     \{}
+\DoxyCodeLine{218       \mbox{\hyperlink{structdsp_1_1_dual_delay_line_ab16113bb450fef7451a460aa62ac9419}{setMemory}}(ram, line\_size);}
+\DoxyCodeLine{219     \}}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a3fb5221b1d6cfd165831a2167625ec09}\label{structdsp_1_1_dual_delay_line_a3fb5221b1d6cfd165831a2167625ec09}} 
+\index{dsp::DualDelayLine@{dsp::DualDelayLine}!read@{read}}
+\index{read@{read}!dsp::DualDelayLine@{dsp::DualDelayLine}}
+\doxysubsubsection{\texorpdfstring{read()}{read()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} dsp\+::\+Dual\+Delay\+Line\+::read (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{pos }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Read a sample pair from the delay line at given position from current write index. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & Offset from write index \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Sample pair at given position from write index 
+\end{DoxyReturn}
+
+
+Definition at line 266 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{266                                        \{}
+\DoxyCodeLine{267       \textcolor{keywordflow}{return} mLine[(mWriteIdx + pos) \& mMask];}
+\DoxyCodeLine{268     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a86260b8a4d427ec2752745a0d7b2cbbf}\label{structdsp_1_1_dual_delay_line_a86260b8a4d427ec2752745a0d7b2cbbf}} 
+\index{dsp::DualDelayLine@{dsp::DualDelayLine}!read0@{read0}}
+\index{read0@{read0}!dsp::DualDelayLine@{dsp::DualDelayLine}}
+\doxysubsubsection{\texorpdfstring{read0()}{read0()}}
+{\footnotesize\ttfamily float dsp\+::\+Dual\+Delay\+Line\+::read0 (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{pos }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Read a single sample from the delay line\textquotesingle{}s primary channel at given position from current write index. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & Offset from write index. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Sample at given position from write index 
+\end{DoxyReturn}
+
+
+Definition at line 308 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{308                                     \{}
+\DoxyCodeLine{309       \textcolor{keywordflow}{return} (mLine[(mWriteIdx + pos) \& mMask]).a;}
+\DoxyCodeLine{310     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a1fd66666a895534972f188d3f9d0aaaa}\label{structdsp_1_1_dual_delay_line_a1fd66666a895534972f188d3f9d0aaaa}} 
+\index{dsp::DualDelayLine@{dsp::DualDelayLine}!read0Frac@{read0Frac}}
+\index{read0Frac@{read0Frac}!dsp::DualDelayLine@{dsp::DualDelayLine}}
+\doxysubsubsection{\texorpdfstring{read0Frac()}{read0Frac()}}
+{\footnotesize\ttfamily float dsp\+::\+Dual\+Delay\+Line\+::read0\+Frac (\begin{DoxyParamCaption}\item[{const float}]{pos }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Read a single sample from the delay line\textquotesingle{}s primary channel at a fractional position from current write index. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & Offset from write index as floating point. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Interpolated sample at given fractional position from write index 
+\end{DoxyReturn}
+
+
+Definition at line 330 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{330                                      \{}
+\DoxyCodeLine{331       \textcolor{keyword}{const} int32\_t base = (uint32\_t)pos;}
+\DoxyCodeLine{332       \textcolor{keyword}{const} \textcolor{keywordtype}{float} frac = pos -\/ base;}
+\DoxyCodeLine{333       \textcolor{keyword}{const} \textcolor{keywordtype}{float} f0 = \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a86260b8a4d427ec2752745a0d7b2cbbf}{read0}}(base);}
+\DoxyCodeLine{334       \textcolor{keyword}{const} \textcolor{keywordtype}{float} f1 = \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a86260b8a4d427ec2752745a0d7b2cbbf}{read0}}(base+1);}
+\DoxyCodeLine{335       \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(frac, f0, f1);}
+\DoxyCodeLine{336     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_acde1ac285bf01b607612bcc7391377dc}\label{structdsp_1_1_dual_delay_line_acde1ac285bf01b607612bcc7391377dc}} 
+\index{dsp::DualDelayLine@{dsp::DualDelayLine}!read0Fracz@{read0Fracz}}
+\index{read0Fracz@{read0Fracz}!dsp::DualDelayLine@{dsp::DualDelayLine}}
+\doxysubsubsection{\texorpdfstring{read0Fracz()}{read0Fracz()}}
+{\footnotesize\ttfamily float dsp\+::\+Dual\+Delay\+Line\+::read0\+Fracz (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{pos,  }\item[{const float}]{frac }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Read a single sample from the delay line\textquotesingle{}s primary channel at a position from current write index with interpolation from last read. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & Offset from write index \\
+\hline
+{\em frac} & Interpolation from last read pair. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Interpolation of last read sample and sample at given position from write index. 
+\end{DoxyReturn}
+
+
+Definition at line 346 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{346                                                            \{}
+\DoxyCodeLine{347       \textcolor{keyword}{const} \textcolor{keywordtype}{float} f0 = \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a86260b8a4d427ec2752745a0d7b2cbbf}{read0}}(pos);}
+\DoxyCodeLine{348       \textcolor{keyword}{const} \textcolor{keywordtype}{float} y = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(frac, f0, mFracZ.a);}
+\DoxyCodeLine{349       mFracZ.a = f0;}
+\DoxyCodeLine{350       \textcolor{keywordflow}{return} y;}
+\DoxyCodeLine{351     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_aba0f97601e7dbbc7c961778a760eb721}\label{structdsp_1_1_dual_delay_line_aba0f97601e7dbbc7c961778a760eb721}} 
+\index{dsp::DualDelayLine@{dsp::DualDelayLine}!read1@{read1}}
+\index{read1@{read1}!dsp::DualDelayLine@{dsp::DualDelayLine}}
+\doxysubsubsection{\texorpdfstring{read1()}{read1()}}
+{\footnotesize\ttfamily float dsp\+::\+Dual\+Delay\+Line\+::read1 (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{pos }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Read a single sample from the delay line\textquotesingle{}s secondary channel at given position from current write index. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & Offset from write index. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Sample at given position from write index 
+\end{DoxyReturn}
+
+
+Definition at line 319 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{319                                     \{}
+\DoxyCodeLine{320       \textcolor{keywordflow}{return} (mLine[(mWriteIdx + pos) \& mMask]).b;}
+\DoxyCodeLine{321     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a9bc2b591b1e8630516e4bc50f1f86893}\label{structdsp_1_1_dual_delay_line_a9bc2b591b1e8630516e4bc50f1f86893}} 
+\index{dsp::DualDelayLine@{dsp::DualDelayLine}!read1Frac@{read1Frac}}
+\index{read1Frac@{read1Frac}!dsp::DualDelayLine@{dsp::DualDelayLine}}
+\doxysubsubsection{\texorpdfstring{read1Frac()}{read1Frac()}}
+{\footnotesize\ttfamily float dsp\+::\+Dual\+Delay\+Line\+::read1\+Frac (\begin{DoxyParamCaption}\item[{const float}]{pos }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Read a single sample from the delay line\textquotesingle{}s secondary channel at a fractional position from current write index. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & Offset from write index as floating point. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Interpolated sample at given fractional position from write index 
+\end{DoxyReturn}
+
+
+Definition at line 360 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{360                                      \{}
+\DoxyCodeLine{361       \textcolor{keyword}{const} int32\_t base = (uint32\_t)pos;}
+\DoxyCodeLine{362       \textcolor{keyword}{const} \textcolor{keywordtype}{float} frac = pos -\/ base;}
+\DoxyCodeLine{363       \textcolor{keyword}{const} \textcolor{keywordtype}{float} f0 = \mbox{\hyperlink{structdsp_1_1_dual_delay_line_aba0f97601e7dbbc7c961778a760eb721}{read1}}(base);}
+\DoxyCodeLine{364       \textcolor{keyword}{const} \textcolor{keywordtype}{float} f1 = \mbox{\hyperlink{structdsp_1_1_dual_delay_line_aba0f97601e7dbbc7c961778a760eb721}{read1}}(base+1);}
+\DoxyCodeLine{365       \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(frac, f0, f1);}
+\DoxyCodeLine{366     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a9b125e8c0ae409bd44697c3397b0b66c}\label{structdsp_1_1_dual_delay_line_a9b125e8c0ae409bd44697c3397b0b66c}} 
+\index{dsp::DualDelayLine@{dsp::DualDelayLine}!read1Fracz@{read1Fracz}}
+\index{read1Fracz@{read1Fracz}!dsp::DualDelayLine@{dsp::DualDelayLine}}
+\doxysubsubsection{\texorpdfstring{read1Fracz()}{read1Fracz()}}
+{\footnotesize\ttfamily float dsp\+::\+Dual\+Delay\+Line\+::read1\+Fracz (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{pos,  }\item[{const float}]{frac }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Read a single sample from the delay line\textquotesingle{}s secondary channel at a position from current write index with interpolation from last read. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & Offset from write index \\
+\hline
+{\em frac} & Interpolation from last read pair. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Interpolation of last read sample and sample at given position from write index. 
+\end{DoxyReturn}
+
+
+Definition at line 376 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{376                                                            \{}
+\DoxyCodeLine{377       \textcolor{keyword}{const} \textcolor{keywordtype}{float} f0 = \mbox{\hyperlink{structdsp_1_1_dual_delay_line_aba0f97601e7dbbc7c961778a760eb721}{read1}}(pos);}
+\DoxyCodeLine{378       \textcolor{keyword}{const} \textcolor{keywordtype}{float} y = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(frac, f0, mFracZ.b);}
+\DoxyCodeLine{379       mFracZ.b = f0;}
+\DoxyCodeLine{380       \textcolor{keywordflow}{return} y;}
+\DoxyCodeLine{381     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a8b2a2fe9a87f4c486876a7841bacfc9b}\label{structdsp_1_1_dual_delay_line_a8b2a2fe9a87f4c486876a7841bacfc9b}} 
+\index{dsp::DualDelayLine@{dsp::DualDelayLine}!readFrac@{readFrac}}
+\index{readFrac@{readFrac}!dsp::DualDelayLine@{dsp::DualDelayLine}}
+\doxysubsubsection{\texorpdfstring{readFrac()}{readFrac()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} dsp\+::\+Dual\+Delay\+Line\+::read\+Frac (\begin{DoxyParamCaption}\item[{const float}]{pos }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Read a sample pair from the delay line at a fractional position from current write index. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & Offset from write index as floating point. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Interpolated sample pair at given fractional position from write index 
+\end{DoxyReturn}
+
+
+Definition at line 277 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{277                                         \{}
+\DoxyCodeLine{278       \textcolor{keyword}{const} int32\_t base = (uint32\_t)pos;}
+\DoxyCodeLine{279       \textcolor{keyword}{const} \textcolor{keywordtype}{float} frac = pos -\/ base;}
+\DoxyCodeLine{280       \textcolor{keyword}{const} \mbox{\hyperlink{structf32pair__t}{f32pair\_t}} p0 = \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a3fb5221b1d6cfd165831a2167625ec09}{read}}(base);}
+\DoxyCodeLine{281       \textcolor{keyword}{const} \mbox{\hyperlink{structf32pair__t}{f32pair\_t}} p1 = \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a3fb5221b1d6cfd165831a2167625ec09}{read}}(base+1);}
+\DoxyCodeLine{282         }
+\DoxyCodeLine{283       \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga3f85349407e946564f98f3844c46ed31}{f32pair\_linint}}(frac, p0, p1); }
+\DoxyCodeLine{284     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a18b6e87e9f3b5e95a22fcd1491c81070}\label{structdsp_1_1_dual_delay_line_a18b6e87e9f3b5e95a22fcd1491c81070}} 
+\index{dsp::DualDelayLine@{dsp::DualDelayLine}!readFracz@{readFracz}}
+\index{readFracz@{readFracz}!dsp::DualDelayLine@{dsp::DualDelayLine}}
+\doxysubsubsection{\texorpdfstring{readFracz()}{readFracz()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} dsp\+::\+Dual\+Delay\+Line\+::read\+Fracz (\begin{DoxyParamCaption}\item[{const uint32\+\_\+t}]{pos,  }\item[{const float}]{frac }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Read a sample pair from the delay line at a position from current write index with interpolation from last read. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em pos} & Offset from write index \\
+\hline
+{\em frac} & Interpolation from last read pair. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Interpolation of last read sample pair and sample pair at given position from write index. 
+\end{DoxyReturn}
+
+
+Definition at line 294 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{294                                                               \{}
+\DoxyCodeLine{295       \textcolor{keyword}{const} \mbox{\hyperlink{structf32pair__t}{f32pair\_t}} p0 = \mbox{\hyperlink{structdsp_1_1_dual_delay_line_a3fb5221b1d6cfd165831a2167625ec09}{read}}(pos);}
+\DoxyCodeLine{296       \textcolor{keyword}{const} \mbox{\hyperlink{structf32pair__t}{f32pair\_t}} y = \mbox{\hyperlink{group__utils__float__math_ga3f85349407e946564f98f3844c46ed31}{f32pair\_linint}}(frac, p0, mFracZ);}
+\DoxyCodeLine{297       mFracZ = p0;}
+\DoxyCodeLine{298       \textcolor{keywordflow}{return} y;}
+\DoxyCodeLine{299     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_ab16113bb450fef7451a460aa62ac9419}\label{structdsp_1_1_dual_delay_line_ab16113bb450fef7451a460aa62ac9419}} 
+\index{dsp::DualDelayLine@{dsp::DualDelayLine}!setMemory@{setMemory}}
+\index{setMemory@{setMemory}!dsp::DualDelayLine@{dsp::DualDelayLine}}
+\doxysubsubsection{\texorpdfstring{setMemory()}{setMemory()}}
+{\footnotesize\ttfamily void dsp\+::\+Dual\+Delay\+Line\+::set\+Memory (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} $\ast$}]{ram,  }\item[{size\+\_\+t}]{line\+\_\+size }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Set the memory area to use as backing buffer for the delay line. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em ram} & Pointer to memory buffer \\
+\hline
+{\em line\+\_\+size} & Size in float pairs of memory buffer\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Will round size to next power of two. 
+\end{DoxyNote}
+
+
+Definition at line 242 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{242                                                      \{}
+\DoxyCodeLine{243       mLine = ram;}
+\DoxyCodeLine{244       mSize = \mbox{\hyperlink{group__utils__int__math_gaead89cd443076420dfc53f83ece258f3}{nextpow2\_u32}}(line\_size); \textcolor{comment}{// must be power of 2}}
+\DoxyCodeLine{245       mMask = (mSize-\/1);}
+\DoxyCodeLine{246       mWriteIdx = 0;}
+\DoxyCodeLine{247     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_dual_delay_line_a7ec8f93fdfe99442844d219e5a331902}\label{structdsp_1_1_dual_delay_line_a7ec8f93fdfe99442844d219e5a331902}} 
+\index{dsp::DualDelayLine@{dsp::DualDelayLine}!write@{write}}
+\index{write@{write}!dsp::DualDelayLine@{dsp::DualDelayLine}}
+\doxysubsubsection{\texorpdfstring{write()}{write()}}
+{\footnotesize\ttfamily void dsp\+::\+Dual\+Delay\+Line\+::write (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} \&}]{p }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Write a sample pair to the delay line. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em p} & Reference to float pair. \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 255 of file delayline.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{255                                    \{}
+\DoxyCodeLine{256       mLine[(mWriteIdx-\/-\/) \& mMask] = p;}
+\DoxyCodeLine{257     \}}
+
+\end{DoxyCode}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/etienne/\+Documents/\+\_\+projects/logue-\/sdk/logue-\/sdk-\/alt/platform/nutekt-\/digital/inc/dsp/\mbox{\hyperlink{delayline_8hpp}{delayline.\+hpp}}\end{DoxyCompactItemize}

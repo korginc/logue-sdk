@@ -1,0 +1,219 @@
+\hypertarget{float__math_8h}{}\doxysection{/home/etienne/\+Documents/\+\_\+projects/logue-\/sdk/logue-\/sdk-\/alt/platform/minilogue-\/xd/inc/utils/float\+\_\+math.h File Reference}
+\label{float__math_8h}\index{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/minilogue-\/xd/inc/utils/float\_math.h@{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/minilogue-\/xd/inc/utils/float\_math.h}}
+
+
+Floating Point Math Utilities.  
+
+
+{\ttfamily \#include $<$math.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+union \mbox{\hyperlink{unionf32__t}{f32\+\_\+t}}
+\item 
+struct \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{Indent}\textbf{ Constants}\par
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries M\+\_\+E}~2.\+718281828459045f
+\item 
+\#define {\bfseries M\+\_\+\+L\+O\+G2E}~1.\+44269504088896f
+\item 
+\#define {\bfseries M\+\_\+\+L\+O\+G10E}~0.\+4342944819032518f
+\item 
+\#define {\bfseries M\+\_\+\+L\+N2}~0.\+6931471805599453094f
+\item 
+\#define {\bfseries M\+\_\+\+L\+N10}~2.\+30258509299404568402f
+\item 
+\#define {\bfseries M\+\_\+\+PI}~3.\+141592653589793f
+\item 
+\#define {\bfseries M\+\_\+\+T\+W\+O\+PI}~6.\+283185307179586f
+\item 
+\#define {\bfseries M\+\_\+\+P\+I\+\_\+2}~1.\+5707963267948966f
+\item 
+\#define {\bfseries M\+\_\+\+P\+I\+\_\+4}~0.\+7853981633974483f
+\item 
+\#define {\bfseries M\+\_\+1\+\_\+\+PI}~0.\+3183098861837907f
+\item 
+\#define {\bfseries M\+\_\+2\+\_\+\+PI}~0.\+6366197723675814f
+\item 
+\#define {\bfseries M\+\_\+4\+\_\+\+PI}~1.\+2732395447351627f
+\item 
+\#define {\bfseries M\+\_\+1\+\_\+\+T\+W\+O\+PI}~0.\+15915494309189534f
+\item 
+\#define {\bfseries M\+\_\+2\+\_\+\+S\+Q\+R\+T\+PI}~1.\+1283791670955126f
+\item 
+\#define {\bfseries M\+\_\+4\+\_\+\+P\+I2}~0.\+40528473456935109f
+\item 
+\#define {\bfseries M\+\_\+\+S\+Q\+R\+T2}~1.\+41421356237309504880f
+\item 
+\#define {\bfseries M\+\_\+1\+\_\+\+S\+Q\+R\+T2}~0.\+7071067811865475f
+\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}\textbf{ Macros}\par
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries F32\+\_\+\+F\+R\+A\+C\+\_\+\+M\+A\+SK}~((1L$<$$<$23)-\/1)
+\item 
+\#define {\bfseries F32\+\_\+\+E\+X\+P\+\_\+\+M\+A\+SK}~(((1L$<$$<$9)-\/1)$<$$<$23)
+\item 
+\#define {\bfseries F32\+\_\+\+S\+I\+G\+N\+\_\+\+M\+A\+SK}~(0x80000000)
+\item 
+\#define {\bfseries f32\+\_\+frac\+\_\+bits}(f)~((f) \& F32\+\_\+\+F\+R\+A\+C\+\_\+\+M\+A\+SK)
+\item 
+\#define {\bfseries f32\+\_\+exp\+\_\+bits}(f)~((f) \& F32\+\_\+\+E\+X\+P\+\_\+\+M\+A\+SK)
+\item 
+\#define {\bfseries f32\+\_\+sign\+\_\+bit}(f)~((f) \& F32\+\_\+\+S\+I\+G\+N\+\_\+\+M\+A\+SK)
+\end{DoxyCompactItemize}
+\end{Indent}
+\doxysubsection*{Functions}
+\begin{Indent}\textbf{ Types}\par
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} \mbox{\hyperlink{group__utils__float__math_ga9806bb82adc4cd5d0b17e4c2bf0eb2dc}{f32pair}} (const float a, const float b)
+\begin{DoxyCompactList}\small\item\em Make a float pair. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}\textbf{ Operations}\par
+\begin{DoxyCompactItemize}
+\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga634c9a1f68a9486de6d7aedc62306e86}{fsel}} (const float a, const float b, const float c)
+\begin{DoxyCompactList}\small\item\em F\+S\+EL construct. \end{DoxyCompactList}\item 
+static uint8\+\_\+t \mbox{\hyperlink{group__utils__float__math_gaeb4fb001e6238b023d6f535567feb2d1}{fselb}} (const float a)
+\begin{DoxyCompactList}\small\item\em F\+S\+EL boolean construct. \end{DoxyCompactList}\item 
+static uint8\+\_\+t \mbox{\hyperlink{group__utils__float__math_gae71741d66a0d39e748f1c8bd1ebf1131}{float\+\_\+is\+\_\+neg}} (const \mbox{\hyperlink{unionf32__t}{f32\+\_\+t}} f)
+\begin{DoxyCompactList}\small\item\em Sign bit check. \end{DoxyCompactList}\item 
+static int32\+\_\+t \mbox{\hyperlink{group__utils__float__math_ga38d07241937f8660090e1930fe4874cf}{float\+\_\+mantissa}} (\mbox{\hyperlink{unionf32__t}{f32\+\_\+t}} f)
+\begin{DoxyCompactList}\small\item\em Obtain mantissa. \end{DoxyCompactList}\item 
+static int32\+\_\+t \mbox{\hyperlink{group__utils__float__math_gaf07907f7a249f74f43ac03e7cdab79bf}{float\+\_\+exponent}} (\mbox{\hyperlink{unionf32__t}{f32\+\_\+t}} f)
+\begin{DoxyCompactList}\small\item\em Obtain exponent. \end{DoxyCompactList}\item 
+static \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} \mbox{\hyperlink{group__utils__float__math_ga45548cf86cb5045985f5746232053702}{f32pair\+\_\+add}} (const \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} p0, const \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} p1)
+\begin{DoxyCompactList}\small\item\em Pair-\/wise addition. \end{DoxyCompactList}\item 
+static \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} \mbox{\hyperlink{group__utils__float__math_gad09d28eaa2bd68381ca0f506a2469445}{f32pair\+\_\+sub}} (const \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} p0, const \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} p1)
+\begin{DoxyCompactList}\small\item\em Pair-\/wise subtraction. \end{DoxyCompactList}\item 
+static \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} \mbox{\hyperlink{group__utils__float__math_ga4898286238b08fc18dfd47134017c2c5}{f32pair\+\_\+addscal}} (const \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} p, const float scl)
+\begin{DoxyCompactList}\small\item\em Pair-\/wise scalar addition. \end{DoxyCompactList}\item 
+static \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} \mbox{\hyperlink{group__utils__float__math_ga52a61bcee1e0992d3493aae9f16658eb}{f32pair\+\_\+mul}} (const \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} p0, const \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} p1)
+\begin{DoxyCompactList}\small\item\em Pair-\/wise product. \end{DoxyCompactList}\item 
+static \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} \mbox{\hyperlink{group__utils__float__math_ga4be540b52c53b9658d9919f46b50b70b}{f32pair\+\_\+mulscal}} (const \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} p, const float scl)
+\begin{DoxyCompactList}\small\item\em Pair-\/wise scalar product. \end{DoxyCompactList}\item 
+static \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} \mbox{\hyperlink{group__utils__float__math_ga3f85349407e946564f98f3844c46ed31}{f32pair\+\_\+linint}} (const float fr, const \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} p0, const \mbox{\hyperlink{structf32pair__t}{f32pair\+\_\+t}} p1)
+\begin{DoxyCompactList}\small\item\em Pair-\/wise linear interpolation. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga5b2f62968ba70af371c5a6c6ae969284}{si\+\_\+copysignf}} (const float x, const float y)
+\begin{DoxyCompactList}\small\item\em Return x with sign of y applied. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gaad7d5924ca8ddd9873f9770fa2f492d3}{si\+\_\+fabsf}} (float x)
+\begin{DoxyCompactList}\small\item\em Absolute value. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gae9cff7ba1922a3532054c15b75038d9e}{si\+\_\+floorf}} (float x)
+\begin{DoxyCompactList}\small\item\em Floor function. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga1b682349aebfa407698eecc9787f17e4}{si\+\_\+ceilf}} (float x)
+\begin{DoxyCompactList}\small\item\em Ceiling function. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga9a9e2cb28de565013ea8c2ec29fa41eb}{si\+\_\+roundf}} (float x)
+\begin{DoxyCompactList}\small\item\em Round to nearest integer. \end{DoxyCompactList}\item 
+static float {\bfseries clampfsel} (const float min, float x, const float max)
+\item 
+static float {\bfseries clampminfsel} (const float min, const float x)
+\item 
+static float {\bfseries clampmaxfsel} (const float x, const float max)
+\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga1df882452fba0cefb4bec86f8b5275ab}{clipmaxf}} (const float x, const float m)
+\begin{DoxyCompactList}\small\item\em Clip upper bound of x to m (inclusive) \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gaa8c7f4f1a2933cfc51e40d3efdd4c225}{clipminf}} (const float m, const float x)
+\begin{DoxyCompactList}\small\item\em Clip lower bound of x to m (inclusive) \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gab572bb7385609c4aba9a4259ee79b6de}{clipminmaxf}} (const float min, const float x, const float max)
+\begin{DoxyCompactList}\small\item\em Clip x to min and max (inclusive) \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga10a1ff6bb784f8c6738457a3d5420f07}{clip0f}} (const float x)
+\begin{DoxyCompactList}\small\item\em Clip lower bound of x to 0.\+f (inclusive) \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga1db7d49792db4b5c43f92451fdc69482}{clip1f}} (const float x)
+\begin{DoxyCompactList}\small\item\em Clip upper bound of x to 1.\+f (inclusive) \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga98c6164e9da3e3ef49eeb8d48e23a38e}{clip01f}} (const float x)
+\begin{DoxyCompactList}\small\item\em Clip x to \mbox{[}0.\+f, 1.\+f\mbox{]} (inclusive) \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga676e8aa1bfebef948150d0ae1dfd744e}{clipm1f}} (const float x)
+\begin{DoxyCompactList}\small\item\em Clip lower bound of x to -\/1.\+f (inclusive) \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga1e8532d81a23ad8cbee2baf5bc6466ec}{clip1m1f}} (const float x)
+\begin{DoxyCompactList}\small\item\em Clip x to \mbox{[}-\/1.\+f, 1.\+f\mbox{]} (inclusive) \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}\textbf{ Faster direct approximations of common trigonometric functions}\par
+{\em \begin{DoxyNote}{Note}
+Use with care. Depending on optimizations and targets these can provide little benefit over libc versions. 
+\end{DoxyNote}
+}\begin{DoxyCompactItemize}
+\item 
+static float \mbox{\hyperlink{group__utils__float__math_gabe8fba5f91c83ed35727cd0d6ac9493a}{fastsinf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} sine approximation, valid for x in \mbox{[}-\/M\+\_\+\+PI, M\+\_\+\+PI\mbox{]} \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga7734d7832184d0b551da0032e9e1afb3}{fastersinf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} sine approximation, valid for x in \mbox{[}-\/M\+\_\+\+PI, M\+\_\+\+PI\mbox{]} \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga1a19a44b01cb7198f2b64ee6ef947f4d}{fastersinfullf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} sine approximation, valid on full x domain \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga7ab3410646ef8eb28a7ce60e9b6f4081}{fastcosf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} cosine approximation, valid for x in \mbox{[}-\/M\+\_\+\+PI, M\+\_\+\+PI\mbox{]} \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gadaa7faabc0ad1c034c5469b6f5a2fde3}{fastercosf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} cosine approximation, valid for x in \mbox{[}-\/M\+\_\+\+PI, M\+\_\+\+PI\mbox{]} \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga04cba11030b3f01fad3c016c971f05e7}{fastcosfullf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} cosine approximation, valid on full x domain \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga4c0b3bf93d23e4af244453d7ab9d12b0}{fastercosfullf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} cosine approximation, valid on full x domain \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga27c8c5d3c3176ec9ac707a7119876b98}{fasttanf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} tangent approximation, valid for x in \mbox{[}-\/M\+\_\+\+P\+I\+\_\+2, M\+\_\+\+P\+I\+\_\+2\mbox{]} \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga39163ff013951956b488a1fd40793787}{fastertanf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} tangent approximation, valid for x in \mbox{[}-\/M\+\_\+\+P\+I\+\_\+2, M\+\_\+\+P\+I\+\_\+2\mbox{]} \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga55d426a72df7892ca47358b23f6b89e6}{fasttanfullf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} tangent approximation, valid on full x domain, except where tangent diverges. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga86436df956ab41e647eb3f6976a4fd7d}{fastertanfullf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} tangent approximation, valid on full x domain, except where tangent diverges. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga831686adbdc9ba8fa72e90497d29c63e}{fastpow2f}} (float p)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} power of 2 approximation, valid for x in \mbox{[} -\/126, ... \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gaafe82bf215bb2eaa05453211b1605365}{fasterpow2f}} (float p)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} power of 2 approximation, valid for x in \mbox{[} -\/126, ... \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gaf3f5a109307a5da9c855fbb6fa934def}{fastpowf}} (float x, float p)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} x to the power of p approximation \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gaaca6894fec4a8a1bb85c2db89608703c}{fasterpowf}} (float x, float p)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} x to the power of p approximation \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga9383bc54895c4b4b47d09756562198a8}{fastexpf}} (float p)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} exponential approximation, valid for x in \mbox{[} $\sim$ -\/87, ... \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gaff635a364b1b3553d00a8eb40d8c5f92}{fasterexpf}} (float p)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} exponential approximation, valid for x in \mbox{[} $\sim$ -\/87, ... \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gab3382b32b845d283c014c6bdd7b053d2}{fastlog2f}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} log base 2 approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga846a0fba37a7eccb86c384c2fb925334}{fasterlog2f}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} log base 2 approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga416996e41e2478b6f03f0fd8b40cadb0}{fastlogf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} natural logarithm approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga7d5494c8990209d4f8542aabd94870e8}{fasterlogf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} natural logarithm approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gaba79359b20fbaf9ce55ad6399648e531}{fasteratan2f}} (float y, float x)
+\begin{DoxyCompactList}\small\item\em atan2 approximation \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga203f54201b3372c744c15996fc28202e}{fastertanhf}} (float x)
+\begin{DoxyCompactList}\small\item\em Hyperbolic tangent approximation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}\textbf{ Useful Conversions}\par
+{\em \begin{DoxyNote}{Note}
+These can be very slow, use with caution. Should use table lookups in performance critical sections. 
+\end{DoxyNote}
+}\begin{DoxyCompactItemize}
+\item 
+static float \mbox{\hyperlink{group__utils__float__math_gaf64f41c57b2a5a47c4f9a4b7de62b611}{ampdbf}} (const float amp)
+\begin{DoxyCompactList}\small\item\em Amplitude to dB. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga4c676fc86a93d4642120a0462e40c285}{fasterampdbf}} (const float amp)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} Amplitude to dB \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga89649b8a7bd303c4de2563247d77bc4b}{dbampf}} (const float db)
+\begin{DoxyCompactList}\small\item\em dB to ampltitude \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga59c24c654553c8180a09a415d9b3b498}{fasterdbampf}} (const float db)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} dB to ampltitude \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}\textbf{ Interpolations}\par
+{\em \begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000003}{Todo}}]Add cubic/spline interpolations\end{DoxyRefDesc}
+}\begin{DoxyCompactItemize}
+\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}} (const float fr, const float x0, const float x1)
+\begin{DoxyCompactList}\small\item\em Linear interpolation. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gaa9fbcb7f3107af4c88bc6ff849937677}{cosintf}} (const float fr, const float x0, const float x1)
+\begin{DoxyCompactList}\small\item\em Cosine interpolation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+
+
+\doxysubsection{Detailed Description}
+Floating Point Math Utilities. 
+

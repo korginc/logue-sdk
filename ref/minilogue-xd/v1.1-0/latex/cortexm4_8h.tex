@@ -1,0 +1,246 @@
+\hypertarget{cortexm4_8h}{}\doxysection{/home/etienne/\+Documents/\+\_\+projects/logue-\/sdk/logue-\/sdk-\/alt/platform/minilogue-\/xd/inc/utils/cortexm4.h File Reference}
+\label{cortexm4_8h}\index{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/minilogue-\/xd/inc/utils/cortexm4.h@{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/minilogue-\/xd/inc/utils/cortexm4.h}}
+
+
+A\+RM Cortex-\/\+M4 specific header.  
+
+
+{\ttfamily \#include \char`\"{}arm\+\_\+math.\+h\char`\"{}}\newline
+\doxysubsection*{Macros}
+\begin{Indent}\textbf{ A\+RM Cortex-\/\+M4 Core Intrinsics}\par
+{\em \begin{DoxyNote}{Note}
+See \href{http://www.keil.com/pack/doc/cmsis/Core/html/group__intrinsic__CPU__gr.html}{\texttt{ http\+://www.\+keil.\+com/pack/doc/cmsis/\+Core/html/group\+\_\+\+\_\+intrinsic\+\_\+\+\_\+\+C\+P\+U\+\_\+\+\_\+gr.\+html}} 
+\end{DoxyNote}
+}\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries bkpt}~\+\_\+\+\_\+\+B\+K\+PT
+\item 
+\#define {\bfseries clrex}~\+\_\+\+\_\+\+C\+L\+R\+EX
+\item 
+\#define {\bfseries clz}~\+\_\+\+\_\+\+C\+LZ
+\item 
+\#define {\bfseries dmb}~\+\_\+\+\_\+\+D\+MB
+\item 
+\#define {\bfseries dsb}~\+\_\+\+\_\+\+D\+SB
+\item 
+\#define {\bfseries isb}~\+\_\+\+\_\+\+I\+SB
+\item 
+\#define {\bfseries lda}~\+\_\+\+\_\+\+L\+DA
+\item 
+\#define {\bfseries ldab}~\+\_\+\+\_\+\+L\+D\+AB
+\item 
+\#define {\bfseries ldaex}~\+\_\+\+\_\+\+L\+D\+A\+EX
+\item 
+\#define {\bfseries ldaxb}~\+\_\+\+\_\+\+L\+D\+A\+E\+XB
+\item 
+\#define {\bfseries ldaxh}~\+\_\+\+\_\+\+L\+D\+A\+E\+XH
+\item 
+\#define {\bfseries ldah}~\+\_\+\+\_\+\+L\+D\+AH
+\item 
+\#define {\bfseries ldrbt}~\+\_\+\+\_\+\+L\+D\+R\+BT
+\item 
+\#define {\bfseries ldrexb}~\+\_\+\+\_\+\+L\+D\+R\+E\+XB
+\item 
+\#define {\bfseries ldrexh}~\+\_\+\+\_\+\+L\+D\+R\+E\+XH
+\item 
+\#define {\bfseries ldrexw}~\+\_\+\+\_\+\+L\+D\+R\+E\+XW
+\item 
+\#define {\bfseries ldrht}~\+\_\+\+\_\+\+L\+D\+R\+HT
+\item 
+\#define {\bfseries ldrt}~\+\_\+\+\_\+\+L\+D\+RT
+\item 
+\#define {\bfseries nop}~\+\_\+\+\_\+\+N\+OP
+\item 
+\#define {\bfseries rbit}~\+\_\+\+\_\+\+R\+B\+IT
+\item 
+\#define {\bfseries rev}~\+\_\+\+\_\+\+R\+EV
+\item 
+\#define {\bfseries rev16}~\+\_\+\+\_\+\+R\+E\+V16
+\item 
+\#define {\bfseries revsh}~\+\_\+\+\_\+\+R\+E\+V\+SH
+\item 
+\#define {\bfseries ror}~\+\_\+\+\_\+\+R\+OR
+\item 
+\#define {\bfseries rrx}~\+\_\+\+\_\+\+R\+RX
+\item 
+\#define {\bfseries sev}~\+\_\+\+\_\+\+S\+EV
+\item 
+\#define {\bfseries ssat}~\+\_\+\+\_\+\+S\+S\+AT
+\item 
+\#define {\bfseries stl}~\+\_\+\+\_\+\+S\+TL
+\item 
+\#define {\bfseries stlb}~\+\_\+\+\_\+\+S\+T\+LB
+\item 
+\#define {\bfseries stlex}~\+\_\+\+\_\+\+S\+T\+L\+EX
+\item 
+\#define {\bfseries stlexb}~\+\_\+\+\_\+\+S\+T\+L\+E\+XB
+\item 
+\#define {\bfseries stlexh}~\+\_\+\+\_\+\+S\+T\+L\+E\+XH
+\item 
+\#define {\bfseries stlh}~\+\_\+\+\_\+\+S\+T\+LH
+\item 
+\#define {\bfseries strbt}~\+\_\+\+\_\+\+S\+T\+R\+BT
+\item 
+\#define {\bfseries strexb}~\+\_\+\+\_\+\+S\+T\+R\+E\+XB
+\item 
+\#define {\bfseries strexh}~\+\_\+\+\_\+\+S\+T\+R\+E\+XH
+\item 
+\#define {\bfseries strexw}~\+\_\+\+\_\+\+S\+T\+R\+E\+XW
+\item 
+\#define {\bfseries strht}~\+\_\+\+\_\+\+S\+T\+R\+HT
+\item 
+\#define {\bfseries strt}~\+\_\+\+\_\+\+S\+T\+RT
+\item 
+\#define {\bfseries usat}~\+\_\+\+\_\+\+U\+S\+AT
+\item 
+\#define {\bfseries wfe}~\+\_\+\+\_\+\+W\+FE
+\item 
+\#define {\bfseries wfi}~\+\_\+\+\_\+\+W\+FI
+\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}\textbf{ A\+P\+SR}\par
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries apsr}()~\+\_\+\+\_\+get\+\_\+\+A\+P\+SR()
+\item 
+\#define {\bfseries apsr\+\_\+clr}(m)
+\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}\textbf{ A\+RM Cortex-\/\+M4 S\+I\+MD Intrinsics}\par
+{\em \begin{DoxyNote}{Note}
+See \href{http://www.keil.com/pack/doc/cmsis/Core/html/group__intrinsic__SIMD__gr.html}{\texttt{ http\+://www.\+keil.\+com/pack/doc/cmsis/\+Core/html/group\+\_\+\+\_\+intrinsic\+\_\+\+\_\+\+S\+I\+M\+D\+\_\+\+\_\+gr.\+html}} and \href{http://www.keil.com/support/man/docs/ARMASM/armasm_dom1361289850039.htm}{\texttt{ http\+://www.\+keil.\+com/support/man/docs/\+A\+R\+M\+A\+S\+M/armasm\+\_\+dom1361289850039.\+htm}} 
+\end{DoxyNote}
+}\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries simd32\+\_\+t}~\+\_\+\+\_\+\+S\+I\+M\+D32\+\_\+\+T\+Y\+PE
+\item 
+\#define {\bfseries sadd8}~\+\_\+\+\_\+\+S\+A\+D\+D8
+\item 
+\#define {\bfseries qadd8}~\+\_\+\+\_\+\+Q\+A\+D\+D8
+\item 
+\#define {\bfseries shadd8}~\+\_\+\+\_\+\+S\+H\+A\+D\+D8
+\item 
+\#define {\bfseries uadd8}~\+\_\+\+\_\+\+U\+A\+D\+D8
+\item 
+\#define {\bfseries uqadd8}~\+\_\+\+\_\+\+U\+Q\+A\+D\+D8
+\item 
+\#define {\bfseries uhadd8}~\+\_\+\+\_\+\+U\+H\+A\+D\+D8
+\item 
+\#define {\bfseries ssub8}~\+\_\+\+\_\+\+S\+S\+U\+B8
+\item 
+\#define {\bfseries qsub8}~\+\_\+\+\_\+\+Q\+S\+U\+B8
+\item 
+\#define {\bfseries shsub8}~\+\_\+\+\_\+\+S\+H\+S\+U\+B8
+\item 
+\#define {\bfseries usub8}~\+\_\+\+\_\+\+U\+S\+U\+B8
+\item 
+\#define {\bfseries uqsub8}~\+\_\+\+\_\+\+U\+Q\+S\+U\+B8
+\item 
+\#define {\bfseries uhsub8}~\+\_\+\+\_\+\+U\+H\+S\+U\+B8
+\item 
+\#define {\bfseries sadd16}~\+\_\+\+\_\+\+S\+A\+D\+D16
+\item 
+\#define {\bfseries qadd16}~\+\_\+\+\_\+\+Q\+A\+D\+D16
+\item 
+\#define {\bfseries shadd16}~\+\_\+\+\_\+\+S\+H\+A\+D\+D16
+\item 
+\#define {\bfseries uadd16}~\+\_\+\+\_\+\+U\+A\+D\+D16
+\item 
+\#define {\bfseries uqadd16}~\+\_\+\+\_\+\+U\+Q\+A\+D\+D16
+\item 
+\#define {\bfseries uhadd16}~\+\_\+\+\_\+\+U\+H\+A\+D\+D16
+\item 
+\#define {\bfseries ssub16}~\+\_\+\+\_\+\+S\+S\+U\+B16
+\item 
+\#define {\bfseries qsub16}~\+\_\+\+\_\+\+Q\+S\+U\+B16
+\item 
+\#define {\bfseries shsub16}~\+\_\+\+\_\+\+S\+H\+S\+U\+B16
+\item 
+\#define {\bfseries usub16}~\+\_\+\+\_\+\+U\+S\+U\+B16
+\item 
+\#define {\bfseries uqsub16}~\+\_\+\+\_\+\+U\+Q\+S\+U\+B16
+\item 
+\#define {\bfseries uhsub16}~\+\_\+\+\_\+\+U\+H\+S\+U\+B16
+\item 
+\#define {\bfseries sasx}~\+\_\+\+\_\+\+S\+A\+SX
+\item 
+\#define {\bfseries qasx}~\+\_\+\+\_\+\+Q\+A\+SX
+\item 
+\#define {\bfseries shasx}~\+\_\+\+\_\+\+S\+H\+A\+SX
+\item 
+\#define {\bfseries uasx}~\+\_\+\+\_\+\+U\+A\+SX
+\item 
+\#define {\bfseries uqasx}~\+\_\+\+\_\+\+U\+Q\+A\+SX
+\item 
+\#define {\bfseries uhasx}~\+\_\+\+\_\+\+U\+H\+A\+SX
+\item 
+\#define {\bfseries ssax}~\+\_\+\+\_\+\+S\+S\+AX
+\item 
+\#define {\bfseries qsax}~\+\_\+\+\_\+\+Q\+S\+AX
+\item 
+\#define {\bfseries shsax}~\+\_\+\+\_\+\+S\+H\+S\+AX
+\item 
+\#define {\bfseries usax}~\+\_\+\+\_\+\+U\+S\+AX
+\item 
+\#define {\bfseries uqsax}~\+\_\+\+\_\+\+U\+Q\+S\+AX
+\item 
+\#define {\bfseries uhsax}~\+\_\+\+\_\+\+U\+H\+S\+AX
+\item 
+\#define {\bfseries usad8}~\+\_\+\+\_\+\+U\+S\+A\+D8
+\item 
+\#define {\bfseries usada8}~\+\_\+\+\_\+\+U\+S\+A\+D\+A8
+\item 
+\#define {\bfseries ssat16}~\+\_\+\+\_\+\+S\+S\+A\+T16
+\item 
+\#define {\bfseries usat16}~\+\_\+\+\_\+\+U\+S\+A\+T16
+\item 
+\#define {\bfseries uxtb16}~\+\_\+\+\_\+\+U\+X\+T\+B16
+\item 
+\#define {\bfseries uxtab16}~\+\_\+\+\_\+\+U\+X\+T\+A\+B16
+\item 
+\#define {\bfseries sxtb16}~\+\_\+\+\_\+\+S\+X\+T\+B16
+\item 
+\#define {\bfseries sxtab16}~\+\_\+\+\_\+\+S\+X\+T\+A\+B16
+\item 
+\#define {\bfseries smuad}~\+\_\+\+\_\+\+S\+M\+U\+AD
+\item 
+\#define {\bfseries smuadx}~\+\_\+\+\_\+\+S\+M\+U\+A\+DX
+\item 
+\#define {\bfseries smlad}~\+\_\+\+\_\+\+S\+M\+L\+AD
+\item 
+\#define {\bfseries smladx}~\+\_\+\+\_\+\+S\+M\+L\+A\+DX
+\item 
+\#define {\bfseries smlald}~\+\_\+\+\_\+\+S\+M\+L\+A\+LD
+\item 
+\#define {\bfseries smlaldx}~\+\_\+\+\_\+\+S\+M\+L\+A\+L\+DX
+\item 
+\#define {\bfseries smusd}~\+\_\+\+\_\+\+S\+M\+U\+SD
+\item 
+\#define {\bfseries smusdx}~\+\_\+\+\_\+\+S\+M\+U\+S\+DX
+\item 
+\#define {\bfseries smlsd}~\+\_\+\+\_\+\+S\+M\+L\+SD
+\item 
+\#define {\bfseries smlsdx}~\+\_\+\+\_\+\+S\+M\+L\+S\+DX
+\item 
+\#define {\bfseries smlsld}~\+\_\+\+\_\+\+S\+M\+L\+S\+LD
+\item 
+\#define {\bfseries smlsldx}~\+\_\+\+\_\+\+S\+M\+L\+S\+L\+DX
+\item 
+\#define {\bfseries sel}~\+\_\+\+\_\+\+S\+EL
+\item 
+\#define {\bfseries qadd}~\+\_\+\+\_\+\+Q\+A\+DD
+\item 
+\#define {\bfseries qsub}~\+\_\+\+\_\+\+Q\+S\+UB
+\item 
+\#define {\bfseries pkhbt}~\+\_\+\+\_\+\+P\+K\+H\+BT
+\item 
+\#define {\bfseries pkhtb}~\+\_\+\+\_\+\+P\+K\+H\+TB
+\item 
+\#define {\bfseries smmla}~\+\_\+\+\_\+\+S\+M\+M\+LA
+\end{DoxyCompactItemize}
+\end{Indent}
+
+
+\doxysubsection{Detailed Description}
+A\+RM Cortex-\/\+M4 specific header. 
+

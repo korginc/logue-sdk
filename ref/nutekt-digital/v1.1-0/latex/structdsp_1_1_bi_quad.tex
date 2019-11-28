@@ -1,0 +1,159 @@
+\hypertarget{structdsp_1_1_bi_quad}{}\doxysection{dsp\+::Bi\+Quad Struct Reference}
+\label{structdsp_1_1_bi_quad}\index{dsp::BiQuad@{dsp::BiQuad}}
+
+
+Transposed form 2 Bi-\/\+Quad construct for F\+I\+R/\+I\+IR filters.  
+
+
+
+
+{\ttfamily \#include $<$biquad.\+hpp$>$}
+
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs}{Coeffs}}
+\begin{DoxyCompactList}\small\item\em Filter coefficients. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Types}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_a039d334477504b7c905d2e766a185e12}\label{structdsp_1_1_bi_quad_a039d334477504b7c905d2e766a185e12}} 
+typedef struct \mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs}{dsp\+::\+Bi\+Quad\+::\+Coeffs}} \mbox{\hyperlink{structdsp_1_1_bi_quad_a039d334477504b7c905d2e766a185e12}{Coeffs}}
+\begin{DoxyCompactList}\small\item\em Filter coefficients. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_a1a2b9996db5f63ade869b651212bb9c9}\label{structdsp_1_1_bi_quad_a1a2b9996db5f63ade869b651212bb9c9}} 
+\mbox{\hyperlink{structdsp_1_1_bi_quad_a1a2b9996db5f63ade869b651212bb9c9}{Bi\+Quad}} (void)
+\begin{DoxyCompactList}\small\item\em Default constructor. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_ac62dc25604e701cf62d8f19102e9fd9b}\label{structdsp_1_1_bi_quad_ac62dc25604e701cf62d8f19102e9fd9b}} 
+void \mbox{\hyperlink{structdsp_1_1_bi_quad_ac62dc25604e701cf62d8f19102e9fd9b}{flush}} (void)
+\begin{DoxyCompactList}\small\item\em Flush internal delays. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_bi_quad_af2b7adbd81163f63aa246110a7b837bd}{process\+\_\+so}} (const float xn)
+\begin{DoxyCompactList}\small\item\em Second order processing of one sample. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_bi_quad_aab242c886cc39d1be8d47d35c4f33c8f}{process\+\_\+fo}} (const float xn)
+\begin{DoxyCompactList}\small\item\em First order processing of one sample. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_bi_quad_ae2b4d3821372269a1e3859febc0f1321}{process}} (const float xn)
+\begin{DoxyCompactList}\small\item\em Default processing function (second order) \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}\label{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}} 
+\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs}{Coeffs}} {\bfseries m\+Coeffs}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}\label{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}} 
+float \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{m\+Z1}}
+\begin{DoxyCompactList}\small\item\em Coefficients for the Bi-\/\+Quad construct. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_ae80cf2266244ac01cc75519c7325a2c4}\label{structdsp_1_1_bi_quad_ae80cf2266244ac01cc75519c7325a2c4}} 
+float {\bfseries m\+Z2}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Transposed form 2 Bi-\/\+Quad construct for F\+I\+R/\+I\+IR filters. 
+
+Definition at line 54 of file biquad.\+hpp.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_ae2b4d3821372269a1e3859febc0f1321}\label{structdsp_1_1_bi_quad_ae2b4d3821372269a1e3859febc0f1321}} 
+\index{dsp::BiQuad@{dsp::BiQuad}!process@{process}}
+\index{process@{process}!dsp::BiQuad@{dsp::BiQuad}}
+\doxysubsubsection{\texorpdfstring{process()}{process()}}
+{\footnotesize\ttfamily float dsp\+::\+Bi\+Quad\+::process (\begin{DoxyParamCaption}\item[{const float}]{xn }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Default processing function (second order) 
+
+
+\begin{DoxyParams}{Parameters}
+{\em xn} & Input sample\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Output sample 
+\end{DoxyReturn}
+
+
+Definition at line 399 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{399                                   \{}
+\DoxyCodeLine{400       \textcolor{keywordflow}{return} \mbox{\hyperlink{structdsp_1_1_bi_quad_af2b7adbd81163f63aa246110a7b837bd}{process\_so}}(xn);}
+\DoxyCodeLine{401     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_aab242c886cc39d1be8d47d35c4f33c8f}\label{structdsp_1_1_bi_quad_aab242c886cc39d1be8d47d35c4f33c8f}} 
+\index{dsp::BiQuad@{dsp::BiQuad}!process\_fo@{process\_fo}}
+\index{process\_fo@{process\_fo}!dsp::BiQuad@{dsp::BiQuad}}
+\doxysubsubsection{\texorpdfstring{process\_fo()}{process\_fo()}}
+{\footnotesize\ttfamily float dsp\+::\+Bi\+Quad\+::process\+\_\+fo (\begin{DoxyParamCaption}\item[{const float}]{xn }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+First order processing of one sample. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em xn} & Input sample\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Output sample 
+\end{DoxyReturn}
+
+
+Definition at line 384 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{384                                      \{}
+\DoxyCodeLine{385       \textcolor{keywordtype}{float} acc = mCoeffs.ff0 * xn + \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{mZ1}};}
+\DoxyCodeLine{386       \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{mZ1}} = mCoeffs.ff1 * xn;}
+\DoxyCodeLine{387       \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{mZ1}} -\/= mCoeffs.fb1 * acc;}
+\DoxyCodeLine{388       \textcolor{keywordflow}{return} acc;}
+\DoxyCodeLine{389     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_af2b7adbd81163f63aa246110a7b837bd}\label{structdsp_1_1_bi_quad_af2b7adbd81163f63aa246110a7b837bd}} 
+\index{dsp::BiQuad@{dsp::BiQuad}!process\_so@{process\_so}}
+\index{process\_so@{process\_so}!dsp::BiQuad@{dsp::BiQuad}}
+\doxysubsubsection{\texorpdfstring{process\_so()}{process\_so()}}
+{\footnotesize\ttfamily float dsp\+::\+Bi\+Quad\+::process\+\_\+so (\begin{DoxyParamCaption}\item[{const float}]{xn }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Second order processing of one sample. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em xn} & Input sample\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Output sample 
+\end{DoxyReturn}
+
+
+Definition at line 367 of file biquad.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{367                                      \{}
+\DoxyCodeLine{368       \textcolor{keywordtype}{float} acc = mCoeffs.ff0 * xn + \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{mZ1}};}
+\DoxyCodeLine{369       \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{mZ1}} = mCoeffs.ff1 * xn + mZ2;}
+\DoxyCodeLine{370       mZ2 = mCoeffs.ff2 * xn;}
+\DoxyCodeLine{371       \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{mZ1}} -\/= mCoeffs.fb1 * acc;}
+\DoxyCodeLine{372       mZ2 -\/= mCoeffs.fb2 * acc;}
+\DoxyCodeLine{373       \textcolor{keywordflow}{return} acc;}
+\DoxyCodeLine{374     \}}
+
+\end{DoxyCode}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/etienne/\+Documents/\+\_\+projects/logue-\/sdk/logue-\/sdk-\/alt/platform/nutekt-\/digital/inc/dsp/\mbox{\hyperlink{biquad_8hpp}{biquad.\+hpp}}\end{DoxyCompactItemize}

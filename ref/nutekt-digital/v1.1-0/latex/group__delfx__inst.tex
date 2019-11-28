@@ -1,0 +1,97 @@
+\hypertarget{group__delfx__inst}{}\doxysection{Delay Effect Instance (delfx)}
+\label{group__delfx__inst}\index{Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structuser__delfx__hook__table}{user\+\_\+delfx\+\_\+hook\+\_\+table}}
+\item 
+struct \mbox{\hyperlink{structuser__delfx__data}{user\+\_\+delfx\+\_\+data}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}\label{group__delfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}} 
+\#define {\bfseries \+\_\+\+\_\+sdram}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((section(\char`\"{}.sdram\char`\"{})))
+\item 
+\mbox{\Hypertarget{group__delfx__inst_gaf000c0b92184c61605df943611733a18}\label{group__delfx__inst_gaf000c0b92184c61605df943611733a18}} 
+\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+init
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga48eb9040f4f18e18753b430410329f99}\label{group__delfx__inst_ga48eb9040f4f18e18753b430410329f99}} 
+\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+P\+R\+O\+C\+E\+SS}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+process
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga64419f288b258507aa1f5542c72988c1}\label{group__delfx__inst_ga64419f288b258507aa1f5542c72988c1}} 
+\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+S\+U\+S\+P\+E\+ND}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+suspend
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga731ccf2ab5130d0db973e2d05048c762}\label{group__delfx__inst_ga731ccf2ab5130d0db973e2d05048c762}} 
+\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+R\+E\+S\+U\+ME}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+resume
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga5f5a1d137209eeca0cd09e87f8aa4cb6}\label{group__delfx__inst_ga5f5a1d137209eeca0cd09e87f8aa4cb6}} 
+\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+param
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga020dcd7324e7d2003f711dead6d8372f}\label{group__delfx__inst_ga020dcd7324e7d2003f711dead6d8372f}} 
+typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Func\+Entry}) (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga02b2fc5c630cde8774080a93999b9d66}\label{group__delfx__inst_ga02b2fc5c630cde8774080a93999b9d66}} 
+typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Func\+Init}) (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+\mbox{\Hypertarget{group__delfx__inst_gab2469aae4c293f32d9c485377c8c6a75}\label{group__delfx__inst_gab2469aae4c293f32d9c485377c8c6a75}} 
+typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Func\+Process}) (float $\ast$xn, uint32\+\_\+t frames)
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga093a529e692157e73ca3d22390c97108}\label{group__delfx__inst_ga093a529e692157e73ca3d22390c97108}} 
+typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Suspend}) (void)
+\item 
+\mbox{\Hypertarget{group__delfx__inst_gac672abcc11cac61e76515a013537ac6a}\label{group__delfx__inst_gac672abcc11cac61e76515a013537ac6a}} 
+typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Resume}) (void)
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga37ac455f95853a2d1d3a8ac1f5554e17}\label{group__delfx__inst_ga37ac455f95853a2d1d3a8ac1f5554e17}} 
+typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Func\+Param}) (uint8\+\_\+t index, int32\+\_\+t value)
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga47328b4993a57ba577c3ff88c117c9a3}\label{group__delfx__inst_ga47328b4993a57ba577c3ff88c117c9a3}} 
+typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Func\+Dummy}) (void)
+\item 
+\mbox{\Hypertarget{group__delfx__inst_gab0b4390b30d8ef1d19c868ef0e947fee}\label{group__delfx__inst_gab0b4390b30d8ef1d19c868ef0e947fee}} 
+typedef struct \mbox{\hyperlink{structuser__delfx__hook__table}{user\+\_\+delfx\+\_\+hook\+\_\+table}} {\bfseries user\+\_\+delfx\+\_\+hook\+\_\+table\+\_\+t}
+\item 
+\mbox{\Hypertarget{group__delfx__inst_gad7b57d68c1d9cb6f614eb04d88448c04}\label{group__delfx__inst_gad7b57d68c1d9cb6f614eb04d88448c04}} 
+typedef struct \mbox{\hyperlink{structuser__delfx__data}{user\+\_\+delfx\+\_\+data}} {\bfseries user\+\_\+delfx\+\_\+data\+\_\+t}
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__delfx__inst_gab467e497326136aa691dd74e4b3b5f13}\label{group__delfx__inst_gab467e497326136aa691dd74e4b3b5f13}} 
+enum {\bfseries user\+\_\+delfx\+\_\+param\+\_\+id\+\_\+t} \{ \newline
+{\bfseries k\+\_\+user\+\_\+delfx\+\_\+param\+\_\+time} = 0, 
+{\bfseries k\+\_\+user\+\_\+delfx\+\_\+param\+\_\+depth}, 
+{\bfseries k\+\_\+user\+\_\+delfx\+\_\+param\+\_\+reserved0}, 
+{\bfseries k\+\_\+user\+\_\+delfx\+\_\+param\+\_\+shift\+\_\+depth}, 
+\newline
+{\bfseries k\+\_\+num\+\_\+user\+\_\+delfx\+\_\+param\+\_\+id}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__delfx__inst_gacb26647b7b28ca29f52fabdcbed3a152}\label{group__delfx__inst_gacb26647b7b28ca29f52fabdcbed3a152}} 
+void {\bfseries \+\_\+entry} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}\label{group__delfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}} 
+void {\bfseries \+\_\+hook\+\_\+init} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga2103260c965e55d6bc8ec31aafec7687}\label{group__delfx__inst_ga2103260c965e55d6bc8ec31aafec7687}} 
+void {\bfseries \+\_\+hook\+\_\+process} (float $\ast$xn, uint32\+\_\+t frames)
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga51724f6540f59f6ee95fbe72d9655315}\label{group__delfx__inst_ga51724f6540f59f6ee95fbe72d9655315}} 
+void {\bfseries \+\_\+hook\+\_\+suspend} (void)
+\item 
+\mbox{\Hypertarget{group__delfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}\label{group__delfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}} 
+void {\bfseries \+\_\+hook\+\_\+resume} (void)
+\item 
+\mbox{\Hypertarget{group__delfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}\label{group__delfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}} 
+void {\bfseries \+\_\+hook\+\_\+param} (uint8\+\_\+t index, int32\+\_\+t value)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}

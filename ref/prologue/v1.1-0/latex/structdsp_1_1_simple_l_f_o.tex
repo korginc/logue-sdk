@@ -1,0 +1,356 @@
+\hypertarget{structdsp_1_1_simple_l_f_o}{}\doxysection{dsp\+::Simple\+L\+FO Struct Reference}
+\label{structdsp_1_1_simple_l_f_o}\index{dsp::SimpleLFO@{dsp::SimpleLFO}}
+
+
+Simple L\+FO.  
+
+
+
+
+{\ttfamily \#include $<$simplelfo.\+hpp$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a86ce69cc6b9f351b17719700ac25e527}\label{structdsp_1_1_simple_l_f_o_a86ce69cc6b9f351b17719700ac25e527}} 
+\mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a86ce69cc6b9f351b17719700ac25e527}{Simple\+L\+FO}} (void)
+\begin{DoxyCompactList}\small\item\em Default constructor. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_ad4056c143044aef4e6353fe3ee68c69f}\label{structdsp_1_1_simple_l_f_o_ad4056c143044aef4e6353fe3ee68c69f}} 
+void \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_ad4056c143044aef4e6353fe3ee68c69f}{cycle}} (void)
+\begin{DoxyCompactList}\small\item\em Step phase one cycle forward. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a5e7732bf24412257ff4090f7c9f64292}\label{structdsp_1_1_simple_l_f_o_a5e7732bf24412257ff4090f7c9f64292}} 
+void \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a5e7732bf24412257ff4090f7c9f64292}{reset}} (void)
+\begin{DoxyCompactList}\small\item\em Reset phase. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a721fecfa933ebd4c4d4f6a5a1a11e867}{set\+F0}} (const float f0, const float fsrecip)
+\begin{DoxyCompactList}\small\item\em Set L\+FO frequency. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_ac94de3290fb59920f9e14f188d369b53}{set\+W0}} (const float w)
+\begin{DoxyCompactList}\small\item\em Set L\+FO frequency in radians. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a77ddf539ae3028576135f78e048ef489}\label{structdsp_1_1_simple_l_f_o_a77ddf539ae3028576135f78e048ef489}} 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a77ddf539ae3028576135f78e048ef489}{sine\+\_\+bi}} (void)
+\begin{DoxyCompactList}\small\item\em Get value of bipolar sine wave for current phase. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a5ec5fd14bae93140673ceb5aae71d27c}\label{structdsp_1_1_simple_l_f_o_a5ec5fd14bae93140673ceb5aae71d27c}} 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a5ec5fd14bae93140673ceb5aae71d27c}{sine\+\_\+uni}} (void)
+\begin{DoxyCompactList}\small\item\em Get value of positive unipolar sine wave for current phase. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a0df3ccb077e68784d8c9226271e29b55}{sine\+\_\+bi\+\_\+off}} (const float offset)
+\begin{DoxyCompactList}\small\item\em Get current value of bipolar sine wave for phase with offset. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a281274662fd46d3985f2978c2c1abbf5}{sine\+\_\+uni\+\_\+off}} (const float offset)
+\begin{DoxyCompactList}\small\item\em Get current value of positive unipolar sine wave for phase with offset. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a11d0ebd1866aeac6864b285c62b980fa}\label{structdsp_1_1_simple_l_f_o_a11d0ebd1866aeac6864b285c62b980fa}} 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a11d0ebd1866aeac6864b285c62b980fa}{triangle\+\_\+bi}} (void)
+\begin{DoxyCompactList}\small\item\em Get current value of bipolar triangle wave for current phase. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_ac70b8fdeb213d33afd36422344b64a42}\label{structdsp_1_1_simple_l_f_o_ac70b8fdeb213d33afd36422344b64a42}} 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_ac70b8fdeb213d33afd36422344b64a42}{triangle\+\_\+uni}} (void)
+\begin{DoxyCompactList}\small\item\em Get value of positive unipolar triangle wave for current phase. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a6f653d29d8f839fdc3bd8c4e87c352a3}{triangle\+\_\+bi\+\_\+off}} (const float offset)
+\begin{DoxyCompactList}\small\item\em Get current value of bipolar triangle wave for phase with offset. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a86db18abf71ecca2de1d6e8b7975f0e1}{triangle\+\_\+uni\+\_\+off}} (const float offset)
+\begin{DoxyCompactList}\small\item\em Get current value of positive unipolar triangle wave for phase with offset. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_ab7db58f63686d01ccfbd053c3372b7ee}\label{structdsp_1_1_simple_l_f_o_ab7db58f63686d01ccfbd053c3372b7ee}} 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_ab7db58f63686d01ccfbd053c3372b7ee}{saw\+\_\+bi}} (void)
+\begin{DoxyCompactList}\small\item\em Get current value of bipolar saw wave for current phase. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a84f97a539f25bf32fe13b59bb9cb3b6a}\label{structdsp_1_1_simple_l_f_o_a84f97a539f25bf32fe13b59bb9cb3b6a}} 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a84f97a539f25bf32fe13b59bb9cb3b6a}{saw\+\_\+uni}} (void)
+\begin{DoxyCompactList}\small\item\em Get value of positive unipolar saw wave for current phase. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a21ccc011765e3ad6e06f580af591ec8e}{saw\+\_\+bi\+\_\+off}} (const float offset)
+\begin{DoxyCompactList}\small\item\em Get current value of bipolar saw wave for phase with offset. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_addd03d5bd5420a6e4e44c47715c69d8a}{saw\+\_\+uni\+\_\+off}} (const float offset)
+\begin{DoxyCompactList}\small\item\em Get current value of positive unipolar saw wave for phase with offset. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a8954d675a7ef25dabd21fe862df01de7}\label{structdsp_1_1_simple_l_f_o_a8954d675a7ef25dabd21fe862df01de7}} 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a8954d675a7ef25dabd21fe862df01de7}{square\+\_\+bi}} (void)
+\begin{DoxyCompactList}\small\item\em Get current value of bipolar square wave for current phase. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_aa711cd98660837ddd6393771bae9f177}\label{structdsp_1_1_simple_l_f_o_aa711cd98660837ddd6393771bae9f177}} 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_aa711cd98660837ddd6393771bae9f177}{square\+\_\+uni}} (void)
+\begin{DoxyCompactList}\small\item\em Get value of positive unipolar square wave for current phase. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_abfa1f9eb44d19b156402c1f31693e938}{square\+\_\+bi\+\_\+off}} (const float offset)
+\begin{DoxyCompactList}\small\item\em Get current value of bipolar square wave for phase with offset. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{structdsp_1_1_simple_l_f_o_a858d2513332f106f7a7b99b73229ddb6}{square\+\_\+uni\+\_\+off}} (const float offset)
+\begin{DoxyCompactList}\small\item\em Get current value of positive unipolar square wave for phase with offset. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a73eb64481f55e08d966811d5b31f152a}\label{structdsp_1_1_simple_l_f_o_a73eb64481f55e08d966811d5b31f152a}} 
+q31\+\_\+t {\bfseries phi0}
+\item 
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a4b99b2b7bcc7ee46402bc2ebc728a322}\label{structdsp_1_1_simple_l_f_o_a4b99b2b7bcc7ee46402bc2ebc728a322}} 
+q31\+\_\+t {\bfseries w0}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Simple L\+FO. 
+
+Definition at line 55 of file simplelfo.\+hpp.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a21ccc011765e3ad6e06f580af591ec8e}\label{structdsp_1_1_simple_l_f_o_a21ccc011765e3ad6e06f580af591ec8e}} 
+\index{dsp::SimpleLFO@{dsp::SimpleLFO}!saw\_bi\_off@{saw\_bi\_off}}
+\index{saw\_bi\_off@{saw\_bi\_off}!dsp::SimpleLFO@{dsp::SimpleLFO}}
+\doxysubsubsection{\texorpdfstring{saw\_bi\_off()}{saw\_bi\_off()}}
+{\footnotesize\ttfamily float dsp\+::\+Simple\+L\+F\+O\+::saw\+\_\+bi\+\_\+off (\begin{DoxyParamCaption}\item[{const float}]{offset }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get current value of bipolar saw wave for phase with offset. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em offset} & Offset to apply to current phase, in \mbox{[}-\/1, 1\mbox{]} \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 231 of file simplelfo.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{232     \{}
+\DoxyCodeLine{233       \textcolor{keyword}{const} q31\_t phi = phi0 + (f32\_to\_q31(offset)<<1);}
+\DoxyCodeLine{234       \textcolor{keywordflow}{return} q31\_to\_f32(phi);}
+\DoxyCodeLine{235     \}          }
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_addd03d5bd5420a6e4e44c47715c69d8a}\label{structdsp_1_1_simple_l_f_o_addd03d5bd5420a6e4e44c47715c69d8a}} 
+\index{dsp::SimpleLFO@{dsp::SimpleLFO}!saw\_uni\_off@{saw\_uni\_off}}
+\index{saw\_uni\_off@{saw\_uni\_off}!dsp::SimpleLFO@{dsp::SimpleLFO}}
+\doxysubsubsection{\texorpdfstring{saw\_uni\_off()}{saw\_uni\_off()}}
+{\footnotesize\ttfamily float dsp\+::\+Simple\+L\+F\+O\+::saw\+\_\+uni\+\_\+off (\begin{DoxyParamCaption}\item[{const float}]{offset }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get current value of positive unipolar saw wave for phase with offset. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em offset} & Offset to apply to current phase, in \mbox{[}-\/1, 1\mbox{]} \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 243 of file simplelfo.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{244     \{}
+\DoxyCodeLine{245       q31\_t phi = phi0 + (f32\_to\_q31(offset)<<1);        }
+\DoxyCodeLine{246       \textcolor{keywordflow}{return} 0.5f * phi + 0.5f;}
+\DoxyCodeLine{247       phi >>= 1;}
+\DoxyCodeLine{248       \textcolor{keywordflow}{return} q31\_to\_f32(qadd(phi,0x40000000));}
+\DoxyCodeLine{249     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a721fecfa933ebd4c4d4f6a5a1a11e867}\label{structdsp_1_1_simple_l_f_o_a721fecfa933ebd4c4d4f6a5a1a11e867}} 
+\index{dsp::SimpleLFO@{dsp::SimpleLFO}!setF0@{setF0}}
+\index{setF0@{setF0}!dsp::SimpleLFO@{dsp::SimpleLFO}}
+\doxysubsubsection{\texorpdfstring{setF0()}{setF0()}}
+{\footnotesize\ttfamily void dsp\+::\+Simple\+L\+F\+O\+::set\+F0 (\begin{DoxyParamCaption}\item[{const float}]{f0,  }\item[{const float}]{fsrecip }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Set L\+FO frequency. 
+
+param f0 Frequency in Hz param fsrecip Reciprocal of sampling frequency (1/\+Fs) 
+
+Definition at line 101 of file simplelfo.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{102     \{}
+\DoxyCodeLine{103       w0 = f32\_to\_q31(2.f * f0 * fsrecip);}
+\DoxyCodeLine{104     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_ac94de3290fb59920f9e14f188d369b53}\label{structdsp_1_1_simple_l_f_o_ac94de3290fb59920f9e14f188d369b53}} 
+\index{dsp::SimpleLFO@{dsp::SimpleLFO}!setW0@{setW0}}
+\index{setW0@{setW0}!dsp::SimpleLFO@{dsp::SimpleLFO}}
+\doxysubsubsection{\texorpdfstring{setW0()}{setW0()}}
+{\footnotesize\ttfamily void dsp\+::\+Simple\+L\+F\+O\+::set\+W0 (\begin{DoxyParamCaption}\item[{const float}]{w }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Set L\+FO frequency in radians. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em w} & Frequency in radians \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 112 of file simplelfo.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{113     \{}
+\DoxyCodeLine{114       w0 = f32\_to\_q31(2.f * w);}
+\DoxyCodeLine{115     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a0df3ccb077e68784d8c9226271e29b55}\label{structdsp_1_1_simple_l_f_o_a0df3ccb077e68784d8c9226271e29b55}} 
+\index{dsp::SimpleLFO@{dsp::SimpleLFO}!sine\_bi\_off@{sine\_bi\_off}}
+\index{sine\_bi\_off@{sine\_bi\_off}!dsp::SimpleLFO@{dsp::SimpleLFO}}
+\doxysubsubsection{\texorpdfstring{sine\_bi\_off()}{sine\_bi\_off()}}
+{\footnotesize\ttfamily float dsp\+::\+Simple\+L\+F\+O\+::sine\+\_\+bi\+\_\+off (\begin{DoxyParamCaption}\item[{const float}]{offset }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get current value of bipolar sine wave for phase with offset. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em offset} & Offset to apply to current phase, in \mbox{[}-\/1, 1\mbox{]} \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 145 of file simplelfo.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{146     \{}
+\DoxyCodeLine{147       \textcolor{keyword}{const} \textcolor{keywordtype}{float} phi = q31\_to\_f32(phi0 + f32\_to\_q31(2*offset));}
+\DoxyCodeLine{148       \textcolor{keywordflow}{return} 4 * phi * (\mbox{\hyperlink{group__utils__float__math_gaad7d5924ca8ddd9873f9770fa2f492d3}{si\_fabsf}}(phi) -\/ 1.f);}
+\DoxyCodeLine{149     \}          }
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a281274662fd46d3985f2978c2c1abbf5}\label{structdsp_1_1_simple_l_f_o_a281274662fd46d3985f2978c2c1abbf5}} 
+\index{dsp::SimpleLFO@{dsp::SimpleLFO}!sine\_uni\_off@{sine\_uni\_off}}
+\index{sine\_uni\_off@{sine\_uni\_off}!dsp::SimpleLFO@{dsp::SimpleLFO}}
+\doxysubsubsection{\texorpdfstring{sine\_uni\_off()}{sine\_uni\_off()}}
+{\footnotesize\ttfamily float dsp\+::\+Simple\+L\+F\+O\+::sine\+\_\+uni\+\_\+off (\begin{DoxyParamCaption}\item[{const float}]{offset }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get current value of positive unipolar sine wave for phase with offset. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em offset} & Offset to apply to current phase, in \mbox{[}-\/1, 1\mbox{]} \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 157 of file simplelfo.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{158     \{}
+\DoxyCodeLine{159       \textcolor{keyword}{const} \textcolor{keywordtype}{float} phi = q31\_to\_f32(phi0 + f32\_to\_q31(2*offset));}
+\DoxyCodeLine{160       \textcolor{keywordflow}{return} 0.5f + 2 * phi * (\mbox{\hyperlink{group__utils__float__math_gaad7d5924ca8ddd9873f9770fa2f492d3}{si\_fabsf}}(phi) -\/ 1.f);}
+\DoxyCodeLine{161     \}          }
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_abfa1f9eb44d19b156402c1f31693e938}\label{structdsp_1_1_simple_l_f_o_abfa1f9eb44d19b156402c1f31693e938}} 
+\index{dsp::SimpleLFO@{dsp::SimpleLFO}!square\_bi\_off@{square\_bi\_off}}
+\index{square\_bi\_off@{square\_bi\_off}!dsp::SimpleLFO@{dsp::SimpleLFO}}
+\doxysubsubsection{\texorpdfstring{square\_bi\_off()}{square\_bi\_off()}}
+{\footnotesize\ttfamily float dsp\+::\+Simple\+L\+F\+O\+::square\+\_\+bi\+\_\+off (\begin{DoxyParamCaption}\item[{const float}]{offset }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get current value of bipolar square wave for phase with offset. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em offset} & Offset to apply to current phase, in \mbox{[}-\/1, 1\mbox{]} \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 276 of file simplelfo.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{277     \{}
+\DoxyCodeLine{278       \textcolor{keyword}{const} q31\_t phi = phi0 + (f32\_to\_q31(offset)<<1);}
+\DoxyCodeLine{279       \textcolor{keywordflow}{return} (phi < 0) ? -\/1.f : 1.f;}
+\DoxyCodeLine{280     \}          }
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a858d2513332f106f7a7b99b73229ddb6}\label{structdsp_1_1_simple_l_f_o_a858d2513332f106f7a7b99b73229ddb6}} 
+\index{dsp::SimpleLFO@{dsp::SimpleLFO}!square\_uni\_off@{square\_uni\_off}}
+\index{square\_uni\_off@{square\_uni\_off}!dsp::SimpleLFO@{dsp::SimpleLFO}}
+\doxysubsubsection{\texorpdfstring{square\_uni\_off()}{square\_uni\_off()}}
+{\footnotesize\ttfamily float dsp\+::\+Simple\+L\+F\+O\+::square\+\_\+uni\+\_\+off (\begin{DoxyParamCaption}\item[{const float}]{offset }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get current value of positive unipolar square wave for phase with offset. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em offset} & Offset to apply to current phase, in \mbox{[}-\/1, 1\mbox{]} \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 288 of file simplelfo.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{289     \{}
+\DoxyCodeLine{290       \textcolor{keyword}{const} q31\_t phi = phi0 + (f32\_to\_q31(offset)<<1);}
+\DoxyCodeLine{291       \textcolor{keywordflow}{return} (phi < 0) ? 0.f : 1.f;}
+\DoxyCodeLine{292     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a6f653d29d8f839fdc3bd8c4e87c352a3}\label{structdsp_1_1_simple_l_f_o_a6f653d29d8f839fdc3bd8c4e87c352a3}} 
+\index{dsp::SimpleLFO@{dsp::SimpleLFO}!triangle\_bi\_off@{triangle\_bi\_off}}
+\index{triangle\_bi\_off@{triangle\_bi\_off}!dsp::SimpleLFO@{dsp::SimpleLFO}}
+\doxysubsubsection{\texorpdfstring{triangle\_bi\_off()}{triangle\_bi\_off()}}
+{\footnotesize\ttfamily float dsp\+::\+Simple\+L\+F\+O\+::triangle\+\_\+bi\+\_\+off (\begin{DoxyParamCaption}\item[{const float}]{offset }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get current value of bipolar triangle wave for phase with offset. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em offset} & Offset to apply to current phase, in \mbox{[}-\/1, 1\mbox{]} \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 188 of file simplelfo.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{189     \{}
+\DoxyCodeLine{190       \textcolor{keyword}{const} q31\_t phi = phi0 + f32\_to\_q31(2*offset);}
+\DoxyCodeLine{191       \textcolor{keywordflow}{return} q31\_to\_f32(qsub(q31abs(phi),0x40000000)<<1);}
+\DoxyCodeLine{192     \}          }
+
+\end{DoxyCode}
+\mbox{\Hypertarget{structdsp_1_1_simple_l_f_o_a86db18abf71ecca2de1d6e8b7975f0e1}\label{structdsp_1_1_simple_l_f_o_a86db18abf71ecca2de1d6e8b7975f0e1}} 
+\index{dsp::SimpleLFO@{dsp::SimpleLFO}!triangle\_uni\_off@{triangle\_uni\_off}}
+\index{triangle\_uni\_off@{triangle\_uni\_off}!dsp::SimpleLFO@{dsp::SimpleLFO}}
+\doxysubsubsection{\texorpdfstring{triangle\_uni\_off()}{triangle\_uni\_off()}}
+{\footnotesize\ttfamily float dsp\+::\+Simple\+L\+F\+O\+::triangle\+\_\+uni\+\_\+off (\begin{DoxyParamCaption}\item[{const float}]{offset }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Get current value of positive unipolar triangle wave for phase with offset. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em offset} & Offset to apply to current phase, in \mbox{[}-\/1, 1\mbox{]} \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line 200 of file simplelfo.\+hpp.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{201     \{}
+\DoxyCodeLine{202       \textcolor{keyword}{const} \textcolor{keywordtype}{float} phi = q31\_to\_f32(phi0 + f32\_to\_q31(2*offset));}
+\DoxyCodeLine{203       \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_gaad7d5924ca8ddd9873f9770fa2f492d3}{si\_fabsf}}(phi); }
+\DoxyCodeLine{204     \}}
+
+\end{DoxyCode}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/etienne/\+Documents/\+\_\+projects/logue-\/sdk/logue-\/sdk-\/alt/platform/prologue/inc/dsp/\mbox{\hyperlink{simplelfo_8hpp}{simplelfo.\+hpp}}\end{DoxyCompactItemize}

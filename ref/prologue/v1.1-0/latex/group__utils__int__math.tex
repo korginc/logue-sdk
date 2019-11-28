@@ -1,0 +1,35 @@
+\hypertarget{group__utils__int__math}{}\doxysection{Integer Math}
+\label{group__utils__int__math}\index{Integer Math@{Integer Math}}
+\doxysubsection*{Clipping Operations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__utils__int__math_gacedbbc2728abab21c9b86fd329d44ee7}\label{group__utils__int__math_gacedbbc2728abab21c9b86fd329d44ee7}} 
+static int32\+\_\+t \mbox{\hyperlink{group__utils__int__math_gacedbbc2728abab21c9b86fd329d44ee7}{clipmaxi32}} (const int32\+\_\+t x, const int32\+\_\+t m)
+\begin{DoxyCompactList}\small\item\em Clip upper bound of signed integer x to m (inclusive) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__utils__int__math_gaffc98181ae40ecc4dd5db45580ce5ef2}\label{group__utils__int__math_gaffc98181ae40ecc4dd5db45580ce5ef2}} 
+static int32\+\_\+t \mbox{\hyperlink{group__utils__int__math_gaffc98181ae40ecc4dd5db45580ce5ef2}{clipmini32}} (const int32\+\_\+t m, const int32\+\_\+t x)
+\begin{DoxyCompactList}\small\item\em Clip lower bound of signed integer x to m (inclusive) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__utils__int__math_gac08c747fe8a15ac7023ee575200c7832}\label{group__utils__int__math_gac08c747fe8a15ac7023ee575200c7832}} 
+static int32\+\_\+t \mbox{\hyperlink{group__utils__int__math_gac08c747fe8a15ac7023ee575200c7832}{clipminmaxi32}} (const int32\+\_\+t min, const int32\+\_\+t x, const int32\+\_\+t max)
+\begin{DoxyCompactList}\small\item\em Clip signe integer x between min and max (inclusive) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__utils__int__math_gaf499259532eca51a13d2a2ba7dac8d77}\label{group__utils__int__math_gaf499259532eca51a13d2a2ba7dac8d77}} 
+static uint32\+\_\+t \mbox{\hyperlink{group__utils__int__math_gaf499259532eca51a13d2a2ba7dac8d77}{clipmaxu32}} (const uint32\+\_\+t x, const uint32\+\_\+t m)
+\begin{DoxyCompactList}\small\item\em Clip upper bound of unsigned integer x to m (inclusive) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__utils__int__math_gad19815d74fb1aee5a978bea02c52f414}\label{group__utils__int__math_gad19815d74fb1aee5a978bea02c52f414}} 
+static uint32\+\_\+t \mbox{\hyperlink{group__utils__int__math_gad19815d74fb1aee5a978bea02c52f414}{clipminu32}} (const uint32\+\_\+t m, const uint32\+\_\+t x)
+\begin{DoxyCompactList}\small\item\em Clip lower bound of unsigned integer x to m (inclusive) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__utils__int__math_ga799539b31e611ad3c9ef9470ec7a74d3}\label{group__utils__int__math_ga799539b31e611ad3c9ef9470ec7a74d3}} 
+static uint32\+\_\+t \mbox{\hyperlink{group__utils__int__math_ga799539b31e611ad3c9ef9470ec7a74d3}{clipminmaxu32}} (const uint32\+\_\+t min, const uint32\+\_\+t x, const uint32\+\_\+t max)
+\begin{DoxyCompactList}\small\item\em Clip unsigned integer x between min and max (inclusive) \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Power of 2s}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__utils__int__math_gaead89cd443076420dfc53f83ece258f3}\label{group__utils__int__math_gaead89cd443076420dfc53f83ece258f3}} 
+static uint32\+\_\+t \mbox{\hyperlink{group__utils__int__math_gaead89cd443076420dfc53f83ece258f3}{nextpow2\+\_\+u32}} (uint32\+\_\+t x)
+\begin{DoxyCompactList}\small\item\em Compute next power of 2 greater than x. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__utils__int__math_ga143b8736b21a5f3e67b71084e98055ec}\label{group__utils__int__math_ga143b8736b21a5f3e67b71084e98055ec}} 
+static uint8\+\_\+t \mbox{\hyperlink{group__utils__int__math_ga143b8736b21a5f3e67b71084e98055ec}{ispow2\+\_\+u32}} (const uint32\+\_\+t x)
+\begin{DoxyCompactList}\small\item\em Check if x is a power of 2. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}

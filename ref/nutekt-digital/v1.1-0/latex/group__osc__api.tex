@@ -1,0 +1,1327 @@
+\hypertarget{group__osc__api}{}\doxysection{Runtime A\+PI}
+\label{group__osc__api}\index{Runtime API@{Runtime API}}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__osc__api_gaef654e7194bae8dc60734599c0e79049}\label{group__osc__api_gaef654e7194bae8dc60734599c0e79049}} 
+\#define {\bfseries \+\_\+\+\_\+fast\+\_\+inline}~static inline \+\_\+\+\_\+attribute\+\_\+\+\_\+((always\+\_\+inline, optimize(\char`\"{}Ofast\char`\"{})))
+\item 
+\mbox{\Hypertarget{group__osc__api_ga13e93ba13aeb9dbe3d8139c3cec6fbb7}\label{group__osc__api_ga13e93ba13aeb9dbe3d8139c3cec6fbb7}} 
+\#define {\bfseries k\+\_\+samplerate}~(48000)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga44cd1427bdbcef427ab758265335c9ca}\label{group__osc__api_ga44cd1427bdbcef427ab758265335c9ca}} 
+\#define {\bfseries k\+\_\+samplerate\+\_\+recipf}~(2.\+08333333333333e-\/005f)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{group__osc__api_ga3c3dbbc0b0122daeeee4a5380aacf7ac}{\+\_\+osc\+\_\+mcu\+\_\+hash}} (void)
+\begin{DoxyCompactList}\small\item\em Get M\+CU hash. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_ga63b59258169a9277e45f3d0fbe7955e6}\label{group__osc__api_ga63b59258169a9277e45f3d0fbe7955e6}} 
+\+\_\+\+\_\+fast\+\_\+inline uint32\+\_\+t {\bfseries osc\+\_\+mcu\+\_\+hash} (void)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__osc__api_gab80d335a0049301225e41b3d3c3b3c07}\label{group__osc__api_gab80d335a0049301225e41b3d3c3b3c07}} 
+const uint32\+\_\+t \mbox{\hyperlink{group__osc__api_gab80d335a0049301225e41b3d3c3b3c07}{k\+\_\+osc\+\_\+api\+\_\+platform}}
+\begin{DoxyCompactList}\small\item\em Current platform. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_gaf7fdee41003df8998020340376034d45}\label{group__osc__api_gaf7fdee41003df8998020340376034d45}} 
+const uint32\+\_\+t \mbox{\hyperlink{group__osc__api_gaf7fdee41003df8998020340376034d45}{k\+\_\+osc\+\_\+api\+\_\+version}}
+\begin{DoxyCompactList}\small\item\em Current A\+PI version. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Note to frequency conversion table}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__osc__api_gab031522281fbc6b1824b88d2ffd8c4b3}\label{group__osc__api_gab031522281fbc6b1824b88d2ffd8c4b3}} 
+const float {\bfseries midi\+\_\+to\+\_\+hz\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+midi\+\_\+to\+\_\+hz\+\_\+size\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga082922e3b29eaff8216a2082dff68584}{osc\+\_\+notehzf}} (uint8\+\_\+t note)
+\begin{DoxyCompactList}\small\item\em Get Hertz value for note. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga2061a488f9b21f9972ab71583960f1db}{osc\+\_\+w0f\+\_\+for\+\_\+note}} (uint8\+\_\+t note, uint8\+\_\+t mod)
+\begin{DoxyCompactList}\small\item\em Get floating point phase increment for given note and fine modulation. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_ga41f1eec291eea6dc6225b00e1893e57e}\label{group__osc__api_ga41f1eec291eea6dc6225b00e1893e57e}} 
+\#define {\bfseries k\+\_\+midi\+\_\+to\+\_\+hz\+\_\+size}~(152)
+\item 
+\mbox{\Hypertarget{group__osc__api_gac6a20c88ddd2f381b2b4dc76b830a624}\label{group__osc__api_gac6a20c88ddd2f381b2b4dc76b830a624}} 
+\#define {\bfseries k\+\_\+note\+\_\+mod\+\_\+fscale}~(0.\+00392156862745098f)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga33355fd32b593798e980d2275d1b8387}\label{group__osc__api_ga33355fd32b593798e980d2275d1b8387}} 
+\#define {\bfseries k\+\_\+note\+\_\+max\+\_\+hz}~(23679.\+643054f)
+\end{DoxyCompactItemize}
+\doxysubsection*{Sine half-\/wave}
+\label{_amgrp5c23d81a9378c4ff2e4abd3f6a8099c4}%
+\begin{DoxyNote}{Note}
+Wrap and negate for phase $>$= 0.\+5 
+\end{DoxyNote}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga0f077d374e0a5f268fdcfa9c0287f318}\label{group__osc__api_ga0f077d374e0a5f268fdcfa9c0287f318}} 
+const float {\bfseries wt\+\_\+sine\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+wt\+\_\+sine\+\_\+lut\+\_\+size\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga7c72f32f2889ff55a075d283dd9bf93a}{osc\+\_\+sinf}} (float x)
+\begin{DoxyCompactList}\small\item\em Lookup value of sin(2$\ast$pi$\ast$x). \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga3aaa9cdb10789d3db5e5a4ff72e8112e}{osc\+\_\+cosf}} (float x)
+\begin{DoxyCompactList}\small\item\em Lookup value of cos(2$\ast$pi$\ast$x) in \mbox{[}0, 1.\+0\mbox{]} range. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_ga36d8fbcffed42389da33f2d936193ac3}\label{group__osc__api_ga36d8fbcffed42389da33f2d936193ac3}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sine\+\_\+size\+\_\+exp}~(7)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga359d5f068081eb35650194f14c63110f}\label{group__osc__api_ga359d5f068081eb35650194f14c63110f}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sine\+\_\+size}~(1U$<$$<$k\+\_\+wt\+\_\+sine\+\_\+size\+\_\+exp)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga423afa2573b928943e61f75514116e70}\label{group__osc__api_ga423afa2573b928943e61f75514116e70}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sine\+\_\+u32shift}~(24)
+\item 
+\mbox{\Hypertarget{group__osc__api_gad41d9aced95991fb3b9012e513e54b23}\label{group__osc__api_gad41d9aced95991fb3b9012e513e54b23}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sine\+\_\+frrecip}~(5.\+96046447753906e-\/008f)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga9c4585bbe76a0bb8ade3a3f2ae9a6fb6}\label{group__osc__api_ga9c4585bbe76a0bb8ade3a3f2ae9a6fb6}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sine\+\_\+mask}~(k\+\_\+wt\+\_\+sine\+\_\+size-\/1)
+\item 
+\mbox{\Hypertarget{group__osc__api_gabad61b5f1e7ed034bb027c6c8ac8960f}\label{group__osc__api_gabad61b5f1e7ed034bb027c6c8ac8960f}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sine\+\_\+lut\+\_\+size}~(k\+\_\+wt\+\_\+sine\+\_\+size+1)
+\end{DoxyCompactItemize}
+\doxysubsection*{Band-\/limited sawtooth half-\/waves}
+\label{_amgrpcdbfee59f19a4f48718cee7e8b1259f2}%
+\begin{DoxyNote}{Note}
+Wrap interpolation towards zero for 0.\+5, negate and reverse phase for $>$= 0.\+5 
+\end{DoxyNote}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__osc__api_gaf1ee43ac5f00d41311b7cdf7714a043b}\label{group__osc__api_gaf1ee43ac5f00d41311b7cdf7714a043b}} 
+const uint8\+\_\+t {\bfseries wt\+\_\+saw\+\_\+notes} \mbox{[}k\+\_\+wt\+\_\+saw\+\_\+notes\+\_\+cnt\mbox{]}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga08ed57c7181f3ce2665c19f9dd97735e}\label{group__osc__api_ga08ed57c7181f3ce2665c19f9dd97735e}} 
+const float {\bfseries wt\+\_\+saw\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+wt\+\_\+saw\+\_\+lut\+\_\+tsize\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga64042f4358abf83f4e15330157314252}{osc\+\_\+sawf}} (float x)
+\begin{DoxyCompactList}\small\item\em Sawtooth wave lookup. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga2c38d05e30af9254a367dc3840679191}{osc\+\_\+bl\+\_\+sawf}} (float x, uint8\+\_\+t idx)
+\begin{DoxyCompactList}\small\item\em Band-\/limited sawtooth wave lookup. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_gad3cbea256f34fe91f7af7978819f1b4f}{osc\+\_\+bl2\+\_\+sawf}} (float x, float idx)
+\begin{DoxyCompactList}\small\item\em Band-\/limited sawtooth wave lookup. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{group__osc__api_gaaed275f73e5c28589fbcbefc33de219f}{\+\_\+osc\+\_\+bl\+\_\+saw\+\_\+idx}} (float note)
+\begin{DoxyCompactList}\small\item\em Get band-\/limited sawtooth wave index for note. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_ga684a3fb3461a75ce740b906b92003f92}\label{group__osc__api_ga684a3fb3461a75ce740b906b92003f92}} 
+\+\_\+\+\_\+fast\+\_\+inline float {\bfseries osc\+\_\+bl\+\_\+saw\+\_\+idx} (float note)
+\item 
+\mbox{\Hypertarget{group__osc__api_gad55ca0ff909da9efd01c1f8f19175814}\label{group__osc__api_gad55ca0ff909da9efd01c1f8f19175814}} 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+size\+\_\+exp}~(7)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga39e645b6af39c8fd58763a91cf1fd570}\label{group__osc__api_ga39e645b6af39c8fd58763a91cf1fd570}} 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+size}~(1U$<$$<$k\+\_\+wt\+\_\+saw\+\_\+size\+\_\+exp)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga69a1e05cba67748e2de83197d9315213}\label{group__osc__api_ga69a1e05cba67748e2de83197d9315213}} 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+u32shift}~(24)
+\item 
+\mbox{\Hypertarget{group__osc__api_gadc33e4d0b9547ee140b4109232b07dad}\label{group__osc__api_gadc33e4d0b9547ee140b4109232b07dad}} 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+frrecip}~(5.\+96046447753906e-\/008f)
+\item 
+\mbox{\Hypertarget{group__osc__api_gaa0d168df801b707d289fb1e6cc0232a3}\label{group__osc__api_gaa0d168df801b707d289fb1e6cc0232a3}} 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+mask}~(k\+\_\+wt\+\_\+saw\+\_\+size-\/1)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga1567ff55f776f7da224fd9901fa87089}\label{group__osc__api_ga1567ff55f776f7da224fd9901fa87089}} 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+lut\+\_\+size}~(k\+\_\+wt\+\_\+saw\+\_\+size+1)
+\item 
+\mbox{\Hypertarget{group__osc__api_gaefb0976eebee8cf75c70177bfb783a73}\label{group__osc__api_gaefb0976eebee8cf75c70177bfb783a73}} 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+notes\+\_\+cnt}~(7)
+\item 
+\mbox{\Hypertarget{group__osc__api_gaafd4e221e445220c17fedcb889b39881}\label{group__osc__api_gaafd4e221e445220c17fedcb889b39881}} 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+lut\+\_\+tsize}~(k\+\_\+wt\+\_\+saw\+\_\+notes\+\_\+cnt $\ast$ k\+\_\+wt\+\_\+saw\+\_\+lut\+\_\+size)
+\end{DoxyCompactItemize}
+\doxysubsection*{Band-\/limited square half-\/waves}
+\label{_amgrpc2c4e619a51399bdafa4598d7a9c5bad}%
+\begin{DoxyNote}{Note}
+Wrap interpolation to zero for 0.\+5, negate and reverse phase for $>$= 0.\+5 
+\end{DoxyNote}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__osc__api_gaa37b38d9e8eea20be90abf11b6e523ae}\label{group__osc__api_gaa37b38d9e8eea20be90abf11b6e523ae}} 
+const uint8\+\_\+t {\bfseries wt\+\_\+sqr\+\_\+notes} \mbox{[}k\+\_\+wt\+\_\+sqr\+\_\+notes\+\_\+cnt\mbox{]}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga8014ef6279466bafe5c033a024f658e5}\label{group__osc__api_ga8014ef6279466bafe5c033a024f658e5}} 
+const float {\bfseries wt\+\_\+sqr\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+wt\+\_\+sqr\+\_\+lut\+\_\+tsize\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_gab7f55c309c3b657fc78787d225cdfb0f}{osc\+\_\+sqrf}} (float x)
+\begin{DoxyCompactList}\small\item\em Square wave lookup. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga7a4a401783f0e18e2d21cd16e9e15cdc}{osc\+\_\+bl\+\_\+sqrf}} (float x, uint8\+\_\+t idx)
+\begin{DoxyCompactList}\small\item\em Band-\/limited square wave lookup. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga0857fef63cbe6b4081a1a1d462f252f3}{osc\+\_\+bl2\+\_\+sqrf}} (float x, float idx)
+\begin{DoxyCompactList}\small\item\em Band-\/limited square wave lookup. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{group__osc__api_ga005fcc269e56eda592fd040986d5a97d}{\+\_\+osc\+\_\+bl\+\_\+sqr\+\_\+idx}} (float note)
+\begin{DoxyCompactList}\small\item\em Get band-\/limited square wave index for note. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_ga4db7f646b60dff9903e0c4047b061a13}\label{group__osc__api_ga4db7f646b60dff9903e0c4047b061a13}} 
+\+\_\+\+\_\+fast\+\_\+inline float {\bfseries osc\+\_\+bl\+\_\+sqr\+\_\+idx} (float note)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga437da9b11ce4119b48ccbd260046e22e}\label{group__osc__api_ga437da9b11ce4119b48ccbd260046e22e}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+size\+\_\+exp}~7
+\item 
+\mbox{\Hypertarget{group__osc__api_ga3a4296c99b522fa6de88a44f90d28407}\label{group__osc__api_ga3a4296c99b522fa6de88a44f90d28407}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+size}~(1U$<$$<$k\+\_\+wt\+\_\+sqr\+\_\+size\+\_\+exp)
+\item 
+\mbox{\Hypertarget{group__osc__api_gad102aced8ee70c90ab59eec45a4c90c1}\label{group__osc__api_gad102aced8ee70c90ab59eec45a4c90c1}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+u32shift}~(24)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga0b9b8b712ffce6192c83a8e5d7b8ff58}\label{group__osc__api_ga0b9b8b712ffce6192c83a8e5d7b8ff58}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+frrecip}~(5.\+96046447753906e-\/008f)
+\item 
+\mbox{\Hypertarget{group__osc__api_gacf1bc0c6a1a9af7c11c7a26254129750}\label{group__osc__api_gacf1bc0c6a1a9af7c11c7a26254129750}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+mask}~(k\+\_\+wt\+\_\+sqr\+\_\+size-\/1)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga56e656fa0ed9b71dd64bfbb9ac4733b2}\label{group__osc__api_ga56e656fa0ed9b71dd64bfbb9ac4733b2}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+lut\+\_\+size}~(k\+\_\+wt\+\_\+sqr\+\_\+size+1)
+\item 
+\mbox{\Hypertarget{group__osc__api_gab1a960993ef4a3072fe77d0e7a1bf064}\label{group__osc__api_gab1a960993ef4a3072fe77d0e7a1bf064}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+notes\+\_\+cnt}~7
+\item 
+\mbox{\Hypertarget{group__osc__api_ga8231a88b73368d23033c3d48e5b1df4c}\label{group__osc__api_ga8231a88b73368d23033c3d48e5b1df4c}} 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+lut\+\_\+tsize}~(k\+\_\+wt\+\_\+sqr\+\_\+notes\+\_\+cnt $\ast$ k\+\_\+wt\+\_\+sqr\+\_\+lut\+\_\+size)
+\end{DoxyCompactItemize}
+\doxysubsection*{Band-\/limited parabolic half-\/waves.}
+\label{_amgrp9c884d63884e6d2fe69ff6ed0e46437e}%
+\begin{DoxyNote}{Note}
+Wrap interpolation to zero for 0.\+5, negate and reverse phase for $>$= 0.\+5. Careful to negate index 0 when wrapping. 
+\end{DoxyNote}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga08911d277df61b4f099f4d0a20a16e32}\label{group__osc__api_ga08911d277df61b4f099f4d0a20a16e32}} 
+const uint8\+\_\+t {\bfseries wt\+\_\+par\+\_\+notes} \mbox{[}k\+\_\+wt\+\_\+par\+\_\+notes\+\_\+cnt\mbox{]}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga77de8b09dd99a4495d4d76832191098e}\label{group__osc__api_ga77de8b09dd99a4495d4d76832191098e}} 
+const float {\bfseries wt\+\_\+par\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+wt\+\_\+par\+\_\+lut\+\_\+tsize\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_gadbb771a6aff9e9c51e8a6b249ddae694}{osc\+\_\+parf}} (float x)
+\begin{DoxyCompactList}\small\item\em Parabolic wave lookup. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga8c69f5f4a9ff36e312c4ba829f50b989}{osc\+\_\+bl\+\_\+parf}} (float x, uint8\+\_\+t idx)
+\begin{DoxyCompactList}\small\item\em Band-\/limited parabolic wave lookup. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga50f6755ad79d68ffd87dbef72d6733c0}{osc\+\_\+bl2\+\_\+parf}} (float x, float idx)
+\begin{DoxyCompactList}\small\item\em Band-\/limited parabolic wave lookup. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{group__osc__api_ga3d3612eb483369630048ad21c28ac0a0}{\+\_\+osc\+\_\+bl\+\_\+par\+\_\+idx}} (float note)
+\begin{DoxyCompactList}\small\item\em Get band-\/limited parabolic wave index for note. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_ga8e920b0d262a919196c40610d37b73d2}\label{group__osc__api_ga8e920b0d262a919196c40610d37b73d2}} 
+\+\_\+\+\_\+fast\+\_\+inline float {\bfseries osc\+\_\+bl\+\_\+par\+\_\+idx} (float note)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga16546bf42b320ead1a1905304dd0e863}\label{group__osc__api_ga16546bf42b320ead1a1905304dd0e863}} 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+size\+\_\+exp}~7
+\item 
+\mbox{\Hypertarget{group__osc__api_gabd460fa50d6018ebe2d35c2ad899efe1}\label{group__osc__api_gabd460fa50d6018ebe2d35c2ad899efe1}} 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+size}~(1U$<$$<$k\+\_\+wt\+\_\+par\+\_\+size\+\_\+exp)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga4bbafe91e4fe14a576bcd81651ea3635}\label{group__osc__api_ga4bbafe91e4fe14a576bcd81651ea3635}} 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+u32shift}~(24)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga53b9c3d29713bde5eb8023ffdc613aa2}\label{group__osc__api_ga53b9c3d29713bde5eb8023ffdc613aa2}} 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+frrecip}~(5.\+96046447753906e-\/008f)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga0bf28b327e698872acfac7b0219f7d29}\label{group__osc__api_ga0bf28b327e698872acfac7b0219f7d29}} 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+mask}~(k\+\_\+wt\+\_\+par\+\_\+size-\/1)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga200cb380ccf77d1252e1bf3e4194a677}\label{group__osc__api_ga200cb380ccf77d1252e1bf3e4194a677}} 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+lut\+\_\+size}~(k\+\_\+wt\+\_\+par\+\_\+size+1)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga868092a9e09f0f9572741f42bcc53804}\label{group__osc__api_ga868092a9e09f0f9572741f42bcc53804}} 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+notes\+\_\+cnt}~7
+\item 
+\mbox{\Hypertarget{group__osc__api_gaf0c9e3c6b0a2edaaf9f8b29e3fe96332}\label{group__osc__api_gaf0c9e3c6b0a2edaaf9f8b29e3fe96332}} 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+lut\+\_\+tsize}~(k\+\_\+wt\+\_\+par\+\_\+notes\+\_\+cnt $\ast$ k\+\_\+wt\+\_\+par\+\_\+lut\+\_\+size)
+\end{DoxyCompactItemize}
+\doxysubsection*{Wave banks.}
+\label{_amgrp4774bb87612135e5656df9287e489562}%
+ \begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000002}{Todo}}]Explain categorization\end{DoxyRefDesc}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga54da0711f5d74d8eebb387db7d7f1bad}\label{group__osc__api_ga54da0711f5d74d8eebb387db7d7f1bad}} 
+const float $\ast$const {\bfseries wavesA} \mbox{[}k\+\_\+waves\+\_\+a\+\_\+cnt\mbox{]}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga2e96839f9de123411e37ed381b5e3e09}\label{group__osc__api_ga2e96839f9de123411e37ed381b5e3e09}} 
+const float $\ast$const {\bfseries wavesB} \mbox{[}k\+\_\+waves\+\_\+b\+\_\+cnt\mbox{]}
+\item 
+\mbox{\Hypertarget{group__osc__api_gae1fc725b74d57c3e91e4b1add0334453}\label{group__osc__api_gae1fc725b74d57c3e91e4b1add0334453}} 
+const float $\ast$const {\bfseries wavesC} \mbox{[}k\+\_\+waves\+\_\+c\+\_\+cnt\mbox{]}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga8190c6191481a651eb74f4eda55fc3b6}\label{group__osc__api_ga8190c6191481a651eb74f4eda55fc3b6}} 
+const float $\ast$const {\bfseries wavesD} \mbox{[}k\+\_\+waves\+\_\+d\+\_\+cnt\mbox{]}
+\item 
+\mbox{\Hypertarget{group__osc__api_gab488727a1d790aa95beac689eaea0d82}\label{group__osc__api_gab488727a1d790aa95beac689eaea0d82}} 
+const float $\ast$const {\bfseries wavesE} \mbox{[}k\+\_\+waves\+\_\+e\+\_\+cnt\mbox{]}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga5695601eba4902d8735f2f922b1114a0}\label{group__osc__api_ga5695601eba4902d8735f2f922b1114a0}} 
+const float $\ast$const {\bfseries wavesF} \mbox{[}k\+\_\+waves\+\_\+f\+\_\+cnt\mbox{]}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga91c124b00ff71ba4347a5fb98c81bb73}\label{group__osc__api_ga91c124b00ff71ba4347a5fb98c81bb73}} 
+static float {\bfseries osc\+\_\+wave\+\_\+scanf} (const float $\ast$w, float x)
+\item 
+\mbox{\Hypertarget{group__osc__api_gaea39f18f1369a99c4bca3ead0df5893b}\label{group__osc__api_gaea39f18f1369a99c4bca3ead0df5893b}} 
+static float {\bfseries osc\+\_\+wave\+\_\+scanuf} (const float $\ast$w, uint32\+\_\+t x)
+\item 
+\mbox{\Hypertarget{group__osc__api_gaa74d99d7bb1770993553b99166e5623a}\label{group__osc__api_gaa74d99d7bb1770993553b99166e5623a}} 
+\#define {\bfseries k\+\_\+waves\+\_\+size\+\_\+exp}~(7)
+\item 
+\mbox{\Hypertarget{group__osc__api_gab0c4467bd5a39e922995fd1923a106c3}\label{group__osc__api_gab0c4467bd5a39e922995fd1923a106c3}} 
+\#define {\bfseries k\+\_\+waves\+\_\+size}~(1U$<$$<$k\+\_\+waves\+\_\+size\+\_\+exp)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga41b8b16dc981908e5353326862d90145}\label{group__osc__api_ga41b8b16dc981908e5353326862d90145}} 
+\#define {\bfseries k\+\_\+waves\+\_\+u32shift}~(24)
+\item 
+\mbox{\Hypertarget{group__osc__api_gac8733f91c829f44c170f32aa249a7d5f}\label{group__osc__api_gac8733f91c829f44c170f32aa249a7d5f}} 
+\#define {\bfseries k\+\_\+waves\+\_\+frrecip}~(5.\+96046447753906e-\/008f)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga88039334bede580997397ee577854ad2}\label{group__osc__api_ga88039334bede580997397ee577854ad2}} 
+\#define {\bfseries k\+\_\+waves\+\_\+mask}~(k\+\_\+waves\+\_\+size-\/1)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga196de4ac6a5e52ac710f4d8cc3c6e535}\label{group__osc__api_ga196de4ac6a5e52ac710f4d8cc3c6e535}} 
+\#define {\bfseries k\+\_\+waves\+\_\+lut\+\_\+size}~(k\+\_\+waves\+\_\+size+1)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga104fc9fbab64eb0ce5def5c3a1238bea}\label{group__osc__api_ga104fc9fbab64eb0ce5def5c3a1238bea}} 
+\#define {\bfseries k\+\_\+waves\+\_\+a\+\_\+cnt}~16
+\item 
+\mbox{\Hypertarget{group__osc__api_ga6a18ba4210b4ac8ec96df73270276078}\label{group__osc__api_ga6a18ba4210b4ac8ec96df73270276078}} 
+\#define {\bfseries k\+\_\+waves\+\_\+b\+\_\+cnt}~16
+\item 
+\mbox{\Hypertarget{group__osc__api_gaba77d6cd02f43fe55c54197fd6a68cd7}\label{group__osc__api_gaba77d6cd02f43fe55c54197fd6a68cd7}} 
+\#define {\bfseries k\+\_\+waves\+\_\+c\+\_\+cnt}~14
+\item 
+\mbox{\Hypertarget{group__osc__api_ga7f1f3825f5c4b663f384f918f11be8f9}\label{group__osc__api_ga7f1f3825f5c4b663f384f918f11be8f9}} 
+\#define {\bfseries k\+\_\+waves\+\_\+d\+\_\+cnt}~13
+\item 
+\mbox{\Hypertarget{group__osc__api_ga6a3030f77d1d57a93772c6fadf7d2340}\label{group__osc__api_ga6a3030f77d1d57a93772c6fadf7d2340}} 
+\#define {\bfseries k\+\_\+waves\+\_\+e\+\_\+cnt}~15
+\item 
+\mbox{\Hypertarget{group__osc__api_ga465ab3c0c329b6b20f9056e95cbd9b70}\label{group__osc__api_ga465ab3c0c329b6b20f9056e95cbd9b70}} 
+\#define {\bfseries k\+\_\+waves\+\_\+f\+\_\+cnt}~16
+\end{DoxyCompactItemize}
+\doxysubsection*{Various function lookups}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga3eef235f0d2ebb62c4ec6df7e978aaed}\label{group__osc__api_ga3eef235f0d2ebb62c4ec6df7e978aaed}} 
+const float {\bfseries log\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+log\+\_\+lut\+\_\+size\mbox{]}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga507061e0ed71f7b2964280b285fefe92}\label{group__osc__api_ga507061e0ed71f7b2964280b285fefe92}} 
+const float {\bfseries tanpi\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+log\+\_\+lut\+\_\+size\mbox{]}
+\item 
+\mbox{\Hypertarget{group__osc__api_gab869921112d3341cd6880303e30caaa9}\label{group__osc__api_gab869921112d3341cd6880303e30caaa9}} 
+const float {\bfseries sqrtm2log\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+sqrtm2log\+\_\+lut\+\_\+size\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga81e180b64abbccaf568738fef522ace1}{osc\+\_\+logf}} (float x)
+\begin{DoxyCompactList}\small\item\em Lookup value of log(x) in \mbox{[}0.\+00001, 1.\+0\mbox{]} range. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga494fa53a08bb6afbd53d9a7e511e1189}{osc\+\_\+tanpif}} (float x)
+\begin{DoxyCompactList}\small\item\em Lookup value of tan(pi$\ast$x) in \mbox{[}0.\+0001, 0.\+49\mbox{]} range. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_gab83291286baa795bfa9dc612e963bf1b}{osc\+\_\+sqrtm2logf}} (float x)
+\begin{DoxyCompactList}\small\item\em Lookup value of sqrt(-\/2$\ast$log(x)) in \mbox{[}0.\+005, 1.\+0\mbox{]} range. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_ga1770575348632d1ece2a90cb89a1595e}\label{group__osc__api_ga1770575348632d1ece2a90cb89a1595e}} 
+\#define {\bfseries k\+\_\+log\+\_\+size\+\_\+exp}~(8)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga75f43d402079fb011e5e899808d17208}\label{group__osc__api_ga75f43d402079fb011e5e899808d17208}} 
+\#define {\bfseries k\+\_\+log\+\_\+size}~(1U$<$$<$k\+\_\+log\+\_\+size\+\_\+exp)
+\item 
+\mbox{\Hypertarget{group__osc__api_gafe51aca970dab97de32b9c17a2445faf}\label{group__osc__api_gafe51aca970dab97de32b9c17a2445faf}} 
+\#define {\bfseries k\+\_\+log\+\_\+mask}~(k\+\_\+log\+\_\+size-\/1)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga9d519de03ebbd63ef19c8c799416b325}\label{group__osc__api_ga9d519de03ebbd63ef19c8c799416b325}} 
+\#define {\bfseries k\+\_\+log\+\_\+lut\+\_\+size}~(k\+\_\+log\+\_\+size+1)
+\item 
+\mbox{\Hypertarget{group__osc__api_gaa4cb65b2223a42489b81e0f4f4ce85ce}\label{group__osc__api_gaa4cb65b2223a42489b81e0f4f4ce85ce}} 
+\#define {\bfseries k\+\_\+tanpi\+\_\+size\+\_\+exp}~(8)
+\item 
+\mbox{\Hypertarget{group__osc__api_gaa99fe33481077deee412e22d793230bd}\label{group__osc__api_gaa99fe33481077deee412e22d793230bd}} 
+\#define {\bfseries k\+\_\+tanpi\+\_\+size}~(1U$<$$<$k\+\_\+tanpi\+\_\+size\+\_\+exp)
+\item 
+\mbox{\Hypertarget{group__osc__api_gae028b404284c870998ade84e8c865143}\label{group__osc__api_gae028b404284c870998ade84e8c865143}} 
+\#define {\bfseries k\+\_\+tanpi\+\_\+mask}~(k\+\_\+tanpi\+\_\+size-\/1)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga7c2642542c50e1f14fb6618d9d2032ae}\label{group__osc__api_ga7c2642542c50e1f14fb6618d9d2032ae}} 
+\#define {\bfseries k\+\_\+tanpi\+\_\+range\+\_\+recip}~(2.\+04081632653061f)
+\item 
+\mbox{\Hypertarget{group__osc__api_gac19b62ac7bbdbfee529baa12a7fa37ac}\label{group__osc__api_gac19b62ac7bbdbfee529baa12a7fa37ac}} 
+\#define {\bfseries k\+\_\+tanpi\+\_\+lut\+\_\+size}~(k\+\_\+tanpi\+\_\+size+1)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga97ff262ca7aa5fd38af7e30e03676874}\label{group__osc__api_ga97ff262ca7aa5fd38af7e30e03676874}} 
+\#define {\bfseries k\+\_\+sqrtm2log\+\_\+size\+\_\+exp}~(8)
+\item 
+\mbox{\Hypertarget{group__osc__api_gab755f676796d481523487c79618cd40d}\label{group__osc__api_gab755f676796d481523487c79618cd40d}} 
+\#define {\bfseries k\+\_\+sqrtm2log\+\_\+size}~(1U$<$$<$k\+\_\+sqrtm2log\+\_\+size\+\_\+exp)
+\item 
+\mbox{\Hypertarget{group__osc__api_gaee35fcc9b6061750f48709432c35727f}\label{group__osc__api_gaee35fcc9b6061750f48709432c35727f}} 
+\#define {\bfseries k\+\_\+sqrtm2log\+\_\+mask}~(k\+\_\+sqrtm2log\+\_\+size-\/1)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga8abf39d968aa4118676a182cddd35c46}\label{group__osc__api_ga8abf39d968aa4118676a182cddd35c46}} 
+\#define {\bfseries k\+\_\+sqrtm2log\+\_\+base}~(0.\+005f)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga1597ed6cc84e4d591071258bfc40c190}\label{group__osc__api_ga1597ed6cc84e4d591071258bfc40c190}} 
+\#define {\bfseries k\+\_\+sqrtm2log\+\_\+range\+\_\+recip}~(1.\+00502512562814f)
+\item 
+\mbox{\Hypertarget{group__osc__api_gab96c617585cff98aa495ff560c57f90b}\label{group__osc__api_gab96c617585cff98aa495ff560c57f90b}} 
+\#define {\bfseries k\+\_\+sqrtm2log\+\_\+lut\+\_\+size}~(k\+\_\+sqrtm2log\+\_\+size+1)
+\end{DoxyCompactItemize}
+\doxysubsection*{Clipping and Saturation.}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga921bef5a01138afa03facfd5b3b23f60}\label{group__osc__api_ga921bef5a01138afa03facfd5b3b23f60}} 
+const float {\bfseries cubicsat\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+cubicsat\+\_\+lut\+\_\+size\mbox{]}
+\item 
+\mbox{\Hypertarget{group__osc__api_gadac2f3795b436a115c2bce4fbc245e60}\label{group__osc__api_gadac2f3795b436a115c2bce4fbc245e60}} 
+const float {\bfseries schetzen\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+schetzen\+\_\+lut\+\_\+size\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga93788000ffc9fdc7bfc4af98544d89e2}{osc\+\_\+softclipf}} (const float c, float x)
+\begin{DoxyCompactList}\small\item\em Soft clip. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_gab7e73c7fa5814f9766c40245cfd5bea6}{osc\+\_\+sat\+\_\+cubicf}} (float x)
+\begin{DoxyCompactList}\small\item\em Cubic saturation. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga3aa843c95ccc3282ae6bd03114d7e12e}{osc\+\_\+sat\+\_\+schetzenf}} (float x)
+\begin{DoxyCompactList}\small\item\em Schetzen saturation. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_gabd88479fe18e2a4f172e7b4bfe5aed4a}\label{group__osc__api_gabd88479fe18e2a4f172e7b4bfe5aed4a}} 
+\#define {\bfseries k\+\_\+cubicsat\+\_\+size\+\_\+exp}~(7)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga1466124714bcc122868f6a2e3bf8f52f}\label{group__osc__api_ga1466124714bcc122868f6a2e3bf8f52f}} 
+\#define {\bfseries k\+\_\+cubicsat\+\_\+size}~(1U$<$$<$k\+\_\+cubicsat\+\_\+size\+\_\+exp)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga6bc43e52842312585e498c271983d3f0}\label{group__osc__api_ga6bc43e52842312585e498c271983d3f0}} 
+\#define {\bfseries k\+\_\+cubicsat\+\_\+mask}~(k\+\_\+cubicsat\+\_\+size-\/1)
+\item 
+\mbox{\Hypertarget{group__osc__api_gaea2cf4f50334de60142c50038c162a62}\label{group__osc__api_gaea2cf4f50334de60142c50038c162a62}} 
+\#define {\bfseries k\+\_\+cubicsat\+\_\+lut\+\_\+size}~(k\+\_\+cubicsat\+\_\+size+1)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga39ecc28858cc18f685fe42fcf4cbc3fa}\label{group__osc__api_ga39ecc28858cc18f685fe42fcf4cbc3fa}} 
+\#define {\bfseries k\+\_\+schetzen\+\_\+size\+\_\+exp}~(7)
+\item 
+\mbox{\Hypertarget{group__osc__api_gac58b9336f267c4ae934e198cbb6001c6}\label{group__osc__api_gac58b9336f267c4ae934e198cbb6001c6}} 
+\#define {\bfseries k\+\_\+schetzen\+\_\+size}~(1U$<$$<$k\+\_\+schetzen\+\_\+size\+\_\+exp)
+\item 
+\mbox{\Hypertarget{group__osc__api_gaf59f11bc0db4c50271c0f95d019c2027}\label{group__osc__api_gaf59f11bc0db4c50271c0f95d019c2027}} 
+\#define {\bfseries k\+\_\+schetzen\+\_\+mask}~(k\+\_\+schetzen\+\_\+size-\/1)
+\item 
+\mbox{\Hypertarget{group__osc__api_gad021b8f68fea9a57647fa4aaedbff52b}\label{group__osc__api_gad021b8f68fea9a57647fa4aaedbff52b}} 
+\#define {\bfseries k\+\_\+schetzen\+\_\+lut\+\_\+size}~(k\+\_\+schetzen\+\_\+size+1)
+\end{DoxyCompactItemize}
+\doxysubsection*{Bit reduction.}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__osc__api_ga3c71a924a98246c4866b8d9d0f4f0123}\label{group__osc__api_ga3c71a924a98246c4866b8d9d0f4f0123}} 
+const float {\bfseries bitres\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+bitres\+\_\+lut\+\_\+size\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga9b46e6b6633dc55ea12fd3a5f2cb4875}{osc\+\_\+bitresf}} (float x)
+\begin{DoxyCompactList}\small\item\em Bit depth scaling table. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_gace619f1dbc0682d91f30955c8ab5feaa}\label{group__osc__api_gace619f1dbc0682d91f30955c8ab5feaa}} 
+\#define {\bfseries k\+\_\+bitres\+\_\+size\+\_\+exp}~(7)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga87a5eb9845ad6a5e2bb551c3c8bc519b}\label{group__osc__api_ga87a5eb9845ad6a5e2bb551c3c8bc519b}} 
+\#define {\bfseries k\+\_\+bitres\+\_\+size}~(1U$<$$<$k\+\_\+bitres\+\_\+size\+\_\+exp)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga63a9c176c52b2449cf51772fa498ff6e}\label{group__osc__api_ga63a9c176c52b2449cf51772fa498ff6e}} 
+\#define {\bfseries k\+\_\+bitres\+\_\+mask}~(k\+\_\+bitres\+\_\+size-\/1)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga95a591a7cf4aab7da478b101f089eb1f}\label{group__osc__api_ga95a591a7cf4aab7da478b101f089eb1f}} 
+\#define {\bfseries k\+\_\+bitres\+\_\+lut\+\_\+size}~(k\+\_\+bitres\+\_\+size+1)
+\end{DoxyCompactItemize}
+\doxysubsection*{Noise source}
+\begin{DoxyCompactItemize}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{group__osc__api_ga146d08eb8fd56de6b32eef3e892a22f1}{\+\_\+osc\+\_\+rand}} (void)
+\begin{DoxyCompactList}\small\item\em Random integer. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_gae264f45df7fd3d825951e366eda6e2ea}\label{group__osc__api_gae264f45df7fd3d825951e366eda6e2ea}} 
+\+\_\+\+\_\+fast\+\_\+inline uint32\+\_\+t {\bfseries osc\+\_\+rand} (void)
+\item 
+float \mbox{\hyperlink{group__osc__api_ga9482bacf03c6b084dcec03b6cd76e67f}{\+\_\+osc\+\_\+white}} (void)
+\begin{DoxyCompactList}\small\item\em Gaussian white noise. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_ga6fdb6904630842ff75bf96b154b4dfc6}\label{group__osc__api_ga6fdb6904630842ff75bf96b154b4dfc6}} 
+\+\_\+\+\_\+fast\+\_\+inline float {\bfseries osc\+\_\+white} (void)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{group__osc__api_ga3d3612eb483369630048ad21c28ac0a0}\label{group__osc__api_ga3d3612eb483369630048ad21c28ac0a0}} 
+\index{Runtime API@{Runtime API}!\_osc\_bl\_par\_idx@{\_osc\_bl\_par\_idx}}
+\index{\_osc\_bl\_par\_idx@{\_osc\_bl\_par\_idx}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{\_osc\_bl\_par\_idx()}{\_osc\_bl\_par\_idx()}}
+{\footnotesize\ttfamily float \+\_\+osc\+\_\+bl\+\_\+par\+\_\+idx (\begin{DoxyParamCaption}\item[{float}]{note }\end{DoxyParamCaption})}
+
+
+
+Get band-\/limited parabolic wave index for note. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em note} & Fractional note in \mbox{[}0-\/151\mbox{]} range. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Corresponding band-\/limited wave fractional index in \mbox{[}0-\/6\mbox{]}. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{group__osc__api_gaaed275f73e5c28589fbcbefc33de219f}\label{group__osc__api_gaaed275f73e5c28589fbcbefc33de219f}} 
+\index{Runtime API@{Runtime API}!\_osc\_bl\_saw\_idx@{\_osc\_bl\_saw\_idx}}
+\index{\_osc\_bl\_saw\_idx@{\_osc\_bl\_saw\_idx}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{\_osc\_bl\_saw\_idx()}{\_osc\_bl\_saw\_idx()}}
+{\footnotesize\ttfamily float \+\_\+osc\+\_\+bl\+\_\+saw\+\_\+idx (\begin{DoxyParamCaption}\item[{float}]{note }\end{DoxyParamCaption})}
+
+
+
+Get band-\/limited sawtooth wave index for note. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em note} & Fractional note in \mbox{[}0-\/151\mbox{]} range. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Corresponding band-\/limited wave fractional index in \mbox{[}0-\/6\mbox{]}. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{group__osc__api_ga005fcc269e56eda592fd040986d5a97d}\label{group__osc__api_ga005fcc269e56eda592fd040986d5a97d}} 
+\index{Runtime API@{Runtime API}!\_osc\_bl\_sqr\_idx@{\_osc\_bl\_sqr\_idx}}
+\index{\_osc\_bl\_sqr\_idx@{\_osc\_bl\_sqr\_idx}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{\_osc\_bl\_sqr\_idx()}{\_osc\_bl\_sqr\_idx()}}
+{\footnotesize\ttfamily float \+\_\+osc\+\_\+bl\+\_\+sqr\+\_\+idx (\begin{DoxyParamCaption}\item[{float}]{note }\end{DoxyParamCaption})}
+
+
+
+Get band-\/limited square wave index for note. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em note} & Fractional note in \mbox{[}0-\/151\mbox{]} range. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Corresponding band-\/limited wave fractional index in \mbox{[}0-\/6\mbox{]}. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{group__osc__api_ga3c3dbbc0b0122daeeee4a5380aacf7ac}\label{group__osc__api_ga3c3dbbc0b0122daeeee4a5380aacf7ac}} 
+\index{Runtime API@{Runtime API}!\_osc\_mcu\_hash@{\_osc\_mcu\_hash}}
+\index{\_osc\_mcu\_hash@{\_osc\_mcu\_hash}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{\_osc\_mcu\_hash()}{\_osc\_mcu\_hash()}}
+{\footnotesize\ttfamily uint32\+\_\+t \+\_\+osc\+\_\+mcu\+\_\+hash (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Get M\+CU hash. 
+
+\begin{DoxyReturn}{Returns}
+A M\+CU specific \char`\"{}unique\char`\"{} hash. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{group__osc__api_ga146d08eb8fd56de6b32eef3e892a22f1}\label{group__osc__api_ga146d08eb8fd56de6b32eef3e892a22f1}} 
+\index{Runtime API@{Runtime API}!\_osc\_rand@{\_osc\_rand}}
+\index{\_osc\_rand@{\_osc\_rand}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{\_osc\_rand()}{\_osc\_rand()}}
+{\footnotesize\ttfamily uint32\+\_\+t \+\_\+osc\+\_\+rand (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Random integer. 
+
+\begin{DoxyReturn}{Returns}
+Value in \mbox{[}0, U\+I\+N\+T\+\_\+\+M\+AX\mbox{]}. 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+Generated with Park-\/\+Miller-\/\+Carta 
+\end{DoxyNote}
+\mbox{\Hypertarget{group__osc__api_ga9482bacf03c6b084dcec03b6cd76e67f}\label{group__osc__api_ga9482bacf03c6b084dcec03b6cd76e67f}} 
+\index{Runtime API@{Runtime API}!\_osc\_white@{\_osc\_white}}
+\index{\_osc\_white@{\_osc\_white}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{\_osc\_white()}{\_osc\_white()}}
+{\footnotesize\ttfamily float \+\_\+osc\+\_\+white (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Gaussian white noise. 
+
+\begin{DoxyReturn}{Returns}
+Value in \mbox{[}-\/1.\+0, 1.\+0\mbox{]}. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{group__osc__api_ga9b46e6b6633dc55ea12fd3a5f2cb4875}\label{group__osc__api_ga9b46e6b6633dc55ea12fd3a5f2cb4875}} 
+\index{Runtime API@{Runtime API}!osc\_bitresf@{osc\_bitresf}}
+\index{osc\_bitresf@{osc\_bitresf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_bitresf()}{osc\_bitresf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+bitresf (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})}
+
+
+
+Bit depth scaling table. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Value in \mbox{[}0, 1.\+0\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Quantization scaling factor. 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+Fractional bit depth, exponentially mapped, 1 to 24 bits. 
+\end{DoxyNote}
+
+
+Definition at line 735 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{735                                            \{}
+\DoxyCodeLine{736     \textcolor{keyword}{const} \textcolor{keywordtype}{float} xf = x * k\_bitres\_size;}
+\DoxyCodeLine{737     \textcolor{keyword}{const} uint32\_t xi = (uint32\_t)xf;}
+\DoxyCodeLine{738     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = bitres\_lut\_f[xi];}
+\DoxyCodeLine{739     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = bitres\_lut\_f[xi+1];}
+\DoxyCodeLine{740     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(xf -\/ xi, y0, y1);}
+\DoxyCodeLine{741   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga50f6755ad79d68ffd87dbef72d6733c0}\label{group__osc__api_ga50f6755ad79d68ffd87dbef72d6733c0}} 
+\index{Runtime API@{Runtime API}!osc\_bl2\_parf@{osc\_bl2\_parf}}
+\index{osc\_bl2\_parf@{osc\_bl2\_parf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_bl2\_parf()}{osc\_bl2\_parf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+bl2\+\_\+parf (\begin{DoxyParamCaption}\item[{float}]{x,  }\item[{float}]{idx }\end{DoxyParamCaption})}
+
+
+
+Band-\/limited parabolic wave lookup. 
+
+(interpolated version)
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Phase in \mbox{[}0, 1.\+0\mbox{]}. \\
+\hline
+{\em idx} & Fractional wave index in \mbox{[}0,6\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Wave sample. 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+Not checking input, caller responsible for bounding x and idx. 
+\end{DoxyNote}
+
+
+Definition at line 471 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{471                                                        \{}
+\DoxyCodeLine{472     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{473 }
+\DoxyCodeLine{474     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_par\_size;}
+\DoxyCodeLine{475     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{476     }
+\DoxyCodeLine{477     uint32\_t x0 = (x0p<=k\_wt\_par\_size) ? x0p : (k\_wt\_par\_size -\/ (x0p \& k\_wt\_par\_mask));}
+\DoxyCodeLine{478     uint32\_t x1 = (x0p<(k\_wt\_par\_size-\/1)) ? (x0 + 1) \& k\_wt\_par\_mask : (x0p >= k\_wt\_par\_size) ? (x0 -\/ 1) \& k\_wt\_par\_mask : (x0 + 1);}
+\DoxyCodeLine{479 }
+\DoxyCodeLine{480     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_par\_lut\_f[(uint16\_t)idx*k\_wt\_par\_lut\_size];}
+\DoxyCodeLine{481     \textcolor{keyword}{const} \textcolor{keywordtype}{float} fr = x0f -\/ x0p;}
+\DoxyCodeLine{482     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
+\DoxyCodeLine{483 }
+\DoxyCodeLine{484     wt += k\_wt\_par\_lut\_size;}
+\DoxyCodeLine{485     }
+\DoxyCodeLine{486     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
+\DoxyCodeLine{487 }
+\DoxyCodeLine{488     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}((idx -\/ (uint8\_t)idx), y0, y1);}
+\DoxyCodeLine{489   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_gad3cbea256f34fe91f7af7978819f1b4f}\label{group__osc__api_gad3cbea256f34fe91f7af7978819f1b4f}} 
+\index{Runtime API@{Runtime API}!osc\_bl2\_sawf@{osc\_bl2\_sawf}}
+\index{osc\_bl2\_sawf@{osc\_bl2\_sawf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_bl2\_sawf()}{osc\_bl2\_sawf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+bl2\+\_\+sawf (\begin{DoxyParamCaption}\item[{float}]{x,  }\item[{float}]{idx }\end{DoxyParamCaption})}
+
+
+
+Band-\/limited sawtooth wave lookup. 
+
+(interpolated version)
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Phase in \mbox{[}0, 1.\+0\mbox{]}. \\
+\hline
+{\em idx} & Fractional wave index in \mbox{[}0,6\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Wave sample. 
+\end{DoxyReturn}
+
+
+Definition at line 251 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{251                                                        \{}
+\DoxyCodeLine{252     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{253     }
+\DoxyCodeLine{254     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_saw\_size;}
+\DoxyCodeLine{255     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{256     }
+\DoxyCodeLine{257     uint32\_t x0 = x0p, x1 = x0p+1;}
+\DoxyCodeLine{258     \textcolor{keywordtype}{float} sign = 1.f;}
+\DoxyCodeLine{259     \textcolor{keywordflow}{if} (x0p >= k\_wt\_saw\_size) \{}
+\DoxyCodeLine{260       x0 = k\_wt\_saw\_size -\/ (x0p \& k\_wt\_saw\_mask);}
+\DoxyCodeLine{261       x1 = x0 -\/ 1;}
+\DoxyCodeLine{262       sign = -\/1.f;}
+\DoxyCodeLine{263     \}}
+\DoxyCodeLine{264     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_saw\_lut\_f[(uint16\_t)idx*k\_wt\_saw\_lut\_size];}
+\DoxyCodeLine{265     \textcolor{keyword}{const} \textcolor{keywordtype}{float} fr = x0f -\/ x0p;}
+\DoxyCodeLine{266     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = sign * \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
+\DoxyCodeLine{267 }
+\DoxyCodeLine{268     wt += k\_wt\_saw\_lut\_size;}
+\DoxyCodeLine{269     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = sign * \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
+\DoxyCodeLine{270     }
+\DoxyCodeLine{271     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}((idx -\/ (uint8\_t)idx), y0, y1);}
+\DoxyCodeLine{272   \} }
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga0857fef63cbe6b4081a1a1d462f252f3}\label{group__osc__api_ga0857fef63cbe6b4081a1a1d462f252f3}} 
+\index{Runtime API@{Runtime API}!osc\_bl2\_sqrf@{osc\_bl2\_sqrf}}
+\index{osc\_bl2\_sqrf@{osc\_bl2\_sqrf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_bl2\_sqrf()}{osc\_bl2\_sqrf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+bl2\+\_\+sqrf (\begin{DoxyParamCaption}\item[{float}]{x,  }\item[{float}]{idx }\end{DoxyParamCaption})}
+
+
+
+Band-\/limited square wave lookup. 
+
+(interpolated version).
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Phase in \mbox{[}0, 1.\+0\mbox{]}. \\
+\hline
+{\em idx} & Fractional wave index in \mbox{[}0,6\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Wave sample. 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+Not checking input, caller responsible for bounding x and idx. 
+\end{DoxyNote}
+
+
+Definition at line 366 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{366                                                        \{}
+\DoxyCodeLine{367     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{368     }
+\DoxyCodeLine{369     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_sqr\_size;}
+\DoxyCodeLine{370     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{371     }
+\DoxyCodeLine{372     uint32\_t x0 = x0p, x1 = x0p+1;}
+\DoxyCodeLine{373     \textcolor{keywordtype}{float} sign = 1.f;}
+\DoxyCodeLine{374     \textcolor{keywordflow}{if} (x0p >= k\_wt\_sqr\_size) \{}
+\DoxyCodeLine{375       x0 = k\_wt\_sqr\_size -\/ (x0p \& k\_wt\_sqr\_mask);}
+\DoxyCodeLine{376       x1 = x0 -\/ 1;}
+\DoxyCodeLine{377       sign = -\/1.f;}
+\DoxyCodeLine{378     \}}
+\DoxyCodeLine{379     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_sqr\_lut\_f[(uint16\_t)idx*k\_wt\_sqr\_lut\_size];}
+\DoxyCodeLine{380     \textcolor{keyword}{const} \textcolor{keywordtype}{float} fr = x0f -\/ x0p;}
+\DoxyCodeLine{381     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = sign * \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
+\DoxyCodeLine{382 }
+\DoxyCodeLine{383     wt += k\_wt\_sqr\_lut\_size;}
+\DoxyCodeLine{384     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = sign * \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
+\DoxyCodeLine{385     }
+\DoxyCodeLine{386     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}((idx -\/ (uint8\_t)idx), y0, y1);}
+\DoxyCodeLine{387   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga8c69f5f4a9ff36e312c4ba829f50b989}\label{group__osc__api_ga8c69f5f4a9ff36e312c4ba829f50b989}} 
+\index{Runtime API@{Runtime API}!osc\_bl\_parf@{osc\_bl\_parf}}
+\index{osc\_bl\_parf@{osc\_bl\_parf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_bl\_parf()}{osc\_bl\_parf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+bl\+\_\+parf (\begin{DoxyParamCaption}\item[{float}]{x,  }\item[{uint8\+\_\+t}]{idx }\end{DoxyParamCaption})}
+
+
+
+Band-\/limited parabolic wave lookup. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Phase in \mbox{[}0, 1.\+0\mbox{]}. \\
+\hline
+{\em idx} & Wave index in \mbox{[}0,6\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Wave sample. 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+Not checking input, caller responsible for bounding x and idx. 
+\end{DoxyNote}
+
+
+Definition at line 449 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{449                                                         \{}
+\DoxyCodeLine{450     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{451 }
+\DoxyCodeLine{452     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_par\_size;}
+\DoxyCodeLine{453     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{454     }
+\DoxyCodeLine{455     \textcolor{keyword}{const} uint32\_t x0 = (x0p<=k\_wt\_par\_size) ? x0p : (k\_wt\_par\_size -\/ (x0p \& k\_wt\_par\_mask));}
+\DoxyCodeLine{456     \textcolor{keyword}{const} uint32\_t x1 = (x0p<(k\_wt\_par\_size-\/1)) ? (x0 + 1) \& k\_wt\_par\_mask : (x0p >= k\_wt\_par\_size) ? (x0 -\/ 1) \& k\_wt\_par\_mask : (x0 + 1);}
+\DoxyCodeLine{457 }
+\DoxyCodeLine{458     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_par\_lut\_f[idx*k\_wt\_par\_lut\_size];}
+\DoxyCodeLine{459     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt[x0], wt[x1]);}
+\DoxyCodeLine{460     \textcolor{keywordflow}{return} y0;}
+\DoxyCodeLine{461   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga2c38d05e30af9254a367dc3840679191}\label{group__osc__api_ga2c38d05e30af9254a367dc3840679191}} 
+\index{Runtime API@{Runtime API}!osc\_bl\_sawf@{osc\_bl\_sawf}}
+\index{osc\_bl\_sawf@{osc\_bl\_sawf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_bl\_sawf()}{osc\_bl\_sawf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+bl\+\_\+sawf (\begin{DoxyParamCaption}\item[{float}]{x,  }\item[{uint8\+\_\+t}]{idx }\end{DoxyParamCaption})}
+
+
+
+Band-\/limited sawtooth wave lookup. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Phase in \mbox{[}0, 1.\+0\mbox{]}. \\
+\hline
+{\em idx} & Wave index in \mbox{[}0,6\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Wave sample. 
+\end{DoxyReturn}
+
+
+Definition at line 226 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{226                                                         \{}
+\DoxyCodeLine{227     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{228     }
+\DoxyCodeLine{229     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_saw\_size;}
+\DoxyCodeLine{230     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{231     }
+\DoxyCodeLine{232     uint32\_t x0 = x0p, x1 = x0p+1;}
+\DoxyCodeLine{233     \textcolor{keywordtype}{float} sign = 1.f;}
+\DoxyCodeLine{234     \textcolor{keywordflow}{if} (x0p >= k\_wt\_saw\_size) \{}
+\DoxyCodeLine{235       x0 = k\_wt\_saw\_size -\/ (x0p \& k\_wt\_saw\_mask);}
+\DoxyCodeLine{236       x1 = x0 -\/ 1;}
+\DoxyCodeLine{237       sign = -\/1.f;}
+\DoxyCodeLine{238     \}}
+\DoxyCodeLine{239     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_saw\_lut\_f[idx*k\_wt\_saw\_lut\_size];}
+\DoxyCodeLine{240     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt[x0], wt[x1]);}
+\DoxyCodeLine{241     \textcolor{keywordflow}{return} sign*y0;}
+\DoxyCodeLine{242   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga7a4a401783f0e18e2d21cd16e9e15cdc}\label{group__osc__api_ga7a4a401783f0e18e2d21cd16e9e15cdc}} 
+\index{Runtime API@{Runtime API}!osc\_bl\_sqrf@{osc\_bl\_sqrf}}
+\index{osc\_bl\_sqrf@{osc\_bl\_sqrf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_bl\_sqrf()}{osc\_bl\_sqrf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+bl\+\_\+sqrf (\begin{DoxyParamCaption}\item[{float}]{x,  }\item[{uint8\+\_\+t}]{idx }\end{DoxyParamCaption})}
+
+
+
+Band-\/limited square wave lookup. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Phase in \mbox{[}0, 1.\+0\mbox{]}. \\
+\hline
+{\em idx} & Wave index in \mbox{[}0,6\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Wave sample. 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+Not checking input, caller responsible for bounding x and idx. 
+\end{DoxyNote}
+
+
+Definition at line 340 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{340                                                         \{}
+\DoxyCodeLine{341     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{342     }
+\DoxyCodeLine{343     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_sqr\_size;}
+\DoxyCodeLine{344     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{345     }
+\DoxyCodeLine{346     uint32\_t x0 = x0p, x1 = x0p+1;}
+\DoxyCodeLine{347     \textcolor{keywordtype}{float} sign = 1.f;}
+\DoxyCodeLine{348     \textcolor{keywordflow}{if} (x0p >= k\_wt\_sqr\_size) \{}
+\DoxyCodeLine{349       x0 = k\_wt\_sqr\_size -\/ (x0p \& k\_wt\_sqr\_mask);}
+\DoxyCodeLine{350       x1 = x0 -\/ 1;}
+\DoxyCodeLine{351       sign = -\/1.f;}
+\DoxyCodeLine{352     \}}
+\DoxyCodeLine{353     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_sqr\_lut\_f[idx*k\_wt\_sqr\_lut\_size];}
+\DoxyCodeLine{354     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt[x0], wt[x1]);}
+\DoxyCodeLine{355     \textcolor{keywordflow}{return} sign*y0;}
+\DoxyCodeLine{356   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga3aaa9cdb10789d3db5e5a4ff72e8112e}\label{group__osc__api_ga3aaa9cdb10789d3db5e5a4ff72e8112e}} 
+\index{Runtime API@{Runtime API}!osc\_cosf@{osc\_cosf}}
+\index{osc\_cosf@{osc\_cosf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_cosf()}{osc\_cosf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+cosf (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})}
+
+
+
+Lookup value of cos(2$\ast$pi$\ast$x) in \mbox{[}0, 1.\+0\mbox{]} range. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Value in \mbox{[}0, 1.\+0\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Result of cos(2$\ast$pi$\ast$x). 
+\end{DoxyReturn}
+
+
+Definition at line 169 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{169                                         \{}
+\DoxyCodeLine{170     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__osc__api_ga7c72f32f2889ff55a075d283dd9bf93a}{osc\_sinf}}(x+0.25f);}
+\DoxyCodeLine{171   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga81e180b64abbccaf568738fef522ace1}\label{group__osc__api_ga81e180b64abbccaf568738fef522ace1}} 
+\index{Runtime API@{Runtime API}!osc\_logf@{osc\_logf}}
+\index{osc\_logf@{osc\_logf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_logf()}{osc\_logf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+logf (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})}
+
+
+
+Lookup value of log(x) in \mbox{[}0.\+00001, 1.\+0\mbox{]} range. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Value in \mbox{[}0.\+00001, 1.\+0\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Result of log(x). 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+Not checking input, caller responsible for bounding x. 
+\end{DoxyNote}
+
+
+Definition at line 591 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{591                                         \{}
+\DoxyCodeLine{592     \textcolor{keyword}{const} \textcolor{keywordtype}{float} idxf = x * k\_log\_size;}
+\DoxyCodeLine{593     \textcolor{keyword}{const} uint32\_t idx = (uint32\_t)idxf;}
+\DoxyCodeLine{594     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = log\_lut\_f[idx];}
+\DoxyCodeLine{595     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = log\_lut\_f[idx+1];}
+\DoxyCodeLine{596     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(idxf -\/ idx, y0, y1);}
+\DoxyCodeLine{597   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga082922e3b29eaff8216a2082dff68584}\label{group__osc__api_ga082922e3b29eaff8216a2082dff68584}} 
+\index{Runtime API@{Runtime API}!osc\_notehzf@{osc\_notehzf}}
+\index{osc\_notehzf@{osc\_notehzf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_notehzf()}{osc\_notehzf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+notehzf (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{note }\end{DoxyParamCaption})}
+
+
+
+Get Hertz value for note. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em note} & Note in \mbox{[}0-\/151\mbox{]} range. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Corresponding Hertz value. 
+\end{DoxyReturn}
+
+
+Definition at line 107 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{107                                                 \{}
+\DoxyCodeLine{108     \textcolor{keywordflow}{return} midi\_to\_hz\_lut\_f[\mbox{\hyperlink{group__utils__int__math_gaf499259532eca51a13d2a2ba7dac8d77}{clipmaxu32}}(note,k\_midi\_to\_hz\_size-\/1)];}
+\DoxyCodeLine{109   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_gadbb771a6aff9e9c51e8a6b249ddae694}\label{group__osc__api_gadbb771a6aff9e9c51e8a6b249ddae694}} 
+\index{Runtime API@{Runtime API}!osc\_parf@{osc\_parf}}
+\index{osc\_parf@{osc\_parf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_parf()}{osc\_parf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+parf (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})}
+
+
+
+Parabolic wave lookup. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Phase in \mbox{[}0, 1.\+0\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Wave sample. 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+Not checking input, caller responsible for bounding x. 
+\end{DoxyNote}
+
+
+Definition at line 429 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{429                                         \{}
+\DoxyCodeLine{430     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{431 }
+\DoxyCodeLine{432     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_par\_size;}
+\DoxyCodeLine{433     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{434     }
+\DoxyCodeLine{435     \textcolor{keyword}{const} uint32\_t x0 = (x0p<=k\_wt\_par\_size) ? x0p : (k\_wt\_par\_size -\/ (x0p \& k\_wt\_par\_mask));}
+\DoxyCodeLine{436     \textcolor{keyword}{const} uint32\_t x1 = (x0p<(k\_wt\_par\_size-\/1)) ? (x0 + 1) \& k\_wt\_par\_mask : (x0p >= k\_wt\_par\_size) ? (x0 -\/ 1) \& k\_wt\_par\_mask : (x0 + 1);}
+\DoxyCodeLine{437     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt\_par\_lut\_f[x0], wt\_par\_lut\_f[x1]);}
+\DoxyCodeLine{438     \textcolor{keywordflow}{return} y0;}
+\DoxyCodeLine{439   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_gab7e73c7fa5814f9766c40245cfd5bea6}\label{group__osc__api_gab7e73c7fa5814f9766c40245cfd5bea6}} 
+\index{Runtime API@{Runtime API}!osc\_sat\_cubicf@{osc\_sat\_cubicf}}
+\index{osc\_sat\_cubicf@{osc\_sat\_cubicf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_sat\_cubicf()}{osc\_sat\_cubicf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+sat\+\_\+cubicf (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})}
+
+
+
+Cubic saturation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Value in \mbox{[}-\/1.\+0, 1.\+0\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Cubic curve above 0.\+42264973081, gain\+: 1.\+2383127573 
+\end{DoxyReturn}
+
+
+Definition at line 684 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{684                                               \{}
+\DoxyCodeLine{685     \textcolor{keyword}{const} \textcolor{keywordtype}{float} xf = \mbox{\hyperlink{group__utils__float__math_gaad7d5924ca8ddd9873f9770fa2f492d3}{si\_fabsf}}(\mbox{\hyperlink{group__utils__float__math_ga1db7d49792db4b5c43f92451fdc69482}{clip1f}}(x)) * k\_cubicsat\_size;}
+\DoxyCodeLine{686     \textcolor{keyword}{const} uint32\_t xi = (uint32\_t)x;}
+\DoxyCodeLine{687     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = cubicsat\_lut\_f[xi];}
+\DoxyCodeLine{688     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = cubicsat\_lut\_f[xi+1];}
+\DoxyCodeLine{689     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga5b2f62968ba70af371c5a6c6ae969284}{si\_copysignf}}(\mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(xf -\/ xi, y0, y1), x);}
+\DoxyCodeLine{690   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga3aa843c95ccc3282ae6bd03114d7e12e}\label{group__osc__api_ga3aa843c95ccc3282ae6bd03114d7e12e}} 
+\index{Runtime API@{Runtime API}!osc\_sat\_schetzenf@{osc\_sat\_schetzenf}}
+\index{osc\_sat\_schetzenf@{osc\_sat\_schetzenf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_sat\_schetzenf()}{osc\_sat\_schetzenf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+sat\+\_\+schetzenf (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})}
+
+
+
+Schetzen saturation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Value in \mbox{[}-\/1.\+0, 1.\+0\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Saturated value. 
+\end{DoxyReturn}
+
+
+Definition at line 705 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{705                                                  \{}
+\DoxyCodeLine{706     \textcolor{keyword}{const} \textcolor{keywordtype}{float} xf = \mbox{\hyperlink{group__utils__float__math_gaad7d5924ca8ddd9873f9770fa2f492d3}{si\_fabsf}}(\mbox{\hyperlink{group__utils__float__math_ga1db7d49792db4b5c43f92451fdc69482}{clip1f}}(x)) * k\_schetzen\_size;}
+\DoxyCodeLine{707     \textcolor{keyword}{const} uint32\_t xi = (uint32\_t)x;}
+\DoxyCodeLine{708     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = schetzen\_lut\_f[xi];}
+\DoxyCodeLine{709     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = schetzen\_lut\_f[xi+1];}
+\DoxyCodeLine{710     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga5b2f62968ba70af371c5a6c6ae969284}{si\_copysignf}}(\mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(xf -\/ xi, y0, y1), x);}
+\DoxyCodeLine{711   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga64042f4358abf83f4e15330157314252}\label{group__osc__api_ga64042f4358abf83f4e15330157314252}} 
+\index{Runtime API@{Runtime API}!osc\_sawf@{osc\_sawf}}
+\index{osc\_sawf@{osc\_sawf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_sawf()}{osc\_sawf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+sawf (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})}
+
+
+
+Sawtooth wave lookup. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Phase in \mbox{[}0, 1.\+0\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Wave sample. 
+\end{DoxyReturn}
+
+
+Definition at line 201 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{201                                         \{}
+\DoxyCodeLine{202     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{203     }
+\DoxyCodeLine{204     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_saw\_size;}
+\DoxyCodeLine{205     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{206     }
+\DoxyCodeLine{207     uint32\_t x0 = x0p, x1 = x0p+1;}
+\DoxyCodeLine{208     \textcolor{keywordtype}{float} sign = 1.f;}
+\DoxyCodeLine{209     \textcolor{keywordflow}{if} (x0p >= k\_wt\_saw\_size) \{}
+\DoxyCodeLine{210       x0 = k\_wt\_saw\_size -\/ (x0p \& k\_wt\_saw\_mask);}
+\DoxyCodeLine{211       x1 = x0 -\/ 1;}
+\DoxyCodeLine{212       sign = -\/1.f;}
+\DoxyCodeLine{213     \}}
+\DoxyCodeLine{214     }
+\DoxyCodeLine{215     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt\_saw\_lut\_f[x0], wt\_saw\_lut\_f[x1]);}
+\DoxyCodeLine{216     \textcolor{keywordflow}{return} sign*y0;}
+\DoxyCodeLine{217   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga7c72f32f2889ff55a075d283dd9bf93a}\label{group__osc__api_ga7c72f32f2889ff55a075d283dd9bf93a}} 
+\index{Runtime API@{Runtime API}!osc\_sinf@{osc\_sinf}}
+\index{osc\_sinf@{osc\_sinf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_sinf()}{osc\_sinf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+sinf (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})}
+
+
+
+Lookup value of sin(2$\ast$pi$\ast$x). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Phase ratio \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Result of sin(2$\ast$pi$\ast$x). 
+\end{DoxyReturn}
+
+
+Definition at line 149 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{149                                         \{}
+\DoxyCodeLine{150     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{151     }
+\DoxyCodeLine{152     \textcolor{comment}{// half period stored -\/-\/ wrap around and invert}}
+\DoxyCodeLine{153     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_sine\_size;}
+\DoxyCodeLine{154     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{155 }
+\DoxyCodeLine{156     \textcolor{keyword}{const} uint32\_t x0 = x0p \& k\_wt\_sine\_mask;}
+\DoxyCodeLine{157     \textcolor{keyword}{const} uint32\_t x1 = (x0 + 1) \& k\_wt\_sine\_mask;}
+\DoxyCodeLine{158     }
+\DoxyCodeLine{159     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt\_sine\_lut\_f[x0], wt\_sine\_lut\_f[x1]);}
+\DoxyCodeLine{160     \textcolor{keywordflow}{return} (x0p < k\_wt\_sine\_size)?y0:-\/y0;}
+\DoxyCodeLine{161   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga93788000ffc9fdc7bfc4af98544d89e2}\label{group__osc__api_ga93788000ffc9fdc7bfc4af98544d89e2}} 
+\index{Runtime API@{Runtime API}!osc\_softclipf@{osc\_softclipf}}
+\index{osc\_softclipf@{osc\_softclipf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_softclipf()}{osc\_softclipf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+softclipf (\begin{DoxyParamCaption}\item[{const float}]{c,  }\item[{float}]{x }\end{DoxyParamCaption})}
+
+
+
+Soft clip. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em c} & Coefficient in \mbox{[}0, 1/3\mbox{]}. \\
+\hline
+{\em x} & Value in (-\/inf, +inf). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Clipped value in \mbox{[}-\/(1-\/c), (1-\/c)\mbox{]}. 
+\end{DoxyReturn}
+
+
+Definition at line 665 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{666   \{}
+\DoxyCodeLine{667     x = \mbox{\hyperlink{group__utils__float__math_ga1e8532d81a23ad8cbee2baf5bc6466ec}{clip1m1f}}(x);}
+\DoxyCodeLine{668     \textcolor{keywordflow}{return} x -\/ c * (x*x*x);}
+\DoxyCodeLine{669   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_gab7f55c309c3b657fc78787d225cdfb0f}\label{group__osc__api_gab7f55c309c3b657fc78787d225cdfb0f}} 
+\index{Runtime API@{Runtime API}!osc\_sqrf@{osc\_sqrf}}
+\index{osc\_sqrf@{osc\_sqrf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_sqrf()}{osc\_sqrf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+sqrf (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})}
+
+
+
+Square wave lookup. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Phase in \mbox{[}0, 1.\+0\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Wave sample. 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+Not checking input, caller responsible for bounding x. 
+\end{DoxyNote}
+
+
+Definition at line 314 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{314                                         \{}
+\DoxyCodeLine{315     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{316     }
+\DoxyCodeLine{317     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_sqr\_size;}
+\DoxyCodeLine{318     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{319     }
+\DoxyCodeLine{320     uint32\_t x0 = x0p, x1 = x0p+1;}
+\DoxyCodeLine{321     \textcolor{keywordtype}{float} sign = 1.f;}
+\DoxyCodeLine{322     \textcolor{keywordflow}{if} (x0p >= k\_wt\_sqr\_size) \{}
+\DoxyCodeLine{323       x0 = k\_wt\_sqr\_size -\/ (x0p \& k\_wt\_sqr\_mask);}
+\DoxyCodeLine{324       x1 = x0 -\/ 1;}
+\DoxyCodeLine{325       sign = -\/1.f;}
+\DoxyCodeLine{326     \}}
+\DoxyCodeLine{327     }
+\DoxyCodeLine{328     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt\_sqr\_lut\_f[x0], wt\_sqr\_lut\_f[x1]);}
+\DoxyCodeLine{329     \textcolor{keywordflow}{return} sign*y0;}
+\DoxyCodeLine{330   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_gab83291286baa795bfa9dc612e963bf1b}\label{group__osc__api_gab83291286baa795bfa9dc612e963bf1b}} 
+\index{Runtime API@{Runtime API}!osc\_sqrtm2logf@{osc\_sqrtm2logf}}
+\index{osc\_sqrtm2logf@{osc\_sqrtm2logf}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_sqrtm2logf()}{osc\_sqrtm2logf()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+sqrtm2logf (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})}
+
+
+
+Lookup value of sqrt(-\/2$\ast$log(x)) in \mbox{[}0.\+005, 1.\+0\mbox{]} range. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Value in \mbox{[}0.\+005, 1.\+0\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Result of sqrt(-\/2$\ast$log(x)). 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+Not checking input, caller responsible for bounding x. 
+\end{DoxyNote}
+
+
+Definition at line 638 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{638                                               \{}
+\DoxyCodeLine{639     \textcolor{keyword}{const} \textcolor{keywordtype}{float} idxf = (x-\/k\_sqrtm2log\_base) * k\_sqrtm2log\_range\_recip * k\_sqrtm2log\_size;}
+\DoxyCodeLine{640     \textcolor{keyword}{const} uint32\_t idx = (uint32\_t)idxf;}
+\DoxyCodeLine{641     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = sqrtm2log\_lut\_f[idx];}
+\DoxyCodeLine{642     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = sqrtm2log\_lut\_f[idx+1];}
+\DoxyCodeLine{643     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(idxf -\/ idx, y0, y1);}
+\DoxyCodeLine{644   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga494fa53a08bb6afbd53d9a7e511e1189}\label{group__osc__api_ga494fa53a08bb6afbd53d9a7e511e1189}} 
+\index{Runtime API@{Runtime API}!osc\_tanpif@{osc\_tanpif}}
+\index{osc\_tanpif@{osc\_tanpif}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_tanpif()}{osc\_tanpif()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+tanpif (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})}
+
+
+
+Lookup value of tan(pi$\ast$x) in \mbox{[}0.\+0001, 0.\+49\mbox{]} range. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em x} & Value in \mbox{[}0.\+0001, 0.\+49\mbox{]}. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Result of tan(pi$\ast$x). 
+\end{DoxyReturn}
+\begin{DoxyNote}{Note}
+Not checking input, caller responsible for bounding x. 
+\end{DoxyNote}
+
+
+Definition at line 614 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{614                                           \{}
+\DoxyCodeLine{615     \textcolor{keyword}{const} \textcolor{keywordtype}{float} idxf = x * k\_tanpi\_range\_recip * k\_tanpi\_size;}
+\DoxyCodeLine{616     \textcolor{keyword}{const} uint32\_t idx = (uint32\_t)idxf;}
+\DoxyCodeLine{617     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = tanpi\_lut\_f[idx];}
+\DoxyCodeLine{618     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = tanpi\_lut\_f[idx+1];}
+\DoxyCodeLine{619     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(idxf -\/ idx, y0, y1);}
+\DoxyCodeLine{620   \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__osc__api_ga2061a488f9b21f9972ab71583960f1db}\label{group__osc__api_ga2061a488f9b21f9972ab71583960f1db}} 
+\index{Runtime API@{Runtime API}!osc\_w0f\_for\_note@{osc\_w0f\_for\_note}}
+\index{osc\_w0f\_for\_note@{osc\_w0f\_for\_note}!Runtime API@{Runtime API}}
+\doxysubsubsection{\texorpdfstring{osc\_w0f\_for\_note()}{osc\_w0f\_for\_note()}}
+{\footnotesize\ttfamily \+\_\+\+\_\+fast\+\_\+inline float osc\+\_\+w0f\+\_\+for\+\_\+note (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{note,  }\item[{uint8\+\_\+t}]{mod }\end{DoxyParamCaption})}
+
+
+
+Get floating point phase increment for given note and fine modulation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em note} & Note in \mbox{[}0-\/151\mbox{]} range, mod in \mbox{[}0-\/255\mbox{]} range. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Corresponding 0-\/1 phase increment in floating point. 
+\end{DoxyReturn}
+
+
+Definition at line 117 of file osc\+\_\+api.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{117                                                                   \{    }
+\DoxyCodeLine{118     \textcolor{keyword}{const} \textcolor{keywordtype}{float} f0 = \mbox{\hyperlink{group__osc__api_ga082922e3b29eaff8216a2082dff68584}{osc\_notehzf}}(note);}
+\DoxyCodeLine{119     \textcolor{keyword}{const} \textcolor{keywordtype}{float} f1 = \mbox{\hyperlink{group__osc__api_ga082922e3b29eaff8216a2082dff68584}{osc\_notehzf}}(note+1);}
+\DoxyCodeLine{120     }
+\DoxyCodeLine{121     \textcolor{keyword}{const} \textcolor{keywordtype}{float} f = \mbox{\hyperlink{group__utils__float__math_ga1df882452fba0cefb4bec86f8b5275ab}{clipmaxf}}(\mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(mod * k\_note\_mod\_fscale, f0, f1), k\_note\_max\_hz);}
+\DoxyCodeLine{122 }
+\DoxyCodeLine{123     \textcolor{keywordflow}{return} f * k\_samplerate\_recipf;}
+\DoxyCodeLine{124   \}}
+
+\end{DoxyCode}

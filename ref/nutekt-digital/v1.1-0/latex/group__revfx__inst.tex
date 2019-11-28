@@ -1,0 +1,97 @@
+\hypertarget{group__revfx__inst}{}\doxysection{Reverb Effect Instance (revfx)}
+\label{group__revfx__inst}\index{Reverb Effect Instance (revfx)@{Reverb Effect Instance (revfx)}}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structuser__revfx__hook__table}{user\+\_\+revfx\+\_\+hook\+\_\+table}}
+\item 
+struct \mbox{\hyperlink{structuser__revfx__data}{user\+\_\+revfx\+\_\+data}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__revfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}\label{group__revfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}} 
+\#define {\bfseries \+\_\+\+\_\+sdram}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((section(\char`\"{}.sdram\char`\"{})))
+\item 
+\mbox{\Hypertarget{group__revfx__inst_gaa652728435e0ce874da0df723834b803}\label{group__revfx__inst_gaa652728435e0ce874da0df723834b803}} 
+\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+init
+\item 
+\mbox{\Hypertarget{group__revfx__inst_gaf5203a31ead7e4c8b740790bb5ef3d9e}\label{group__revfx__inst_gaf5203a31ead7e4c8b740790bb5ef3d9e}} 
+\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+P\+R\+O\+C\+E\+SS}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+process
+\item 
+\mbox{\Hypertarget{group__revfx__inst_ga9040b6119e1fe8f948d27e5d0c264178}\label{group__revfx__inst_ga9040b6119e1fe8f948d27e5d0c264178}} 
+\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+S\+U\+S\+P\+E\+ND}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+suspend
+\item 
+\mbox{\Hypertarget{group__revfx__inst_gaf2d0a6f391e14291400e4c8a29b13d16}\label{group__revfx__inst_gaf2d0a6f391e14291400e4c8a29b13d16}} 
+\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+R\+E\+S\+U\+ME}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+resume
+\item 
+\mbox{\Hypertarget{group__revfx__inst_gab10bd99358a0d4e32de9d92d15a3c49a}\label{group__revfx__inst_gab10bd99358a0d4e32de9d92d15a3c49a}} 
+\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+param
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__revfx__inst_gabbb660179f0360f923cf50470f67d934}\label{group__revfx__inst_gabbb660179f0360f923cf50470f67d934}} 
+typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Func\+Entry}) (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+\mbox{\Hypertarget{group__revfx__inst_gac02ebd06c4c5d560bfb83251cd57a31d}\label{group__revfx__inst_gac02ebd06c4c5d560bfb83251cd57a31d}} 
+typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Func\+Init}) (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+\mbox{\Hypertarget{group__revfx__inst_ga2ba7b605ab1cdbbd1d74209b8970e44e}\label{group__revfx__inst_ga2ba7b605ab1cdbbd1d74209b8970e44e}} 
+typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Func\+Process}) (float $\ast$xn, uint32\+\_\+t frames)
+\item 
+\mbox{\Hypertarget{group__revfx__inst_gaae7cafac357d1f4722d33761442f755e}\label{group__revfx__inst_gaae7cafac357d1f4722d33761442f755e}} 
+typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Suspend}) (void)
+\item 
+\mbox{\Hypertarget{group__revfx__inst_ga68a6f02fdf17eb97ab73dc0df87c4db8}\label{group__revfx__inst_ga68a6f02fdf17eb97ab73dc0df87c4db8}} 
+typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Resume}) (void)
+\item 
+\mbox{\Hypertarget{group__revfx__inst_ga3557a5b6eb520b583d78eaf0afbfd38f}\label{group__revfx__inst_ga3557a5b6eb520b583d78eaf0afbfd38f}} 
+typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Func\+Param}) (uint8\+\_\+t index, int32\+\_\+t value)
+\item 
+\mbox{\Hypertarget{group__revfx__inst_ga8ed081e6b91c1bd9cadd65f23882c4ce}\label{group__revfx__inst_ga8ed081e6b91c1bd9cadd65f23882c4ce}} 
+typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Func\+Dummy}) (void)
+\item 
+\mbox{\Hypertarget{group__revfx__inst_gadeeb68064f90189188f56e4c6e1df4f3}\label{group__revfx__inst_gadeeb68064f90189188f56e4c6e1df4f3}} 
+typedef struct \mbox{\hyperlink{structuser__revfx__hook__table}{user\+\_\+revfx\+\_\+hook\+\_\+table}} {\bfseries user\+\_\+revfx\+\_\+hook\+\_\+table\+\_\+t}
+\item 
+\mbox{\Hypertarget{group__revfx__inst_gaeddde9e047f4d2ab8ce6202d3f7db3fc}\label{group__revfx__inst_gaeddde9e047f4d2ab8ce6202d3f7db3fc}} 
+typedef struct \mbox{\hyperlink{structuser__revfx__data}{user\+\_\+revfx\+\_\+data}} {\bfseries user\+\_\+revfx\+\_\+data\+\_\+t}
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__revfx__inst_ga345542bbc4ec36e1d117b40bedcce2be}\label{group__revfx__inst_ga345542bbc4ec36e1d117b40bedcce2be}} 
+enum {\bfseries user\+\_\+revfx\+\_\+param\+\_\+id\+\_\+t} \{ \newline
+{\bfseries k\+\_\+user\+\_\+revfx\+\_\+param\+\_\+time} = 0, 
+{\bfseries k\+\_\+user\+\_\+revfx\+\_\+param\+\_\+depth}, 
+{\bfseries k\+\_\+user\+\_\+revfx\+\_\+param\+\_\+reserved0}, 
+{\bfseries k\+\_\+user\+\_\+revfx\+\_\+param\+\_\+shift\+\_\+depth}, 
+\newline
+{\bfseries k\+\_\+num\+\_\+user\+\_\+revfx\+\_\+param\+\_\+id}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__revfx__inst_gacb26647b7b28ca29f52fabdcbed3a152}\label{group__revfx__inst_gacb26647b7b28ca29f52fabdcbed3a152}} 
+void {\bfseries \+\_\+entry} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+\mbox{\Hypertarget{group__revfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}\label{group__revfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}} 
+void {\bfseries \+\_\+hook\+\_\+init} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+\mbox{\Hypertarget{group__revfx__inst_ga2103260c965e55d6bc8ec31aafec7687}\label{group__revfx__inst_ga2103260c965e55d6bc8ec31aafec7687}} 
+void {\bfseries \+\_\+hook\+\_\+process} (float $\ast$xn, uint32\+\_\+t frames)
+\item 
+\mbox{\Hypertarget{group__revfx__inst_ga51724f6540f59f6ee95fbe72d9655315}\label{group__revfx__inst_ga51724f6540f59f6ee95fbe72d9655315}} 
+void {\bfseries \+\_\+hook\+\_\+suspend} (void)
+\item 
+\mbox{\Hypertarget{group__revfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}\label{group__revfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}} 
+void {\bfseries \+\_\+hook\+\_\+resume} (void)
+\item 
+\mbox{\Hypertarget{group__revfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}\label{group__revfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}} 
+void {\bfseries \+\_\+hook\+\_\+param} (uint8\+\_\+t index, int32\+\_\+t value)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}

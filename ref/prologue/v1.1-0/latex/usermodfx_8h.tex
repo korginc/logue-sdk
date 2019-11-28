@@ -1,0 +1,82 @@
+\hypertarget{usermodfx_8h}{}\doxysection{/home/etienne/\+Documents/\+\_\+projects/logue-\/sdk/logue-\/sdk-\/alt/platform/prologue/inc/usermodfx.h File Reference}
+\label{usermodfx_8h}\index{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/prologue/inc/usermodfx.h@{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/prologue/inc/usermodfx.h}}
+
+
+C interface header for user modulation fx.  
+
+
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}fx\+\_\+api.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}userprg.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structuser__modfx__hook__table}{user\+\_\+modfx\+\_\+hook\+\_\+table}}
+\item 
+struct \mbox{\hyperlink{structuser__modfx__data}{user\+\_\+modfx\+\_\+data}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries \+\_\+\+\_\+sdram}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((section(\char`\"{}.sdram\char`\"{})))
+\item 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+init
+\item 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+P\+R\+O\+C\+E\+SS}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+process
+\item 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+S\+U\+S\+P\+E\+ND}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+suspend
+\item 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+R\+E\+S\+U\+ME}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+resume
+\item 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+param
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Entry}) (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Init}) (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Process}) (const float $\ast$main\+\_\+xn, float $\ast$main\+\_\+yn, const float $\ast$sub\+\_\+xn, float $\ast$sub\+\_\+yn, uint32\+\_\+t frames)
+\item 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Suspend}) (void)
+\item 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Resume}) (void)
+\item 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Param}) (uint8\+\_\+t index, int32\+\_\+t value)
+\item 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Dummy}) (void)
+\item 
+typedef struct \mbox{\hyperlink{structuser__modfx__hook__table}{user\+\_\+modfx\+\_\+hook\+\_\+table}} {\bfseries user\+\_\+modfx\+\_\+hook\+\_\+table\+\_\+t}
+\item 
+typedef struct \mbox{\hyperlink{structuser__modfx__data}{user\+\_\+modfx\+\_\+data}} {\bfseries user\+\_\+modfx\+\_\+data\+\_\+t}
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga3b9993e5a63875826d097ac92d781d09}\label{group__modfx__inst_ga3b9993e5a63875826d097ac92d781d09}} 
+enum {\bfseries user\+\_\+modfx\+\_\+param\+\_\+id\+\_\+t} \{ {\bfseries k\+\_\+user\+\_\+modfx\+\_\+param\+\_\+time} = 0, 
+{\bfseries k\+\_\+user\+\_\+modfx\+\_\+param\+\_\+depth}, 
+{\bfseries k\+\_\+num\+\_\+user\+\_\+modfx\+\_\+param\+\_\+id}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void {\bfseries \+\_\+entry} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+void {\bfseries \+\_\+hook\+\_\+init} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+void {\bfseries \+\_\+hook\+\_\+process} (const float $\ast$main\+\_\+xn, float $\ast$main\+\_\+yn, const float $\ast$sub\+\_\+xn, float $\ast$sub\+\_\+yn, uint32\+\_\+t frames)
+\item 
+void {\bfseries \+\_\+hook\+\_\+suspend} (void)
+\item 
+void {\bfseries \+\_\+hook\+\_\+resume} (void)
+\item 
+void {\bfseries \+\_\+hook\+\_\+param} (uint8\+\_\+t index, int32\+\_\+t value)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+C interface header for user modulation fx. 
+

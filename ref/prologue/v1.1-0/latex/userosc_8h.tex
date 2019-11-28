@@ -1,0 +1,107 @@
+\hypertarget{userosc_8h}{}\doxysection{/home/etienne/\+Documents/\+\_\+projects/logue-\/sdk/logue-\/sdk-\/alt/platform/prologue/inc/userosc.h File Reference}
+\label{userosc_8h}\index{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/prologue/inc/userosc.h@{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/prologue/inc/userosc.h}}
+
+
+C interface header for user oscillators.  
+
+
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}osc\+\_\+api.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}userprg.\+h\char`\"{}}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param}}
+\item 
+struct \mbox{\hyperlink{structuser__osc__hook__table}{user\+\_\+osc\+\_\+hook\+\_\+table}}
+\item 
+struct \mbox{\hyperlink{structuser__osc__data}{user\+\_\+osc\+\_\+data}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries param\+\_\+val\+\_\+to\+\_\+f32}(val)~((uint16\+\_\+t)val $\ast$ 9.\+77517106549365e-\/004f)
+\item 
+\#define {\bfseries O\+S\+C\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+init
+\item 
+\#define {\bfseries O\+S\+C\+\_\+\+C\+Y\+C\+LE}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+cycle
+\item 
+\#define {\bfseries O\+S\+C\+\_\+\+N\+O\+T\+E\+ON}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+on
+\item 
+\#define {\bfseries O\+S\+C\+\_\+\+N\+O\+T\+E\+O\+FF}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+off
+\item 
+\#define {\bfseries O\+S\+C\+\_\+\+M\+U\+TE}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+mute
+\item 
+\#define {\bfseries O\+S\+C\+\_\+\+V\+A\+L\+UE}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+value
+\item 
+\#define {\bfseries O\+S\+C\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+param
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param}} {\bfseries user\+\_\+osc\+\_\+param\+\_\+t}
+\item 
+typedef void($\ast$ {\bfseries User\+Osc\+Func\+Entry}) (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+typedef void($\ast$ {\bfseries User\+Osc\+Func\+Init}) (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+typedef void($\ast$ {\bfseries User\+Osc\+Func\+Cycle}) (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params, int32\+\_\+t $\ast$buf, const uint32\+\_\+t frames)
+\item 
+typedef void($\ast$ {\bfseries User\+Osc\+Func\+On}) (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
+\item 
+typedef void($\ast$ {\bfseries User\+Osc\+Func\+Off}) (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
+\item 
+typedef void($\ast$ {\bfseries User\+Osc\+Func\+Mute}) (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
+\item 
+typedef void($\ast$ {\bfseries User\+Osc\+Func\+Value}) (uint16\+\_\+t value)
+\item 
+typedef void($\ast$ {\bfseries User\+Osc\+Func\+Param}) (uint16\+\_\+t idx, uint16\+\_\+t value)
+\item 
+typedef void($\ast$ {\bfseries User\+Osc\+Func\+Dummy}) (void)
+\item 
+typedef struct \mbox{\hyperlink{structuser__osc__hook__table}{user\+\_\+osc\+\_\+hook\+\_\+table}} {\bfseries user\+\_\+osc\+\_\+hook\+\_\+table\+\_\+t}
+\item 
+typedef struct \mbox{\hyperlink{structuser__osc__data}{user\+\_\+osc\+\_\+data}} {\bfseries user\+\_\+osc\+\_\+data\+\_\+t}
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__osc__inst_ga389ccf713f8ed0c77fec90998c5804ff}\label{group__osc__inst_ga389ccf713f8ed0c77fec90998c5804ff}} 
+enum {\bfseries user\+\_\+osc\+\_\+param\+\_\+id\+\_\+t} \{ \newline
+{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id1} = 0, 
+{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id2}, 
+{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id3}, 
+{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id4}, 
+\newline
+{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id5}, 
+{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id6}, 
+{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+shape}, 
+{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+shiftshape}, 
+\newline
+{\bfseries k\+\_\+num\+\_\+user\+\_\+osc\+\_\+param\+\_\+id}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void {\bfseries \+\_\+entry} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+void {\bfseries \+\_\+hook\+\_\+init} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+void {\bfseries \+\_\+hook\+\_\+cycle} (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params, int32\+\_\+t $\ast$yn, const uint32\+\_\+t frames)
+\item 
+void {\bfseries \+\_\+hook\+\_\+on} (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
+\item 
+void {\bfseries \+\_\+hook\+\_\+off} (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
+\item 
+void {\bfseries \+\_\+hook\+\_\+mute} (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
+\item 
+void {\bfseries \+\_\+hook\+\_\+value} (uint16\+\_\+t value)
+\item 
+void {\bfseries \+\_\+hook\+\_\+param} (uint16\+\_\+t index, uint16\+\_\+t value)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+C interface header for user oscillators. 
+

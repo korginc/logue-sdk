@@ -1,0 +1,336 @@
+\hypertarget{osc__api_8h}{}\doxysection{/home/etienne/\+Documents/\+\_\+projects/logue-\/sdk/logue-\/sdk-\/alt/platform/nutekt-\/digital/inc/osc\+\_\+api.h File Reference}
+\label{osc__api_8h}\index{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/nutekt-\/digital/inc/osc\_api.h@{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/nutekt-\/digital/inc/osc\_api.h}}
+
+
+Oscillator runtime A\+PI.  
+
+
+{\ttfamily \#include \char`\"{}float\+\_\+math.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}int\+\_\+math.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}fixed\+\_\+math.\+h\char`\"{}}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries \+\_\+\+\_\+fast\+\_\+inline}~static inline \+\_\+\+\_\+attribute\+\_\+\+\_\+((always\+\_\+inline, optimize(\char`\"{}Ofast\char`\"{})))
+\item 
+\#define {\bfseries k\+\_\+samplerate}~(48000)
+\item 
+\#define {\bfseries k\+\_\+samplerate\+\_\+recipf}~(2.\+08333333333333e-\/005f)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{group__osc__api_ga3c3dbbc0b0122daeeee4a5380aacf7ac}{\+\_\+osc\+\_\+mcu\+\_\+hash}} (void)
+\begin{DoxyCompactList}\small\item\em Get M\+CU hash. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline uint32\+\_\+t {\bfseries osc\+\_\+mcu\+\_\+hash} (void)
+\end{DoxyCompactItemize}
+\begin{Indent}\textbf{ Noise source}\par
+\begin{DoxyCompactItemize}
+\item 
+uint32\+\_\+t \mbox{\hyperlink{group__osc__api_ga146d08eb8fd56de6b32eef3e892a22f1}{\+\_\+osc\+\_\+rand}} (void)
+\begin{DoxyCompactList}\small\item\em Random integer. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline uint32\+\_\+t {\bfseries osc\+\_\+rand} (void)
+\item 
+float \mbox{\hyperlink{group__osc__api_ga9482bacf03c6b084dcec03b6cd76e67f}{\+\_\+osc\+\_\+white}} (void)
+\begin{DoxyCompactList}\small\item\em Gaussian white noise. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float {\bfseries osc\+\_\+white} (void)
+\end{DoxyCompactItemize}
+\end{Indent}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+const uint32\+\_\+t \mbox{\hyperlink{group__osc__api_gab80d335a0049301225e41b3d3c3b3c07}{k\+\_\+osc\+\_\+api\+\_\+platform}}
+\begin{DoxyCompactList}\small\item\em Current platform. \end{DoxyCompactList}\item 
+const uint32\+\_\+t \mbox{\hyperlink{group__osc__api_gaf7fdee41003df8998020340376034d45}{k\+\_\+osc\+\_\+api\+\_\+version}}
+\begin{DoxyCompactList}\small\item\em Current A\+PI version. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Note to frequency conversion table}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries k\+\_\+midi\+\_\+to\+\_\+hz\+\_\+size}~(152)
+\item 
+\#define {\bfseries k\+\_\+note\+\_\+mod\+\_\+fscale}~(0.\+00392156862745098f)
+\item 
+\#define {\bfseries k\+\_\+note\+\_\+max\+\_\+hz}~(23679.\+643054f)
+\item 
+const float {\bfseries midi\+\_\+to\+\_\+hz\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+midi\+\_\+to\+\_\+hz\+\_\+size\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga082922e3b29eaff8216a2082dff68584}{osc\+\_\+notehzf}} (uint8\+\_\+t note)
+\begin{DoxyCompactList}\small\item\em Get Hertz value for note. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga2061a488f9b21f9972ab71583960f1db}{osc\+\_\+w0f\+\_\+for\+\_\+note}} (uint8\+\_\+t note, uint8\+\_\+t mod)
+\begin{DoxyCompactList}\small\item\em Get floating point phase increment for given note and fine modulation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Sine half-\/wave}
+\label{_amgrp5c23d81a9378c4ff2e4abd3f6a8099c4}%
+\begin{DoxyNote}{Note}
+Wrap and negate for phase $>$= 0.\+5 
+\end{DoxyNote}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sine\+\_\+size\+\_\+exp}~(7)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sine\+\_\+size}~(1U$<$$<$k\+\_\+wt\+\_\+sine\+\_\+size\+\_\+exp)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sine\+\_\+u32shift}~(24)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sine\+\_\+frrecip}~(5.\+96046447753906e-\/008f)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sine\+\_\+mask}~(k\+\_\+wt\+\_\+sine\+\_\+size-\/1)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sine\+\_\+lut\+\_\+size}~(k\+\_\+wt\+\_\+sine\+\_\+size+1)
+\item 
+const float {\bfseries wt\+\_\+sine\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+wt\+\_\+sine\+\_\+lut\+\_\+size\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga7c72f32f2889ff55a075d283dd9bf93a}{osc\+\_\+sinf}} (float x)
+\begin{DoxyCompactList}\small\item\em Lookup value of sin(2$\ast$pi$\ast$x). \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga3aaa9cdb10789d3db5e5a4ff72e8112e}{osc\+\_\+cosf}} (float x)
+\begin{DoxyCompactList}\small\item\em Lookup value of cos(2$\ast$pi$\ast$x) in \mbox{[}0, 1.\+0\mbox{]} range. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Band-\/limited sawtooth half-\/waves}
+\label{_amgrpcdbfee59f19a4f48718cee7e8b1259f2}%
+\begin{DoxyNote}{Note}
+Wrap interpolation towards zero for 0.\+5, negate and reverse phase for $>$= 0.\+5 
+\end{DoxyNote}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+size\+\_\+exp}~(7)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+size}~(1U$<$$<$k\+\_\+wt\+\_\+saw\+\_\+size\+\_\+exp)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+u32shift}~(24)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+frrecip}~(5.\+96046447753906e-\/008f)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+mask}~(k\+\_\+wt\+\_\+saw\+\_\+size-\/1)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+lut\+\_\+size}~(k\+\_\+wt\+\_\+saw\+\_\+size+1)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+notes\+\_\+cnt}~(7)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+saw\+\_\+lut\+\_\+tsize}~(k\+\_\+wt\+\_\+saw\+\_\+notes\+\_\+cnt $\ast$ k\+\_\+wt\+\_\+saw\+\_\+lut\+\_\+size)
+\item 
+const uint8\+\_\+t {\bfseries wt\+\_\+saw\+\_\+notes} \mbox{[}k\+\_\+wt\+\_\+saw\+\_\+notes\+\_\+cnt\mbox{]}
+\item 
+const float {\bfseries wt\+\_\+saw\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+wt\+\_\+saw\+\_\+lut\+\_\+tsize\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga64042f4358abf83f4e15330157314252}{osc\+\_\+sawf}} (float x)
+\begin{DoxyCompactList}\small\item\em Sawtooth wave lookup. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga2c38d05e30af9254a367dc3840679191}{osc\+\_\+bl\+\_\+sawf}} (float x, uint8\+\_\+t idx)
+\begin{DoxyCompactList}\small\item\em Band-\/limited sawtooth wave lookup. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_gad3cbea256f34fe91f7af7978819f1b4f}{osc\+\_\+bl2\+\_\+sawf}} (float x, float idx)
+\begin{DoxyCompactList}\small\item\em Band-\/limited sawtooth wave lookup. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{group__osc__api_gaaed275f73e5c28589fbcbefc33de219f}{\+\_\+osc\+\_\+bl\+\_\+saw\+\_\+idx}} (float note)
+\begin{DoxyCompactList}\small\item\em Get band-\/limited sawtooth wave index for note. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float {\bfseries osc\+\_\+bl\+\_\+saw\+\_\+idx} (float note)
+\end{DoxyCompactItemize}
+\doxysubsection*{Band-\/limited square half-\/waves}
+\label{_amgrpc2c4e619a51399bdafa4598d7a9c5bad}%
+\begin{DoxyNote}{Note}
+Wrap interpolation to zero for 0.\+5, negate and reverse phase for $>$= 0.\+5 
+\end{DoxyNote}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+size\+\_\+exp}~7
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+size}~(1U$<$$<$k\+\_\+wt\+\_\+sqr\+\_\+size\+\_\+exp)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+u32shift}~(24)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+frrecip}~(5.\+96046447753906e-\/008f)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+mask}~(k\+\_\+wt\+\_\+sqr\+\_\+size-\/1)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+lut\+\_\+size}~(k\+\_\+wt\+\_\+sqr\+\_\+size+1)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+notes\+\_\+cnt}~7
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+sqr\+\_\+lut\+\_\+tsize}~(k\+\_\+wt\+\_\+sqr\+\_\+notes\+\_\+cnt $\ast$ k\+\_\+wt\+\_\+sqr\+\_\+lut\+\_\+size)
+\item 
+const uint8\+\_\+t {\bfseries wt\+\_\+sqr\+\_\+notes} \mbox{[}k\+\_\+wt\+\_\+sqr\+\_\+notes\+\_\+cnt\mbox{]}
+\item 
+const float {\bfseries wt\+\_\+sqr\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+wt\+\_\+sqr\+\_\+lut\+\_\+tsize\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_gab7f55c309c3b657fc78787d225cdfb0f}{osc\+\_\+sqrf}} (float x)
+\begin{DoxyCompactList}\small\item\em Square wave lookup. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga7a4a401783f0e18e2d21cd16e9e15cdc}{osc\+\_\+bl\+\_\+sqrf}} (float x, uint8\+\_\+t idx)
+\begin{DoxyCompactList}\small\item\em Band-\/limited square wave lookup. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga0857fef63cbe6b4081a1a1d462f252f3}{osc\+\_\+bl2\+\_\+sqrf}} (float x, float idx)
+\begin{DoxyCompactList}\small\item\em Band-\/limited square wave lookup. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{group__osc__api_ga005fcc269e56eda592fd040986d5a97d}{\+\_\+osc\+\_\+bl\+\_\+sqr\+\_\+idx}} (float note)
+\begin{DoxyCompactList}\small\item\em Get band-\/limited square wave index for note. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float {\bfseries osc\+\_\+bl\+\_\+sqr\+\_\+idx} (float note)
+\end{DoxyCompactItemize}
+\doxysubsection*{Band-\/limited parabolic half-\/waves.}
+\label{_amgrp9c884d63884e6d2fe69ff6ed0e46437e}%
+\begin{DoxyNote}{Note}
+Wrap interpolation to zero for 0.\+5, negate and reverse phase for $>$= 0.\+5. Careful to negate index 0 when wrapping. 
+\end{DoxyNote}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+size\+\_\+exp}~7
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+size}~(1U$<$$<$k\+\_\+wt\+\_\+par\+\_\+size\+\_\+exp)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+u32shift}~(24)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+frrecip}~(5.\+96046447753906e-\/008f)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+mask}~(k\+\_\+wt\+\_\+par\+\_\+size-\/1)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+lut\+\_\+size}~(k\+\_\+wt\+\_\+par\+\_\+size+1)
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+notes\+\_\+cnt}~7
+\item 
+\#define {\bfseries k\+\_\+wt\+\_\+par\+\_\+lut\+\_\+tsize}~(k\+\_\+wt\+\_\+par\+\_\+notes\+\_\+cnt $\ast$ k\+\_\+wt\+\_\+par\+\_\+lut\+\_\+size)
+\item 
+const uint8\+\_\+t {\bfseries wt\+\_\+par\+\_\+notes} \mbox{[}k\+\_\+wt\+\_\+par\+\_\+notes\+\_\+cnt\mbox{]}
+\item 
+const float {\bfseries wt\+\_\+par\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+wt\+\_\+par\+\_\+lut\+\_\+tsize\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_gadbb771a6aff9e9c51e8a6b249ddae694}{osc\+\_\+parf}} (float x)
+\begin{DoxyCompactList}\small\item\em Parabolic wave lookup. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga8c69f5f4a9ff36e312c4ba829f50b989}{osc\+\_\+bl\+\_\+parf}} (float x, uint8\+\_\+t idx)
+\begin{DoxyCompactList}\small\item\em Band-\/limited parabolic wave lookup. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga50f6755ad79d68ffd87dbef72d6733c0}{osc\+\_\+bl2\+\_\+parf}} (float x, float idx)
+\begin{DoxyCompactList}\small\item\em Band-\/limited parabolic wave lookup. \end{DoxyCompactList}\item 
+float \mbox{\hyperlink{group__osc__api_ga3d3612eb483369630048ad21c28ac0a0}{\+\_\+osc\+\_\+bl\+\_\+par\+\_\+idx}} (float note)
+\begin{DoxyCompactList}\small\item\em Get band-\/limited parabolic wave index for note. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float {\bfseries osc\+\_\+bl\+\_\+par\+\_\+idx} (float note)
+\end{DoxyCompactItemize}
+\doxysubsection*{Wave banks.}
+\label{_amgrp4774bb87612135e5656df9287e489562}%
+ \begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000002}{Todo}}]Explain categorization\end{DoxyRefDesc}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries k\+\_\+waves\+\_\+size\+\_\+exp}~(7)
+\item 
+\#define {\bfseries k\+\_\+waves\+\_\+size}~(1U$<$$<$k\+\_\+waves\+\_\+size\+\_\+exp)
+\item 
+\#define {\bfseries k\+\_\+waves\+\_\+u32shift}~(24)
+\item 
+\#define {\bfseries k\+\_\+waves\+\_\+frrecip}~(5.\+96046447753906e-\/008f)
+\item 
+\#define {\bfseries k\+\_\+waves\+\_\+mask}~(k\+\_\+waves\+\_\+size-\/1)
+\item 
+\#define {\bfseries k\+\_\+waves\+\_\+lut\+\_\+size}~(k\+\_\+waves\+\_\+size+1)
+\item 
+\#define {\bfseries k\+\_\+waves\+\_\+a\+\_\+cnt}~16
+\item 
+\#define {\bfseries k\+\_\+waves\+\_\+b\+\_\+cnt}~16
+\item 
+\#define {\bfseries k\+\_\+waves\+\_\+c\+\_\+cnt}~14
+\item 
+\#define {\bfseries k\+\_\+waves\+\_\+d\+\_\+cnt}~13
+\item 
+\#define {\bfseries k\+\_\+waves\+\_\+e\+\_\+cnt}~15
+\item 
+\#define {\bfseries k\+\_\+waves\+\_\+f\+\_\+cnt}~16
+\item 
+const float $\ast$const {\bfseries wavesA} \mbox{[}k\+\_\+waves\+\_\+a\+\_\+cnt\mbox{]}
+\item 
+const float $\ast$const {\bfseries wavesB} \mbox{[}k\+\_\+waves\+\_\+b\+\_\+cnt\mbox{]}
+\item 
+const float $\ast$const {\bfseries wavesC} \mbox{[}k\+\_\+waves\+\_\+c\+\_\+cnt\mbox{]}
+\item 
+const float $\ast$const {\bfseries wavesD} \mbox{[}k\+\_\+waves\+\_\+d\+\_\+cnt\mbox{]}
+\item 
+const float $\ast$const {\bfseries wavesE} \mbox{[}k\+\_\+waves\+\_\+e\+\_\+cnt\mbox{]}
+\item 
+const float $\ast$const {\bfseries wavesF} \mbox{[}k\+\_\+waves\+\_\+f\+\_\+cnt\mbox{]}
+\item 
+static float {\bfseries osc\+\_\+wave\+\_\+scanf} (const float $\ast$w, float x)
+\item 
+static float {\bfseries osc\+\_\+wave\+\_\+scanuf} (const float $\ast$w, uint32\+\_\+t x)
+\end{DoxyCompactItemize}
+\doxysubsection*{Various function lookups}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries k\+\_\+log\+\_\+size\+\_\+exp}~(8)
+\item 
+\#define {\bfseries k\+\_\+log\+\_\+size}~(1U$<$$<$k\+\_\+log\+\_\+size\+\_\+exp)
+\item 
+\#define {\bfseries k\+\_\+log\+\_\+mask}~(k\+\_\+log\+\_\+size-\/1)
+\item 
+\#define {\bfseries k\+\_\+log\+\_\+lut\+\_\+size}~(k\+\_\+log\+\_\+size+1)
+\item 
+\#define {\bfseries k\+\_\+tanpi\+\_\+size\+\_\+exp}~(8)
+\item 
+\#define {\bfseries k\+\_\+tanpi\+\_\+size}~(1U$<$$<$k\+\_\+tanpi\+\_\+size\+\_\+exp)
+\item 
+\#define {\bfseries k\+\_\+tanpi\+\_\+mask}~(k\+\_\+tanpi\+\_\+size-\/1)
+\item 
+\#define {\bfseries k\+\_\+tanpi\+\_\+range\+\_\+recip}~(2.\+04081632653061f)
+\item 
+\#define {\bfseries k\+\_\+tanpi\+\_\+lut\+\_\+size}~(k\+\_\+tanpi\+\_\+size+1)
+\item 
+\#define {\bfseries k\+\_\+sqrtm2log\+\_\+size\+\_\+exp}~(8)
+\item 
+\#define {\bfseries k\+\_\+sqrtm2log\+\_\+size}~(1U$<$$<$k\+\_\+sqrtm2log\+\_\+size\+\_\+exp)
+\item 
+\#define {\bfseries k\+\_\+sqrtm2log\+\_\+mask}~(k\+\_\+sqrtm2log\+\_\+size-\/1)
+\item 
+\#define {\bfseries k\+\_\+sqrtm2log\+\_\+base}~(0.\+005f)
+\item 
+\#define {\bfseries k\+\_\+sqrtm2log\+\_\+range\+\_\+recip}~(1.\+00502512562814f)
+\item 
+\#define {\bfseries k\+\_\+sqrtm2log\+\_\+lut\+\_\+size}~(k\+\_\+sqrtm2log\+\_\+size+1)
+\item 
+const float {\bfseries log\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+log\+\_\+lut\+\_\+size\mbox{]}
+\item 
+const float {\bfseries tanpi\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+log\+\_\+lut\+\_\+size\mbox{]}
+\item 
+const float {\bfseries sqrtm2log\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+sqrtm2log\+\_\+lut\+\_\+size\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga81e180b64abbccaf568738fef522ace1}{osc\+\_\+logf}} (float x)
+\begin{DoxyCompactList}\small\item\em Lookup value of log(x) in \mbox{[}0.\+00001, 1.\+0\mbox{]} range. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga494fa53a08bb6afbd53d9a7e511e1189}{osc\+\_\+tanpif}} (float x)
+\begin{DoxyCompactList}\small\item\em Lookup value of tan(pi$\ast$x) in \mbox{[}0.\+0001, 0.\+49\mbox{]} range. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_gab83291286baa795bfa9dc612e963bf1b}{osc\+\_\+sqrtm2logf}} (float x)
+\begin{DoxyCompactList}\small\item\em Lookup value of sqrt(-\/2$\ast$log(x)) in \mbox{[}0.\+005, 1.\+0\mbox{]} range. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Clipping and Saturation.}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries k\+\_\+cubicsat\+\_\+size\+\_\+exp}~(7)
+\item 
+\#define {\bfseries k\+\_\+cubicsat\+\_\+size}~(1U$<$$<$k\+\_\+cubicsat\+\_\+size\+\_\+exp)
+\item 
+\#define {\bfseries k\+\_\+cubicsat\+\_\+mask}~(k\+\_\+cubicsat\+\_\+size-\/1)
+\item 
+\#define {\bfseries k\+\_\+cubicsat\+\_\+lut\+\_\+size}~(k\+\_\+cubicsat\+\_\+size+1)
+\item 
+\#define {\bfseries k\+\_\+schetzen\+\_\+size\+\_\+exp}~(7)
+\item 
+\#define {\bfseries k\+\_\+schetzen\+\_\+size}~(1U$<$$<$k\+\_\+schetzen\+\_\+size\+\_\+exp)
+\item 
+\#define {\bfseries k\+\_\+schetzen\+\_\+mask}~(k\+\_\+schetzen\+\_\+size-\/1)
+\item 
+\#define {\bfseries k\+\_\+schetzen\+\_\+lut\+\_\+size}~(k\+\_\+schetzen\+\_\+size+1)
+\item 
+const float {\bfseries cubicsat\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+cubicsat\+\_\+lut\+\_\+size\mbox{]}
+\item 
+const float {\bfseries schetzen\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+schetzen\+\_\+lut\+\_\+size\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga93788000ffc9fdc7bfc4af98544d89e2}{osc\+\_\+softclipf}} (const float c, float x)
+\begin{DoxyCompactList}\small\item\em Soft clip. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_gab7e73c7fa5814f9766c40245cfd5bea6}{osc\+\_\+sat\+\_\+cubicf}} (float x)
+\begin{DoxyCompactList}\small\item\em Cubic saturation. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga3aa843c95ccc3282ae6bd03114d7e12e}{osc\+\_\+sat\+\_\+schetzenf}} (float x)
+\begin{DoxyCompactList}\small\item\em Schetzen saturation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Bit reduction.}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries k\+\_\+bitres\+\_\+size\+\_\+exp}~(7)
+\item 
+\#define {\bfseries k\+\_\+bitres\+\_\+size}~(1U$<$$<$k\+\_\+bitres\+\_\+size\+\_\+exp)
+\item 
+\#define {\bfseries k\+\_\+bitres\+\_\+mask}~(k\+\_\+bitres\+\_\+size-\/1)
+\item 
+\#define {\bfseries k\+\_\+bitres\+\_\+lut\+\_\+size}~(k\+\_\+bitres\+\_\+size+1)
+\item 
+const float {\bfseries bitres\+\_\+lut\+\_\+f} \mbox{[}k\+\_\+bitres\+\_\+lut\+\_\+size\mbox{]}
+\item 
+\+\_\+\+\_\+fast\+\_\+inline float \mbox{\hyperlink{group__osc__api_ga9b46e6b6633dc55ea12fd3a5f2cb4875}{osc\+\_\+bitresf}} (float x)
+\begin{DoxyCompactList}\small\item\em Bit depth scaling table. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Oscillator runtime A\+PI. 
+

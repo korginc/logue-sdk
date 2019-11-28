@@ -1,0 +1,227 @@
+\hypertarget{fixed__math_8h}{}\doxysection{/home/etienne/\+Documents/\+\_\+projects/logue-\/sdk/logue-\/sdk-\/alt/platform/prologue/inc/utils/fixed\+\_\+math.h File Reference}
+\label{fixed__math_8h}\index{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/prologue/inc/utils/fixed\_math.h@{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/prologue/inc/utils/fixed\_math.h}}
+
+
+Fixed Point Math Utilities.  
+
+
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}cortexm4.\+h\char`\"{}}\newline
+\doxysubsection*{Macros}
+\begin{Indent}\textbf{ Fixed-\/\+Point and Floating Point Type Conversions}\par
+{\em \begin{DoxyNote}{Note}
+Should get properly compiled to V\+C\+VT instructions on A\+RM Cortex-\/\+M4 
+\end{DoxyNote}
+}\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries q15\+\_\+to\+\_\+f32\+\_\+c}~3.\+05175781250000e-\/005f
+\item 
+\#define {\bfseries q31\+\_\+to\+\_\+f32\+\_\+c}~4.\+65661287307739e-\/010f
+\item 
+\#define {\bfseries q15\+\_\+to\+\_\+f32}(q)~((float)(q) $\ast$ q15\+\_\+to\+\_\+f32\+\_\+c)
+\item 
+\#define {\bfseries q31\+\_\+to\+\_\+f32}(q)~((float)(q) $\ast$ q31\+\_\+to\+\_\+f32\+\_\+c)
+\item 
+\#define {\bfseries f32\+\_\+to\+\_\+q15}(f)~((q15\+\_\+t)ssat((q31\+\_\+t)((float)(f) $\ast$ ((1$<$$<$15)-\/1)),16))
+\item 
+\#define {\bfseries f32\+\_\+to\+\_\+q31}(f)~((q31\+\_\+t)((float)(f) $\ast$ (float)0x7\+F\+F\+F\+F\+F\+FF))
+\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}\textbf{ Fixed point Constants}\par
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries M\+\_\+\+H\+A\+L\+P\+I\+\_\+\+Q1\+\_\+14}~0x6488
+\item 
+\#define {\bfseries M\+\_\+\+H\+A\+L\+P\+I\+\_\+\+Q1\+\_\+30}~0x6487\+E\+D51
+\item 
+\#define {\bfseries M\+\_\+\+P\+I\+\_\+\+Q2\+\_\+13}~0x6488
+\item 
+\#define {\bfseries M\+\_\+\+P\+I\+\_\+\+Q2\+\_\+29}~0x6487\+E\+D51
+\item 
+\#define {\bfseries M\+\_\+1\+O\+V\+E\+R\+P\+I\+\_\+\+Q15}~0x28\+BE
+\item 
+\#define {\bfseries M\+\_\+1\+O\+V\+E\+R\+P\+I\+\_\+\+Q31}~0x28\+B\+E60\+DC
+\item 
+\#define {\bfseries M\+\_\+\+T\+W\+O\+P\+I\+\_\+\+Q3\+\_\+12}~0x6488
+\item 
+\#define {\bfseries M\+\_\+\+T\+W\+O\+P\+I\+\_\+\+Q3\+\_\+28}~0x6487\+E\+D51
+\item 
+\#define {\bfseries M\+\_\+1\+O\+V\+E\+R48\+K\+\_\+\+Q31}~0x0000\+A\+E\+C3
+\item 
+\#define {\bfseries M\+\_\+1\+O\+V\+E\+R44\+K\+\_\+\+Q31}~0x0000\+B\+E38
+\item 
+\#define {\bfseries M\+\_\+1\+O\+V\+E\+R22\+K\+\_\+\+Q31}~0x00017\+C70
+\end{DoxyCompactItemize}
+\end{Indent}
+\doxysubsection*{Typedefs}
+\begin{Indent}\textbf{ Fixed point Types}\par
+\begin{DoxyCompactItemize}
+\item 
+typedef int8\+\_\+t {\bfseries q7\+\_\+t}
+\item 
+typedef int8\+\_\+t {\bfseries q7\+\_\+0\+\_\+t}
+\item 
+typedef uint8\+\_\+t {\bfseries q8\+\_\+t}
+\item 
+typedef uint8\+\_\+t {\bfseries q8\+\_\+0\+\_\+t}
+\item 
+typedef int16\+\_\+t {\bfseries q15\+\_\+t}
+\item 
+typedef int16\+\_\+t {\bfseries q1\+\_\+14\+\_\+t}
+\item 
+typedef int16\+\_\+t {\bfseries q2\+\_\+13\+\_\+t}
+\item 
+typedef int16\+\_\+t {\bfseries q3\+\_\+12\+\_\+t}
+\item 
+typedef int16\+\_\+t {\bfseries q4\+\_\+11\+\_\+t}
+\item 
+typedef int16\+\_\+t {\bfseries q5\+\_\+10\+\_\+t}
+\item 
+typedef int16\+\_\+t {\bfseries q6\+\_\+9\+\_\+t}
+\item 
+typedef int16\+\_\+t {\bfseries q7\+\_\+8\+\_\+t}
+\item 
+typedef int16\+\_\+t {\bfseries q8\+\_\+7\+\_\+t}
+\item 
+typedef int16\+\_\+t {\bfseries q13\+\_\+2\+\_\+t}
+\item 
+typedef int16\+\_\+t {\bfseries q15\+\_\+0\+\_\+t}
+\item 
+typedef uint16\+\_\+t {\bfseries uq16\+\_\+t}
+\item 
+typedef uint16\+\_\+t {\bfseries uq16\+\_\+0\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q23\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q31\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q1\+\_\+30\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q2\+\_\+29\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q3\+\_\+28\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q4\+\_\+27\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q5\+\_\+26\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q6\+\_\+25\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q7\+\_\+24\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q8\+\_\+23\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q15\+\_\+16\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q16\+\_\+15\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q17\+\_\+14\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q18\+\_\+13\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q19\+\_\+12\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q20\+\_\+11\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q21\+\_\+10\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q22\+\_\+9\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q23\+\_\+8\+\_\+t}
+\item 
+typedef int32\+\_\+t {\bfseries q31\+\_\+0\+\_\+t}
+\item 
+typedef uint32\+\_\+t {\bfseries uq32\+\_\+t}
+\item 
+typedef uint32\+\_\+t {\bfseries uq14\+\_\+18\+\_\+t}
+\item 
+typedef uint32\+\_\+t {\bfseries uq32\+\_\+0\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q63\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q1\+\_\+62\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q2\+\_\+61\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q3\+\_\+60\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q4\+\_\+59\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q5\+\_\+58\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q6\+\_\+57\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q7\+\_\+56\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q8\+\_\+55\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q16\+\_\+47\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q23\+\_\+40\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q31\+\_\+32\+\_\+t}
+\item 
+typedef int64\+\_\+t {\bfseries q63\+\_\+0\+\_\+t}
+\item 
+typedef uint64\+\_\+t {\bfseries uq64\+\_\+t}
+\item 
+typedef uint64\+\_\+t {\bfseries uq64\+\_\+0\+\_\+t}
+\end{DoxyCompactItemize}
+\end{Indent}
+\doxysubsection*{Q15.}
+\label{_amgrpb1d56f813bd44c867d36fb206f148f21}%
+\begin{DoxyNote}{Note}
+Some arguments are used multiple times, make sure not to pass expressions. 
+\end{DoxyNote}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries q15add}(a,  b)~((q15\+\_\+t)(qadd16((q15\+\_\+t)(a),(q15\+\_\+t)(b)) \& 0x\+F\+F\+FF))
+\item 
+\#define {\bfseries q15sub}(a,  b)~((q15\+\_\+t)(qsub16((q15\+\_\+t)(a),(q15\+\_\+t)(b)) \& 0x\+F\+F\+FF))
+\item 
+\#define {\bfseries q15mul}(a,  b)~((q15\+\_\+t)(((int32\+\_\+t)(q15\+\_\+t)(a) $\ast$ (q15\+\_\+t)(b))$>$$>$15))
+\item 
+\#define {\bfseries q15absmul}(a,  b)~(-\/q15mul(a, -\/b))
+\item 
+\#define {\bfseries q15abs}(a)~((q15\+\_\+t)(qsub16(((q15\+\_\+t)(a) $^\wedge$ ((q15\+\_\+t)(a)$>$$>$15)), ((q15\+\_\+t)(a)$>$$>$15)) \& 0x\+F\+F\+FF))
+\item 
+\#define {\bfseries q15addp}(a,  b)~((simd32\+\_\+t)(qadd16((simd32\+\_\+t)(a),(simd32\+\_\+t)(b))))
+\item 
+\#define {\bfseries q15subp}(a,  b)~((simd32\+\_\+t)(qsub16((simd32\+\_\+t)(a),(simd32\+\_\+t)(b))))
+\item 
+\#define {\bfseries q15absp}(a)~((simd32\+\_\+t)(qsub16((simd32\+\_\+t)(a) $^\wedge$ ((simd32\+\_\+t)(a)$>$$>$15), (simd32\+\_\+t)(a)$>$$>$15)))
+\item 
+static q15\+\_\+t \mbox{\hyperlink{group__utils__fixed__math_ga94f298e4f812c0341679dadf4e469a69}{q15max}} (q15\+\_\+t a, q15\+\_\+t b)
+\begin{DoxyCompactList}\small\item\em Maximum. \end{DoxyCompactList}\item 
+static q15\+\_\+t \mbox{\hyperlink{group__utils__fixed__math_gaed0dbbd50dca8315871cacc6dbf685bc}{q15min}} (q15\+\_\+t a, q15\+\_\+t b)
+\begin{DoxyCompactList}\small\item\em Minimum. \end{DoxyCompactList}\item 
+static simd32\+\_\+t \mbox{\hyperlink{group__utils__fixed__math_ga439f56f45b8624bbba86c009a46a9a32}{q15maxp}} (simd32\+\_\+t a, simd32\+\_\+t b)
+\begin{DoxyCompactList}\small\item\em Maximum. \end{DoxyCompactList}\item 
+static simd32\+\_\+t \mbox{\hyperlink{group__utils__fixed__math_gaeb0bc5bb14e0dc548e6a4788321d8e3f}{q15minp}} (simd32\+\_\+t a, simd32\+\_\+t b)
+\begin{DoxyCompactList}\small\item\em Minimum. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Q31.}
+\label{_amgrp44935b30b688cfe14a332d79ef27b480}%
+\begin{DoxyNote}{Note}
+Some arguments are used multiple times, make sure not to pass expressions. 
+\end{DoxyNote}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries q31add}(a,  b)~(qadd((q31\+\_\+t)(a),(q31\+\_\+t)(b)))
+\item 
+\#define {\bfseries q31sub}(a,  b)~(qsub((q31\+\_\+t)(a),(q31\+\_\+t)(b)))
+\item 
+\#define {\bfseries q31mul}(a,  b)~((q31\+\_\+t)(((q63\+\_\+t)(q31\+\_\+t)(a) $\ast$ (q31\+\_\+t)(b))$>$$>$31))
+\item 
+\#define {\bfseries q31absmul}(a,  b)~(-\/q31mul(a,-\/b))
+\item 
+\#define {\bfseries q31abs}(a)~(qsub((q31\+\_\+t)(a) $^\wedge$ ((q31\+\_\+t)(a)$>$$>$31), (q31\+\_\+t)(a)$>$$>$31))
+\item 
+static q31\+\_\+t \mbox{\hyperlink{group__utils__fixed__math_gadd730c1104c15095b938300dd066ed60}{q31max}} (q31\+\_\+t a, q31\+\_\+t b)
+\begin{DoxyCompactList}\small\item\em Maximum. \end{DoxyCompactList}\item 
+static q31\+\_\+t \mbox{\hyperlink{group__utils__fixed__math_gae1c470c5c7c1b07e8e98f03f753dba77}{q31min}} (q31\+\_\+t a, q31\+\_\+t b)
+\begin{DoxyCompactList}\small\item\em Minimum. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Fixed Point Math Utilities. 
+

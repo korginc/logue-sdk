@@ -1,0 +1,93 @@
+\hypertarget{group__modfx__inst}{}\doxysection{Modulation Effect Instance (modfx)}
+\label{group__modfx__inst}\index{Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}}
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structuser__modfx__hook__table}{user\+\_\+modfx\+\_\+hook\+\_\+table}}
+\item 
+struct \mbox{\hyperlink{structuser__modfx__data}{user\+\_\+modfx\+\_\+data}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}\label{group__modfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}} 
+\#define {\bfseries \+\_\+\+\_\+sdram}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((section(\char`\"{}.sdram\char`\"{})))
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga1279d5595265df4e6a6e0af6ce7b171d}\label{group__modfx__inst_ga1279d5595265df4e6a6e0af6ce7b171d}} 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+init
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga494b853126d08f155ad6be0d4d734282}\label{group__modfx__inst_ga494b853126d08f155ad6be0d4d734282}} 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+P\+R\+O\+C\+E\+SS}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+process
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga2d7ccaa59b94b340094c21b543503876}\label{group__modfx__inst_ga2d7ccaa59b94b340094c21b543503876}} 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+S\+U\+S\+P\+E\+ND}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+suspend
+\item 
+\mbox{\Hypertarget{group__modfx__inst_gad68cd8b4158289f9493560b6fc77e093}\label{group__modfx__inst_gad68cd8b4158289f9493560b6fc77e093}} 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+R\+E\+S\+U\+ME}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+resume
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga6bbfbdac075f0b043aac53ad2c5932e3}\label{group__modfx__inst_ga6bbfbdac075f0b043aac53ad2c5932e3}} 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+param
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__modfx__inst_gad9f91eede0a9944bd7256a939c041408}\label{group__modfx__inst_gad9f91eede0a9944bd7256a939c041408}} 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Entry}) (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga9b08840f9ff4094ca7f60d4a42fa7593}\label{group__modfx__inst_ga9b08840f9ff4094ca7f60d4a42fa7593}} 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Init}) (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga587856d772cbe5171081feb011788e7f}\label{group__modfx__inst_ga587856d772cbe5171081feb011788e7f}} 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Process}) (const float $\ast$main\+\_\+xn, float $\ast$main\+\_\+yn, const float $\ast$sub\+\_\+xn, float $\ast$sub\+\_\+yn, uint32\+\_\+t frames)
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga31fb21a576dbf18e3808a5fc06db5f41}\label{group__modfx__inst_ga31fb21a576dbf18e3808a5fc06db5f41}} 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Suspend}) (void)
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga48dd1be920ef81b9ed91cb2b5f05bc23}\label{group__modfx__inst_ga48dd1be920ef81b9ed91cb2b5f05bc23}} 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Resume}) (void)
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga0ef197250ab24053300fdc664e05d169}\label{group__modfx__inst_ga0ef197250ab24053300fdc664e05d169}} 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Param}) (uint8\+\_\+t index, int32\+\_\+t value)
+\item 
+\mbox{\Hypertarget{group__modfx__inst_gaa8cd509de06ea007b40aee53bbb7622d}\label{group__modfx__inst_gaa8cd509de06ea007b40aee53bbb7622d}} 
+typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Dummy}) (void)
+\item 
+\mbox{\Hypertarget{group__modfx__inst_gada469d6590b3a4b5fd6aca726cdf8adb}\label{group__modfx__inst_gada469d6590b3a4b5fd6aca726cdf8adb}} 
+typedef struct \mbox{\hyperlink{structuser__modfx__hook__table}{user\+\_\+modfx\+\_\+hook\+\_\+table}} {\bfseries user\+\_\+modfx\+\_\+hook\+\_\+table\+\_\+t}
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga42279f4051944350fb7dbd11f881d1fd}\label{group__modfx__inst_ga42279f4051944350fb7dbd11f881d1fd}} 
+typedef struct \mbox{\hyperlink{structuser__modfx__data}{user\+\_\+modfx\+\_\+data}} {\bfseries user\+\_\+modfx\+\_\+data\+\_\+t}
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga3b9993e5a63875826d097ac92d781d09}\label{group__modfx__inst_ga3b9993e5a63875826d097ac92d781d09}} 
+enum {\bfseries user\+\_\+modfx\+\_\+param\+\_\+id\+\_\+t} \{ {\bfseries k\+\_\+user\+\_\+modfx\+\_\+param\+\_\+time} = 0, 
+{\bfseries k\+\_\+user\+\_\+modfx\+\_\+param\+\_\+depth}, 
+{\bfseries k\+\_\+num\+\_\+user\+\_\+modfx\+\_\+param\+\_\+id}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{group__modfx__inst_gacb26647b7b28ca29f52fabdcbed3a152}\label{group__modfx__inst_gacb26647b7b28ca29f52fabdcbed3a152}} 
+void {\bfseries \+\_\+entry} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}\label{group__modfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}} 
+void {\bfseries \+\_\+hook\+\_\+init} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\item 
+\mbox{\Hypertarget{group__modfx__inst_gaea822f104394d2f1d9139568d18d7994}\label{group__modfx__inst_gaea822f104394d2f1d9139568d18d7994}} 
+void {\bfseries \+\_\+hook\+\_\+process} (const float $\ast$main\+\_\+xn, float $\ast$main\+\_\+yn, const float $\ast$sub\+\_\+xn, float $\ast$sub\+\_\+yn, uint32\+\_\+t frames)
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga51724f6540f59f6ee95fbe72d9655315}\label{group__modfx__inst_ga51724f6540f59f6ee95fbe72d9655315}} 
+void {\bfseries \+\_\+hook\+\_\+suspend} (void)
+\item 
+\mbox{\Hypertarget{group__modfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}\label{group__modfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}} 
+void {\bfseries \+\_\+hook\+\_\+resume} (void)
+\item 
+\mbox{\Hypertarget{group__modfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}\label{group__modfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}} 
+void {\bfseries \+\_\+hook\+\_\+param} (uint8\+\_\+t index, int32\+\_\+t value)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}

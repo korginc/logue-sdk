@@ -1,0 +1,45 @@
+\hypertarget{buffer__ops_8h}{}\doxysection{/home/etienne/\+Documents/\+\_\+projects/logue-\/sdk/logue-\/sdk-\/alt/platform/nutekt-\/digital/inc/utils/buffer\+\_\+ops.h File Reference}
+\label{buffer__ops_8h}\index{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/nutekt-\/digital/inc/utils/buffer\_ops.h@{/home/etienne/Documents/\_projects/logue-\/sdk/logue-\/sdk-\/alt/platform/nutekt-\/digital/inc/utils/buffer\_ops.h}}
+
+
+Operations over data buffers.  
+
+
+{\ttfamily \#include \char`\"{}fixed\+\_\+math.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}int\+\_\+math.\+h\char`\"{}}\newline
+{\ttfamily \#include \char`\"{}float\+\_\+math.\+h\char`\"{}}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries R\+E\+P4}(expr)~(expr);(expr);(expr);(expr);
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{Indent}\textbf{ Buffer format conversion}\par
+\begin{DoxyCompactItemize}
+\item 
+static void \mbox{\hyperlink{group__utils__buffer__ops_ga88b304b1d72d236e5adb6347c503a806}{buf\+\_\+q31\+\_\+to\+\_\+f32}} (const q31\+\_\+t $\ast$q31, float $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ flt, const size\+\_\+t len)
+\begin{DoxyCompactList}\small\item\em Buffer-\/wise Q31 to float conversion. \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{group__utils__buffer__ops_ga190a92fbb9a26862eded35fd7bf9bcfd}{buf\+\_\+f32\+\_\+to\+\_\+q31}} (const float $\ast$flt, q31\+\_\+t $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ q31, const size\+\_\+t len)
+\begin{DoxyCompactList}\small\item\em Buffer-\/wise float to Q31 conversion. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}\textbf{ Buffer clear}\par
+\begin{DoxyCompactItemize}
+\item 
+static void \mbox{\hyperlink{group__utils__buffer__ops_gae0d1c2944e8c5591e0c720c8bd115e4a}{buf\+\_\+clr\+\_\+f32}} (float $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ ptr, const uint32\+\_\+t len)
+\begin{DoxyCompactList}\small\item\em Buffer clear (float version) \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{group__utils__buffer__ops_ga919da9a4ef2fafa8dc53e21cf4c9d488}{buf\+\_\+clr\+\_\+u32}} (uint32\+\_\+t $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ ptr, const size\+\_\+t len)
+\begin{DoxyCompactList}\small\item\em Buffer clear (32bit unsigned integer version). \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+\begin{Indent}\textbf{ Buffer copy}\par
+\begin{DoxyCompactItemize}
+\item 
+static void \mbox{\hyperlink{group__utils__buffer__ops_ga1f282da20f88a19b2a808a462d07b184}{buf\+\_\+cpy\+\_\+f32}} (const float $\ast$src, float $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ dst, const size\+\_\+t len)
+\begin{DoxyCompactList}\small\item\em Buffer copy (float version). \end{DoxyCompactList}\item 
+static void \mbox{\hyperlink{group__utils__buffer__ops_gaf84d4a02bfd6940f02dcf23cd0fcc9ad}{buf\+\_\+cpy\+\_\+u32}} (const uint32\+\_\+t $\ast$src, uint32\+\_\+t $\ast$\+\_\+\+\_\+restrict\+\_\+\+\_\+ dst, const size\+\_\+t len)
+\begin{DoxyCompactList}\small\item\em Buffer copy (32bit unsigned integer version). \end{DoxyCompactList}\end{DoxyCompactItemize}
+\end{Indent}
+
+
+\doxysubsection{Detailed Description}
+Operations over data buffers. 
+
