@@ -1,5 +1,7 @@
 ## NuTekt NTS-1 digital SDK Source and Template Projects 
 
+[日本語](./README_ja.md)
+
 ### Overview
 
 All source files needed to build custom oscillators and effects for the [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1) exist under this directory.

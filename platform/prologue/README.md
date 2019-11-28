@@ -1,5 +1,7 @@
 ## prologue SDK Source and Template Projects
 
+[日本語](./README_ja.md)
+
 ### Overview
 
 All source files needed to build custom oscillators and effects for the [prologue synthesizer](https://www.korg.com/products/synthesizers/prologue) exist under this directory.
