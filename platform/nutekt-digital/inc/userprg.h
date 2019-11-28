@@ -34,7 +34,7 @@
  * @file    userprg.h
  * @brief   Common C interface header for custom user programs.
  *
- * @addtogroup api
+ * @addtogroup common Common
  * @{
  */
 
@@ -83,7 +83,7 @@ extern "C" {
     k_user_target_nutektdigital_osc    = (3U<<8) | k_user_module_osc,
   };
   
-#define USER_TARGET_PLATFORM      (k_user_target_miniloguexd)
+#define USER_TARGET_PLATFORM      (k_user_target_nutektdigital)
 #define USER_TARGET_PLATFORM_MASK (0x7F<<8)
 #define USER_TARGET_MODULE_MASK   (0x7F)
 
