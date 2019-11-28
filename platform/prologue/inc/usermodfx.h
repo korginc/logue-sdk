@@ -35,7 +35,10 @@
  * @file    usermodfx.h
  * @brief   C interface header for user modulation fx.
  *
- * @addtogroup api
+ * @addtogroup fx Effects
+ * @{
+ *
+ * @addtogroup modfx_inst Modulation Effect Instance (modfx)
  * @{
  */
 
@@ -114,3 +117,4 @@ extern "C" {
 
 #endif // __usermodfx_h
 
+/** @} @} */

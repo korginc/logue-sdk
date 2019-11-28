@@ -35,7 +35,10 @@
  * @file    userdelfx.h
  * @brief   C interface header for user delay fx.
  *
- * @addtogroup api
+ * @addtogroup fx Effects
+ * @{
+ *
+ * @addtogroup delfx_inst Delay Effect Instance (delfx)
  * @{
  */
 
@@ -112,4 +115,4 @@ extern "C" {
   
 #endif // __userdelfx_h
 
-/** @} */
+/** @} @} */

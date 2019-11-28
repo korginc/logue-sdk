@@ -35,8 +35,12 @@
  * @file    int_math.h
  * @brief   Integer Math Utilities.
  *
- * @addtogroup UTILS
+ * @addtogroup utils Utils
  * @{
+ *
+ * @addtogroup utils_int_math Integer Math
+ * @{
+ *
  */
 
 #ifndef __int_math_h
@@ -53,29 +57,47 @@
  * @{
  */
 
+/** Clip upper bound of signed integer x to m (inclusive)
+ */
 static inline __attribute__((optimize("Ofast"), always_inline))
-int32_t clipmaxi32(const int32_t x, const int32_t m)
-{ return (((x)>=m)?m:(x)); }
+int32_t clipmaxi32(const int32_t x, const int32_t m) {
+  return (((x)>=m)?m:(x));
+}
 
+/** Clip lower bound of signed integer x to m (inclusive)
+ */
 static inline __attribute__((optimize("Ofast"), always_inline))
-int32_t clipmini32(const int32_t  m, const int32_t x)
-{ return (((x)<=m)?m:(x)); }
+int32_t clipmini32(const int32_t  m, const int32_t x) {
+  return (((x)<=m)?m:(x));
+}
 
+/** Clip signe integer x between min and max (inclusive)
+ */
 static inline __attribute__((optimize("Ofast"), always_inline))
-int32_t clipminmaxi32(const int32_t min, const int32_t x, const int32_t max)
-{ return (((x)>=max)?max:((x)<=min)?min:(x)); }
+int32_t clipminmaxi32(const int32_t min, const int32_t x, const int32_t max) {
+  return (((x)>=max)?max:((x)<=min)?min:(x));
+}
 
+/** Clip upper bound of unsigned integer x to m (inclusive)
+ */
 static inline __attribute__((optimize("Ofast"), always_inline))
-uint32_t clipmaxu32(const uint32_t x, const uint32_t m)
-{ return (((x)>=m)?m:(x)); }
+uint32_t clipmaxu32(const uint32_t x, const uint32_t m) {
+  return (((x)>=m)?m:(x));
+}
 
+/** Clip lower bound of unsigned integer x to m (inclusive)
+ */
 static inline __attribute__((optimize("Ofast"), always_inline))
-uint32_t clipminu32(const uint32_t  m, const uint32_t x)
-{ return (((x)<=m)?m:(x)); }
+uint32_t clipminu32(const uint32_t  m, const uint32_t x) {
+  return (((x)<=m)?m:(x));
+}
 
+/** Clip unsigned integer x between min and max (inclusive)
+ */
 static inline __attribute__((optimize("Ofast"), always_inline))
-uint32_t clipminmaxu32(const uint32_t min, const uint32_t x, const uint32_t max)
-{ return (((x)>=max)?max:((x)<=min)?min:(x)); }
+uint32_t clipminmaxu32(const uint32_t min, const uint32_t x, const uint32_t max) {
+  return (((x)>=max)?max:((x)<=min)?min:(x));
+}
 
 
 /** @} */
@@ -84,6 +106,13 @@ uint32_t clipminmaxu32(const uint32_t min, const uint32_t x, const uint32_t max)
 /* Power of 2s.                                                              */
 /*===========================================================================*/
 
+/**
+ * @name    Power of 2s
+ * @{
+ */
+
+/** Compute next power of 2 greater than x
+ */
 static inline __attribute__((always_inline))
 uint32_t nextpow2_u32(uint32_t x) {
   x--;
@@ -93,11 +122,15 @@ uint32_t nextpow2_u32(uint32_t x) {
   return ++x;
 }
 
+/** Check if x is a power of 2
+ */
 static inline __attribute__((always_inline))
 uint8_t ispow2_u32(const uint32_t x) {
   return x && !(x & (x-1));
 }
 
+/** @} */
+
 #endif // __int_math_h
 
-/** @} */
+/** @} @} */

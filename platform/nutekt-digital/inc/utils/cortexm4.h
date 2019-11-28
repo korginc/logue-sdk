@@ -35,7 +35,10 @@
  * @file    cortexm4.h
  * @brief   ARM Cortex-M4 specific header.
  *
- * @addtogroup UTILS
+ * @addtogroup utils Utils
+ * @{
+ *
+ * @addtogroup utils_cortexm4 ARM Cortex-M4 Specific
  * @{
  */
 
@@ -44,8 +47,11 @@
 
 #include "arm_math.h" // CMSIS
 
-// ARM Cortex-M4 Core Intrinsics ------------------------------------------------------------
-// See http://www.keil.com/pack/doc/cmsis/Core/html/group__intrinsic__CPU__gr.html
+/**
+ * @name    ARM Cortex-M4 Core Intrinsics
+ * @note    See http://www.keil.com/pack/doc/cmsis/Core/html/group__intrinsic__CPU__gr.html
+ * @{
+ */
 
 #define bkpt   __BKPT
 #define clrex  __CLREX
@@ -90,6 +96,13 @@
 #define wfe    __WFE
 #define wfi    __WFI
 
+/** @} */
+
+/**
+ * @name    APSR
+ * @{
+ */
+
 #define apsr() __get_APSR()
 #define apsr_clr(m) {                                                   \
     uint32_t p;                                                         \
@@ -98,9 +111,13 @@
                       "msr APSR_nzcvq, %0\r\n" : "=r" (p) : "i" ((m))); \
   }
 
-// ARM Cortex-M4 SIMD Intrinsics ------------------------------------------------------------
-// See http://www.keil.com/pack/doc/cmsis/Core/html/group__intrinsic__SIMD__gr.html
-//   and http://www.keil.com/support/man/docs/ARMASM/armasm_dom1361289850039.htm
+/** @} */
+
+/**
+ * @name ARM Cortex-M4 SIMD Intrinsics
+ * @note See http://www.keil.com/pack/doc/cmsis/Core/html/group__intrinsic__SIMD__gr.html and http://www.keil.com/support/man/docs/ARMASM/armasm_dom1361289850039.htm
+ * @{
+ */
 
 #define simd32_t __SIMD32_TYPE
 
@@ -167,6 +184,8 @@
 #define pkhtb   __PKHTB
 #define smmla   __SMMLA
 
+/** @} */
+
 #endif // __cortexm4_h
 
-/** @} */
+/** @} @} */

@@ -35,7 +35,10 @@
  * @file    fx_api.h
  * @brief   Effects runtime API.
  *
- * @addtogroup api
+ * @addtogroup fx Effects
+ * @{
+ * 
+ * @addtogroup fx_api Runtime API
  * @{
  */
 
@@ -421,4 +424,4 @@ extern "C" {
 
 #endif // __fx_api_h
 
-/** @} */
+/** @} @} */

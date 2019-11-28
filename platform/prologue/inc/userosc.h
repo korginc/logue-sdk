@@ -35,7 +35,10 @@
  * @file    userosc.h
  * @brief   C interface header for user oscillators.
  *
- * @addtogroup api
+ * @addtogroup osc Oscillator
+ * @{
+ *
+ * @addtogroup osc_inst Oscillator Instance (osc)
  * @{
  */
 
@@ -132,4 +135,4 @@ extern "C" {
 
 #endif // __userosc_h
 
-/** @} */
+/** @} @} */

@@ -35,8 +35,12 @@
  * @file    fixed_math.h
  * @brief   Fixed Point Math Utilities.
  *
- * @addtogroup UTILS
+ * @addtogroup utils Utils
  * @{
+ *
+ * @addtogroup utils_fixed_math Fixed-Point Math
+ * @{
+ *
  */
 
 #ifndef __fixed_math_h
@@ -167,10 +171,6 @@ typedef uint64_t uq64_0_t;
 /*===========================================================================*/
 /* Common Primitives.                                                        */
 /*===========================================================================*/
-/**
- * @name   Common Primitives.
- * @{
- */
 
 // Some useful references:
 // For absolute value see: https://community.arm.com/processors/f/discussions/6636/how-to-get-absolute-value-of-a-32-bit-signed-integer-as-fast-as-possible
@@ -188,32 +188,36 @@ typedef uint64_t uq64_0_t;
 #define q15absmul(a,b) (-q15mul(a, -b))
 #define q15abs(a)   ((q15_t)(qsub16(((q15_t)(a) ^ ((q15_t)(a)>>15)), ((q15_t)(a)>>15)) & 0xFFFF))
 
+/** Maximum
+ */
 static inline __attribute__((optimize("Ofast"),always_inline))
 q15_t q15max(q15_t a, q15_t b) {
   qsub16(a,b);
   return sel(a,b);
 }
 
+/** Minimum
+ */
 static inline __attribute__((optimize("Ofast"),always_inline))
 q15_t q15min(q15_t a, q15_t b) {
   qsub16(b,a);
   return sel(a,b);
 }
 
-/* static inline __attribute__((optimize("Ofast"),always_inline)) */
-/* uint8_t q15recip(const q15_t in, int16_t *dst) { */
-/*   return (uint8_t)arm_recip_q15(in, dst, (q15_t *)q15_recip_table); */
-/* } */
-
 #define q15addp(a,b) ((simd32_t)(qadd16((simd32_t)(a),(simd32_t)(b))))
 #define q15subp(a,b) ((simd32_t)(qsub16((simd32_t)(a),(simd32_t)(b))))
 #define q15absp(a)   ((simd32_t)(qsub16((simd32_t)(a) ^ ((simd32_t)(a)>>15), (simd32_t)(a)>>15)))
 
+/** Maximum
+ */
 static inline __attribute__((optimize("Ofast"),always_inline))
 simd32_t q15maxp(simd32_t a, simd32_t b) {
   qsub16(a,b);
   return sel(a,b);
 }
+
+/** Minimum
+ */
 static inline __attribute__((optimize("Ofast"),always_inline))
 simd32_t q15minp(simd32_t a, simd32_t b) {
   qsub16(b,a);
@@ -234,12 +238,16 @@ simd32_t q15minp(simd32_t a, simd32_t b) {
 #define q31absmul(a,b) (-q31mul(a,-b))
 #define q31abs(a)   (qsub((q31_t)(a) ^ ((q31_t)(a)>>31), (q31_t)(a)>>31))
 
+/** Maximum
+ */
 static inline __attribute__((optimize("Ofast"),always_inline))
 q31_t q31max(q31_t a, q31_t b) {
   qsub(a,b);
   return sel(a,b);
 }
 
+/** Minimum
+ */
 static inline __attribute__((optimize("Ofast"),always_inline))
 q31_t q31min(q31_t a, q31_t b) {
   qsub(b,a);
@@ -249,9 +257,6 @@ q31_t q31min(q31_t a, q31_t b) {
 /** @} */
 
 
-/** @} */
-
-
 #endif // __fixed_math_h
 
-/** @} */
+/** @} @} */

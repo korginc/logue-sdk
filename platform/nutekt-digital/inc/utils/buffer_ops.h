@@ -35,8 +35,12 @@
  * @file    buffer_ops.h
  * @brief   Operations over data buffers.
  *
- * @addtogroup UTILS
+ * @addtogroup utils Utils
  * @{
+ *
+ * @addtogroup utils_buffer_ops Buffer Operations
+ * @{
+ *
  */
 
 #ifndef __buffer_ops_h
@@ -53,6 +57,8 @@
  * @{
  */
 
+/** Buffer-wise Q31 to float conversion
+ */
 static inline __attribute__((optimize("Ofast"),always_inline))
 void buf_q31_to_f32(const q31_t *q31,
                     float * __restrict__ flt,
@@ -68,6 +74,8 @@ void buf_q31_to_f32(const q31_t *q31,
   }
 }
 
+/** Buffer-wise float to Q31 conversion
+ */
 static inline __attribute__((optimize("Ofast"),always_inline))
 void buf_f32_to_q31(const float *flt,
                     q31_t * __restrict__ q31,
@@ -90,6 +98,8 @@ void buf_f32_to_q31(const float *flt,
  * @{
  */
 
+/** Buffer clear (float version)
+ */
 static inline __attribute__((optimize("Ofast"),always_inline))
 void buf_clr_f32(float * __restrict__ ptr,
                  const uint32_t len)
@@ -104,6 +114,8 @@ void buf_clr_f32(float * __restrict__ ptr,
   }
 }
 
+/** Buffer clear (32bit unsigned integer version).
+ */
 static inline __attribute__((optimize("Ofast"),always_inline))
 void buf_clr_u32(uint32_t * __restrict__ ptr,
                  const size_t len)
@@ -125,6 +137,8 @@ void buf_clr_u32(uint32_t * __restrict__ ptr,
  * @{
  */
 
+/** Buffer copy (float version).
+ */
 static inline __attribute__((optimize("Ofast"),always_inline))
 void buf_cpy_f32(const float *src,
                  float * __restrict__ dst,
@@ -140,6 +154,8 @@ void buf_cpy_f32(const float *src,
   }
 }
 
+/** Buffer copy (32bit unsigned integer version).
+ */
 static inline __attribute__((optimize("Ofast"),always_inline))
 void buf_cpy_u32(const uint32_t *src,
                  uint32_t * __restrict__ dst,
@@ -159,4 +175,4 @@ void buf_cpy_u32(const uint32_t *src,
 
 #endif // __buffer_ops_h
 
-/** @} */
+/** @} @} */

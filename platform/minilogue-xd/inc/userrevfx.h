@@ -35,7 +35,10 @@
  * @file    userrevfx.h
  * @brief   C interface header for user reverb fx.
  *
- * @addtogroup api
+ * @addtogroup fx Effects
+ * @{
+ *
+ * @addtogroup revfx_inst Reverb Effect Instance (revfx)
  * @{
  */
 
@@ -112,4 +115,4 @@ extern "C" {
   
 #endif // __userrevfx_h
 
-/** @} */
+/** @} @} */

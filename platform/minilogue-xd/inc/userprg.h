@@ -34,7 +34,7 @@
  * @file    userprg.h
  * @brief   Common C interface header for custom user programs.
  *
- * @addtogroup api
+ * @addtogroup common Common
  * @{
  */
 

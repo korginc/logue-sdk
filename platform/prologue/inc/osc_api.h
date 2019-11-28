@@ -34,7 +34,10 @@
  * @file    osc_api.h
  * @brief   Oscillator runtime API.
  *
- * @addtogroup api
+ * @addtogroup osc Oscillator
+ * @{
+ *
+ * @addtogroup osc_api Runtime API
  * @{
  */
 
@@ -782,4 +785,4 @@ extern "C" {
 
 #endif // __osc_api_h
 
-/** @} */
+/** @} @} */
