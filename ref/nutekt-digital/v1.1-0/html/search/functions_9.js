@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['nextpow2_5fu32_366',['nextpow2_u32',['../group__utils__int__math.html#gaead89cd443076420dfc53f83ece258f3',1,'int_math.h']]]
+  ['nextpow2_5fu32_376',['nextpow2_u32',['../group__utils__int__math.html#gaead89cd443076420dfc53f83ece258f3',1,'int_math.h']]]
 ];

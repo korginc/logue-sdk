@@ -7,8 +7,10 @@ var indexSectionsWithContent =
   4: "_abcdefilnopqrstuw",
   5: "km",
   6: "c",
-  7: "abcdefimoru",
-  8: "mt"
+  7: "u",
+  8: "k",
+  9: "abcdefimoru",
+  10: "mt"
 };
 
 var indexSectionNames =
@@ -20,8 +22,10 @@ var indexSectionNames =
   4: "functions",
   5: "variables",
   6: "typedefs",
-  7: "groups",
-  8: "pages"
+  7: "enums",
+  8: "enumvalues",
+  9: "groups",
+  10: "pages"
 };
 
 var indexSectionLabels =
@@ -33,7 +37,9 @@ var indexSectionLabels =
   4: "Functions",
   5: "Variables",
   6: "Typedefs",
-  7: "Modules",
-  8: "Pages"
+  7: "Enumerations",
+  8: "Enumerator",
+  9: "Modules",
+  10: "Pages"
 };
 

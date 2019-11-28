@@ -12,94 +12,61 @@ C interface header for user oscillators.
 \begin{DoxyCompactItemize}
 \item 
 struct \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param}}
-\item 
-struct \mbox{\hyperlink{structuser__osc__hook__table}{user\+\_\+osc\+\_\+hook\+\_\+table}}
-\item 
-struct \mbox{\hyperlink{structuser__osc__data}{user\+\_\+osc\+\_\+data}}
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Internal realtime parameters. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
-\#define {\bfseries param\+\_\+val\+\_\+to\+\_\+f32}(val)~((uint16\+\_\+t)val $\ast$ 9.\+77517106549365e-\/004f)
+\#define \mbox{\hyperlink{group__osc__inst_ga72749128a5dd70093194c1cb2f67910d}{param\+\_\+val\+\_\+to\+\_\+f32}}(val)~((uint16\+\_\+t)val $\ast$ 9.\+77517106549365e-\/004f)
+\begin{DoxyCompactList}\small\item\em Convert 10bit parameter values to float. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
 \item 
-\#define {\bfseries O\+S\+C\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+init
+typedef struct \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param}} \mbox{\hyperlink{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}{user\+\_\+osc\+\_\+param\+\_\+t}}
+\begin{DoxyCompactList}\small\item\em Internal realtime parameters. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
 \item 
-\#define {\bfseries O\+S\+C\+\_\+\+C\+Y\+C\+LE}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+cycle
+enum \mbox{\hyperlink{group__osc__inst_ga389ccf713f8ed0c77fec90998c5804ff}{user\+\_\+osc\+\_\+param\+\_\+id\+\_\+t}} \{ \newline
+{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id1} = 0, 
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id2}}, 
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id3}}, 
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id4}}, 
+\newline
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id5}}, 
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id6}}, 
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+shape}}, 
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+shiftshape}}, 
+\newline
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffad29a8e8d8253b6d09ceb29b1acac05e4}{k\+\_\+num\+\_\+user\+\_\+osc\+\_\+param\+\_\+id}}
+ \}
+\begin{DoxyCompactList}\small\item\em User facing osc-\/specific parameters. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Core A\+PI}
+\begin{DoxyCompactItemize}
 \item 
-\#define {\bfseries O\+S\+C\+\_\+\+N\+O\+T\+E\+ON}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+on
+\#define {\bfseries O\+S\+C\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__osc__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}{\+\_\+hook\+\_\+init}}
 \item 
-\#define {\bfseries O\+S\+C\+\_\+\+N\+O\+T\+E\+O\+FF}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+off
+\#define {\bfseries O\+S\+C\+\_\+\+C\+Y\+C\+LE}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__osc__inst_ga5fdcf65ee3fb8562620dc05cb4377b2f}{\+\_\+hook\+\_\+cycle}}
+\item 
+\#define {\bfseries O\+S\+C\+\_\+\+N\+O\+T\+E\+ON}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__osc__inst_gae328f96aa574fd6f5a845fbb55500efe}{\+\_\+hook\+\_\+on}}
+\item 
+\#define {\bfseries O\+S\+C\+\_\+\+N\+O\+T\+E\+O\+FF}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__osc__inst_ga93a9b6927a917951dac4887808da3605}{\+\_\+hook\+\_\+off}}
 \item 
 \#define {\bfseries O\+S\+C\+\_\+\+M\+U\+TE}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+mute
 \item 
 \#define {\bfseries O\+S\+C\+\_\+\+V\+A\+L\+UE}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+value
 \item 
-\#define {\bfseries O\+S\+C\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+param
-\end{DoxyCompactItemize}
-\doxysubsection*{Typedefs}
-\begin{DoxyCompactItemize}
+\#define {\bfseries O\+S\+C\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__osc__inst_gae7b024ad4e7abb4f5ac93e3de5568e30}{\+\_\+hook\+\_\+param}}
 \item 
-typedef struct \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param}} {\bfseries user\+\_\+osc\+\_\+param\+\_\+t}
-\item 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Entry}) (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Init}) (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Cycle}) (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params, int32\+\_\+t $\ast$buf, const uint32\+\_\+t frames)
-\item 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+On}) (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
-\item 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Off}) (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
-\item 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Mute}) (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
-\item 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Value}) (uint16\+\_\+t value)
-\item 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Param}) (uint16\+\_\+t idx, uint16\+\_\+t value)
-\item 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Dummy}) (void)
-\item 
-typedef struct \mbox{\hyperlink{structuser__osc__hook__table}{user\+\_\+osc\+\_\+hook\+\_\+table}} {\bfseries user\+\_\+osc\+\_\+hook\+\_\+table\+\_\+t}
-\item 
-typedef struct \mbox{\hyperlink{structuser__osc__data}{user\+\_\+osc\+\_\+data}} {\bfseries user\+\_\+osc\+\_\+data\+\_\+t}
-\end{DoxyCompactItemize}
-\doxysubsection*{Enumerations}
-\begin{DoxyCompactItemize}
-\item 
-\mbox{\Hypertarget{group__osc__inst_ga389ccf713f8ed0c77fec90998c5804ff}\label{group__osc__inst_ga389ccf713f8ed0c77fec90998c5804ff}} 
-enum {\bfseries user\+\_\+osc\+\_\+param\+\_\+id\+\_\+t} \{ \newline
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id1} = 0, 
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id2}, 
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id3}, 
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id4}, 
-\newline
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id5}, 
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id6}, 
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+shape}, 
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+shiftshape}, 
-\newline
-{\bfseries k\+\_\+num\+\_\+user\+\_\+osc\+\_\+param\+\_\+id}
- \}
-\end{DoxyCompactItemize}
-\doxysubsection*{Functions}
-\begin{DoxyCompactItemize}
-\item 
-void {\bfseries \+\_\+entry} (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-void {\bfseries \+\_\+hook\+\_\+init} (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-void {\bfseries \+\_\+hook\+\_\+cycle} (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params, int32\+\_\+t $\ast$yn, const uint32\+\_\+t frames)
-\item 
-void {\bfseries \+\_\+hook\+\_\+on} (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
-\item 
-void {\bfseries \+\_\+hook\+\_\+off} (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
-\item 
-void {\bfseries \+\_\+hook\+\_\+mute} (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
-\item 
-void {\bfseries \+\_\+hook\+\_\+value} (uint16\+\_\+t value)
-\item 
-void {\bfseries \+\_\+hook\+\_\+param} (uint16\+\_\+t index, uint16\+\_\+t value)
-\end{DoxyCompactItemize}
+void \mbox{\hyperlink{group__osc__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}{\+\_\+hook\+\_\+init}} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\begin{DoxyCompactList}\small\item\em Initialization callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__osc__inst_ga5fdcf65ee3fb8562620dc05cb4377b2f}{\+\_\+hook\+\_\+cycle}} (const \mbox{\hyperlink{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params, int32\+\_\+t $\ast$yn, const uint32\+\_\+t frames)
+\begin{DoxyCompactList}\small\item\em Rendering callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__osc__inst_gae328f96aa574fd6f5a845fbb55500efe}{\+\_\+hook\+\_\+on}} (const \mbox{\hyperlink{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
+\begin{DoxyCompactList}\small\item\em Note on callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__osc__inst_ga93a9b6927a917951dac4887808da3605}{\+\_\+hook\+\_\+off}} (const \mbox{\hyperlink{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
+\begin{DoxyCompactList}\small\item\em Note off callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__osc__inst_gae7b024ad4e7abb4f5ac93e3de5568e30}{\+\_\+hook\+\_\+param}} (uint16\+\_\+t index, uint16\+\_\+t value)
+\begin{DoxyCompactList}\small\item\em Parameter change callback. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}

@@ -1,93 +1,200 @@
 \hypertarget{group__modfx__inst}{}\doxysection{Modulation Effect Instance (modfx)}
 \label{group__modfx__inst}\index{Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}}
-\doxysubsection*{Classes}
-\begin{DoxyCompactItemize}
-\item 
-struct \mbox{\hyperlink{structuser__modfx__hook__table}{user\+\_\+modfx\+\_\+hook\+\_\+table}}
-\item 
-struct \mbox{\hyperlink{structuser__modfx__data}{user\+\_\+modfx\+\_\+data}}
-\end{DoxyCompactItemize}
 \doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{group__modfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}\label{group__modfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}} 
-\#define {\bfseries \+\_\+\+\_\+sdram}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((section(\char`\"{}.sdram\char`\"{})))
-\item 
-\mbox{\Hypertarget{group__modfx__inst_ga1279d5595265df4e6a6e0af6ce7b171d}\label{group__modfx__inst_ga1279d5595265df4e6a6e0af6ce7b171d}} 
-\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+init
-\item 
-\mbox{\Hypertarget{group__modfx__inst_ga494b853126d08f155ad6be0d4d734282}\label{group__modfx__inst_ga494b853126d08f155ad6be0d4d734282}} 
-\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+P\+R\+O\+C\+E\+SS}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+process
-\item 
-\mbox{\Hypertarget{group__modfx__inst_ga2d7ccaa59b94b340094c21b543503876}\label{group__modfx__inst_ga2d7ccaa59b94b340094c21b543503876}} 
-\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+S\+U\+S\+P\+E\+ND}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+suspend
-\item 
-\mbox{\Hypertarget{group__modfx__inst_gad68cd8b4158289f9493560b6fc77e093}\label{group__modfx__inst_gad68cd8b4158289f9493560b6fc77e093}} 
-\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+R\+E\+S\+U\+ME}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+resume
-\item 
-\mbox{\Hypertarget{group__modfx__inst_ga6bbfbdac075f0b043aac53ad2c5932e3}\label{group__modfx__inst_ga6bbfbdac075f0b043aac53ad2c5932e3}} 
-\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+param
-\end{DoxyCompactItemize}
-\doxysubsection*{Typedefs}
-\begin{DoxyCompactItemize}
-\item 
-\mbox{\Hypertarget{group__modfx__inst_gad9f91eede0a9944bd7256a939c041408}\label{group__modfx__inst_gad9f91eede0a9944bd7256a939c041408}} 
-typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Entry}) (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-\mbox{\Hypertarget{group__modfx__inst_ga9b08840f9ff4094ca7f60d4a42fa7593}\label{group__modfx__inst_ga9b08840f9ff4094ca7f60d4a42fa7593}} 
-typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Init}) (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-\mbox{\Hypertarget{group__modfx__inst_ga587856d772cbe5171081feb011788e7f}\label{group__modfx__inst_ga587856d772cbe5171081feb011788e7f}} 
-typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Process}) (const float $\ast$main\+\_\+xn, float $\ast$main\+\_\+yn, const float $\ast$sub\+\_\+xn, float $\ast$sub\+\_\+yn, uint32\+\_\+t frames)
-\item 
-\mbox{\Hypertarget{group__modfx__inst_ga31fb21a576dbf18e3808a5fc06db5f41}\label{group__modfx__inst_ga31fb21a576dbf18e3808a5fc06db5f41}} 
-typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Suspend}) (void)
-\item 
-\mbox{\Hypertarget{group__modfx__inst_ga48dd1be920ef81b9ed91cb2b5f05bc23}\label{group__modfx__inst_ga48dd1be920ef81b9ed91cb2b5f05bc23}} 
-typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Resume}) (void)
-\item 
-\mbox{\Hypertarget{group__modfx__inst_ga0ef197250ab24053300fdc664e05d169}\label{group__modfx__inst_ga0ef197250ab24053300fdc664e05d169}} 
-typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Param}) (uint8\+\_\+t index, int32\+\_\+t value)
-\item 
-\mbox{\Hypertarget{group__modfx__inst_gaa8cd509de06ea007b40aee53bbb7622d}\label{group__modfx__inst_gaa8cd509de06ea007b40aee53bbb7622d}} 
-typedef void($\ast$ {\bfseries User\+Mod\+F\+X\+Func\+Dummy}) (void)
-\item 
-\mbox{\Hypertarget{group__modfx__inst_gada469d6590b3a4b5fd6aca726cdf8adb}\label{group__modfx__inst_gada469d6590b3a4b5fd6aca726cdf8adb}} 
-typedef struct \mbox{\hyperlink{structuser__modfx__hook__table}{user\+\_\+modfx\+\_\+hook\+\_\+table}} {\bfseries user\+\_\+modfx\+\_\+hook\+\_\+table\+\_\+t}
-\item 
-\mbox{\Hypertarget{group__modfx__inst_ga42279f4051944350fb7dbd11f881d1fd}\label{group__modfx__inst_ga42279f4051944350fb7dbd11f881d1fd}} 
-typedef struct \mbox{\hyperlink{structuser__modfx__data}{user\+\_\+modfx\+\_\+data}} {\bfseries user\+\_\+modfx\+\_\+data\+\_\+t}
-\end{DoxyCompactItemize}
+\#define \mbox{\hyperlink{group__modfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}{\+\_\+\+\_\+sdram}}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((section(\char`\"{}.sdram\char`\"{})))
+\begin{DoxyCompactList}\small\item\em This macro can be used to declare a memory buffer in S\+D\+R\+AM space. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsection*{Enumerations}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{group__modfx__inst_ga3b9993e5a63875826d097ac92d781d09}\label{group__modfx__inst_ga3b9993e5a63875826d097ac92d781d09}} 
-enum {\bfseries user\+\_\+modfx\+\_\+param\+\_\+id\+\_\+t} \{ {\bfseries k\+\_\+user\+\_\+modfx\+\_\+param\+\_\+time} = 0, 
-{\bfseries k\+\_\+user\+\_\+modfx\+\_\+param\+\_\+depth}, 
-{\bfseries k\+\_\+num\+\_\+user\+\_\+modfx\+\_\+param\+\_\+id}
+enum \mbox{\hyperlink{group__modfx__inst_ga3b9993e5a63875826d097ac92d781d09}{user\+\_\+modfx\+\_\+param\+\_\+id\+\_\+t}} \{ {\bfseries k\+\_\+user\+\_\+modfx\+\_\+param\+\_\+time} = 0, 
+\mbox{\hyperlink{group__modfx__inst_gga3b9993e5a63875826d097ac92d781d09aca340e656a23a5d83dddf895b26e7013}{k\+\_\+user\+\_\+modfx\+\_\+param\+\_\+depth}}, 
+\mbox{\hyperlink{group__modfx__inst_gga3b9993e5a63875826d097ac92d781d09a9710f31054b61240f12fd6ec01ec9d8e}{k\+\_\+num\+\_\+user\+\_\+modfx\+\_\+param\+\_\+id}}
  \}
-\end{DoxyCompactItemize}
-\doxysubsection*{Functions}
+\begin{DoxyCompactList}\small\item\em User facing parameters. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Core A\+PI}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{group__modfx__inst_gacb26647b7b28ca29f52fabdcbed3a152}\label{group__modfx__inst_gacb26647b7b28ca29f52fabdcbed3a152}} 
-void {\bfseries \+\_\+entry} (uint32\+\_\+t platform, uint32\+\_\+t api)
+void \mbox{\hyperlink{group__modfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}{\+\_\+hook\+\_\+init}} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\begin{DoxyCompactList}\small\item\em Initialization callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__modfx__inst_gaea822f104394d2f1d9139568d18d7994}{\+\_\+hook\+\_\+process}} (const float $\ast$main\+\_\+xn, float $\ast$main\+\_\+yn, const float $\ast$sub\+\_\+xn, float $\ast$sub\+\_\+yn, uint32\+\_\+t frames)
+\begin{DoxyCompactList}\small\item\em Processing callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__modfx__inst_ga51724f6540f59f6ee95fbe72d9655315}{\+\_\+hook\+\_\+suspend}} (void)
+\begin{DoxyCompactList}\small\item\em Suspend callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__modfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}{\+\_\+hook\+\_\+resume}} (void)
+\begin{DoxyCompactList}\small\item\em Resume callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__modfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}{\+\_\+hook\+\_\+param}} (uint8\+\_\+t index, int32\+\_\+t value)
+\begin{DoxyCompactList}\small\item\em Parameter change callback. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__modfx__inst_ga1279d5595265df4e6a6e0af6ce7b171d}\label{group__modfx__inst_ga1279d5595265df4e6a6e0af6ce7b171d}} 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__osc__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}{\+\_\+hook\+\_\+init}}
 \item 
-\mbox{\Hypertarget{group__modfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}\label{group__modfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}} 
-void {\bfseries \+\_\+hook\+\_\+init} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\mbox{\Hypertarget{group__modfx__inst_ga494b853126d08f155ad6be0d4d734282}\label{group__modfx__inst_ga494b853126d08f155ad6be0d4d734282}} 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+P\+R\+O\+C\+E\+SS}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_ga2103260c965e55d6bc8ec31aafec7687}{\+\_\+hook\+\_\+process}}
 \item 
-\mbox{\Hypertarget{group__modfx__inst_gaea822f104394d2f1d9139568d18d7994}\label{group__modfx__inst_gaea822f104394d2f1d9139568d18d7994}} 
-void {\bfseries \+\_\+hook\+\_\+process} (const float $\ast$main\+\_\+xn, float $\ast$main\+\_\+yn, const float $\ast$sub\+\_\+xn, float $\ast$sub\+\_\+yn, uint32\+\_\+t frames)
+\mbox{\Hypertarget{group__modfx__inst_ga2d7ccaa59b94b340094c21b543503876}\label{group__modfx__inst_ga2d7ccaa59b94b340094c21b543503876}} 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+S\+U\+S\+P\+E\+ND}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_ga51724f6540f59f6ee95fbe72d9655315}{\+\_\+hook\+\_\+suspend}}
 \item 
-\mbox{\Hypertarget{group__modfx__inst_ga51724f6540f59f6ee95fbe72d9655315}\label{group__modfx__inst_ga51724f6540f59f6ee95fbe72d9655315}} 
-void {\bfseries \+\_\+hook\+\_\+suspend} (void)
+\mbox{\Hypertarget{group__modfx__inst_gad68cd8b4158289f9493560b6fc77e093}\label{group__modfx__inst_gad68cd8b4158289f9493560b6fc77e093}} 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+R\+E\+S\+U\+ME}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}{\+\_\+hook\+\_\+resume}}
 \item 
-\mbox{\Hypertarget{group__modfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}\label{group__modfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}} 
-void {\bfseries \+\_\+hook\+\_\+resume} (void)
-\item 
-\mbox{\Hypertarget{group__modfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}\label{group__modfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}} 
-void {\bfseries \+\_\+hook\+\_\+param} (uint8\+\_\+t index, int32\+\_\+t value)
+\mbox{\Hypertarget{group__modfx__inst_ga6bbfbdac075f0b043aac53ad2c5932e3}\label{group__modfx__inst_ga6bbfbdac075f0b043aac53ad2c5932e3}} 
+\#define {\bfseries M\+O\+D\+F\+X\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__osc__inst_gae7b024ad4e7abb4f5ac93e3de5568e30}{\+\_\+hook\+\_\+param}}
 \end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{group__modfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}\label{group__modfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}} 
+\index{Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}!\_\_sdram@{\_\_sdram}}
+\index{\_\_sdram@{\_\_sdram}!Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}}
+\doxysubsubsection{\texorpdfstring{\_\_sdram}{\_\_sdram}}
+{\footnotesize\ttfamily \#define \+\_\+\+\_\+sdram~\+\_\+\+\_\+attribute\+\_\+\+\_\+((section(\char`\"{}.sdram\char`\"{})))}
+
+
+
+This macro can be used to declare a memory buffer in S\+D\+R\+AM space. 
+
+E.\+g.\+: float g\+\_\+my\+\_\+buffer\mbox{[}1024\mbox{]} \+\_\+\+\_\+sdram; 
+
+Definition at line 63 of file usermodfx.\+h.
+
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{group__modfx__inst_ga3b9993e5a63875826d097ac92d781d09}\label{group__modfx__inst_ga3b9993e5a63875826d097ac92d781d09}} 
+\index{Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}!user\_modfx\_param\_id\_t@{user\_modfx\_param\_id\_t}}
+\index{user\_modfx\_param\_id\_t@{user\_modfx\_param\_id\_t}!Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}}
+\doxysubsubsection{\texorpdfstring{user\_modfx\_param\_id\_t}{user\_modfx\_param\_id\_t}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{group__modfx__inst_ga3b9993e5a63875826d097ac92d781d09}{user\+\_\+modfx\+\_\+param\+\_\+id\+\_\+t}}}
+
+
+
+User facing parameters. 
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_user\_modfx\_param\_depth@{k\_user\_modfx\_param\_depth}!Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}}\index{Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}!k\_user\_modfx\_param\_depth@{k\_user\_modfx\_param\_depth}}}\mbox{\Hypertarget{group__modfx__inst_gga3b9993e5a63875826d097ac92d781d09aca340e656a23a5d83dddf895b26e7013}\label{group__modfx__inst_gga3b9993e5a63875826d097ac92d781d09aca340e656a23a5d83dddf895b26e7013}} 
+k\+\_\+user\+\_\+modfx\+\_\+param\+\_\+depth&Time parameter. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_num\_user\_modfx\_param\_id@{k\_num\_user\_modfx\_param\_id}!Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}}\index{Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}!k\_num\_user\_modfx\_param\_id@{k\_num\_user\_modfx\_param\_id}}}\mbox{\Hypertarget{group__modfx__inst_gga3b9993e5a63875826d097ac92d781d09a9710f31054b61240f12fd6ec01ec9d8e}\label{group__modfx__inst_gga3b9993e5a63875826d097ac92d781d09a9710f31054b61240f12fd6ec01ec9d8e}} 
+k\+\_\+num\+\_\+user\+\_\+modfx\+\_\+param\+\_\+id&Depth parameter. \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line 68 of file usermodfx.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{68                \{}
+\DoxyCodeLine{69     k\_user\_modfx\_param\_time = 0, }
+\DoxyCodeLine{70     \mbox{\hyperlink{group__modfx__inst_gga3b9993e5a63875826d097ac92d781d09aca340e656a23a5d83dddf895b26e7013}{k\_user\_modfx\_param\_depth}},    }
+\DoxyCodeLine{71     \mbox{\hyperlink{group__modfx__inst_gga3b9993e5a63875826d097ac92d781d09a9710f31054b61240f12fd6ec01ec9d8e}{k\_num\_user\_modfx\_param\_id}}}
+\DoxyCodeLine{72   \} \mbox{\hyperlink{group__modfx__inst_ga3b9993e5a63875826d097ac92d781d09}{user\_modfx\_param\_id\_t}};}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{group__modfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}\label{group__modfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}} 
+\index{Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}!\_hook\_init@{\_hook\_init}}
+\index{\_hook\_init@{\_hook\_init}!Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_init()}{\_hook\_init()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+init (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{platform,  }\item[{uint32\+\_\+t}]{api }\end{DoxyParamCaption})}
+
+
+
+Initialization callback. 
+
+Must be implemented by your custom effect.
+
+
+\begin{DoxyParams}{Parameters}
+{\em platform} & Current target platform/module. See \mbox{\hyperlink{userprg_8h}{userprg.\+h}} \\
+\hline
+{\em api} & Current A\+PI version. See \mbox{\hyperlink{userprg_8h}{userprg.\+h}} \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{group__modfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}\label{group__modfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}} 
+\index{Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}!\_hook\_param@{\_hook\_param}}
+\index{\_hook\_param@{\_hook\_param}!Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_param()}{\_hook\_param()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+param (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{index,  }\item[{int32\+\_\+t}]{value }\end{DoxyParamCaption})}
+
+
+
+Parameter change callback. 
+
+Must be implemented by your custom effect.
+
+
+\begin{DoxyParams}{Parameters}
+{\em index} & Parameter ID. See user\+\_\+modfx\+\_\+param\+\_\+id\+\_\+t. \\
+\hline
+{\em index} & Parameter value.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+All parameters have 10 bit resolution. 
+\end{DoxyNote}
+\mbox{\Hypertarget{group__modfx__inst_gaea822f104394d2f1d9139568d18d7994}\label{group__modfx__inst_gaea822f104394d2f1d9139568d18d7994}} 
+\index{Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}!\_hook\_process@{\_hook\_process}}
+\index{\_hook\_process@{\_hook\_process}!Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_process()}{\_hook\_process()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+process (\begin{DoxyParamCaption}\item[{const float $\ast$}]{main\+\_\+xn,  }\item[{float $\ast$}]{main\+\_\+yn,  }\item[{const float $\ast$}]{sub\+\_\+xn,  }\item[{float $\ast$}]{sub\+\_\+yn,  }\item[{uint32\+\_\+t}]{frames }\end{DoxyParamCaption})}
+
+
+
+Processing callback. 
+
+Must be implemented by your custom effect.
+
+
+\begin{DoxyParams}{Parameters}
+{\em main\+\_\+xn} & Input sample buffer for main timbre \\
+\hline
+{\em main\+\_\+yn} & Output sample buffer for main timbre \\
+\hline
+{\em sub\+\_\+xn} & Input sample buffer for sub timbre \\
+\hline
+{\em sub\+\_\+yn} & Output sample buffer for sub timbre \\
+\hline
+{\em frames} & Size of buffers. (2 samples per frames)\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Implementation must support at least up to 64 frames. 
+
+Optimize for powers of two. 
+
+On platforms that do not have a sub timbre the sub\+\_\+xn / sub\+\_\+yn parameters can be ignored. 
+\end{DoxyNote}
+\mbox{\Hypertarget{group__modfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}\label{group__modfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}} 
+\index{Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}!\_hook\_resume@{\_hook\_resume}}
+\index{\_hook\_resume@{\_hook\_resume}!Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_resume()}{\_hook\_resume()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+resume (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Resume callback. 
+
+Must be implemented by your custom effect.
+
+Called before calls to processing callback resume after being suspended. \mbox{\Hypertarget{group__modfx__inst_ga51724f6540f59f6ee95fbe72d9655315}\label{group__modfx__inst_ga51724f6540f59f6ee95fbe72d9655315}} 
+\index{Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}!\_hook\_suspend@{\_hook\_suspend}}
+\index{\_hook\_suspend@{\_hook\_suspend}!Modulation Effect Instance (modfx)@{Modulation Effect Instance (modfx)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_suspend()}{\_hook\_suspend()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+suspend (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Suspend callback. 
+
+Must be implemented by your custom effect.
+
+Called before effect gets suspended. While suspended the processing callback will not be called. 

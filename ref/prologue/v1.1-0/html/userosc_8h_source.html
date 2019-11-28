@@ -115,97 +115,120 @@ $(function() {
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160; </div>
-<div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="structuser__osc__param.html">   57</a></span>&#160;  <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structuser__osc__param.html">user_osc_param</a> {</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;    int32_t  shape_lfo;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;    uint16_t pitch; <span class="comment">// high byte: note number, low byte: mod (0-255)</span></div>
-<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    uint16_t cutoff;    <span class="comment">// 0x0000-0x1fff</span></div>
-<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    uint16_t resonance; <span class="comment">// 0x0000-0x1fff    </span></div>
-<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    uint16_t reserved0[3];</div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;  } <a class="code" href="structuser__osc__param.html">user_osc_param_t</a>;</div>
-<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;  </div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;  <span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    k_user_osc_param_id1 = 0,</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;    k_user_osc_param_id2,</div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    k_user_osc_param_id3,</div>
-<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    k_user_osc_param_id4,</div>
-<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    k_user_osc_param_id5,</div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    k_user_osc_param_id6,</div>
-<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    k_user_osc_param_shape,</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;    k_user_osc_param_shiftshape,</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;    k_num_user_osc_param_id</div>
-<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;  } user_osc_param_id_t;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160; </div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="preprocessor">#define param_val_to_f32(val) ((uint16_t)val * 9.77517106549365e-004f)</span></div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncEntry)(uint32_t platform, uint32_t api);</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncInit)(uint32_t platform, uint32_t api);</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncCycle)(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params, int32_t *buf, <span class="keyword">const</span> uint32_t frames);</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncOn)(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
-<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncOff)(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncMute)(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncValue)(uint16_t value);</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncParam)(uint16_t idx, uint16_t value);</div>
-<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncDummy)(void);</div>
-<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;  </div>
-<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;<span class="preprocessor">#pragma pack(push, 1)</span></div>
-<div class="line"><a name="l00090"></a><span class="lineno"><a class="line" href="structuser__osc__hook__table.html">   90</a></span>&#160;  <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structuser__osc__hook__table.html">user_osc_hook_table</a> {</div>
-<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    uint8_t          magic[4];</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    uint32_t         api;</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    uint8_t          platform;</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;    uint8_t          reserved0[7];</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;    </div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;    UserOscFuncInit  func_entry;</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;    UserOscFuncCycle func_cycle;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    UserOscFuncOn    func_on;</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    UserOscFuncOff   func_off;</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    UserOscFuncMute  func_mute;</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;    UserOscFuncValue func_value;</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;    UserOscFuncParam func_param;</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;    UserOscFuncDummy reserved1[5];</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;  } <a class="code" href="structuser__osc__hook__table.html">user_osc_hook_table_t</a>;</div>
-<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;<span class="preprocessor">#pragma pack(pop)</span></div>
+<div class="line"><a name="l00060"></a><span class="lineno"><a class="line" href="structuser__osc__param.html">   60</a></span>&#160;  <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structuser__osc__param.html">user_osc_param</a> {</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    int32_t  shape_lfo; </div>
+<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="group__osc.html#gab6df9842725b547e7fe0e7e83694a388">   62</a></span>&#160;    uint16_t <a class="code" href="group__osc.html#gab6df9842725b547e7fe0e7e83694a388">pitch</a>; </div>
+<div class="line"><a name="l00063"></a><span class="lineno"><a class="line" href="group__osc.html#gac430f8aadb3b0c98927ec4f1168f46d5">   63</a></span>&#160;    uint16_t <a class="code" href="group__osc.html#gac430f8aadb3b0c98927ec4f1168f46d5">cutoff</a>;    </div>
+<div class="line"><a name="l00064"></a><span class="lineno"><a class="line" href="group__osc.html#ga25df04811cfc872f701bb29a01ac8e1a">   64</a></span>&#160;    uint16_t <a class="code" href="group__osc.html#ga25df04811cfc872f701bb29a01ac8e1a">resonance</a>; </div>
+<div class="line"><a name="l00065"></a><span class="lineno"><a class="line" href="group__osc.html#gab5ab8bcf71de04a01422d6ec563aab21">   65</a></span>&#160;    uint16_t <a class="code" href="group__osc.html#gab5ab8bcf71de04a01422d6ec563aab21">reserved0</a>[3];</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;  } <a class="code" href="group__osc__inst.html#gabbafa473e22967ee64899cd4dd140bf6">user_osc_param_t</a>;</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160; </div>
+<div class="line"><a name="l00071"></a><span class="lineno"><a class="line" href="group__osc__inst.html#ga389ccf713f8ed0c77fec90998c5804ff">   71</a></span>&#160;  <span class="keyword">typedef</span> <span class="keyword">enum</span> {</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    k_user_osc_param_id1 = 0,    </div>
+<div class="line"><a name="l00073"></a><span class="lineno"><a class="line" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e">   73</a></span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e">k_user_osc_param_id2</a>,        </div>
+<div class="line"><a name="l00074"></a><span class="lineno"><a class="line" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc">   74</a></span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc">k_user_osc_param_id3</a>,        </div>
+<div class="line"><a name="l00075"></a><span class="lineno"><a class="line" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa">   75</a></span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa">k_user_osc_param_id4</a>,        </div>
+<div class="line"><a name="l00076"></a><span class="lineno"><a class="line" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688">   76</a></span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688">k_user_osc_param_id5</a>,        </div>
+<div class="line"><a name="l00077"></a><span class="lineno"><a class="line" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd">   77</a></span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd">k_user_osc_param_id6</a>,        </div>
+<div class="line"><a name="l00078"></a><span class="lineno"><a class="line" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5">   78</a></span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5">k_user_osc_param_shape</a>,      </div>
+<div class="line"><a name="l00079"></a><span class="lineno"><a class="line" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d">   79</a></span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d">k_user_osc_param_shiftshape</a>, </div>
+<div class="line"><a name="l00080"></a><span class="lineno"><a class="line" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffad29a8e8d8253b6d09ceb29b1acac05e4">   80</a></span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffad29a8e8d8253b6d09ceb29b1acac05e4">k_num_user_osc_param_id</a></div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;  } <a class="code" href="group__osc__inst.html#ga389ccf713f8ed0c77fec90998c5804ff">user_osc_param_id_t</a>;</div>
+<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160; </div>
+<div class="line"><a name="l00086"></a><span class="lineno"><a class="line" href="group__osc__inst.html#ga72749128a5dd70093194c1cb2f67910d">   86</a></span>&#160;<span class="preprocessor">#define param_val_to_f32(val) ((uint16_t)val * 9.77517106549365e-004f)  </span></div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;  </div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncEntry)(uint32_t platform, uint32_t api);</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncInit)(uint32_t platform, uint32_t api);</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncCycle)(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params, int32_t *buf, <span class="keyword">const</span> uint32_t frames);</div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncOn)(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncOff)(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncMute)(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncValue)(uint16_t value);</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncParam)(uint16_t idx, uint16_t value);</div>
+<div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;  <span class="keyword">typedef</span> void (*UserOscFuncDummy)(void);</div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;<span class="preprocessor">#pragma pack(push, 1)</span></div>
-<div class="line"><a name="l00108"></a><span class="lineno"><a class="line" href="structuser__osc__data.html">  108</a></span>&#160;  <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structuser__osc__data.html">user_osc_data</a> {</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    <a class="code" href="structuser__prg__header.html">user_prg_header_t</a>     header;</div>
-<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    <a class="code" href="structuser__osc__hook__table.html">user_osc_hook_table_t</a> hooks;</div>
-<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    <span class="comment">// ... more bytes following</span></div>
-<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  } <a class="code" href="structuser__osc__data.html">user_osc_data_t</a>;</div>
-<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;<span class="preprocessor">#pragma pack(pop)</span></div>
-<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160; </div>
-<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;<span class="preprocessor">#define OSC_INIT    __attribute__((used)) _hook_init </span></div>
-<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;<span class="preprocessor">#define OSC_CYCLE   __attribute__((used)) _hook_cycle</span></div>
-<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;<span class="preprocessor">#define OSC_NOTEON  __attribute__((used)) _hook_on</span></div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;<span class="preprocessor">#define OSC_NOTEOFF __attribute__((used)) _hook_off</span></div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;<span class="preprocessor">#define OSC_MUTE    __attribute__((used)) _hook_mute</span></div>
-<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;<span class="preprocessor">#define OSC_VALUE   __attribute__((used)) _hook_value</span></div>
-<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;<span class="preprocessor">#define OSC_PARAM   __attribute__((used)) _hook_param</span></div>
-<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160; </div>
-<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;  <span class="keywordtype">void</span> _entry(uint32_t platform, uint32_t api);</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  <span class="keywordtype">void</span> _hook_init(uint32_t platform, uint32_t api);</div>
-<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  <span class="keywordtype">void</span> _hook_cycle(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params, int32_t *yn, <span class="keyword">const</span> uint32_t frames);</div>
-<div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;  <span class="keywordtype">void</span> _hook_on(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
-<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;  <span class="keywordtype">void</span> _hook_off(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
-<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  <span class="keywordtype">void</span> _hook_mute(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  <span class="keywordtype">void</span> _hook_value(uint16_t value);</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;  <span class="keywordtype">void</span> _hook_param(uint16_t index, uint16_t value);</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  </div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;} <span class="comment">// extern &quot;C&quot;</span></div>
-<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160; </div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;<span class="preprocessor">#endif // __userosc_h</span></div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160; </div>
+<div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;<span class="preprocessor">#pragma pack(push, 1)</span></div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;  <span class="keyword">typedef</span> <span class="keyword">struct </span>user_osc_hook_table {</div>
+<div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    uint8_t          magic[4];</div>
+<div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    uint32_t         api;</div>
+<div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;    uint8_t          platform;</div>
+<div class="line"><a name="l00113"></a><span class="lineno">  113</span>&#160;    uint8_t          reserved0[7];</div>
+<div class="line"><a name="l00114"></a><span class="lineno">  114</span>&#160;    </div>
+<div class="line"><a name="l00115"></a><span class="lineno">  115</span>&#160;    UserOscFuncInit  func_entry;</div>
+<div class="line"><a name="l00116"></a><span class="lineno">  116</span>&#160;    UserOscFuncCycle func_cycle;</div>
+<div class="line"><a name="l00117"></a><span class="lineno">  117</span>&#160;    UserOscFuncOn    func_on;</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    UserOscFuncOff   func_off;</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    UserOscFuncMute  func_mute;</div>
+<div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;    UserOscFuncValue func_value;</div>
+<div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;    UserOscFuncParam func_param;</div>
+<div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160;    UserOscFuncDummy reserved1[5];</div>
+<div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;  } user_osc_hook_table_t;</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;<span class="preprocessor">#pragma pack(pop)</span></div>
+<div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160; </div>
+<div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;<span class="preprocessor">#pragma pack(push, 1)</span></div>
+<div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  <span class="keyword">typedef</span> <span class="keyword">struct </span>user_osc_data {</div>
+<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    user_prg_header_t     header;</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    user_osc_hook_table_t hooks;</div>
+<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;    <span class="comment">// ... more bytes following</span></div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;  } user_osc_data_t;</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;<span class="preprocessor">#pragma pack(pop)</span></div>
+<div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;  </div>
+<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;<span class="preprocessor">#define OSC_INIT    __attribute__((used)) _hook_init </span></div>
+<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;<span class="preprocessor">#define OSC_CYCLE   __attribute__((used)) _hook_cycle</span></div>
+<div class="line"><a name="l00142"></a><span class="lineno">  142</span>&#160;<span class="preprocessor">#define OSC_NOTEON  __attribute__((used)) _hook_on</span></div>
+<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;<span class="preprocessor">#define OSC_NOTEOFF __attribute__((used)) _hook_off</span></div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;<span class="preprocessor">#define OSC_MUTE    __attribute__((used)) _hook_mute</span></div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;<span class="preprocessor">#define OSC_VALUE   __attribute__((used)) _hook_value</span></div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;<span class="preprocessor">#define OSC_PARAM   __attribute__((used)) _hook_param</span></div>
+<div class="line"><a name="l00147"></a><span class="lineno">  147</span>&#160; </div>
+<div class="line"><a name="l00149"></a><span class="lineno">  149</span>&#160;  <span class="keywordtype">void</span> _entry(uint32_t platform, uint32_t api);</div>
+<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160; </div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="group__osc__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a>(uint32_t platform, uint32_t api);</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160; </div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="group__osc__inst.html#ga5fdcf65ee3fb8562620dc05cb4377b2f">_hook_cycle</a>(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params, int32_t *yn, <span class="keyword">const</span> uint32_t frames);</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160; </div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="group__osc__inst.html#gae328f96aa574fd6f5a845fbb55500efe">_hook_on</a>(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160; </div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="group__osc__inst.html#ga93a9b6927a917951dac4887808da3605">_hook_off</a>(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160; </div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;  <span class="keywordtype">void</span> _hook_mute(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160; </div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;  <span class="keywordtype">void</span> _hook_value(uint16_t value);</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160; </div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="group__osc__inst.html#gae7b024ad4e7abb4f5ac93e3de5568e30">_hook_param</a>(uint16_t index, uint16_t value);</div>
+<div class="line"><a name="l00202"></a><span class="lineno">  202</span>&#160; </div>
+<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
+<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;} <span class="comment">// extern &quot;C&quot;</span></div>
+<div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160; </div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;<span class="preprocessor">#endif // __userosc_h</span></div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
-<div class="ttc" id="astructuser__osc__data_html"><div class="ttname"><a href="structuser__osc__data.html">user_osc_data</a></div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00108">userosc.h:108</a></div></div>
-<div class="ttc" id="astructuser__osc__hook__table_html"><div class="ttname"><a href="structuser__osc__hook__table.html">user_osc_hook_table</a></div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00090">userosc.h:90</a></div></div>
-<div class="ttc" id="astructuser__prg__header_html"><div class="ttname"><a href="structuser__prg__header.html">user_prg_header</a></div><div class="ttdef"><b>Definition:</b> <a href="userprg_8h_source.html#l00142">userprg.h:142</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_gabbafa473e22967ee64899cd4dd140bf6"><div class="ttname"><a href="group__osc__inst.html#gabbafa473e22967ee64899cd4dd140bf6">user_osc_param_t</a></div><div class="ttdeci">struct user_osc_param user_osc_param_t</div><div class="ttdoc">Internal realtime parameters.</div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e">k_user_osc_param_id2</a></div><div class="ttdoc">Edit parameter 1.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00073">userosc.h:73</a></div></div>
+<div class="ttc" id="agroup__osc_html_gab6df9842725b547e7fe0e7e83694a388"><div class="ttname"><a href="group__osc.html#gab6df9842725b547e7fe0e7e83694a388">user_osc_param::pitch</a></div><div class="ttdeci">uint16_t pitch</div><div class="ttdoc">Value of LFO implicitely applied to shape parameter.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00062">userosc.h:62</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_ga93a9b6927a917951dac4887808da3605"><div class="ttname"><a href="group__osc__inst.html#ga93a9b6927a917951dac4887808da3605">_hook_off</a></div><div class="ttdeci">void _hook_off(const user_osc_param_t *const params)</div><div class="ttdoc">Note off callback.</div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc">k_user_osc_param_id3</a></div><div class="ttdoc">Edit parameter 2.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00074">userosc.h:74</a></div></div>
+<div class="ttc" id="agroup__osc_html_gab5ab8bcf71de04a01422d6ec563aab21"><div class="ttname"><a href="group__osc.html#gab5ab8bcf71de04a01422d6ec563aab21">user_osc_param::reserved0</a></div><div class="ttdeci">uint16_t reserved0[3]</div><div class="ttdoc">Current resonance value (0x0000-0x1fff)</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00065">userosc.h:65</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_ga5fdcf65ee3fb8562620dc05cb4377b2f"><div class="ttname"><a href="group__osc__inst.html#ga5fdcf65ee3fb8562620dc05cb4377b2f">_hook_cycle</a></div><div class="ttdeci">void _hook_cycle(const user_osc_param_t *const params, int32_t *yn, const uint32_t frames)</div><div class="ttdoc">Rendering callback.</div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d">k_user_osc_param_shiftshape</a></div><div class="ttdoc">Shape parameter.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00079">userosc.h:79</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_ga3fa3290dddc1fe71cdb7dfc075c4ad94"><div class="ttname"><a href="group__osc__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a></div><div class="ttdeci">void _hook_init(uint32_t platform, uint32_t api)</div><div class="ttdoc">Initialization callback.</div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd">k_user_osc_param_id6</a></div><div class="ttdoc">Edit parameter 5.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00077">userosc.h:77</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5">k_user_osc_param_shape</a></div><div class="ttdoc">Edit parameter 6.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00078">userosc.h:78</a></div></div>
+<div class="ttc" id="agroup__osc_html_gac430f8aadb3b0c98927ec4f1168f46d5"><div class="ttname"><a href="group__osc.html#gac430f8aadb3b0c98927ec4f1168f46d5">user_osc_param::cutoff</a></div><div class="ttdeci">uint16_t cutoff</div><div class="ttdoc">Current pitch.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00063">userosc.h:63</a></div></div>
 <div class="ttc" id="auserprg_8h_html"><div class="ttname"><a href="userprg_8h.html">userprg.h</a></div><div class="ttdoc">Common C interface header for custom user programs.</div></div>
+<div class="ttc" id="agroup__osc__inst_html_gae7b024ad4e7abb4f5ac93e3de5568e30"><div class="ttname"><a href="group__osc__inst.html#gae7b024ad4e7abb4f5ac93e3de5568e30">_hook_param</a></div><div class="ttdeci">void _hook_param(uint16_t index, uint16_t value)</div><div class="ttdoc">Parameter change callback.</div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa">k_user_osc_param_id4</a></div><div class="ttdoc">Edit parameter 3.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00075">userosc.h:75</a></div></div>
 <div class="ttc" id="aosc__api_8h_html"><div class="ttname"><a href="osc__api_8h.html">osc_api.h</a></div><div class="ttdoc">Oscillator runtime API.</div></div>
-<div class="ttc" id="astructuser__osc__param_html"><div class="ttname"><a href="structuser__osc__param.html">user_osc_param</a></div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00057">userosc.h:57</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688">k_user_osc_param_id5</a></div><div class="ttdoc">Edit parameter 4.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00076">userosc.h:76</a></div></div>
+<div class="ttc" id="astructuser__osc__param_html"><div class="ttname"><a href="structuser__osc__param.html">user_osc_param</a></div><div class="ttdoc">Internal realtime parameters.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00060">userosc.h:60</a></div></div>
+<div class="ttc" id="agroup__osc_html_ga25df04811cfc872f701bb29a01ac8e1a"><div class="ttname"><a href="group__osc.html#ga25df04811cfc872f701bb29a01ac8e1a">user_osc_param::resonance</a></div><div class="ttdeci">uint16_t resonance</div><div class="ttdoc">Current cutoff value (0x0000-0x1fff)</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00064">userosc.h:64</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_ga389ccf713f8ed0c77fec90998c5804ff"><div class="ttname"><a href="group__osc__inst.html#ga389ccf713f8ed0c77fec90998c5804ff">user_osc_param_id_t</a></div><div class="ttdeci">user_osc_param_id_t</div><div class="ttdoc">User facing osc-specific parameters.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00071">userosc.h:71</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffad29a8e8d8253b6d09ceb29b1acac05e4"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffad29a8e8d8253b6d09ceb29b1acac05e4">k_num_user_osc_param_id</a></div><div class="ttdoc">Alternative Shape parameter: generally available via a shift function.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00080">userosc.h:80</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_gae328f96aa574fd6f5a845fbb55500efe"><div class="ttname"><a href="group__osc__inst.html#gae328f96aa574fd6f5a845fbb55500efe">_hook_on</a></div><div class="ttdeci">void _hook_on(const user_osc_param_t *const params)</div><div class="ttdoc">Note on callback.</div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Nov 28 2019 17:07:51 for prologue SDK by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Nov 29 2019 08:55:25 for prologue SDK by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.16
 </small></address>

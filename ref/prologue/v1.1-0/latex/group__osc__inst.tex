@@ -4,28 +4,60 @@
 \begin{DoxyCompactItemize}
 \item 
 struct \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param}}
-\item 
-struct \mbox{\hyperlink{structuser__osc__hook__table}{user\+\_\+osc\+\_\+hook\+\_\+table}}
-\item 
-struct \mbox{\hyperlink{structuser__osc__data}{user\+\_\+osc\+\_\+data}}
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Internal realtime parameters. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{group__osc__inst_ga72749128a5dd70093194c1cb2f67910d}\label{group__osc__inst_ga72749128a5dd70093194c1cb2f67910d}} 
-\#define {\bfseries param\+\_\+val\+\_\+to\+\_\+f32}(val)~((uint16\+\_\+t)val $\ast$ 9.\+77517106549365e-\/004f)
+\#define \mbox{\hyperlink{group__osc__inst_ga72749128a5dd70093194c1cb2f67910d}{param\+\_\+val\+\_\+to\+\_\+f32}}(val)~((uint16\+\_\+t)val $\ast$ 9.\+77517106549365e-\/004f)
+\begin{DoxyCompactList}\small\item\em Convert 10bit parameter values to float. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
 \item 
+\mbox{\Hypertarget{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}\label{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}} 
+typedef struct \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param}} \mbox{\hyperlink{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}{user\+\_\+osc\+\_\+param\+\_\+t}}
+\begin{DoxyCompactList}\small\item\em Internal realtime parameters. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{group__osc__inst_ga389ccf713f8ed0c77fec90998c5804ff}{user\+\_\+osc\+\_\+param\+\_\+id\+\_\+t}} \{ \newline
+{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id1} = 0, 
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id2}}, 
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id3}}, 
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id4}}, 
+\newline
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id5}}, 
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id6}}, 
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+shape}}, 
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d}{k\+\_\+user\+\_\+osc\+\_\+param\+\_\+shiftshape}}, 
+\newline
+\mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffad29a8e8d8253b6d09ceb29b1acac05e4}{k\+\_\+num\+\_\+user\+\_\+osc\+\_\+param\+\_\+id}}
+ \}
+\begin{DoxyCompactList}\small\item\em User facing osc-\/specific parameters. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Core A\+PI}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{group__osc__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}{\+\_\+hook\+\_\+init}} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\begin{DoxyCompactList}\small\item\em Initialization callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__osc__inst_ga5fdcf65ee3fb8562620dc05cb4377b2f}{\+\_\+hook\+\_\+cycle}} (const \mbox{\hyperlink{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params, int32\+\_\+t $\ast$yn, const uint32\+\_\+t frames)
+\begin{DoxyCompactList}\small\item\em Rendering callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__osc__inst_gae328f96aa574fd6f5a845fbb55500efe}{\+\_\+hook\+\_\+on}} (const \mbox{\hyperlink{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
+\begin{DoxyCompactList}\small\item\em Note on callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__osc__inst_ga93a9b6927a917951dac4887808da3605}{\+\_\+hook\+\_\+off}} (const \mbox{\hyperlink{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
+\begin{DoxyCompactList}\small\item\em Note off callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__osc__inst_gae7b024ad4e7abb4f5ac93e3de5568e30}{\+\_\+hook\+\_\+param}} (uint16\+\_\+t index, uint16\+\_\+t value)
+\begin{DoxyCompactList}\small\item\em Parameter change callback. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{group__osc__inst_ga33cc9776891bdb1a200bef208a59a3c3}\label{group__osc__inst_ga33cc9776891bdb1a200bef208a59a3c3}} 
-\#define {\bfseries O\+S\+C\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+init
+\#define {\bfseries O\+S\+C\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__osc__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}{\+\_\+hook\+\_\+init}}
 \item 
 \mbox{\Hypertarget{group__osc__inst_ga11022a022f3b4d0415840f5a0ef30f10}\label{group__osc__inst_ga11022a022f3b4d0415840f5a0ef30f10}} 
-\#define {\bfseries O\+S\+C\+\_\+\+C\+Y\+C\+LE}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+cycle
+\#define {\bfseries O\+S\+C\+\_\+\+C\+Y\+C\+LE}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__osc__inst_ga5fdcf65ee3fb8562620dc05cb4377b2f}{\+\_\+hook\+\_\+cycle}}
 \item 
 \mbox{\Hypertarget{group__osc__inst_gabd95d8168965054097f665809ca9e9b8}\label{group__osc__inst_gabd95d8168965054097f665809ca9e9b8}} 
-\#define {\bfseries O\+S\+C\+\_\+\+N\+O\+T\+E\+ON}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+on
+\#define {\bfseries O\+S\+C\+\_\+\+N\+O\+T\+E\+ON}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__osc__inst_gae328f96aa574fd6f5a845fbb55500efe}{\+\_\+hook\+\_\+on}}
 \item 
 \mbox{\Hypertarget{group__osc__inst_gad5ca928ca9d633b7c9551c5ba1c1515a}\label{group__osc__inst_gad5ca928ca9d633b7c9551c5ba1c1515a}} 
-\#define {\bfseries O\+S\+C\+\_\+\+N\+O\+T\+E\+O\+FF}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+off
+\#define {\bfseries O\+S\+C\+\_\+\+N\+O\+T\+E\+O\+FF}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__osc__inst_ga93a9b6927a917951dac4887808da3605}{\+\_\+hook\+\_\+off}}
 \item 
 \mbox{\Hypertarget{group__osc__inst_ga3b05b4465e35bafb0120bda796714e23}\label{group__osc__inst_ga3b05b4465e35bafb0120bda796714e23}} 
 \#define {\bfseries O\+S\+C\+\_\+\+M\+U\+TE}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+mute
@@ -34,92 +66,182 @@ struct \mbox{\hyperlink{structuser__osc__data}{user\+\_\+osc\+\_\+data}}
 \#define {\bfseries O\+S\+C\+\_\+\+V\+A\+L\+UE}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+value
 \item 
 \mbox{\Hypertarget{group__osc__inst_gaee8e04514599c0dd9c2bc9bb9d756712}\label{group__osc__inst_gaee8e04514599c0dd9c2bc9bb9d756712}} 
-\#define {\bfseries O\+S\+C\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+param
-\end{DoxyCompactItemize}
-\doxysubsection*{Typedefs}
-\begin{DoxyCompactItemize}
-\item 
-\mbox{\Hypertarget{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}\label{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}} 
-typedef struct \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param}} {\bfseries user\+\_\+osc\+\_\+param\+\_\+t}
-\item 
-\mbox{\Hypertarget{group__osc__inst_gaab1bfc7940a2ceea55807f35862954c4}\label{group__osc__inst_gaab1bfc7940a2ceea55807f35862954c4}} 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Entry}) (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-\mbox{\Hypertarget{group__osc__inst_ga78dcbd45d8c983b785e177f46be5adc5}\label{group__osc__inst_ga78dcbd45d8c983b785e177f46be5adc5}} 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Init}) (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-\mbox{\Hypertarget{group__osc__inst_gaf6eb24eac87ce2fa61daf7ddd9285560}\label{group__osc__inst_gaf6eb24eac87ce2fa61daf7ddd9285560}} 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Cycle}) (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params, int32\+\_\+t $\ast$buf, const uint32\+\_\+t frames)
-\item 
-\mbox{\Hypertarget{group__osc__inst_gac01a8d7aa8ccfe91afec468e746a90e9}\label{group__osc__inst_gac01a8d7aa8ccfe91afec468e746a90e9}} 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+On}) (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
-\item 
-\mbox{\Hypertarget{group__osc__inst_ga4c35d0840a6c9cad501ae7cbf12d8678}\label{group__osc__inst_ga4c35d0840a6c9cad501ae7cbf12d8678}} 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Off}) (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
-\item 
-\mbox{\Hypertarget{group__osc__inst_ga3008fb811b74a456b1a15ffb75687514}\label{group__osc__inst_ga3008fb811b74a456b1a15ffb75687514}} 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Mute}) (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
-\item 
-\mbox{\Hypertarget{group__osc__inst_gab56dae17806aefbf1d383d55f9417da6}\label{group__osc__inst_gab56dae17806aefbf1d383d55f9417da6}} 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Value}) (uint16\+\_\+t value)
-\item 
-\mbox{\Hypertarget{group__osc__inst_gad6188423c521059962e2379ef0fa2431}\label{group__osc__inst_gad6188423c521059962e2379ef0fa2431}} 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Param}) (uint16\+\_\+t idx, uint16\+\_\+t value)
-\item 
-\mbox{\Hypertarget{group__osc__inst_ga46b2a977d4e2041215e6db5b763a9568}\label{group__osc__inst_ga46b2a977d4e2041215e6db5b763a9568}} 
-typedef void($\ast$ {\bfseries User\+Osc\+Func\+Dummy}) (void)
-\item 
-\mbox{\Hypertarget{group__osc__inst_ga54f5d441197d9809f08bc815bc35ff35}\label{group__osc__inst_ga54f5d441197d9809f08bc815bc35ff35}} 
-typedef struct \mbox{\hyperlink{structuser__osc__hook__table}{user\+\_\+osc\+\_\+hook\+\_\+table}} {\bfseries user\+\_\+osc\+\_\+hook\+\_\+table\+\_\+t}
-\item 
-\mbox{\Hypertarget{group__osc__inst_gafbe831b5b560a00dff250fde3c63ca7d}\label{group__osc__inst_gafbe831b5b560a00dff250fde3c63ca7d}} 
-typedef struct \mbox{\hyperlink{structuser__osc__data}{user\+\_\+osc\+\_\+data}} {\bfseries user\+\_\+osc\+\_\+data\+\_\+t}
-\end{DoxyCompactItemize}
-\doxysubsection*{Enumerations}
-\begin{DoxyCompactItemize}
-\item 
-\mbox{\Hypertarget{group__osc__inst_ga389ccf713f8ed0c77fec90998c5804ff}\label{group__osc__inst_ga389ccf713f8ed0c77fec90998c5804ff}} 
-enum {\bfseries user\+\_\+osc\+\_\+param\+\_\+id\+\_\+t} \{ \newline
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id1} = 0, 
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id2}, 
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id3}, 
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id4}, 
-\newline
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id5}, 
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id6}, 
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+shape}, 
-{\bfseries k\+\_\+user\+\_\+osc\+\_\+param\+\_\+shiftshape}, 
-\newline
-{\bfseries k\+\_\+num\+\_\+user\+\_\+osc\+\_\+param\+\_\+id}
- \}
-\end{DoxyCompactItemize}
-\doxysubsection*{Functions}
-\begin{DoxyCompactItemize}
-\item 
-\mbox{\Hypertarget{group__osc__inst_gacb26647b7b28ca29f52fabdcbed3a152}\label{group__osc__inst_gacb26647b7b28ca29f52fabdcbed3a152}} 
-void {\bfseries \+\_\+entry} (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-\mbox{\Hypertarget{group__osc__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}\label{group__osc__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}} 
-void {\bfseries \+\_\+hook\+\_\+init} (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-\mbox{\Hypertarget{group__osc__inst_ga5fdcf65ee3fb8562620dc05cb4377b2f}\label{group__osc__inst_ga5fdcf65ee3fb8562620dc05cb4377b2f}} 
-void {\bfseries \+\_\+hook\+\_\+cycle} (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params, int32\+\_\+t $\ast$yn, const uint32\+\_\+t frames)
-\item 
-\mbox{\Hypertarget{group__osc__inst_gae328f96aa574fd6f5a845fbb55500efe}\label{group__osc__inst_gae328f96aa574fd6f5a845fbb55500efe}} 
-void {\bfseries \+\_\+hook\+\_\+on} (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
-\item 
-\mbox{\Hypertarget{group__osc__inst_ga93a9b6927a917951dac4887808da3605}\label{group__osc__inst_ga93a9b6927a917951dac4887808da3605}} 
-void {\bfseries \+\_\+hook\+\_\+off} (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
-\item 
-\mbox{\Hypertarget{group__osc__inst_ga0c504dfa1ba1dba51cbd96f9bf6b76f6}\label{group__osc__inst_ga0c504dfa1ba1dba51cbd96f9bf6b76f6}} 
-void {\bfseries \+\_\+hook\+\_\+mute} (const \mbox{\hyperlink{structuser__osc__param}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const params)
-\item 
-\mbox{\Hypertarget{group__osc__inst_ga3a62c9f7a48dbf3578ec598dfe54dddb}\label{group__osc__inst_ga3a62c9f7a48dbf3578ec598dfe54dddb}} 
-void {\bfseries \+\_\+hook\+\_\+value} (uint16\+\_\+t value)
-\item 
-\mbox{\Hypertarget{group__osc__inst_gae7b024ad4e7abb4f5ac93e3de5568e30}\label{group__osc__inst_gae7b024ad4e7abb4f5ac93e3de5568e30}} 
-void {\bfseries \+\_\+hook\+\_\+param} (uint16\+\_\+t index, uint16\+\_\+t value)
+\#define {\bfseries O\+S\+C\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__osc__inst_gae7b024ad4e7abb4f5ac93e3de5568e30}{\+\_\+hook\+\_\+param}}
 \end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{group__osc__inst_ga389ccf713f8ed0c77fec90998c5804ff}\label{group__osc__inst_ga389ccf713f8ed0c77fec90998c5804ff}} 
+\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!user\_osc\_param\_id\_t@{user\_osc\_param\_id\_t}}
+\index{user\_osc\_param\_id\_t@{user\_osc\_param\_id\_t}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}
+\doxysubsubsection{\texorpdfstring{user\_osc\_param\_id\_t}{user\_osc\_param\_id\_t}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{group__osc__inst_ga389ccf713f8ed0c77fec90998c5804ff}{user\+\_\+osc\+\_\+param\+\_\+id\+\_\+t}}}
+
+
+
+User facing osc-\/specific parameters. 
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_user\_osc\_param\_id2@{k\_user\_osc\_param\_id2}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!k\_user\_osc\_param\_id2@{k\_user\_osc\_param\_id2}}}\mbox{\Hypertarget{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e}\label{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e}} 
+k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id2&Edit parameter 1. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_user\_osc\_param\_id3@{k\_user\_osc\_param\_id3}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!k\_user\_osc\_param\_id3@{k\_user\_osc\_param\_id3}}}\mbox{\Hypertarget{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc}\label{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc}} 
+k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id3&Edit parameter 2. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_user\_osc\_param\_id4@{k\_user\_osc\_param\_id4}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!k\_user\_osc\_param\_id4@{k\_user\_osc\_param\_id4}}}\mbox{\Hypertarget{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa}\label{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa}} 
+k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id4&Edit parameter 3. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_user\_osc\_param\_id5@{k\_user\_osc\_param\_id5}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!k\_user\_osc\_param\_id5@{k\_user\_osc\_param\_id5}}}\mbox{\Hypertarget{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688}\label{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688}} 
+k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id5&Edit parameter 4. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_user\_osc\_param\_id6@{k\_user\_osc\_param\_id6}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!k\_user\_osc\_param\_id6@{k\_user\_osc\_param\_id6}}}\mbox{\Hypertarget{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd}\label{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd}} 
+k\+\_\+user\+\_\+osc\+\_\+param\+\_\+id6&Edit parameter 5. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_user\_osc\_param\_shape@{k\_user\_osc\_param\_shape}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!k\_user\_osc\_param\_shape@{k\_user\_osc\_param\_shape}}}\mbox{\Hypertarget{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5}\label{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5}} 
+k\+\_\+user\+\_\+osc\+\_\+param\+\_\+shape&Edit parameter 6. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_user\_osc\_param\_shiftshape@{k\_user\_osc\_param\_shiftshape}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!k\_user\_osc\_param\_shiftshape@{k\_user\_osc\_param\_shiftshape}}}\mbox{\Hypertarget{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d}\label{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d}} 
+k\+\_\+user\+\_\+osc\+\_\+param\+\_\+shiftshape&Shape parameter. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_num\_user\_osc\_param\_id@{k\_num\_user\_osc\_param\_id}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!k\_num\_user\_osc\_param\_id@{k\_num\_user\_osc\_param\_id}}}\mbox{\Hypertarget{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffad29a8e8d8253b6d09ceb29b1acac05e4}\label{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffad29a8e8d8253b6d09ceb29b1acac05e4}} 
+k\+\_\+num\+\_\+user\+\_\+osc\+\_\+param\+\_\+id&Alternative Shape parameter\+: generally available via a shift function. \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line 71 of file userosc.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{71                \{}
+\DoxyCodeLine{72     k\_user\_osc\_param\_id1 = 0,    }
+\DoxyCodeLine{73     \mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e}{k\_user\_osc\_param\_id2}},        }
+\DoxyCodeLine{74     \mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc}{k\_user\_osc\_param\_id3}},        }
+\DoxyCodeLine{75     \mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa}{k\_user\_osc\_param\_id4}},        }
+\DoxyCodeLine{76     \mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688}{k\_user\_osc\_param\_id5}},        }
+\DoxyCodeLine{77     \mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd}{k\_user\_osc\_param\_id6}},        }
+\DoxyCodeLine{78     \mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5}{k\_user\_osc\_param\_shape}},      }
+\DoxyCodeLine{79     \mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d}{k\_user\_osc\_param\_shiftshape}}, }
+\DoxyCodeLine{80     \mbox{\hyperlink{group__osc__inst_gga389ccf713f8ed0c77fec90998c5804ffad29a8e8d8253b6d09ceb29b1acac05e4}{k\_num\_user\_osc\_param\_id}}}
+\DoxyCodeLine{81   \} \mbox{\hyperlink{group__osc__inst_ga389ccf713f8ed0c77fec90998c5804ff}{user\_osc\_param\_id\_t}};}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{group__osc__inst_ga5fdcf65ee3fb8562620dc05cb4377b2f}\label{group__osc__inst_ga5fdcf65ee3fb8562620dc05cb4377b2f}} 
+\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!\_hook\_cycle@{\_hook\_cycle}}
+\index{\_hook\_cycle@{\_hook\_cycle}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_cycle()}{\_hook\_cycle()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+cycle (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const}]{params,  }\item[{int32\+\_\+t $\ast$}]{yn,  }\item[{const uint32\+\_\+t}]{frames }\end{DoxyParamCaption})}
+
+
+
+Rendering callback. 
+
+Must be implemented by your custom effect.
+
+
+\begin{DoxyParams}{Parameters}
+{\em params} & Current realtime parameter state. \\
+\hline
+{\em yn} & Output buffer. (1 sample per frame) \\
+\hline
+{\em frames} & Size of output buffer.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Implementation must support at least up to 64 frames. 
+
+Optimize for powers of two. 
+\end{DoxyNote}
+\mbox{\Hypertarget{group__osc__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}\label{group__osc__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}} 
+\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!\_hook\_init@{\_hook\_init}}
+\index{\_hook\_init@{\_hook\_init}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_init()}{\_hook\_init()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+init (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{platform,  }\item[{uint32\+\_\+t}]{api }\end{DoxyParamCaption})}
+
+
+
+Initialization callback. 
+
+Must be implemented by your custom effect.
+
+
+\begin{DoxyParams}{Parameters}
+{\em platform} & Current target platform/module. See \mbox{\hyperlink{userprg_8h}{userprg.\+h}} \\
+\hline
+{\em api} & Current A\+PI version. See \mbox{\hyperlink{userprg_8h}{userprg.\+h}} \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{group__osc__inst_ga93a9b6927a917951dac4887808da3605}\label{group__osc__inst_ga93a9b6927a917951dac4887808da3605}} 
+\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!\_hook\_off@{\_hook\_off}}
+\index{\_hook\_off@{\_hook\_off}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_off()}{\_hook\_off()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+off (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const}]{params }\end{DoxyParamCaption})}
+
+
+
+Note off callback. 
+
+Must be implemented by your custom effect.
+
+
+\begin{DoxyParams}{Parameters}
+{\em params} & Current realtime parameter state. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{group__osc__inst_gae328f96aa574fd6f5a845fbb55500efe}\label{group__osc__inst_gae328f96aa574fd6f5a845fbb55500efe}} 
+\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!\_hook\_on@{\_hook\_on}}
+\index{\_hook\_on@{\_hook\_on}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_on()}{\_hook\_on()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+on (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{group__osc__inst_gabbafa473e22967ee64899cd4dd140bf6}{user\+\_\+osc\+\_\+param\+\_\+t}} $\ast$const}]{params }\end{DoxyParamCaption})}
+
+
+
+Note on callback. 
+
+Must be implemented by your custom effect.
+
+
+\begin{DoxyParams}{Parameters}
+{\em params} & Current realtime parameter state. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{group__osc__inst_gae7b024ad4e7abb4f5ac93e3de5568e30}\label{group__osc__inst_gae7b024ad4e7abb4f5ac93e3de5568e30}} 
+\index{Oscillator Instance (osc)@{Oscillator Instance (osc)}!\_hook\_param@{\_hook\_param}}
+\index{\_hook\_param@{\_hook\_param}!Oscillator Instance (osc)@{Oscillator Instance (osc)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_param()}{\_hook\_param()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+param (\begin{DoxyParamCaption}\item[{uint16\+\_\+t}]{index,  }\item[{uint16\+\_\+t}]{value }\end{DoxyParamCaption})}
+
+
+
+Parameter change callback. 
+
+Must be implemented by your custom effect.
+
+
+\begin{DoxyParams}{Parameters}
+{\em index} & Parameter ID. See user\+\_\+osc\+\_\+param\+\_\+id\+\_\+t. \\
+\hline
+{\em index} & Parameter value.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+10 bit resolution for shape/shift-\/shape. 
+
+0-\/200 for bipolar percent parameters. 0\% at 100, -\/100\% at 0. 
+
+0-\/100 for unipolar percent and typeless parameters. 
+\end{DoxyNote}

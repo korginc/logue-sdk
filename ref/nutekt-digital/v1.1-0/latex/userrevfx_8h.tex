@@ -8,77 +8,46 @@ C interface header for user reverb fx.
 {\ttfamily \#include $<$stdint.\+h$>$}\newline
 {\ttfamily \#include \char`\"{}fx\+\_\+api.\+h\char`\"{}}\newline
 {\ttfamily \#include \char`\"{}userprg.\+h\char`\"{}}\newline
-\doxysubsection*{Classes}
-\begin{DoxyCompactItemize}
-\item 
-struct \mbox{\hyperlink{structuser__revfx__hook__table}{user\+\_\+revfx\+\_\+hook\+\_\+table}}
-\item 
-struct \mbox{\hyperlink{structuser__revfx__data}{user\+\_\+revfx\+\_\+data}}
-\end{DoxyCompactItemize}
 \doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
-\#define {\bfseries \+\_\+\+\_\+sdram}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((section(\char`\"{}.sdram\char`\"{})))
-\item 
-\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+init
-\item 
-\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+P\+R\+O\+C\+E\+SS}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+process
-\item 
-\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+S\+U\+S\+P\+E\+ND}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+suspend
-\item 
-\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+R\+E\+S\+U\+ME}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+resume
-\item 
-\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+param
-\end{DoxyCompactItemize}
-\doxysubsection*{Typedefs}
-\begin{DoxyCompactItemize}
-\item 
-typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Func\+Entry}) (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Func\+Init}) (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Func\+Process}) (float $\ast$xn, uint32\+\_\+t frames)
-\item 
-typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Suspend}) (void)
-\item 
-typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Resume}) (void)
-\item 
-typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Func\+Param}) (uint8\+\_\+t index, int32\+\_\+t value)
-\item 
-typedef void($\ast$ {\bfseries User\+Rev\+F\+X\+Func\+Dummy}) (void)
-\item 
-typedef struct \mbox{\hyperlink{structuser__revfx__hook__table}{user\+\_\+revfx\+\_\+hook\+\_\+table}} {\bfseries user\+\_\+revfx\+\_\+hook\+\_\+table\+\_\+t}
-\item 
-typedef struct \mbox{\hyperlink{structuser__revfx__data}{user\+\_\+revfx\+\_\+data}} {\bfseries user\+\_\+revfx\+\_\+data\+\_\+t}
-\end{DoxyCompactItemize}
+\#define \mbox{\hyperlink{group__revfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}{\+\_\+\+\_\+sdram}}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((section(\char`\"{}.sdram\char`\"{})))
+\begin{DoxyCompactList}\small\item\em This macro can be used to declare a memory buffer in S\+D\+R\+AM space. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsection*{Enumerations}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{group__revfx__inst_ga345542bbc4ec36e1d117b40bedcce2be}\label{group__revfx__inst_ga345542bbc4ec36e1d117b40bedcce2be}} 
-enum {\bfseries user\+\_\+revfx\+\_\+param\+\_\+id\+\_\+t} \{ \newline
+enum \mbox{\hyperlink{group__revfx__inst_ga345542bbc4ec36e1d117b40bedcce2be}{user\+\_\+revfx\+\_\+param\+\_\+id\+\_\+t}} \{ \newline
 {\bfseries k\+\_\+user\+\_\+revfx\+\_\+param\+\_\+time} = 0, 
-{\bfseries k\+\_\+user\+\_\+revfx\+\_\+param\+\_\+depth}, 
-{\bfseries k\+\_\+user\+\_\+revfx\+\_\+param\+\_\+reserved0}, 
+\mbox{\hyperlink{group__revfx__inst_gga345542bbc4ec36e1d117b40bedcce2bea07c4a195b88f01a56288fcde5ecdfb2a}{k\+\_\+user\+\_\+revfx\+\_\+param\+\_\+depth}}, 
+\mbox{\hyperlink{group__revfx__inst_gga345542bbc4ec36e1d117b40bedcce2bea48e993395db06e35acfe0d676f24e710}{k\+\_\+user\+\_\+revfx\+\_\+param\+\_\+reserved0}}, 
 {\bfseries k\+\_\+user\+\_\+revfx\+\_\+param\+\_\+shift\+\_\+depth}, 
 \newline
-{\bfseries k\+\_\+num\+\_\+user\+\_\+revfx\+\_\+param\+\_\+id}
+\mbox{\hyperlink{group__revfx__inst_gga345542bbc4ec36e1d117b40bedcce2beaacdb01b710b350f7ef9dd5a6c0ada0da}{k\+\_\+num\+\_\+user\+\_\+revfx\+\_\+param\+\_\+id}}
  \}
-\end{DoxyCompactItemize}
-\doxysubsection*{Functions}
+\begin{DoxyCompactList}\small\item\em User facing parameters. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Core A\+PI}
 \begin{DoxyCompactItemize}
 \item 
-void {\bfseries \+\_\+entry} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}{\+\_\+hook\+\_\+init}}
 \item 
-void {\bfseries \+\_\+hook\+\_\+init} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+P\+R\+O\+C\+E\+SS}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_ga2103260c965e55d6bc8ec31aafec7687}{\+\_\+hook\+\_\+process}}
 \item 
-void {\bfseries \+\_\+hook\+\_\+process} (float $\ast$xn, uint32\+\_\+t frames)
+\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+S\+U\+S\+P\+E\+ND}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_ga51724f6540f59f6ee95fbe72d9655315}{\+\_\+hook\+\_\+suspend}}
 \item 
-void {\bfseries \+\_\+hook\+\_\+suspend} (void)
+\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+R\+E\+S\+U\+ME}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}{\+\_\+hook\+\_\+resume}}
 \item 
-void {\bfseries \+\_\+hook\+\_\+resume} (void)
+\#define {\bfseries R\+E\+V\+F\+X\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}{\+\_\+hook\+\_\+param}}
 \item 
-void {\bfseries \+\_\+hook\+\_\+param} (uint8\+\_\+t index, int32\+\_\+t value)
-\end{DoxyCompactItemize}
+void \mbox{\hyperlink{group__revfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}{\+\_\+hook\+\_\+init}} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\begin{DoxyCompactList}\small\item\em Initialization callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__revfx__inst_ga2103260c965e55d6bc8ec31aafec7687}{\+\_\+hook\+\_\+process}} (float $\ast$xn, uint32\+\_\+t frames)
+\begin{DoxyCompactList}\small\item\em Processing callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__revfx__inst_ga51724f6540f59f6ee95fbe72d9655315}{\+\_\+hook\+\_\+suspend}} (void)
+\begin{DoxyCompactList}\small\item\em Suspend callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__revfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}{\+\_\+hook\+\_\+resume}} (void)
+\begin{DoxyCompactList}\small\item\em Resume callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__revfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}{\+\_\+hook\+\_\+param}} (uint8\+\_\+t index, int32\+\_\+t value)
+\begin{DoxyCompactList}\small\item\em Parameter change callback. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}

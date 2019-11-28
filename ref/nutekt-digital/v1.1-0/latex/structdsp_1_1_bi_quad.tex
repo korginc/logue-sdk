@@ -39,11 +39,11 @@ float \mbox{\hyperlink{structdsp_1_1_bi_quad_ae2b4d3821372269a1e3859febc0f1321}{
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}\label{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}} 
-\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs}{Coeffs}} {\bfseries m\+Coeffs}
-\item 
-\mbox{\Hypertarget{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}\label{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}} 
-float \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{m\+Z1}}
+\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs}{Coeffs}} \mbox{\hyperlink{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}{m\+Coeffs}}
 \begin{DoxyCompactList}\small\item\em Coefficients for the Bi-\/\+Quad construct. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}\label{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}} 
+float {\bfseries m\+Z1}
+\item 
 \mbox{\Hypertarget{structdsp_1_1_bi_quad_ae80cf2266244ac01cc75519c7325a2c4}\label{structdsp_1_1_bi_quad_ae80cf2266244ac01cc75519c7325a2c4}} 
 float {\bfseries m\+Z2}
 \end{DoxyCompactItemize}
@@ -111,9 +111,9 @@ Definition at line 384 of file biquad.\+hpp.
 
 \begin{DoxyCode}{0}
 \DoxyCodeLine{384                                      \{}
-\DoxyCodeLine{385       \textcolor{keywordtype}{float} acc = mCoeffs.ff0 * xn + \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{mZ1}};}
-\DoxyCodeLine{386       \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{mZ1}} = mCoeffs.ff1 * xn;}
-\DoxyCodeLine{387       \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{mZ1}} -\/= mCoeffs.fb1 * acc;}
+\DoxyCodeLine{385       \textcolor{keywordtype}{float} acc = \mbox{\hyperlink{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}{mCoeffs}}.ff0 * xn + mZ1;}
+\DoxyCodeLine{386       mZ1 = \mbox{\hyperlink{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}{mCoeffs}}.ff1 * xn;}
+\DoxyCodeLine{387       mZ1 -\/= \mbox{\hyperlink{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}{mCoeffs}}.fb1 * acc;}
 \DoxyCodeLine{388       \textcolor{keywordflow}{return} acc;}
 \DoxyCodeLine{389     \}}
 
@@ -143,11 +143,11 @@ Definition at line 367 of file biquad.\+hpp.
 
 \begin{DoxyCode}{0}
 \DoxyCodeLine{367                                      \{}
-\DoxyCodeLine{368       \textcolor{keywordtype}{float} acc = mCoeffs.ff0 * xn + \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{mZ1}};}
-\DoxyCodeLine{369       \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{mZ1}} = mCoeffs.ff1 * xn + mZ2;}
-\DoxyCodeLine{370       mZ2 = mCoeffs.ff2 * xn;}
-\DoxyCodeLine{371       \mbox{\hyperlink{structdsp_1_1_bi_quad_a8da74c3d75875caf7f556e82d55bfa8e}{mZ1}} -\/= mCoeffs.fb1 * acc;}
-\DoxyCodeLine{372       mZ2 -\/= mCoeffs.fb2 * acc;}
+\DoxyCodeLine{368       \textcolor{keywordtype}{float} acc = \mbox{\hyperlink{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}{mCoeffs}}.ff0 * xn + mZ1;}
+\DoxyCodeLine{369       mZ1 = \mbox{\hyperlink{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}{mCoeffs}}.ff1 * xn + mZ2;}
+\DoxyCodeLine{370       mZ2 = \mbox{\hyperlink{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}{mCoeffs}}.ff2 * xn;}
+\DoxyCodeLine{371       mZ1 -\/= \mbox{\hyperlink{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}{mCoeffs}}.fb1 * acc;}
+\DoxyCodeLine{372       mZ2 -\/= \mbox{\hyperlink{structdsp_1_1_bi_quad_ad5079f7105d9d97fdff57a19a5af5de0}{mCoeffs}}.fb2 * acc;}
 \DoxyCodeLine{373       \textcolor{keywordflow}{return} acc;}
 \DoxyCodeLine{374     \}}
 

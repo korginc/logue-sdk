@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['md0_461',['mD0',['../structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604',1,'dsp::ExtBiQuad']]],
-  ['mz1_462',['mZ1',['../structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e',1,'dsp::BiQuad']]]
+  ['mcoeffs_471',['mCoeffs',['../structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0',1,'dsp::BiQuad::mCoeffs()'],['../structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90',1,'dsp::ExtBiQuad::mCoeffs()']]]
 ];

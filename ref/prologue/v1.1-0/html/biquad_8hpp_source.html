@@ -294,7 +294,7 @@ $(function() {
 <div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;    <span class="comment">/* Constructor / Destructor.                                           */</span></div>
 <div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
 <div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160; </div>
-<div class="line"><a name="l00344"></a><span class="lineno"><a class="line" href="structdsp_1_1_bi_quad.html#a1a2b9996db5f63ade869b651212bb9c9">  344</a></span>&#160;    <a class="code" href="structdsp_1_1_bi_quad.html#a1a2b9996db5f63ade869b651212bb9c9">BiQuad</a>(<span class="keywordtype">void</span>) : <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a>(0), mZ2(0)</div>
+<div class="line"><a name="l00344"></a><span class="lineno"><a class="line" href="structdsp_1_1_bi_quad.html#a1a2b9996db5f63ade869b651212bb9c9">  344</a></span>&#160;    <a class="code" href="structdsp_1_1_bi_quad.html#a1a2b9996db5f63ade869b651212bb9c9">BiQuad</a>(<span class="keywordtype">void</span>) : mZ1(0), mZ2(0)</div>
 <div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;    { }</div>
 <div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;      </div>
 <div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
@@ -303,24 +303,24 @@ $(function() {
 <div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160; </div>
 <div class="line"><a name="l00354"></a><span class="lineno">  354</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
 <div class="line"><a name="l00355"></a><span class="lineno"><a class="line" href="structdsp_1_1_bi_quad.html#ac62dc25604e701cf62d8f19102e9fd9b">  355</a></span>&#160;    void <a class="code" href="structdsp_1_1_bi_quad.html#ac62dc25604e701cf62d8f19102e9fd9b">flush</a>(<span class="keywordtype">void</span>) {</div>
-<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;      <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a> = mZ2 = 0;</div>
+<div class="line"><a name="l00356"></a><span class="lineno">  356</span>&#160;      mZ1 = mZ2 = 0;</div>
 <div class="line"><a name="l00357"></a><span class="lineno">  357</span>&#160;    }</div>
 <div class="line"><a name="l00358"></a><span class="lineno">  358</span>&#160; </div>
 <div class="line"><a name="l00366"></a><span class="lineno">  366</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
 <div class="line"><a name="l00367"></a><span class="lineno"><a class="line" href="structdsp_1_1_bi_quad.html#af2b7adbd81163f63aa246110a7b837bd">  367</a></span>&#160;    float <a class="code" href="structdsp_1_1_bi_quad.html#af2b7adbd81163f63aa246110a7b837bd">process_so</a>(const <span class="keywordtype">float</span> xn) {</div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;      <span class="keywordtype">float</span> acc = mCoeffs.ff0 * xn + <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a>;</div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;      <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a> = mCoeffs.ff1 * xn + mZ2;</div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;      mZ2 = mCoeffs.ff2 * xn;</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;      <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a> -= mCoeffs.fb1 * acc;</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;      mZ2 -= mCoeffs.fb2 * acc;</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;      <span class="keywordtype">float</span> acc = <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.ff0 * xn + mZ1;</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;      mZ1 = <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.ff1 * xn + mZ2;</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;      mZ2 = <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.ff2 * xn;</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;      mZ1 -= <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.fb1 * acc;</div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;      mZ2 -= <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.fb2 * acc;</div>
 <div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;      <span class="keywordflow">return</span> acc;</div>
 <div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;    }</div>
 <div class="line"><a name="l00375"></a><span class="lineno">  375</span>&#160; </div>
 <div class="line"><a name="l00383"></a><span class="lineno">  383</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
 <div class="line"><a name="l00384"></a><span class="lineno"><a class="line" href="structdsp_1_1_bi_quad.html#aab242c886cc39d1be8d47d35c4f33c8f">  384</a></span>&#160;    float <a class="code" href="structdsp_1_1_bi_quad.html#aab242c886cc39d1be8d47d35c4f33c8f">process_fo</a>(const <span class="keywordtype">float</span> xn) {</div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;      <span class="keywordtype">float</span> acc = mCoeffs.ff0 * xn + <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a>;</div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;      <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a> = mCoeffs.ff1 * xn;</div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;      <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a> -= mCoeffs.fb1 * acc;</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;      <span class="keywordtype">float</span> acc = <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.ff0 * xn + mZ1;</div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;      mZ1 = <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.ff1 * xn;</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;      mZ1 -= <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.fb1 * acc;</div>
 <div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;      <span class="keywordflow">return</span> acc;</div>
 <div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;    }</div>
 <div class="line"><a name="l00390"></a><span class="lineno">  390</span>&#160; </div>
@@ -332,237 +332,237 @@ $(function() {
 <div class="line"><a name="l00403"></a><span class="lineno">  403</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
 <div class="line"><a name="l00404"></a><span class="lineno">  404</span>&#160;    <span class="comment">/* Member Variables.                                                   */</span></div>
 <div class="line"><a name="l00405"></a><span class="lineno">  405</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
-<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160;      </div>
-<div class="line"><a name="l00407"></a><span class="lineno">  407</span>&#160;    <a class="code" href="structdsp_1_1_bi_quad.html#a039d334477504b7c905d2e766a185e12">Coeffs</a> mCoeffs; </div>
-<div class="line"><a name="l00408"></a><span class="lineno"><a class="line" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">  408</a></span>&#160;    <span class="keywordtype">float</span> <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a>, mZ2;      </div>
-<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;  };</div>
-<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160; </div>
-<div class="line"><a name="l00414"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html">  414</a></span>&#160;  <span class="keyword">struct </span><a class="code" href="structdsp_1_1_ext_bi_quad.html">ExtBiQuad</a> {</div>
-<div class="line"><a name="l00415"></a><span class="lineno">  415</span>&#160;    <span class="comment">// Extended BiQuad structure</span></div>
-<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;      </div>
-<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
-<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;    <span class="comment">/* Types and Data Structures.                                          */</span></div>
-<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
-<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;            </div>
-<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
-<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;    <span class="comment">/* Constructor / Destructor.                                           */</span></div>
-<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
-<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160; </div>
-<div class="line"><a name="l00428"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a3bf65c7a9da8afa532e580e27f21f8cf">  428</a></span>&#160;    <a class="code" href="structdsp_1_1_ext_bi_quad.html#a3bf65c7a9da8afa532e580e27f21f8cf">ExtBiQuad</a>(<span class="keywordtype">void</span>) :</div>
-<div class="line"><a name="l00429"></a><span class="lineno">  429</span>&#160;      mZ1(0), mZ2(0),</div>
-<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">mD0</a>(0), mD1(0),</div>
-<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;      mW0(0), mW1(0)</div>
-<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;    { }</div>
-<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;      </div>
-<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
-<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;    <span class="comment">/* Public Methods.                                                     */</span></div>
-<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
-<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160; </div>
-<div class="line"><a name="l00441"></a><span class="lineno">  441</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00442"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a467c3de53f216a4607a097257a2f5585">  442</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a467c3de53f216a4607a097257a2f5585">flush</a>(<span class="keywordtype">void</span>) {</div>
-<div class="line"><a name="l00443"></a><span class="lineno">  443</span>&#160;      mZ1 = mZ2 = 0;</div>
-<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;    }</div>
-<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160; </div>
-<div class="line"><a name="l00453"></a><span class="lineno">  453</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00454"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#ab592e4092d50a50084f1a18e68978edc">  454</a></span>&#160;    float <a class="code" href="structdsp_1_1_ext_bi_quad.html#ab592e4092d50a50084f1a18e68978edc">process_so</a>(const <span class="keywordtype">float</span> xn) {</div>
-<div class="line"><a name="l00455"></a><span class="lineno">  455</span>&#160;      <span class="keywordtype">float</span> acc = mCoeffs.ff0 * xn + mZ1;</div>
-<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;      mZ1 = mCoeffs.ff1 * xn + mZ2;</div>
-<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;      mZ2 = mCoeffs.ff2 * xn;</div>
-<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;      mZ1 -= mCoeffs.fb1 * acc;</div>
-<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;      mZ2 -= mCoeffs.fb2 * acc;</div>
-<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;      <span class="keywordflow">return</span> mW1 * (mW0 * acc + <a class="code" href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">mD0</a> * xn) + mD1 * xn;</div>
-<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;    }</div>
-<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160; </div>
-<div class="line"><a name="l00470"></a><span class="lineno">  470</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00471"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#aa2b946a7a450217a16dbc21ecbe2567b">  471</a></span>&#160;    float <a class="code" href="structdsp_1_1_ext_bi_quad.html#aa2b946a7a450217a16dbc21ecbe2567b">process_fo</a>(const <span class="keywordtype">float</span> xn) {</div>
-<div class="line"><a name="l00472"></a><span class="lineno">  472</span>&#160;      <span class="keywordtype">float</span> acc = mCoeffs.ff0 * xn + mZ1;</div>
-<div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160;      mZ1 = mCoeffs.ff1 * xn;</div>
-<div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;      mZ1 -= mCoeffs.fb1 * acc;</div>
-<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;      <span class="keywordflow">return</span> mW1 * (mW0 * acc + <a class="code" href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">mD0</a> * xn) + mD1 * xn;</div>
-<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;    }</div>
-<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160; </div>
-<div class="line"><a name="l00485"></a><span class="lineno">  485</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00486"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#aa0b7cf847c954d2db3939108ea0cea6d">  486</a></span>&#160;    float <a class="code" href="structdsp_1_1_ext_bi_quad.html#aa0b7cf847c954d2db3939108ea0cea6d">process</a>(const <span class="keywordtype">float</span> xn) {</div>
-<div class="line"><a name="l00487"></a><span class="lineno">  487</span>&#160;      <span class="keywordflow">return</span> <a class="code" href="structdsp_1_1_ext_bi_quad.html#ab592e4092d50a50084f1a18e68978edc">process_so</a>(xn);</div>
-<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;    }</div>
-<div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160; </div>
-<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160;    <span class="comment">// -- Invertable All-Pass based Low/High Pass -------</span></div>
-<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160; </div>
-<div class="line"><a name="l00497"></a><span class="lineno">  497</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00498"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#ab2c9c9c725ed7bb8caf6fe16093bc1fa">  498</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#ab2c9c9c725ed7bb8caf6fe16093bc1fa">setFOAPLP</a>(const <span class="keywordtype">float</span> k) {</div>
-<div class="line"><a name="l00499"></a><span class="lineno">  499</span>&#160;      <span class="comment">// k = tan(pi*wc)</span></div>
-<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;      mCoeffs.<a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html#ac4fa8fa646c429c80dfbd26977e1aabf">setFOAP</a>(k);</div>
-<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">mD0</a> = mW0 = 0.5f;</div>
-<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;      mD1 = 0.f;</div>
-<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;      mW1 = 1.f;</div>
-<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;    }</div>
-<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160; </div>
-<div class="line"><a name="l00511"></a><span class="lineno">  511</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00512"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a31f0f7d63c0c1e780414cc7e2e0d9a7e">  512</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a31f0f7d63c0c1e780414cc7e2e0d9a7e">setFOAPHP</a>(const <span class="keywordtype">float</span> k) {</div>
-<div class="line"><a name="l00513"></a><span class="lineno">  513</span>&#160;      <span class="comment">// k = tan(pi*wc)</span></div>
-<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;      mCoeffs.<a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html#ac4fa8fa646c429c80dfbd26977e1aabf">setFOAP</a>(k);</div>
-<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">mD0</a> = 0.5f;</div>
-<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;      mW0 = -0.5f;</div>
-<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160;      mD1 = 0.f;</div>
-<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;      mW1 = 1.f;</div>
-<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;    }</div>
-<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160; </div>
-<div class="line"><a name="l00526"></a><span class="lineno">  526</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00527"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a7480643e7a485238b290d8c5e1dd8fce">  527</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a7480643e7a485238b290d8c5e1dd8fce">toggleFOLPHP</a>(<span class="keywordtype">void</span>) {</div>
-<div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160;      mW0 = -mW0;</div>
-<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160;    }</div>
-<div class="line"><a name="l00530"></a><span class="lineno">  530</span>&#160; </div>
-<div class="line"><a name="l00536"></a><span class="lineno">  536</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00537"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a8a93612b897152699a2a330a3032c4af">  537</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a8a93612b897152699a2a330a3032c4af">updateFOLPHP</a>(const <span class="keywordtype">float</span> k) {</div>
-<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;      mCoeffs.<a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html#ac4fa8fa646c429c80dfbd26977e1aabf">setFOAP</a>(k);</div>
-<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160;    }</div>
-<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160; </div>
-<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;    <span class="comment">// -- All-Pass based Low/High Shelf -----------------</span></div>
-<div class="line"><a name="l00542"></a><span class="lineno">  542</span>&#160;    </div>
-<div class="line"><a name="l00549"></a><span class="lineno">  549</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00550"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a8a1adcb9b9d973a465b05e3f5003b8a8">  550</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a8a1adcb9b9d973a465b05e3f5003b8a8">setFOLS</a>(const <span class="keywordtype">float</span> k, const <span class="keywordtype">float</span> gain) {</div>
-<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160;      <span class="comment">// k = tan(pi*wc)</span></div>
-<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;      <span class="comment">// gain = raw amplitude (pre converted from dB)</span></div>
-<div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> h = gain - 1.f;</div>
-<div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> g = (gain &gt;=  1.f) ? 1.f : gain;</div>
-<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;      mCoeffs.ff0 = mCoeffs.fb1 = (k - g) / (k + g);</div>
-<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;      mCoeffs.ff1 = 1.f;</div>
-<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160;      mCoeffs.fb2 = mCoeffs.ff2 = 0.f;</div>
-<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160; </div>
-<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;      mW0 = 1.f;</div>
-<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">mD0</a> = 1.f;</div>
-<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;        </div>
-<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;      mW1 = 0.5f * h;</div>
-<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;      mD1 = 1.f;</div>
-<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160;    }</div>
-<div class="line"><a name="l00565"></a><span class="lineno">  565</span>&#160; </div>
-<div class="line"><a name="l00572"></a><span class="lineno">  572</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00573"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a31329f25b9d54145aa96178c3bf94f25">  573</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a31329f25b9d54145aa96178c3bf94f25">setFOHS</a>(const <span class="keywordtype">float</span> k, const <span class="keywordtype">float</span> gain) {</div>
-<div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160;      <span class="comment">// k = tan(pi*wc)</span></div>
-<div class="line"><a name="l00575"></a><span class="lineno">  575</span>&#160;      <span class="comment">// gain = raw amplitude (pre converted from dB)</span></div>
-<div class="line"><a name="l00576"></a><span class="lineno">  576</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> h = gain - 1.f;</div>
-<div class="line"><a name="l00577"></a><span class="lineno">  577</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> gk = (gain &gt;=  1.f) ? k : gain*k;</div>
-<div class="line"><a name="l00578"></a><span class="lineno">  578</span>&#160;      mCoeffs.ff0 = mCoeffs.fb1 = (gk - 1.f) / (gk + 1);</div>
-<div class="line"><a name="l00579"></a><span class="lineno">  579</span>&#160;      mCoeffs.ff1 = 1.f;</div>
-<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160;      mCoeffs.fb2 = mCoeffs.ff2 = 0.f;</div>
-<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160; </div>
-<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;      mW0 = -1.f;</div>
-<div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">mD0</a> = 1.f;</div>
-<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;        </div>
-<div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160;      mW1 = 0.5f * h;</div>
-<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160;      mD1 = 1.f;</div>
-<div class="line"><a name="l00587"></a><span class="lineno">  587</span>&#160;    }</div>
-<div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160; </div>
-<div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;    <span class="comment">// TODO: second order shelves</span></div>
-<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;      </div>
-<div class="line"><a name="l00591"></a><span class="lineno">  591</span>&#160;    <span class="comment">// -- All-Pass based Band Pass/Reject -------------</span></div>
-<div class="line"><a name="l00600"></a><span class="lineno">  600</span>&#160;<span class="comment"></span>    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00601"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a08b840666c94d35e1d62bad1e72208ed">  601</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a08b840666c94d35e1d62bad1e72208ed">setSOAPBR2</a>(const <span class="keywordtype">float</span> delta, const <span class="keywordtype">float</span> gamma) {</div>
-<div class="line"><a name="l00602"></a><span class="lineno">  602</span>&#160;      <span class="comment">// Alternative implementation based on second order tunable all pass</span></div>
-<div class="line"><a name="l00603"></a><span class="lineno">  603</span>&#160;      <span class="comment">// delta = cos(2pi*wc)</span></div>
-<div class="line"><a name="l00604"></a><span class="lineno">  604</span>&#160;      mCoeffs.<a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html#a3e5808456124c450d5a11f8995172eed">setSOAP2</a>(delta, gamma);</div>
-<div class="line"><a name="l00605"></a><span class="lineno">  605</span>&#160; </div>
-<div class="line"><a name="l00606"></a><span class="lineno">  606</span>&#160;      mW0 = 1.f;</div>
-<div class="line"><a name="l00607"></a><span class="lineno">  607</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">mD0</a> = 1.f;</div>
-<div class="line"><a name="l00608"></a><span class="lineno">  608</span>&#160; </div>
-<div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160;      mW1 = 0.5f;</div>
-<div class="line"><a name="l00610"></a><span class="lineno">  610</span>&#160;      mD1 = 0.f;</div>
-<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160;    }</div>
-<div class="line"><a name="l00612"></a><span class="lineno">  612</span>&#160; </div>
-<div class="line"><a name="l00621"></a><span class="lineno">  621</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00622"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#ad74e13dd8332fc2961adbd3af2e6124c">  622</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#ad74e13dd8332fc2961adbd3af2e6124c">setSOAPBP2</a>(const <span class="keywordtype">float</span> delta, const <span class="keywordtype">float</span> gamma) {</div>
-<div class="line"><a name="l00623"></a><span class="lineno">  623</span>&#160;      <span class="comment">// Alternative implementation based on second order tunable all pass</span></div>
-<div class="line"><a name="l00624"></a><span class="lineno">  624</span>&#160;      <span class="comment">// delta = cos(2pi*wc) </span></div>
-<div class="line"><a name="l00625"></a><span class="lineno">  625</span>&#160;      mCoeffs.<a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html#a3e5808456124c450d5a11f8995172eed">setSOAP2</a>(delta, gamma);</div>
-<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;        </div>
-<div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;      mW0 = -1.f;</div>
-<div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">mD0</a> = 1.f;</div>
-<div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160;        </div>
-<div class="line"><a name="l00630"></a><span class="lineno">  630</span>&#160;      mW1 = 0.5f;</div>
-<div class="line"><a name="l00631"></a><span class="lineno">  631</span>&#160;      mD1 = 0.f;</div>
-<div class="line"><a name="l00632"></a><span class="lineno">  632</span>&#160;    }</div>
-<div class="line"><a name="l00633"></a><span class="lineno">  633</span>&#160;      </div>
-<div class="line"><a name="l00634"></a><span class="lineno">  634</span>&#160;    <span class="comment">// -- All-Pass based Peak/Notch -------------</span></div>
-<div class="line"><a name="l00644"></a><span class="lineno">  644</span>&#160;<span class="comment"></span>    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
-<div class="line"><a name="l00645"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#aea3534c3a5fb43828ae6c4994f1b3b0b">  645</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#aea3534c3a5fb43828ae6c4994f1b3b0b">setSOAPPN2</a>(const <span class="keywordtype">float</span> delta, const <span class="keywordtype">float</span> gamma, const <span class="keywordtype">float</span> gain) {</div>
-<div class="line"><a name="l00646"></a><span class="lineno">  646</span>&#160;      <span class="comment">// Alternative implementation based on second order tunable all pass</span></div>
-<div class="line"><a name="l00647"></a><span class="lineno">  647</span>&#160;      <span class="comment">// delta = cos(2pi*wc)</span></div>
-<div class="line"><a name="l00648"></a><span class="lineno">  648</span>&#160; </div>
-<div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> h = gain - 1.f;</div>
-<div class="line"><a name="l00650"></a><span class="lineno">  650</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> g = (gain &gt;=  1.f) ? 1.f : gain;</div>
-<div class="line"><a name="l00651"></a><span class="lineno">  651</span>&#160;        </div>
-<div class="line"><a name="l00652"></a><span class="lineno">  652</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> c = (gamma - g) / (gamma + g);</div>
-<div class="line"><a name="l00653"></a><span class="lineno">  653</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> d = -delta;</div>
-<div class="line"><a name="l00654"></a><span class="lineno">  654</span>&#160;        </div>
-<div class="line"><a name="l00655"></a><span class="lineno">  655</span>&#160;      mCoeffs.ff0 = mCoeffs.fb2 = -c;</div>
-<div class="line"><a name="l00656"></a><span class="lineno">  656</span>&#160;      mCoeffs.ff1 = mCoeffs.fb1 = d * (1.f - c);</div>
-<div class="line"><a name="l00657"></a><span class="lineno">  657</span>&#160;      mCoeffs.ff2 = 1.f;</div>
-<div class="line"><a name="l00658"></a><span class="lineno">  658</span>&#160;        </div>
-<div class="line"><a name="l00659"></a><span class="lineno">  659</span>&#160;      mW0 = -1.f;</div>
-<div class="line"><a name="l00660"></a><span class="lineno">  660</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">mD0</a> = 1.f;</div>
-<div class="line"><a name="l00661"></a><span class="lineno">  661</span>&#160; </div>
-<div class="line"><a name="l00662"></a><span class="lineno">  662</span>&#160;      mW1 = 0.5f * h;</div>
-<div class="line"><a name="l00663"></a><span class="lineno">  663</span>&#160;      mD1 = 1.f;</div>
-<div class="line"><a name="l00664"></a><span class="lineno">  664</span>&#160;    }</div>
-<div class="line"><a name="l00665"></a><span class="lineno">  665</span>&#160;      </div>
-<div class="line"><a name="l00666"></a><span class="lineno">  666</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
-<div class="line"><a name="l00667"></a><span class="lineno">  667</span>&#160;    <span class="comment">/* Member Variables.                                                   */</span></div>
-<div class="line"><a name="l00668"></a><span class="lineno">  668</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
-<div class="line"><a name="l00669"></a><span class="lineno">  669</span>&#160;    </div>
-<div class="line"><a name="l00670"></a><span class="lineno">  670</span>&#160;    <a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html">BiQuad::Coeffs</a> mCoeffs; </div>
-<div class="line"><a name="l00671"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">  671</a></span>&#160;    <span class="keywordtype">float</span> <a class="code" href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">mD0</a>, mD1, mW0, mW1;</div>
+<div class="line"><a name="l00406"></a><span class="lineno">  406</span>&#160; </div>
+<div class="line"><a name="l00408"></a><span class="lineno"><a class="line" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">  408</a></span>&#160;    <a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html">Coeffs</a> <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>;</div>
+<div class="line"><a name="l00409"></a><span class="lineno">  409</span>&#160;    <span class="keywordtype">float</span> mZ1, mZ2;      </div>
+<div class="line"><a name="l00410"></a><span class="lineno">  410</span>&#160;  };</div>
+<div class="line"><a name="l00411"></a><span class="lineno">  411</span>&#160; </div>
+<div class="line"><a name="l00415"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html">  415</a></span>&#160;  <span class="keyword">struct </span><a class="code" href="structdsp_1_1_ext_bi_quad.html">ExtBiQuad</a> {</div>
+<div class="line"><a name="l00416"></a><span class="lineno">  416</span>&#160;    <span class="comment">// Extended BiQuad structure</span></div>
+<div class="line"><a name="l00417"></a><span class="lineno">  417</span>&#160;      </div>
+<div class="line"><a name="l00418"></a><span class="lineno">  418</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
+<div class="line"><a name="l00419"></a><span class="lineno">  419</span>&#160;    <span class="comment">/* Types and Data Structures.                                          */</span></div>
+<div class="line"><a name="l00420"></a><span class="lineno">  420</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
+<div class="line"><a name="l00421"></a><span class="lineno">  421</span>&#160;            </div>
+<div class="line"><a name="l00422"></a><span class="lineno">  422</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
+<div class="line"><a name="l00423"></a><span class="lineno">  423</span>&#160;    <span class="comment">/* Constructor / Destructor.                                           */</span></div>
+<div class="line"><a name="l00424"></a><span class="lineno">  424</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
+<div class="line"><a name="l00425"></a><span class="lineno">  425</span>&#160; </div>
+<div class="line"><a name="l00429"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a3bf65c7a9da8afa532e580e27f21f8cf">  429</a></span>&#160;    <a class="code" href="structdsp_1_1_ext_bi_quad.html#a3bf65c7a9da8afa532e580e27f21f8cf">ExtBiQuad</a>(<span class="keywordtype">void</span>) :</div>
+<div class="line"><a name="l00430"></a><span class="lineno">  430</span>&#160;      mZ1(0), mZ2(0),</div>
+<div class="line"><a name="l00431"></a><span class="lineno">  431</span>&#160;      mD0(0), mD1(0),</div>
+<div class="line"><a name="l00432"></a><span class="lineno">  432</span>&#160;      mW0(0), mW1(0)</div>
+<div class="line"><a name="l00433"></a><span class="lineno">  433</span>&#160;    { }</div>
+<div class="line"><a name="l00434"></a><span class="lineno">  434</span>&#160;      </div>
+<div class="line"><a name="l00435"></a><span class="lineno">  435</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
+<div class="line"><a name="l00436"></a><span class="lineno">  436</span>&#160;    <span class="comment">/* Public Methods.                                                     */</span></div>
+<div class="line"><a name="l00437"></a><span class="lineno">  437</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
+<div class="line"><a name="l00438"></a><span class="lineno">  438</span>&#160; </div>
+<div class="line"><a name="l00442"></a><span class="lineno">  442</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00443"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a467c3de53f216a4607a097257a2f5585">  443</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a467c3de53f216a4607a097257a2f5585">flush</a>(<span class="keywordtype">void</span>) {</div>
+<div class="line"><a name="l00444"></a><span class="lineno">  444</span>&#160;      mZ1 = mZ2 = 0;</div>
+<div class="line"><a name="l00445"></a><span class="lineno">  445</span>&#160;    }</div>
+<div class="line"><a name="l00446"></a><span class="lineno">  446</span>&#160; </div>
+<div class="line"><a name="l00454"></a><span class="lineno">  454</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00455"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#ab592e4092d50a50084f1a18e68978edc">  455</a></span>&#160;    float <a class="code" href="structdsp_1_1_ext_bi_quad.html#ab592e4092d50a50084f1a18e68978edc">process_so</a>(const <span class="keywordtype">float</span> xn) {</div>
+<div class="line"><a name="l00456"></a><span class="lineno">  456</span>&#160;      <span class="keywordtype">float</span> acc = <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff0 * xn + mZ1;</div>
+<div class="line"><a name="l00457"></a><span class="lineno">  457</span>&#160;      mZ1 = <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff1 * xn + mZ2;</div>
+<div class="line"><a name="l00458"></a><span class="lineno">  458</span>&#160;      mZ2 = <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff2 * xn;</div>
+<div class="line"><a name="l00459"></a><span class="lineno">  459</span>&#160;      mZ1 -= <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.fb1 * acc;</div>
+<div class="line"><a name="l00460"></a><span class="lineno">  460</span>&#160;      mZ2 -= <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.fb2 * acc;</div>
+<div class="line"><a name="l00461"></a><span class="lineno">  461</span>&#160;      <span class="keywordflow">return</span> mW1 * (mW0 * acc + mD0 * xn) + mD1 * xn;</div>
+<div class="line"><a name="l00462"></a><span class="lineno">  462</span>&#160;    }</div>
+<div class="line"><a name="l00463"></a><span class="lineno">  463</span>&#160; </div>
+<div class="line"><a name="l00471"></a><span class="lineno">  471</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00472"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#aa2b946a7a450217a16dbc21ecbe2567b">  472</a></span>&#160;    float <a class="code" href="structdsp_1_1_ext_bi_quad.html#aa2b946a7a450217a16dbc21ecbe2567b">process_fo</a>(const <span class="keywordtype">float</span> xn) {</div>
+<div class="line"><a name="l00473"></a><span class="lineno">  473</span>&#160;      <span class="keywordtype">float</span> acc = <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff0 * xn + mZ1;</div>
+<div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;      mZ1 = <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff1 * xn;</div>
+<div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;      mZ1 -= <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.fb1 * acc;</div>
+<div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160;      <span class="keywordflow">return</span> mW1 * (mW0 * acc + mD0 * xn) + mD1 * xn;</div>
+<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;    }</div>
+<div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160; </div>
+<div class="line"><a name="l00486"></a><span class="lineno">  486</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00487"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#aa0b7cf847c954d2db3939108ea0cea6d">  487</a></span>&#160;    float <a class="code" href="structdsp_1_1_ext_bi_quad.html#aa0b7cf847c954d2db3939108ea0cea6d">process</a>(const <span class="keywordtype">float</span> xn) {</div>
+<div class="line"><a name="l00488"></a><span class="lineno">  488</span>&#160;      <span class="keywordflow">return</span> <a class="code" href="structdsp_1_1_ext_bi_quad.html#ab592e4092d50a50084f1a18e68978edc">process_so</a>(xn);</div>
+<div class="line"><a name="l00489"></a><span class="lineno">  489</span>&#160;    }</div>
+<div class="line"><a name="l00490"></a><span class="lineno">  490</span>&#160; </div>
+<div class="line"><a name="l00491"></a><span class="lineno">  491</span>&#160;    <span class="comment">// -- Invertable All-Pass based Low/High Pass -------</span></div>
+<div class="line"><a name="l00492"></a><span class="lineno">  492</span>&#160; </div>
+<div class="line"><a name="l00498"></a><span class="lineno">  498</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00499"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#ab2c9c9c725ed7bb8caf6fe16093bc1fa">  499</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#ab2c9c9c725ed7bb8caf6fe16093bc1fa">setFOAPLP</a>(const <span class="keywordtype">float</span> k) {</div>
+<div class="line"><a name="l00500"></a><span class="lineno">  500</span>&#160;      <span class="comment">// k = tan(pi*wc)</span></div>
+<div class="line"><a name="l00501"></a><span class="lineno">  501</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.<a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html#ac4fa8fa646c429c80dfbd26977e1aabf">setFOAP</a>(k);</div>
+<div class="line"><a name="l00502"></a><span class="lineno">  502</span>&#160;      mD0 = mW0 = 0.5f;</div>
+<div class="line"><a name="l00503"></a><span class="lineno">  503</span>&#160;      mD1 = 0.f;</div>
+<div class="line"><a name="l00504"></a><span class="lineno">  504</span>&#160;      mW1 = 1.f;</div>
+<div class="line"><a name="l00505"></a><span class="lineno">  505</span>&#160;    }</div>
+<div class="line"><a name="l00506"></a><span class="lineno">  506</span>&#160; </div>
+<div class="line"><a name="l00512"></a><span class="lineno">  512</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00513"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a31f0f7d63c0c1e780414cc7e2e0d9a7e">  513</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a31f0f7d63c0c1e780414cc7e2e0d9a7e">setFOAPHP</a>(const <span class="keywordtype">float</span> k) {</div>
+<div class="line"><a name="l00514"></a><span class="lineno">  514</span>&#160;      <span class="comment">// k = tan(pi*wc)</span></div>
+<div class="line"><a name="l00515"></a><span class="lineno">  515</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.<a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html#ac4fa8fa646c429c80dfbd26977e1aabf">setFOAP</a>(k);</div>
+<div class="line"><a name="l00516"></a><span class="lineno">  516</span>&#160;      mD0 = 0.5f;</div>
+<div class="line"><a name="l00517"></a><span class="lineno">  517</span>&#160;      mW0 = -0.5f;</div>
+<div class="line"><a name="l00518"></a><span class="lineno">  518</span>&#160;      mD1 = 0.f;</div>
+<div class="line"><a name="l00519"></a><span class="lineno">  519</span>&#160;      mW1 = 1.f;</div>
+<div class="line"><a name="l00520"></a><span class="lineno">  520</span>&#160;    }</div>
+<div class="line"><a name="l00521"></a><span class="lineno">  521</span>&#160; </div>
+<div class="line"><a name="l00525"></a><span class="lineno">  525</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00526"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a7480643e7a485238b290d8c5e1dd8fce">  526</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a7480643e7a485238b290d8c5e1dd8fce">toggleFOLPHP</a>(<span class="keywordtype">void</span>) {</div>
+<div class="line"><a name="l00527"></a><span class="lineno">  527</span>&#160;      mW0 = -mW0;</div>
+<div class="line"><a name="l00528"></a><span class="lineno">  528</span>&#160;    }</div>
+<div class="line"><a name="l00529"></a><span class="lineno">  529</span>&#160; </div>
+<div class="line"><a name="l00535"></a><span class="lineno">  535</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00536"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a8a93612b897152699a2a330a3032c4af">  536</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a8a93612b897152699a2a330a3032c4af">updateFOLPHP</a>(const <span class="keywordtype">float</span> k) {</div>
+<div class="line"><a name="l00537"></a><span class="lineno">  537</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.<a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html#ac4fa8fa646c429c80dfbd26977e1aabf">setFOAP</a>(k);</div>
+<div class="line"><a name="l00538"></a><span class="lineno">  538</span>&#160;    }</div>
+<div class="line"><a name="l00539"></a><span class="lineno">  539</span>&#160; </div>
+<div class="line"><a name="l00540"></a><span class="lineno">  540</span>&#160;    <span class="comment">// -- All-Pass based Low/High Shelf -----------------</span></div>
+<div class="line"><a name="l00541"></a><span class="lineno">  541</span>&#160;    </div>
+<div class="line"><a name="l00548"></a><span class="lineno">  548</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00549"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a8a1adcb9b9d973a465b05e3f5003b8a8">  549</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a8a1adcb9b9d973a465b05e3f5003b8a8">setFOLS</a>(const <span class="keywordtype">float</span> k, const <span class="keywordtype">float</span> gain) {</div>
+<div class="line"><a name="l00550"></a><span class="lineno">  550</span>&#160;      <span class="comment">// k = tan(pi*wc)</span></div>
+<div class="line"><a name="l00551"></a><span class="lineno">  551</span>&#160;      <span class="comment">// gain = raw amplitude (pre converted from dB)</span></div>
+<div class="line"><a name="l00552"></a><span class="lineno">  552</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> h = gain - 1.f;</div>
+<div class="line"><a name="l00553"></a><span class="lineno">  553</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> g = (gain &gt;=  1.f) ? 1.f : gain;</div>
+<div class="line"><a name="l00554"></a><span class="lineno">  554</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff0 = <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.fb1 = (k - g) / (k + g);</div>
+<div class="line"><a name="l00555"></a><span class="lineno">  555</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff1 = 1.f;</div>
+<div class="line"><a name="l00556"></a><span class="lineno">  556</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.fb2 = <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff2 = 0.f;</div>
+<div class="line"><a name="l00557"></a><span class="lineno">  557</span>&#160; </div>
+<div class="line"><a name="l00558"></a><span class="lineno">  558</span>&#160;      mW0 = 1.f;</div>
+<div class="line"><a name="l00559"></a><span class="lineno">  559</span>&#160;      mD0 = 1.f;</div>
+<div class="line"><a name="l00560"></a><span class="lineno">  560</span>&#160;        </div>
+<div class="line"><a name="l00561"></a><span class="lineno">  561</span>&#160;      mW1 = 0.5f * h;</div>
+<div class="line"><a name="l00562"></a><span class="lineno">  562</span>&#160;      mD1 = 1.f;</div>
+<div class="line"><a name="l00563"></a><span class="lineno">  563</span>&#160;    }</div>
+<div class="line"><a name="l00564"></a><span class="lineno">  564</span>&#160; </div>
+<div class="line"><a name="l00571"></a><span class="lineno">  571</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00572"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a31329f25b9d54145aa96178c3bf94f25">  572</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a31329f25b9d54145aa96178c3bf94f25">setFOHS</a>(const <span class="keywordtype">float</span> k, const <span class="keywordtype">float</span> gain) {</div>
+<div class="line"><a name="l00573"></a><span class="lineno">  573</span>&#160;      <span class="comment">// k = tan(pi*wc)</span></div>
+<div class="line"><a name="l00574"></a><span class="lineno">  574</span>&#160;      <span class="comment">// gain = raw amplitude (pre converted from dB)</span></div>
+<div class="line"><a name="l00575"></a><span class="lineno">  575</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> h = gain - 1.f;</div>
+<div class="line"><a name="l00576"></a><span class="lineno">  576</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> gk = (gain &gt;=  1.f) ? k : gain*k;</div>
+<div class="line"><a name="l00577"></a><span class="lineno">  577</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff0 = <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.fb1 = (gk - 1.f) / (gk + 1);</div>
+<div class="line"><a name="l00578"></a><span class="lineno">  578</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff1 = 1.f;</div>
+<div class="line"><a name="l00579"></a><span class="lineno">  579</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.fb2 = <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff2 = 0.f;</div>
+<div class="line"><a name="l00580"></a><span class="lineno">  580</span>&#160; </div>
+<div class="line"><a name="l00581"></a><span class="lineno">  581</span>&#160;      mW0 = -1.f;</div>
+<div class="line"><a name="l00582"></a><span class="lineno">  582</span>&#160;      mD0 = 1.f;</div>
+<div class="line"><a name="l00583"></a><span class="lineno">  583</span>&#160;        </div>
+<div class="line"><a name="l00584"></a><span class="lineno">  584</span>&#160;      mW1 = 0.5f * h;</div>
+<div class="line"><a name="l00585"></a><span class="lineno">  585</span>&#160;      mD1 = 1.f;</div>
+<div class="line"><a name="l00586"></a><span class="lineno">  586</span>&#160;    }</div>
+<div class="line"><a name="l00587"></a><span class="lineno">  587</span>&#160; </div>
+<div class="line"><a name="l00588"></a><span class="lineno">  588</span>&#160;    <span class="comment">// TODO: second order shelves</span></div>
+<div class="line"><a name="l00589"></a><span class="lineno">  589</span>&#160;      </div>
+<div class="line"><a name="l00590"></a><span class="lineno">  590</span>&#160;    <span class="comment">// -- All-Pass based Band Pass/Reject -------------</span></div>
+<div class="line"><a name="l00599"></a><span class="lineno">  599</span>&#160;<span class="comment"></span>    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00600"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a08b840666c94d35e1d62bad1e72208ed">  600</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#a08b840666c94d35e1d62bad1e72208ed">setSOAPBR2</a>(const <span class="keywordtype">float</span> delta, const <span class="keywordtype">float</span> gamma) {</div>
+<div class="line"><a name="l00601"></a><span class="lineno">  601</span>&#160;      <span class="comment">// Alternative implementation based on second order tunable all pass</span></div>
+<div class="line"><a name="l00602"></a><span class="lineno">  602</span>&#160;      <span class="comment">// delta = cos(2pi*wc)</span></div>
+<div class="line"><a name="l00603"></a><span class="lineno">  603</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.<a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html#a3e5808456124c450d5a11f8995172eed">setSOAP2</a>(delta, gamma);</div>
+<div class="line"><a name="l00604"></a><span class="lineno">  604</span>&#160; </div>
+<div class="line"><a name="l00605"></a><span class="lineno">  605</span>&#160;      mW0 = 1.f;</div>
+<div class="line"><a name="l00606"></a><span class="lineno">  606</span>&#160;      mD0 = 1.f;</div>
+<div class="line"><a name="l00607"></a><span class="lineno">  607</span>&#160; </div>
+<div class="line"><a name="l00608"></a><span class="lineno">  608</span>&#160;      mW1 = 0.5f;</div>
+<div class="line"><a name="l00609"></a><span class="lineno">  609</span>&#160;      mD1 = 0.f;</div>
+<div class="line"><a name="l00610"></a><span class="lineno">  610</span>&#160;    }</div>
+<div class="line"><a name="l00611"></a><span class="lineno">  611</span>&#160; </div>
+<div class="line"><a name="l00620"></a><span class="lineno">  620</span>&#160;    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00621"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#ad74e13dd8332fc2961adbd3af2e6124c">  621</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#ad74e13dd8332fc2961adbd3af2e6124c">setSOAPBP2</a>(const <span class="keywordtype">float</span> delta, const <span class="keywordtype">float</span> gamma) {</div>
+<div class="line"><a name="l00622"></a><span class="lineno">  622</span>&#160;      <span class="comment">// Alternative implementation based on second order tunable all pass</span></div>
+<div class="line"><a name="l00623"></a><span class="lineno">  623</span>&#160;      <span class="comment">// delta = cos(2pi*wc) </span></div>
+<div class="line"><a name="l00624"></a><span class="lineno">  624</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.<a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html#a3e5808456124c450d5a11f8995172eed">setSOAP2</a>(delta, gamma);</div>
+<div class="line"><a name="l00625"></a><span class="lineno">  625</span>&#160;        </div>
+<div class="line"><a name="l00626"></a><span class="lineno">  626</span>&#160;      mW0 = -1.f;</div>
+<div class="line"><a name="l00627"></a><span class="lineno">  627</span>&#160;      mD0 = 1.f;</div>
+<div class="line"><a name="l00628"></a><span class="lineno">  628</span>&#160;        </div>
+<div class="line"><a name="l00629"></a><span class="lineno">  629</span>&#160;      mW1 = 0.5f;</div>
+<div class="line"><a name="l00630"></a><span class="lineno">  630</span>&#160;      mD1 = 0.f;</div>
+<div class="line"><a name="l00631"></a><span class="lineno">  631</span>&#160;    }</div>
+<div class="line"><a name="l00632"></a><span class="lineno">  632</span>&#160;      </div>
+<div class="line"><a name="l00633"></a><span class="lineno">  633</span>&#160;    <span class="comment">// -- All-Pass based Peak/Notch -------------</span></div>
+<div class="line"><a name="l00643"></a><span class="lineno">  643</span>&#160;<span class="comment"></span>    <span class="keyword">inline</span> __attribute__((optimize(<span class="stringliteral">&quot;Ofast&quot;</span>),always_inline))</div>
+<div class="line"><a name="l00644"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#aea3534c3a5fb43828ae6c4994f1b3b0b">  644</a></span>&#160;    void <a class="code" href="structdsp_1_1_ext_bi_quad.html#aea3534c3a5fb43828ae6c4994f1b3b0b">setSOAPPN2</a>(const <span class="keywordtype">float</span> delta, const <span class="keywordtype">float</span> gamma, const <span class="keywordtype">float</span> gain) {</div>
+<div class="line"><a name="l00645"></a><span class="lineno">  645</span>&#160;      <span class="comment">// Alternative implementation based on second order tunable all pass</span></div>
+<div class="line"><a name="l00646"></a><span class="lineno">  646</span>&#160;      <span class="comment">// delta = cos(2pi*wc)</span></div>
+<div class="line"><a name="l00647"></a><span class="lineno">  647</span>&#160; </div>
+<div class="line"><a name="l00648"></a><span class="lineno">  648</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> h = gain - 1.f;</div>
+<div class="line"><a name="l00649"></a><span class="lineno">  649</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> g = (gain &gt;=  1.f) ? 1.f : gain;</div>
+<div class="line"><a name="l00650"></a><span class="lineno">  650</span>&#160;        </div>
+<div class="line"><a name="l00651"></a><span class="lineno">  651</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> c = (gamma - g) / (gamma + g);</div>
+<div class="line"><a name="l00652"></a><span class="lineno">  652</span>&#160;      <span class="keyword">const</span> <span class="keywordtype">float</span> d = -delta;</div>
+<div class="line"><a name="l00653"></a><span class="lineno">  653</span>&#160;        </div>
+<div class="line"><a name="l00654"></a><span class="lineno">  654</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff0 = <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.fb2 = -c;</div>
+<div class="line"><a name="l00655"></a><span class="lineno">  655</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff1 = <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.fb1 = d * (1.f - c);</div>
+<div class="line"><a name="l00656"></a><span class="lineno">  656</span>&#160;      <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>.ff2 = 1.f;</div>
+<div class="line"><a name="l00657"></a><span class="lineno">  657</span>&#160;        </div>
+<div class="line"><a name="l00658"></a><span class="lineno">  658</span>&#160;      mW0 = -1.f;</div>
+<div class="line"><a name="l00659"></a><span class="lineno">  659</span>&#160;      mD0 = 1.f;</div>
+<div class="line"><a name="l00660"></a><span class="lineno">  660</span>&#160; </div>
+<div class="line"><a name="l00661"></a><span class="lineno">  661</span>&#160;      mW1 = 0.5f * h;</div>
+<div class="line"><a name="l00662"></a><span class="lineno">  662</span>&#160;      mD1 = 1.f;</div>
+<div class="line"><a name="l00663"></a><span class="lineno">  663</span>&#160;    }</div>
+<div class="line"><a name="l00664"></a><span class="lineno">  664</span>&#160;      </div>
+<div class="line"><a name="l00665"></a><span class="lineno">  665</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
+<div class="line"><a name="l00666"></a><span class="lineno">  666</span>&#160;    <span class="comment">/* Member Variables.                                                   */</span></div>
+<div class="line"><a name="l00667"></a><span class="lineno">  667</span>&#160;    <span class="comment">/*=====================================================================*/</span></div>
+<div class="line"><a name="l00668"></a><span class="lineno">  668</span>&#160; </div>
+<div class="line"><a name="l00670"></a><span class="lineno"><a class="line" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">  670</a></span>&#160;    <a class="code" href="structdsp_1_1_bi_quad_1_1_coeffs.html">BiQuad::Coeffs</a> <a class="code" href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">mCoeffs</a>;</div>
+<div class="line"><a name="l00671"></a><span class="lineno">  671</span>&#160;    <span class="keywordtype">float</span> mD0, mD1, mW0, mW1;</div>
 <div class="line"><a name="l00672"></a><span class="lineno">  672</span>&#160;    <span class="keywordtype">float</span> mZ1, mZ2;</div>
 <div class="line"><a name="l00673"></a><span class="lineno">  673</span>&#160;  };    </div>
 <div class="line"><a name="l00674"></a><span class="lineno">  674</span>&#160;}</div>
 <div class="line"><a name="l00675"></a><span class="lineno">  675</span>&#160; </div>
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="astructdsp_1_1_bi_quad_html_a039d334477504b7c905d2e766a185e12"><div class="ttname"><a href="structdsp_1_1_bi_quad.html#a039d334477504b7c905d2e766a185e12">dsp::BiQuad::Coeffs</a></div><div class="ttdeci">struct dsp::BiQuad::Coeffs Coeffs</div><div class="ttdoc">Filter coefficients.</div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html">dsp::ExtBiQuad</a></div><div class="ttdoc">Extended transposed form 2 Bi-Quad construct.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00414">biquad.hpp:414</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_ab592e4092d50a50084f1a18e68978edc"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#ab592e4092d50a50084f1a18e68978edc">dsp::ExtBiQuad::process_so</a></div><div class="ttdeci">float process_so(const float xn)</div><div class="ttdoc">Second order processing of one sample.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00454">biquad.hpp:454</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_aea3534c3a5fb43828ae6c4994f1b3b0b"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#aea3534c3a5fb43828ae6c4994f1b3b0b">dsp::ExtBiQuad::setSOAPPN2</a></div><div class="ttdeci">void setSOAPPN2(const float delta, const float gamma, const float gain)</div><div class="ttdoc">Calculate coefficients for second order all pass based peak/notch filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00645">biquad.hpp:645</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html">dsp::ExtBiQuad</a></div><div class="ttdoc">Extended transposed form 2 Bi-Quad construct.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00415">biquad.hpp:415</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_ab592e4092d50a50084f1a18e68978edc"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#ab592e4092d50a50084f1a18e68978edc">dsp::ExtBiQuad::process_so</a></div><div class="ttdeci">float process_so(const float xn)</div><div class="ttdoc">Second order processing of one sample.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00455">biquad.hpp:455</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a141e395cc99f1adfb4ea29899f2c7b90"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90">dsp::ExtBiQuad::mCoeffs</a></div><div class="ttdeci">BiQuad::Coeffs mCoeffs</div><div class="ttdoc">Coefficients for the Bi-Quad construct.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00670">biquad.hpp:670</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_aea3534c3a5fb43828ae6c4994f1b3b0b"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#aea3534c3a5fb43828ae6c4994f1b3b0b">dsp::ExtBiQuad::setSOAPPN2</a></div><div class="ttdeci">void setSOAPPN2(const float delta, const float gamma, const float gain)</div><div class="ttdoc">Calculate coefficients for second order all pass based peak/notch filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00644">biquad.hpp:644</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html">dsp::BiQuad::Coeffs</a></div><div class="ttdoc">Filter coefficients.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00065">biquad.hpp:65</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_a6f797f4663320fc775195b8ee8a6fec1"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#a6f797f4663320fc775195b8ee8a6fec1">dsp::BiQuad::Coeffs::setFOAP2</a></div><div class="ttdeci">void setFOAP2(const float wc)</div><div class="ttdoc">Calculate coefficients for first order all pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00185">biquad.hpp:185</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_a3e5808456124c450d5a11f8995172eed"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#a3e5808456124c450d5a11f8995172eed">dsp::BiQuad::Coeffs::setSOAP2</a></div><div class="ttdeci">void setSOAP2(const float delta, const float gamma)</div><div class="ttdoc">Calculate coefficients for second order all pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00306">biquad.hpp:306</a></div></div>
-<div class="ttc" id="astructdsp_1_1_bi_quad_html_a8da74c3d75875caf7f556e82d55bfa8e"><div class="ttname"><a href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">dsp::BiQuad::mZ1</a></div><div class="ttdeci">float mZ1</div><div class="ttdoc">Coefficients for the Bi-Quad construct.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00408">biquad.hpp:408</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_a3fd3a1df1d7f1e5c4c587d905e4f7869"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#a3fd3a1df1d7f1e5c4c587d905e4f7869">dsp::BiQuad::Coeffs::setSOBR</a></div><div class="ttdeci">void setSOBR(const float k, const float q)</div><div class="ttdoc">Calculate coefficients for second order band reject filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00269">biquad.hpp:269</a></div></div>
 <div class="ttc" id="afloat__math_8h_html"><div class="ttname"><a href="float__math_8h.html">float_math.h</a></div><div class="ttdoc">Floating Point Math Utilities.</div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_afc3f5f22a2e316471782c95e7a076e49"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#afc3f5f22a2e316471782c95e7a076e49">dsp::BiQuad::Coeffs::setSODC</a></div><div class="ttdeci">void setSODC(const float pole)</div><div class="ttdoc">Calculate coefficients for second order DC filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00200">biquad.hpp:200</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_ad74e13dd8332fc2961adbd3af2e6124c"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#ad74e13dd8332fc2961adbd3af2e6124c">dsp::ExtBiQuad::setSOAPBP2</a></div><div class="ttdeci">void setSOAPBP2(const float delta, const float gamma)</div><div class="ttdoc">Calculate coefficients for second order all pass based band pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00622">biquad.hpp:622</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_ad74e13dd8332fc2961adbd3af2e6124c"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#ad74e13dd8332fc2961adbd3af2e6124c">dsp::ExtBiQuad::setSOAPBP2</a></div><div class="ttdeci">void setSOAPBP2(const float delta, const float gamma)</div><div class="ttdoc">Calculate coefficients for second order all pass based band pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00621">biquad.hpp:621</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_abe454541de91119843be3a53c114d7a7"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#abe454541de91119843be3a53c114d7a7">dsp::BiQuad::Coeffs::setSOLP</a></div><div class="ttdeci">void setSOLP(const float k, const float q)</div><div class="ttdoc">Calculate coefficients for second order low pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00214">biquad.hpp:214</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_html_aab242c886cc39d1be8d47d35c4f33c8f"><div class="ttname"><a href="structdsp_1_1_bi_quad.html#aab242c886cc39d1be8d47d35c4f33c8f">dsp::BiQuad::process_fo</a></div><div class="ttdeci">float process_fo(const float xn)</div><div class="ttdoc">First order processing of one sample.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00384">biquad.hpp:384</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a31329f25b9d54145aa96178c3bf94f25"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a31329f25b9d54145aa96178c3bf94f25">dsp::ExtBiQuad::setFOHS</a></div><div class="ttdeci">void setFOHS(const float k, const float gain)</div><div class="ttdoc">Calculate coefficients for first order all pass based high shelf filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00573">biquad.hpp:573</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a31329f25b9d54145aa96178c3bf94f25"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a31329f25b9d54145aa96178c3bf94f25">dsp::ExtBiQuad::setFOHS</a></div><div class="ttdeci">void setFOHS(const float k, const float gain)</div><div class="ttdoc">Calculate coefficients for first order all pass based high shelf filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00572">biquad.hpp:572</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_af089c9b11ed38520c61806313c5355d5"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#af089c9b11ed38520c61806313c5355d5">dsp::BiQuad::Coeffs::wc</a></div><div class="ttdeci">static float wc(const float fc, const float fsrecip)</div><div class="ttdoc">Convert Hz frequency to radians.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00089">biquad.hpp:89</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_ae2cdea17f17c4ce8533f7000ae09ee4e"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#ae2cdea17f17c4ce8533f7000ae09ee4e">dsp::BiQuad::Coeffs::setFOLP</a></div><div class="ttdeci">void setFOLP(const float k)</div><div class="ttdoc">Calculate coefficients for first order low pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00138">biquad.hpp:138</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a08b840666c94d35e1d62bad1e72208ed"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a08b840666c94d35e1d62bad1e72208ed">dsp::ExtBiQuad::setSOAPBR2</a></div><div class="ttdeci">void setSOAPBR2(const float delta, const float gamma)</div><div class="ttdoc">Calculate coefficients for second order all pass based band reject filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00601">biquad.hpp:601</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a08b840666c94d35e1d62bad1e72208ed"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a08b840666c94d35e1d62bad1e72208ed">dsp::ExtBiQuad::setSOAPBR2</a></div><div class="ttdeci">void setSOAPBR2(const float delta, const float gamma)</div><div class="ttdoc">Calculate coefficients for second order all pass based band reject filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00600">biquad.hpp:600</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_ab5562c997aebce5740e5fe15fb8a21f9"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#ab5562c997aebce5740e5fe15fb8a21f9">dsp::BiQuad::Coeffs::Coeffs</a></div><div class="ttdeci">Coeffs()</div><div class="ttdoc">Default constructor.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00075">biquad.hpp:75</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_a2b918efddbaf8d04ae2383a8cf742970"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#a2b918efddbaf8d04ae2383a8cf742970">dsp::BiQuad::Coeffs::setSOHP</a></div><div class="ttdeci">void setSOHP(const float k, const float q)</div><div class="ttdoc">Calculate coefficients for second order high pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00232">biquad.hpp:232</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_html_af2b7adbd81163f63aa246110a7b837bd"><div class="ttname"><a href="structdsp_1_1_bi_quad.html#af2b7adbd81163f63aa246110a7b837bd">dsp::BiQuad::process_so</a></div><div class="ttdeci">float process_so(const float xn)</div><div class="ttdoc">Second order processing of one sample.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00367">biquad.hpp:367</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_ab2c9c9c725ed7bb8caf6fe16093bc1fa"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#ab2c9c9c725ed7bb8caf6fe16093bc1fa">dsp::ExtBiQuad::setFOAPLP</a></div><div class="ttdeci">void setFOAPLP(const float k)</div><div class="ttdoc">Calculate coefficients for &quot;invertable&quot; all pass based low pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00498">biquad.hpp:498</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a467c3de53f216a4607a097257a2f5585"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a467c3de53f216a4607a097257a2f5585">dsp::ExtBiQuad::flush</a></div><div class="ttdeci">void flush(void)</div><div class="ttdoc">Flush internal delays.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00442">biquad.hpp:442</a></div></div>
+<div class="ttc" id="astructdsp_1_1_bi_quad_html_ad5079f7105d9d97fdff57a19a5af5de0"><div class="ttname"><a href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">dsp::BiQuad::mCoeffs</a></div><div class="ttdeci">Coeffs mCoeffs</div><div class="ttdoc">Coefficients for the Bi-Quad construct.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00408">biquad.hpp:408</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_ab2c9c9c725ed7bb8caf6fe16093bc1fa"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#ab2c9c9c725ed7bb8caf6fe16093bc1fa">dsp::ExtBiQuad::setFOAPLP</a></div><div class="ttdeci">void setFOAPLP(const float k)</div><div class="ttdoc">Calculate coefficients for &quot;invertable&quot; all pass based low pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00499">biquad.hpp:499</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a467c3de53f216a4607a097257a2f5585"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a467c3de53f216a4607a097257a2f5585">dsp::ExtBiQuad::flush</a></div><div class="ttdeci">void flush(void)</div><div class="ttdoc">Flush internal delays.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00443">biquad.hpp:443</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_ad4dcd2259b92bd034ff0340bf5577836"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#ad4dcd2259b92bd034ff0340bf5577836">dsp::BiQuad::Coeffs::setSOAP3</a></div><div class="ttdeci">void setSOAP3(const float delta, const float radius)</div><div class="ttdoc">Calculate coefficients for second order all pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00325">biquad.hpp:325</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a2083084675fd9e910f2013a743690604"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a2083084675fd9e910f2013a743690604">dsp::ExtBiQuad::mD0</a></div><div class="ttdeci">float mD0</div><div class="ttdoc">Coefficients for the Bi-Quad construct.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00671">biquad.hpp:671</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_aa0b7cf847c954d2db3939108ea0cea6d"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#aa0b7cf847c954d2db3939108ea0cea6d">dsp::ExtBiQuad::process</a></div><div class="ttdeci">float process(const float xn)</div><div class="ttdoc">Default processing function (second order)</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00486">biquad.hpp:486</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_aa0b7cf847c954d2db3939108ea0cea6d"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#aa0b7cf847c954d2db3939108ea0cea6d">dsp::ExtBiQuad::process</a></div><div class="ttdeci">float process(const float xn)</div><div class="ttdoc">Default processing function (second order)</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00487">biquad.hpp:487</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_a6074341e5c6ebaae22ae540111ee2cb1"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#a6074341e5c6ebaae22ae540111ee2cb1">dsp::BiQuad::Coeffs::setFOHP</a></div><div class="ttdeci">void setFOHP(const float k)</div><div class="ttdoc">Calculate coefficients for first order high pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00152">biquad.hpp:152</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_a58ab727dbe6105944f60cccab9ecca73"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#a58ab727dbe6105944f60cccab9ecca73">dsp::BiQuad::Coeffs::setPoleHP</a></div><div class="ttdeci">void setPoleHP(const float pole)</div><div class="ttdoc">Calculate coefficients for single pole high pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00113">biquad.hpp:113</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a7480643e7a485238b290d8c5e1dd8fce"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a7480643e7a485238b290d8c5e1dd8fce">dsp::ExtBiQuad::toggleFOLPHP</a></div><div class="ttdeci">void toggleFOLPHP(void)</div><div class="ttdoc">Toggle &quot;invertable&quot; all pass based low/high pass filter to opposite mode.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00527">biquad.hpp:527</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a8a93612b897152699a2a330a3032c4af"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a8a93612b897152699a2a330a3032c4af">dsp::ExtBiQuad::updateFOLPHP</a></div><div class="ttdeci">void updateFOLPHP(const float k)</div><div class="ttdoc">Update &quot;invertable&quot; all pass based low/high pass filter coefficients.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00537">biquad.hpp:537</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a7480643e7a485238b290d8c5e1dd8fce"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a7480643e7a485238b290d8c5e1dd8fce">dsp::ExtBiQuad::toggleFOLPHP</a></div><div class="ttdeci">void toggleFOLPHP(void)</div><div class="ttdoc">Toggle &quot;invertable&quot; all pass based low/high pass filter to opposite mode.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00526">biquad.hpp:526</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a8a93612b897152699a2a330a3032c4af"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a8a93612b897152699a2a330a3032c4af">dsp::ExtBiQuad::updateFOLPHP</a></div><div class="ttdeci">void updateFOLPHP(const float k)</div><div class="ttdoc">Update &quot;invertable&quot; all pass based low/high pass filter coefficients.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00536">biquad.hpp:536</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_html_ac62dc25604e701cf62d8f19102e9fd9b"><div class="ttname"><a href="structdsp_1_1_bi_quad.html#ac62dc25604e701cf62d8f19102e9fd9b">dsp::BiQuad::flush</a></div><div class="ttdeci">void flush(void)</div><div class="ttdoc">Flush internal delays.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00355">biquad.hpp:355</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a3bf65c7a9da8afa532e580e27f21f8cf"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a3bf65c7a9da8afa532e580e27f21f8cf">dsp::ExtBiQuad::ExtBiQuad</a></div><div class="ttdeci">ExtBiQuad(void)</div><div class="ttdoc">Default constructor.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00428">biquad.hpp:428</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a3bf65c7a9da8afa532e580e27f21f8cf"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a3bf65c7a9da8afa532e580e27f21f8cf">dsp::ExtBiQuad::ExtBiQuad</a></div><div class="ttdeci">ExtBiQuad(void)</div><div class="ttdoc">Default constructor.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00429">biquad.hpp:429</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_ae0dbf7b88d1fc415507322835f31d0b9"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#ae0dbf7b88d1fc415507322835f31d0b9">dsp::BiQuad::Coeffs::setPoleLP</a></div><div class="ttdeci">void setPoleLP(const float pole)</div><div class="ttdoc">Calculate coefficients for single pole low pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00101">biquad.hpp:101</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_html_a1a2b9996db5f63ade869b651212bb9c9"><div class="ttname"><a href="structdsp_1_1_bi_quad.html#a1a2b9996db5f63ade869b651212bb9c9">dsp::BiQuad::BiQuad</a></div><div class="ttdeci">BiQuad(void)</div><div class="ttdoc">Default constructor.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00344">biquad.hpp:344</a></div></div>
 <div class="ttc" id="anamespacedsp_html"><div class="ttname"><a href="namespacedsp.html">dsp</a></div><div class="ttdoc">Common DSP Utilities.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00049">biquad.hpp:49</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_html_ae2b4d3821372269a1e3859febc0f1321"><div class="ttname"><a href="structdsp_1_1_bi_quad.html#ae2b4d3821372269a1e3859febc0f1321">dsp::BiQuad::process</a></div><div class="ttdeci">float process(const float xn)</div><div class="ttdoc">Default processing function (second order)</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00399">biquad.hpp:399</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a8a1adcb9b9d973a465b05e3f5003b8a8"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a8a1adcb9b9d973a465b05e3f5003b8a8">dsp::ExtBiQuad::setFOLS</a></div><div class="ttdeci">void setFOLS(const float k, const float gain)</div><div class="ttdoc">Calculate coefficients for first order all pass based low shelf filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00550">biquad.hpp:550</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a8a1adcb9b9d973a465b05e3f5003b8a8"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a8a1adcb9b9d973a465b05e3f5003b8a8">dsp::ExtBiQuad::setFOLS</a></div><div class="ttdeci">void setFOLS(const float k, const float gain)</div><div class="ttdoc">Calculate coefficients for first order all pass based low shelf filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00549">biquad.hpp:549</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_html"><div class="ttname"><a href="structdsp_1_1_bi_quad.html">dsp::BiQuad</a></div><div class="ttdoc">Transposed form 2 Bi-Quad construct for FIR/IIR filters.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00054">biquad.hpp:54</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_aca63ca38ea1c0016c850f07de7773ed3"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#aca63ca38ea1c0016c850f07de7773ed3">dsp::BiQuad::Coeffs::setSOBP</a></div><div class="ttdeci">void setSOBP(const float k, const float q)</div><div class="ttdoc">Calculate coefficients for second order band pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00250">biquad.hpp:250</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_ac4fa8fa646c429c80dfbd26977e1aabf"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#ac4fa8fa646c429c80dfbd26977e1aabf">dsp::BiQuad::Coeffs::setFOAP</a></div><div class="ttdeci">void setFOAP(const float k)</div><div class="ttdoc">Calculate coefficients for first order all pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00168">biquad.hpp:168</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_aa2b946a7a450217a16dbc21ecbe2567b"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#aa2b946a7a450217a16dbc21ecbe2567b">dsp::ExtBiQuad::process_fo</a></div><div class="ttdeci">float process_fo(const float xn)</div><div class="ttdoc">First order processing of one sample.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00471">biquad.hpp:471</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_aa2b946a7a450217a16dbc21ecbe2567b"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#aa2b946a7a450217a16dbc21ecbe2567b">dsp::ExtBiQuad::process_fo</a></div><div class="ttdeci">float process_fo(const float xn)</div><div class="ttdoc">First order processing of one sample.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00472">biquad.hpp:472</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_a28e2c3660d8b61f0584cef0d3baaae46"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#a28e2c3660d8b61f0584cef0d3baaae46">dsp::BiQuad::Coeffs::setSOAP1</a></div><div class="ttdeci">void setSOAP1(const float k, const float q)</div><div class="ttdoc">Calculate coefficients for second order all pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00286">biquad.hpp:286</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_1_1_coeffs_html_ab728a7ef5d2461f42af60efc5724d6a5"><div class="ttname"><a href="structdsp_1_1_bi_quad_1_1_coeffs.html#ab728a7ef5d2461f42af60efc5724d6a5">dsp::BiQuad::Coeffs::setFODC</a></div><div class="ttdeci">void setFODC(const float pole)</div><div class="ttdoc">Calculate coefficients for single pole DC filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00125">biquad.hpp:125</a></div></div>
-<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a31f0f7d63c0c1e780414cc7e2e0d9a7e"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a31f0f7d63c0c1e780414cc7e2e0d9a7e">dsp::ExtBiQuad::setFOAPHP</a></div><div class="ttdeci">void setFOAPHP(const float k)</div><div class="ttdoc">Calculate coefficients for &quot;invertable&quot; all pass based high pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00512">biquad.hpp:512</a></div></div>
+<div class="ttc" id="astructdsp_1_1_ext_bi_quad_html_a31f0f7d63c0c1e780414cc7e2e0d9a7e"><div class="ttname"><a href="structdsp_1_1_ext_bi_quad.html#a31f0f7d63c0c1e780414cc7e2e0d9a7e">dsp::ExtBiQuad::setFOAPHP</a></div><div class="ttdeci">void setFOAPHP(const float k)</div><div class="ttdoc">Calculate coefficients for &quot;invertable&quot; all pass based high pass filter.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00513">biquad.hpp:513</a></div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Nov 28 2019 17:07:51 for prologue SDK by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Nov 29 2019 08:55:25 for prologue SDK by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.16
 </small></address>

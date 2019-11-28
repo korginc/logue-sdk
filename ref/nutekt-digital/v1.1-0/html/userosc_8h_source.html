@@ -167,7 +167,7 @@ $(function() {
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160; </div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;<span class="preprocessor">#pragma pack(push, 1)</span></div>
 <div class="line"><a name="l00108"></a><span class="lineno"><a class="line" href="structuser__osc__data.html">  108</a></span>&#160;  <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structuser__osc__data.html">user_osc_data</a> {</div>
-<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    <a class="code" href="structuser__prg__header.html">user_prg_header_t</a>     header;</div>
+<div class="line"><a name="l00109"></a><span class="lineno">  109</span>&#160;    user_prg_header_t     header;</div>
 <div class="line"><a name="l00110"></a><span class="lineno">  110</span>&#160;    <a class="code" href="structuser__osc__hook__table.html">user_osc_hook_table_t</a> hooks;</div>
 <div class="line"><a name="l00111"></a><span class="lineno">  111</span>&#160;    <span class="comment">// ... more bytes following</span></div>
 <div class="line"><a name="l00112"></a><span class="lineno">  112</span>&#160;  } <a class="code" href="structuser__osc__data.html">user_osc_data_t</a>;</div>
@@ -182,13 +182,13 @@ $(function() {
 <div class="line"><a name="l00121"></a><span class="lineno">  121</span>&#160;<span class="preprocessor">#define OSC_PARAM   __attribute__((used)) _hook_param</span></div>
 <div class="line"><a name="l00122"></a><span class="lineno">  122</span>&#160; </div>
 <div class="line"><a name="l00123"></a><span class="lineno">  123</span>&#160;  <span class="keywordtype">void</span> _entry(uint32_t platform, uint32_t api);</div>
-<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  <span class="keywordtype">void</span> _hook_init(uint32_t platform, uint32_t api);</div>
+<div class="line"><a name="l00124"></a><span class="lineno">  124</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="group__delfx__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a>(uint32_t platform, uint32_t api);</div>
 <div class="line"><a name="l00125"></a><span class="lineno">  125</span>&#160;  <span class="keywordtype">void</span> _hook_cycle(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params, int32_t *yn, <span class="keyword">const</span> uint32_t frames);</div>
 <div class="line"><a name="l00126"></a><span class="lineno">  126</span>&#160;  <span class="keywordtype">void</span> _hook_on(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
 <div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;  <span class="keywordtype">void</span> _hook_off(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
 <div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;  <span class="keywordtype">void</span> _hook_mute(<span class="keyword">const</span> <a class="code" href="structuser__osc__param.html">user_osc_param_t</a> * <span class="keyword">const</span> params);</div>
 <div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;  <span class="keywordtype">void</span> _hook_value(uint16_t value);</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;  <span class="keywordtype">void</span> _hook_param(uint16_t index, uint16_t value);</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;  <span class="keywordtype">void</span> <a class="code" href="group__delfx__inst.html#gae3cedf87a00cacb4008e52ce1fe1ca60">_hook_param</a>(uint16_t index, uint16_t value);</div>
 <div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;  </div>
 <div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;<span class="preprocessor">#ifdef __cplusplus</span></div>
 <div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;} <span class="comment">// extern &quot;C&quot;</span></div>
@@ -199,13 +199,14 @@ $(function() {
 </div><!-- fragment --></div><!-- contents -->
 <div class="ttc" id="astructuser__osc__data_html"><div class="ttname"><a href="structuser__osc__data.html">user_osc_data</a></div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00108">userosc.h:108</a></div></div>
 <div class="ttc" id="astructuser__osc__hook__table_html"><div class="ttname"><a href="structuser__osc__hook__table.html">user_osc_hook_table</a></div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00090">userosc.h:90</a></div></div>
-<div class="ttc" id="astructuser__prg__header_html"><div class="ttname"><a href="structuser__prg__header.html">user_prg_header</a></div><div class="ttdef"><b>Definition:</b> <a href="userprg_8h_source.html#l00142">userprg.h:142</a></div></div>
+<div class="ttc" id="agroup__delfx__inst_html_ga3fa3290dddc1fe71cdb7dfc075c4ad94"><div class="ttname"><a href="group__delfx__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a></div><div class="ttdeci">void _hook_init(uint32_t platform, uint32_t api)</div><div class="ttdoc">Initialization callback.</div></div>
 <div class="ttc" id="auserprg_8h_html"><div class="ttname"><a href="userprg_8h.html">userprg.h</a></div><div class="ttdoc">Common C interface header for custom user programs.</div></div>
 <div class="ttc" id="aosc__api_8h_html"><div class="ttname"><a href="osc__api_8h.html">osc_api.h</a></div><div class="ttdoc">Oscillator runtime API.</div></div>
+<div class="ttc" id="agroup__delfx__inst_html_gae3cedf87a00cacb4008e52ce1fe1ca60"><div class="ttname"><a href="group__delfx__inst.html#gae3cedf87a00cacb4008e52ce1fe1ca60">_hook_param</a></div><div class="ttdeci">void _hook_param(uint8_t index, int32_t value)</div><div class="ttdoc">Parameter change callback.</div></div>
 <div class="ttc" id="astructuser__osc__param_html"><div class="ttname"><a href="structuser__osc__param.html">user_osc_param</a></div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00057">userosc.h:57</a></div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Nov 28 2019 17:08:35 for Nu:Tekt NTS-1 digital SDK by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Nov 29 2019 08:55:47 for Nu:Tekt NTS-1 digital SDK by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.16
 </small></address>

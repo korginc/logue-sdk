@@ -65,111 +65,292 @@ $(function() {
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#define-members">Macros</a> &#124;
-<a href="#typedef-members">Typedefs</a> &#124;
-<a href="#enum-members">Enumerations</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#enum-members">Enumerations</a>  </div>
   <div class="headertitle">
 <div class="title">Reverb Effect Instance (revfx)<div class="ingroups"><a class="el" href="group__fx.html">Effects</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser__revfx__hook__table.html">user_revfx_hook_table</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser__revfx__data.html">user_revfx_data</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ga0d9ed861a37cbe2f45f4e0a4712e73cc"><td class="memItemLeft" align="right" valign="top"><a id="ga0d9ed861a37cbe2f45f4e0a4712e73cc"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>__sdram</b>&#160;&#160;&#160;__attribute__((section(&quot;.sdram&quot;)))</td></tr>
+<tr class="memitem:ga0d9ed861a37cbe2f45f4e0a4712e73cc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#ga0d9ed861a37cbe2f45f4e0a4712e73cc">__sdram</a>&#160;&#160;&#160;__attribute__((section(&quot;.sdram&quot;)))</td></tr>
+<tr class="memdesc:ga0d9ed861a37cbe2f45f4e0a4712e73cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">This macro can be used to declare a memory buffer in SDRAM space.  <a href="group__revfx__inst.html#ga0d9ed861a37cbe2f45f4e0a4712e73cc">More...</a><br /></td></tr>
 <tr class="separator:ga0d9ed861a37cbe2f45f4e0a4712e73cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa652728435e0ce874da0df723834b803"><td class="memItemLeft" align="right" valign="top"><a id="gaa652728435e0ce874da0df723834b803"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_INIT</b>&#160;&#160;&#160;__attribute__((used)) _hook_init</td></tr>
-<tr class="separator:gaa652728435e0ce874da0df723834b803"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf5203a31ead7e4c8b740790bb5ef3d9e"><td class="memItemLeft" align="right" valign="top"><a id="gaf5203a31ead7e4c8b740790bb5ef3d9e"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_PROCESS</b>&#160;&#160;&#160;__attribute__((used)) _hook_process</td></tr>
-<tr class="separator:gaf5203a31ead7e4c8b740790bb5ef3d9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga9040b6119e1fe8f948d27e5d0c264178"><td class="memItemLeft" align="right" valign="top"><a id="ga9040b6119e1fe8f948d27e5d0c264178"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_SUSPEND</b>&#160;&#160;&#160;__attribute__((used)) _hook_suspend</td></tr>
-<tr class="separator:ga9040b6119e1fe8f948d27e5d0c264178"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf2d0a6f391e14291400e4c8a29b13d16"><td class="memItemLeft" align="right" valign="top"><a id="gaf2d0a6f391e14291400e4c8a29b13d16"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_RESUME</b>&#160;&#160;&#160;__attribute__((used)) _hook_resume</td></tr>
-<tr class="separator:gaf2d0a6f391e14291400e4c8a29b13d16"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gab10bd99358a0d4e32de9d92d15a3c49a"><td class="memItemLeft" align="right" valign="top"><a id="gab10bd99358a0d4e32de9d92d15a3c49a"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_PARAM</b>&#160;&#160;&#160;__attribute__((used)) _hook_param</td></tr>
-<tr class="separator:gab10bd99358a0d4e32de9d92d15a3c49a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:gabbb660179f0360f923cf50470f67d934"><td class="memItemLeft" align="right" valign="top"><a id="gabbb660179f0360f923cf50470f67d934"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXFuncEntry</b>) (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:gabbb660179f0360f923cf50470f67d934"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac02ebd06c4c5d560bfb83251cd57a31d"><td class="memItemLeft" align="right" valign="top"><a id="gac02ebd06c4c5d560bfb83251cd57a31d"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXFuncInit</b>) (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:gac02ebd06c4c5d560bfb83251cd57a31d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga2ba7b605ab1cdbbd1d74209b8970e44e"><td class="memItemLeft" align="right" valign="top"><a id="ga2ba7b605ab1cdbbd1d74209b8970e44e"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXFuncProcess</b>) (float *xn, uint32_t frames)</td></tr>
-<tr class="separator:ga2ba7b605ab1cdbbd1d74209b8970e44e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaae7cafac357d1f4722d33761442f755e"><td class="memItemLeft" align="right" valign="top"><a id="gaae7cafac357d1f4722d33761442f755e"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXSuspend</b>) (void)</td></tr>
-<tr class="separator:gaae7cafac357d1f4722d33761442f755e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga68a6f02fdf17eb97ab73dc0df87c4db8"><td class="memItemLeft" align="right" valign="top"><a id="ga68a6f02fdf17eb97ab73dc0df87c4db8"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXResume</b>) (void)</td></tr>
-<tr class="separator:ga68a6f02fdf17eb97ab73dc0df87c4db8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3557a5b6eb520b583d78eaf0afbfd38f"><td class="memItemLeft" align="right" valign="top"><a id="ga3557a5b6eb520b583d78eaf0afbfd38f"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXFuncParam</b>) (uint8_t index, int32_t value)</td></tr>
-<tr class="separator:ga3557a5b6eb520b583d78eaf0afbfd38f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga8ed081e6b91c1bd9cadd65f23882c4ce"><td class="memItemLeft" align="right" valign="top"><a id="ga8ed081e6b91c1bd9cadd65f23882c4ce"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXFuncDummy</b>) (void)</td></tr>
-<tr class="separator:ga8ed081e6b91c1bd9cadd65f23882c4ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadeeb68064f90189188f56e4c6e1df4f3"><td class="memItemLeft" align="right" valign="top"><a id="gadeeb68064f90189188f56e4c6e1df4f3"></a>
-typedef struct <a class="el" href="structuser__revfx__hook__table.html">user_revfx_hook_table</a>&#160;</td><td class="memItemRight" valign="bottom"><b>user_revfx_hook_table_t</b></td></tr>
-<tr class="separator:gadeeb68064f90189188f56e4c6e1df4f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaeddde9e047f4d2ab8ce6202d3f7db3fc"><td class="memItemLeft" align="right" valign="top"><a id="gaeddde9e047f4d2ab8ce6202d3f7db3fc"></a>
-typedef struct <a class="el" href="structuser__revfx__data.html">user_revfx_data</a>&#160;</td><td class="memItemRight" valign="bottom"><b>user_revfx_data_t</b></td></tr>
-<tr class="separator:gaeddde9e047f4d2ab8ce6202d3f7db3fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:ga345542bbc4ec36e1d117b40bedcce2be"><td class="memItemLeft" align="right" valign="top"><a id="ga345542bbc4ec36e1d117b40bedcce2be"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>user_revfx_param_id_t</b> { <br />
+<tr class="memitem:ga345542bbc4ec36e1d117b40bedcce2be"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#ga345542bbc4ec36e1d117b40bedcce2be">user_revfx_param_id_t</a> { <br />
 &#160;&#160;<b>k_user_revfx_param_time</b> = 0, 
-<b>k_user_revfx_param_depth</b>, 
-<b>k_user_revfx_param_reserved0</b>, 
+<a class="el" href="group__revfx__inst.html#gga345542bbc4ec36e1d117b40bedcce2bea07c4a195b88f01a56288fcde5ecdfb2a">k_user_revfx_param_depth</a>, 
+<a class="el" href="group__revfx__inst.html#gga345542bbc4ec36e1d117b40bedcce2bea48e993395db06e35acfe0d676f24e710">k_user_revfx_param_reserved0</a>, 
 <b>k_user_revfx_param_shift_depth</b>, 
 <br />
-&#160;&#160;<b>k_num_user_revfx_param_id</b>
+&#160;&#160;<a class="el" href="group__revfx__inst.html#gga345542bbc4ec36e1d117b40bedcce2beaacdb01b710b350f7ef9dd5a6c0ada0da">k_num_user_revfx_param_id</a>
 <br />
  }</td></tr>
+<tr class="memdesc:ga345542bbc4ec36e1d117b40bedcce2be"><td class="mdescLeft">&#160;</td><td class="mdescRight">User facing parameters.  <a href="group__revfx__inst.html#ga345542bbc4ec36e1d117b40bedcce2be">More...</a><br /></td></tr>
 <tr class="separator:ga345542bbc4ec36e1d117b40bedcce2be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:gacb26647b7b28ca29f52fabdcbed3a152"><td class="memItemLeft" align="right" valign="top"><a id="gacb26647b7b28ca29f52fabdcbed3a152"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_entry</b> (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:gacb26647b7b28ca29f52fabdcbed3a152"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memItemLeft" align="right" valign="top"><a id="ga3fa3290dddc1fe71cdb7dfc075c4ad94"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_init</b> (uint32_t platform, uint32_t api)</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+Core API</h2></td></tr>
+<tr class="memitem:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a> (uint32_t platform, uint32_t api)</td></tr>
+<tr class="memdesc:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialization callback.  <a href="group__revfx__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">More...</a><br /></td></tr>
 <tr class="separator:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga2103260c965e55d6bc8ec31aafec7687"><td class="memItemLeft" align="right" valign="top"><a id="ga2103260c965e55d6bc8ec31aafec7687"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_process</b> (float *xn, uint32_t frames)</td></tr>
+<tr class="memitem:ga2103260c965e55d6bc8ec31aafec7687"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#ga2103260c965e55d6bc8ec31aafec7687">_hook_process</a> (float *xn, uint32_t frames)</td></tr>
+<tr class="memdesc:ga2103260c965e55d6bc8ec31aafec7687"><td class="mdescLeft">&#160;</td><td class="mdescRight">Processing callback.  <a href="group__revfx__inst.html#ga2103260c965e55d6bc8ec31aafec7687">More...</a><br /></td></tr>
 <tr class="separator:ga2103260c965e55d6bc8ec31aafec7687"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga51724f6540f59f6ee95fbe72d9655315"><td class="memItemLeft" align="right" valign="top"><a id="ga51724f6540f59f6ee95fbe72d9655315"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_suspend</b> (void)</td></tr>
+<tr class="memitem:ga51724f6540f59f6ee95fbe72d9655315"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#ga51724f6540f59f6ee95fbe72d9655315">_hook_suspend</a> (void)</td></tr>
+<tr class="memdesc:ga51724f6540f59f6ee95fbe72d9655315"><td class="mdescLeft">&#160;</td><td class="mdescRight">Suspend callback.  <a href="group__revfx__inst.html#ga51724f6540f59f6ee95fbe72d9655315">More...</a><br /></td></tr>
 <tr class="separator:ga51724f6540f59f6ee95fbe72d9655315"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga1c1d3d3a390700e46fc85a0e415a7da0"><td class="memItemLeft" align="right" valign="top"><a id="ga1c1d3d3a390700e46fc85a0e415a7da0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_resume</b> (void)</td></tr>
+<tr class="memitem:ga1c1d3d3a390700e46fc85a0e415a7da0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#ga1c1d3d3a390700e46fc85a0e415a7da0">_hook_resume</a> (void)</td></tr>
+<tr class="memdesc:ga1c1d3d3a390700e46fc85a0e415a7da0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resume callback.  <a href="group__revfx__inst.html#ga1c1d3d3a390700e46fc85a0e415a7da0">More...</a><br /></td></tr>
 <tr class="separator:ga1c1d3d3a390700e46fc85a0e415a7da0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae3cedf87a00cacb4008e52ce1fe1ca60"><td class="memItemLeft" align="right" valign="top"><a id="gae3cedf87a00cacb4008e52ce1fe1ca60"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_param</b> (uint8_t index, int32_t value)</td></tr>
+<tr class="memitem:gae3cedf87a00cacb4008e52ce1fe1ca60"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#gae3cedf87a00cacb4008e52ce1fe1ca60">_hook_param</a> (uint8_t index, int32_t value)</td></tr>
+<tr class="memdesc:gae3cedf87a00cacb4008e52ce1fe1ca60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameter change callback.  <a href="group__revfx__inst.html#gae3cedf87a00cacb4008e52ce1fe1ca60">More...</a><br /></td></tr>
 <tr class="separator:gae3cedf87a00cacb4008e52ce1fe1ca60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa652728435e0ce874da0df723834b803"><td class="memItemLeft" align="right" valign="top"><a id="gaa652728435e0ce874da0df723834b803"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_INIT</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__osc__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a></td></tr>
+<tr class="separator:gaa652728435e0ce874da0df723834b803"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf5203a31ead7e4c8b740790bb5ef3d9e"><td class="memItemLeft" align="right" valign="top"><a id="gaf5203a31ead7e4c8b740790bb5ef3d9e"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_PROCESS</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#ga2103260c965e55d6bc8ec31aafec7687">_hook_process</a></td></tr>
+<tr class="separator:gaf5203a31ead7e4c8b740790bb5ef3d9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9040b6119e1fe8f948d27e5d0c264178"><td class="memItemLeft" align="right" valign="top"><a id="ga9040b6119e1fe8f948d27e5d0c264178"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_SUSPEND</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#ga51724f6540f59f6ee95fbe72d9655315">_hook_suspend</a></td></tr>
+<tr class="separator:ga9040b6119e1fe8f948d27e5d0c264178"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf2d0a6f391e14291400e4c8a29b13d16"><td class="memItemLeft" align="right" valign="top"><a id="gaf2d0a6f391e14291400e4c8a29b13d16"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_RESUME</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#ga1c1d3d3a390700e46fc85a0e415a7da0">_hook_resume</a></td></tr>
+<tr class="separator:gaf2d0a6f391e14291400e4c8a29b13d16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab10bd99358a0d4e32de9d92d15a3c49a"><td class="memItemLeft" align="right" valign="top"><a id="gab10bd99358a0d4e32de9d92d15a3c49a"></a>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_PARAM</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__osc__inst.html#gae7b024ad4e7abb4f5ac93e3de5568e30">_hook_param</a></td></tr>
+<tr class="separator:gab10bd99358a0d4e32de9d92d15a3c49a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h2 class="groupheader">Macro Definition Documentation</h2>
+<a id="ga0d9ed861a37cbe2f45f4e0a4712e73cc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0d9ed861a37cbe2f45f4e0a4712e73cc">&#9670;&nbsp;</a></span>__sdram</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define __sdram&#160;&#160;&#160;__attribute__((section(&quot;.sdram&quot;)))</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This macro can be used to declare a memory buffer in SDRAM space. </p>
+<p>E.g.: float g_my_buffer[1024] __sdram; </p>
+
+<p class="definition">Definition at line <a class="el" href="userrevfx_8h_source.html#l00062">62</a> of file <a class="el" href="userrevfx_8h_source.html">userrevfx.h</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="ga345542bbc4ec36e1d117b40bedcce2be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga345542bbc4ec36e1d117b40bedcce2be">&#9670;&nbsp;</a></span>user_revfx_param_id_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__revfx__inst.html#ga345542bbc4ec36e1d117b40bedcce2be">user_revfx_param_id_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>User facing parameters. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga345542bbc4ec36e1d117b40bedcce2bea07c4a195b88f01a56288fcde5ecdfb2a"></a>k_user_revfx_param_depth&#160;</td><td class="fielddoc"><p>Time parameter. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga345542bbc4ec36e1d117b40bedcce2bea48e993395db06e35acfe0d676f24e710"></a>k_user_revfx_param_reserved0&#160;</td><td class="fielddoc"><p>Depth parameter. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga345542bbc4ec36e1d117b40bedcce2beaacdb01b710b350f7ef9dd5a6c0ada0da"></a>k_num_user_revfx_param_id&#160;</td><td class="fielddoc"><p>Alternative depth parameter, usually accessible via shift function. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="userrevfx_8h_source.html#l00067">67</a> of file <a class="el" href="userrevfx_8h_source.html">userrevfx.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;               {</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;    k_user_revfx_param_time = 0,    </div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;    <a class="code" href="group__revfx__inst.html#gga345542bbc4ec36e1d117b40bedcce2bea07c4a195b88f01a56288fcde5ecdfb2a">k_user_revfx_param_depth</a>,       </div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    <a class="code" href="group__revfx__inst.html#gga345542bbc4ec36e1d117b40bedcce2bea48e993395db06e35acfe0d676f24e710">k_user_revfx_param_reserved0</a>,</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;    k_user_revfx_param_shift_depth, </div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;    <a class="code" href="group__revfx__inst.html#gga345542bbc4ec36e1d117b40bedcce2beaacdb01b710b350f7ef9dd5a6c0ada0da">k_num_user_revfx_param_id</a></div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;  } <a class="code" href="group__revfx__inst.html#ga345542bbc4ec36e1d117b40bedcce2be">user_revfx_param_id_t</a>;</div>
+</div><!-- fragment -->
+</div>
+</div>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="ga3fa3290dddc1fe71cdb7dfc075c4ad94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3fa3290dddc1fe71cdb7dfc075c4ad94">&#9670;&nbsp;</a></span>_hook_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _hook_init </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>platform</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>api</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialization callback. </p>
+<p>Must be implemented by your custom effect.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">platform</td><td>Current target platform/module. See <a class="el" href="userprg_8h.html" title="Common C interface header for custom user programs.">userprg.h</a> </td></tr>
+    <tr><td class="paramname">api</td><td>Current API version. See <a class="el" href="userprg_8h.html" title="Common C interface header for custom user programs.">userprg.h</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gae3cedf87a00cacb4008e52ce1fe1ca60"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae3cedf87a00cacb4008e52ce1fe1ca60">&#9670;&nbsp;</a></span>_hook_param()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _hook_param </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Parameter change callback. </p>
+<p>Must be implemented by your custom effect.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">index</td><td>Parameter ID. See user_revfx_param_id_t. </td></tr>
+    <tr><td class="paramname">index</td><td>Parameter value.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>All parameters have 10 bit resolution. </dd></dl>
+
+</div>
+</div>
+<a id="ga2103260c965e55d6bc8ec31aafec7687"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2103260c965e55d6bc8ec31aafec7687">&#9670;&nbsp;</a></span>_hook_process()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _hook_process </td>
+          <td>(</td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>xn</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>frames</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Processing callback. </p>
+<p>Must be implemented by your custom effect.</p>
+<p>Reverb effects must write back their result to the input buffer and are responsible for wet/dry mix balance. Typically wet/dry balance should be controllable via the shift-depth parameter.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">xn</td><td>Input/output sample buffer. </td></tr>
+    <tr><td class="paramname">frames</td><td>Size of buffer in frames. (2 samples per frames)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Implementation must support at least up to 64 frames. </dd>
+<dd>
+Optimize for powers of two. </dd></dl>
+
+</div>
+</div>
+<a id="ga1c1d3d3a390700e46fc85a0e415a7da0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1c1d3d3a390700e46fc85a0e415a7da0">&#9670;&nbsp;</a></span>_hook_resume()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _hook_resume </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Resume callback. </p>
+<p>Must be implemented by your custom effect.</p>
+<p>Called before calls to processing callback resume after being suspended. </p>
+
+</div>
+</div>
+<a id="ga51724f6540f59f6ee95fbe72d9655315"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga51724f6540f59f6ee95fbe72d9655315">&#9670;&nbsp;</a></span>_hook_suspend()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _hook_suspend </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Suspend callback. </p>
+<p>Must be implemented by your custom effect.</p>
+<p>Called before effect gets suspended. While suspended the processing callback will not be called. </p>
+
+</div>
+</div>
 </div><!-- contents -->
+<div class="ttc" id="agroup__revfx__inst_html_gga345542bbc4ec36e1d117b40bedcce2bea48e993395db06e35acfe0d676f24e710"><div class="ttname"><a href="group__revfx__inst.html#gga345542bbc4ec36e1d117b40bedcce2bea48e993395db06e35acfe0d676f24e710">k_user_revfx_param_reserved0</a></div><div class="ttdoc">Depth parameter.</div><div class="ttdef"><b>Definition:</b> <a href="userrevfx_8h_source.html#l00070">userrevfx.h:70</a></div></div>
+<div class="ttc" id="agroup__revfx__inst_html_gga345542bbc4ec36e1d117b40bedcce2beaacdb01b710b350f7ef9dd5a6c0ada0da"><div class="ttname"><a href="group__revfx__inst.html#gga345542bbc4ec36e1d117b40bedcce2beaacdb01b710b350f7ef9dd5a6c0ada0da">k_num_user_revfx_param_id</a></div><div class="ttdoc">Alternative depth parameter, usually accessible via shift function.</div><div class="ttdef"><b>Definition:</b> <a href="userrevfx_8h_source.html#l00072">userrevfx.h:72</a></div></div>
+<div class="ttc" id="agroup__revfx__inst_html_ga345542bbc4ec36e1d117b40bedcce2be"><div class="ttname"><a href="group__revfx__inst.html#ga345542bbc4ec36e1d117b40bedcce2be">user_revfx_param_id_t</a></div><div class="ttdeci">user_revfx_param_id_t</div><div class="ttdoc">User facing parameters.</div><div class="ttdef"><b>Definition:</b> <a href="userrevfx_8h_source.html#l00067">userrevfx.h:67</a></div></div>
+<div class="ttc" id="agroup__revfx__inst_html_gga345542bbc4ec36e1d117b40bedcce2bea07c4a195b88f01a56288fcde5ecdfb2a"><div class="ttname"><a href="group__revfx__inst.html#gga345542bbc4ec36e1d117b40bedcce2bea07c4a195b88f01a56288fcde5ecdfb2a">k_user_revfx_param_depth</a></div><div class="ttdoc">Time parameter.</div><div class="ttdef"><b>Definition:</b> <a href="userrevfx_8h_source.html#l00069">userrevfx.h:69</a></div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Nov 28 2019 17:07:51 for prologue SDK by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Nov 29 2019 08:55:26 for prologue SDK by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.16
 </small></address>

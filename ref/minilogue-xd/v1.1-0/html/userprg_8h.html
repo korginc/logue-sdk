@@ -69,7 +69,6 @@ $(function() {
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#define-members">Macros</a> &#124;
-<a href="#typedef-members">Typedefs</a> &#124;
 <a href="#enum-members">Enumerations</a>  </div>
   <div class="headertitle">
 <div class="title">userprg.h File Reference</div>  </div>
@@ -82,19 +81,11 @@ $(function() {
 </div>
 <p><a href="userprg_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser__prg__param.html">user_prg_param</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser__prg__header.html">user_prg_header</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser__prg__sig.html">user_prg_sig</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:gaa88ecd5d5e1dd184a0427b4794ddf66a"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>USER_TARGET_PLATFORM</b>&#160;&#160;&#160;(k_user_target_miniloguexd)</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__common.html#gaa88ecd5d5e1dd184a0427b4794ddf66a">USER_TARGET_PLATFORM</a>&#160;&#160;&#160;(k_user_target_miniloguexd)</td></tr>
+<tr class="memdesc:gaa88ecd5d5e1dd184a0427b4794ddf66a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Target platform for this user code. <br /></td></tr>
 <tr class="separator:gaa88ecd5d5e1dd184a0427b4794ddf66a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab6fd8f7e1b8fe499221a9695036bc964"><td class="memItemLeft" align="right" valign="top">
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>USER_TARGET_PLATFORM_MASK</b>&#160;&#160;&#160;(0x7F&lt;&lt;8)</td></tr>
@@ -105,7 +96,8 @@ Macros</h2></td></tr>
 <tr class="memitem:gaa35fbd877e8666cdd53f2c5fca458ae8"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><b>USER_TARGET_PLATFORM_IS_COMPAT</b>(tgt)</td></tr>
 <tr class="separator:gaa35fbd877e8666cdd53f2c5fca458ae8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae02a2fe3dc6f103d09f7f077bc64cf4b"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>USER_API_VERSION</b>&#160;&#160;&#160;(k_user_api_1_1_0)</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__common.html#gae02a2fe3dc6f103d09f7f077bc64cf4b">USER_API_VERSION</a>&#160;&#160;&#160;(k_user_api_1_1_0)</td></tr>
+<tr class="memdesc:gae02a2fe3dc6f103d09f7f077bc64cf4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">API version targeted by this code. <br /></td></tr>
 <tr class="separator:gae02a2fe3dc6f103d09f7f077bc64cf4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2febe56482836a980b9bd7d9a7af48c9"><td class="memItemLeft" align="right" valign="top">
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>USER_API_MAJOR_MASK</b>&#160;&#160;&#160;(0x7F&lt;&lt;16)</td></tr>
@@ -149,32 +141,21 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>USER_PRG_NAME_LEN</b>&#160;&#160;&#160;(13)</td></tr>
 <tr class="separator:ga87f04d3c4cbd0dc3804e964bbb480116"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:ga9fcfec073c66042e6afe5c82bbd6f0bb"><td class="memItemLeft" align="right" valign="top">
-typedef struct <a class="el" href="structuser__prg__param.html">user_prg_param</a>&#160;</td><td class="memItemRight" valign="bottom"><b>user_prg_param_t</b></td></tr>
-<tr class="separator:ga9fcfec073c66042e6afe5c82bbd6f0bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadefb79ddd8de3601a8954ff77789cd77"><td class="memItemLeft" align="right" valign="top">
-typedef struct <a class="el" href="structuser__prg__header.html">user_prg_header</a>&#160;</td><td class="memItemRight" valign="bottom"><b>user_prg_header_t</b></td></tr>
-<tr class="separator:gadefb79ddd8de3601a8954ff77789cd77"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga1c4810489be90adb44bc06f8cd428e41"><td class="memItemLeft" align="right" valign="top">
-typedef struct <a class="el" href="structuser__prg__sig.html">user_prg_sig</a>&#160;</td><td class="memItemRight" valign="bottom"><b>user_prg_sig_t</b></td></tr>
-<tr class="separator:ga1c4810489be90adb44bc06f8cd428e41"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:ga06fc87d81c62e9abb8790b6e5713c55b"><td class="memItemLeft" align="right" valign="top"><a id="ga06fc87d81c62e9abb8790b6e5713c55b"></a>enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
+<tr class="memitem:ga06fc87d81c62e9abb8790b6e5713c55b"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
 &#160;&#160;<b>k_user_module_global</b> = 0U, 
-<b>k_user_module_modfx</b>, 
-<b>k_user_module_delfx</b>, 
-<b>k_user_module_revfx</b>, 
+<a class="el" href="group__common.html#gga06fc87d81c62e9abb8790b6e5713c55ba8a4261c928d57f6b579711e6fdbf0f40">k_user_module_modfx</a>, 
+<a class="el" href="group__common.html#gga06fc87d81c62e9abb8790b6e5713c55ba771928fbf185b2f06a0888614f047dd2">k_user_module_delfx</a>, 
+<a class="el" href="group__common.html#gga06fc87d81c62e9abb8790b6e5713c55babd86ac97aea8696eb860a57a156b61a6">k_user_module_revfx</a>, 
 <br />
-&#160;&#160;<b>k_user_module_osc</b>, 
-<b>k_num_user_modules</b>
+&#160;&#160;<a class="el" href="group__common.html#gga06fc87d81c62e9abb8790b6e5713c55ba1f9aef67d49edf7f55d8e563bdcc8f7d">k_user_module_osc</a>, 
+<a class="el" href="group__common.html#gga06fc87d81c62e9abb8790b6e5713c55ba8d1ff7b58b79eafcb54250b5f528080d">k_num_user_modules</a>
 <br />
  }</td></tr>
+<tr class="memdesc:ga06fc87d81c62e9abb8790b6e5713c55b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Module categories.  <a href="group__common.html#ga06fc87d81c62e9abb8790b6e5713c55b">More...</a><br /></td></tr>
 <tr class="separator:ga06fc87d81c62e9abb8790b6e5713c55b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadf764cbdea00d65edcd07bb9953ad2b7"><td class="memItemLeft" align="right" valign="top"><a id="gadf764cbdea00d65edcd07bb9953ad2b7"></a>enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
+<tr class="memitem:gadf764cbdea00d65edcd07bb9953ad2b7"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
 &#160;&#160;<b>k_user_target_prologue</b> = (1U&lt;&lt;8), 
 <b>k_user_target_prologue_global</b> = (1U&lt;&lt;8) | k_user_module_global, 
 <b>k_user_target_prologue_modfx</b> = (1U&lt;&lt;8) | k_user_module_modfx, 
@@ -184,8 +165,9 @@ Enumerations</h2></td></tr>
 <b>k_user_target_prologue_osc</b> = (1U&lt;&lt;8) | k_user_module_osc
 <br />
  }</td></tr>
+<tr class="memdesc:gadf764cbdea00d65edcd07bb9953ad2b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">prologue specific platform/module pairs.  <a href="group__common.html#gadf764cbdea00d65edcd07bb9953ad2b7">More...</a><br /></td></tr>
 <tr class="separator:gadf764cbdea00d65edcd07bb9953ad2b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga99fb83031ce9923c84392b4e92f956b5"><td class="memItemLeft" align="right" valign="top"><a id="ga99fb83031ce9923c84392b4e92f956b5"></a>enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
+<tr class="memitem:ga99fb83031ce9923c84392b4e92f956b5"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
 &#160;&#160;<b>k_user_target_miniloguexd</b> = (2U&lt;&lt;8), 
 <b>k_user_target_miniloguexd_global</b> = (2U&lt;&lt;8) | k_user_module_global, 
 <b>k_user_target_miniloguexd_modfx</b> = (2U&lt;&lt;8) | k_user_module_modfx, 
@@ -195,8 +177,9 @@ Enumerations</h2></td></tr>
 <b>k_user_target_miniloguexd_osc</b> = (2U&lt;&lt;8) | k_user_module_osc
 <br />
  }</td></tr>
+<tr class="memdesc:ga99fb83031ce9923c84392b4e92f956b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">minilogue xd specific platform/module pairs.  <a href="group__common.html#ga99fb83031ce9923c84392b4e92f956b5">More...</a><br /></td></tr>
 <tr class="separator:ga99fb83031ce9923c84392b4e92f956b5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gabc6126af1d45847bc59afa0aa3216b04"><td class="memItemLeft" align="right" valign="top"><a id="gabc6126af1d45847bc59afa0aa3216b04"></a>enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
+<tr class="memitem:gabc6126af1d45847bc59afa0aa3216b04"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <br />
 &#160;&#160;<b>k_user_target_nutektdigital</b> = (3U&lt;&lt;8), 
 <b>k_user_target_nutektdigital_global</b> = (3U&lt;&lt;8) | k_user_module_global, 
 <b>k_user_target_nutektdigital_modfx</b> = (3U&lt;&lt;8) | k_user_module_modfx, 
@@ -206,17 +189,13 @@ Enumerations</h2></td></tr>
 <b>k_user_target_nutektdigital_osc</b> = (3U&lt;&lt;8) | k_user_module_osc
 <br />
  }</td></tr>
+<tr class="memdesc:gabc6126af1d45847bc59afa0aa3216b04"><td class="mdescLeft">&#160;</td><td class="mdescRight">Nu:Tekt NTS-1 digital specific platform/module pairs.  <a href="group__common.html#gabc6126af1d45847bc59afa0aa3216b04">More...</a><br /></td></tr>
 <tr class="separator:gabc6126af1d45847bc59afa0aa3216b04"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadc29c2ff13d900c2f185ee95427fb06c"><td class="memItemLeft" align="right" valign="top"><a id="gadc29c2ff13d900c2f185ee95427fb06c"></a>enum &#160;</td><td class="memItemRight" valign="bottom">{ <b>k_user_api_1_0_0</b> = ((1U&lt;&lt;16) | (0U&lt;&lt;8) | (0U)), 
+<tr class="memitem:gadc29c2ff13d900c2f185ee95427fb06c"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom">{ <b>k_user_api_1_0_0</b> = ((1U&lt;&lt;16) | (0U&lt;&lt;8) | (0U)), 
 <b>k_user_api_1_1_0</b> = ((1U&lt;&lt;16) | (1U&lt;&lt;8) | (0U))
  }</td></tr>
+<tr class="memdesc:gadc29c2ff13d900c2f185ee95427fb06c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Existing API versions.  <a href="group__common.html#gadc29c2ff13d900c2f185ee95427fb06c">More...</a><br /></td></tr>
 <tr class="separator:gadc29c2ff13d900c2f185ee95427fb06c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga61dadd085c1777f559549e05962b2c9e"><td class="memItemLeft" align="right" valign="top"><a id="ga61dadd085c1777f559549e05962b2c9e"></a>enum &#160;</td><td class="memItemRight" valign="bottom">{ <b>k_user_prg_param_type_percent</b> = 0, 
-<b>k_user_prg_param_type_percent_bipolar</b>, 
-<b>k_user_prg_param_type_select</b>, 
-<b>k_user_prg_param_type_count</b>
- }</td></tr>
-<tr class="separator:ga61dadd085c1777f559549e05962b2c9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Common C interface header for custom user programs. </p>
@@ -225,7 +204,7 @@ Enumerations</h2></td></tr>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Nov 28 2019 17:08:13 for minilogue xd SDK by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Nov 29 2019 08:55:36 for minilogue xd SDK by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.16
 </small></address>

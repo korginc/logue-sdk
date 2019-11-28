@@ -1,97 +1,204 @@
 \hypertarget{group__delfx__inst}{}\doxysection{Delay Effect Instance (delfx)}
 \label{group__delfx__inst}\index{Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}}
-\doxysubsection*{Classes}
-\begin{DoxyCompactItemize}
-\item 
-struct \mbox{\hyperlink{structuser__delfx__hook__table}{user\+\_\+delfx\+\_\+hook\+\_\+table}}
-\item 
-struct \mbox{\hyperlink{structuser__delfx__data}{user\+\_\+delfx\+\_\+data}}
-\end{DoxyCompactItemize}
 \doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{group__delfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}\label{group__delfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}} 
-\#define {\bfseries \+\_\+\+\_\+sdram}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((section(\char`\"{}.sdram\char`\"{})))
-\item 
-\mbox{\Hypertarget{group__delfx__inst_gaf000c0b92184c61605df943611733a18}\label{group__delfx__inst_gaf000c0b92184c61605df943611733a18}} 
-\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+init
-\item 
-\mbox{\Hypertarget{group__delfx__inst_ga48eb9040f4f18e18753b430410329f99}\label{group__delfx__inst_ga48eb9040f4f18e18753b430410329f99}} 
-\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+P\+R\+O\+C\+E\+SS}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+process
-\item 
-\mbox{\Hypertarget{group__delfx__inst_ga64419f288b258507aa1f5542c72988c1}\label{group__delfx__inst_ga64419f288b258507aa1f5542c72988c1}} 
-\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+S\+U\+S\+P\+E\+ND}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+suspend
-\item 
-\mbox{\Hypertarget{group__delfx__inst_ga731ccf2ab5130d0db973e2d05048c762}\label{group__delfx__inst_ga731ccf2ab5130d0db973e2d05048c762}} 
-\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+R\+E\+S\+U\+ME}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+resume
-\item 
-\mbox{\Hypertarget{group__delfx__inst_ga5f5a1d137209eeca0cd09e87f8aa4cb6}\label{group__delfx__inst_ga5f5a1d137209eeca0cd09e87f8aa4cb6}} 
-\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \+\_\+hook\+\_\+param
-\end{DoxyCompactItemize}
-\doxysubsection*{Typedefs}
-\begin{DoxyCompactItemize}
-\item 
-\mbox{\Hypertarget{group__delfx__inst_ga020dcd7324e7d2003f711dead6d8372f}\label{group__delfx__inst_ga020dcd7324e7d2003f711dead6d8372f}} 
-typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Func\+Entry}) (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-\mbox{\Hypertarget{group__delfx__inst_ga02b2fc5c630cde8774080a93999b9d66}\label{group__delfx__inst_ga02b2fc5c630cde8774080a93999b9d66}} 
-typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Func\+Init}) (uint32\+\_\+t platform, uint32\+\_\+t api)
-\item 
-\mbox{\Hypertarget{group__delfx__inst_gab2469aae4c293f32d9c485377c8c6a75}\label{group__delfx__inst_gab2469aae4c293f32d9c485377c8c6a75}} 
-typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Func\+Process}) (float $\ast$xn, uint32\+\_\+t frames)
-\item 
-\mbox{\Hypertarget{group__delfx__inst_ga093a529e692157e73ca3d22390c97108}\label{group__delfx__inst_ga093a529e692157e73ca3d22390c97108}} 
-typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Suspend}) (void)
-\item 
-\mbox{\Hypertarget{group__delfx__inst_gac672abcc11cac61e76515a013537ac6a}\label{group__delfx__inst_gac672abcc11cac61e76515a013537ac6a}} 
-typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Resume}) (void)
-\item 
-\mbox{\Hypertarget{group__delfx__inst_ga37ac455f95853a2d1d3a8ac1f5554e17}\label{group__delfx__inst_ga37ac455f95853a2d1d3a8ac1f5554e17}} 
-typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Func\+Param}) (uint8\+\_\+t index, int32\+\_\+t value)
-\item 
-\mbox{\Hypertarget{group__delfx__inst_ga47328b4993a57ba577c3ff88c117c9a3}\label{group__delfx__inst_ga47328b4993a57ba577c3ff88c117c9a3}} 
-typedef void($\ast$ {\bfseries User\+Del\+F\+X\+Func\+Dummy}) (void)
-\item 
-\mbox{\Hypertarget{group__delfx__inst_gab0b4390b30d8ef1d19c868ef0e947fee}\label{group__delfx__inst_gab0b4390b30d8ef1d19c868ef0e947fee}} 
-typedef struct \mbox{\hyperlink{structuser__delfx__hook__table}{user\+\_\+delfx\+\_\+hook\+\_\+table}} {\bfseries user\+\_\+delfx\+\_\+hook\+\_\+table\+\_\+t}
-\item 
-\mbox{\Hypertarget{group__delfx__inst_gad7b57d68c1d9cb6f614eb04d88448c04}\label{group__delfx__inst_gad7b57d68c1d9cb6f614eb04d88448c04}} 
-typedef struct \mbox{\hyperlink{structuser__delfx__data}{user\+\_\+delfx\+\_\+data}} {\bfseries user\+\_\+delfx\+\_\+data\+\_\+t}
-\end{DoxyCompactItemize}
+\#define \mbox{\hyperlink{group__delfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}{\+\_\+\+\_\+sdram}}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((section(\char`\"{}.sdram\char`\"{})))
+\begin{DoxyCompactList}\small\item\em This macro can be used to declare a memory buffer in S\+D\+R\+AM space. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \doxysubsection*{Enumerations}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{group__delfx__inst_gab467e497326136aa691dd74e4b3b5f13}\label{group__delfx__inst_gab467e497326136aa691dd74e4b3b5f13}} 
-enum {\bfseries user\+\_\+delfx\+\_\+param\+\_\+id\+\_\+t} \{ \newline
+enum \mbox{\hyperlink{group__delfx__inst_gab467e497326136aa691dd74e4b3b5f13}{user\+\_\+delfx\+\_\+param\+\_\+id\+\_\+t}} \{ \newline
 {\bfseries k\+\_\+user\+\_\+delfx\+\_\+param\+\_\+time} = 0, 
-{\bfseries k\+\_\+user\+\_\+delfx\+\_\+param\+\_\+depth}, 
-{\bfseries k\+\_\+user\+\_\+delfx\+\_\+param\+\_\+reserved0}, 
+\mbox{\hyperlink{group__delfx__inst_ggab467e497326136aa691dd74e4b3b5f13a8f90a3919030687e0ad9a621fb2f56ae}{k\+\_\+user\+\_\+delfx\+\_\+param\+\_\+depth}}, 
+\mbox{\hyperlink{group__delfx__inst_ggab467e497326136aa691dd74e4b3b5f13a4f69f4181e989a2d0c8d87b1111e9888}{k\+\_\+user\+\_\+delfx\+\_\+param\+\_\+reserved0}}, 
 {\bfseries k\+\_\+user\+\_\+delfx\+\_\+param\+\_\+shift\+\_\+depth}, 
 \newline
-{\bfseries k\+\_\+num\+\_\+user\+\_\+delfx\+\_\+param\+\_\+id}
+\mbox{\hyperlink{group__delfx__inst_ggab467e497326136aa691dd74e4b3b5f13a6038aca93f365ee8015d21c1b6f17dfe}{k\+\_\+num\+\_\+user\+\_\+delfx\+\_\+param\+\_\+id}}
  \}
-\end{DoxyCompactItemize}
-\doxysubsection*{Functions}
+\begin{DoxyCompactList}\small\item\em User facing parameters. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Core A\+PI}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{group__delfx__inst_gacb26647b7b28ca29f52fabdcbed3a152}\label{group__delfx__inst_gacb26647b7b28ca29f52fabdcbed3a152}} 
-void {\bfseries \+\_\+entry} (uint32\+\_\+t platform, uint32\+\_\+t api)
+void \mbox{\hyperlink{group__delfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}{\+\_\+hook\+\_\+init}} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\begin{DoxyCompactList}\small\item\em Initialization callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__delfx__inst_ga2103260c965e55d6bc8ec31aafec7687}{\+\_\+hook\+\_\+process}} (float $\ast$xn, uint32\+\_\+t frames)
+\begin{DoxyCompactList}\small\item\em Processing callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__delfx__inst_ga51724f6540f59f6ee95fbe72d9655315}{\+\_\+hook\+\_\+suspend}} (void)
+\begin{DoxyCompactList}\small\item\em Suspend callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__delfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}{\+\_\+hook\+\_\+resume}} (void)
+\begin{DoxyCompactList}\small\item\em Resume callback. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{group__delfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}{\+\_\+hook\+\_\+param}} (uint8\+\_\+t index, int32\+\_\+t value)
+\begin{DoxyCompactList}\small\item\em Parameter change callback. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__delfx__inst_gaf000c0b92184c61605df943611733a18}\label{group__delfx__inst_gaf000c0b92184c61605df943611733a18}} 
+\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+I\+N\+IT}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}{\+\_\+hook\+\_\+init}}
 \item 
-\mbox{\Hypertarget{group__delfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}\label{group__delfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}} 
-void {\bfseries \+\_\+hook\+\_\+init} (uint32\+\_\+t platform, uint32\+\_\+t api)
+\mbox{\Hypertarget{group__delfx__inst_ga48eb9040f4f18e18753b430410329f99}\label{group__delfx__inst_ga48eb9040f4f18e18753b430410329f99}} 
+\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+P\+R\+O\+C\+E\+SS}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_ga2103260c965e55d6bc8ec31aafec7687}{\+\_\+hook\+\_\+process}}
 \item 
-\mbox{\Hypertarget{group__delfx__inst_ga2103260c965e55d6bc8ec31aafec7687}\label{group__delfx__inst_ga2103260c965e55d6bc8ec31aafec7687}} 
-void {\bfseries \+\_\+hook\+\_\+process} (float $\ast$xn, uint32\+\_\+t frames)
+\mbox{\Hypertarget{group__delfx__inst_ga64419f288b258507aa1f5542c72988c1}\label{group__delfx__inst_ga64419f288b258507aa1f5542c72988c1}} 
+\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+S\+U\+S\+P\+E\+ND}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_ga51724f6540f59f6ee95fbe72d9655315}{\+\_\+hook\+\_\+suspend}}
 \item 
-\mbox{\Hypertarget{group__delfx__inst_ga51724f6540f59f6ee95fbe72d9655315}\label{group__delfx__inst_ga51724f6540f59f6ee95fbe72d9655315}} 
-void {\bfseries \+\_\+hook\+\_\+suspend} (void)
+\mbox{\Hypertarget{group__delfx__inst_ga731ccf2ab5130d0db973e2d05048c762}\label{group__delfx__inst_ga731ccf2ab5130d0db973e2d05048c762}} 
+\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+R\+E\+S\+U\+ME}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}{\+\_\+hook\+\_\+resume}}
 \item 
-\mbox{\Hypertarget{group__delfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}\label{group__delfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}} 
-void {\bfseries \+\_\+hook\+\_\+resume} (void)
-\item 
-\mbox{\Hypertarget{group__delfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}\label{group__delfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}} 
-void {\bfseries \+\_\+hook\+\_\+param} (uint8\+\_\+t index, int32\+\_\+t value)
+\mbox{\Hypertarget{group__delfx__inst_ga5f5a1d137209eeca0cd09e87f8aa4cb6}\label{group__delfx__inst_ga5f5a1d137209eeca0cd09e87f8aa4cb6}} 
+\#define {\bfseries D\+E\+L\+F\+X\+\_\+\+P\+A\+R\+AM}~\+\_\+\+\_\+attribute\+\_\+\+\_\+((used)) \mbox{\hyperlink{group__revfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}{\+\_\+hook\+\_\+param}}
 \end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{group__delfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}\label{group__delfx__inst_ga0d9ed861a37cbe2f45f4e0a4712e73cc}} 
+\index{Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}!\_\_sdram@{\_\_sdram}}
+\index{\_\_sdram@{\_\_sdram}!Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}}
+\doxysubsubsection{\texorpdfstring{\_\_sdram}{\_\_sdram}}
+{\footnotesize\ttfamily \#define \+\_\+\+\_\+sdram~\+\_\+\+\_\+attribute\+\_\+\+\_\+((section(\char`\"{}.sdram\char`\"{})))}
+
+
+
+This macro can be used to declare a memory buffer in S\+D\+R\+AM space. 
+
+E.\+g.\+: float g\+\_\+my\+\_\+buffer\mbox{[}1024\mbox{]} \+\_\+\+\_\+sdram; 
+
+Definition at line 62 of file userdelfx.\+h.
+
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{group__delfx__inst_gab467e497326136aa691dd74e4b3b5f13}\label{group__delfx__inst_gab467e497326136aa691dd74e4b3b5f13}} 
+\index{Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}!user\_delfx\_param\_id\_t@{user\_delfx\_param\_id\_t}}
+\index{user\_delfx\_param\_id\_t@{user\_delfx\_param\_id\_t}!Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}}
+\doxysubsubsection{\texorpdfstring{user\_delfx\_param\_id\_t}{user\_delfx\_param\_id\_t}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{group__delfx__inst_gab467e497326136aa691dd74e4b3b5f13}{user\+\_\+delfx\+\_\+param\+\_\+id\+\_\+t}}}
+
+
+
+User facing parameters. 
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_user\_delfx\_param\_depth@{k\_user\_delfx\_param\_depth}!Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}}\index{Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}!k\_user\_delfx\_param\_depth@{k\_user\_delfx\_param\_depth}}}\mbox{\Hypertarget{group__delfx__inst_ggab467e497326136aa691dd74e4b3b5f13a8f90a3919030687e0ad9a621fb2f56ae}\label{group__delfx__inst_ggab467e497326136aa691dd74e4b3b5f13a8f90a3919030687e0ad9a621fb2f56ae}} 
+k\+\_\+user\+\_\+delfx\+\_\+param\+\_\+depth&Time parameter. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_user\_delfx\_param\_reserved0@{k\_user\_delfx\_param\_reserved0}!Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}}\index{Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}!k\_user\_delfx\_param\_reserved0@{k\_user\_delfx\_param\_reserved0}}}\mbox{\Hypertarget{group__delfx__inst_ggab467e497326136aa691dd74e4b3b5f13a4f69f4181e989a2d0c8d87b1111e9888}\label{group__delfx__inst_ggab467e497326136aa691dd74e4b3b5f13a4f69f4181e989a2d0c8d87b1111e9888}} 
+k\+\_\+user\+\_\+delfx\+\_\+param\+\_\+reserved0&Depth parameter. \\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{k\_num\_user\_delfx\_param\_id@{k\_num\_user\_delfx\_param\_id}!Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}}\index{Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}!k\_num\_user\_delfx\_param\_id@{k\_num\_user\_delfx\_param\_id}}}\mbox{\Hypertarget{group__delfx__inst_ggab467e497326136aa691dd74e4b3b5f13a6038aca93f365ee8015d21c1b6f17dfe}\label{group__delfx__inst_ggab467e497326136aa691dd74e4b3b5f13a6038aca93f365ee8015d21c1b6f17dfe}} 
+k\+\_\+num\+\_\+user\+\_\+delfx\+\_\+param\+\_\+id&Alternative depth parameter, usually accessible via shift function. \\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line 67 of file userdelfx.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{67                \{}
+\DoxyCodeLine{68     k\_user\_delfx\_param\_time = 0,     }
+\DoxyCodeLine{69     \mbox{\hyperlink{group__delfx__inst_ggab467e497326136aa691dd74e4b3b5f13a8f90a3919030687e0ad9a621fb2f56ae}{k\_user\_delfx\_param\_depth}},        }
+\DoxyCodeLine{70     \mbox{\hyperlink{group__delfx__inst_ggab467e497326136aa691dd74e4b3b5f13a4f69f4181e989a2d0c8d87b1111e9888}{k\_user\_delfx\_param\_reserved0}},}
+\DoxyCodeLine{71     k\_user\_delfx\_param\_shift\_depth,  }
+\DoxyCodeLine{72     \mbox{\hyperlink{group__delfx__inst_ggab467e497326136aa691dd74e4b3b5f13a6038aca93f365ee8015d21c1b6f17dfe}{k\_num\_user\_delfx\_param\_id}}}
+\DoxyCodeLine{73   \} \mbox{\hyperlink{group__delfx__inst_gab467e497326136aa691dd74e4b3b5f13}{user\_delfx\_param\_id\_t}};}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{group__delfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}\label{group__delfx__inst_ga3fa3290dddc1fe71cdb7dfc075c4ad94}} 
+\index{Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}!\_hook\_init@{\_hook\_init}}
+\index{\_hook\_init@{\_hook\_init}!Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_init()}{\_hook\_init()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+init (\begin{DoxyParamCaption}\item[{uint32\+\_\+t}]{platform,  }\item[{uint32\+\_\+t}]{api }\end{DoxyParamCaption})}
+
+
+
+Initialization callback. 
+
+Must be implemented by your custom effect.
+
+
+\begin{DoxyParams}{Parameters}
+{\em platform} & Current target platform/module. See \mbox{\hyperlink{userprg_8h}{userprg.\+h}} \\
+\hline
+{\em api} & Current A\+PI version. See \mbox{\hyperlink{userprg_8h}{userprg.\+h}} \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{group__delfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}\label{group__delfx__inst_gae3cedf87a00cacb4008e52ce1fe1ca60}} 
+\index{Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}!\_hook\_param@{\_hook\_param}}
+\index{\_hook\_param@{\_hook\_param}!Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_param()}{\_hook\_param()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+param (\begin{DoxyParamCaption}\item[{uint8\+\_\+t}]{index,  }\item[{int32\+\_\+t}]{value }\end{DoxyParamCaption})}
+
+
+
+Parameter change callback. 
+
+Must be implemented by your custom effect.
+
+
+\begin{DoxyParams}{Parameters}
+{\em index} & Parameter ID. See user\+\_\+delfx\+\_\+param\+\_\+id\+\_\+t. \\
+\hline
+{\em index} & Parameter value.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+All parameters have 10 bit resolution. 
+\end{DoxyNote}
+\mbox{\Hypertarget{group__delfx__inst_ga2103260c965e55d6bc8ec31aafec7687}\label{group__delfx__inst_ga2103260c965e55d6bc8ec31aafec7687}} 
+\index{Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}!\_hook\_process@{\_hook\_process}}
+\index{\_hook\_process@{\_hook\_process}!Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_process()}{\_hook\_process()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+process (\begin{DoxyParamCaption}\item[{float $\ast$}]{xn,  }\item[{uint32\+\_\+t}]{frames }\end{DoxyParamCaption})}
+
+
+
+Processing callback. 
+
+Must be implemented by your custom effect.
+
+Delay effects must write back their result to the input buffer and are responsible for wet/dry mix balance. Typically wet/dry balance should be controllable via the shift-\/depth parameter.
+
+
+\begin{DoxyParams}{Parameters}
+{\em xn} & Input/output sample buffer. \\
+\hline
+{\em frames} & Size of buffer in frames. (2 samples per frames)\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Note}
+Implementation must support at least up to 64 frames. 
+
+Optimize for powers of two. 
+\end{DoxyNote}
+\mbox{\Hypertarget{group__delfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}\label{group__delfx__inst_ga1c1d3d3a390700e46fc85a0e415a7da0}} 
+\index{Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}!\_hook\_resume@{\_hook\_resume}}
+\index{\_hook\_resume@{\_hook\_resume}!Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_resume()}{\_hook\_resume()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+resume (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Resume callback. 
+
+Must be implemented by your custom effect.
+
+Called before calls to processing callback resume after being suspended. \mbox{\Hypertarget{group__delfx__inst_ga51724f6540f59f6ee95fbe72d9655315}\label{group__delfx__inst_ga51724f6540f59f6ee95fbe72d9655315}} 
+\index{Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}!\_hook\_suspend@{\_hook\_suspend}}
+\index{\_hook\_suspend@{\_hook\_suspend}!Delay Effect Instance (delfx)@{Delay Effect Instance (delfx)}}
+\doxysubsubsection{\texorpdfstring{\_hook\_suspend()}{\_hook\_suspend()}}
+{\footnotesize\ttfamily void \+\_\+hook\+\_\+suspend (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+
+
+Suspend callback. 
+
+Must be implemented by your custom effect.
+
+Called before effect gets suspended. While suspended the processing callback will not be called. 

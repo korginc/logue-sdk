@@ -118,11 +118,11 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="stru
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:ad5079f7105d9d97fdff57a19a5af5de0"><td class="memItemLeft" align="right" valign="top"><a id="ad5079f7105d9d97fdff57a19a5af5de0"></a>
-<a class="el" href="structdsp_1_1_bi_quad_1_1_coeffs.html">Coeffs</a>&#160;</td><td class="memItemRight" valign="bottom"><b>mCoeffs</b></td></tr>
+<a class="el" href="structdsp_1_1_bi_quad_1_1_coeffs.html">Coeffs</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a></td></tr>
+<tr class="memdesc:ad5079f7105d9d97fdff57a19a5af5de0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coefficients for the Bi-Quad construct. <br /></td></tr>
 <tr class="separator:ad5079f7105d9d97fdff57a19a5af5de0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8da74c3d75875caf7f556e82d55bfa8e"><td class="memItemLeft" align="right" valign="top"><a id="a8da74c3d75875caf7f556e82d55bfa8e"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a></td></tr>
-<tr class="memdesc:a8da74c3d75875caf7f556e82d55bfa8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Coefficients for the Bi-Quad construct. <br /></td></tr>
+float&#160;</td><td class="memItemRight" valign="bottom"><b>mZ1</b></td></tr>
 <tr class="separator:a8da74c3d75875caf7f556e82d55bfa8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae80cf2266244ac01cc75519c7325a2c4"><td class="memItemLeft" align="right" valign="top"><a id="ae80cf2266244ac01cc75519c7325a2c4"></a>
 float&#160;</td><td class="memItemRight" valign="bottom"><b>mZ2</b></td></tr>
@@ -208,9 +208,9 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>mZ2</b></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="biquad_8hpp_source.html#l00384">384</a> of file <a class="el" href="biquad_8hpp_source.html">biquad.hpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00384"></a><span class="lineno">  384</span>&#160;                                     {</div>
-<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;      <span class="keywordtype">float</span> acc = mCoeffs.ff0 * xn + <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a>;</div>
-<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;      <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a> = mCoeffs.ff1 * xn;</div>
-<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;      <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a> -= mCoeffs.fb1 * acc;</div>
+<div class="line"><a name="l00385"></a><span class="lineno">  385</span>&#160;      <span class="keywordtype">float</span> acc = <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.ff0 * xn + mZ1;</div>
+<div class="line"><a name="l00386"></a><span class="lineno">  386</span>&#160;      mZ1 = <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.ff1 * xn;</div>
+<div class="line"><a name="l00387"></a><span class="lineno">  387</span>&#160;      mZ1 -= <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.fb1 * acc;</div>
 <div class="line"><a name="l00388"></a><span class="lineno">  388</span>&#160;      <span class="keywordflow">return</span> acc;</div>
 <div class="line"><a name="l00389"></a><span class="lineno">  389</span>&#160;    }</div>
 </div><!-- fragment -->
@@ -251,11 +251,11 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>mZ2</b></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="biquad_8hpp_source.html#l00367">367</a> of file <a class="el" href="biquad_8hpp_source.html">biquad.hpp</a>.</p>
 <div class="fragment"><div class="line"><a name="l00367"></a><span class="lineno">  367</span>&#160;                                     {</div>
-<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;      <span class="keywordtype">float</span> acc = mCoeffs.ff0 * xn + <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a>;</div>
-<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;      <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a> = mCoeffs.ff1 * xn + mZ2;</div>
-<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;      mZ2 = mCoeffs.ff2 * xn;</div>
-<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;      <a class="code" href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">mZ1</a> -= mCoeffs.fb1 * acc;</div>
-<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;      mZ2 -= mCoeffs.fb2 * acc;</div>
+<div class="line"><a name="l00368"></a><span class="lineno">  368</span>&#160;      <span class="keywordtype">float</span> acc = <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.ff0 * xn + mZ1;</div>
+<div class="line"><a name="l00369"></a><span class="lineno">  369</span>&#160;      mZ1 = <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.ff1 * xn + mZ2;</div>
+<div class="line"><a name="l00370"></a><span class="lineno">  370</span>&#160;      mZ2 = <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.ff2 * xn;</div>
+<div class="line"><a name="l00371"></a><span class="lineno">  371</span>&#160;      mZ1 -= <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.fb1 * acc;</div>
+<div class="line"><a name="l00372"></a><span class="lineno">  372</span>&#160;      mZ2 -= <a class="code" href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">mCoeffs</a>.fb2 * acc;</div>
 <div class="line"><a name="l00373"></a><span class="lineno">  373</span>&#160;      <span class="keywordflow">return</span> acc;</div>
 <div class="line"><a name="l00374"></a><span class="lineno">  374</span>&#160;    }</div>
 </div><!-- fragment -->
@@ -265,11 +265,11 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>mZ2</b></td></tr>
 <li>/home/etienne/Documents/_projects/logue-sdk/logue-sdk-alt/platform/minilogue-xd/inc/dsp/<a class="el" href="biquad_8hpp_source.html">biquad.hpp</a></li>
 </ul>
 </div><!-- contents -->
-<div class="ttc" id="astructdsp_1_1_bi_quad_html_a8da74c3d75875caf7f556e82d55bfa8e"><div class="ttname"><a href="structdsp_1_1_bi_quad.html#a8da74c3d75875caf7f556e82d55bfa8e">dsp::BiQuad::mZ1</a></div><div class="ttdeci">float mZ1</div><div class="ttdoc">Coefficients for the Bi-Quad construct.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00408">biquad.hpp:408</a></div></div>
 <div class="ttc" id="astructdsp_1_1_bi_quad_html_af2b7adbd81163f63aa246110a7b837bd"><div class="ttname"><a href="structdsp_1_1_bi_quad.html#af2b7adbd81163f63aa246110a7b837bd">dsp::BiQuad::process_so</a></div><div class="ttdeci">float process_so(const float xn)</div><div class="ttdoc">Second order processing of one sample.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00367">biquad.hpp:367</a></div></div>
+<div class="ttc" id="astructdsp_1_1_bi_quad_html_ad5079f7105d9d97fdff57a19a5af5de0"><div class="ttname"><a href="structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0">dsp::BiQuad::mCoeffs</a></div><div class="ttdeci">Coeffs mCoeffs</div><div class="ttdoc">Coefficients for the Bi-Quad construct.</div><div class="ttdef"><b>Definition:</b> <a href="biquad_8hpp_source.html#l00408">biquad.hpp:408</a></div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Nov 28 2019 17:08:14 for minilogue xd SDK by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Nov 29 2019 08:55:37 for minilogue xd SDK by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.16
 </small></address>

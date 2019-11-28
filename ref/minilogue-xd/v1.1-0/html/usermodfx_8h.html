@@ -69,9 +69,7 @@ $(function() {
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#define-members">Macros</a> &#124;
-<a href="#typedef-members">Typedefs</a> &#124;
-<a href="#enum-members">Enumerations</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#enum-members">Enumerations</a>  </div>
   <div class="headertitle">
 <div class="title">usermodfx.h File Reference</div>  </div>
 </div><!--header-->
@@ -85,91 +83,52 @@ $(function() {
 </div>
 <p><a href="usermodfx_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser__modfx__hook__table.html">user_modfx_hook_table</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser__modfx__data.html">user_modfx_data</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ga0d9ed861a37cbe2f45f4e0a4712e73cc"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>__sdram</b>&#160;&#160;&#160;__attribute__((section(&quot;.sdram&quot;)))</td></tr>
+<tr class="memitem:ga0d9ed861a37cbe2f45f4e0a4712e73cc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__modfx__inst.html#ga0d9ed861a37cbe2f45f4e0a4712e73cc">__sdram</a>&#160;&#160;&#160;__attribute__((section(&quot;.sdram&quot;)))</td></tr>
+<tr class="memdesc:ga0d9ed861a37cbe2f45f4e0a4712e73cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">This macro can be used to declare a memory buffer in SDRAM space.  <a href="group__modfx__inst.html#ga0d9ed861a37cbe2f45f4e0a4712e73cc">More...</a><br /></td></tr>
 <tr class="separator:ga0d9ed861a37cbe2f45f4e0a4712e73cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga1279d5595265df4e6a6e0af6ce7b171d"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>MODFX_INIT</b>&#160;&#160;&#160;__attribute__((used)) _hook_init</td></tr>
-<tr class="separator:ga1279d5595265df4e6a6e0af6ce7b171d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga494b853126d08f155ad6be0d4d734282"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>MODFX_PROCESS</b>&#160;&#160;&#160;__attribute__((used)) _hook_process</td></tr>
-<tr class="separator:ga494b853126d08f155ad6be0d4d734282"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga2d7ccaa59b94b340094c21b543503876"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>MODFX_SUSPEND</b>&#160;&#160;&#160;__attribute__((used)) _hook_suspend</td></tr>
-<tr class="separator:ga2d7ccaa59b94b340094c21b543503876"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad68cd8b4158289f9493560b6fc77e093"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>MODFX_RESUME</b>&#160;&#160;&#160;__attribute__((used)) _hook_resume</td></tr>
-<tr class="separator:gad68cd8b4158289f9493560b6fc77e093"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga6bbfbdac075f0b043aac53ad2c5932e3"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>MODFX_PARAM</b>&#160;&#160;&#160;__attribute__((used)) _hook_param</td></tr>
-<tr class="separator:ga6bbfbdac075f0b043aac53ad2c5932e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:gad9f91eede0a9944bd7256a939c041408"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserModFXFuncEntry</b>) (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:gad9f91eede0a9944bd7256a939c041408"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga9b08840f9ff4094ca7f60d4a42fa7593"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserModFXFuncInit</b>) (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:ga9b08840f9ff4094ca7f60d4a42fa7593"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga587856d772cbe5171081feb011788e7f"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserModFXFuncProcess</b>) (const float *main_xn, float *main_yn, const float *sub_xn, float *sub_yn, uint32_t frames)</td></tr>
-<tr class="separator:ga587856d772cbe5171081feb011788e7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga31fb21a576dbf18e3808a5fc06db5f41"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserModFXSuspend</b>) (void)</td></tr>
-<tr class="separator:ga31fb21a576dbf18e3808a5fc06db5f41"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga48dd1be920ef81b9ed91cb2b5f05bc23"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserModFXResume</b>) (void)</td></tr>
-<tr class="separator:ga48dd1be920ef81b9ed91cb2b5f05bc23"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga0ef197250ab24053300fdc664e05d169"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserModFXFuncParam</b>) (uint8_t index, int32_t value)</td></tr>
-<tr class="separator:ga0ef197250ab24053300fdc664e05d169"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa8cd509de06ea007b40aee53bbb7622d"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserModFXFuncDummy</b>) (void)</td></tr>
-<tr class="separator:gaa8cd509de06ea007b40aee53bbb7622d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gada469d6590b3a4b5fd6aca726cdf8adb"><td class="memItemLeft" align="right" valign="top">
-typedef struct <a class="el" href="structuser__modfx__hook__table.html">user_modfx_hook_table</a>&#160;</td><td class="memItemRight" valign="bottom"><b>user_modfx_hook_table_t</b></td></tr>
-<tr class="separator:gada469d6590b3a4b5fd6aca726cdf8adb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga42279f4051944350fb7dbd11f881d1fd"><td class="memItemLeft" align="right" valign="top">
-typedef struct <a class="el" href="structuser__modfx__data.html">user_modfx_data</a>&#160;</td><td class="memItemRight" valign="bottom"><b>user_modfx_data_t</b></td></tr>
-<tr class="separator:ga42279f4051944350fb7dbd11f881d1fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:ga3b9993e5a63875826d097ac92d781d09"><td class="memItemLeft" align="right" valign="top"><a id="ga3b9993e5a63875826d097ac92d781d09"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>user_modfx_param_id_t</b> { <b>k_user_modfx_param_time</b> = 0, 
-<b>k_user_modfx_param_depth</b>, 
-<b>k_num_user_modfx_param_id</b>
+<tr class="memitem:ga3b9993e5a63875826d097ac92d781d09"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__modfx__inst.html#ga3b9993e5a63875826d097ac92d781d09">user_modfx_param_id_t</a> { <b>k_user_modfx_param_time</b> = 0, 
+<a class="el" href="group__modfx__inst.html#gga3b9993e5a63875826d097ac92d781d09aca340e656a23a5d83dddf895b26e7013">k_user_modfx_param_depth</a>, 
+<a class="el" href="group__modfx__inst.html#gga3b9993e5a63875826d097ac92d781d09a9710f31054b61240f12fd6ec01ec9d8e">k_num_user_modfx_param_id</a>
  }</td></tr>
+<tr class="memdesc:ga3b9993e5a63875826d097ac92d781d09"><td class="mdescLeft">&#160;</td><td class="mdescRight">User facing parameters.  <a href="group__modfx__inst.html#ga3b9993e5a63875826d097ac92d781d09">More...</a><br /></td></tr>
 <tr class="separator:ga3b9993e5a63875826d097ac92d781d09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:gacb26647b7b28ca29f52fabdcbed3a152"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_entry</b> (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:gacb26647b7b28ca29f52fabdcbed3a152"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_init</b> (uint32_t platform, uint32_t api)</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+Core API</h2></td></tr>
+<tr class="memitem:ga1279d5595265df4e6a6e0af6ce7b171d"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MODFX_INIT</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a></td></tr>
+<tr class="separator:ga1279d5595265df4e6a6e0af6ce7b171d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga494b853126d08f155ad6be0d4d734282"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MODFX_PROCESS</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#ga2103260c965e55d6bc8ec31aafec7687">_hook_process</a></td></tr>
+<tr class="separator:ga494b853126d08f155ad6be0d4d734282"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2d7ccaa59b94b340094c21b543503876"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MODFX_SUSPEND</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#ga51724f6540f59f6ee95fbe72d9655315">_hook_suspend</a></td></tr>
+<tr class="separator:ga2d7ccaa59b94b340094c21b543503876"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad68cd8b4158289f9493560b6fc77e093"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MODFX_RESUME</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#ga1c1d3d3a390700e46fc85a0e415a7da0">_hook_resume</a></td></tr>
+<tr class="separator:gad68cd8b4158289f9493560b6fc77e093"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga6bbfbdac075f0b043aac53ad2c5932e3"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>MODFX_PARAM</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#gae3cedf87a00cacb4008e52ce1fe1ca60">_hook_param</a></td></tr>
+<tr class="separator:ga6bbfbdac075f0b043aac53ad2c5932e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__modfx__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a> (uint32_t platform, uint32_t api)</td></tr>
+<tr class="memdesc:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialization callback.  <a href="group__modfx__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">More...</a><br /></td></tr>
 <tr class="separator:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaea822f104394d2f1d9139568d18d7994"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_process</b> (const float *main_xn, float *main_yn, const float *sub_xn, float *sub_yn, uint32_t frames)</td></tr>
+<tr class="memitem:gaea822f104394d2f1d9139568d18d7994"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__modfx__inst.html#gaea822f104394d2f1d9139568d18d7994">_hook_process</a> (const float *main_xn, float *main_yn, const float *sub_xn, float *sub_yn, uint32_t frames)</td></tr>
+<tr class="memdesc:gaea822f104394d2f1d9139568d18d7994"><td class="mdescLeft">&#160;</td><td class="mdescRight">Processing callback.  <a href="group__modfx__inst.html#gaea822f104394d2f1d9139568d18d7994">More...</a><br /></td></tr>
 <tr class="separator:gaea822f104394d2f1d9139568d18d7994"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga51724f6540f59f6ee95fbe72d9655315"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_suspend</b> (void)</td></tr>
+<tr class="memitem:ga51724f6540f59f6ee95fbe72d9655315"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__modfx__inst.html#ga51724f6540f59f6ee95fbe72d9655315">_hook_suspend</a> (void)</td></tr>
+<tr class="memdesc:ga51724f6540f59f6ee95fbe72d9655315"><td class="mdescLeft">&#160;</td><td class="mdescRight">Suspend callback.  <a href="group__modfx__inst.html#ga51724f6540f59f6ee95fbe72d9655315">More...</a><br /></td></tr>
 <tr class="separator:ga51724f6540f59f6ee95fbe72d9655315"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga1c1d3d3a390700e46fc85a0e415a7da0"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_resume</b> (void)</td></tr>
+<tr class="memitem:ga1c1d3d3a390700e46fc85a0e415a7da0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__modfx__inst.html#ga1c1d3d3a390700e46fc85a0e415a7da0">_hook_resume</a> (void)</td></tr>
+<tr class="memdesc:ga1c1d3d3a390700e46fc85a0e415a7da0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resume callback.  <a href="group__modfx__inst.html#ga1c1d3d3a390700e46fc85a0e415a7da0">More...</a><br /></td></tr>
 <tr class="separator:ga1c1d3d3a390700e46fc85a0e415a7da0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae3cedf87a00cacb4008e52ce1fe1ca60"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_param</b> (uint8_t index, int32_t value)</td></tr>
+<tr class="memitem:gae3cedf87a00cacb4008e52ce1fe1ca60"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__modfx__inst.html#gae3cedf87a00cacb4008e52ce1fe1ca60">_hook_param</a> (uint8_t index, int32_t value)</td></tr>
+<tr class="memdesc:gae3cedf87a00cacb4008e52ce1fe1ca60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameter change callback.  <a href="group__modfx__inst.html#gae3cedf87a00cacb4008e52ce1fe1ca60">More...</a><br /></td></tr>
 <tr class="separator:gae3cedf87a00cacb4008e52ce1fe1ca60"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -179,7 +138,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_param</b> (uint
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Nov 28 2019 17:08:13 for minilogue xd SDK by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Nov 29 2019 08:55:36 for minilogue xd SDK by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.16
 </small></address>

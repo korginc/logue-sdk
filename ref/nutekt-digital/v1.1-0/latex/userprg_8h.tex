@@ -6,28 +6,19 @@ Common C interface header for custom user programs.
 
 
 {\ttfamily \#include $<$stdint.\+h$>$}\newline
-\doxysubsection*{Classes}
-\begin{DoxyCompactItemize}
-\item 
-struct \mbox{\hyperlink{structuser__prg__param}{user\+\_\+prg\+\_\+param}}
-\item 
-struct \mbox{\hyperlink{structuser__prg__header}{user\+\_\+prg\+\_\+header}}
-\item 
-struct \mbox{\hyperlink{structuser__prg__sig}{user\+\_\+prg\+\_\+sig}}
-\end{DoxyCompactItemize}
 \doxysubsection*{Macros}
 \begin{DoxyCompactItemize}
 \item 
-\#define {\bfseries U\+S\+E\+R\+\_\+\+T\+A\+R\+G\+E\+T\+\_\+\+P\+L\+A\+T\+F\+O\+RM}~(k\+\_\+user\+\_\+target\+\_\+nutektdigital)
-\item 
+\#define \mbox{\hyperlink{group__common_gaa88ecd5d5e1dd184a0427b4794ddf66a}{U\+S\+E\+R\+\_\+\+T\+A\+R\+G\+E\+T\+\_\+\+P\+L\+A\+T\+F\+O\+RM}}~(k\+\_\+user\+\_\+target\+\_\+nutektdigital)
+\begin{DoxyCompactList}\small\item\em Target platform for this user code. \end{DoxyCompactList}\item 
 \#define {\bfseries U\+S\+E\+R\+\_\+\+T\+A\+R\+G\+E\+T\+\_\+\+P\+L\+A\+T\+F\+O\+R\+M\+\_\+\+M\+A\+SK}~(0x7F$<$$<$8)
 \item 
 \#define {\bfseries U\+S\+E\+R\+\_\+\+T\+A\+R\+G\+E\+T\+\_\+\+M\+O\+D\+U\+L\+E\+\_\+\+M\+A\+SK}~(0x7F)
 \item 
 \#define {\bfseries U\+S\+E\+R\+\_\+\+T\+A\+R\+G\+E\+T\+\_\+\+P\+L\+A\+T\+F\+O\+R\+M\+\_\+\+I\+S\+\_\+\+C\+O\+M\+P\+AT}(tgt)
 \item 
-\#define {\bfseries U\+S\+E\+R\+\_\+\+A\+P\+I\+\_\+\+V\+E\+R\+S\+I\+ON}~(k\+\_\+user\+\_\+api\+\_\+1\+\_\+1\+\_\+0)
-\item 
+\#define \mbox{\hyperlink{group__common_gae02a2fe3dc6f103d09f7f077bc64cf4b}{U\+S\+E\+R\+\_\+\+A\+P\+I\+\_\+\+V\+E\+R\+S\+I\+ON}}~(k\+\_\+user\+\_\+api\+\_\+1\+\_\+1\+\_\+0)
+\begin{DoxyCompactList}\small\item\em A\+PI version targeted by this code. \end{DoxyCompactList}\item 
 \#define {\bfseries U\+S\+E\+R\+\_\+\+A\+P\+I\+\_\+\+M\+A\+J\+O\+R\+\_\+\+M\+A\+SK}~(0x7F$<$$<$16)
 \item 
 \#define {\bfseries U\+S\+E\+R\+\_\+\+A\+P\+I\+\_\+\+M\+I\+N\+O\+R\+\_\+\+M\+A\+SK}~(0x7F$<$$<$8)
@@ -56,30 +47,19 @@ struct \mbox{\hyperlink{structuser__prg__sig}{user\+\_\+prg\+\_\+sig}}
 \item 
 \#define {\bfseries U\+S\+E\+R\+\_\+\+P\+R\+G\+\_\+\+N\+A\+M\+E\+\_\+\+L\+EN}~(13)
 \end{DoxyCompactItemize}
-\doxysubsection*{Typedefs}
-\begin{DoxyCompactItemize}
-\item 
-typedef struct \mbox{\hyperlink{structuser__prg__param}{user\+\_\+prg\+\_\+param}} {\bfseries user\+\_\+prg\+\_\+param\+\_\+t}
-\item 
-typedef struct \mbox{\hyperlink{structuser__prg__header}{user\+\_\+prg\+\_\+header}} {\bfseries user\+\_\+prg\+\_\+header\+\_\+t}
-\item 
-typedef struct \mbox{\hyperlink{structuser__prg__sig}{user\+\_\+prg\+\_\+sig}} {\bfseries user\+\_\+prg\+\_\+sig\+\_\+t}
-\end{DoxyCompactItemize}
 \doxysubsection*{Enumerations}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{group__common_ga06fc87d81c62e9abb8790b6e5713c55b}\label{group__common_ga06fc87d81c62e9abb8790b6e5713c55b}} 
 enum \{ \newline
 {\bfseries k\+\_\+user\+\_\+module\+\_\+global} = 0U, 
-{\bfseries k\+\_\+user\+\_\+module\+\_\+modfx}, 
-{\bfseries k\+\_\+user\+\_\+module\+\_\+delfx}, 
-{\bfseries k\+\_\+user\+\_\+module\+\_\+revfx}, 
+\mbox{\hyperlink{group__common_gga06fc87d81c62e9abb8790b6e5713c55ba8a4261c928d57f6b579711e6fdbf0f40}{k\+\_\+user\+\_\+module\+\_\+modfx}}, 
+\mbox{\hyperlink{group__common_gga06fc87d81c62e9abb8790b6e5713c55ba771928fbf185b2f06a0888614f047dd2}{k\+\_\+user\+\_\+module\+\_\+delfx}}, 
+\mbox{\hyperlink{group__common_gga06fc87d81c62e9abb8790b6e5713c55babd86ac97aea8696eb860a57a156b61a6}{k\+\_\+user\+\_\+module\+\_\+revfx}}, 
 \newline
-{\bfseries k\+\_\+user\+\_\+module\+\_\+osc}, 
-{\bfseries k\+\_\+num\+\_\+user\+\_\+modules}
+\mbox{\hyperlink{group__common_gga06fc87d81c62e9abb8790b6e5713c55ba1f9aef67d49edf7f55d8e563bdcc8f7d}{k\+\_\+user\+\_\+module\+\_\+osc}}, 
+\mbox{\hyperlink{group__common_gga06fc87d81c62e9abb8790b6e5713c55ba8d1ff7b58b79eafcb54250b5f528080d}{k\+\_\+num\+\_\+user\+\_\+modules}}
  \}
-\item 
-\mbox{\Hypertarget{group__common_gadf764cbdea00d65edcd07bb9953ad2b7}\label{group__common_gadf764cbdea00d65edcd07bb9953ad2b7}} 
+\begin{DoxyCompactList}\small\item\em Module categories. \end{DoxyCompactList}\item 
 enum \{ \newline
 {\bfseries k\+\_\+user\+\_\+target\+\_\+prologue} = (1U$<$$<$8), 
 {\bfseries k\+\_\+user\+\_\+target\+\_\+prologue\+\_\+global} = (1U$<$$<$8) $\vert$ k\+\_\+user\+\_\+module\+\_\+global, 
@@ -89,8 +69,7 @@ enum \{ \newline
 {\bfseries k\+\_\+user\+\_\+target\+\_\+prologue\+\_\+revfx} = (1U$<$$<$8) $\vert$ k\+\_\+user\+\_\+module\+\_\+revfx, 
 {\bfseries k\+\_\+user\+\_\+target\+\_\+prologue\+\_\+osc} = (1U$<$$<$8) $\vert$ k\+\_\+user\+\_\+module\+\_\+osc
  \}
-\item 
-\mbox{\Hypertarget{group__common_ga99fb83031ce9923c84392b4e92f956b5}\label{group__common_ga99fb83031ce9923c84392b4e92f956b5}} 
+\begin{DoxyCompactList}\small\item\em prologue specific platform/module pairs. \end{DoxyCompactList}\item 
 enum \{ \newline
 {\bfseries k\+\_\+user\+\_\+target\+\_\+miniloguexd} = (2U$<$$<$8), 
 {\bfseries k\+\_\+user\+\_\+target\+\_\+miniloguexd\+\_\+global} = (2U$<$$<$8) $\vert$ k\+\_\+user\+\_\+module\+\_\+global, 
@@ -100,8 +79,7 @@ enum \{ \newline
 {\bfseries k\+\_\+user\+\_\+target\+\_\+miniloguexd\+\_\+revfx} = (2U$<$$<$8) $\vert$ k\+\_\+user\+\_\+module\+\_\+revfx, 
 {\bfseries k\+\_\+user\+\_\+target\+\_\+miniloguexd\+\_\+osc} = (2U$<$$<$8) $\vert$ k\+\_\+user\+\_\+module\+\_\+osc
  \}
-\item 
-\mbox{\Hypertarget{group__common_gabc6126af1d45847bc59afa0aa3216b04}\label{group__common_gabc6126af1d45847bc59afa0aa3216b04}} 
+\begin{DoxyCompactList}\small\item\em minilogue xd specific platform/module pairs. \end{DoxyCompactList}\item 
 enum \{ \newline
 {\bfseries k\+\_\+user\+\_\+target\+\_\+nutektdigital} = (3U$<$$<$8), 
 {\bfseries k\+\_\+user\+\_\+target\+\_\+nutektdigital\+\_\+global} = (3U$<$$<$8) $\vert$ k\+\_\+user\+\_\+module\+\_\+global, 
@@ -111,19 +89,11 @@ enum \{ \newline
 {\bfseries k\+\_\+user\+\_\+target\+\_\+nutektdigital\+\_\+revfx} = (3U$<$$<$8) $\vert$ k\+\_\+user\+\_\+module\+\_\+revfx, 
 {\bfseries k\+\_\+user\+\_\+target\+\_\+nutektdigital\+\_\+osc} = (3U$<$$<$8) $\vert$ k\+\_\+user\+\_\+module\+\_\+osc
  \}
-\item 
-\mbox{\Hypertarget{group__common_gadc29c2ff13d900c2f185ee95427fb06c}\label{group__common_gadc29c2ff13d900c2f185ee95427fb06c}} 
+\begin{DoxyCompactList}\small\item\em Nu\+:Tekt N\+T\+S-\/1 digital specific platform/module pairs. \end{DoxyCompactList}\item 
 enum \{ {\bfseries k\+\_\+user\+\_\+api\+\_\+1\+\_\+0\+\_\+0} = ((1U$<$$<$16) $\vert$ (0U$<$$<$8) $\vert$ (0U)), 
 {\bfseries k\+\_\+user\+\_\+api\+\_\+1\+\_\+1\+\_\+0} = ((1U$<$$<$16) $\vert$ (1U$<$$<$8) $\vert$ (0U))
  \}
-\item 
-\mbox{\Hypertarget{group__common_ga61dadd085c1777f559549e05962b2c9e}\label{group__common_ga61dadd085c1777f559549e05962b2c9e}} 
-enum \{ {\bfseries k\+\_\+user\+\_\+prg\+\_\+param\+\_\+type\+\_\+percent} = 0, 
-{\bfseries k\+\_\+user\+\_\+prg\+\_\+param\+\_\+type\+\_\+percent\+\_\+bipolar}, 
-{\bfseries k\+\_\+user\+\_\+prg\+\_\+param\+\_\+type\+\_\+select}, 
-{\bfseries k\+\_\+user\+\_\+prg\+\_\+param\+\_\+type\+\_\+count}
- \}
-\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Existing A\+PI versions. \end{DoxyCompactList}\end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}

@@ -69,9 +69,7 @@ $(function() {
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#define-members">Macros</a> &#124;
-<a href="#typedef-members">Typedefs</a> &#124;
-<a href="#enum-members">Enumerations</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#enum-members">Enumerations</a>  </div>
   <div class="headertitle">
 <div class="title">userrevfx.h File Reference</div>  </div>
 </div><!--header-->
@@ -85,96 +83,57 @@ $(function() {
 </div>
 <p><a href="userrevfx_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
-Classes</h2></td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser__revfx__hook__table.html">user_revfx_hook_table</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser__revfx__data.html">user_revfx_data</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
-<tr class="memitem:ga0d9ed861a37cbe2f45f4e0a4712e73cc"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>__sdram</b>&#160;&#160;&#160;__attribute__((section(&quot;.sdram&quot;)))</td></tr>
+<tr class="memitem:ga0d9ed861a37cbe2f45f4e0a4712e73cc"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#ga0d9ed861a37cbe2f45f4e0a4712e73cc">__sdram</a>&#160;&#160;&#160;__attribute__((section(&quot;.sdram&quot;)))</td></tr>
+<tr class="memdesc:ga0d9ed861a37cbe2f45f4e0a4712e73cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">This macro can be used to declare a memory buffer in SDRAM space.  <a href="group__revfx__inst.html#ga0d9ed861a37cbe2f45f4e0a4712e73cc">More...</a><br /></td></tr>
 <tr class="separator:ga0d9ed861a37cbe2f45f4e0a4712e73cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaa652728435e0ce874da0df723834b803"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_INIT</b>&#160;&#160;&#160;__attribute__((used)) _hook_init</td></tr>
-<tr class="separator:gaa652728435e0ce874da0df723834b803"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf5203a31ead7e4c8b740790bb5ef3d9e"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_PROCESS</b>&#160;&#160;&#160;__attribute__((used)) _hook_process</td></tr>
-<tr class="separator:gaf5203a31ead7e4c8b740790bb5ef3d9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga9040b6119e1fe8f948d27e5d0c264178"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_SUSPEND</b>&#160;&#160;&#160;__attribute__((used)) _hook_suspend</td></tr>
-<tr class="separator:ga9040b6119e1fe8f948d27e5d0c264178"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf2d0a6f391e14291400e4c8a29b13d16"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_RESUME</b>&#160;&#160;&#160;__attribute__((used)) _hook_resume</td></tr>
-<tr class="separator:gaf2d0a6f391e14291400e4c8a29b13d16"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gab10bd99358a0d4e32de9d92d15a3c49a"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_PARAM</b>&#160;&#160;&#160;__attribute__((used)) _hook_param</td></tr>
-<tr class="separator:gab10bd99358a0d4e32de9d92d15a3c49a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:gabbb660179f0360f923cf50470f67d934"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXFuncEntry</b>) (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:gabbb660179f0360f923cf50470f67d934"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac02ebd06c4c5d560bfb83251cd57a31d"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXFuncInit</b>) (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:gac02ebd06c4c5d560bfb83251cd57a31d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga2ba7b605ab1cdbbd1d74209b8970e44e"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXFuncProcess</b>) (float *xn, uint32_t frames)</td></tr>
-<tr class="separator:ga2ba7b605ab1cdbbd1d74209b8970e44e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaae7cafac357d1f4722d33761442f755e"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXSuspend</b>) (void)</td></tr>
-<tr class="separator:gaae7cafac357d1f4722d33761442f755e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga68a6f02fdf17eb97ab73dc0df87c4db8"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXResume</b>) (void)</td></tr>
-<tr class="separator:ga68a6f02fdf17eb97ab73dc0df87c4db8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3557a5b6eb520b583d78eaf0afbfd38f"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXFuncParam</b>) (uint8_t index, int32_t value)</td></tr>
-<tr class="separator:ga3557a5b6eb520b583d78eaf0afbfd38f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga8ed081e6b91c1bd9cadd65f23882c4ce"><td class="memItemLeft" align="right" valign="top">
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserRevFXFuncDummy</b>) (void)</td></tr>
-<tr class="separator:ga8ed081e6b91c1bd9cadd65f23882c4ce"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadeeb68064f90189188f56e4c6e1df4f3"><td class="memItemLeft" align="right" valign="top">
-typedef struct <a class="el" href="structuser__revfx__hook__table.html">user_revfx_hook_table</a>&#160;</td><td class="memItemRight" valign="bottom"><b>user_revfx_hook_table_t</b></td></tr>
-<tr class="separator:gadeeb68064f90189188f56e4c6e1df4f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaeddde9e047f4d2ab8ce6202d3f7db3fc"><td class="memItemLeft" align="right" valign="top">
-typedef struct <a class="el" href="structuser__revfx__data.html">user_revfx_data</a>&#160;</td><td class="memItemRight" valign="bottom"><b>user_revfx_data_t</b></td></tr>
-<tr class="separator:gaeddde9e047f4d2ab8ce6202d3f7db3fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:ga345542bbc4ec36e1d117b40bedcce2be"><td class="memItemLeft" align="right" valign="top"><a id="ga345542bbc4ec36e1d117b40bedcce2be"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>user_revfx_param_id_t</b> { <br />
+<tr class="memitem:ga345542bbc4ec36e1d117b40bedcce2be"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#ga345542bbc4ec36e1d117b40bedcce2be">user_revfx_param_id_t</a> { <br />
 &#160;&#160;<b>k_user_revfx_param_time</b> = 0, 
-<b>k_user_revfx_param_depth</b>, 
-<b>k_user_revfx_param_reserved0</b>, 
+<a class="el" href="group__revfx__inst.html#gga345542bbc4ec36e1d117b40bedcce2bea07c4a195b88f01a56288fcde5ecdfb2a">k_user_revfx_param_depth</a>, 
+<a class="el" href="group__revfx__inst.html#gga345542bbc4ec36e1d117b40bedcce2bea48e993395db06e35acfe0d676f24e710">k_user_revfx_param_reserved0</a>, 
 <b>k_user_revfx_param_shift_depth</b>, 
 <br />
-&#160;&#160;<b>k_num_user_revfx_param_id</b>
+&#160;&#160;<a class="el" href="group__revfx__inst.html#gga345542bbc4ec36e1d117b40bedcce2beaacdb01b710b350f7ef9dd5a6c0ada0da">k_num_user_revfx_param_id</a>
 <br />
  }</td></tr>
+<tr class="memdesc:ga345542bbc4ec36e1d117b40bedcce2be"><td class="mdescLeft">&#160;</td><td class="mdescRight">User facing parameters.  <a href="group__revfx__inst.html#ga345542bbc4ec36e1d117b40bedcce2be">More...</a><br /></td></tr>
 <tr class="separator:ga345542bbc4ec36e1d117b40bedcce2be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:gacb26647b7b28ca29f52fabdcbed3a152"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_entry</b> (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:gacb26647b7b28ca29f52fabdcbed3a152"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_init</b> (uint32_t platform, uint32_t api)</td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+Core API</h2></td></tr>
+<tr class="memitem:gaa652728435e0ce874da0df723834b803"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_INIT</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a></td></tr>
+<tr class="separator:gaa652728435e0ce874da0df723834b803"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf5203a31ead7e4c8b740790bb5ef3d9e"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_PROCESS</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#ga2103260c965e55d6bc8ec31aafec7687">_hook_process</a></td></tr>
+<tr class="separator:gaf5203a31ead7e4c8b740790bb5ef3d9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9040b6119e1fe8f948d27e5d0c264178"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_SUSPEND</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#ga51724f6540f59f6ee95fbe72d9655315">_hook_suspend</a></td></tr>
+<tr class="separator:ga9040b6119e1fe8f948d27e5d0c264178"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf2d0a6f391e14291400e4c8a29b13d16"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_RESUME</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#ga1c1d3d3a390700e46fc85a0e415a7da0">_hook_resume</a></td></tr>
+<tr class="separator:gaf2d0a6f391e14291400e4c8a29b13d16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab10bd99358a0d4e32de9d92d15a3c49a"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>REVFX_PARAM</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#gae3cedf87a00cacb4008e52ce1fe1ca60">_hook_param</a></td></tr>
+<tr class="separator:gab10bd99358a0d4e32de9d92d15a3c49a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a> (uint32_t platform, uint32_t api)</td></tr>
+<tr class="memdesc:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialization callback.  <a href="group__revfx__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">More...</a><br /></td></tr>
 <tr class="separator:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga2103260c965e55d6bc8ec31aafec7687"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_process</b> (float *xn, uint32_t frames)</td></tr>
+<tr class="memitem:ga2103260c965e55d6bc8ec31aafec7687"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#ga2103260c965e55d6bc8ec31aafec7687">_hook_process</a> (float *xn, uint32_t frames)</td></tr>
+<tr class="memdesc:ga2103260c965e55d6bc8ec31aafec7687"><td class="mdescLeft">&#160;</td><td class="mdescRight">Processing callback.  <a href="group__revfx__inst.html#ga2103260c965e55d6bc8ec31aafec7687">More...</a><br /></td></tr>
 <tr class="separator:ga2103260c965e55d6bc8ec31aafec7687"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga51724f6540f59f6ee95fbe72d9655315"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_suspend</b> (void)</td></tr>
+<tr class="memitem:ga51724f6540f59f6ee95fbe72d9655315"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#ga51724f6540f59f6ee95fbe72d9655315">_hook_suspend</a> (void)</td></tr>
+<tr class="memdesc:ga51724f6540f59f6ee95fbe72d9655315"><td class="mdescLeft">&#160;</td><td class="mdescRight">Suspend callback.  <a href="group__revfx__inst.html#ga51724f6540f59f6ee95fbe72d9655315">More...</a><br /></td></tr>
 <tr class="separator:ga51724f6540f59f6ee95fbe72d9655315"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga1c1d3d3a390700e46fc85a0e415a7da0"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_resume</b> (void)</td></tr>
+<tr class="memitem:ga1c1d3d3a390700e46fc85a0e415a7da0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#ga1c1d3d3a390700e46fc85a0e415a7da0">_hook_resume</a> (void)</td></tr>
+<tr class="memdesc:ga1c1d3d3a390700e46fc85a0e415a7da0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resume callback.  <a href="group__revfx__inst.html#ga1c1d3d3a390700e46fc85a0e415a7da0">More...</a><br /></td></tr>
 <tr class="separator:ga1c1d3d3a390700e46fc85a0e415a7da0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae3cedf87a00cacb4008e52ce1fe1ca60"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_param</b> (uint8_t index, int32_t value)</td></tr>
+<tr class="memitem:gae3cedf87a00cacb4008e52ce1fe1ca60"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__revfx__inst.html#gae3cedf87a00cacb4008e52ce1fe1ca60">_hook_param</a> (uint8_t index, int32_t value)</td></tr>
+<tr class="memdesc:gae3cedf87a00cacb4008e52ce1fe1ca60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameter change callback.  <a href="group__revfx__inst.html#gae3cedf87a00cacb4008e52ce1fe1ca60">More...</a><br /></td></tr>
 <tr class="separator:gae3cedf87a00cacb4008e52ce1fe1ca60"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
@@ -184,7 +143,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_param</b> (uint
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Nov 28 2019 17:08:13 for minilogue xd SDK by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Nov 29 2019 08:55:36 for minilogue xd SDK by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.16
 </small></address>

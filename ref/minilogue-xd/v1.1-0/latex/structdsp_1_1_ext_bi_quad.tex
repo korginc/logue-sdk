@@ -28,6 +28,7 @@ void \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_ab2c9c9c725ed7bb8caf6fe16093bc1f
 \begin{DoxyCompactList}\small\item\em Calculate coefficients for \char`\"{}invertable\char`\"{} all pass based low pass filter. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a31f0f7d63c0c1e780414cc7e2e0d9a7e}{set\+F\+O\+A\+P\+HP}} (const float k)
 \begin{DoxyCompactList}\small\item\em Calculate coefficients for \char`\"{}invertable\char`\"{} all pass based high pass filter. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_a7480643e7a485238b290d8c5e1dd8fce}\label{structdsp_1_1_ext_bi_quad_a7480643e7a485238b290d8c5e1dd8fce}} 
 void \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a7480643e7a485238b290d8c5e1dd8fce}{toggle\+F\+O\+L\+P\+HP}} (void)
 \begin{DoxyCompactList}\small\item\em Toggle \char`\"{}invertable\char`\"{} all pass based low/high pass filter to opposite mode. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a8a93612b897152699a2a330a3032c4af}{update\+F\+O\+L\+P\+HP}} (const float k)
@@ -46,11 +47,11 @@ void \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_aea3534c3a5fb43828ae6c4994f1b3b0
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}\label{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}} 
-\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs}{Bi\+Quad\+::\+Coeffs}} {\bfseries m\+Coeffs}
-\item 
-\mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}\label{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}} 
-float \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}{m\+D0}}
+\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs}{Bi\+Quad\+::\+Coeffs}} \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{m\+Coeffs}}
 \begin{DoxyCompactList}\small\item\em Coefficients for the Bi-\/\+Quad construct. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}\label{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}} 
+float {\bfseries m\+D0}
+\item 
 \mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_a10863a4e91c2dacfbe82118dbca705bd}\label{structdsp_1_1_ext_bi_quad_a10863a4e91c2dacfbe82118dbca705bd}} 
 float {\bfseries m\+D1}
 \item 
@@ -71,7 +72,7 @@ float {\bfseries m\+Z2}
 \doxysubsection{Detailed Description}
 Extended transposed form 2 Bi-\/\+Quad construct. 
 
-Definition at line 414 of file biquad.\+hpp.
+Definition at line 415 of file biquad.\+hpp.
 
 
 
@@ -96,13 +97,13 @@ Output sample
 \end{DoxyReturn}
 
 
-Definition at line 486 of file biquad.\+hpp.
+Definition at line 487 of file biquad.\+hpp.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{486                                   \{}
-\DoxyCodeLine{487       \textcolor{keywordflow}{return} \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_ab592e4092d50a50084f1a18e68978edc}{process\_so}}(xn);}
-\DoxyCodeLine{488     \}}
+\DoxyCodeLine{487                                   \{}
+\DoxyCodeLine{488       \textcolor{keywordflow}{return} \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_ab592e4092d50a50084f1a18e68978edc}{process\_so}}(xn);}
+\DoxyCodeLine{489     \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_aa2b946a7a450217a16dbc21ecbe2567b}\label{structdsp_1_1_ext_bi_quad_aa2b946a7a450217a16dbc21ecbe2567b}} 
@@ -125,16 +126,16 @@ Output sample
 \end{DoxyReturn}
 
 
-Definition at line 471 of file biquad.\+hpp.
+Definition at line 472 of file biquad.\+hpp.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{471                                      \{}
-\DoxyCodeLine{472       \textcolor{keywordtype}{float} acc = mCoeffs.ff0 * xn + mZ1;}
-\DoxyCodeLine{473       mZ1 = mCoeffs.ff1 * xn;}
-\DoxyCodeLine{474       mZ1 -\/= mCoeffs.fb1 * acc;}
-\DoxyCodeLine{475       \textcolor{keywordflow}{return} mW1 * (mW0 * acc + \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}{mD0}} * xn) + mD1 * xn;}
-\DoxyCodeLine{476     \}}
+\DoxyCodeLine{472                                      \{}
+\DoxyCodeLine{473       \textcolor{keywordtype}{float} acc = \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff0 * xn + mZ1;}
+\DoxyCodeLine{474       mZ1 = \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff1 * xn;}
+\DoxyCodeLine{475       mZ1 -\/= \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.fb1 * acc;}
+\DoxyCodeLine{476       \textcolor{keywordflow}{return} mW1 * (mW0 * acc + mD0 * xn) + mD1 * xn;}
+\DoxyCodeLine{477     \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_ab592e4092d50a50084f1a18e68978edc}\label{structdsp_1_1_ext_bi_quad_ab592e4092d50a50084f1a18e68978edc}} 
@@ -157,18 +158,18 @@ Output sample
 \end{DoxyReturn}
 
 
-Definition at line 454 of file biquad.\+hpp.
+Definition at line 455 of file biquad.\+hpp.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{454                                      \{}
-\DoxyCodeLine{455       \textcolor{keywordtype}{float} acc = mCoeffs.ff0 * xn + mZ1;}
-\DoxyCodeLine{456       mZ1 = mCoeffs.ff1 * xn + mZ2;}
-\DoxyCodeLine{457       mZ2 = mCoeffs.ff2 * xn;}
-\DoxyCodeLine{458       mZ1 -\/= mCoeffs.fb1 * acc;}
-\DoxyCodeLine{459       mZ2 -\/= mCoeffs.fb2 * acc;}
-\DoxyCodeLine{460       \textcolor{keywordflow}{return} mW1 * (mW0 * acc + \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}{mD0}} * xn) + mD1 * xn;}
-\DoxyCodeLine{461     \}}
+\DoxyCodeLine{455                                      \{}
+\DoxyCodeLine{456       \textcolor{keywordtype}{float} acc = \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff0 * xn + mZ1;}
+\DoxyCodeLine{457       mZ1 = \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff1 * xn + mZ2;}
+\DoxyCodeLine{458       mZ2 = \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff2 * xn;}
+\DoxyCodeLine{459       mZ1 -\/= \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.fb1 * acc;}
+\DoxyCodeLine{460       mZ2 -\/= \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.fb2 * acc;}
+\DoxyCodeLine{461       \textcolor{keywordflow}{return} mW1 * (mW0 * acc + mD0 * xn) + mD1 * xn;}
+\DoxyCodeLine{462     \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_a31f0f7d63c0c1e780414cc7e2e0d9a7e}\label{structdsp_1_1_ext_bi_quad_a31f0f7d63c0c1e780414cc7e2e0d9a7e}} 
@@ -188,18 +189,18 @@ Calculate coefficients for \char`\"{}invertable\char`\"{} all pass based high pa
 \end{DoxyParams}
 
 
-Definition at line 512 of file biquad.\+hpp.
+Definition at line 513 of file biquad.\+hpp.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{512                                   \{}
-\DoxyCodeLine{513       \textcolor{comment}{// k = tan(pi*wc)}}
-\DoxyCodeLine{514       mCoeffs.\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_ac4fa8fa646c429c80dfbd26977e1aabf}{setFOAP}}(k);}
-\DoxyCodeLine{515       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}{mD0}} = 0.5f;}
-\DoxyCodeLine{516       mW0 = -\/0.5f;}
-\DoxyCodeLine{517       mD1 = 0.f;}
-\DoxyCodeLine{518       mW1 = 1.f;}
-\DoxyCodeLine{519     \}}
+\DoxyCodeLine{513                                   \{}
+\DoxyCodeLine{514       \textcolor{comment}{// k = tan(pi*wc)}}
+\DoxyCodeLine{515       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_ac4fa8fa646c429c80dfbd26977e1aabf}{setFOAP}}(k);}
+\DoxyCodeLine{516       mD0 = 0.5f;}
+\DoxyCodeLine{517       mW0 = -\/0.5f;}
+\DoxyCodeLine{518       mD1 = 0.f;}
+\DoxyCodeLine{519       mW1 = 1.f;}
+\DoxyCodeLine{520     \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_ab2c9c9c725ed7bb8caf6fe16093bc1fa}\label{structdsp_1_1_ext_bi_quad_ab2c9c9c725ed7bb8caf6fe16093bc1fa}} 
@@ -219,17 +220,17 @@ Calculate coefficients for \char`\"{}invertable\char`\"{} all pass based low pas
 \end{DoxyParams}
 
 
-Definition at line 498 of file biquad.\+hpp.
+Definition at line 499 of file biquad.\+hpp.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{498                                   \{}
-\DoxyCodeLine{499       \textcolor{comment}{// k = tan(pi*wc)}}
-\DoxyCodeLine{500       mCoeffs.\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_ac4fa8fa646c429c80dfbd26977e1aabf}{setFOAP}}(k);}
-\DoxyCodeLine{501       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}{mD0}} = mW0 = 0.5f;}
-\DoxyCodeLine{502       mD1 = 0.f;}
-\DoxyCodeLine{503       mW1 = 1.f;}
-\DoxyCodeLine{504     \}}
+\DoxyCodeLine{499                                   \{}
+\DoxyCodeLine{500       \textcolor{comment}{// k = tan(pi*wc)}}
+\DoxyCodeLine{501       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_ac4fa8fa646c429c80dfbd26977e1aabf}{setFOAP}}(k);}
+\DoxyCodeLine{502       mD0 = mW0 = 0.5f;}
+\DoxyCodeLine{503       mD1 = 0.f;}
+\DoxyCodeLine{504       mW1 = 1.f;}
+\DoxyCodeLine{505     \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_a31329f25b9d54145aa96178c3bf94f25}\label{structdsp_1_1_ext_bi_quad_a31329f25b9d54145aa96178c3bf94f25}} 
@@ -251,25 +252,25 @@ Calculate coefficients for first order all pass based high shelf filter.
 \end{DoxyParams}
 
 
-Definition at line 573 of file biquad.\+hpp.
+Definition at line 572 of file biquad.\+hpp.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{573                                                   \{}
-\DoxyCodeLine{574       \textcolor{comment}{// k = tan(pi*wc)}}
-\DoxyCodeLine{575       \textcolor{comment}{// gain = raw amplitude (pre converted from dB)}}
-\DoxyCodeLine{576       \textcolor{keyword}{const} \textcolor{keywordtype}{float} h = gain -\/ 1.f;}
-\DoxyCodeLine{577       \textcolor{keyword}{const} \textcolor{keywordtype}{float} gk = (gain >=  1.f) ? k : gain*k;}
-\DoxyCodeLine{578       mCoeffs.ff0 = mCoeffs.fb1 = (gk -\/ 1.f) / (gk + 1);}
-\DoxyCodeLine{579       mCoeffs.ff1 = 1.f;}
-\DoxyCodeLine{580       mCoeffs.fb2 = mCoeffs.ff2 = 0.f;}
-\DoxyCodeLine{581 }
-\DoxyCodeLine{582       mW0 = -\/1.f;}
-\DoxyCodeLine{583       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}{mD0}} = 1.f;}
-\DoxyCodeLine{584         }
-\DoxyCodeLine{585       mW1 = 0.5f * h;}
-\DoxyCodeLine{586       mD1 = 1.f;}
-\DoxyCodeLine{587     \}}
+\DoxyCodeLine{572                                                   \{}
+\DoxyCodeLine{573       \textcolor{comment}{// k = tan(pi*wc)}}
+\DoxyCodeLine{574       \textcolor{comment}{// gain = raw amplitude (pre converted from dB)}}
+\DoxyCodeLine{575       \textcolor{keyword}{const} \textcolor{keywordtype}{float} h = gain -\/ 1.f;}
+\DoxyCodeLine{576       \textcolor{keyword}{const} \textcolor{keywordtype}{float} gk = (gain >=  1.f) ? k : gain*k;}
+\DoxyCodeLine{577       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff0 = \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.fb1 = (gk -\/ 1.f) / (gk + 1);}
+\DoxyCodeLine{578       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff1 = 1.f;}
+\DoxyCodeLine{579       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.fb2 = \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff2 = 0.f;}
+\DoxyCodeLine{580 }
+\DoxyCodeLine{581       mW0 = -\/1.f;}
+\DoxyCodeLine{582       mD0 = 1.f;}
+\DoxyCodeLine{583         }
+\DoxyCodeLine{584       mW1 = 0.5f * h;}
+\DoxyCodeLine{585       mD1 = 1.f;}
+\DoxyCodeLine{586     \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_a8a1adcb9b9d973a465b05e3f5003b8a8}\label{structdsp_1_1_ext_bi_quad_a8a1adcb9b9d973a465b05e3f5003b8a8}} 
@@ -291,25 +292,25 @@ Calculate coefficients for first order all pass based low shelf filter.
 \end{DoxyParams}
 
 
-Definition at line 550 of file biquad.\+hpp.
+Definition at line 549 of file biquad.\+hpp.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{550                                                   \{}
-\DoxyCodeLine{551       \textcolor{comment}{// k = tan(pi*wc)}}
-\DoxyCodeLine{552       \textcolor{comment}{// gain = raw amplitude (pre converted from dB)}}
-\DoxyCodeLine{553       \textcolor{keyword}{const} \textcolor{keywordtype}{float} h = gain -\/ 1.f;}
-\DoxyCodeLine{554       \textcolor{keyword}{const} \textcolor{keywordtype}{float} g = (gain >=  1.f) ? 1.f : gain;}
-\DoxyCodeLine{555       mCoeffs.ff0 = mCoeffs.fb1 = (k -\/ g) / (k + g);}
-\DoxyCodeLine{556       mCoeffs.ff1 = 1.f;}
-\DoxyCodeLine{557       mCoeffs.fb2 = mCoeffs.ff2 = 0.f;}
-\DoxyCodeLine{558 }
-\DoxyCodeLine{559       mW0 = 1.f;}
-\DoxyCodeLine{560       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}{mD0}} = 1.f;}
-\DoxyCodeLine{561         }
-\DoxyCodeLine{562       mW1 = 0.5f * h;}
-\DoxyCodeLine{563       mD1 = 1.f;}
-\DoxyCodeLine{564     \}}
+\DoxyCodeLine{549                                                   \{}
+\DoxyCodeLine{550       \textcolor{comment}{// k = tan(pi*wc)}}
+\DoxyCodeLine{551       \textcolor{comment}{// gain = raw amplitude (pre converted from dB)}}
+\DoxyCodeLine{552       \textcolor{keyword}{const} \textcolor{keywordtype}{float} h = gain -\/ 1.f;}
+\DoxyCodeLine{553       \textcolor{keyword}{const} \textcolor{keywordtype}{float} g = (gain >=  1.f) ? 1.f : gain;}
+\DoxyCodeLine{554       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff0 = \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.fb1 = (k -\/ g) / (k + g);}
+\DoxyCodeLine{555       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff1 = 1.f;}
+\DoxyCodeLine{556       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.fb2 = \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff2 = 0.f;}
+\DoxyCodeLine{557 }
+\DoxyCodeLine{558       mW0 = 1.f;}
+\DoxyCodeLine{559       mD0 = 1.f;}
+\DoxyCodeLine{560         }
+\DoxyCodeLine{561       mW1 = 0.5f * h;}
+\DoxyCodeLine{562       mD1 = 1.f;}
+\DoxyCodeLine{563     \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_ad74e13dd8332fc2961adbd3af2e6124c}\label{structdsp_1_1_ext_bi_quad_ad74e13dd8332fc2961adbd3af2e6124c}} 
@@ -334,21 +335,21 @@ q is inverse of relative bandwidth (wc / wb)
 \end{DoxyNote}
 
 
-Definition at line 622 of file biquad.\+hpp.
+Definition at line 621 of file biquad.\+hpp.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{622                                                           \{}
-\DoxyCodeLine{623       \textcolor{comment}{// Alternative implementation based on second order tunable all pass}}
-\DoxyCodeLine{624       \textcolor{comment}{// delta = cos(2pi*wc) }}
-\DoxyCodeLine{625       mCoeffs.\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_a3e5808456124c450d5a11f8995172eed}{setSOAP2}}(delta, gamma);}
-\DoxyCodeLine{626         }
-\DoxyCodeLine{627       mW0 = -\/1.f;}
-\DoxyCodeLine{628       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}{mD0}} = 1.f;}
-\DoxyCodeLine{629         }
-\DoxyCodeLine{630       mW1 = 0.5f;}
-\DoxyCodeLine{631       mD1 = 0.f;}
-\DoxyCodeLine{632     \}}
+\DoxyCodeLine{621                                                           \{}
+\DoxyCodeLine{622       \textcolor{comment}{// Alternative implementation based on second order tunable all pass}}
+\DoxyCodeLine{623       \textcolor{comment}{// delta = cos(2pi*wc) }}
+\DoxyCodeLine{624       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_a3e5808456124c450d5a11f8995172eed}{setSOAP2}}(delta, gamma);}
+\DoxyCodeLine{625         }
+\DoxyCodeLine{626       mW0 = -\/1.f;}
+\DoxyCodeLine{627       mD0 = 1.f;}
+\DoxyCodeLine{628         }
+\DoxyCodeLine{629       mW1 = 0.5f;}
+\DoxyCodeLine{630       mD1 = 0.f;}
+\DoxyCodeLine{631     \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_a08b840666c94d35e1d62bad1e72208ed}\label{structdsp_1_1_ext_bi_quad_a08b840666c94d35e1d62bad1e72208ed}} 
@@ -373,21 +374,21 @@ q is inverse of relative bandwidth (wc / wb)
 \end{DoxyNote}
 
 
-Definition at line 601 of file biquad.\+hpp.
+Definition at line 600 of file biquad.\+hpp.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{601                                                           \{}
-\DoxyCodeLine{602       \textcolor{comment}{// Alternative implementation based on second order tunable all pass}}
-\DoxyCodeLine{603       \textcolor{comment}{// delta = cos(2pi*wc)}}
-\DoxyCodeLine{604       mCoeffs.\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_a3e5808456124c450d5a11f8995172eed}{setSOAP2}}(delta, gamma);}
-\DoxyCodeLine{605 }
-\DoxyCodeLine{606       mW0 = 1.f;}
-\DoxyCodeLine{607       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}{mD0}} = 1.f;}
-\DoxyCodeLine{608 }
-\DoxyCodeLine{609       mW1 = 0.5f;}
-\DoxyCodeLine{610       mD1 = 0.f;}
-\DoxyCodeLine{611     \}}
+\DoxyCodeLine{600                                                           \{}
+\DoxyCodeLine{601       \textcolor{comment}{// Alternative implementation based on second order tunable all pass}}
+\DoxyCodeLine{602       \textcolor{comment}{// delta = cos(2pi*wc)}}
+\DoxyCodeLine{603       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_a3e5808456124c450d5a11f8995172eed}{setSOAP2}}(delta, gamma);}
+\DoxyCodeLine{604 }
+\DoxyCodeLine{605       mW0 = 1.f;}
+\DoxyCodeLine{606       mD0 = 1.f;}
+\DoxyCodeLine{607 }
+\DoxyCodeLine{608       mW1 = 0.5f;}
+\DoxyCodeLine{609       mD1 = 0.f;}
+\DoxyCodeLine{610     \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_aea3534c3a5fb43828ae6c4994f1b3b0b}\label{structdsp_1_1_ext_bi_quad_aea3534c3a5fb43828ae6c4994f1b3b0b}} 
@@ -414,56 +415,30 @@ q is inverse of relative bandwidth (wc / wb)
 \end{DoxyNote}
 
 
-Definition at line 645 of file biquad.\+hpp.
+Definition at line 644 of file biquad.\+hpp.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{645                                                                             \{}
-\DoxyCodeLine{646       \textcolor{comment}{// Alternative implementation based on second order tunable all pass}}
-\DoxyCodeLine{647       \textcolor{comment}{// delta = cos(2pi*wc)}}
-\DoxyCodeLine{648 }
-\DoxyCodeLine{649       \textcolor{keyword}{const} \textcolor{keywordtype}{float} h = gain -\/ 1.f;}
-\DoxyCodeLine{650       \textcolor{keyword}{const} \textcolor{keywordtype}{float} g = (gain >=  1.f) ? 1.f : gain;}
-\DoxyCodeLine{651         }
-\DoxyCodeLine{652       \textcolor{keyword}{const} \textcolor{keywordtype}{float} c = (gamma -\/ g) / (gamma + g);}
-\DoxyCodeLine{653       \textcolor{keyword}{const} \textcolor{keywordtype}{float} d = -\/delta;}
-\DoxyCodeLine{654         }
-\DoxyCodeLine{655       mCoeffs.ff0 = mCoeffs.fb2 = -\/c;}
-\DoxyCodeLine{656       mCoeffs.ff1 = mCoeffs.fb1 = d * (1.f -\/ c);}
-\DoxyCodeLine{657       mCoeffs.ff2 = 1.f;}
-\DoxyCodeLine{658         }
-\DoxyCodeLine{659       mW0 = -\/1.f;}
-\DoxyCodeLine{660       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a2083084675fd9e910f2013a743690604}{mD0}} = 1.f;}
-\DoxyCodeLine{661 }
-\DoxyCodeLine{662       mW1 = 0.5f * h;}
-\DoxyCodeLine{663       mD1 = 1.f;}
-\DoxyCodeLine{664     \}}
-
-\end{DoxyCode}
-\mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_a7480643e7a485238b290d8c5e1dd8fce}\label{structdsp_1_1_ext_bi_quad_a7480643e7a485238b290d8c5e1dd8fce}} 
-\index{dsp::ExtBiQuad@{dsp::ExtBiQuad}!toggleFOLPHP@{toggleFOLPHP}}
-\index{toggleFOLPHP@{toggleFOLPHP}!dsp::ExtBiQuad@{dsp::ExtBiQuad}}
-\doxysubsubsection{\texorpdfstring{toggleFOLPHP()}{toggleFOLPHP()}}
-{\footnotesize\ttfamily void dsp\+::\+Ext\+Bi\+Quad\+::toggle\+F\+O\+L\+P\+HP (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
-
-
-
-Toggle \char`\"{}invertable\char`\"{} all pass based low/high pass filter to opposite mode. 
-
-
-\begin{DoxyParams}{Parameters}
-{\em k} & Tangent of PI x cutoff frequency in radians\+: tan(pi$\ast$wc) \\
-\hline
-\end{DoxyParams}
-
-
-Definition at line 527 of file biquad.\+hpp.
-
-
-\begin{DoxyCode}{0}
-\DoxyCodeLine{527                             \{}
-\DoxyCodeLine{528       mW0 = -\/mW0;}
-\DoxyCodeLine{529     \}}
+\DoxyCodeLine{644                                                                             \{}
+\DoxyCodeLine{645       \textcolor{comment}{// Alternative implementation based on second order tunable all pass}}
+\DoxyCodeLine{646       \textcolor{comment}{// delta = cos(2pi*wc)}}
+\DoxyCodeLine{647 }
+\DoxyCodeLine{648       \textcolor{keyword}{const} \textcolor{keywordtype}{float} h = gain -\/ 1.f;}
+\DoxyCodeLine{649       \textcolor{keyword}{const} \textcolor{keywordtype}{float} g = (gain >=  1.f) ? 1.f : gain;}
+\DoxyCodeLine{650         }
+\DoxyCodeLine{651       \textcolor{keyword}{const} \textcolor{keywordtype}{float} c = (gamma -\/ g) / (gamma + g);}
+\DoxyCodeLine{652       \textcolor{keyword}{const} \textcolor{keywordtype}{float} d = -\/delta;}
+\DoxyCodeLine{653         }
+\DoxyCodeLine{654       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff0 = \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.fb2 = -\/c;}
+\DoxyCodeLine{655       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff1 = \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.fb1 = d * (1.f -\/ c);}
+\DoxyCodeLine{656       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.ff2 = 1.f;}
+\DoxyCodeLine{657         }
+\DoxyCodeLine{658       mW0 = -\/1.f;}
+\DoxyCodeLine{659       mD0 = 1.f;}
+\DoxyCodeLine{660 }
+\DoxyCodeLine{661       mW1 = 0.5f * h;}
+\DoxyCodeLine{662       mD1 = 1.f;}
+\DoxyCodeLine{663     \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{structdsp_1_1_ext_bi_quad_a8a93612b897152699a2a330a3032c4af}\label{structdsp_1_1_ext_bi_quad_a8a93612b897152699a2a330a3032c4af}} 
@@ -485,13 +460,13 @@ Agnostic from current mode.
 \end{DoxyParams}
 
 
-Definition at line 537 of file biquad.\+hpp.
+Definition at line 536 of file biquad.\+hpp.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{537                                      \{}
-\DoxyCodeLine{538       mCoeffs.\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_ac4fa8fa646c429c80dfbd26977e1aabf}{setFOAP}}(k);}
-\DoxyCodeLine{539     \}}
+\DoxyCodeLine{536                                      \{}
+\DoxyCodeLine{537       \mbox{\hyperlink{structdsp_1_1_ext_bi_quad_a141e395cc99f1adfb4ea29899f2c7b90}{mCoeffs}}.\mbox{\hyperlink{structdsp_1_1_bi_quad_1_1_coeffs_ac4fa8fa646c429c80dfbd26977e1aabf}{setFOAP}}(k);}
+\DoxyCodeLine{538     \}}
 
 \end{DoxyCode}
 
