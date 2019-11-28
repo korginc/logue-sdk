@@ -36,14 +36,21 @@
  * @file    biquad.hpp
  * @brief   Generic biquad structure and convenience methods.
  *
- * @addtogroup dsp
+ * @addtogroup dsp DSP
  * @{
+ *
  */
 
 #include "float_math.h"
 
+/**
+ * Common DSP Utilities
+ */
 namespace dsp {
-  
+
+  /**
+   * Transposed form 2 Bi-Quad construct for FIR/IIR filters.
+   */
   struct BiQuad {
     
     // Transposed Form 2
@@ -51,29 +58,45 @@ namespace dsp {
     /*=====================================================================*/
     /* Types and Data Structures.                                          */
     /*=====================================================================*/
-    
+
+    /**
+     * Filter coefficients
+     */
     typedef struct Coeffs {
       float ff0;
       float ff1;
       float ff2;
       float fb1;
       float fb2;
-        
+      
+      /**
+       * Default constructor
+       */
       Coeffs() :
         ff0(0), ff1(0), ff2(0),
         fb1(0), fb2(0)
       { }
 
       // -- Pre-calculations -------------------
-        
+
+      /**
+       * Convert Hz frequency to radians
+       *
+       * @param   fc Frequency in Hz
+       * @param   fsrecip Reciprocal of sampling frequency (1/Fs)
+       */
       static inline __attribute__((optimize("Ofast"),always_inline))
       float wc(const float fc, const float fsrecip) {
-        // fc is center freq
         return fc * fsrecip;
       }
       
       // -- Filter types -----------------------
 
+      /**
+       * Calculate coefficients for single pole low pass filter.
+       *
+       * @param   pole Pole position in radians
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setPoleLP(const float pole) {
         ff0 = 1.f - pole;
@@ -81,6 +104,11 @@ namespace dsp {
         fb2 = ff2 = ff1 = 0.f;
       }
 
+      /**
+       * Calculate coefficients for single pole high pass filter.
+       *
+       * @param   pole Pole position in radians
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setPoleHP(const float pole) {
         ff0 = 1.f - pole;
@@ -88,6 +116,11 @@ namespace dsp {
         fb2 = ff2 = ff1 = 0.f;
       }
 
+      /**
+       * Calculate coefficients for single pole DC filter.
+       *
+       * @param   pole Pole position in radians
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setFODC(const float pole) {
         ff0 = 1.f;
@@ -95,10 +128,14 @@ namespace dsp {
         fb1 = -pole;
         fb2 = ff2 = 0.f;
       }
-        
+
+      /**
+       * Calculate coefficients for first order low pass filter.
+       *
+       * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setFOLP(const float k) {
-        // k = tan(wc)
         const float kp1 = k+1.f;
         const float km1 = k-1.f;
         ff0 = ff1 = k / kp1;
@@ -106,6 +143,11 @@ namespace dsp {
         fb2 = ff2 = 0.f;
       }
 
+      /**
+       * Calculate coefficients for first order high pass filter.
+       *
+       * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setFOHP(const float k) {
         // k = tan(pi*wc)
@@ -116,7 +158,12 @@ namespace dsp {
         fb1 = km1 / kp1;
         fb2 = ff2 = 0.f;
       }
-        
+
+      /**
+       * Calculate coefficients for first order all pass filter.
+       *
+       * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setFOAP(const float k) {
         // k = tan(pi*wc)
@@ -127,6 +174,13 @@ namespace dsp {
         fb2 = ff2 = 0.f;
       }
 
+      /**
+       * Calculate coefficients for first order all pass filter.
+       *
+       * @param   wc cutoff frequency in radians
+       *
+       * @note Alternative implementation with no tangeant lookup
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setFOAP2(const float wc) {
         // Note: alternative implementation for use in phasers
@@ -137,7 +191,11 @@ namespace dsp {
         fb2 = ff2 = 0.f;
       }
 
-
+      /**
+       * Calculate coefficients for second order DC filter.
+       *
+       * @param   pole Pole position in radians
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setSODC(const float pole) {
         ff0 = ff2 = 1.f;
@@ -145,7 +203,13 @@ namespace dsp {
         fb1 = -2.f * pole;
         fb2 = pole * pole;
       }
-        
+
+      /**
+       * Calculate coefficients for second order low pass filter.
+       *
+       * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+       * @param   q Resonance with flat response at q = sqrt(2)
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setSOLP(const float k, const float q) {
         // k = tan(pi*wc)
@@ -158,6 +222,12 @@ namespace dsp {
         fb2 = (qk2 - k + q) * qk2_k_q_r;
       }
 
+      /**
+       * Calculate coefficients for second order high pass filter.
+       *
+       * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+       * @param   q Resonance with flat response at q = sqrt(2)
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setSOHP(const float k, const float q) {
         // k = tan(pi*wc)
@@ -169,7 +239,13 @@ namespace dsp {
         fb1 = 2.f * (qk2 - q) * qk2_k_q_r;
         fb2 = (qk2 - k + q) * qk2_k_q_r;
       }
-        
+
+      /**
+       * Calculate coefficients for second order band pass filter.
+       *
+       * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+       * @param   q Resonance with flat response at q = sqrt(2)
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setSOBP(const float k, const float q) {
         // k = tan(pi*wc)
@@ -183,6 +259,12 @@ namespace dsp {
         fb2 = (qk2 - k + q) * qk2_k_q_r;
       }
 
+      /**
+       * Calculate coefficients for second order band reject filter.
+       *
+       * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+       * @param   q Resonance with flat response at q = sqrt(2)
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setSOBR(const float k, const float q) {
         // k = tan(pi*wc)
@@ -193,7 +275,13 @@ namespace dsp {
         ff1 = fb1 = 2.f * (qk2 - q) * qk2_k_q_r;
         fb2 = (qk2 - k + q) * qk2_k_q_r;
       }
-        
+
+      /**
+       * Calculate coefficients for second order all pass filter.
+       *
+       * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+       * @param   q Inverse of relative bandwidth (Fc / Fb)
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setSOAP1(const float k, const float q) {
         // k = tan(pi*wc)
@@ -204,12 +292,20 @@ namespace dsp {
         ff1 = fb1 = 2.f * (qk2 - q) * qk2_k_q_r;
         ff2 = 1.f;
       }
-        
+
+      /**
+       * Calculate coefficients for second order all pass filter.
+       *
+       * @param   delta cos(2pi*wc)
+       * @param   gamma tan(pi * wb)
+       *
+       * @note q is inverse of relative bandwidth (wc / wb)
+       * @note Alternative implementation, so called "tunable" in DAFX second edition.
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setSOAP2(const float delta, const float gamma) {
         // Note: Alternative implementation .. so called "tunable" in DAFX.
         // delta = cos(2pi*wc)
-        // q is inverse of relative bandwidth (Fc / Fb)
         const float c = (gamma - 1.f) / (gamma + 1.f);
         const float d = -delta;
         ff0 = fb2 = -c;
@@ -217,6 +313,14 @@ namespace dsp {
         ff2 = 1.f;
       }
 
+      /**
+       * Calculate coefficients for second order all pass filter.
+       *
+       * @param   delta cos(2pi*wc)
+       * @param   radius 
+       *
+       * @note Another alternative implementation.
+       */
       inline __attribute__((optimize("Ofast"),always_inline))
       void setSOAP3(const float delta, const float radius) {
         // Note: alternative implementation for use in phasers
@@ -233,7 +337,10 @@ namespace dsp {
     /*=====================================================================*/
     /* Constructor / Destructor.                                           */
     /*=====================================================================*/
-      
+
+    /**
+     * Default constructor
+     */
     BiQuad(void) : mZ1(0), mZ2(0)
     { }
       
@@ -241,11 +348,21 @@ namespace dsp {
     /* Public Methods.                                                     */
     /*=====================================================================*/
 
+    /**
+     * Flush internal delays
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     void flush(void) {
       mZ1 = mZ2 = 0;
     }
-      
+
+    /**
+     * Second order processing of one sample
+     *
+     * @param xn  Input sample
+     *
+     * @return Output sample
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     float process_so(const float xn) {
       float acc = mCoeffs.ff0 * xn + mZ1;
@@ -256,6 +373,13 @@ namespace dsp {
       return acc;
     }
 
+    /**
+     * First order processing of one sample
+     *
+     * @param xn  Input sample
+     *
+     * @return Output sample
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     float process_fo(const float xn) {
       float acc = mCoeffs.ff0 * xn + mZ1;
@@ -263,7 +387,14 @@ namespace dsp {
       mZ1 -= mCoeffs.fb1 * acc;
       return acc;
     }
-      
+
+    /**
+     * Default processing function (second order)
+     *
+     * @param xn  Input sample
+     *
+     * @return Output sample
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     float process(const float xn) {
       return process_so(xn);
@@ -273,10 +404,13 @@ namespace dsp {
     /* Member Variables.                                                   */
     /*=====================================================================*/
       
-    Coeffs mCoeffs;
+    Coeffs mCoeffs; /** Coefficients for the Bi-Quad construct */
     float mZ1, mZ2;      
   };
 
+  /**
+   * Extended transposed form 2 Bi-Quad construct
+   */
   struct ExtBiQuad {
     // Extended BiQuad structure
       
@@ -287,7 +421,10 @@ namespace dsp {
     /*=====================================================================*/
     /* Constructor / Destructor.                                           */
     /*=====================================================================*/
-      
+
+    /**
+     * Default constructor.
+     */
     ExtBiQuad(void) :
       mZ1(0), mZ2(0),
       mD0(0), mD1(0),
@@ -298,11 +435,21 @@ namespace dsp {
     /* Public Methods.                                                     */
     /*=====================================================================*/
 
+    /**
+     * Flush internal delays
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     void flush(void) {
       mZ1 = mZ2 = 0;
     }
-      
+
+    /**
+     * Second order processing of one sample
+     *
+     * @param xn  Input sample
+     *
+     * @return Output sample
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     float process_so(const float xn) {
       float acc = mCoeffs.ff0 * xn + mZ1;
@@ -313,6 +460,13 @@ namespace dsp {
       return mW1 * (mW0 * acc + mD0 * xn) + mD1 * xn;
     }
 
+    /**
+     * First order processing of one sample
+     *
+     * @param xn  Input sample
+     *
+     * @return Output sample
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     float process_fo(const float xn) {
       float acc = mCoeffs.ff0 * xn + mZ1;
@@ -321,13 +475,25 @@ namespace dsp {
       return mW1 * (mW0 * acc + mD0 * xn) + mD1 * xn;
     }
 
+    /**
+     * Default processing function (second order)
+     *
+     * @param xn  Input sample
+     *
+     * @return Output sample
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     float process(const float xn) {
       return process_so(xn);
     }
 
     // -- Invertable All-Pass based Low/High Pass -------
-      
+
+    /**
+     * Calculate coefficients for "invertable" all pass based low pass filter.
+     *
+     * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     void setFOAPLP(const float k) {
       // k = tan(pi*wc)
@@ -337,6 +503,11 @@ namespace dsp {
       mW1 = 1.f;
     }
 
+    /**
+     * Calculate coefficients for "invertable" all pass based high pass filter.
+     *
+     * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     void setFOAPHP(const float k) {
       // k = tan(pi*wc)
@@ -347,18 +518,34 @@ namespace dsp {
       mW1 = 1.f;
     }
 
+    /**
+     * Toggle "invertable" all pass based low/high pass filter to opposite mode.
+     *
+     * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     void toggleFOLPHP(void) {
       mW0 = -mW0;
     }
 
+    /**
+     * Update "invertable" all pass based low/high pass filter coefficients. Agnostic from current mode.
+     *
+     * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     void updateFOLPHP(const float k) {
       mCoeffs.setFOAP(k);
     }
 
     // -- All-Pass based Low/High Shelf -----------------
-      
+    
+    /**
+     * Calculate coefficients for first order all pass based low shelf filter.
+     *
+     * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+     * @param   gain 10^(gain_db/20)
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     void setFOLS(const float k, const float gain) {
       // k = tan(pi*wc)
@@ -375,7 +562,13 @@ namespace dsp {
       mW1 = 0.5f * h;
       mD1 = 1.f;
     }
-      
+
+    /**
+     * Calculate coefficients for first order all pass based high shelf filter.
+     *
+     * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
+     * @param   gain 10^(gain_db/20)
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     void setFOHS(const float k, const float gain) {
       // k = tan(pi*wc)
@@ -396,6 +589,14 @@ namespace dsp {
     // TODO: second order shelves
       
     // -- All-Pass based Band Pass/Reject -------------
+    /**
+     * Calculate coefficients for second order all pass based band reject filter.
+     *
+     * @param   delta cos(2pi*wc)
+     * @param   gamma tan(pi * wb)
+     *
+     * @note q is inverse of relative bandwidth (wc / wb)
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     void setSOAPBR2(const float delta, const float gamma) {
       // Alternative implementation based on second order tunable all pass
@@ -409,10 +610,18 @@ namespace dsp {
       mD1 = 0.f;
     }
 
+    /**
+     * Calculate coefficients for second order all pass based band pass filter.
+     *
+     * @param   delta cos(2pi*wc)
+     * @param   gamma tan(pi * wb)
+     *
+     * @note q is inverse of relative bandwidth (wc / wb)
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     void setSOAPBP2(const float delta, const float gamma) {
       // Alternative implementation based on second order tunable all pass
-      // delta = cos(pi*wc) //TODO: check if this shouldnt be cos(2pi*wc) instead
+      // delta = cos(2pi*wc) 
       mCoeffs.setSOAP2(delta, gamma);
         
       mW0 = -1.f;
@@ -423,6 +632,15 @@ namespace dsp {
     }
       
     // -- All-Pass based Peak/Notch -------------
+    /**
+     * Calculate coefficients for second order all pass based peak/notch filter.
+     *
+     * @param   delta cos(2pi*wc)
+     * @param   gamma tan(pi * wb)
+     * @param   gain 10^(gain_db/20)
+     *
+     * @note q is inverse of relative bandwidth (wc / wb)
+     */
     inline __attribute__((optimize("Ofast"),always_inline))
     void setSOAPPN2(const float delta, const float gamma, const float gain) {
       // Alternative implementation based on second order tunable all pass
@@ -448,8 +666,8 @@ namespace dsp {
     /*=====================================================================*/
     /* Member Variables.                                                   */
     /*=====================================================================*/
-      
-    BiQuad::Coeffs mCoeffs;
+    
+    BiQuad::Coeffs mCoeffs; /** Coefficients for the Bi-Quad construct */
     float mD0, mD1, mW0, mW1;
     float mZ1, mZ2;
   };    
