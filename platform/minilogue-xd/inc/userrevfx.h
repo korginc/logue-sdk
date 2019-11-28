@@ -54,24 +54,40 @@
 extern "C" {
 #endif
 
+  /**
+   * This macro can be used to declare a memory buffer in SDRAM space.
+   *
+   * E.g.: float g_my_buffer[1024] __sdram;
+   */
 #define __sdram __attribute__((section(".sdram")))
 
+  /**
+   * User facing parameters
+   */
   typedef enum {
-    k_user_revfx_param_time = 0,
-    k_user_revfx_param_depth,
+    k_user_revfx_param_time = 0,    /** Time parameter */
+    k_user_revfx_param_depth,       /** Depth parameter */
     k_user_revfx_param_reserved0,
-    k_user_revfx_param_shift_depth,
+    k_user_revfx_param_shift_depth, /** Alternative depth parameter, usually accessible via shift function */
     k_num_user_revfx_param_id
   } user_revfx_param_id_t;
 
+  /** @private */
   typedef void (*UserRevFXFuncEntry)(uint32_t platform, uint32_t api);
+  /** @private */
   typedef void (*UserRevFXFuncInit)(uint32_t platform, uint32_t api);
+  /** @private */
   typedef void (*UserRevFXFuncProcess)(float *xn, uint32_t frames);
+  /** @private */
   typedef void (*UserRevFXSuspend)(void);
+  /** @private */
   typedef void (*UserRevFXResume)(void);
+  /** @private */
   typedef void (*UserRevFXFuncParam)(uint8_t index, int32_t value);
+  /** @private */
   typedef void (*UserRevFXFuncDummy)(void);
-  
+
+  /** @private */
 #pragma pack(push, 1)
   typedef struct user_revfx_hook_table {
     uint8_t              magic[4];
@@ -88,6 +104,7 @@ extern "C" {
   } user_revfx_hook_table_t;
 #pragma pack(pop)
 
+  /** @private */
 #pragma pack(push, 1)
   typedef struct user_revfx_data {
     user_prg_header_t       header;
@@ -96,18 +113,67 @@ extern "C" {
   } user_revfx_data_t;
 #pragma pack(pop)
 
+  /**
+   * @name    Core API
+   * @{
+   */
+  
 #define REVFX_INIT    __attribute__((used)) _hook_init 
 #define REVFX_PROCESS __attribute__((used)) _hook_process
 #define REVFX_SUSPEND __attribute__((used)) _hook_suspend
 #define REVFX_RESUME  __attribute__((used)) _hook_resume
 #define REVFX_PARAM   __attribute__((used)) _hook_param
 
+  /** @private */
   void _entry(uint32_t platform, uint32_t api);
+
+  /**
+   * Initialization callback. Must be implemented by your custom effect.
+   *
+   * @param platform Current target platform/module. See userprg.h
+   * @param api Current API version. See userprg.h
+   */
   void _hook_init(uint32_t platform, uint32_t api);
+
+  /**
+   * Processing callback. Must be implemented by your custom effect.
+   *
+   * Reverb effects must write back their result to the input buffer and are responsible for wet/dry mix balance.
+   * Typically wet/dry balance should be controllable via the shift-depth parameter.
+   *
+   * @param xn Input/output sample buffer. 
+   * @param frames Size of buffer in frames. (2 samples per frames)
+   *
+   * @note Implementation must support at least up to 64 frames.
+   * @note Optimize for powers of two.
+   */  
   void _hook_process(float *xn, uint32_t frames);
+
+  /**
+   * Suspend callback. Must be implemented by your custom effect.
+   *
+   * Called before effect gets suspended. While suspended the processing callback will not be called.
+   */    
   void _hook_suspend(void);
+
+  /**
+   * Resume callback. Must be implemented by your custom effect.
+   *
+   * Called before calls to processing callback resume after being suspended.
+   */    
   void _hook_resume(void);
+
+  /**
+   * Parameter change callback. Must be implemented by your custom effect.
+   *
+   * @param index Parameter ID. See user_revfx_param_id_t.
+   * @param index Parameter value. 
+   *
+   * @note All parameters have 10 bit resolution.
+   */
   void _hook_param(uint8_t index, int32_t value);
+
+  /** @} */
   
 #ifdef __cplusplus
 } // extern "C"

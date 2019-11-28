@@ -403,8 +403,9 @@ namespace dsp {
     /*=====================================================================*/
     /* Member Variables.                                                   */
     /*=====================================================================*/
-      
-    Coeffs mCoeffs; /** Coefficients for the Bi-Quad construct */
+
+    /** Coefficients for the Bi-Quad construct */
+    Coeffs mCoeffs;
     float mZ1, mZ2;      
   };
 
@@ -520,8 +521,6 @@ namespace dsp {
 
     /**
      * Toggle "invertable" all pass based low/high pass filter to opposite mode.
-     *
-     * @param   k Tangent of PI x cutoff frequency in radians: tan(pi*wc)
      */
     inline __attribute__((optimize("Ofast"),always_inline))
     void toggleFOLPHP(void) {
@@ -666,8 +665,9 @@ namespace dsp {
     /*=====================================================================*/
     /* Member Variables.                                                   */
     /*=====================================================================*/
-    
-    BiQuad::Coeffs mCoeffs; /** Coefficients for the Bi-Quad construct */
+
+    /** Coefficients for the Bi-Quad construct */
+    BiQuad::Coeffs mCoeffs;
     float mD0, mD1, mW0, mW1;
     float mZ1, mZ2;
   };    
