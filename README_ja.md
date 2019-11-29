@@ -2,6 +2,11 @@
 
 このリポジトリには [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/synthesizers/nts_1) の3製品で使用できる自作オシレーターやエフェクトのビルドに必要なファイルが全て揃っています.
 
+#### まずは使ってみよう
+
+既に公開されているオシレーターやエフェクトの情報は[Unit Index](https://korginc.github.io/logue-sdk/ja/unit-index/) にあります.
+具体的な入手方法については各デベロッパーのウェブサイトにてご確認下さい.
+
 #### 互換性に関して
 
 SDK version 1.1-0 でビルドされた user units (ビルド済みのカスタムコードバイナリ）を実行するためには, 下記バージョンのファームウェアが製品本体にインストールされている必要があります.
