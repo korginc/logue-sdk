@@ -56,9 +56,14 @@ extern "C" {
 #define __fast_inline static inline __attribute__((always_inline, optimize("Ofast")))  
   
   /*===========================================================================*/
-  /* General API                                                               */
+  /* Runtime Environment                                                       */
   /*===========================================================================*/
 
+  /**
+   * @name   Runtime Environment
+   * @{ 
+   */
+  
   /**
    * Current platform
    */
@@ -101,12 +106,12 @@ extern "C" {
   __fast_inline float fx_get_bpmf(void) {
     return _fx_get_bpmf();
   }
+
+  /** @} */
   
   /*===========================================================================*/
   /* Lookup tables                                                             */
   /*===========================================================================*/
-  
-  /** @} */
   
   /**
    * @name   Sine half-wave
@@ -176,8 +181,6 @@ extern "C" {
     return fx_sinuf(x+((k_wt_sine_size>>2)<<k_wt_sine_u32shift));
   }
   
-  /** @} */
-    
   /** @} */
     
   /*===========================================================================*/
@@ -413,8 +416,6 @@ extern "C" {
     return _fx_white();
   }
   
-  /** @} */
-
   /** @} */
   
 #ifdef __cplusplus

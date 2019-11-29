@@ -56,9 +56,14 @@ extern "C" {
 #define __fast_inline static inline __attribute__((always_inline, optimize("Ofast")))  
   
   /*===========================================================================*/
-  /* General API                                                               */
+  /* Runtime Environment                                                       */
   /*===========================================================================*/
 
+  /**
+   * @name   Runtime Environment
+   * @{ 
+   */
+  
   /**
    * Current platform
    */
@@ -101,17 +106,16 @@ extern "C" {
   __fast_inline float fx_get_bpmf(void) {
     return _fx_get_bpmf();
   }
+
+  /** @} */
   
   /*===========================================================================*/
   /* Lookup tables                                                             */
   /*===========================================================================*/
   
-  /** @} */
-  
   /**
    * @name   Sine half-wave
    * @note   Wrap and negate for phase >= 0.5
-   * @todo   Replace by full period wave and simplify scan code
    * @{ 
    */
   
@@ -151,7 +155,6 @@ extern "C" {
    * @return     Result of sin(2*pi*x).
    */
   __fast_inline float fx_sinuf(uint32_t x) {
-    //TODO
     (void)x;
     return 0.f;
   }
@@ -176,8 +179,6 @@ extern "C" {
     return fx_sinuf(x+((k_wt_sine_size>>2)<<k_wt_sine_u32shift));
   }
   
-  /** @} */
-    
   /** @} */
     
   /*===========================================================================*/
@@ -413,8 +414,6 @@ extern "C" {
     return _fx_white();
   }
   
-  /** @} */
-
   /** @} */
   
 #ifdef __cplusplus

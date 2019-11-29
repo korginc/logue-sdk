@@ -55,8 +55,13 @@ extern "C" {
 #define __fast_inline static inline __attribute__((always_inline, optimize("Ofast")))  
   
   /*===========================================================================*/
-  /* General                                                                   */
+  /* Runtime Environment                                                       */
   /*===========================================================================*/
+
+  /**
+   * @name   Runtime Environment
+   * @{ 
+   */
 
   /**
    * Current platform
@@ -81,6 +86,8 @@ extern "C" {
 
 #define k_samplerate        (48000)
 #define k_samplerate_recipf (2.08333333333333e-005f)
+
+  /** @} */
   
   /*===========================================================================*/
   /* Lookup tables                                                             */
@@ -507,7 +514,8 @@ extern "C" {
   /*===========================================================================*/
   /**
    * @name   Wave banks.
-   * @todo   Explain categorization
+   *
+   * Banks are organized in categories from A to F in order of increasing harmonic components.
    *
    * @{ 
    */
@@ -518,8 +526,6 @@ extern "C" {
 #define k_waves_frrecip    (5.96046447753906e-008f) // 1/(1<<24)
 #define k_waves_mask       (k_waves_size-1)
 #define k_waves_lut_size   (k_waves_size+1)
-
-  //TODO: add or remove waves to uniformize banks
   
 #define k_waves_a_cnt       16
   
