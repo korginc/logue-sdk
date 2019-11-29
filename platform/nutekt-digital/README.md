@@ -161,7 +161,7 @@ Your main implementation file should include *userosc.h* and implement the follo
 
     _Note: Floating-point numbers can be converted to Q31 format using the `f32_to_q31(f)` macro defined in `inc/utils/fixed_math.h`. Also see `inc/userosc.h` for `user_osc_param_t` definition._
 
-    _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
+    _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you prefer. (Optimize for powers of two: 16, 32, 64)_
 
 * `void OSC_NOTEON(const user_osc_param_t * const params)`: Called whenever a note on event occurs.
 
@@ -181,7 +181,7 @@ Your main implementation file should include `usermodfx.h` and implement the fol
 
     _Note: There are *main\_* and *sub\_* versions of the inputs and outputs in order to support the dual timbre feature of the prologue. On the prologue, both main and sub should be processed the same way in parallel. On other non-multitimbral platforms you can ignore *sub\_xn* and *sub\_yn*_
 
-    _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
+    _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you prefer. (Optimize for powers of two: 16, 32, 64)_
 
 * `void MODFX_PARAM(uint8_t index, uint32_t value)`: Called whenever the user changes a parameter value.
 
@@ -195,7 +195,7 @@ Your main implementation file should include `userdelfx.h` and implement the fol
 
 * `void DELFX_PROCESS(float *xn, uint32_t frames)`: This is where you should process the input samples. This function is called every time a buffer of *frames* samples is required (1 sample per frame). In this case *xn* is both the input and output buffer. Your results should be written in place mixed with the appropriate amount of dry and wet signal (e.g.: set via the shift-depth parameter).
 
-    _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
+    _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you prefer. (Optimize for powers of two: 16, 32, 64)_
 
 * `void DELFX_PARAM(uint8_t index, uint32_t value)`: Called whenever the user changes a parameter value.
 
@@ -209,7 +209,7 @@ Your main implementation file should include `userrevfx.h` and implement the fol
 
 * `void REVFX_PROCESS(float *xn, uint32_t frames)`: This is where you should process the input samples. This function is called every time a buffer of *frames* samples is required (1 sample per frame). In this case *xn* is both the input and output buffer. Your results should be written in place mixed with the appropriate amount of dry and wet signal (e.g.: set via the shift-depth parameter).
 
-    _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
+    _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you prefer. (Optimize for powers of two: 16, 32, 64)_
 
 * `void REVFX_PARAM(uint8_t index, uint32_t value)`: Called whenever the user changes a parameter value.
 
