@@ -148,7 +148,7 @@ The *tests/* directory contains very simple code that illustrates how to write o
 
 ## Core API
 
-Here's an overview of the core API for oscillators in the logue SDK. 
+Here's an overview of the core API for custom oscillator/effects. 
 
 ### Oscillators (osc)
 
