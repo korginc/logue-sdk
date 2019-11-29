@@ -33,9 +33,11 @@ Firmware version >= 1.02 is required to run user units built with SDK version 1.
     2. [Info-ZIP](../../tools/zip)
     3. [logue-cli](../../tools/logue-cli) (optional)
 
-### Building a Project
+### Building the Demo Oscillator (Waves)
 
- 1. move into a project directory.
+Waves is a morphing wavetable oscillator that uses the wavetables provided by the custom oscillator API. It is a good example of how to use API functions, declare edit menu parameters and use parameter values of various types. See [demos/waves/](demos/waves/) for code and details.
+
+ 1. move into the project directory.
  
 ```
 $ cd logue-sdk/platform/nutekt-digital/demos/waves/
@@ -69,46 +71,19 @@ Done
 *.ntkdigunit* files are simple zip files containing the binary payload for the custom oscillator or effect and a metadata file.
 They can be loaded onto a [NuTekt NTS-1 digital](https://www.korg.com/products/dj/nts_1) using the [logue-cli utility](../../tools/logue-cli/) or the [Librarian application](https://www.korg.com/products/dj/nts_1/librarian_contents.php).
 
-## Demo Code
-
-### Waves
-
-Waves is a morphing wavetable oscillator that uses the wavetables provided by the custom oscillator API. It is a good example of how to use API functions, declare edit menu parameters and use parameter values of various types. See [demos/waves/](demos/waves/) for code and details.
-
 ## Creating a New Project
 
 1. Create a copy of a template project for the module you are targetting (osc/modfx/delfx/revfx) and rename it to your convenience.
 2. Make sure the PLATFORMDIR variable at the top of the *Makefile* is set to point to the [platform/](../) directory. This path will be used to locate external dependencies and required tools.
-3. Set your desired project name in *project.mk*. See the [project.mk](#project.mk) section for syntax details.
+3. Set your desired project name in *project.mk*. See the [project.mk](#projectmk) section for syntax details.
 4. Add source files to your new project and edit the *project.mk* file accordingly so that they are found during builds.
-5. Edit the *manifest.json* file and set the appropriate metadata for your project. See the [manifest.json](#manifest.json) section for syntax details.
+5. Edit the *manifest.json* file and set the appropriate metadata for your project. See the [manifest.json](#manifestjson) section for syntax details.
 
 ## Project Structure
 
 ### manifest.json
 
-The manifest file consists essentially of a json dictionary with the following fields:
-
-* platform (string) : Name of the target platform, should be set to *nutekt-digital*
-* module (string) : Keyword for the module targetted, should be one of the following: *osc*, *modfx*, *delfx*, *revfx*
-* api (string) : API version used. (format: MAJOR.MINOR-PATCH)
-* dev_id (int) : Developer ID, currently unused, set to 0
-* prg_id (int) : Program ID, currently unused, can be set for reference.
-* version (string) : Program version. (format: MAJOR.MINOR-PATCH)
-* name (string) : Program name. (will be displayed on the minilogue xd)
-* num_params (int) : Number of parameters in edit menu. Only used for *osc* type projects, should be 0 for custom effects. Oscillators can have up to 6 custom parameters.
-* params (array) : Parameter descriptors. Only meaningful for *osc* type projects. Set to an empty array otherwise.
-
-Parameter descriptors are themselves arrays and should contain 4 values:
-
-0. name (string) : Up to about 10 characters can be displayed in the edit menu of the minilogue xd.
-1. minimum value (int) : Value should be in -100,100 range.
-2. maximum value (int) : Value should be in -100,100 range and greater than minimum value.
-3. type (string) : "%" indicates a percentage type, an empty string indicates a typeless value. 
-
-In the case of typeless values, the minimum and maximum values should be positive. Also the displayed value will be offset by 1 such that a 0-9 range will be shown as 1-10 to the minilogue xd user. 
-
-Here is an example of a manifest file:
+The manifest file consists essentially of a json dictionary like this one:
 
 ```
 {
@@ -134,6 +109,26 @@ Here is an example of a manifest file:
 }
 ```
 
+
+* platform (string) : Name of the target platform, should be set to *nutekt-digital*
+* module (string) : Keyword for the module targetted, should be one of the following: *osc*, *modfx*, *delfx*, *revfx*
+* api (string) : API version used. (format: MAJOR.MINOR-PATCH)
+* dev_id (int) : Developer ID, currently unused, set to 0
+* prg_id (int) : Program ID, currently unused, can be set for reference.
+* version (string) : Program version. (format: MAJOR.MINOR-PATCH)
+* name (string) : Program name. (will be displayed on the minilogue xd)
+* num_params (int) : Number of parameters in edit menu. Only used for *osc* type projects, should be 0 for custom effects. Oscillators can have up to 6 custom parameters.
+* params (array) : Parameter descriptors. Only meaningful for *osc* type projects. Set to an empty array otherwise.
+
+Parameter descriptors are themselves arrays and should contain 4 values:
+
+0. name (string) : Up to about 10 characters can be displayed in the edit menu of the minilogue xd.
+1. minimum value (int) : Value should be in -100,100 range.
+2. maximum value (int) : Value should be in -100,100 range and greater than minimum value.
+3. type (string) : "%" indicates a percentage type, an empty string indicates a typeless value. 
+
+In the case of typeless values, the minimum and maximum values should be positive. Also the displayed value will be offset by 1 such that a 0-9 range will be shown as 1-10 to the minilogue xd user. 
+
 ### project.mk
 
 This file is included by the main Makefile to simplify customization.
@@ -151,6 +146,66 @@ The following variables are declared:
 ### tests/
 
 The *tests/* directory contains very simple code that illustrates how to write oscillators and effects. They are not meant to do anything useful, nor claim to be optimized. You can refer to these as examples of how to use the different interfaces and test your setup.
+
+## Core API
+
+Here's an overview of the core API for oscillators in the logue SDK. 
+
+### Oscillators (osc)
+
+Your main implementation file should include *userosc.h* and implement the following functions. For more details see the [Oscillator Instance API reference](https://korginc.github.io/logue-sdk/ref/nutekt-digital/v1.1-0/html/group__osc__inst.html).
+
+* `void OSC_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the oscillator. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
+
+* `void OSC_CYCLE(const user_osc_param_t \* const params, int32_t \*yn, const uint32_t frames)`: This is where the waveform should be computed. This function is called every time a buffer of *frames* samples is required (1 sample per frame). Samples should be written to the *yn* buffer. Output samples should be formatted in [Q31 fixed point representation](https://en.wikipedia.org/wiki/Q_(number_format)). 
+
+    _Note: Floating-point numbers can be converted to Q31 format using the `f32_to_q31(f)` macro defined in `inc/utils/fixed_math.h`. Also see `inc/userosc.h` for `user_osc_param_t` definition._
+
+    _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
+
+* `void OSC_NOTEON(const user_osc_param_t \* const params)`: Called whenever a note on event occurs.
+
+* `void OSC_NOTEOFF(const user_osc_param_t \* const params)`: Called whenever a note off event occurs.
+
+* `void OSC_PARAM(uint16_t index, uint16_t value)`: Called whenever the user changes a parameter value.
+
+### Modulation Effects API (modfx)
+
+Your main implementation file should include `usermodfx.h` and implement the following functions. For more details see the [Oscillator Instance API reference](https://korginc.github.io/logue-sdk/ref/nutekt-digital/v1.1-0/html/group__modfx__inst.html).
+
+* `void MODFX_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the effect. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
+
+* `void MODFX_PROCESS(const float \*main_xn, float \*main_yn, const float \*sub_xn,  float \*sub_yn, uint32_t frames)`: This is where you should process the input samples. This function is called every time a buffer of *frames* samples is required (1 sample per frame).  *\*\_xn* buffers denote inputs and *\*\_yn* denote output buffers, where you should write your results. 
+
+    _Note: There are *main\_* and *sub\_* versions of the inputs and outputs in order to support the dual timbre feature of the nutekt-digital. On the nutekt-digital, both main and sub should be processed the same way in parallel. On other non-multitimbral platforms you can ignore *sub\_xn* and *sub\_yn*_
+
+    _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
+
+* `void MODFX_PARAM(uint8_t index, uint32_t value)`: Called whenever the user changes a parameter value.
+
+### Delay Effects API (delfx)
+
+Your main implementation file should include `userdelfx.h` and implement the following functions. For more details see the [Oscillator Instance API reference](https://korginc.github.io/logue-sdk/ref/nutekt-digital/v1.1-0/html/group__delfx__inst.html).
+
+* `void DELFX_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the effect. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
+
+* `void DELFX_PROCESS(float \*xn, uint32_t frames)`: This is where you should process the input samples. This function is called every time a buffer of *frames* samples is required (1 sample per frame). In this case *xn* is both the input and output buffer. Your results should be written in place mixed with the appropriate amount of dry and wet signal (e.g.: set via the shift-depth parameter).
+
+    _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
+
+* `void DELFX_PARAM(uint8_t index, uint32_t value)`: Called whenever the user changes a parameter value.
+
+### Reverb Effects API (revfx)
+
+Your main implementation file should include `userrevfx.h` and implement the following functions. For more details see the [Oscillator Instance API reference](https://korginc.github.io/logue-sdk/ref/nutekt-digital/v1.1-0/html/group__revfx__inst.html).
+
+* `void REVFX_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the effect. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
+
+* `void REVFX_PROCESS(float \*xn, uint32_t frames)`: This is where you should process the input samples. This function is called every time a buffer of *frames* samples is required (1 sample per frame). In this case *xn* is both the input and output buffer. Your results should be written in place mixed with the appropriate amount of dry and wet signal (e.g.: set via the shift-depth parameter).
+
+    _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
+
+* `void REVFX_PARAM(uint8_t index, uint32_t value)`: Called whenever the user changes a parameter value.
 
 ## Web Assembly Builds _(experimental)_
 
