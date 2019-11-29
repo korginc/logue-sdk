@@ -157,15 +157,15 @@ Your main implementation file should include *userosc.h* and implement the follo
 
 * `void OSC_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the oscillator. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
 
-* `void OSC_CYCLE(const user_osc_param_t \* const params, int32_t \*yn, const uint32_t frames)`: This is where the waveform should be computed. This function is called every time a buffer of *frames* samples is required (1 sample per frame). Samples should be written to the *yn* buffer. Output samples should be formatted in [Q31 fixed point representation](https://en.wikipedia.org/wiki/Q_(number_format)). 
+* `void OSC_CYCLE(const user_osc_param_t * const params, int32_t *yn, const uint32_t frames)`: This is where the waveform should be computed. This function is called every time a buffer of *frames* samples is required (1 sample per frame). Samples should be written to the *yn* buffer. Output samples should be formatted in [Q31 fixed point representation](https://en.wikipedia.org/wiki/Q_(number_format)). 
 
     _Note: Floating-point numbers can be converted to Q31 format using the `f32_to_q31(f)` macro defined in `inc/utils/fixed_math.h`. Also see `inc/userosc.h` for `user_osc_param_t` definition._
 
     _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
 
-* `void OSC_NOTEON(const user_osc_param_t \* const params)`: Called whenever a note on event occurs.
+* `void OSC_NOTEON(const user_osc_param_t * const params)`: Called whenever a note on event occurs.
 
-* `void OSC_NOTEOFF(const user_osc_param_t \* const params)`: Called whenever a note off event occurs.
+* `void OSC_NOTEOFF(const user_osc_param_t * const params)`: Called whenever a note off event occurs.
 
 * `void OSC_PARAM(uint16_t index, uint16_t value)`: Called whenever the user changes a parameter value.
 
@@ -177,7 +177,7 @@ Your main implementation file should include `usermodfx.h` and implement the fol
 
 * `void MODFX_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the effect. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
 
-* `void MODFX_PROCESS(const float \*main_xn, float \*main_yn, const float \*sub_xn,  float \*sub_yn, uint32_t frames)`: This is where you should process the input samples. This function is called every time a buffer of *frames* samples is required (1 sample per frame).  *\*\_xn* buffers denote inputs and *\*\_yn* denote output buffers, where you should write your results. 
+* `void MODFX_PROCESS(const float *main_xn, float *main_yn, const float *sub_xn,  float *sub_yn, uint32_t frames)`: This is where you should process the input samples. This function is called every time a buffer of *frames* samples is required (1 sample per frame).  *\*\_xn* buffers denote inputs and *\*\_yn* denote output buffers, where you should write your results. 
 
     _Note: There are *main\_* and *sub\_* versions of the inputs and outputs in order to support the dual timbre feature of the prologue. On the prologue, both main and sub should be processed the same way in parallel. On other non-multitimbral platforms you can ignore *sub\_xn* and *sub\_yn*_
 
@@ -193,7 +193,7 @@ Your main implementation file should include `userdelfx.h` and implement the fol
 
 * `void DELFX_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the effect. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
 
-* `void DELFX_PROCESS(float \*xn, uint32_t frames)`: This is where you should process the input samples. This function is called every time a buffer of *frames* samples is required (1 sample per frame). In this case *xn* is both the input and output buffer. Your results should be written in place mixed with the appropriate amount of dry and wet signal (e.g.: set via the shift-depth parameter).
+* `void DELFX_PROCESS(float *xn, uint32_t frames)`: This is where you should process the input samples. This function is called every time a buffer of *frames* samples is required (1 sample per frame). In this case *xn* is both the input and output buffer. Your results should be written in place mixed with the appropriate amount of dry and wet signal (e.g.: set via the shift-depth parameter).
 
     _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
 
@@ -207,7 +207,7 @@ Your main implementation file should include `userrevfx.h` and implement the fol
 
 * `void REVFX_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the effect. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
 
-* `void REVFX_PROCESS(float \*xn, uint32_t frames)`: This is where you should process the input samples. This function is called every time a buffer of *frames* samples is required (1 sample per frame). In this case *xn* is both the input and output buffer. Your results should be written in place mixed with the appropriate amount of dry and wet signal (e.g.: set via the shift-depth parameter).
+* `void REVFX_PROCESS(float *xn, uint32_t frames)`: This is where you should process the input samples. This function is called every time a buffer of *frames* samples is required (1 sample per frame). In this case *xn* is both the input and output buffer. Your results should be written in place mixed with the appropriate amount of dry and wet signal (e.g.: set via the shift-depth parameter).
 
     _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
 
