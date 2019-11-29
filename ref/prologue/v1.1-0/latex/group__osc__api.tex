@@ -5,22 +5,8 @@
 \item 
 \mbox{\Hypertarget{group__osc__api_gaef654e7194bae8dc60734599c0e79049}\label{group__osc__api_gaef654e7194bae8dc60734599c0e79049}} 
 \#define {\bfseries \+\_\+\+\_\+fast\+\_\+inline}~static inline \+\_\+\+\_\+attribute\+\_\+\+\_\+((always\+\_\+inline, optimize(\char`\"{}Ofast\char`\"{})))
-\item 
-\mbox{\Hypertarget{group__osc__api_ga13e93ba13aeb9dbe3d8139c3cec6fbb7}\label{group__osc__api_ga13e93ba13aeb9dbe3d8139c3cec6fbb7}} 
-\#define {\bfseries k\+\_\+samplerate}~(48000)
-\item 
-\mbox{\Hypertarget{group__osc__api_ga44cd1427bdbcef427ab758265335c9ca}\label{group__osc__api_ga44cd1427bdbcef427ab758265335c9ca}} 
-\#define {\bfseries k\+\_\+samplerate\+\_\+recipf}~(2.\+08333333333333e-\/005f)
 \end{DoxyCompactItemize}
-\doxysubsection*{Functions}
-\begin{DoxyCompactItemize}
-\item 
-uint32\+\_\+t \mbox{\hyperlink{group__osc__api_ga3c3dbbc0b0122daeeee4a5380aacf7ac}{\+\_\+osc\+\_\+mcu\+\_\+hash}} (void)
-\begin{DoxyCompactList}\small\item\em Get M\+CU hash. \end{DoxyCompactList}\item 
-\mbox{\Hypertarget{group__osc__api_ga63b59258169a9277e45f3d0fbe7955e6}\label{group__osc__api_ga63b59258169a9277e45f3d0fbe7955e6}} 
-\+\_\+\+\_\+fast\+\_\+inline uint32\+\_\+t {\bfseries osc\+\_\+mcu\+\_\+hash} (void)
-\end{DoxyCompactItemize}
-\doxysubsection*{Variables}
+\doxysubsection*{Runtime Environment}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{group__osc__api_gab80d335a0049301225e41b3d3c3b3c07}\label{group__osc__api_gab80d335a0049301225e41b3d3c3b3c07}} 
@@ -28,7 +14,18 @@ const uint32\+\_\+t \mbox{\hyperlink{group__osc__api_gab80d335a0049301225e41b3d3
 \begin{DoxyCompactList}\small\item\em Current platform. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{group__osc__api_gaf7fdee41003df8998020340376034d45}\label{group__osc__api_gaf7fdee41003df8998020340376034d45}} 
 const uint32\+\_\+t \mbox{\hyperlink{group__osc__api_gaf7fdee41003df8998020340376034d45}{k\+\_\+osc\+\_\+api\+\_\+version}}
-\begin{DoxyCompactList}\small\item\em Current A\+PI version. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Current A\+PI version. \end{DoxyCompactList}\item 
+uint32\+\_\+t \mbox{\hyperlink{group__osc__api_ga3c3dbbc0b0122daeeee4a5380aacf7ac}{\+\_\+osc\+\_\+mcu\+\_\+hash}} (void)
+\begin{DoxyCompactList}\small\item\em Get M\+CU hash. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc__api_ga63b59258169a9277e45f3d0fbe7955e6}\label{group__osc__api_ga63b59258169a9277e45f3d0fbe7955e6}} 
+\+\_\+\+\_\+fast\+\_\+inline uint32\+\_\+t {\bfseries osc\+\_\+mcu\+\_\+hash} (void)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga13e93ba13aeb9dbe3d8139c3cec6fbb7}\label{group__osc__api_ga13e93ba13aeb9dbe3d8139c3cec6fbb7}} 
+\#define {\bfseries k\+\_\+samplerate}~(48000)
+\item 
+\mbox{\Hypertarget{group__osc__api_ga44cd1427bdbcef427ab758265335c9ca}\label{group__osc__api_ga44cd1427bdbcef427ab758265335c9ca}} 
+\#define {\bfseries k\+\_\+samplerate\+\_\+recipf}~(2.\+08333333333333e-\/005f)
+\end{DoxyCompactItemize}
 \doxysubsection*{Note to frequency conversion table}
 \begin{DoxyCompactItemize}
 \item 
@@ -226,9 +223,7 @@ float \mbox{\hyperlink{group__osc__api_ga3d3612eb483369630048ad21c28ac0a0}{\+\_\
 \end{DoxyCompactItemize}
 \doxysubsection*{Wave banks.}
 \label{_amgrp4774bb87612135e5656df9287e489562}%
- \begin{DoxyRefDesc}{Todo}
-\item[\mbox{\hyperlink{todo__todo000002}{Todo}}]Explain categorization\end{DoxyRefDesc}
-\begin{DoxyCompactItemize}
+Banks are organized in categories from A to F in order of increasing harmonic components. \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{group__osc__api_ga54da0711f5d74d8eebb387db7d7f1bad}\label{group__osc__api_ga54da0711f5d74d8eebb387db7d7f1bad}} 
 const float $\ast$const {\bfseries wavesA} \mbox{[}k\+\_\+waves\+\_\+a\+\_\+cnt\mbox{]}
@@ -550,17 +545,17 @@ Fractional bit depth, exponentially mapped, 1 to 24 bits.
 \end{DoxyNote}
 
 
-Definition at line 735 of file osc\+\_\+api.\+h.
+Definition at line 741 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{735                                            \{}
-\DoxyCodeLine{736     \textcolor{keyword}{const} \textcolor{keywordtype}{float} xf = x * k\_bitres\_size;}
-\DoxyCodeLine{737     \textcolor{keyword}{const} uint32\_t xi = (uint32\_t)xf;}
-\DoxyCodeLine{738     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = bitres\_lut\_f[xi];}
-\DoxyCodeLine{739     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = bitres\_lut\_f[xi+1];}
-\DoxyCodeLine{740     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(xf -\/ xi, y0, y1);}
-\DoxyCodeLine{741   \}}
+\DoxyCodeLine{741                                            \{}
+\DoxyCodeLine{742     \textcolor{keyword}{const} \textcolor{keywordtype}{float} xf = x * k\_bitres\_size;}
+\DoxyCodeLine{743     \textcolor{keyword}{const} uint32\_t xi = (uint32\_t)xf;}
+\DoxyCodeLine{744     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = bitres\_lut\_f[xi];}
+\DoxyCodeLine{745     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = bitres\_lut\_f[xi+1];}
+\DoxyCodeLine{746     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(xf -\/ xi, y0, y1);}
+\DoxyCodeLine{747   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga50f6755ad79d68ffd87dbef72d6733c0}\label{group__osc__api_ga50f6755ad79d68ffd87dbef72d6733c0}} 
@@ -590,29 +585,29 @@ Not checking input, caller responsible for bounding x and idx.
 \end{DoxyNote}
 
 
-Definition at line 471 of file osc\+\_\+api.\+h.
+Definition at line 478 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{471                                                        \{}
-\DoxyCodeLine{472     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
-\DoxyCodeLine{473 }
-\DoxyCodeLine{474     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_par\_size;}
-\DoxyCodeLine{475     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
-\DoxyCodeLine{476     }
-\DoxyCodeLine{477     uint32\_t x0 = (x0p<=k\_wt\_par\_size) ? x0p : (k\_wt\_par\_size -\/ (x0p \& k\_wt\_par\_mask));}
-\DoxyCodeLine{478     uint32\_t x1 = (x0p<(k\_wt\_par\_size-\/1)) ? (x0 + 1) \& k\_wt\_par\_mask : (x0p >= k\_wt\_par\_size) ? (x0 -\/ 1) \& k\_wt\_par\_mask : (x0 + 1);}
-\DoxyCodeLine{479 }
-\DoxyCodeLine{480     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_par\_lut\_f[(uint16\_t)idx*k\_wt\_par\_lut\_size];}
-\DoxyCodeLine{481     \textcolor{keyword}{const} \textcolor{keywordtype}{float} fr = x0f -\/ x0p;}
-\DoxyCodeLine{482     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
-\DoxyCodeLine{483 }
-\DoxyCodeLine{484     wt += k\_wt\_par\_lut\_size;}
-\DoxyCodeLine{485     }
-\DoxyCodeLine{486     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
-\DoxyCodeLine{487 }
-\DoxyCodeLine{488     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}((idx -\/ (uint8\_t)idx), y0, y1);}
-\DoxyCodeLine{489   \}}
+\DoxyCodeLine{478                                                        \{}
+\DoxyCodeLine{479     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{480 }
+\DoxyCodeLine{481     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_par\_size;}
+\DoxyCodeLine{482     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{483     }
+\DoxyCodeLine{484     uint32\_t x0 = (x0p<=k\_wt\_par\_size) ? x0p : (k\_wt\_par\_size -\/ (x0p \& k\_wt\_par\_mask));}
+\DoxyCodeLine{485     uint32\_t x1 = (x0p<(k\_wt\_par\_size-\/1)) ? (x0 + 1) \& k\_wt\_par\_mask : (x0p >= k\_wt\_par\_size) ? (x0 -\/ 1) \& k\_wt\_par\_mask : (x0 + 1);}
+\DoxyCodeLine{486 }
+\DoxyCodeLine{487     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_par\_lut\_f[(uint16\_t)idx*k\_wt\_par\_lut\_size];}
+\DoxyCodeLine{488     \textcolor{keyword}{const} \textcolor{keywordtype}{float} fr = x0f -\/ x0p;}
+\DoxyCodeLine{489     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
+\DoxyCodeLine{490 }
+\DoxyCodeLine{491     wt += k\_wt\_par\_lut\_size;}
+\DoxyCodeLine{492     }
+\DoxyCodeLine{493     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
+\DoxyCodeLine{494 }
+\DoxyCodeLine{495     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}((idx -\/ (uint8\_t)idx), y0, y1);}
+\DoxyCodeLine{496   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_gad3cbea256f34fe91f7af7978819f1b4f}\label{group__osc__api_gad3cbea256f34fe91f7af7978819f1b4f}} 
@@ -639,32 +634,32 @@ Wave sample.
 \end{DoxyReturn}
 
 
-Definition at line 251 of file osc\+\_\+api.\+h.
+Definition at line 258 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{251                                                        \{}
-\DoxyCodeLine{252     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
-\DoxyCodeLine{253     }
-\DoxyCodeLine{254     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_saw\_size;}
-\DoxyCodeLine{255     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
-\DoxyCodeLine{256     }
-\DoxyCodeLine{257     uint32\_t x0 = x0p, x1 = x0p+1;}
-\DoxyCodeLine{258     \textcolor{keywordtype}{float} sign = 1.f;}
-\DoxyCodeLine{259     \textcolor{keywordflow}{if} (x0p >= k\_wt\_saw\_size) \{}
-\DoxyCodeLine{260       x0 = k\_wt\_saw\_size -\/ (x0p \& k\_wt\_saw\_mask);}
-\DoxyCodeLine{261       x1 = x0 -\/ 1;}
-\DoxyCodeLine{262       sign = -\/1.f;}
-\DoxyCodeLine{263     \}}
-\DoxyCodeLine{264     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_saw\_lut\_f[(uint16\_t)idx*k\_wt\_saw\_lut\_size];}
-\DoxyCodeLine{265     \textcolor{keyword}{const} \textcolor{keywordtype}{float} fr = x0f -\/ x0p;}
-\DoxyCodeLine{266     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = sign * \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
-\DoxyCodeLine{267 }
-\DoxyCodeLine{268     wt += k\_wt\_saw\_lut\_size;}
-\DoxyCodeLine{269     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = sign * \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
-\DoxyCodeLine{270     }
-\DoxyCodeLine{271     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}((idx -\/ (uint8\_t)idx), y0, y1);}
-\DoxyCodeLine{272   \} }
+\DoxyCodeLine{258                                                        \{}
+\DoxyCodeLine{259     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{260     }
+\DoxyCodeLine{261     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_saw\_size;}
+\DoxyCodeLine{262     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{263     }
+\DoxyCodeLine{264     uint32\_t x0 = x0p, x1 = x0p+1;}
+\DoxyCodeLine{265     \textcolor{keywordtype}{float} sign = 1.f;}
+\DoxyCodeLine{266     \textcolor{keywordflow}{if} (x0p >= k\_wt\_saw\_size) \{}
+\DoxyCodeLine{267       x0 = k\_wt\_saw\_size -\/ (x0p \& k\_wt\_saw\_mask);}
+\DoxyCodeLine{268       x1 = x0 -\/ 1;}
+\DoxyCodeLine{269       sign = -\/1.f;}
+\DoxyCodeLine{270     \}}
+\DoxyCodeLine{271     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_saw\_lut\_f[(uint16\_t)idx*k\_wt\_saw\_lut\_size];}
+\DoxyCodeLine{272     \textcolor{keyword}{const} \textcolor{keywordtype}{float} fr = x0f -\/ x0p;}
+\DoxyCodeLine{273     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = sign * \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
+\DoxyCodeLine{274 }
+\DoxyCodeLine{275     wt += k\_wt\_saw\_lut\_size;}
+\DoxyCodeLine{276     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = sign * \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
+\DoxyCodeLine{277     }
+\DoxyCodeLine{278     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}((idx -\/ (uint8\_t)idx), y0, y1);}
+\DoxyCodeLine{279   \} }
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga0857fef63cbe6b4081a1a1d462f252f3}\label{group__osc__api_ga0857fef63cbe6b4081a1a1d462f252f3}} 
@@ -694,32 +689,32 @@ Not checking input, caller responsible for bounding x and idx.
 \end{DoxyNote}
 
 
-Definition at line 366 of file osc\+\_\+api.\+h.
+Definition at line 373 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{366                                                        \{}
-\DoxyCodeLine{367     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
-\DoxyCodeLine{368     }
-\DoxyCodeLine{369     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_sqr\_size;}
-\DoxyCodeLine{370     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
-\DoxyCodeLine{371     }
-\DoxyCodeLine{372     uint32\_t x0 = x0p, x1 = x0p+1;}
-\DoxyCodeLine{373     \textcolor{keywordtype}{float} sign = 1.f;}
-\DoxyCodeLine{374     \textcolor{keywordflow}{if} (x0p >= k\_wt\_sqr\_size) \{}
-\DoxyCodeLine{375       x0 = k\_wt\_sqr\_size -\/ (x0p \& k\_wt\_sqr\_mask);}
-\DoxyCodeLine{376       x1 = x0 -\/ 1;}
-\DoxyCodeLine{377       sign = -\/1.f;}
-\DoxyCodeLine{378     \}}
-\DoxyCodeLine{379     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_sqr\_lut\_f[(uint16\_t)idx*k\_wt\_sqr\_lut\_size];}
-\DoxyCodeLine{380     \textcolor{keyword}{const} \textcolor{keywordtype}{float} fr = x0f -\/ x0p;}
-\DoxyCodeLine{381     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = sign * \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
-\DoxyCodeLine{382 }
-\DoxyCodeLine{383     wt += k\_wt\_sqr\_lut\_size;}
-\DoxyCodeLine{384     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = sign * \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
-\DoxyCodeLine{385     }
-\DoxyCodeLine{386     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}((idx -\/ (uint8\_t)idx), y0, y1);}
-\DoxyCodeLine{387   \}}
+\DoxyCodeLine{373                                                        \{}
+\DoxyCodeLine{374     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{375     }
+\DoxyCodeLine{376     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_sqr\_size;}
+\DoxyCodeLine{377     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{378     }
+\DoxyCodeLine{379     uint32\_t x0 = x0p, x1 = x0p+1;}
+\DoxyCodeLine{380     \textcolor{keywordtype}{float} sign = 1.f;}
+\DoxyCodeLine{381     \textcolor{keywordflow}{if} (x0p >= k\_wt\_sqr\_size) \{}
+\DoxyCodeLine{382       x0 = k\_wt\_sqr\_size -\/ (x0p \& k\_wt\_sqr\_mask);}
+\DoxyCodeLine{383       x1 = x0 -\/ 1;}
+\DoxyCodeLine{384       sign = -\/1.f;}
+\DoxyCodeLine{385     \}}
+\DoxyCodeLine{386     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_sqr\_lut\_f[(uint16\_t)idx*k\_wt\_sqr\_lut\_size];}
+\DoxyCodeLine{387     \textcolor{keyword}{const} \textcolor{keywordtype}{float} fr = x0f -\/ x0p;}
+\DoxyCodeLine{388     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = sign * \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
+\DoxyCodeLine{389 }
+\DoxyCodeLine{390     wt += k\_wt\_sqr\_lut\_size;}
+\DoxyCodeLine{391     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = sign * \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(fr, wt[x0], wt[x1]);}
+\DoxyCodeLine{392     }
+\DoxyCodeLine{393     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}((idx -\/ (uint8\_t)idx), y0, y1);}
+\DoxyCodeLine{394   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga8c69f5f4a9ff36e312c4ba829f50b989}\label{group__osc__api_ga8c69f5f4a9ff36e312c4ba829f50b989}} 
@@ -747,23 +742,23 @@ Not checking input, caller responsible for bounding x and idx.
 \end{DoxyNote}
 
 
-Definition at line 449 of file osc\+\_\+api.\+h.
+Definition at line 456 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{449                                                         \{}
-\DoxyCodeLine{450     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
-\DoxyCodeLine{451 }
-\DoxyCodeLine{452     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_par\_size;}
-\DoxyCodeLine{453     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
-\DoxyCodeLine{454     }
-\DoxyCodeLine{455     \textcolor{keyword}{const} uint32\_t x0 = (x0p<=k\_wt\_par\_size) ? x0p : (k\_wt\_par\_size -\/ (x0p \& k\_wt\_par\_mask));}
-\DoxyCodeLine{456     \textcolor{keyword}{const} uint32\_t x1 = (x0p<(k\_wt\_par\_size-\/1)) ? (x0 + 1) \& k\_wt\_par\_mask : (x0p >= k\_wt\_par\_size) ? (x0 -\/ 1) \& k\_wt\_par\_mask : (x0 + 1);}
-\DoxyCodeLine{457 }
-\DoxyCodeLine{458     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_par\_lut\_f[idx*k\_wt\_par\_lut\_size];}
-\DoxyCodeLine{459     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt[x0], wt[x1]);}
-\DoxyCodeLine{460     \textcolor{keywordflow}{return} y0;}
-\DoxyCodeLine{461   \}}
+\DoxyCodeLine{456                                                         \{}
+\DoxyCodeLine{457     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{458 }
+\DoxyCodeLine{459     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_par\_size;}
+\DoxyCodeLine{460     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{461     }
+\DoxyCodeLine{462     \textcolor{keyword}{const} uint32\_t x0 = (x0p<=k\_wt\_par\_size) ? x0p : (k\_wt\_par\_size -\/ (x0p \& k\_wt\_par\_mask));}
+\DoxyCodeLine{463     \textcolor{keyword}{const} uint32\_t x1 = (x0p<(k\_wt\_par\_size-\/1)) ? (x0 + 1) \& k\_wt\_par\_mask : (x0p >= k\_wt\_par\_size) ? (x0 -\/ 1) \& k\_wt\_par\_mask : (x0 + 1);}
+\DoxyCodeLine{464 }
+\DoxyCodeLine{465     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_par\_lut\_f[idx*k\_wt\_par\_lut\_size];}
+\DoxyCodeLine{466     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt[x0], wt[x1]);}
+\DoxyCodeLine{467     \textcolor{keywordflow}{return} y0;}
+\DoxyCodeLine{468   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga2c38d05e30af9254a367dc3840679191}\label{group__osc__api_ga2c38d05e30af9254a367dc3840679191}} 
@@ -788,27 +783,27 @@ Wave sample.
 \end{DoxyReturn}
 
 
-Definition at line 226 of file osc\+\_\+api.\+h.
+Definition at line 233 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{226                                                         \{}
-\DoxyCodeLine{227     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
-\DoxyCodeLine{228     }
-\DoxyCodeLine{229     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_saw\_size;}
-\DoxyCodeLine{230     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
-\DoxyCodeLine{231     }
-\DoxyCodeLine{232     uint32\_t x0 = x0p, x1 = x0p+1;}
-\DoxyCodeLine{233     \textcolor{keywordtype}{float} sign = 1.f;}
-\DoxyCodeLine{234     \textcolor{keywordflow}{if} (x0p >= k\_wt\_saw\_size) \{}
-\DoxyCodeLine{235       x0 = k\_wt\_saw\_size -\/ (x0p \& k\_wt\_saw\_mask);}
-\DoxyCodeLine{236       x1 = x0 -\/ 1;}
-\DoxyCodeLine{237       sign = -\/1.f;}
-\DoxyCodeLine{238     \}}
-\DoxyCodeLine{239     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_saw\_lut\_f[idx*k\_wt\_saw\_lut\_size];}
-\DoxyCodeLine{240     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt[x0], wt[x1]);}
-\DoxyCodeLine{241     \textcolor{keywordflow}{return} sign*y0;}
-\DoxyCodeLine{242   \}}
+\DoxyCodeLine{233                                                         \{}
+\DoxyCodeLine{234     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{235     }
+\DoxyCodeLine{236     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_saw\_size;}
+\DoxyCodeLine{237     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{238     }
+\DoxyCodeLine{239     uint32\_t x0 = x0p, x1 = x0p+1;}
+\DoxyCodeLine{240     \textcolor{keywordtype}{float} sign = 1.f;}
+\DoxyCodeLine{241     \textcolor{keywordflow}{if} (x0p >= k\_wt\_saw\_size) \{}
+\DoxyCodeLine{242       x0 = k\_wt\_saw\_size -\/ (x0p \& k\_wt\_saw\_mask);}
+\DoxyCodeLine{243       x1 = x0 -\/ 1;}
+\DoxyCodeLine{244       sign = -\/1.f;}
+\DoxyCodeLine{245     \}}
+\DoxyCodeLine{246     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_saw\_lut\_f[idx*k\_wt\_saw\_lut\_size];}
+\DoxyCodeLine{247     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt[x0], wt[x1]);}
+\DoxyCodeLine{248     \textcolor{keywordflow}{return} sign*y0;}
+\DoxyCodeLine{249   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga7a4a401783f0e18e2d21cd16e9e15cdc}\label{group__osc__api_ga7a4a401783f0e18e2d21cd16e9e15cdc}} 
@@ -836,27 +831,27 @@ Not checking input, caller responsible for bounding x and idx.
 \end{DoxyNote}
 
 
-Definition at line 340 of file osc\+\_\+api.\+h.
+Definition at line 347 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{340                                                         \{}
-\DoxyCodeLine{341     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
-\DoxyCodeLine{342     }
-\DoxyCodeLine{343     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_sqr\_size;}
-\DoxyCodeLine{344     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
-\DoxyCodeLine{345     }
-\DoxyCodeLine{346     uint32\_t x0 = x0p, x1 = x0p+1;}
-\DoxyCodeLine{347     \textcolor{keywordtype}{float} sign = 1.f;}
-\DoxyCodeLine{348     \textcolor{keywordflow}{if} (x0p >= k\_wt\_sqr\_size) \{}
-\DoxyCodeLine{349       x0 = k\_wt\_sqr\_size -\/ (x0p \& k\_wt\_sqr\_mask);}
-\DoxyCodeLine{350       x1 = x0 -\/ 1;}
-\DoxyCodeLine{351       sign = -\/1.f;}
-\DoxyCodeLine{352     \}}
-\DoxyCodeLine{353     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_sqr\_lut\_f[idx*k\_wt\_sqr\_lut\_size];}
-\DoxyCodeLine{354     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt[x0], wt[x1]);}
-\DoxyCodeLine{355     \textcolor{keywordflow}{return} sign*y0;}
-\DoxyCodeLine{356   \}}
+\DoxyCodeLine{347                                                         \{}
+\DoxyCodeLine{348     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{349     }
+\DoxyCodeLine{350     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_sqr\_size;}
+\DoxyCodeLine{351     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{352     }
+\DoxyCodeLine{353     uint32\_t x0 = x0p, x1 = x0p+1;}
+\DoxyCodeLine{354     \textcolor{keywordtype}{float} sign = 1.f;}
+\DoxyCodeLine{355     \textcolor{keywordflow}{if} (x0p >= k\_wt\_sqr\_size) \{}
+\DoxyCodeLine{356       x0 = k\_wt\_sqr\_size -\/ (x0p \& k\_wt\_sqr\_mask);}
+\DoxyCodeLine{357       x1 = x0 -\/ 1;}
+\DoxyCodeLine{358       sign = -\/1.f;}
+\DoxyCodeLine{359     \}}
+\DoxyCodeLine{360     \textcolor{keyword}{const} \textcolor{keywordtype}{float} *wt = \&wt\_sqr\_lut\_f[idx*k\_wt\_sqr\_lut\_size];}
+\DoxyCodeLine{361     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt[x0], wt[x1]);}
+\DoxyCodeLine{362     \textcolor{keywordflow}{return} sign*y0;}
+\DoxyCodeLine{363   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga3aaa9cdb10789d3db5e5a4ff72e8112e}\label{group__osc__api_ga3aaa9cdb10789d3db5e5a4ff72e8112e}} 
@@ -879,13 +874,13 @@ Result of cos(2$\ast$pi$\ast$x).
 \end{DoxyReturn}
 
 
-Definition at line 169 of file osc\+\_\+api.\+h.
+Definition at line 176 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{169                                         \{}
-\DoxyCodeLine{170     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__osc__api_ga7c72f32f2889ff55a075d283dd9bf93a}{osc\_sinf}}(x+0.25f);}
-\DoxyCodeLine{171   \}}
+\DoxyCodeLine{176                                         \{}
+\DoxyCodeLine{177     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__osc__api_ga7c72f32f2889ff55a075d283dd9bf93a}{osc\_sinf}}(x+0.25f);}
+\DoxyCodeLine{178   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga81e180b64abbccaf568738fef522ace1}\label{group__osc__api_ga81e180b64abbccaf568738fef522ace1}} 
@@ -911,17 +906,17 @@ Not checking input, caller responsible for bounding x.
 \end{DoxyNote}
 
 
-Definition at line 591 of file osc\+\_\+api.\+h.
+Definition at line 597 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{591                                         \{}
-\DoxyCodeLine{592     \textcolor{keyword}{const} \textcolor{keywordtype}{float} idxf = x * k\_log\_size;}
-\DoxyCodeLine{593     \textcolor{keyword}{const} uint32\_t idx = (uint32\_t)idxf;}
-\DoxyCodeLine{594     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = log\_lut\_f[idx];}
-\DoxyCodeLine{595     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = log\_lut\_f[idx+1];}
-\DoxyCodeLine{596     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(idxf -\/ idx, y0, y1);}
-\DoxyCodeLine{597   \}}
+\DoxyCodeLine{597                                         \{}
+\DoxyCodeLine{598     \textcolor{keyword}{const} \textcolor{keywordtype}{float} idxf = x * k\_log\_size;}
+\DoxyCodeLine{599     \textcolor{keyword}{const} uint32\_t idx = (uint32\_t)idxf;}
+\DoxyCodeLine{600     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = log\_lut\_f[idx];}
+\DoxyCodeLine{601     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = log\_lut\_f[idx+1];}
+\DoxyCodeLine{602     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(idxf -\/ idx, y0, y1);}
+\DoxyCodeLine{603   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga082922e3b29eaff8216a2082dff68584}\label{group__osc__api_ga082922e3b29eaff8216a2082dff68584}} 
@@ -944,13 +939,13 @@ Corresponding Hertz value.
 \end{DoxyReturn}
 
 
-Definition at line 107 of file osc\+\_\+api.\+h.
+Definition at line 114 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{107                                                 \{}
-\DoxyCodeLine{108     \textcolor{keywordflow}{return} midi\_to\_hz\_lut\_f[\mbox{\hyperlink{group__utils__int__math_gaf499259532eca51a13d2a2ba7dac8d77}{clipmaxu32}}(note,k\_midi\_to\_hz\_size-\/1)];}
-\DoxyCodeLine{109   \}}
+\DoxyCodeLine{114                                                 \{}
+\DoxyCodeLine{115     \textcolor{keywordflow}{return} midi\_to\_hz\_lut\_f[\mbox{\hyperlink{group__utils__int__math_gaf499259532eca51a13d2a2ba7dac8d77}{clipmaxu32}}(note,k\_midi\_to\_hz\_size-\/1)];}
+\DoxyCodeLine{116   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_gadbb771a6aff9e9c51e8a6b249ddae694}\label{group__osc__api_gadbb771a6aff9e9c51e8a6b249ddae694}} 
@@ -976,21 +971,21 @@ Not checking input, caller responsible for bounding x.
 \end{DoxyNote}
 
 
-Definition at line 429 of file osc\+\_\+api.\+h.
+Definition at line 436 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{429                                         \{}
-\DoxyCodeLine{430     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
-\DoxyCodeLine{431 }
-\DoxyCodeLine{432     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_par\_size;}
-\DoxyCodeLine{433     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
-\DoxyCodeLine{434     }
-\DoxyCodeLine{435     \textcolor{keyword}{const} uint32\_t x0 = (x0p<=k\_wt\_par\_size) ? x0p : (k\_wt\_par\_size -\/ (x0p \& k\_wt\_par\_mask));}
-\DoxyCodeLine{436     \textcolor{keyword}{const} uint32\_t x1 = (x0p<(k\_wt\_par\_size-\/1)) ? (x0 + 1) \& k\_wt\_par\_mask : (x0p >= k\_wt\_par\_size) ? (x0 -\/ 1) \& k\_wt\_par\_mask : (x0 + 1);}
-\DoxyCodeLine{437     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt\_par\_lut\_f[x0], wt\_par\_lut\_f[x1]);}
-\DoxyCodeLine{438     \textcolor{keywordflow}{return} y0;}
-\DoxyCodeLine{439   \}}
+\DoxyCodeLine{436                                         \{}
+\DoxyCodeLine{437     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{438 }
+\DoxyCodeLine{439     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_par\_size;}
+\DoxyCodeLine{440     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{441     }
+\DoxyCodeLine{442     \textcolor{keyword}{const} uint32\_t x0 = (x0p<=k\_wt\_par\_size) ? x0p : (k\_wt\_par\_size -\/ (x0p \& k\_wt\_par\_mask));}
+\DoxyCodeLine{443     \textcolor{keyword}{const} uint32\_t x1 = (x0p<(k\_wt\_par\_size-\/1)) ? (x0 + 1) \& k\_wt\_par\_mask : (x0p >= k\_wt\_par\_size) ? (x0 -\/ 1) \& k\_wt\_par\_mask : (x0 + 1);}
+\DoxyCodeLine{444     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt\_par\_lut\_f[x0], wt\_par\_lut\_f[x1]);}
+\DoxyCodeLine{445     \textcolor{keywordflow}{return} y0;}
+\DoxyCodeLine{446   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_gab7e73c7fa5814f9766c40245cfd5bea6}\label{group__osc__api_gab7e73c7fa5814f9766c40245cfd5bea6}} 
@@ -1013,17 +1008,17 @@ Cubic curve above 0.\+42264973081, gain\+: 1.\+2383127573
 \end{DoxyReturn}
 
 
-Definition at line 684 of file osc\+\_\+api.\+h.
+Definition at line 690 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{684                                               \{}
-\DoxyCodeLine{685     \textcolor{keyword}{const} \textcolor{keywordtype}{float} xf = \mbox{\hyperlink{group__utils__float__math_gaad7d5924ca8ddd9873f9770fa2f492d3}{si\_fabsf}}(\mbox{\hyperlink{group__utils__float__math_ga1db7d49792db4b5c43f92451fdc69482}{clip1f}}(x)) * k\_cubicsat\_size;}
-\DoxyCodeLine{686     \textcolor{keyword}{const} uint32\_t xi = (uint32\_t)x;}
-\DoxyCodeLine{687     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = cubicsat\_lut\_f[xi];}
-\DoxyCodeLine{688     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = cubicsat\_lut\_f[xi+1];}
-\DoxyCodeLine{689     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga5b2f62968ba70af371c5a6c6ae969284}{si\_copysignf}}(\mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(xf -\/ xi, y0, y1), x);}
-\DoxyCodeLine{690   \}}
+\DoxyCodeLine{690                                               \{}
+\DoxyCodeLine{691     \textcolor{keyword}{const} \textcolor{keywordtype}{float} xf = \mbox{\hyperlink{group__utils__float__math_gaad7d5924ca8ddd9873f9770fa2f492d3}{si\_fabsf}}(\mbox{\hyperlink{group__utils__float__math_ga1db7d49792db4b5c43f92451fdc69482}{clip1f}}(x)) * k\_cubicsat\_size;}
+\DoxyCodeLine{692     \textcolor{keyword}{const} uint32\_t xi = (uint32\_t)x;}
+\DoxyCodeLine{693     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = cubicsat\_lut\_f[xi];}
+\DoxyCodeLine{694     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = cubicsat\_lut\_f[xi+1];}
+\DoxyCodeLine{695     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga5b2f62968ba70af371c5a6c6ae969284}{si\_copysignf}}(\mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(xf -\/ xi, y0, y1), x);}
+\DoxyCodeLine{696   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga3aa843c95ccc3282ae6bd03114d7e12e}\label{group__osc__api_ga3aa843c95ccc3282ae6bd03114d7e12e}} 
@@ -1046,17 +1041,17 @@ Saturated value.
 \end{DoxyReturn}
 
 
-Definition at line 705 of file osc\+\_\+api.\+h.
+Definition at line 711 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{705                                                  \{}
-\DoxyCodeLine{706     \textcolor{keyword}{const} \textcolor{keywordtype}{float} xf = \mbox{\hyperlink{group__utils__float__math_gaad7d5924ca8ddd9873f9770fa2f492d3}{si\_fabsf}}(\mbox{\hyperlink{group__utils__float__math_ga1db7d49792db4b5c43f92451fdc69482}{clip1f}}(x)) * k\_schetzen\_size;}
-\DoxyCodeLine{707     \textcolor{keyword}{const} uint32\_t xi = (uint32\_t)x;}
-\DoxyCodeLine{708     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = schetzen\_lut\_f[xi];}
-\DoxyCodeLine{709     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = schetzen\_lut\_f[xi+1];}
-\DoxyCodeLine{710     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga5b2f62968ba70af371c5a6c6ae969284}{si\_copysignf}}(\mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(xf -\/ xi, y0, y1), x);}
-\DoxyCodeLine{711   \}}
+\DoxyCodeLine{711                                                  \{}
+\DoxyCodeLine{712     \textcolor{keyword}{const} \textcolor{keywordtype}{float} xf = \mbox{\hyperlink{group__utils__float__math_gaad7d5924ca8ddd9873f9770fa2f492d3}{si\_fabsf}}(\mbox{\hyperlink{group__utils__float__math_ga1db7d49792db4b5c43f92451fdc69482}{clip1f}}(x)) * k\_schetzen\_size;}
+\DoxyCodeLine{713     \textcolor{keyword}{const} uint32\_t xi = (uint32\_t)x;}
+\DoxyCodeLine{714     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = schetzen\_lut\_f[xi];}
+\DoxyCodeLine{715     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = schetzen\_lut\_f[xi+1];}
+\DoxyCodeLine{716     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga5b2f62968ba70af371c5a6c6ae969284}{si\_copysignf}}(\mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(xf -\/ xi, y0, y1), x);}
+\DoxyCodeLine{717   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga64042f4358abf83f4e15330157314252}\label{group__osc__api_ga64042f4358abf83f4e15330157314252}} 
@@ -1079,27 +1074,27 @@ Wave sample.
 \end{DoxyReturn}
 
 
-Definition at line 201 of file osc\+\_\+api.\+h.
+Definition at line 208 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{201                                         \{}
-\DoxyCodeLine{202     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
-\DoxyCodeLine{203     }
-\DoxyCodeLine{204     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_saw\_size;}
-\DoxyCodeLine{205     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
-\DoxyCodeLine{206     }
-\DoxyCodeLine{207     uint32\_t x0 = x0p, x1 = x0p+1;}
-\DoxyCodeLine{208     \textcolor{keywordtype}{float} sign = 1.f;}
-\DoxyCodeLine{209     \textcolor{keywordflow}{if} (x0p >= k\_wt\_saw\_size) \{}
-\DoxyCodeLine{210       x0 = k\_wt\_saw\_size -\/ (x0p \& k\_wt\_saw\_mask);}
-\DoxyCodeLine{211       x1 = x0 -\/ 1;}
-\DoxyCodeLine{212       sign = -\/1.f;}
-\DoxyCodeLine{213     \}}
-\DoxyCodeLine{214     }
-\DoxyCodeLine{215     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt\_saw\_lut\_f[x0], wt\_saw\_lut\_f[x1]);}
-\DoxyCodeLine{216     \textcolor{keywordflow}{return} sign*y0;}
-\DoxyCodeLine{217   \}}
+\DoxyCodeLine{208                                         \{}
+\DoxyCodeLine{209     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{210     }
+\DoxyCodeLine{211     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_saw\_size;}
+\DoxyCodeLine{212     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{213     }
+\DoxyCodeLine{214     uint32\_t x0 = x0p, x1 = x0p+1;}
+\DoxyCodeLine{215     \textcolor{keywordtype}{float} sign = 1.f;}
+\DoxyCodeLine{216     \textcolor{keywordflow}{if} (x0p >= k\_wt\_saw\_size) \{}
+\DoxyCodeLine{217       x0 = k\_wt\_saw\_size -\/ (x0p \& k\_wt\_saw\_mask);}
+\DoxyCodeLine{218       x1 = x0 -\/ 1;}
+\DoxyCodeLine{219       sign = -\/1.f;}
+\DoxyCodeLine{220     \}}
+\DoxyCodeLine{221     }
+\DoxyCodeLine{222     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt\_saw\_lut\_f[x0], wt\_saw\_lut\_f[x1]);}
+\DoxyCodeLine{223     \textcolor{keywordflow}{return} sign*y0;}
+\DoxyCodeLine{224   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga7c72f32f2889ff55a075d283dd9bf93a}\label{group__osc__api_ga7c72f32f2889ff55a075d283dd9bf93a}} 
@@ -1122,23 +1117,23 @@ Result of sin(2$\ast$pi$\ast$x).
 \end{DoxyReturn}
 
 
-Definition at line 149 of file osc\+\_\+api.\+h.
+Definition at line 156 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{149                                         \{}
-\DoxyCodeLine{150     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
-\DoxyCodeLine{151     }
-\DoxyCodeLine{152     \textcolor{comment}{// half period stored -\/-\/ wrap around and invert}}
-\DoxyCodeLine{153     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_sine\_size;}
-\DoxyCodeLine{154     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
-\DoxyCodeLine{155 }
-\DoxyCodeLine{156     \textcolor{keyword}{const} uint32\_t x0 = x0p \& k\_wt\_sine\_mask;}
-\DoxyCodeLine{157     \textcolor{keyword}{const} uint32\_t x1 = (x0 + 1) \& k\_wt\_sine\_mask;}
+\DoxyCodeLine{156                                         \{}
+\DoxyCodeLine{157     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
 \DoxyCodeLine{158     }
-\DoxyCodeLine{159     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt\_sine\_lut\_f[x0], wt\_sine\_lut\_f[x1]);}
-\DoxyCodeLine{160     \textcolor{keywordflow}{return} (x0p < k\_wt\_sine\_size)?y0:-\/y0;}
-\DoxyCodeLine{161   \}}
+\DoxyCodeLine{159     \textcolor{comment}{// half period stored -\/-\/ wrap around and invert}}
+\DoxyCodeLine{160     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_sine\_size;}
+\DoxyCodeLine{161     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{162 }
+\DoxyCodeLine{163     \textcolor{keyword}{const} uint32\_t x0 = x0p \& k\_wt\_sine\_mask;}
+\DoxyCodeLine{164     \textcolor{keyword}{const} uint32\_t x1 = (x0 + 1) \& k\_wt\_sine\_mask;}
+\DoxyCodeLine{165     }
+\DoxyCodeLine{166     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt\_sine\_lut\_f[x0], wt\_sine\_lut\_f[x1]);}
+\DoxyCodeLine{167     \textcolor{keywordflow}{return} (x0p < k\_wt\_sine\_size)?y0:-\/y0;}
+\DoxyCodeLine{168   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga93788000ffc9fdc7bfc4af98544d89e2}\label{group__osc__api_ga93788000ffc9fdc7bfc4af98544d89e2}} 
@@ -1163,14 +1158,14 @@ Clipped value in \mbox{[}-\/(1-\/c), (1-\/c)\mbox{]}.
 \end{DoxyReturn}
 
 
-Definition at line 665 of file osc\+\_\+api.\+h.
+Definition at line 671 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{666   \{}
-\DoxyCodeLine{667     x = \mbox{\hyperlink{group__utils__float__math_ga1e8532d81a23ad8cbee2baf5bc6466ec}{clip1m1f}}(x);}
-\DoxyCodeLine{668     \textcolor{keywordflow}{return} x -\/ c * (x*x*x);}
-\DoxyCodeLine{669   \}}
+\DoxyCodeLine{672   \{}
+\DoxyCodeLine{673     x = \mbox{\hyperlink{group__utils__float__math_ga1e8532d81a23ad8cbee2baf5bc6466ec}{clip1m1f}}(x);}
+\DoxyCodeLine{674     \textcolor{keywordflow}{return} x -\/ c * (x*x*x);}
+\DoxyCodeLine{675   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_gab7f55c309c3b657fc78787d225cdfb0f}\label{group__osc__api_gab7f55c309c3b657fc78787d225cdfb0f}} 
@@ -1196,27 +1191,27 @@ Not checking input, caller responsible for bounding x.
 \end{DoxyNote}
 
 
-Definition at line 314 of file osc\+\_\+api.\+h.
+Definition at line 321 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{314                                         \{}
-\DoxyCodeLine{315     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
-\DoxyCodeLine{316     }
-\DoxyCodeLine{317     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_sqr\_size;}
-\DoxyCodeLine{318     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
-\DoxyCodeLine{319     }
-\DoxyCodeLine{320     uint32\_t x0 = x0p, x1 = x0p+1;}
-\DoxyCodeLine{321     \textcolor{keywordtype}{float} sign = 1.f;}
-\DoxyCodeLine{322     \textcolor{keywordflow}{if} (x0p >= k\_wt\_sqr\_size) \{}
-\DoxyCodeLine{323       x0 = k\_wt\_sqr\_size -\/ (x0p \& k\_wt\_sqr\_mask);}
-\DoxyCodeLine{324       x1 = x0 -\/ 1;}
-\DoxyCodeLine{325       sign = -\/1.f;}
-\DoxyCodeLine{326     \}}
-\DoxyCodeLine{327     }
-\DoxyCodeLine{328     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt\_sqr\_lut\_f[x0], wt\_sqr\_lut\_f[x1]);}
-\DoxyCodeLine{329     \textcolor{keywordflow}{return} sign*y0;}
-\DoxyCodeLine{330   \}}
+\DoxyCodeLine{321                                         \{}
+\DoxyCodeLine{322     \textcolor{keyword}{const} \textcolor{keywordtype}{float} p = x -\/ (uint32\_t)x;}
+\DoxyCodeLine{323     }
+\DoxyCodeLine{324     \textcolor{keyword}{const} \textcolor{keywordtype}{float} x0f = 2.f * p * k\_wt\_sqr\_size;}
+\DoxyCodeLine{325     \textcolor{keyword}{const} uint32\_t x0p = (uint32\_t)x0f;}
+\DoxyCodeLine{326     }
+\DoxyCodeLine{327     uint32\_t x0 = x0p, x1 = x0p+1;}
+\DoxyCodeLine{328     \textcolor{keywordtype}{float} sign = 1.f;}
+\DoxyCodeLine{329     \textcolor{keywordflow}{if} (x0p >= k\_wt\_sqr\_size) \{}
+\DoxyCodeLine{330       x0 = k\_wt\_sqr\_size -\/ (x0p \& k\_wt\_sqr\_mask);}
+\DoxyCodeLine{331       x1 = x0 -\/ 1;}
+\DoxyCodeLine{332       sign = -\/1.f;}
+\DoxyCodeLine{333     \}}
+\DoxyCodeLine{334     }
+\DoxyCodeLine{335     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(x0f -\/ x0p, wt\_sqr\_lut\_f[x0], wt\_sqr\_lut\_f[x1]);}
+\DoxyCodeLine{336     \textcolor{keywordflow}{return} sign*y0;}
+\DoxyCodeLine{337   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_gab83291286baa795bfa9dc612e963bf1b}\label{group__osc__api_gab83291286baa795bfa9dc612e963bf1b}} 
@@ -1242,17 +1237,17 @@ Not checking input, caller responsible for bounding x.
 \end{DoxyNote}
 
 
-Definition at line 638 of file osc\+\_\+api.\+h.
+Definition at line 644 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{638                                               \{}
-\DoxyCodeLine{639     \textcolor{keyword}{const} \textcolor{keywordtype}{float} idxf = (x-\/k\_sqrtm2log\_base) * k\_sqrtm2log\_range\_recip * k\_sqrtm2log\_size;}
-\DoxyCodeLine{640     \textcolor{keyword}{const} uint32\_t idx = (uint32\_t)idxf;}
-\DoxyCodeLine{641     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = sqrtm2log\_lut\_f[idx];}
-\DoxyCodeLine{642     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = sqrtm2log\_lut\_f[idx+1];}
-\DoxyCodeLine{643     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(idxf -\/ idx, y0, y1);}
-\DoxyCodeLine{644   \}}
+\DoxyCodeLine{644                                               \{}
+\DoxyCodeLine{645     \textcolor{keyword}{const} \textcolor{keywordtype}{float} idxf = (x-\/k\_sqrtm2log\_base) * k\_sqrtm2log\_range\_recip * k\_sqrtm2log\_size;}
+\DoxyCodeLine{646     \textcolor{keyword}{const} uint32\_t idx = (uint32\_t)idxf;}
+\DoxyCodeLine{647     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = sqrtm2log\_lut\_f[idx];}
+\DoxyCodeLine{648     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = sqrtm2log\_lut\_f[idx+1];}
+\DoxyCodeLine{649     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(idxf -\/ idx, y0, y1);}
+\DoxyCodeLine{650   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga494fa53a08bb6afbd53d9a7e511e1189}\label{group__osc__api_ga494fa53a08bb6afbd53d9a7e511e1189}} 
@@ -1278,17 +1273,17 @@ Not checking input, caller responsible for bounding x.
 \end{DoxyNote}
 
 
-Definition at line 614 of file osc\+\_\+api.\+h.
+Definition at line 620 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{614                                           \{}
-\DoxyCodeLine{615     \textcolor{keyword}{const} \textcolor{keywordtype}{float} idxf = x * k\_tanpi\_range\_recip * k\_tanpi\_size;}
-\DoxyCodeLine{616     \textcolor{keyword}{const} uint32\_t idx = (uint32\_t)idxf;}
-\DoxyCodeLine{617     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = tanpi\_lut\_f[idx];}
-\DoxyCodeLine{618     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = tanpi\_lut\_f[idx+1];}
-\DoxyCodeLine{619     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(idxf -\/ idx, y0, y1);}
-\DoxyCodeLine{620   \}}
+\DoxyCodeLine{620                                           \{}
+\DoxyCodeLine{621     \textcolor{keyword}{const} \textcolor{keywordtype}{float} idxf = x * k\_tanpi\_range\_recip * k\_tanpi\_size;}
+\DoxyCodeLine{622     \textcolor{keyword}{const} uint32\_t idx = (uint32\_t)idxf;}
+\DoxyCodeLine{623     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y0 = tanpi\_lut\_f[idx];}
+\DoxyCodeLine{624     \textcolor{keyword}{const} \textcolor{keywordtype}{float} y1 = tanpi\_lut\_f[idx+1];}
+\DoxyCodeLine{625     \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(idxf -\/ idx, y0, y1);}
+\DoxyCodeLine{626   \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__osc__api_ga2061a488f9b21f9972ab71583960f1db}\label{group__osc__api_ga2061a488f9b21f9972ab71583960f1db}} 
@@ -1311,17 +1306,17 @@ Corresponding 0-\/1 phase increment in floating point.
 \end{DoxyReturn}
 
 
-Definition at line 117 of file osc\+\_\+api.\+h.
+Definition at line 124 of file osc\+\_\+api.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{117                                                                   \{    }
-\DoxyCodeLine{118     \textcolor{keyword}{const} \textcolor{keywordtype}{float} f0 = \mbox{\hyperlink{group__osc__api_ga082922e3b29eaff8216a2082dff68584}{osc\_notehzf}}(note);}
-\DoxyCodeLine{119     \textcolor{keyword}{const} \textcolor{keywordtype}{float} f1 = \mbox{\hyperlink{group__osc__api_ga082922e3b29eaff8216a2082dff68584}{osc\_notehzf}}(note+1);}
-\DoxyCodeLine{120     }
-\DoxyCodeLine{121     \textcolor{keyword}{const} \textcolor{keywordtype}{float} f = \mbox{\hyperlink{group__utils__float__math_ga1df882452fba0cefb4bec86f8b5275ab}{clipmaxf}}(\mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(mod * k\_note\_mod\_fscale, f0, f1), k\_note\_max\_hz);}
-\DoxyCodeLine{122 }
-\DoxyCodeLine{123     \textcolor{keywordflow}{return} f * k\_samplerate\_recipf;}
-\DoxyCodeLine{124   \}}
+\DoxyCodeLine{124                                                                   \{    }
+\DoxyCodeLine{125     \textcolor{keyword}{const} \textcolor{keywordtype}{float} f0 = \mbox{\hyperlink{group__osc__api_ga082922e3b29eaff8216a2082dff68584}{osc\_notehzf}}(note);}
+\DoxyCodeLine{126     \textcolor{keyword}{const} \textcolor{keywordtype}{float} f1 = \mbox{\hyperlink{group__osc__api_ga082922e3b29eaff8216a2082dff68584}{osc\_notehzf}}(note+1);}
+\DoxyCodeLine{127     }
+\DoxyCodeLine{128     \textcolor{keyword}{const} \textcolor{keywordtype}{float} f = \mbox{\hyperlink{group__utils__float__math_ga1df882452fba0cefb4bec86f8b5275ab}{clipmaxf}}(\mbox{\hyperlink{group__utils__float__math_ga9011c5bbee79355452dcfea7fa08fd32}{linintf}}(mod * k\_note\_mod\_fscale, f0, f1), k\_note\_max\_hz);}
+\DoxyCodeLine{129 }
+\DoxyCodeLine{130     \textcolor{keywordflow}{return} f * k\_samplerate\_recipf;}
+\DoxyCodeLine{131   \}}
 
 \end{DoxyCode}
