@@ -4,7 +4,7 @@
 layout: home
 ---
 
-The *logue SDK* is a C/C++ software development kit and API that allows to create custom oscillators and effects for the KORG [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd) and [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/synthesizers/nts_1) synthesizers.
+The *logue SDK* is a C/C++ software development kit and API that allows to create custom oscillators and effects for the KORG [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd) and [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1) synthesizers.
 
 ## Quick Start
 

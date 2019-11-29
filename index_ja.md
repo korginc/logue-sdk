@@ -5,7 +5,7 @@ layout: home_ja
 permalink: /ja/
 ---
 
-*logue SDK* とは KORG [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/synthesizers/nts_1) 等のシンセサイザーで使用可能な自作オシレーターやエフェクトを作成可能な C/C++ のソフト開発キットとAPIです。
+*logue SDK* とは KORG [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1) 等のシンセサイザーで使用可能な自作オシレーターやエフェクトを作成可能な C/C++ のソフト開発キットとAPIです。
 
 ## Quick Start
 
