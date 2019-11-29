@@ -49,7 +49,7 @@ This is a list of existing user contributed and paid oscillator/effect units mad
 | [String](https://sellfy.com/p/Ump7/) | Tim Shoebridge | 7 oscillator 1980's analogue string emulation | paid |
 | [Pluck](https://sellfy.com/p/bG1k/) | Tim Shoebridge | Karplus Strong | paid |
 
-_Note: Additions, corrections, broken links? Let us know at *logue-sdk@korg.co.jp*_
+_Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp_
 
 ## Modulation Effects (modfx)
 
@@ -66,7 +66,7 @@ _Note: Additions, corrections, broken links? Let us know at *logue-sdk@korg.co.j
 | [Drift](https://www.sinevibes.com/korgdrift/ ) | Sinevibes | Physically modelled stereo panner based on Lorenz osc. | paid |
 | [SVF](https://www.sinevibes.com/korgsvf/) | Sinevibes | State-variable filter 4 pole, -24dB/oct, resonant | paid |
 
-_Note: Additions, modifications, broken links? Let us know at *logue-sdk@korg.co.jp*_
+_Note: Additions, modifications, broken links? Let us know at logue-sdk@korg.co.jp_
 
 ## Delay Effects (delfx)
 
@@ -84,7 +84,7 @@ _Note: Additions, modifications, broken links? Let us know at *logue-sdk@korg.co
 | [Stutter](https://www.sinevibes.com/korgstutter/) | Sinevibes | Self-randomizing audio repeater | paid |
 | [Timer](https://www.sinevibes.com/korgtime/) | Sinevibes | Ultra wide range delay/looper | paid |
 
-_Note: Additions, corrections, broken links? Let us know at *logue-sdk@korg.co.jp*_
+_Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp_
 
 ## Reverb Effects (revfx)
 
@@ -98,4 +98,4 @@ _Note: Additions, corrections, broken links? Let us know at *logue-sdk@korg.co.j
 | [wavDesk](https://gumroad.com/l/wavDesk) | Roll-Log Sounds | Generate oscillator from multiple wavetables | donation |
 | [wavShelf](https://gumroad.com/l/wavShelf) | Roll-Log Sounds | Generate oscillator from multiple samples | donation |
 
-_Note: Additions, corrections, broken links? Let us know at *logue-sdk@korg.co.jp*_
+_Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp_
