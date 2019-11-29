@@ -67,9 +67,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
-<a href="#define-members">Macros</a> &#124;
-<a href="#func-members">Functions</a> &#124;
-<a href="#var-members">Variables</a>  </div>
+<a href="#define-members">Macros</a>  </div>
   <div class="headertitle">
 <div class="title">osc_api.h File Reference</div>  </div>
 </div><!--header-->
@@ -88,21 +86,9 @@ Macros</h2></td></tr>
 <tr class="memitem:gaef654e7194bae8dc60734599c0e79049"><td class="memItemLeft" align="right" valign="top">
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>__fast_inline</b>&#160;&#160;&#160;static inline __attribute__((always_inline, optimize(&quot;Ofast&quot;)))</td></tr>
 <tr class="separator:gaef654e7194bae8dc60734599c0e79049"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga13e93ba13aeb9dbe3d8139c3cec6fbb7"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>k_samplerate</b>&#160;&#160;&#160;(48000)</td></tr>
-<tr class="separator:ga13e93ba13aeb9dbe3d8139c3cec6fbb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga44cd1427bdbcef427ab758265335c9ca"><td class="memItemLeft" align="right" valign="top">
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>k_samplerate_recipf</b>&#160;&#160;&#160;(2.08333333333333e-005f)</td></tr>
-<tr class="separator:ga44cd1427bdbcef427ab758265335c9ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga3c3dbbc0b0122daeeee4a5380aacf7ac"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__api.html#ga3c3dbbc0b0122daeeee4a5380aacf7ac">_osc_mcu_hash</a> (void)</td></tr>
-<tr class="memdesc:ga3c3dbbc0b0122daeeee4a5380aacf7ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get MCU hash.  <a href="group__osc__api.html#ga3c3dbbc0b0122daeeee4a5380aacf7ac">More...</a><br /></td></tr>
-<tr class="separator:ga3c3dbbc0b0122daeeee4a5380aacf7ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga63b59258169a9277e45f3d0fbe7955e6"><td class="memItemLeft" align="right" valign="top">
-__fast_inline uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>osc_mcu_hash</b> (void)</td></tr>
-<tr class="separator:ga63b59258169a9277e45f3d0fbe7955e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><div class="groupHeader">Noise source</div></td></tr>
 <tr class="memitem:ga146d08eb8fd56de6b32eef3e892a22f1"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__api.html#ga146d08eb8fd56de6b32eef3e892a22f1">_osc_rand</a> (void)</td></tr>
 <tr class="memdesc:ga146d08eb8fd56de6b32eef3e892a22f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Random integer.  <a href="group__osc__api.html#ga146d08eb8fd56de6b32eef3e892a22f1">More...</a><br /></td></tr>
@@ -117,8 +103,14 @@ __fast_inline uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>osc
 __fast_inline float&#160;</td><td class="memItemRight" valign="bottom"><b>osc_white</b> (void)</td></tr>
 <tr class="separator:ga6fdb6904630842ff75bf96b154b4dfc6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
-Variables</h2></td></tr>
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+Runtime Environment</h2></td></tr>
+<tr class="memitem:ga13e93ba13aeb9dbe3d8139c3cec6fbb7"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>k_samplerate</b>&#160;&#160;&#160;(48000)</td></tr>
+<tr class="separator:ga13e93ba13aeb9dbe3d8139c3cec6fbb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga44cd1427bdbcef427ab758265335c9ca"><td class="memItemLeft" align="right" valign="top">
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>k_samplerate_recipf</b>&#160;&#160;&#160;(2.08333333333333e-005f)</td></tr>
+<tr class="separator:ga44cd1427bdbcef427ab758265335c9ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab80d335a0049301225e41b3d3c3b3c07"><td class="memItemLeft" align="right" valign="top">
 const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__api.html#gab80d335a0049301225e41b3d3c3b3c07">k_osc_api_platform</a></td></tr>
 <tr class="memdesc:gab80d335a0049301225e41b3d3c3b3c07"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current platform. <br /></td></tr>
@@ -127,6 +119,12 @@ const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" 
 const uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__api.html#gaf7fdee41003df8998020340376034d45">k_osc_api_version</a></td></tr>
 <tr class="memdesc:gaf7fdee41003df8998020340376034d45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current API version. <br /></td></tr>
 <tr class="separator:gaf7fdee41003df8998020340376034d45"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3c3dbbc0b0122daeeee4a5380aacf7ac"><td class="memItemLeft" align="right" valign="top">uint32_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__api.html#ga3c3dbbc0b0122daeeee4a5380aacf7ac">_osc_mcu_hash</a> (void)</td></tr>
+<tr class="memdesc:ga3c3dbbc0b0122daeeee4a5380aacf7ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get MCU hash.  <a href="group__osc__api.html#ga3c3dbbc0b0122daeeee4a5380aacf7ac">More...</a><br /></td></tr>
+<tr class="separator:ga3c3dbbc0b0122daeeee4a5380aacf7ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga63b59258169a9277e45f3d0fbe7955e6"><td class="memItemLeft" align="right" valign="top">
+__fast_inline uint32_t&#160;</td><td class="memItemRight" valign="bottom"><b>osc_mcu_hash</b> (void)</td></tr>
+<tr class="separator:ga63b59258169a9277e45f3d0fbe7955e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
 Note to frequency conversion table</h2></td></tr>
@@ -333,7 +331,7 @@ __fast_inline float&#160;</td><td class="memItemRight" valign="bottom"><b>osc_bl
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
 Wave banks.</h2></td></tr>
-<tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrp4774bb87612135e5656df9287e489562"></a> </p><dl class="todo"><dt><b><a class="el" href="todo.html#_todo000002">Todo:</a></b></dt><dd>Explain categorization</dd></dl>
+<tr><td class="ititle" colspan="2"><p><a class="anchor" id="amgrp4774bb87612135e5656df9287e489562"></a>Banks are organized in categories from A to F in order of increasing harmonic components. </p>
 </td></tr>
 <tr class="memitem:gaa74d99d7bb1770993553b99166e5623a"><td class="memItemLeft" align="right" valign="top">
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>k_waves_size_exp</b>&#160;&#160;&#160;(7)</td></tr>
@@ -532,7 +530,7 @@ const float&#160;</td><td class="memItemRight" valign="bottom"><b>bitres_lut_f</
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Nov 29 2019 09:42:23 for Nu:Tekt NTS-1 digital SDK by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Nov 29 2019 09:57:56 for Nu:Tekt NTS-1 digital SDK by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.16
 </small></address>

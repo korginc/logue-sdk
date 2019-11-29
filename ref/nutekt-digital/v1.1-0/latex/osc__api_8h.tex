@@ -12,18 +12,8 @@ Oscillator runtime A\+PI.
 \begin{DoxyCompactItemize}
 \item 
 \#define {\bfseries \+\_\+\+\_\+fast\+\_\+inline}~static inline \+\_\+\+\_\+attribute\+\_\+\+\_\+((always\+\_\+inline, optimize(\char`\"{}Ofast\char`\"{})))
-\item 
-\#define {\bfseries k\+\_\+samplerate}~(48000)
-\item 
-\#define {\bfseries k\+\_\+samplerate\+\_\+recipf}~(2.\+08333333333333e-\/005f)
 \end{DoxyCompactItemize}
 \doxysubsection*{Functions}
-\begin{DoxyCompactItemize}
-\item 
-uint32\+\_\+t \mbox{\hyperlink{group__osc__api_ga3c3dbbc0b0122daeeee4a5380aacf7ac}{\+\_\+osc\+\_\+mcu\+\_\+hash}} (void)
-\begin{DoxyCompactList}\small\item\em Get M\+CU hash. \end{DoxyCompactList}\item 
-\+\_\+\+\_\+fast\+\_\+inline uint32\+\_\+t {\bfseries osc\+\_\+mcu\+\_\+hash} (void)
-\end{DoxyCompactItemize}
 \begin{Indent}\textbf{ Noise source}\par
 \begin{DoxyCompactItemize}
 \item 
@@ -36,13 +26,21 @@ float \mbox{\hyperlink{group__osc__api_ga9482bacf03c6b084dcec03b6cd76e67f}{\+\_\
 \+\_\+\+\_\+fast\+\_\+inline float {\bfseries osc\+\_\+white} (void)
 \end{DoxyCompactItemize}
 \end{Indent}
-\doxysubsection*{Variables}
+\doxysubsection*{Runtime Environment}
 \begin{DoxyCompactItemize}
+\item 
+\#define {\bfseries k\+\_\+samplerate}~(48000)
+\item 
+\#define {\bfseries k\+\_\+samplerate\+\_\+recipf}~(2.\+08333333333333e-\/005f)
 \item 
 const uint32\+\_\+t \mbox{\hyperlink{group__osc__api_gab80d335a0049301225e41b3d3c3b3c07}{k\+\_\+osc\+\_\+api\+\_\+platform}}
 \begin{DoxyCompactList}\small\item\em Current platform. \end{DoxyCompactList}\item 
 const uint32\+\_\+t \mbox{\hyperlink{group__osc__api_gaf7fdee41003df8998020340376034d45}{k\+\_\+osc\+\_\+api\+\_\+version}}
-\begin{DoxyCompactList}\small\item\em Current A\+PI version. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Current A\+PI version. \end{DoxyCompactList}\item 
+uint32\+\_\+t \mbox{\hyperlink{group__osc__api_ga3c3dbbc0b0122daeeee4a5380aacf7ac}{\+\_\+osc\+\_\+mcu\+\_\+hash}} (void)
+\begin{DoxyCompactList}\small\item\em Get M\+CU hash. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+fast\+\_\+inline uint32\+\_\+t {\bfseries osc\+\_\+mcu\+\_\+hash} (void)
+\end{DoxyCompactItemize}
 \doxysubsection*{Note to frequency conversion table}
 \begin{DoxyCompactItemize}
 \item 
@@ -196,9 +194,7 @@ float \mbox{\hyperlink{group__osc__api_ga3d3612eb483369630048ad21c28ac0a0}{\+\_\
 \end{DoxyCompactItemize}
 \doxysubsection*{Wave banks.}
 \label{_amgrp4774bb87612135e5656df9287e489562}%
- \begin{DoxyRefDesc}{Todo}
-\item[\mbox{\hyperlink{todo__todo000002}{Todo}}]Explain categorization\end{DoxyRefDesc}
-\begin{DoxyCompactItemize}
+Banks are organized in categories from A to F in order of increasing harmonic components. \begin{DoxyCompactItemize}
 \item 
 \#define {\bfseries k\+\_\+waves\+\_\+size\+\_\+exp}~(7)
 \item 
