@@ -6,7 +6,7 @@ permalink: /ja/unit-index/
 language: ja
 ---
 
-logue SDKで作られたユーザーオシレーターとエフェクトのリストです. 無償のものと有償のものがあります. 全てを網羅しているわけでは有りませんが, できるだけ沢山リストできるよう努力します. 追加、訂正、リンク切れについては *logue-sdk@korg.co.jp* までご連絡下さい。
+logue SDKで作られたユーザーオシレーターとエフェクトのリストです. 無償のものと有償のものがあります. 全てを網羅しているわけでは有りませんが, できるだけ沢山リストできるよう努力します. 追加,訂正，リンク切れについては *logue-sdk@korg.co.jp* までご連絡下さい.
 
 | [オシレーター](#オシレーター) | [モジュレーション](#モジュレーション) | [ディレイ](#ディレイ) | [リバーブ](#リバーブ) | [その他](#その他) |
 
@@ -51,7 +51,7 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [String](https://sellfy.com/p/Ump7/) | Tim Shoebridge | 7 oscillator 1980's analogue string emulation | paid |
 | [Pluck](https://sellfy.com/p/bG1k/) | Tim Shoebridge | Karplus Strong | paid |
 
-_Note: 追加、訂正、リンク切れについては *logue-sdk@korg.co.jp* までご連絡下さい。_
+_Note: 追加,訂正，リンク切れについては *logue-sdk@korg.co.jp* までご連絡下さい._
 
 ## モジュレーション
 
@@ -68,7 +68,7 @@ _Note: 追加、訂正、リンク切れについては *logue-sdk@korg.co.jp* �
 | [Drift](https://www.sinevibes.com/korgdrift/ ) | Sinevibes | Physically modelled stereo panner based on Lorenz osc. | paid |
 | [SVF](https://www.sinevibes.com/korgsvf/) | Sinevibes | State-variable filter 4 pole, -24dB/oct, resonant | paid |
 
-_Note: 追加、訂正、リンク切れについては *logue-sdk@korg.co.jp* までご連絡下さい。_
+_Note: 追加,訂正，リンク切れについては *logue-sdk@korg.co.jp* までご連絡下さい._
 
 ## ディレイ
 
@@ -86,7 +86,7 @@ _Note: 追加、訂正、リンク切れについては *logue-sdk@korg.co.jp* �
 | [Stutter](https://www.sinevibes.com/korgstutter/) | Sinevibes | Self-randomizing audio repeater | paid |
 | [Timer](https://www.sinevibes.com/korgtime/) | Sinevibes | Ultra wide range delay/looper | paid |
 
-_Note: 追加、訂正、リンク切れについては *logue-sdk@korg.co.jp* までご連絡下さい。_
+_Note: 追加,訂正，リンク切れについては *logue-sdk@korg.co.jp* までご連絡下さい._
 
 ## リバーブ
 
@@ -100,4 +100,4 @@ _Note: 追加、訂正、リンク切れについては *logue-sdk@korg.co.jp* �
 | [wavDesk](https://gumroad.com/l/wavDesk) | Roll-Log Sounds | Generate oscillator from multiple wavetables | donation |
 | [wavShelf](https://gumroad.com/l/wavShelf) | Roll-Log Sounds | Generate oscillator from multiple samples | donation |
 
-_Note: 追加、訂正、リンク切れについては *logue-sdk@korg.co.jp* までご連絡下さい。_
+_Note: 追加,訂正，リンク切れについては *logue-sdk@korg.co.jp* までご連絡下さい._
