@@ -170,7 +170,7 @@ Your main implementation file should include *userosc.h* and implement the follo
 
 ### Modulation Effects API (modfx)
 
-Your main implementation file should include `usermodfx.h` and implement the following functions. For more details see the [Oscillator Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__modfx__inst.html).
+Your main implementation file should include `usermodfx.h` and implement the following functions. For more details see the [Modulation Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__modfx__inst.html).
 
 * `void MODFX_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the effect. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
 
@@ -184,7 +184,7 @@ Your main implementation file should include `usermodfx.h` and implement the fol
 
 ### Delay Effects API (delfx)
 
-Your main implementation file should include `userdelfx.h` and implement the following functions. For more details see the [Oscillator Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__delfx__inst.html).
+Your main implementation file should include `userdelfx.h` and implement the following functions. For more details see the [Delay Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__delfx__inst.html).
 
 * `void DELFX_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the effect. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
 
@@ -196,7 +196,7 @@ Your main implementation file should include `userdelfx.h` and implement the fol
 
 ### Reverb Effects API (revfx)
 
-Your main implementation file should include `userrevfx.h` and implement the following functions. For more details see the [Oscillator Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__revfx__inst.html).
+Your main implementation file should include `userrevfx.h` and implement the following functions. For more details see the [Reverb Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__revfx__inst.html).
 
 * `void REVFX_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the effect. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
 
