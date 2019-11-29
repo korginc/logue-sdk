@@ -66,7 +66,7 @@ Done
 ```
  3. As the *Packaging...* line indicates, a *.mnlgxdunit* file will be generated. This is the final product.
  
-### Manipulating/Using *.mnlgxdunit* Files
+### Using *unit* Files
 
 *.mnlgxdunit* files are simple zip files containing the binary payload for the custom oscillator or effect and a metadata file.
 They can be loaded onto a [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd) using the [logue-cli utility](../../tools/logue-cli/) or the [Librarian application](https://www.korg.com/products/synthesizers/minilogue_xd/librarian_contents.php).

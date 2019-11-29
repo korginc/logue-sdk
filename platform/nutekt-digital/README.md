@@ -66,7 +66,7 @@ Done
 ```
  3. As the *Packaging...* line indicates, a *.ntkdigunit* file will be generated. This is the final product.
  
-### Manipulating/Using *.ntkdigunit* Files
+### Using *unit* Files
 
 *.ntkdigunit* files are simple zip files containing the binary payload for the custom oscillator or effect and a metadata file.
 They can be loaded onto a [NuTekt NTS-1 digital](https://www.korg.com/products/dj/nts_1) using the [logue-cli utility](../../tools/logue-cli/) or the [Librarian application](https://www.korg.com/products/dj/nts_1/librarian_contents.php).
