@@ -147,6 +147,75 @@ manifestファイルはjsonフォーマットで下記の例のように書き�
 
 この *tests/* ディレクトリにはオシレーターやエフェクトの書き方の説明したシンプルなテストコードがあります.　有用なコンテンツではありませんが、環境のテスト等を行う際に参照して下さい.
 
+## Core API
+
+logue SDK での「unit」作成にあたり, 中心となるAPIの概要を説明します.
+
+### オシレーター
+
+主要な機能のソースファイルには *userosc.h* をインクルードし, 下記の関数を含む必要があります.
+
+* `void OSC_INIT(uint32_t platform, uint32_t api)`: オシレーターのインスタンス化の際に呼ばれます. このコールバック関数を使用して必要な初期化処理を行います.
+
+* `void OSC_CYCLE(const user_osc_param_t * const params, int32_t *yn, const uint32_t frames)`: ここで実際の波形が計算されます. この関数は *frames* サンプルで必ず呼ばれます(フレーム毎に1サンプル).
+サンプルは *yn* バッファーに書き込む必要があります. 出力されるサンプルは[Q31 固定小数点フォーマット](https://en.wikipedia.org/wiki/Q_(number_format)) にする必要があります.
+
+    _Note: `inc/utils/fixed_math.h` で定義されている `f32_to_q31(f)` マクロを使うことで, 浮動小数点数をQ31フォーマットに変換できます.  `user_osc_param_t` の定義については `inc/userosc.h`_ も参照して下さい.
+
+    _Note: 最大64フレームまでのバッファサイズをサポートする必要があります. 必要な場合はより小さいバッファーで複数の処理を実行することができます. （2のべき乗で最適化してください : 16, 32, 64）_
+
+* `void OSC_NOTEON(const user_osc_param_t * const params)`: ノート・オン時に呼ばれます.
+
+* `void OSC_NOTEOFF(const user_osc_param_t * const params)`: ノート・オフ時に呼ばれます.
+
+* `void OSC_PARAM(uint16_t index, uint16_t value)`: パラメーター変更時に呼ばれます.
+
+より詳細な情報については [Oscillator Instance API reference](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__osc__inst.html) を参照してください. また, [Oscillator Runtime API](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__osc__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__utils.html) ,  [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/namespacedsp.html) も役に立ちます.
+
+### Modulation Effects API (modfx)
+
+主要な機能のソースファイルには *usermodfx.h* をインクルードし, 下記の関数を含む必要があります.
+
+* `void MODFX_INIT(uint32_t platform, uint32_t api)`: エフェクトのインスタンス化の際に呼ばれます. このコールバック関数を使用して必要な初期化処理を行います. APIについての詳細は `inc/userprg.h` を参照して下さい.
+
+* `void MODFX_PROCESS(const float *main_xn, float *main_yn, const float *sub_xn,  float *sub_yn, uint32_t frames)`: ここでは入力サンプルを処理します. この関数は *frames* サンプルで必ず呼ばれます(フレーム毎に1サンプル). *\*\_xn* は入力バッファ,  *\*\_yn*  は出力バッファとなり, ここで処理結果を書き込みます。
+
+    _Note: prologueの2ティンバーをサポートするために、main\_とsub\_の入力と出力のバージョンがあります. prologueではmainとsubの両方に同じ方法で並列に処理する必要があります. マルチティンバーでないプラットフォームでは *sub\_xn* , *sub\_yn* は無視できます._
+
+    _Note: 最大64フレームまでのバッファサイズをサポートする必要があります. 必要な場合はより小さいバッファーで複数の処理を実行することができます. （2のべき乗で最適化してください : 16, 32, 64）_
+
+* `void MODFX_PARAM(uint8_t index, uint32_t value)`: パラメーター変更時に呼ばれます.
+
+より詳細な情報については [Modulation Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__modfx__inst.html) 参照してください. また, [Effects Runtime API](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__fx__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__utils.html),   [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/namespacedsp.html) も役に立ちます.
+
+### Delay Effects API (delfx)
+
+主要な機能のソースファイルには *userdelfx.h* をインクルードし, 下記の関数を含む必要があります.
+
+* `void DELFX_INIT(uint32_t platform, uint32_t api)`: エフェクトのインスタンス化の際に呼ばれます. このコールバック関数を使用して必要な初期化処理を行います.
+
+* `void DELFX_PROCESS(float *xn, uint32_t frames)`: ここでは入力サンプルを処理します. この関数は *frames* サンプルで必ず呼ばれます(フレーム毎に1サンプル). この場合, *xn* は入力と出力バッファーの両方になります. 結果はDryとWetを適切な割合で合わせて書き込む必要があります. （例: shift-depthパラメーターで設定する）
+
+    _Note: 最大64フレームまでのバッファサイズをサポートする必要があります. 必要な場合はより小さいバッファーで複数の処理を実行することができます. （2のべき乗で最適化してください : 16, 32, 64）_
+    
+* `void DELFX_PARAM(uint8_t index, uint32_t value)`: パラメーター変更時に呼ばれます.
+
+より詳細な情報については [Delay Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__delfx__inst.html) を参照してください. また [Effects Runtime API](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__fx__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__utils.html) , [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/namespacedsp.html) も役に立ちます.
+
+### Reverb Effects API (revfx)
+
+主要な機能のソースファイルには *userrevfx.h* をインクルードし, 下記の関数を含む必要があります.
+
+* `void REVFX_INIT(uint32_t platform, uint32_t api)`: エフェクトのインスタンス化の際に呼ばれます. このコールバック関数を使用して必要な初期化処理を行います. 
+
+* `void REVFX_PROCESS(float *xn, uint32_t frames)`: ここでは入力サンプルを処理します.  この関数は *frames* サンプルで必ず呼ばれます(フレーム毎に1サンプル). この場合, *xn* は入力と出力バッファーの両方になります. 結果はDryとWetを適切な割合で合わせて書き込む必要があります. （例: shift-depthパラメーターで設定する）
+
+    _Note: 最大64フレームまでのバッファサイズをサポートする必要があります. 必要な場合はより小さいバッファーで複数の処理を実行することができます. （2のべき乗で最適化してください : 16, 32, 64）_
+    
+* `void REVFX_PARAM(uint8_t index, uint32_t value)`: パラメーター変更時に呼ばれます.
+
+より詳細な情報については [Reverb Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__revfx__inst.html) を参照してください. また. [Effects Runtime API](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__fx__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__utils.html) , [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/namespacedsp.html) も役に立ちます.
+
 ## Web Assembly Builds _(実験中)_
 
 Web Assembly(Emscripten) のビルドと Web Audio Player がalpha/wasm-builds branchにあります.
