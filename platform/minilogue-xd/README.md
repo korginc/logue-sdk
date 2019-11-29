@@ -152,7 +152,7 @@ Here's an overview of the core API for custom oscillator/effects.
 
 ### Oscillators (osc)
 
-Your main implementation file should include *userosc.h* and implement the following functions. For more details see the [Oscillator Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__osc__inst.html).
+Your main implementation file should include *userosc.h* and implement the following functions. 
 
 * `void OSC_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the oscillator. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
 
@@ -168,9 +168,11 @@ Your main implementation file should include *userosc.h* and implement the follo
 
 * `void OSC_PARAM(uint16_t index, uint16_t value)`: Called whenever the user changes a parameter value.
 
+For more details see the [Oscillator Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__osc__inst.html). Also see the [Oscillator Runtime API](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__osc__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__utils.html) and [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/namespacedsp.html) for useful primitives.
+
 ### Modulation Effects API (modfx)
 
-Your main implementation file should include `usermodfx.h` and implement the following functions. For more details see the [Modulation Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__modfx__inst.html).
+Your main implementation file should include `usermodfx.h` and implement the following functions. 
 
 * `void MODFX_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the effect. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
 
@@ -180,11 +182,13 @@ Your main implementation file should include `usermodfx.h` and implement the fol
 
     _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
 
+For more details see the [Modulation Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__modfx__inst.html). Also see the [Effects Runtime API](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__fx__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__utils.html) and [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/namespacedsp.html) for useful primitives.
+
 * `void MODFX_PARAM(uint8_t index, uint32_t value)`: Called whenever the user changes a parameter value.
 
 ### Delay Effects API (delfx)
 
-Your main implementation file should include `userdelfx.h` and implement the following functions. For more details see the [Delay Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__delfx__inst.html).
+Your main implementation file should include `userdelfx.h` and implement the following functions.
 
 * `void DELFX_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the effect. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
 
@@ -192,11 +196,13 @@ Your main implementation file should include `userdelfx.h` and implement the fol
 
     _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
 
+For more details see the [Delay Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__delfx__inst.html). Also see the [Effects Runtime API](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__fx__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__utils.html) and [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/namespacedsp.html) for useful primitives.
+
 * `void DELFX_PARAM(uint8_t index, uint32_t value)`: Called whenever the user changes a parameter value.
 
 ### Reverb Effects API (revfx)
 
-Your main implementation file should include `userrevfx.h` and implement the following functions. For more details see the [Reverb Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__revfx__inst.html).
+Your main implementation file should include `userrevfx.h` and implement the following functions.
 
 * `void REVFX_INIT(uint32_t platform, uint32_t api)`: Called on instantiation of the effect. Use this callback to perform any required initializations. See `inc/userprg.h` for possible values of platform and api.
 
@@ -205,6 +211,8 @@ Your main implementation file should include `userrevfx.h` and implement the fol
     _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
 
 * `void REVFX_PARAM(uint8_t index, uint32_t value)`: Called whenever the user changes a parameter value.
+
+For more details see the [Reverb Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__revfx__inst.html). Also see the [Effects Runtime API](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__fx__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__utils.html) and [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/namespacedsp.html) for useful primitives.
 
 ## Web Assembly Builds _(experimental)_
 
