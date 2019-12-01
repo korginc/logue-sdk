@@ -65,10 +65,13 @@ extern "C" {
    * User facing parameters
    */
   typedef enum {
-    k_user_delfx_param_time = 0,     /** Time parameter */
-    k_user_delfx_param_depth,        /** Depth parameter */
+    /** Time parameter */
+    k_user_delfx_param_time = 0,
+    /** Depth parameter */
+    k_user_delfx_param_depth,
     k_user_delfx_param_reserved0,
-    k_user_delfx_param_shift_depth,  /** Alternative depth parameter, usually accessible via shift function */
+    /** Alternative depth parameter, usually accessible via shift function */
+    k_user_delfx_param_shift_depth,
     k_num_user_delfx_param_id
   } user_delfx_param_id_t;
 
