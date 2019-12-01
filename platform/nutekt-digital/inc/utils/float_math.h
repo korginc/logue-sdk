@@ -536,7 +536,7 @@ float fastersinf(float x) {
  * @note Adapted from Paul Mineiro's FastFloat
  */
 static inline __attribute__((optimize("Ofast"), always_inline))
-float fastersinfullf(float x) {
+float fastsinfullf(float x) {
   const int32_t k = (int32_t)(x * M_1_TWOPI);
   const float half = (x < 0) ? -0.5f : 0.5f;
   return fastsinf((half + k) * M_TWOPI - x);
@@ -630,6 +630,48 @@ float fastertanfullf(float x) {
   return fastersinf(xnew)/fastercosf(xnew);
 }
 
+/** "Fast" log base 2 approximation, valid for positive x as precision allows.
+ * @note Adapted from Paul Mineiro's FastFloat
+ */
+static inline __attribute__((optimize("Ofast"), always_inline))
+float fastlog2f(float x) {
+  union { float f; uint32_t i; } vx = { x };
+  union { uint32_t i; float f; } mx = { (vx.i & 0x007FFFFF) | 0x3f000000 };
+  float y = vx.i;
+  y *= 1.1920928955078125e-7f;
+
+  return y - 124.22551499f
+           - 1.498030302f * mx.f 
+           - 1.72587999f / (0.3520887068f + mx.f);
+}
+
+/** "Faster" log base 2 approximation, valid for positive x as precision allows.
+ * @note Adapted from Paul Mineiro's FastFloat
+ */
+static inline __attribute__((optimize("Ofast"), always_inline))
+float fasterlog2f(float x) {
+  union { float f; uint32_t i; } vx = { x };
+  float y = (float)(vx.i);
+  y *= 1.1920928955078125e-7f;
+  return y - 126.94269504f;
+}
+
+/** "Fast" natural logarithm approximation, valid for positive x as precision allows.
+ * @note Adapted from Paul Mineiro's FastFloat
+ */
+static inline __attribute__((optimize("Ofast"), always_inline))
+float fastlogf(float x) {
+  return 0.69314718f * fastlog2f(x);
+}
+
+/** "Fast" natural logarithm approximation, valid for positive x as precision allows.
+ * @note Adapted from Paul Mineiro's FastFloat
+ */
+static inline __attribute__((optimize("Ofast"), always_inline))
+float fasterlogf(float x) {
+  return 0.69314718f * fasterlog2f(x);
+}
+
 /** "Fast" power of 2 approximation, valid for x in [ -126, ... as precision allows.
  * @note Adapted from Paul Mineiro's FastFloat
  */
@@ -686,48 +728,6 @@ float fastexpf(float p) {
 static inline __attribute__((optimize("Ofast"), always_inline))
 float fasterexpf(float p) {
   return fasterpow2f(1.442695040f * p);
-}
-
-/** "Fast" log base 2 approximation, valid for positive x as precision allows.
- * @note Adapted from Paul Mineiro's FastFloat
- */
-static inline __attribute__((optimize("Ofast"), always_inline))
-float fastlog2f(float x) {
-  union { float f; uint32_t i; } vx = { x };
-  union { uint32_t i; float f; } mx = { (vx.i & 0x007FFFFF) | 0x3f000000 };
-  float y = vx.i;
-  y *= 1.1920928955078125e-7f;
-
-  return y - 124.22551499f
-           - 1.498030302f * mx.f 
-           - 1.72587999f / (0.3520887068f + mx.f);
-}
-
-/** "Faster" log base 2 approximation, valid for positive x as precision allows.
- * @note Adapted from Paul Mineiro's FastFloat
- */
-static inline __attribute__((optimize("Ofast"), always_inline))
-float fasterlog2f(float x) {
-  union { float f; uint32_t i; } vx = { x };
-  float y = (float)(vx.i);
-  y *= 1.1920928955078125e-7f;
-  return y - 126.94269504f;
-}
-
-/** "Fast" natural logarithm approximation, valid for positive x as precision allows.
- * @note Adapted from Paul Mineiro's FastFloat
- */
-static inline __attribute__((optimize("Ofast"), always_inline))
-float fastlogf(float x) {
-  return 0.69314718f * fastlog2f(x);
-}
-
-/** "Fast" natural logarithm approximation, valid for positive x as precision allows.
- * @note Adapted from Paul Mineiro's FastFloat
- */
-static inline __attribute__((optimize("Ofast"), always_inline))
-float fasterlogf(float x) {
-  return 0.69314718f * fasterlog2f(x);
 }
 
 /*= End of FastFloat derived code =====================================*/
