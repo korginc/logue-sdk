@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['cubicsat_5flut_5ff_1029',['cubicsat_lut_f',['../fx__api_8h.html#a921bef5a01138afa03facfd5b3b23f60',1,'cubicsat_lut_f():&#160;fx_api.h'],['../group__osc__api.html#ga921bef5a01138afa03facfd5b3b23f60',1,'cubicsat_lut_f():&#160;osc_api.h']]],
-  ['cutoff_1030',['cutoff',['../group__osc.html#gac430f8aadb3b0c98927ec4f1168f46d5',1,'user_osc_param']]]
+  ['mcoeffs_491',['mCoeffs',['../structdsp_1_1_bi_quad.html#ad5079f7105d9d97fdff57a19a5af5de0',1,'dsp::BiQuad::mCoeffs()'],['../structdsp_1_1_ext_bi_quad.html#a141e395cc99f1adfb4ea29899f2c7b90',1,'dsp::ExtBiQuad::mCoeffs()']]]
 ];

@@ -11,19 +11,19 @@
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\Hypertarget{group__osc_ga2daeea98d63a34dbd6ea8a659a5669bf}\label{group__osc_ga2daeea98d63a34dbd6ea8a659a5669bf}} 
-int32\+\_\+t {\bfseries user\+\_\+osc\+\_\+param\+::shape\+\_\+lfo}
-\item 
-\mbox{\Hypertarget{group__osc_gab6df9842725b547e7fe0e7e83694a388}\label{group__osc_gab6df9842725b547e7fe0e7e83694a388}} 
-uint16\+\_\+t \mbox{\hyperlink{group__osc_gab6df9842725b547e7fe0e7e83694a388}{user\+\_\+osc\+\_\+param\+::pitch}}
+int32\+\_\+t \mbox{\hyperlink{group__osc_ga2daeea98d63a34dbd6ea8a659a5669bf}{user\+\_\+osc\+\_\+param\+::shape\+\_\+lfo}}
 \begin{DoxyCompactList}\small\item\em Value of L\+FO implicitely applied to shape parameter. \end{DoxyCompactList}\item 
-uint16\+\_\+t \mbox{\hyperlink{group__osc_gac430f8aadb3b0c98927ec4f1168f46d5}{user\+\_\+osc\+\_\+param\+::cutoff}}
+uint16\+\_\+t \mbox{\hyperlink{group__osc_gab6df9842725b547e7fe0e7e83694a388}{user\+\_\+osc\+\_\+param\+::pitch}}
 \begin{DoxyCompactList}\small\item\em Current pitch. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc_gac430f8aadb3b0c98927ec4f1168f46d5}\label{group__osc_gac430f8aadb3b0c98927ec4f1168f46d5}} 
+uint16\+\_\+t \mbox{\hyperlink{group__osc_gac430f8aadb3b0c98927ec4f1168f46d5}{user\+\_\+osc\+\_\+param\+::cutoff}}
+\begin{DoxyCompactList}\small\item\em Current cutoff value (0x0000-\/0x1fff) \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{group__osc_ga25df04811cfc872f701bb29a01ac8e1a}\label{group__osc_ga25df04811cfc872f701bb29a01ac8e1a}} 
 uint16\+\_\+t \mbox{\hyperlink{group__osc_ga25df04811cfc872f701bb29a01ac8e1a}{user\+\_\+osc\+\_\+param\+::resonance}}
-\begin{DoxyCompactList}\small\item\em Current cutoff value (0x0000-\/0x1fff) \end{DoxyCompactList}\item 
-\mbox{\Hypertarget{group__osc_gab5ab8bcf71de04a01422d6ec563aab21}\label{group__osc_gab5ab8bcf71de04a01422d6ec563aab21}} 
-uint16\+\_\+t \mbox{\hyperlink{group__osc_gab5ab8bcf71de04a01422d6ec563aab21}{user\+\_\+osc\+\_\+param\+::reserved0}} \mbox{[}3\mbox{]}
 \begin{DoxyCompactList}\small\item\em Current resonance value (0x0000-\/0x1fff) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{group__osc_gab5ab8bcf71de04a01422d6ec563aab21}\label{group__osc_gab5ab8bcf71de04a01422d6ec563aab21}} 
+uint16\+\_\+t {\bfseries user\+\_\+osc\+\_\+param\+::reserved0} \mbox{[}3\mbox{]}
+\item 
 \mbox{\Hypertarget{group__osc_ga8e99ea555ce375979cd903aa056b29d3}\label{group__osc_ga8e99ea555ce375979cd903aa056b29d3}} 
 uint8\+\_\+t {\bfseries user\+\_\+osc\+\_\+hook\+\_\+table\+::magic} \mbox{[}4\mbox{]}
 \item 
@@ -72,11 +72,11 @@ user\+\_\+osc\+\_\+hook\+\_\+table\+\_\+t {\bfseries user\+\_\+osc\+\_\+data\+::
 
 
 \doxysubsection{Variable Documentation}
-\mbox{\Hypertarget{group__osc_gac430f8aadb3b0c98927ec4f1168f46d5}\label{group__osc_gac430f8aadb3b0c98927ec4f1168f46d5}} 
-\index{Oscillator@{Oscillator}!cutoff@{cutoff}}
-\index{cutoff@{cutoff}!Oscillator@{Oscillator}}
-\doxysubsubsection{\texorpdfstring{cutoff}{cutoff}}
-{\footnotesize\ttfamily uint16\+\_\+t user\+\_\+osc\+\_\+param\+::cutoff}
+\mbox{\Hypertarget{group__osc_gab6df9842725b547e7fe0e7e83694a388}\label{group__osc_gab6df9842725b547e7fe0e7e83694a388}} 
+\index{Oscillator@{Oscillator}!pitch@{pitch}}
+\index{pitch@{pitch}!Oscillator@{Oscillator}}
+\doxysubsubsection{\texorpdfstring{pitch}{pitch}}
+{\footnotesize\ttfamily uint16\+\_\+t user\+\_\+osc\+\_\+param\+::pitch}
 
 
 
@@ -84,5 +84,5 @@ Current pitch.
 
 high byte\+: note number, low byte\+: fine (0-\/255) 
 
-Definition at line 63 of file userosc.\+h.
+Definition at line 64 of file userosc.\+h.
 

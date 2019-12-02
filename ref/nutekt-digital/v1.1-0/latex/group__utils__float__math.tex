@@ -183,8 +183,10 @@ static float \mbox{\hyperlink{group__utils__float__math_gabe8fba5f91c83ed35727cd
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} sine approximation, valid for x in \mbox{[}-\/M\+\_\+\+PI, M\+\_\+\+PI\mbox{]} \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_ga7734d7832184d0b551da0032e9e1afb3}{fastersinf}} (float x)
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} sine approximation, valid for x in \mbox{[}-\/M\+\_\+\+PI, M\+\_\+\+PI\mbox{]} \end{DoxyCompactList}\item 
-static float \mbox{\hyperlink{group__utils__float__math_ga1a19a44b01cb7198f2b64ee6ef947f4d}{fastersinfullf}} (float x)
+static float \mbox{\hyperlink{group__utils__float__math_ga74d25b883133e5d7ecea5f3a77b6849c}{fastsinfullf}} (float x)
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} sine approximation, valid on full x domain \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga1a19a44b01cb7198f2b64ee6ef947f4d}{fastersinfullf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} sine approximation, valid on full x domain \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_ga7ab3410646ef8eb28a7ce60e9b6f4081}{fastcosf}} (float x)
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} cosine approximation, valid for x in \mbox{[}-\/M\+\_\+\+PI, M\+\_\+\+PI\mbox{]} \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_gadaa7faabc0ad1c034c5469b6f5a2fde3}{fastercosf}} (float x)
@@ -201,6 +203,14 @@ static float \mbox{\hyperlink{group__utils__float__math_ga55d426a72df7892ca47358
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} tangent approximation, valid on full x domain, except where tangent diverges. \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_ga86436df956ab41e647eb3f6976a4fd7d}{fastertanfullf}} (float x)
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} tangent approximation, valid on full x domain, except where tangent diverges. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gab3382b32b845d283c014c6bdd7b053d2}{fastlog2f}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} log base 2 approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga846a0fba37a7eccb86c384c2fb925334}{fasterlog2f}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} log base 2 approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga416996e41e2478b6f03f0fd8b40cadb0}{fastlogf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} natural logarithm approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga7d5494c8990209d4f8542aabd94870e8}{fasterlogf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} natural logarithm approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_ga831686adbdc9ba8fa72e90497d29c63e}{fastpow2f}} (float p)
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} power of 2 approximation, valid for x in \mbox{[} -\/126, ... \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_gaafe82bf215bb2eaa05453211b1605365}{fasterpow2f}} (float p)
@@ -213,14 +223,6 @@ static float \mbox{\hyperlink{group__utils__float__math_ga9383bc54895c4b4b47d097
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} exponential approximation, valid for x in \mbox{[} $\sim$ -\/87, ... \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_gaff635a364b1b3553d00a8eb40d8c5f92}{fasterexpf}} (float p)
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} exponential approximation, valid for x in \mbox{[} $\sim$ -\/87, ... \end{DoxyCompactList}\item 
-static float \mbox{\hyperlink{group__utils__float__math_gab3382b32b845d283c014c6bdd7b053d2}{fastlog2f}} (float x)
-\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} log base 2 approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
-static float \mbox{\hyperlink{group__utils__float__math_ga846a0fba37a7eccb86c384c2fb925334}{fasterlog2f}} (float x)
-\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} log base 2 approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
-static float \mbox{\hyperlink{group__utils__float__math_ga416996e41e2478b6f03f0fd8b40cadb0}{fastlogf}} (float x)
-\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} natural logarithm approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
-static float \mbox{\hyperlink{group__utils__float__math_ga7d5494c8990209d4f8542aabd94870e8}{fasterlogf}} (float x)
-\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} natural logarithm approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_gaba79359b20fbaf9ce55ad6399648e531}{fasteratan2f}} (float y, float x)
 \begin{DoxyCompactList}\small\item\em atan2 approximation \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_ga203f54201b3372c744c15996fc28202e}{fastertanhf}} (float x)
@@ -440,13 +442,13 @@ Adapted from Paul Mineiro\textquotesingle{}s Fast\+Float
 \end{DoxyNote}
 
 
-Definition at line 687 of file float\+\_\+math.\+h.
+Definition at line 729 of file float\+\_\+math.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{687                           \{}
-\DoxyCodeLine{688   \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_gaafe82bf215bb2eaa05453211b1605365}{fasterpow2f}}(1.442695040f * p);}
-\DoxyCodeLine{689 \}}
+\DoxyCodeLine{729                           \{}
+\DoxyCodeLine{730   \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_gaafe82bf215bb2eaa05453211b1605365}{fasterpow2f}}(1.442695040f * p);}
+\DoxyCodeLine{731 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__utils__float__math_ga846a0fba37a7eccb86c384c2fb925334}\label{group__utils__float__math_ga846a0fba37a7eccb86c384c2fb925334}} 
@@ -464,16 +466,16 @@ Adapted from Paul Mineiro\textquotesingle{}s Fast\+Float
 \end{DoxyNote}
 
 
-Definition at line 710 of file float\+\_\+math.\+h.
+Definition at line 652 of file float\+\_\+math.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{710                            \{}
-\DoxyCodeLine{711   \textcolor{keyword}{union }\{ \textcolor{keywordtype}{float} f; uint32\_t i; \} vx = \{ x \};}
-\DoxyCodeLine{712   \textcolor{keywordtype}{float} y = (float)(vx.i);}
-\DoxyCodeLine{713   y *= 1.1920928955078125e-\/7f;}
-\DoxyCodeLine{714   \textcolor{keywordflow}{return} y -\/ 126.94269504f;}
-\DoxyCodeLine{715 \}}
+\DoxyCodeLine{652                            \{}
+\DoxyCodeLine{653   \textcolor{keyword}{union }\{ \textcolor{keywordtype}{float} f; uint32\_t i; \} vx = \{ x \};}
+\DoxyCodeLine{654   \textcolor{keywordtype}{float} y = (float)(vx.i);}
+\DoxyCodeLine{655   y *= 1.1920928955078125e-\/7f;}
+\DoxyCodeLine{656   \textcolor{keywordflow}{return} y -\/ 126.94269504f;}
+\DoxyCodeLine{657 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__utils__float__math_ga7d5494c8990209d4f8542aabd94870e8}\label{group__utils__float__math_ga7d5494c8990209d4f8542aabd94870e8}} 
@@ -491,13 +493,13 @@ Adapted from Paul Mineiro\textquotesingle{}s Fast\+Float
 \end{DoxyNote}
 
 
-Definition at line 729 of file float\+\_\+math.\+h.
+Definition at line 671 of file float\+\_\+math.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{729                           \{}
-\DoxyCodeLine{730   \textcolor{keywordflow}{return} 0.69314718f * \mbox{\hyperlink{group__utils__float__math_ga846a0fba37a7eccb86c384c2fb925334}{fasterlog2f}}(x);}
-\DoxyCodeLine{731 \}}
+\DoxyCodeLine{671                           \{}
+\DoxyCodeLine{672   \textcolor{keywordflow}{return} 0.69314718f * \mbox{\hyperlink{group__utils__float__math_ga846a0fba37a7eccb86c384c2fb925334}{fasterlog2f}}(x);}
+\DoxyCodeLine{673 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__utils__float__math_gaafe82bf215bb2eaa05453211b1605365}\label{group__utils__float__math_gaafe82bf215bb2eaa05453211b1605365}} 
@@ -515,15 +517,15 @@ Adapted from Paul Mineiro\textquotesingle{}s Fast\+Float
 \end{DoxyNote}
 
 
-Definition at line 652 of file float\+\_\+math.\+h.
+Definition at line 694 of file float\+\_\+math.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{652                            \{}
-\DoxyCodeLine{653   \textcolor{keywordtype}{float} clipp = (p < -\/126) ? -\/126.0f : p;}
-\DoxyCodeLine{654   \textcolor{keyword}{union }\{ uint32\_t i; \textcolor{keywordtype}{float} f; \} v = \{ (uint32\_t)( (1 << 23) * (clipp + 126.94269504f) ) \};}
-\DoxyCodeLine{655   \textcolor{keywordflow}{return} v.f;}
-\DoxyCodeLine{656 \}}
+\DoxyCodeLine{694                            \{}
+\DoxyCodeLine{695   \textcolor{keywordtype}{float} clipp = (p < -\/126) ? -\/126.0f : p;}
+\DoxyCodeLine{696   \textcolor{keyword}{union }\{ uint32\_t i; \textcolor{keywordtype}{float} f; \} v = \{ (uint32\_t)( (1 << 23) * (clipp + 126.94269504f) ) \};}
+\DoxyCodeLine{697   \textcolor{keywordflow}{return} v.f;}
+\DoxyCodeLine{698 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__utils__float__math_gaaca6894fec4a8a1bb85c2db89608703c}\label{group__utils__float__math_gaaca6894fec4a8a1bb85c2db89608703c}} 
@@ -541,13 +543,13 @@ Adapted from Paul Mineiro\textquotesingle{}s Fast\+Float
 \end{DoxyNote}
 
 
-Definition at line 671 of file float\+\_\+math.\+h.
+Definition at line 713 of file float\+\_\+math.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{671                                    \{}
-\DoxyCodeLine{672   \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_gaafe82bf215bb2eaa05453211b1605365}{fasterpow2f}}(p * \mbox{\hyperlink{group__utils__float__math_ga846a0fba37a7eccb86c384c2fb925334}{fasterlog2f}}(x));}
-\DoxyCodeLine{673 \}}
+\DoxyCodeLine{713                                    \{}
+\DoxyCodeLine{714   \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_gaafe82bf215bb2eaa05453211b1605365}{fasterpow2f}}(p * \mbox{\hyperlink{group__utils__float__math_ga846a0fba37a7eccb86c384c2fb925334}{fasterlog2f}}(x));}
+\DoxyCodeLine{715 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__utils__float__math_ga7734d7832184d0b551da0032e9e1afb3}\label{group__utils__float__math_ga7734d7832184d0b551da0032e9e1afb3}} 
@@ -591,24 +593,22 @@ Definition at line 524 of file float\+\_\+math.\+h.
 
 
 
-\char`\"{}\+Fast\char`\"{} sine approximation, valid on full x domain 
-
-\char`\"{}\+Faster\char`\"{} sine approximation, valid on full x domain
+\char`\"{}\+Faster\char`\"{} sine approximation, valid on full x domain 
 
 \begin{DoxyNote}{Note}
 Adapted from Paul Mineiro\textquotesingle{}s Fast\+Float 
 \end{DoxyNote}
 
 
-Definition at line 539 of file float\+\_\+math.\+h.
+Definition at line 549 of file float\+\_\+math.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{539                               \{}
-\DoxyCodeLine{540   \textcolor{keyword}{const} int32\_t k = (int32\_t)(x * M\_1\_TWOPI);}
-\DoxyCodeLine{541   \textcolor{keyword}{const} \textcolor{keywordtype}{float} half = (x < 0) ? -\/0.5f : 0.5f;}
-\DoxyCodeLine{542   \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_gabe8fba5f91c83ed35727cd0d6ac9493a}{fastsinf}}((half + k) * M\_TWOPI -\/ x);}
-\DoxyCodeLine{543 \}}
+\DoxyCodeLine{549                               \{}
+\DoxyCodeLine{550   \textcolor{keyword}{const} int32\_t k = (int32\_t)(x * M\_1\_TWOPI);}
+\DoxyCodeLine{551   \textcolor{keyword}{const} \textcolor{keywordtype}{float} half = (x < 0) ? -\/0.5f : 0.5f;}
+\DoxyCodeLine{552   \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga7734d7832184d0b551da0032e9e1afb3}{fastersinf}}((half + k) * M\_TWOPI -\/ x);}
+\DoxyCodeLine{553 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__utils__float__math_ga39163ff013951956b488a1fd40793787}\label{group__utils__float__math_ga39163ff013951956b488a1fd40793787}} 
@@ -706,13 +706,13 @@ Adapted from Paul Mineiro\textquotesingle{}s Fast\+Float
 \end{DoxyNote}
 
 
-Definition at line 679 of file float\+\_\+math.\+h.
+Definition at line 721 of file float\+\_\+math.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{679                         \{}
-\DoxyCodeLine{680   \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga831686adbdc9ba8fa72e90497d29c63e}{fastpow2f}}(1.442695040f * p);}
-\DoxyCodeLine{681 \}}
+\DoxyCodeLine{721                         \{}
+\DoxyCodeLine{722   \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga831686adbdc9ba8fa72e90497d29c63e}{fastpow2f}}(1.442695040f * p);}
+\DoxyCodeLine{723 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__utils__float__math_gab3382b32b845d283c014c6bdd7b053d2}\label{group__utils__float__math_gab3382b32b845d283c014c6bdd7b053d2}} 
@@ -730,20 +730,20 @@ Adapted from Paul Mineiro\textquotesingle{}s Fast\+Float
 \end{DoxyNote}
 
 
-Definition at line 695 of file float\+\_\+math.\+h.
+Definition at line 637 of file float\+\_\+math.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{695                          \{}
-\DoxyCodeLine{696   \textcolor{keyword}{union }\{ \textcolor{keywordtype}{float} f; uint32\_t i; \} vx = \{ x \};}
-\DoxyCodeLine{697   \textcolor{keyword}{union }\{ uint32\_t i; \textcolor{keywordtype}{float} f; \} mx = \{ (vx.i \& 0x007FFFFF) | 0x3f000000 \};}
-\DoxyCodeLine{698   \textcolor{keywordtype}{float} y = vx.i;}
-\DoxyCodeLine{699   y *= 1.1920928955078125e-\/7f;}
-\DoxyCodeLine{700 }
-\DoxyCodeLine{701   \textcolor{keywordflow}{return} y -\/ 124.22551499f}
-\DoxyCodeLine{702            -\/ 1.498030302f * mx.f }
-\DoxyCodeLine{703            -\/ 1.72587999f / (0.3520887068f + mx.f);}
-\DoxyCodeLine{704 \}}
+\DoxyCodeLine{637                          \{}
+\DoxyCodeLine{638   \textcolor{keyword}{union }\{ \textcolor{keywordtype}{float} f; uint32\_t i; \} vx = \{ x \};}
+\DoxyCodeLine{639   \textcolor{keyword}{union }\{ uint32\_t i; \textcolor{keywordtype}{float} f; \} mx = \{ (vx.i \& 0x007FFFFF) | 0x3f000000 \};}
+\DoxyCodeLine{640   \textcolor{keywordtype}{float} y = vx.i;}
+\DoxyCodeLine{641   y *= 1.1920928955078125e-\/7f;}
+\DoxyCodeLine{642 }
+\DoxyCodeLine{643   \textcolor{keywordflow}{return} y -\/ 124.22551499f}
+\DoxyCodeLine{644            -\/ 1.498030302f * mx.f }
+\DoxyCodeLine{645            -\/ 1.72587999f / (0.3520887068f + mx.f);}
+\DoxyCodeLine{646 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__utils__float__math_ga416996e41e2478b6f03f0fd8b40cadb0}\label{group__utils__float__math_ga416996e41e2478b6f03f0fd8b40cadb0}} 
@@ -761,13 +761,13 @@ Adapted from Paul Mineiro\textquotesingle{}s Fast\+Float
 \end{DoxyNote}
 
 
-Definition at line 721 of file float\+\_\+math.\+h.
+Definition at line 663 of file float\+\_\+math.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{721                         \{}
-\DoxyCodeLine{722   \textcolor{keywordflow}{return} 0.69314718f * \mbox{\hyperlink{group__utils__float__math_gab3382b32b845d283c014c6bdd7b053d2}{fastlog2f}}(x);}
-\DoxyCodeLine{723 \}}
+\DoxyCodeLine{663                         \{}
+\DoxyCodeLine{664   \textcolor{keywordflow}{return} 0.69314718f * \mbox{\hyperlink{group__utils__float__math_gab3382b32b845d283c014c6bdd7b053d2}{fastlog2f}}(x);}
+\DoxyCodeLine{665 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__utils__float__math_ga831686adbdc9ba8fa72e90497d29c63e}\label{group__utils__float__math_ga831686adbdc9ba8fa72e90497d29c63e}} 
@@ -785,20 +785,20 @@ Adapted from Paul Mineiro\textquotesingle{}s Fast\+Float
 \end{DoxyNote}
 
 
-Definition at line 637 of file float\+\_\+math.\+h.
+Definition at line 679 of file float\+\_\+math.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{637                          \{}
-\DoxyCodeLine{638   \textcolor{keywordtype}{float} clipp = (p < -\/126) ? -\/126.0f : p;}
-\DoxyCodeLine{639   \textcolor{keywordtype}{int} w = clipp;}
-\DoxyCodeLine{640   \textcolor{keywordtype}{float} z = clipp -\/ w + 1.f;}
-\DoxyCodeLine{641   \textcolor{keyword}{union }\{ uint32\_t i; \textcolor{keywordtype}{float} f; \} v = \{ (uint32\_t) ( (1 << 23) * }
-\DoxyCodeLine{642       (clipp + 121.2740575f + 27.7280233f / (4.84252568f -\/ z) -\/ 1.49012907f * z)}
-\DoxyCodeLine{643       ) \};}
-\DoxyCodeLine{644 }
-\DoxyCodeLine{645   \textcolor{keywordflow}{return} v.f;}
-\DoxyCodeLine{646 \}}
+\DoxyCodeLine{679                          \{}
+\DoxyCodeLine{680   \textcolor{keywordtype}{float} clipp = (p < -\/126) ? -\/126.0f : p;}
+\DoxyCodeLine{681   \textcolor{keywordtype}{int} w = clipp;}
+\DoxyCodeLine{682   \textcolor{keywordtype}{float} z = clipp -\/ w + 1.f;}
+\DoxyCodeLine{683   \textcolor{keyword}{union }\{ uint32\_t i; \textcolor{keywordtype}{float} f; \} v = \{ (uint32\_t) ( (1 << 23) * }
+\DoxyCodeLine{684       (clipp + 121.2740575f + 27.7280233f / (4.84252568f -\/ z) -\/ 1.49012907f * z)}
+\DoxyCodeLine{685       ) \};}
+\DoxyCodeLine{686 }
+\DoxyCodeLine{687   \textcolor{keywordflow}{return} v.f;}
+\DoxyCodeLine{688 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__utils__float__math_gaf3f5a109307a5da9c855fbb6fa934def}\label{group__utils__float__math_gaf3f5a109307a5da9c855fbb6fa934def}} 
@@ -818,13 +818,13 @@ Warning\+: Seems to have divergent segments with discontinuities for some base/e
 \end{DoxyNote}
 
 
-Definition at line 663 of file float\+\_\+math.\+h.
+Definition at line 705 of file float\+\_\+math.\+h.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{663                                  \{}
-\DoxyCodeLine{664   \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga831686adbdc9ba8fa72e90497d29c63e}{fastpow2f}}(p * \mbox{\hyperlink{group__utils__float__math_gab3382b32b845d283c014c6bdd7b053d2}{fastlog2f}}(x));}
-\DoxyCodeLine{665 \}}
+\DoxyCodeLine{705                                  \{}
+\DoxyCodeLine{706   \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_ga831686adbdc9ba8fa72e90497d29c63e}{fastpow2f}}(p * \mbox{\hyperlink{group__utils__float__math_gab3382b32b845d283c014c6bdd7b053d2}{fastlog2f}}(x));}
+\DoxyCodeLine{707 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__utils__float__math_gabe8fba5f91c83ed35727cd0d6ac9493a}\label{group__utils__float__math_gabe8fba5f91c83ed35727cd0d6ac9493a}} 
@@ -865,6 +865,32 @@ Definition at line 499 of file float\+\_\+math.\+h.
 \DoxyCodeLine{515 }
 \DoxyCodeLine{516   \textcolor{keywordflow}{return} q * qpprox + qpproxsq * (p.f + qpproxsq * (r.f + qpproxsq * s.f));}
 \DoxyCodeLine{517 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{group__utils__float__math_ga74d25b883133e5d7ecea5f3a77b6849c}\label{group__utils__float__math_ga74d25b883133e5d7ecea5f3a77b6849c}} 
+\index{Floating-\/Point Math@{Floating-\/Point Math}!fastsinfullf@{fastsinfullf}}
+\index{fastsinfullf@{fastsinfullf}!Floating-\/Point Math@{Floating-\/Point Math}}
+\doxysubsubsection{\texorpdfstring{fastsinfullf()}{fastsinfullf()}}
+{\footnotesize\ttfamily static float fastsinfullf (\begin{DoxyParamCaption}\item[{float}]{x }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}
+
+
+
+\char`\"{}\+Fast\char`\"{} sine approximation, valid on full x domain 
+
+\begin{DoxyNote}{Note}
+Adapted from Paul Mineiro\textquotesingle{}s Fast\+Float 
+\end{DoxyNote}
+
+
+Definition at line 539 of file float\+\_\+math.\+h.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{539                             \{}
+\DoxyCodeLine{540   \textcolor{keyword}{const} int32\_t k = (int32\_t)(x * M\_1\_TWOPI);}
+\DoxyCodeLine{541   \textcolor{keyword}{const} \textcolor{keywordtype}{float} half = (x < 0) ? -\/0.5f : 0.5f;}
+\DoxyCodeLine{542   \textcolor{keywordflow}{return} \mbox{\hyperlink{group__utils__float__math_gabe8fba5f91c83ed35727cd0d6ac9493a}{fastsinf}}((half + k) * M\_TWOPI -\/ x);}
+\DoxyCodeLine{543 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{group__utils__float__math_ga27c8c5d3c3176ec9ac707a7119876b98}\label{group__utils__float__math_ga27c8c5d3c3176ec9ac707a7119876b98}} 

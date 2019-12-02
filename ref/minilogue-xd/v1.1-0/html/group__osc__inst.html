@@ -66,8 +66,7 @@ $(function() {
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#define-members">Macros</a> &#124;
 <a href="#typedef-members">Typedefs</a> &#124;
-<a href="#enum-members">Enumerations</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#enum-members">Enumerations</a>  </div>
   <div class="headertitle">
 <div class="title">Oscillator Instance (osc)<div class="ingroups"><a class="el" href="group__osc.html">Oscillator</a></div></div>  </div>
 </div><!--header-->
@@ -76,28 +75,70 @@ $(function() {
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser__osc__param.html">user_osc_param</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser__osc__hook__table.html">user_osc_hook_table</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structuser__osc__data.html">user_osc_data</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal realtime parameters.  <a href="structuser__osc__param.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="define-members"></a>
 Macros</h2></td></tr>
 <tr class="memitem:ga72749128a5dd70093194c1cb2f67910d"><td class="memItemLeft" align="right" valign="top"><a id="ga72749128a5dd70093194c1cb2f67910d"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>param_val_to_f32</b>(val)&#160;&#160;&#160;((uint16_t)val * 9.77517106549365e-004f)</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__inst.html#ga72749128a5dd70093194c1cb2f67910d">param_val_to_f32</a>(val)&#160;&#160;&#160;((uint16_t)val * 9.77517106549365e-004f)</td></tr>
+<tr class="memdesc:ga72749128a5dd70093194c1cb2f67910d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Convert 10bit parameter values to float. <br /></td></tr>
 <tr class="separator:ga72749128a5dd70093194c1cb2f67910d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
+Typedefs</h2></td></tr>
+<tr class="memitem:gabbafa473e22967ee64899cd4dd140bf6"><td class="memItemLeft" align="right" valign="top"><a id="gabbafa473e22967ee64899cd4dd140bf6"></a>
+typedef struct <a class="el" href="structuser__osc__param.html">user_osc_param</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__inst.html#gabbafa473e22967ee64899cd4dd140bf6">user_osc_param_t</a></td></tr>
+<tr class="memdesc:gabbafa473e22967ee64899cd4dd140bf6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal realtime parameters. <br /></td></tr>
+<tr class="separator:gabbafa473e22967ee64899cd4dd140bf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:ga389ccf713f8ed0c77fec90998c5804ff"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__inst.html#ga389ccf713f8ed0c77fec90998c5804ff">user_osc_param_id_t</a> { <br />
+&#160;&#160;<a class="el" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffacb8cacb5ac3ea5ee23b52faf038c5a7e">k_user_osc_param_id1</a> = 0, 
+<a class="el" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e">k_user_osc_param_id2</a>, 
+<a class="el" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc">k_user_osc_param_id3</a>, 
+<a class="el" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa">k_user_osc_param_id4</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688">k_user_osc_param_id5</a>, 
+<a class="el" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd">k_user_osc_param_id6</a>, 
+<a class="el" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5">k_user_osc_param_shape</a>, 
+<a class="el" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d">k_user_osc_param_shiftshape</a>, 
+<br />
+&#160;&#160;<b>k_num_user_osc_param_id</b>
+<br />
+ }</td></tr>
+<tr class="memdesc:ga389ccf713f8ed0c77fec90998c5804ff"><td class="mdescLeft">&#160;</td><td class="mdescRight">User facing osc-specific parameters.  <a href="group__osc__inst.html#ga389ccf713f8ed0c77fec90998c5804ff">More...</a><br /></td></tr>
+<tr class="separator:ga389ccf713f8ed0c77fec90998c5804ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="member-group"></a>
+Core API</h2></td></tr>
+<tr class="memitem:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a> (uint32_t platform, uint32_t api)</td></tr>
+<tr class="memdesc:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialization callback.  <a href="group__osc__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">More...</a><br /></td></tr>
+<tr class="separator:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga5fdcf65ee3fb8562620dc05cb4377b2f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__inst.html#ga5fdcf65ee3fb8562620dc05cb4377b2f">_hook_cycle</a> (const <a class="el" href="group__osc__inst.html#gabbafa473e22967ee64899cd4dd140bf6">user_osc_param_t</a> *const params, int32_t *yn, const uint32_t frames)</td></tr>
+<tr class="memdesc:ga5fdcf65ee3fb8562620dc05cb4377b2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rendering callback.  <a href="group__osc__inst.html#ga5fdcf65ee3fb8562620dc05cb4377b2f">More...</a><br /></td></tr>
+<tr class="separator:ga5fdcf65ee3fb8562620dc05cb4377b2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae328f96aa574fd6f5a845fbb55500efe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__inst.html#gae328f96aa574fd6f5a845fbb55500efe">_hook_on</a> (const <a class="el" href="group__osc__inst.html#gabbafa473e22967ee64899cd4dd140bf6">user_osc_param_t</a> *const params)</td></tr>
+<tr class="memdesc:gae328f96aa574fd6f5a845fbb55500efe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Note on callback.  <a href="group__osc__inst.html#gae328f96aa574fd6f5a845fbb55500efe">More...</a><br /></td></tr>
+<tr class="separator:gae328f96aa574fd6f5a845fbb55500efe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga93a9b6927a917951dac4887808da3605"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__inst.html#ga93a9b6927a917951dac4887808da3605">_hook_off</a> (const <a class="el" href="group__osc__inst.html#gabbafa473e22967ee64899cd4dd140bf6">user_osc_param_t</a> *const params)</td></tr>
+<tr class="memdesc:ga93a9b6927a917951dac4887808da3605"><td class="mdescLeft">&#160;</td><td class="mdescRight">Note off callback.  <a href="group__osc__inst.html#ga93a9b6927a917951dac4887808da3605">More...</a><br /></td></tr>
+<tr class="separator:ga93a9b6927a917951dac4887808da3605"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae7b024ad4e7abb4f5ac93e3de5568e30"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__osc__inst.html#gae7b024ad4e7abb4f5ac93e3de5568e30">_hook_param</a> (uint16_t index, uint16_t value)</td></tr>
+<tr class="memdesc:gae7b024ad4e7abb4f5ac93e3de5568e30"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parameter change callback.  <a href="group__osc__inst.html#gae7b024ad4e7abb4f5ac93e3de5568e30">More...</a><br /></td></tr>
+<tr class="separator:gae7b024ad4e7abb4f5ac93e3de5568e30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga33cc9776891bdb1a200bef208a59a3c3"><td class="memItemLeft" align="right" valign="top"><a id="ga33cc9776891bdb1a200bef208a59a3c3"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>OSC_INIT</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a></td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>OSC_INIT</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__osc__inst.html#ga3fa3290dddc1fe71cdb7dfc075c4ad94">_hook_init</a></td></tr>
 <tr class="separator:ga33cc9776891bdb1a200bef208a59a3c3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga11022a022f3b4d0415840f5a0ef30f10"><td class="memItemLeft" align="right" valign="top"><a id="ga11022a022f3b4d0415840f5a0ef30f10"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>OSC_CYCLE</b>&#160;&#160;&#160;__attribute__((used)) _hook_cycle</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>OSC_CYCLE</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__osc__inst.html#ga5fdcf65ee3fb8562620dc05cb4377b2f">_hook_cycle</a></td></tr>
 <tr class="separator:ga11022a022f3b4d0415840f5a0ef30f10"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabd95d8168965054097f665809ca9e9b8"><td class="memItemLeft" align="right" valign="top"><a id="gabd95d8168965054097f665809ca9e9b8"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>OSC_NOTEON</b>&#160;&#160;&#160;__attribute__((used)) _hook_on</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>OSC_NOTEON</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__osc__inst.html#gae328f96aa574fd6f5a845fbb55500efe">_hook_on</a></td></tr>
 <tr class="separator:gabd95d8168965054097f665809ca9e9b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad5ca928ca9d633b7c9551c5ba1c1515a"><td class="memItemLeft" align="right" valign="top"><a id="gad5ca928ca9d633b7c9551c5ba1c1515a"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>OSC_NOTEOFF</b>&#160;&#160;&#160;__attribute__((used)) _hook_off</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>OSC_NOTEOFF</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__osc__inst.html#ga93a9b6927a917951dac4887808da3605">_hook_off</a></td></tr>
 <tr class="separator:gad5ca928ca9d633b7c9551c5ba1c1515a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3b05b4465e35bafb0120bda796714e23"><td class="memItemLeft" align="right" valign="top"><a id="ga3b05b4465e35bafb0120bda796714e23"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>OSC_MUTE</b>&#160;&#160;&#160;__attribute__((used)) _hook_mute</td></tr>
@@ -106,98 +147,255 @@ Macros</h2></td></tr>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>OSC_VALUE</b>&#160;&#160;&#160;__attribute__((used)) _hook_value</td></tr>
 <tr class="separator:ga02682feb445d88186d6d40048f85ae88"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaee8e04514599c0dd9c2bc9bb9d756712"><td class="memItemLeft" align="right" valign="top"><a id="gaee8e04514599c0dd9c2bc9bb9d756712"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>OSC_PARAM</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__revfx__inst.html#gae3cedf87a00cacb4008e52ce1fe1ca60">_hook_param</a></td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>OSC_PARAM</b>&#160;&#160;&#160;__attribute__((used)) <a class="el" href="group__osc__inst.html#gae7b024ad4e7abb4f5ac93e3de5568e30">_hook_param</a></td></tr>
 <tr class="separator:gaee8e04514599c0dd9c2bc9bb9d756712"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="typedef-members"></a>
-Typedefs</h2></td></tr>
-<tr class="memitem:gabbafa473e22967ee64899cd4dd140bf6"><td class="memItemLeft" align="right" valign="top"><a id="gabbafa473e22967ee64899cd4dd140bf6"></a>
-typedef struct <a class="el" href="structuser__osc__param.html">user_osc_param</a>&#160;</td><td class="memItemRight" valign="bottom"><b>user_osc_param_t</b></td></tr>
-<tr class="separator:gabbafa473e22967ee64899cd4dd140bf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaab1bfc7940a2ceea55807f35862954c4"><td class="memItemLeft" align="right" valign="top"><a id="gaab1bfc7940a2ceea55807f35862954c4"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserOscFuncEntry</b>) (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:gaab1bfc7940a2ceea55807f35862954c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga78dcbd45d8c983b785e177f46be5adc5"><td class="memItemLeft" align="right" valign="top"><a id="ga78dcbd45d8c983b785e177f46be5adc5"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserOscFuncInit</b>) (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:ga78dcbd45d8c983b785e177f46be5adc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf6eb24eac87ce2fa61daf7ddd9285560"><td class="memItemLeft" align="right" valign="top"><a id="gaf6eb24eac87ce2fa61daf7ddd9285560"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserOscFuncCycle</b>) (const <a class="el" href="structuser__osc__param.html">user_osc_param_t</a> *const params, int32_t *buf, const uint32_t frames)</td></tr>
-<tr class="separator:gaf6eb24eac87ce2fa61daf7ddd9285560"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gac01a8d7aa8ccfe91afec468e746a90e9"><td class="memItemLeft" align="right" valign="top"><a id="gac01a8d7aa8ccfe91afec468e746a90e9"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserOscFuncOn</b>) (const <a class="el" href="structuser__osc__param.html">user_osc_param_t</a> *const params)</td></tr>
-<tr class="separator:gac01a8d7aa8ccfe91afec468e746a90e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga4c35d0840a6c9cad501ae7cbf12d8678"><td class="memItemLeft" align="right" valign="top"><a id="ga4c35d0840a6c9cad501ae7cbf12d8678"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserOscFuncOff</b>) (const <a class="el" href="structuser__osc__param.html">user_osc_param_t</a> *const params)</td></tr>
-<tr class="separator:ga4c35d0840a6c9cad501ae7cbf12d8678"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3008fb811b74a456b1a15ffb75687514"><td class="memItemLeft" align="right" valign="top"><a id="ga3008fb811b74a456b1a15ffb75687514"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserOscFuncMute</b>) (const <a class="el" href="structuser__osc__param.html">user_osc_param_t</a> *const params)</td></tr>
-<tr class="separator:ga3008fb811b74a456b1a15ffb75687514"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gab56dae17806aefbf1d383d55f9417da6"><td class="memItemLeft" align="right" valign="top"><a id="gab56dae17806aefbf1d383d55f9417da6"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserOscFuncValue</b>) (uint16_t value)</td></tr>
-<tr class="separator:gab56dae17806aefbf1d383d55f9417da6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad6188423c521059962e2379ef0fa2431"><td class="memItemLeft" align="right" valign="top"><a id="gad6188423c521059962e2379ef0fa2431"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserOscFuncParam</b>) (uint16_t idx, uint16_t value)</td></tr>
-<tr class="separator:gad6188423c521059962e2379ef0fa2431"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga46b2a977d4e2041215e6db5b763a9568"><td class="memItemLeft" align="right" valign="top"><a id="ga46b2a977d4e2041215e6db5b763a9568"></a>
-typedef void(*&#160;</td><td class="memItemRight" valign="bottom"><b>UserOscFuncDummy</b>) (void)</td></tr>
-<tr class="separator:ga46b2a977d4e2041215e6db5b763a9568"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga54f5d441197d9809f08bc815bc35ff35"><td class="memItemLeft" align="right" valign="top"><a id="ga54f5d441197d9809f08bc815bc35ff35"></a>
-typedef struct <a class="el" href="structuser__osc__hook__table.html">user_osc_hook_table</a>&#160;</td><td class="memItemRight" valign="bottom"><b>user_osc_hook_table_t</b></td></tr>
-<tr class="separator:ga54f5d441197d9809f08bc815bc35ff35"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gafbe831b5b560a00dff250fde3c63ca7d"><td class="memItemLeft" align="right" valign="top"><a id="gafbe831b5b560a00dff250fde3c63ca7d"></a>
-typedef struct <a class="el" href="structuser__osc__data.html">user_osc_data</a>&#160;</td><td class="memItemRight" valign="bottom"><b>user_osc_data_t</b></td></tr>
-<tr class="separator:gafbe831b5b560a00dff250fde3c63ca7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
-Enumerations</h2></td></tr>
-<tr class="memitem:ga389ccf713f8ed0c77fec90998c5804ff"><td class="memItemLeft" align="right" valign="top"><a id="ga389ccf713f8ed0c77fec90998c5804ff"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>user_osc_param_id_t</b> { <br />
-&#160;&#160;<b>k_user_osc_param_id1</b> = 0, 
-<b>k_user_osc_param_id2</b>, 
-<b>k_user_osc_param_id3</b>, 
-<b>k_user_osc_param_id4</b>, 
-<br />
-&#160;&#160;<b>k_user_osc_param_id5</b>, 
-<b>k_user_osc_param_id6</b>, 
-<b>k_user_osc_param_shape</b>, 
-<b>k_user_osc_param_shiftshape</b>, 
-<br />
-&#160;&#160;<b>k_num_user_osc_param_id</b>
-<br />
- }</td></tr>
-<tr class="separator:ga389ccf713f8ed0c77fec90998c5804ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
-Functions</h2></td></tr>
-<tr class="memitem:gacb26647b7b28ca29f52fabdcbed3a152"><td class="memItemLeft" align="right" valign="top"><a id="gacb26647b7b28ca29f52fabdcbed3a152"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_entry</b> (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:gacb26647b7b28ca29f52fabdcbed3a152"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memItemLeft" align="right" valign="top"><a id="ga3fa3290dddc1fe71cdb7dfc075c4ad94"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_init</b> (uint32_t platform, uint32_t api)</td></tr>
-<tr class="separator:ga3fa3290dddc1fe71cdb7dfc075c4ad94"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga5fdcf65ee3fb8562620dc05cb4377b2f"><td class="memItemLeft" align="right" valign="top"><a id="ga5fdcf65ee3fb8562620dc05cb4377b2f"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_cycle</b> (const <a class="el" href="structuser__osc__param.html">user_osc_param_t</a> *const params, int32_t *yn, const uint32_t frames)</td></tr>
-<tr class="separator:ga5fdcf65ee3fb8562620dc05cb4377b2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae328f96aa574fd6f5a845fbb55500efe"><td class="memItemLeft" align="right" valign="top"><a id="gae328f96aa574fd6f5a845fbb55500efe"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_on</b> (const <a class="el" href="structuser__osc__param.html">user_osc_param_t</a> *const params)</td></tr>
-<tr class="separator:gae328f96aa574fd6f5a845fbb55500efe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga93a9b6927a917951dac4887808da3605"><td class="memItemLeft" align="right" valign="top"><a id="ga93a9b6927a917951dac4887808da3605"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_off</b> (const <a class="el" href="structuser__osc__param.html">user_osc_param_t</a> *const params)</td></tr>
-<tr class="separator:ga93a9b6927a917951dac4887808da3605"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga0c504dfa1ba1dba51cbd96f9bf6b76f6"><td class="memItemLeft" align="right" valign="top"><a id="ga0c504dfa1ba1dba51cbd96f9bf6b76f6"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_mute</b> (const <a class="el" href="structuser__osc__param.html">user_osc_param_t</a> *const params)</td></tr>
-<tr class="separator:ga0c504dfa1ba1dba51cbd96f9bf6b76f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3a62c9f7a48dbf3578ec598dfe54dddb"><td class="memItemLeft" align="right" valign="top"><a id="ga3a62c9f7a48dbf3578ec598dfe54dddb"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_value</b> (uint16_t value)</td></tr>
-<tr class="separator:ga3a62c9f7a48dbf3578ec598dfe54dddb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae7b024ad4e7abb4f5ac93e3de5568e30"><td class="memItemLeft" align="right" valign="top"><a id="gae7b024ad4e7abb4f5ac93e3de5568e30"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>_hook_param</b> (uint16_t index, uint16_t value)</td></tr>
-<tr class="separator:gae7b024ad4e7abb4f5ac93e3de5568e30"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="ga389ccf713f8ed0c77fec90998c5804ff"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga389ccf713f8ed0c77fec90998c5804ff">&#9670;&nbsp;</a></span>user_osc_param_id_t</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__osc__inst.html#ga389ccf713f8ed0c77fec90998c5804ff">user_osc_param_id_t</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>User facing osc-specific parameters. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga389ccf713f8ed0c77fec90998c5804ffacb8cacb5ac3ea5ee23b52faf038c5a7e"></a>k_user_osc_param_id1&#160;</td><td class="fielddoc"><p>Edit parameter 1. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e"></a>k_user_osc_param_id2&#160;</td><td class="fielddoc"><p>Edit parameter 2. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc"></a>k_user_osc_param_id3&#160;</td><td class="fielddoc"><p>Edit parameter 3. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa"></a>k_user_osc_param_id4&#160;</td><td class="fielddoc"><p>Edit parameter 4. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688"></a>k_user_osc_param_id5&#160;</td><td class="fielddoc"><p>Edit parameter 5. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd"></a>k_user_osc_param_id6&#160;</td><td class="fielddoc"><p>Edit parameter 6. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5"></a>k_user_osc_param_shape&#160;</td><td class="fielddoc"><p>Shape parameter. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d"></a>k_user_osc_param_shiftshape&#160;</td><td class="fielddoc"><p>Alternative Shape parameter: generally available via a shift function. </p>
+</td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="userosc_8h_source.html#l00075">75</a> of file <a class="el" href="userosc_8h_source.html">userosc.h</a>.</p>
+<div class="fragment"><div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;               {</div>
+<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffacb8cacb5ac3ea5ee23b52faf038c5a7e">k_user_osc_param_id1</a> = 0,</div>
+<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e">k_user_osc_param_id2</a>,</div>
+<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc">k_user_osc_param_id3</a>,</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa">k_user_osc_param_id4</a>,</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688">k_user_osc_param_id5</a>,</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd">k_user_osc_param_id6</a>,</div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5">k_user_osc_param_shape</a>,</div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;    <a class="code" href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d">k_user_osc_param_shiftshape</a>,</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    k_num_user_osc_param_id</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;  } <a class="code" href="group__osc__inst.html#ga389ccf713f8ed0c77fec90998c5804ff">user_osc_param_id_t</a>;</div>
+</div><!-- fragment -->
+</div>
+</div>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="ga5fdcf65ee3fb8562620dc05cb4377b2f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga5fdcf65ee3fb8562620dc05cb4377b2f">&#9670;&nbsp;</a></span>_hook_cycle()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _hook_cycle </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__osc__inst.html#gabbafa473e22967ee64899cd4dd140bf6">user_osc_param_t</a> *const&#160;</td>
+          <td class="paramname"><em>params</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t *&#160;</td>
+          <td class="paramname"><em>yn</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint32_t&#160;</td>
+          <td class="paramname"><em>frames</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Rendering callback. </p>
+<p>Must be implemented by your custom effect.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">params</td><td>Current realtime parameter state. </td></tr>
+    <tr><td class="paramname">yn</td><td>Output buffer. (1 sample per frame) </td></tr>
+    <tr><td class="paramname">frames</td><td>Size of output buffer.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>Implementation must support at least up to 64 frames. </dd>
+<dd>
+Optimize for powers of two. </dd></dl>
+
+</div>
+</div>
+<a id="ga3fa3290dddc1fe71cdb7dfc075c4ad94"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3fa3290dddc1fe71cdb7dfc075c4ad94">&#9670;&nbsp;</a></span>_hook_init()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _hook_init </td>
+          <td>(</td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>platform</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>api</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialization callback. </p>
+<p>Must be implemented by your custom effect.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">platform</td><td>Current target platform/module. See <a class="el" href="userprg_8h.html" title="Common C interface header for custom user programs.">userprg.h</a> </td></tr>
+    <tr><td class="paramname">api</td><td>Current API version. See <a class="el" href="userprg_8h.html" title="Common C interface header for custom user programs.">userprg.h</a> </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga93a9b6927a917951dac4887808da3605"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga93a9b6927a917951dac4887808da3605">&#9670;&nbsp;</a></span>_hook_off()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _hook_off </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__osc__inst.html#gabbafa473e22967ee64899cd4dd140bf6">user_osc_param_t</a> *const&#160;</td>
+          <td class="paramname"><em>params</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Note off callback. </p>
+<p>Must be implemented by your custom effect.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">params</td><td>Current realtime parameter state. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gae328f96aa574fd6f5a845fbb55500efe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae328f96aa574fd6f5a845fbb55500efe">&#9670;&nbsp;</a></span>_hook_on()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _hook_on </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="group__osc__inst.html#gabbafa473e22967ee64899cd4dd140bf6">user_osc_param_t</a> *const&#160;</td>
+          <td class="paramname"><em>params</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Note on callback. </p>
+<p>Must be implemented by your custom effect.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">params</td><td>Current realtime parameter state. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gae7b024ad4e7abb4f5ac93e3de5568e30"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae7b024ad4e7abb4f5ac93e3de5568e30">&#9670;&nbsp;</a></span>_hook_param()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void _hook_param </td>
+          <td>(</td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint16_t&#160;</td>
+          <td class="paramname"><em>value</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Parameter change callback. </p>
+<p>Must be implemented by your custom effect.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">index</td><td>Parameter ID. See user_osc_param_id_t. </td></tr>
+    <tr><td class="paramname">index</td><td>Parameter value.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>10 bit resolution for shape/shift-shape. </dd>
+<dd>
+0-200 for bipolar percent parameters. 0% at 100, -100% at 0. </dd>
+<dd>
+0-100 for unipolar percent and typeless parameters. </dd></dl>
+
+</div>
+</div>
 </div><!-- contents -->
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffacd05c9c051ab5f40a7464a3eb70bd01e">k_user_osc_param_id2</a></div><div class="ttdoc">Edit parameter 2.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00079">userosc.h:79</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffaf5625bc9bf4950faf8848346104435cc">k_user_osc_param_id3</a></div><div class="ttdoc">Edit parameter 3.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00081">userosc.h:81</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa73b2725bdd56fb63ac05814aa4f62c8d">k_user_osc_param_shiftshape</a></div><div class="ttdoc">Alternative Shape parameter: generally available via a shift function.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00091">userosc.h:91</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa8bf86c1e461ce9a8cdfbec8277d3aedd">k_user_osc_param_id6</a></div><div class="ttdoc">Edit parameter 6.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00087">userosc.h:87</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa22dabcac487c4a6102db288375fe21e5">k_user_osc_param_shape</a></div><div class="ttdoc">Shape parameter.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00089">userosc.h:89</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffacb8cacb5ac3ea5ee23b52faf038c5a7e"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffacb8cacb5ac3ea5ee23b52faf038c5a7e">k_user_osc_param_id1</a></div><div class="ttdoc">Edit parameter 1.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00077">userosc.h:77</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffa7380e9b7c5e8c21947e759dcfc1fdaaa">k_user_osc_param_id4</a></div><div class="ttdoc">Edit parameter 4.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00083">userosc.h:83</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688"><div class="ttname"><a href="group__osc__inst.html#gga389ccf713f8ed0c77fec90998c5804ffaa94bd0a53e8df9706729769d8f85b688">k_user_osc_param_id5</a></div><div class="ttdoc">Edit parameter 5.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00085">userosc.h:85</a></div></div>
+<div class="ttc" id="agroup__osc__inst_html_ga389ccf713f8ed0c77fec90998c5804ff"><div class="ttname"><a href="group__osc__inst.html#ga389ccf713f8ed0c77fec90998c5804ff">user_osc_param_id_t</a></div><div class="ttdeci">user_osc_param_id_t</div><div class="ttdoc">User facing osc-specific parameters.</div><div class="ttdef"><b>Definition:</b> <a href="userosc_8h_source.html#l00075">userosc.h:75</a></div></div>
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Nov 29 2019 09:57:48 for minilogue xd SDK by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Mon Dec 2 2019 08:56:03 for minilogue xd SDK by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.16
 </small></address>

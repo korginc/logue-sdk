@@ -144,8 +144,10 @@ static float \mbox{\hyperlink{group__utils__float__math_gabe8fba5f91c83ed35727cd
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} sine approximation, valid for x in \mbox{[}-\/M\+\_\+\+PI, M\+\_\+\+PI\mbox{]} \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_ga7734d7832184d0b551da0032e9e1afb3}{fastersinf}} (float x)
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} sine approximation, valid for x in \mbox{[}-\/M\+\_\+\+PI, M\+\_\+\+PI\mbox{]} \end{DoxyCompactList}\item 
-static float \mbox{\hyperlink{group__utils__float__math_ga1a19a44b01cb7198f2b64ee6ef947f4d}{fastersinfullf}} (float x)
+static float \mbox{\hyperlink{group__utils__float__math_ga74d25b883133e5d7ecea5f3a77b6849c}{fastsinfullf}} (float x)
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} sine approximation, valid on full x domain \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga1a19a44b01cb7198f2b64ee6ef947f4d}{fastersinfullf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} sine approximation, valid on full x domain \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_ga7ab3410646ef8eb28a7ce60e9b6f4081}{fastcosf}} (float x)
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} cosine approximation, valid for x in \mbox{[}-\/M\+\_\+\+PI, M\+\_\+\+PI\mbox{]} \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_gadaa7faabc0ad1c034c5469b6f5a2fde3}{fastercosf}} (float x)
@@ -162,6 +164,14 @@ static float \mbox{\hyperlink{group__utils__float__math_ga55d426a72df7892ca47358
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} tangent approximation, valid on full x domain, except where tangent diverges. \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_ga86436df956ab41e647eb3f6976a4fd7d}{fastertanfullf}} (float x)
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} tangent approximation, valid on full x domain, except where tangent diverges. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_gab3382b32b845d283c014c6bdd7b053d2}{fastlog2f}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} log base 2 approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga846a0fba37a7eccb86c384c2fb925334}{fasterlog2f}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} log base 2 approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga416996e41e2478b6f03f0fd8b40cadb0}{fastlogf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} natural logarithm approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
+static float \mbox{\hyperlink{group__utils__float__math_ga7d5494c8990209d4f8542aabd94870e8}{fasterlogf}} (float x)
+\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} natural logarithm approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_ga831686adbdc9ba8fa72e90497d29c63e}{fastpow2f}} (float p)
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} power of 2 approximation, valid for x in \mbox{[} -\/126, ... \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_gaafe82bf215bb2eaa05453211b1605365}{fasterpow2f}} (float p)
@@ -174,14 +184,6 @@ static float \mbox{\hyperlink{group__utils__float__math_ga9383bc54895c4b4b47d097
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} exponential approximation, valid for x in \mbox{[} $\sim$ -\/87, ... \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_gaff635a364b1b3553d00a8eb40d8c5f92}{fasterexpf}} (float p)
 \begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} exponential approximation, valid for x in \mbox{[} $\sim$ -\/87, ... \end{DoxyCompactList}\item 
-static float \mbox{\hyperlink{group__utils__float__math_gab3382b32b845d283c014c6bdd7b053d2}{fastlog2f}} (float x)
-\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} log base 2 approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
-static float \mbox{\hyperlink{group__utils__float__math_ga846a0fba37a7eccb86c384c2fb925334}{fasterlog2f}} (float x)
-\begin{DoxyCompactList}\small\item\em \char`\"{}\+Faster\char`\"{} log base 2 approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
-static float \mbox{\hyperlink{group__utils__float__math_ga416996e41e2478b6f03f0fd8b40cadb0}{fastlogf}} (float x)
-\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} natural logarithm approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
-static float \mbox{\hyperlink{group__utils__float__math_ga7d5494c8990209d4f8542aabd94870e8}{fasterlogf}} (float x)
-\begin{DoxyCompactList}\small\item\em \char`\"{}\+Fast\char`\"{} natural logarithm approximation, valid for positive x as precision allows. \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_gaba79359b20fbaf9ce55ad6399648e531}{fasteratan2f}} (float y, float x)
 \begin{DoxyCompactList}\small\item\em atan2 approximation \end{DoxyCompactList}\item 
 static float \mbox{\hyperlink{group__utils__float__math_ga203f54201b3372c744c15996fc28202e}{fastertanhf}} (float x)
