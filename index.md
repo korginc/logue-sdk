@@ -17,11 +17,11 @@ $ git clone https://github.com/korginc/logue-sdk.git
 $ cd logue-sdk
 $ git submodule update --init
 ```
- * Install toolchain: [GNU Arm Embedded Toolchain](https://github.com/korginc/logue-sdk/tools/gcc)
+ * Install toolchain: [GNU Arm Embedded Toolchain](https://github.com/korginc/logue-sdk/tree/master/tools/gcc)
  * Install other utilties:
-    * [GNU Make](https://github.com/korginc/logue-sdk/tools/make)
-    * [Info-ZIP](https://github.com/korginc/logue-sdk/tools/zip)
-    * [logue-cli](https://github.com/korginc/logue-sdk/tools/logue-cli) (optional)
+    * [GNU Make](https://github.com/korginc/logue-sdk/tree/master/tools/make)
+    * [Info-ZIP](https://github.com/korginc/logue-sdk/tree/master/tools/zip)
+    * [logue-cli](https://github.com/korginc/logue-sdk/tree/master/tools/logue-cli) (optional)
 
 ### Building the Demo Oscillator (Waves)
 

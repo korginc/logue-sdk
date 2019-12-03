@@ -18,11 +18,11 @@ permalink: /ja/
  $ cd logue-sdk
  $ git submodule update --init
  ```
- * 必要なツールチェーンをインストールします: [GNU Arm Embedded Toolchain](../../tools/gcc)
+ * 必要なツールチェーンをインストールします: [GNU Arm Embedded Toolchain](https://github.com/korginc/logue-sdk/tree/master/tools/gcc)
  * その他のユーティリティをインストールします:
-    * [GNU Make](../../tools/make)
-    * [Info-ZIP](../../tools/zip)
-    * [logue-cli](../../tools/logue-cli) (optional)
+    * [GNU Make](https://github.com/korginc/logue-sdk/tree/master/tools/make)
+    * [Info-ZIP](https://github.com/korginc/logue-sdk/tree/master/tools/zip)
+    * [logue-cli](https://github.com/korginc/logue-sdk/tree/master/tools/logue-cli) (optional)
 
 ### デモプロジェクトのビルド （Waves）
 
