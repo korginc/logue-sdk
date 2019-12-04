@@ -132,7 +132,7 @@ void OSC_PARAM(uint16_t index, uint16_t value)
   case k_user_osc_param_shape:
     s_state.dist = 0.3f * valf;
     break;
-  case k_user_osc_param_shift_shape:
+  case k_user_osc_param_shiftshape:
     s_state.drive = 1.f + valf; 
     break;
   default:
