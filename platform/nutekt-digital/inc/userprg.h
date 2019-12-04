@@ -51,14 +51,19 @@ extern "C" {
    * Module categories.
    */
   enum {
-    k_user_module_global = 0U, /** Dummy category, may be used in future. */
-    k_user_module_modfx,       /** Modulation effects */
-    k_user_module_delfx,       /** Delay effects */
-    k_user_module_revfx,       /** Reverb effects */
-    k_user_module_osc,         /** Oscillators */
+    /** Dummy category, may be used in future. */
+    k_user_module_global = 0U,
+    /** Modulation effects */
+    k_user_module_modfx,
+    /** Delay effects */
+    k_user_module_delfx,
+    /** Reverb effects */
+    k_user_module_revfx,
+    /** Oscillators */
+    k_user_module_osc,
     k_num_user_modules,
   };
-
+  
   /**
    * prologue specific platform/module pairs. Passed to user code via initialization callback.
    */

@@ -66,8 +66,10 @@ extern "C" {
    * User facing parameters
    */
   typedef enum {
-    k_user_modfx_param_time = 0, /** Time parameter */
-    k_user_modfx_param_depth,    /** Depth parameter */
+    /** Time parameter */
+    k_user_modfx_param_time = 0,
+    /** Depth parameter */
+    k_user_modfx_param_depth,
     k_num_user_modfx_param_id
   } user_modfx_param_id_t;
 

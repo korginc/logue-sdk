@@ -58,10 +58,14 @@ extern "C" {
    * Internal realtime parameters
    */
   typedef struct user_osc_param {
-    int32_t  shape_lfo; /** Value of LFO implicitely applied to shape parameter */
-    uint16_t pitch;	/** Current pitch. high byte: note number, low byte: fine (0-255) */
-    uint16_t cutoff;	/** Current cutoff value (0x0000-0x1fff) */
-    uint16_t resonance;	/** Current resonance value (0x0000-0x1fff) */
+    /** Value of LFO implicitely applied to shape parameter */
+    int32_t  shape_lfo;
+    /** Current pitch. high byte: note number, low byte: fine (0-255) */
+    uint16_t pitch;
+    /** Current cutoff value (0x0000-0x1fff) */
+    uint16_t cutoff;
+    /** Current resonance value (0x0000-0x1fff) */
+    uint16_t resonance;
     uint16_t reserved0[3];
   } user_osc_param_t;
 
@@ -69,14 +73,22 @@ extern "C" {
    * User facing osc-specific parameters
    */
   typedef enum {
-    k_user_osc_param_id1 = 0,    /** Edit parameter 1 */
-    k_user_osc_param_id2,        /** Edit parameter 2 */
-    k_user_osc_param_id3,        /** Edit parameter 3 */
-    k_user_osc_param_id4,        /** Edit parameter 4 */
-    k_user_osc_param_id5,        /** Edit parameter 5 */
-    k_user_osc_param_id6,        /** Edit parameter 6 */
-    k_user_osc_param_shape,      /** Shape parameter */
-    k_user_osc_param_shiftshape, /** Alternative Shape parameter: generally available via a shift function */
+    /** Edit parameter 1 */
+    k_user_osc_param_id1 = 0,
+    /** Edit parameter 2 */
+    k_user_osc_param_id2,
+    /** Edit parameter 3 */
+    k_user_osc_param_id3,
+    /** Edit parameter 4 */
+    k_user_osc_param_id4,
+    /** Edit parameter 5 */
+    k_user_osc_param_id5,
+    /** Edit parameter 6 */
+    k_user_osc_param_id6,
+    /** Shape parameter */
+    k_user_osc_param_shape,
+    /** Alternative Shape parameter: generally available via a shift function */
+    k_user_osc_param_shiftshape,
     k_num_user_osc_param_id
   } user_osc_param_id_t;
 
