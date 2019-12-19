@@ -38,7 +38,7 @@ endif
 # Include project specific definition
 # #############################################################################
 
-include ./project.mk
+include $(PROJECTDIR)/project.mk
 
 # #############################################################################
 # configure cross compilation
@@ -219,16 +219,16 @@ $(BUILDDIR)/%.elf: $(OBJS) $(LDSCRIPT)
 
 clean:
 	@echo Cleaning
-	-rm -fR .dep $(BUILDDIR) $(PKGARCH)
+	-rm -fR .dep $(BUILDDIR) $(PROJECTDIR)/$(PKGARCH)
 	@echo
 	@echo Done
 
 package:
-	@echo Packaging to ./$(PKGARCH)
+	@echo Packaging to $(PROJECTDIR)/$(PKGARCH)
 	@mkdir -p $(PKGDIR)
-	@cp -a $(MANIFEST) $(PKGDIR)/
+	@cp -a $(PROJECTDIR)/$(MANIFEST) $(PKGDIR)/
 	@cp -a $(BUILDDIR)/$(PROJECT).bin $(PKGDIR)/$(PAYLOAD)
 	@$(ZIP) $(ZIP_ARGS) $(PROJECT).zip $(PKGDIR)
-	@mv $(PROJECT).zip $(PKGARCH)
+	@mv $(PROJECT).zip $(PROJECTDIR)/$(PKGARCH)
 	@echo
 	@echo Done
