@@ -42,7 +42,7 @@
 
 SECTIONS
 {
-  
+
   .hooks : ALIGN(16) SUBALIGN(16)
   {
     . = ALIGN(4);
@@ -51,7 +51,7 @@ SECTIONS
     . = ALIGN(4);
     _hooks_end = .;
   } > SRAM
-  
+
   /* Constructors */
   .init_array : ALIGN(4) SUBALIGN(4)
   {
@@ -62,7 +62,7 @@ SECTIONS
     . = ALIGN(4);
     PROVIDE(__init_array_end = .);
   } > SRAM
-    
+
   /* Common Code */
   .text : ALIGN(4) SUBALIGN(4)
   {
@@ -120,7 +120,7 @@ SECTIONS
     . = ALIGN(4);
     __extab_end = .;
   } > SRAM
-  
+
   .ARM.exidx : ALIGN(4) SUBALIGN(4)
   { /* Note: Aligning when there's no content for this section throws a warning. Looks like a linker bug. */
     /* . = ALIGN(4); */
@@ -129,7 +129,7 @@ SECTIONS
     /* . = ALIGN(4); */
     __exidx_end = .;
   } > SRAM
-  
+
   .eh_frame_hdr : ALIGN(4) SUBALIGN(4)
   {
     . = ALIGN(4);
@@ -138,7 +138,7 @@ SECTIONS
     . = ALIGN(4);
     _eh_frame_hdr_end = .;
   } > SRAM
-  
+
   .eh_frame : ALIGN(4) SUBALIGN(4) ONLY_IF_RO
   {
     . = ALIGN(4);
@@ -147,7 +147,7 @@ SECTIONS
     . = ALIGN(4);
     _eh_frame_end = .;
   } > SRAM
-    
+
   /*
   /DISCARD/
   {
@@ -156,6 +156,6 @@ SECTIONS
     libgcc.a ( * )
   }
   //*/
-  
+
   /* .ARM.attributes 0 : { *(.ARM.attributes) } //*/
 }
