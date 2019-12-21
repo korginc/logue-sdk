@@ -2,6 +2,8 @@
 # Project Customization
 # #############################################################################
 
+include $(PLATFORMDIR)/delfx.mk
+
 PROJECT = delayline_test
 
 UCSRC = 

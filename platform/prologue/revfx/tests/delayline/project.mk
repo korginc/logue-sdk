@@ -2,6 +2,8 @@
 # Project Customization
 # #############################################################################
 
+include $(PLATFORMDIR)/revfx.mk
+
 PROJECT = delayline_test
 
 UCSRC = 

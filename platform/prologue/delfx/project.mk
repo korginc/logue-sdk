@@ -2,6 +2,8 @@
 # Project Customization
 # #############################################################################
 
+include $(PLATFORMDIR)/delfx.mk
+
 PROJECT = delfx_test
 
 UCSRC =

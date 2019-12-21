@@ -2,6 +2,8 @@
 # Project Customization
 # #############################################################################
 
+include $(PLATFORMDIR)/osc.mk
+
 PROJECT = square_test
 
 UCSRC = 

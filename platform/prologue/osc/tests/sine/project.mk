@@ -2,6 +2,8 @@
 # Project Customization
 # #############################################################################
 
+include $(PLATFORMDIR)/osc.mk
+
 PROJECT = sine_test
 
 UCSRC = 

@@ -1,5 +1,5 @@
 # #############################################################################
-# Prologue Oscillator Makefile
+# logue-sdk Makefile
 # #############################################################################
 
 ifeq ($(OS),Windows_NT)
@@ -38,7 +38,7 @@ endif
 # Include project specific definition
 # #############################################################################
 
-include ./project.mk
+include $(PROJECTDIR)/project.mk
 
 # #############################################################################
 # configure cross compilation
@@ -64,16 +64,16 @@ BIN  = $(CP) -O binary
 
 LDDIR = $(PROJECTDIR)/ld
 RULESPATH = $(LDDIR)
-LDSCRIPT = $(LDDIR)/userosc.ld
+LDSCRIPT = $(LDDIR)/$(MLDSCRIPT)
 DLIBS = -lm
 
-DADEFS = -DSTM32F446xE -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4
-DDEFS = -DSTM32F446xE -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT
+DADEFS = $(MDEFS) -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4
+DDEFS = $(MDEFS) -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT
 
 COPT = -std=c11 -mstructure-size-boundary=8
 CXXOPT = -std=c++11 -fno-rtti -fno-exceptions -fno-non-call-exceptions
 
-LDOPT = -Xlinker --just-symbols=$(LDDIR)/osc_api.syms
+LDOPT = -Xlinker --just-symbols=$(LDDIR)/$(MSYMS)
 
 CWARN = -W -Wall -Wextra
 CXXWARN = -W -Wall -Wextra
@@ -92,7 +92,7 @@ TOPT = -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT
 # #############################################################################
 
 PKGDIR = $(PROJECT)
-PKGARCH = $(PROJECT).ntkdigunit
+PKGARCH = $(PROJECT).$(PKGEXT)
 MANIFEST = manifest.json
 PAYLOAD = payload.bin
 BUILDDIR = $(PROJECTDIR)/build
@@ -219,16 +219,16 @@ $(BUILDDIR)/%.elf: $(OBJS) $(LDSCRIPT)
 
 clean:
 	@echo Cleaning
-	-rm -fR .dep $(BUILDDIR) $(PKGARCH)
+	-rm -fR .dep $(BUILDDIR) $(PROJECTDIR)/$(PKGARCH)
 	@echo
 	@echo Done
 
 package:
-	@echo Packaging to ./$(PKGARCH)
+	@echo Packaging to $(PROJECTDIR)/$(PKGARCH)
 	@mkdir -p $(PKGDIR)
-	@cp -a $(MANIFEST) $(PKGDIR)/
+	@cp -a $(PROJECTDIR)/$(MANIFEST) $(PKGDIR)/
 	@cp -a $(BUILDDIR)/$(PROJECT).bin $(PKGDIR)/$(PAYLOAD)
 	@$(ZIP) $(ZIP_ARGS) $(PROJECT).zip $(PKGDIR)
-	@mv $(PROJECT).zip $(PKGARCH)
+	@mv $(PROJECT).zip $(PROJECTDIR)/$(PKGARCH)
 	@echo
 	@echo Done

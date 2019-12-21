@@ -2,6 +2,8 @@
 # Project Customization
 # #############################################################################
 
+include $(PLATFORMDIR)/revfx.mk
+
 PROJECT = biquad_test
 
 UCSRC = 

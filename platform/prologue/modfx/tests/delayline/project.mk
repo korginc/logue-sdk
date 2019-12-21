@@ -2,6 +2,8 @@
 # Project Customization
 # #############################################################################
 
+include $(PLATFORMDIR)/modfx.mk
+
 PROJECT = delayline_test
 
 UCSRC = 

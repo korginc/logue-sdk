@@ -1,5 +1,5 @@
 # #############################################################################
-# Prologue Oscillator Makefile
+# logue-sdk Makefile
 # #############################################################################
 
 ifeq ($(OS),Windows_NT)
@@ -64,16 +64,16 @@ BIN  = $(CP) -O binary
 
 LDDIR = $(PROJECTDIR)/ld
 RULESPATH = $(LDDIR)
-LDSCRIPT = $(LDDIR)/userosc.ld
+LDSCRIPT = $(LDDIR)/$(MLDSCRIPT)
 DLIBS = -lm
 
-DADEFS = -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4
-DDEFS = -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT
+DADEFS = $(MDEFS) -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4
+DDEFS = $(MDEFS) -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT
 
 COPT = -std=c11 -mstructure-size-boundary=8
 CXXOPT = -std=c++11 -fno-rtti -fno-exceptions -fno-non-call-exceptions
 
-LDOPT = -Xlinker --just-symbols=$(LDDIR)/osc_api.syms
+LDOPT = -Xlinker --just-symbols=$(LDDIR)/$(MSYMS)
 
 CWARN = -W -Wall -Wextra
 CXXWARN = -W -Wall -Wextra
@@ -92,7 +92,7 @@ TOPT = -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT
 # #############################################################################
 
 PKGDIR = $(PROJECT)
-PKGARCH = $(PROJECT).prlgunit
+PKGARCH = $(PROJECT).$(PKGEXT)
 MANIFEST = manifest.json
 PAYLOAD = payload.bin
 BUILDDIR = $(PROJECTDIR)/build
