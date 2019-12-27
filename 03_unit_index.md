@@ -21,6 +21,7 @@ This is a list of existing user contributed and paid oscillator/effect units mad
 | [PWG](https://www.dirtboxsynth.com/sd_product/pwg-parametric-waveform-generator/) | Dirtbox Synth | Parametric waveform generator | paid |
 | [SUPAwave](https://www.dirtboxsynth.com/sd_product/supawave/) | Dirtbox Synth | | paid |
 | [Blinds](https://edouard.digital/) | Edouard Digital | PWM for any waveform | paid |
+| [1973](http://hammondeggsmusic.ca/logueplugins/1973.html) | Hammond Eggs Music | Single osc., dual filter, emulation of miniKorg 700 | donation | 
 | [Chips2.0](http://hammondeggsmusic.ca/logueplugins/chips2.html) | Hammond Eggs Music | Chiptune oscillator with PWM, arpeg., and noise drums | donation | 
 | [Duet](http://hammondeggsmusic.ca/logueplugins/duet.html) | Hammond Eggs Music | Dual osc. dual lfo. saw+saw or saw+pwm | donation |
 | [Extra](http://hammondeggsmusic.ca/logueplugins/extra.html) | Hammond Eggs Music | Paraphonic voice expander | donation |
@@ -62,6 +63,8 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Resonance](https://www.dirtboxsynth.com/sd_product/resonance/) | Dirtbox Synth | Dual combo filter | paid |
 | [Buckets](http://hammondeggsmusic.ca/logueplugins/buckets.html) | Hammond Eggs Music | 70's style BBD chorus | donation |
 | [Hera2.0](http://hammondeggsmusic.ca/logueplugins/hera2.html) | Hammond Eggs Music | 80's style chorus | donation |
+| [Corrosion](https://www.sinevibes.com/korgcorrosion/) | Sinevibes | Multi-algorithm distortion processor | paid |
+| [DCM8](https://www.sinevibes.com/korgdcm8/) | Sinevibes | Sample rate and bit depth reducer | paid |
 | [Dipole](https://www.sinevibes.com/korgdipole/) | Sinevibes | Through-Zero Flanger | paid |
 | [Drift](https://www.sinevibes.com/korgdrift/ ) | Sinevibes | Physically modelled stereo panner based on Lorenz osc. | paid |
 | [SVF](https://www.sinevibes.com/korgsvf/) | Sinevibes | State-variable filter 4 pole, -24dB/oct, resonant | paid |
