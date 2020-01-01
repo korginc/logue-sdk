@@ -4,20 +4,20 @@
 
 ifeq ($(OS),Windows_NT)
 ifeq ($(MSYSTEM), MSYS)
-    detected_OS := $(shell uname -s)
+  detected_OS := $(shell uname -s)
 else
-    detected_OS := Windows
+  detected_OS := Windows
 endif
 else
-    detected_OS := $(shell uname -s)
+  detected_OS := $(shell uname -s)
 endif
 
-PLATFORMDIR = ../../..
-PROJECTDIR = ../..
-TOOLSDIR = $(PLATFORMDIR)/../../tools
-EXTDIR = $(PLATFORMDIR)/../ext
-
-CMSISDIR = $(EXTDIR)/CMSIS/CMSIS
+PROJECTDIR = .
+SDKDIR = ../../../../..
+PLATFORMDIR = ${SDKDIR}/platform/minilogue-xd
+TOOLSDIR = $(SDKDIR)/tools
+SDKGCCDIR = ${SDKDIR}/tools/gcc/gcc-arm-none-eabi-5_4-2016q3
+CMSISDIR = ${SDKDIR}/platform/ext/CMSIS/CMSIS
 
 # #############################################################################
 # configure archive utility
@@ -47,7 +47,7 @@ include ./project.mk
 MCU = cortex-m4
 
 GCC_TARGET = arm-none-eabi-
-GCC_BIN_PATH = $(TOOLSDIR)/gcc/gcc-arm-none-eabi-5_4-2016q3/bin
+GCC_BIN_PATH = $(SDKGCCDIR)/bin
 
 CC   = $(GCC_BIN_PATH)/$(GCC_TARGET)gcc
 CXXC = $(GCC_BIN_PATH)/$(GCC_TARGET)g++
@@ -62,7 +62,7 @@ SZ   = $(GCC_BIN_PATH)/$(GCC_TARGET)size
 HEX  = $(CP) -O ihex
 BIN  = $(CP) -O binary
 
-LDDIR = $(PROJECTDIR)/ld
+LDDIR = $(PROJECTDIR)/../../ld
 RULESPATH = $(LDDIR)
 LDSCRIPT = $(LDDIR)/userrevfx.ld
 DLIBS = -lm
@@ -103,7 +103,7 @@ ASMSRC = $(UASMSRC)
 
 ASMXSRC = $(UASMXSRC)
 
-CSRC = $(PROJECTDIR)/tpl/_unit.c $(UCSRC)
+CSRC = $(PROJECTDIR)/../../tpl/_unit.c $(UCSRC)
 
 CXXSRC = $(UCXXSRC)
 
@@ -120,11 +120,8 @@ CXXOBJS := $(addprefix $(OBJDIR)/, $(notdir $(CXXSRC:.cpp=.o)))
 OBJS := $(ASMXOBJS) $(ASMOBJS) $(COBJS) $(CXXOBJS)
 
 DINCDIR = $(PROJECTDIR)/inc \
-	  $(PROJECTDIR)/inc/api \
-          $(PLATFORMDIR)/inc \
-	  $(PLATFORMDIR)/inc/dsp \
-	  $(PLATFORMDIR)/inc/utils \
-          $(CMSISDIR)/Include
+					$(PLATFORMDIR) \
+					$(CMSISDIR)/Include
 
 INCDIR := $(patsubst %,-I%,$(DINCDIR) $(UINCDIR))
 
@@ -149,10 +146,10 @@ CXXFLAGS  = $(MCFLAGS) $(TOPT) $(OPT) $(CXXOPT) $(CXXWARN) -Wa,-alms=$(LSTDIR)/$
 LDFLAGS   = $(MCFLAGS) $(TOPT) $(OPT) -nostartfiles $(LIBDIR) -Wl,-Map=$(BUILDDIR)/$(PROJECT).map,--cref,--no-warn-mismatch,--library-path=$(RULESPATH),--script=$(LDSCRIPT) $(LDOPT)
 
 OUTFILES := $(BUILDDIR)/$(PROJECT).elf \
-	    $(BUILDDIR)/$(PROJECT).hex \
-	    $(BUILDDIR)/$(PROJECT).bin \
-	    $(BUILDDIR)/$(PROJECT).dmp \
-	    $(BUILDDIR)/$(PROJECT).list
+	    			$(BUILDDIR)/$(PROJECT).hex \
+	    			$(BUILDDIR)/$(PROJECT).bin \
+	    			$(BUILDDIR)/$(PROJECT).dmp \
+	    			$(BUILDDIR)/$(PROJECT).list
 
 ###############################################################################
 # targets
