@@ -223,5 +223,3 @@ Emscripten builds for oscillators and a Web Audio player are available in the al
 ### Can't compile, missing CMSIS arm_math.h
 
 The CMSIS submodule is likely not initialized or up to date. Make sure to run `git submodule update --init` to initialize and update all submodules.
-
-

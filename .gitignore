@@ -55,4 +55,3 @@ tools/emscripten/emsdk
 # Debug files
 *.dSYM/
 *.su
-
