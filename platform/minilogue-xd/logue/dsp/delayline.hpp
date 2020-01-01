@@ -41,9 +41,9 @@
  *
  */
 
-#include "float_math.h"
-#include "int_math.h"
-#include "buffer_ops.h"
+#include "../utils/float_math.h"
+#include "../utils/int_math.h"
+#include "../utils/buffer_ops.h"
 
 /**
  * Common DSP Utilities
@@ -396,4 +396,3 @@ namespace dsp {
 }
 
 /** @} */
-
