@@ -39,7 +39,7 @@
  * @{
  */
 
-#include "userosc.h"
+#include <logue/userosc.h>
 
 /*===========================================================================*/
 /* Externs and Types.                                                        */

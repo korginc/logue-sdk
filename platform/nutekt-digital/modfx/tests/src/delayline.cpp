@@ -9,9 +9,8 @@
  *
  */
 
-#include "usermodfx.h"
-
-#include "delayline.hpp"
+#include <logue/usermodfx.h>
+#include <logue/dsp/delayline.hpp>
 
 static dsp::DualDelayLine s_delay;
 

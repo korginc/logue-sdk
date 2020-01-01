@@ -38,7 +38,7 @@
  *
  */
 
-#include "userosc.h"
+#include <logue/userosc.h>
 #include "waves.hpp"
 
 static Waves s_waves;

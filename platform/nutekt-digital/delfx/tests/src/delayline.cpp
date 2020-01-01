@@ -9,9 +9,8 @@
  *
  */
 
-#include "userdelfx.h"
-
-#include "delayline.hpp"
+#include <logue/userdelfx.h>
+#include <logue/dsp/delayline.hpp>
 
 static dsp::DelayLine s_delay;
 

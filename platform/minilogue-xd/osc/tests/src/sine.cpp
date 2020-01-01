@@ -38,7 +38,7 @@
  *
  */
 
-#include "userosc.h"
+#include <logue/userosc.h>
 
 typedef struct State {
   float w0;

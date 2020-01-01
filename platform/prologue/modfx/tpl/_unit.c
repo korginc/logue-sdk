@@ -39,7 +39,7 @@
  * @{
  */
 
-#include "usermodfx.h"
+#include <logue/usermodfx.h>
 
 /*===========================================================================*/
 /* Externs and Types.                                                        */

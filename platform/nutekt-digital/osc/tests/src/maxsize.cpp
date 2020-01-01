@@ -38,7 +38,7 @@
  *
  */
 
-#include "userosc.h"
+#include <logue/userosc.h>
 
 #define k_pad_size 0x1f25
 

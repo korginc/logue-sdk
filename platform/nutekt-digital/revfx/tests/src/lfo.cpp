@@ -9,9 +9,8 @@
  *
  */
 
-#include "userrevfx.h"
-
-#include "simplelfo.hpp"
+#include <logue/userrevfx.h>
+#include <logue/dsp/simplelfo.hpp>
 
 static dsp::SimpleLFO s_lfo;
 
