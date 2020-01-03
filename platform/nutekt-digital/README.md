@@ -124,10 +124,12 @@ Parameter descriptors are themselves arrays and should contain 4 values:
 
 0. name (string) : Up to about 10 characters can be displayed in the edit menu of the minilogue xd.
 1. minimum value (int) : Value should be in -100,100 range.
-2. maximum value (int) : Value should be in -100,100 range and greater than minimum value.
+2. maximum value (int) : Value should be in -100,100 range and greater than or equals to minimum value.
 3. type (string) : "%" indicates a percentage type, an empty string indicates a typeless value. 
 
-In the case of typeless values, the minimum and maximum values should be positive. Also the displayed value will be offset by 1 such that a 0-9 range will be shown as 1-10 to the minilogue xd user. 
+In the case of typeless values, the minimum and maximum values should be zero or positive. Also when the minimum value is zero, the displayed value will be offset by 1 such that a 0-9 range will be shown as 1-10 to the NTS-1 user.
+
+As for the percentage type, when the minimum value is negative, the parameter value will be offset by 100 such that -30 - 20 range will be passed as 70 - 120 to the user module (`OSC_PARAM`).
 
 ### project.mk
 
