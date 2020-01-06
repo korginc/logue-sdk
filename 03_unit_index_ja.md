@@ -59,7 +59,6 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 ## モジュレーション
 
 | 名前 | 開発者 | 備考 |  |
-| [mist](https://github.com/centrevillage/cv_logue/tree/master/osc/mist) | centrevillage | Unstable Harmonic Oscillator | free |
 | [AMPit](https://www.dirtboxsynth.com/sd_product/ampit/) | Dirtbox Synth | distortion | paid |
 | [Basic Autopanner](https://www.dirtboxsynth.com/sd_product/basic-autopanner/) | Dirtbox Synth | Simple auto-panning | paid |
 | [Filter Pack](https://www.dirtboxsynth.com/sd_product/filter-pack/) | Dirtbox Synth | Low pass, high pass, band pass & band reject | paid |

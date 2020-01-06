@@ -59,7 +59,6 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 ## Modulation Effects (modfx)
 
 | Name | Developer | Description |  |
-| [mist](https://github.com/centrevillage/cv_logue/tree/master/osc/mist) | centrevillage | Unstable Harmonic Oscillator | free |
 | [AMPit](https://www.dirtboxsynth.com/sd_product/ampit/) | Dirtbox Synth | distortion | paid |
 | [Basic Autopanner](https://www.dirtboxsynth.com/sd_product/basic-autopanner/) | Dirtbox Synth | Simple auto-panning | paid |
 | [Filter Pack](https://www.dirtboxsynth.com/sd_product/filter-pack/) | Dirtbox Synth | Low pass, high pass, band pass & band reject | paid |
