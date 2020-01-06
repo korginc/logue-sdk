@@ -40,7 +40,7 @@
 
 #include "userosc.h"
 
-#define k_pad_size 0x1f3e
+#define k_pad_size 0x1f25
 
 typedef struct State {
   float w0;
@@ -69,10 +69,7 @@ static const uint32_t k_pad_data[k_pad_size] __attribute__((used)) = {
     DUMMY8(3*2048+3*512),
     DUMMY8(3*2048+3*512+128),
     DUMMY4(3*2048+3*512+2*128),
-    DUMMY(3*2048+3*512+2*128+32),
-    DUMMY(3*2048+3*512+2*128+32+8),
-    DUMMY(3*2048+3*512+2*128+32+2*8),
-    0, 1, 2, 3, 4, 5
+    0, 1, 2, 3, 4
 };
 
 enum {
