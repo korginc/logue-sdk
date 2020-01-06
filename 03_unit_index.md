@@ -37,9 +37,13 @@ This is a list of existing user contributed and paid oscillator/effect units mad
 | [MO2 va](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits VA mode | free |
 | [MO2 wsh](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits waveshaping mode | free |
 | [MO2 wta-wtf](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits wavetable modes | free |
+| [2DTB](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | 2D wavetable oscillator | donation |
+| [FBFM](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | Feedback FM oscillator | donation |
 | [Fume](https://rolllogsounds.com) | Roll-Log Sounds | 2 operator wavetable FM | paid |
 | [PolySquares](https://rolllogsounds.com) | Roll-Log Sounds | Additive squarewave DCO | free |
+| [PTSW](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | Portamento / Unison sawtooth oscillator | donation |
 | [Scan](https://rolllogsounds.com) | Roll-Log Sounds | Wavetable scanning | free |
+| [Sheprd](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Shepard tone oscillator | donation |
 | [Syng](https://rolllogsounds.com) | Roll-Log Sounds | Vocal formant oscillator | paid |
 | [Bent](https://www.sinevibes.com/korgbent/) | Sinevibes | Bent-wave modulation synthesis | paid |
 | [Tube](https://www.sinevibes.com/korgtube/) | Sinevibes | Resonator modeling synthesis | paid |
@@ -63,6 +67,8 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Resonance](https://www.dirtboxsynth.com/sd_product/resonance/) | Dirtbox Synth | Dual combo filter | paid |
 | [Buckets](http://hammondeggsmusic.ca/logueplugins/buckets.html) | Hammond Eggs Music | 70's style BBD chorus | donation |
 | [Hera2.0](http://hammondeggsmusic.ca/logueplugins/hera2.html) | Hammond Eggs Music | 80's style chorus | donation |
+| [cvRing](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Stereo ring modulation effect tuned to V/Oct | donation |
+| [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | donation |
 | [Corrosion](https://www.sinevibes.com/korgcorrosion/) | Sinevibes | Multi-algorithm distortion processor | paid |
 | [DCM8](https://www.sinevibes.com/korgdcm8/) | Sinevibes | Sample rate and bit depth reducer | paid |
 | [Dipole](https://www.sinevibes.com/korgdipole/) | Sinevibes | Through-Zero Flanger | paid |
@@ -84,6 +90,10 @@ _Note: Additions, modifications, broken links? Let us know at logue-sdk@korg.co.
 | [pseudo](http://hammondeggsmusic.ca/logueplugins/pseudo.html) | Hammond Eggs Music | A unique mono looper with adjustable stereo playback spread | donation |
 | [Vector](http://hammondeggsmusic.ca/logueplugins/vector.html) | Hammond Eggs Music | An experimental vector-graphic video game | donation |
 | [while(1)](http://hammondeggsmusic.ca/logueplugins/while1.html) | Hammond Eggs Music | A versatile looper / metronome |  donation |
+| [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | donation |
+| [LogReverse](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Reverse delay with manual mode | donation |
+| [LogLooper](https://gum.co/rolllog_free_pack) | Roll-log Sounds | 25.9 seconds looper/sampler | donation |
+| [Smoke](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Graunular freeze/delay | donation |
 | [Stutter](https://www.sinevibes.com/korgstutter/) | Sinevibes | Self-randomizing audio repeater | paid |
 | [Time](https://www.sinevibes.com/korgtime/) | Sinevibes | Ultra wide range delay/looper | paid |
 
@@ -92,7 +102,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 ## Reverb Effects (revfx)
 
 | Name | Developer | Description |  |
-| | | None yet... | |
+| [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | donation |
 
 ## Miscelaneous 
 
