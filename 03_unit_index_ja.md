@@ -50,6 +50,7 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [Turbo](https://www.sinevibes.com/korgturbo/) | Sinevibes | Variable waveshaping synthesis | paid | 
 | [Staub](https://www.staub-audio.com/products/staub/) | Staub Audio | Rave hoover sound | paid |
 | [One](https://sellfy.com/p/vp0w/) | Tim Shoebridge | Moog One waveform morphing | paid | 
+| [Fold](https://sellfy.com/p/hn3tf1/) | Tim Shoebridge | Analogue wave-folding emulation | paid | 
 | [Pluck](https://sellfy.com/p/bG1k/) | Tim Shoebridge | Karplus Strong | paid |
 | [String](https://sellfy.com/p/Ump7/) | Tim Shoebridge | 7 oscillator 1980's analogue string emulation | paid |
 | [Two](https://sellfy.com/p/wxqvjn/) | Tim Shoebridge | Waveform mixing and phase modulation | paid |
