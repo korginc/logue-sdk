@@ -1,7 +1,7 @@
 /*
     BSD 3-Clause License
 
-    Copyright (c) 2018, KORG INC.
+    Copyright (c) 2020, KORG INC.
     All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@ typedef struct State {
   float w0;
   float phase;
   float drive;
+  float harmonic;
   float dist;
   float lfo, lfoz;
   uint8_t flags;
@@ -61,6 +62,7 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   s_state.w0    = 0.f;
   s_state.phase = 0.f;
   s_state.drive = 1.f;
+  s_state.harmonic = 0.f;
   s_state.dist  = 0.f;
   s_state.lfo = s_state.lfoz = 0.f;
   s_state.flags = k_flags_none;
@@ -77,6 +79,8 @@ void OSC_CYCLE(const user_osc_param_t * const params,
   float phase = (flags & k_flag_reset) ? 0.f : s_state.phase;
   
   const float drive = s_state.drive;
+  const float harmonic = 0.5f * s_state.harmonic;
+  const float fundamental = 1.f - (0.5f * fabsf(s_state.harmonic));
   const float dist  = s_state.dist;
 
   const float lfo = s_state.lfo = q31_to_f32(params->shape_lfo);
@@ -92,9 +96,14 @@ void OSC_CYCLE(const user_osc_param_t * const params,
     // Phase distortion
     float p = phase + linintf(dist_mod, 0.f, dist_mod * osc_sinf(phase));
     p = (p <= 0) ? 1.f - p : p - (uint32_t)p;
-
+    
     // Main signal
-    const float sig  = osc_softclipf(0.05f, drive * osc_sinf(p));
+    float sig  = drive * osc_sinf(p);
+
+    // Add harmonic
+    sig = osc_softclipf(0.05f, fundamental * sig + harmonic * osc_sinf(4*phase));
+
+    // Write to output buffer in Q31
     *(y++) = f32_to_q31(sig);
     
     phase += w0;
@@ -128,6 +137,12 @@ void OSC_PARAM(uint16_t index, uint16_t value)
   case k_user_osc_param_id4:
   case k_user_osc_param_id5:
   case k_user_osc_param_id6:
+    // Bipolar percent parameters (each of 6 with different range)
+    // [-100, 100] encoded as [0, 200]
+    {
+      const int16_t bipolar = value - 100; // recover signed representation
+      s_state.harmonic = bipolar * 0.01f; // scale to [0.f,1.f]
+    }
     break;
   case k_user_osc_param_shape:
     s_state.dist = 0.3f * valf;
