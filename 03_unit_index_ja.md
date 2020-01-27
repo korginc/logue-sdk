@@ -30,6 +30,7 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [Duet](http://hammondeggsmusic.ca/logueplugins/duet.html) | Hammond Eggs Music | Dual osc. dual lfo. saw+saw or saw+pwm | donation |
 | [Extra](http://hammondeggsmusic.ca/logueplugins/extra.html) | Hammond Eggs Music | Paraphonic voice expander | donation |
 | [Percy](http://hammondeggsmusic.ca/logueplugins/percy.html) | Hammond Eggs Music | Sample based percussive organ | donation |
+| [Shapes](http://hammondeggsmusic.ca/logueplugins/shapes.html) | Hammond Eggs Music | Smoothly transition between common wave shapes | donation |
 | [Souper](http://hammondeggsmusic.ca/logueplugins/souper.html) | Hammond Eggs Music | 5+5 oscillator supersaw | donation |
 | [Organ](https://github.com/len/korg-prologue/tree/master/src/organ) | len | 5 draw bars, similar to Vox Super Continental | free | 
 | [Pluck](https://github.com/len/korg-prologue/tree/master/src/pluck) | len | Karplus Strong | free |
