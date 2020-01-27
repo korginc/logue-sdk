@@ -79,7 +79,7 @@ Your main implementation file should include `usermodfx.h` and implement the fol
 
     _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
 
-* `void MODFX_PARAM(uint8_t index, uint32_t value)`: Called whenever the user changes a parameter value.
+* `void MODFX_PARAM(uint8_t index, int32_t value)`: Called whenever the user changes a parameter value.
 
 For more details see the [Modulation Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__modfx__inst.html). Also see the [Effects Runtime API](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__fx__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__utils.html) and [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/namespacedsp.html) for useful primitives.
 
@@ -93,7 +93,7 @@ Your main implementation file should include `userdelfx.h` and implement the fol
 
     _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
 
-* `void DELFX_PARAM(uint8_t index, uint32_t value)`: Called whenever the user changes a parameter value.
+* `void DELFX_PARAM(uint8_t index, int32_t value)`: Called whenever the user changes a parameter value.
 
 For more details see the [Delay Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__delfx__inst.html). Also see the [Effects Runtime API](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__fx__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__utils.html) and [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/namespacedsp.html) for useful primitives.
 
@@ -107,6 +107,6 @@ Your main implementation file should include `userrevfx.h` and implement the fol
 
     _Note: Buffer lengths up to 64 frames should be supported. However you can perform multiple passes on smaller buffers if you preffer. (Optimize for powers of two: 16, 32, 64)_
 
-* `void REVFX_PARAM(uint8_t index, uint32_t value)`: Called whenever the user changes a parameter value.
+* `void REVFX_PARAM(uint8_t index, int32_t value)`: Called whenever the user changes a parameter value.
 
 For more details see the [Reverb Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__revfx__inst.html). Also see the [Effects Runtime API](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__fx__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/group__utils.html) and [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/prologue/v1.1-0/html/namespacedsp.html) for useful primitives.

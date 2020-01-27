@@ -85,7 +85,7 @@ logue SDK でのエフェクト作成にあたり, 中心となるAPIの概要�
 
     _Note: 最大64フレームまでのバッファサイズをサポートする必要があります. 必要な場合はより小さいバッファーで複数の処理を実行することができます. （2のべき乗で最適化してください : 16, 32, 64）_
 
-* `void MODFX_PARAM(uint8_t index, uint32_t value)`: パラメーター変更時に呼ばれます.
+* `void MODFX_PARAM(uint8_t index, int32_t value)`: パラメーター変更時に呼ばれます.
 
 より詳細な情報については [Modulation Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__modfx__inst.html) 参照してください. また, [Effects Runtime API](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__fx__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__utils.html),   [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/namespacedsp.html) も役に立ちます.
 
@@ -99,7 +99,7 @@ logue SDK でのエフェクト作成にあたり, 中心となるAPIの概要�
 
     _Note: 最大64フレームまでのバッファサイズをサポートする必要があります. 必要な場合はより小さいバッファーで複数の処理を実行することができます. （2のべき乗で最適化してください : 16, 32, 64）_
     
-* `void DELFX_PARAM(uint8_t index, uint32_t value)`: パラメーター変更時に呼ばれます.
+* `void DELFX_PARAM(uint8_t index, int32_t value)`: パラメーター変更時に呼ばれます.
 
 より詳細な情報については [Delay Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__delfx__inst.html) を参照してください. また [Effects Runtime API](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__fx__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__utils.html) , [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/namespacedsp.html) も役に立ちます.
 
@@ -113,6 +113,6 @@ logue SDK でのエフェクト作成にあたり, 中心となるAPIの概要�
 
     _Note: 最大64フレームまでのバッファサイズをサポートする必要があります. 必要な場合はより小さいバッファーで複数の処理を実行することができます. （2のべき乗で最適化してください : 16, 32, 64）_
     
-* `void REVFX_PARAM(uint8_t index, uint32_t value)`: パラメーター変更時に呼ばれます.
+* `void REVFX_PARAM(uint8_t index, int32_t value)`: パラメーター変更時に呼ばれます.
 
 より詳細な情報については [Reverb Effect Instance API reference](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__revfx__inst.html) を参照してください. また. [Effects Runtime API](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__fx__api.html), [Arithmetic Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/group__utils.html) , [Common DSP Utilities](https://korginc.github.io/logue-sdk/ref/minilogue-xd/v1.1-0/html/namespacedsp.html) も役に立ちます.
