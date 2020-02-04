@@ -71,6 +71,10 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Resonance](https://www.dirtboxsynth.com/sd_product/resonance/) | Dirtbox Synth | Dual combo filter | paid |
 | [Buckets](http://hammondeggsmusic.ca/logueplugins/buckets.html) | Hammond Eggs Music | 70's style BBD chorus | donation |
 | [Hera2.0](http://hammondeggsmusic.ca/logueplugins/hera2.html) | Hammond Eggs Music | 80's style chorus | donation |
+| [Crusher](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Bit crusher and decimator | free |
+| [Gator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style gate arpeggiator | free |
+| [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | free |
+| [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | free |
 | [cvRing](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Stereo ring modulation effect tuned to V/Oct | donation |
 | [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | donation |
 | [Corrosion](https://www.sinevibes.com/korgcorrosion/) | Sinevibes | Multi-algorithm distortion processor | paid |
@@ -83,6 +87,8 @@ _Note: Additions, modifications, broken links? Let us know at logue-sdk@korg.co.
 
 ## Delay Effects (delfx)
 
+_Note: The delay effect section can contain effects that perform other functions than delay, see descriptions below._
+
 | Name | Developer | Description |  |
 | [lobit](https://github.com/centrevillage/cv_logue/tree/master/delfx/lobit) | centrevillage |  | free |
 | [pitchshift](https://github.com/centrevillage/cv_logue/tree/master/delfx/pitchshift) | centrevillage |  | free |
@@ -94,6 +100,11 @@ _Note: Additions, modifications, broken links? Let us know at logue-sdk@korg.co.
 | [pseudo](http://hammondeggsmusic.ca/logueplugins/pseudo.html) | Hammond Eggs Music | A unique mono looper with adjustable stereo playback spread | donation |
 | [Vector](http://hammondeggsmusic.ca/logueplugins/vector.html) | Hammond Eggs Music | An experimental vector-graphic video game | donation |
 | [while(1)](http://hammondeggsmusic.ca/logueplugins/while1.html) | Hammond Eggs Music | A versatile looper / metronome |  donation |
+| [Crusher](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Bit crusher and decimator | free |
+| [Gator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style gate arpeggiator | free |
+| [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | free |
+| [Looper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style loop recorder | free |
+| [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | free |
 | [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | donation |
 | [LogReverse](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Reverse delay with manual mode | donation |
 | [LogLooper](https://gum.co/rolllog_free_pack) | Roll-log Sounds | 25.9 seconds looper/sampler | donation |
@@ -105,7 +116,14 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 
 ## Reverb Effects (revfx)
 
+_Note: The reverb effect section can contain effects that perform other functions than reverberation, see descriptions below._
+
 | Name | Developer | Description |  |
+| [Crusher](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Bit crusher and decimator | free |
+| [Gator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style gate arpeggiator | free |
+| [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | free |
+| [Looper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style loop recorder | free |
+| [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | free |
 | [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | donation |
 
 ## Miscelaneous 
