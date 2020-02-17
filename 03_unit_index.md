@@ -81,7 +81,10 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [DCM8](https://www.sinevibes.com/korgdcm8/) | Sinevibes | Sample rate and bit depth reducer | paid |
 | [Dipole](https://www.sinevibes.com/korgdipole/) | Sinevibes | Through-Zero Flanger | paid |
 | [Drift](https://www.sinevibes.com/korgdrift/ ) | Sinevibes | Physically modelled stereo panner based on Lorenz osc. | paid |
+| [Ring](https://www.sinevibes.com/korgring/ ) | Sinevibes | 2x oversampling ring modulator | paid |
+| [Shift](https://www.sinevibes.com/korgshift/ ) | Sinevibes | Analog-modelled Bode frequency shifter | paid |
 | [SVF](https://www.sinevibes.com/korgsvf/) | Sinevibes | State-variable filter 4 pole, -24dB/oct, resonant | paid |
+| [Whirl](https://www.sinevibes.com/korgwhirl/) | Sinevibes | Barber-pole phaser based on Bode frequency shifter | paid |
 
 _Note: Additions, modifications, broken links? Let us know at logue-sdk@korg.co.jp_
 
@@ -109,7 +112,7 @@ _Note: The delay effect section can contain effects that perform other functions
 | [LogReverse](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Reverse delay with manual mode | donation |
 | [LogLooper](https://gum.co/rolllog_free_pack) | Roll-log Sounds | 25.9 seconds looper/sampler | donation |
 | [Smoke](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Graunular freeze/delay | donation |
-| [Stutter](https://www.sinevibes.com/korgstutter/) | Sinevibes | Self-randomizing audio repeater | paid |
+| [Rerun](https://www.sinevibes.com/korgrerun/) | Sinevibes | Self-randomizing audio repeater | paid |
 | [Time](https://www.sinevibes.com/korgtime/) | Sinevibes | Ultra wide range delay/looper | paid |
 
 _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp_
