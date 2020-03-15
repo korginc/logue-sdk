@@ -58,6 +58,7 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [String](https://www.soundmangling.com/2019/08/11/string-for-minilogue-xd/) | Tim Shoebridge | 7 oscillator 1980's analogue string emulation | paid |
 | [Two](https://www.soundmangling.com/2019/08/11/two-for-minilogue-xd/) | Tim Shoebridge | Waveform mixing and phase modulation | paid |
 | [Three](https://www.soundmangling.com/2019/11/10/three-for-minilogue-xd/) | Tim Shoebridge | Three waves, three EGs | paid |
+| [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | donation |
 
 _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp までご連絡下さい._
 
