@@ -55,8 +55,9 @@ This is a list of existing user contributed and paid oscillator/effect units mad
 | [Tube](https://www.sinevibes.com/korgtube/) | Sinevibes | Resonator modeling synthesis | paid |
 | [Turbo](https://www.sinevibes.com/korgturbo/) | Sinevibes | Variable waveshaping synthesis | paid | 
 | [Staub](https://www.staub-audio.com/products/staub/) | Staub Audio | Rave hoover sound | paid |
-| [One](https://www.soundmangling.com/2019/08/11/one-for-minilogue-xd/) | Tim Shoebridge | Moog One waveform morphing | paid | 
+| [Beats](https://www.soundmangling.com/2020/03/22/beats-for-minilogue-xd/) | Tim Shoebridge | 28 beat-making sounds inc. kick, snares, toms and more | paid | 
 | [Fold](https://www.soundmangling.com/2020/01/04/fold-for-minilogue-xd/) | Tim Shoebridge | Analogue wave-folding emulation | paid | 
+| [One](https://www.soundmangling.com/2019/08/11/one-for-minilogue-xd/) | Tim Shoebridge | Moog One waveform morphing | paid | 
 | [Pluck](https://www.soundmangling.com/2019/08/11/pluck-for-minilogue-xd/) | Tim Shoebridge | Karplus Strong | paid |
 | [String](https://www.soundmangling.com/2019/08/11/string-for-minilogue-xd/) | Tim Shoebridge | 7 oscillator 1980's analogue string emulation | paid |
 | [Two](https://www.soundmangling.com/2019/08/11/two-for-minilogue-xd/) | Tim Shoebridge | Waveform mixing and phase modulation | paid |
