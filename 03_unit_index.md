@@ -133,6 +133,7 @@ _Note: The reverb effect section can contain effects that perform other function
 | [Looper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style loop recorder | free |
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | free |
 | [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | donation |
+| [Albedo](https://www.sinevibes.com/korgalbedo/) | Sinevibes | Granular cloud reverb | paid |
 
 ## Miscelaneous 
 
