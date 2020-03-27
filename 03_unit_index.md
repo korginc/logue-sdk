@@ -14,6 +14,7 @@ This is a list of existing user contributed and paid oscillator/effect units mad
 | [Supersaw](https://www.2getheraudio.com/korg-multi-engine/supersaw-oscillator/) | 2getheraudio | 7 sawtooths and morphing filter | paid |
 | [Tarabbia](https://www.2getheraudio.com/korg-multi-engine/tarabbia-oscillator/) | 2getheraudio | Continuous saw-square morphing with unison mode | paid |
 | [Wavesweep](https://www.2getheraudio.com/korg-multi-engine/wavesweep-oscillator/) | 2getheraudio | Sweep through logue SDK wavetables | paid |
+| [Cain CZ](https://cain-synthesizer.com/cain-cz-2) | Cain Synthesizer | Phase distortion oscillator | donation |
 | [mist](https://github.com/centrevillage/cv_logue/tree/master/osc/mist) | centrevillage | Unstable Harmonic Oscillator | free |
 | [fnord](https://github.com/damnatron/logue-sdk/tree/master/platform/prologue/contrib/prlgunit) | damnatron | 3 operator FM | free |
 | [morph](https://github.com/damnatron/logue-sdk/tree/master/platform/prologue/contrib/prlgunit) | damnatron | Morphing between sawtooth, square, sine | free |
