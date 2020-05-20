@@ -16,6 +16,8 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [Supersaw](https://www.2getheraudio.com/korg-multi-engine/supersaw-oscillator/) | 2getheraudio | 7 sawtooths and morphing filter | paid |
 | [Tarabbia](https://www.2getheraudio.com/korg-multi-engine/tarabbia-oscillator/) | 2getheraudio | Continuous saw-square morphing with unison mode | paid |
 | [Wavesweep](https://www.2getheraudio.com/korg-multi-engine/wavesweep-oscillator/) | 2getheraudio | Sweep through logue SDK wavetables | paid |
+| [Hoovic](https://blog.boochow.com/logue/hoovic) | boochow instruments | Hoover sound | paid |
+| [picture](https://github.com/boochow/picture) | boochow instruments | Picture display for oscilloscopes (requires Lissa delay effect) | free |
 | [Cain CZ](https://cain-synthesizer.com/cain-cz-2) | Cain Synthesizer | Phase distortion oscillator | donation |
 | [mist](https://github.com/centrevillage/cv_logue/tree/master/osc/mist) | centrevillage | Unstable Harmonic Oscillator | free |
 | [fnord](https://github.com/damnatron/logue-sdk/tree/master/platform/prologue/contrib/prlgunit) | damnatron | 3 operator FM | free |
@@ -104,6 +106,7 @@ _Note: 追加,訂正，リンク切れについては *logue-sdk@korg.co.jp* ま
 _Note: The delay effect section can contain effects that perform other functions than delay, see descriptions below._
 
 | 名前 | 開発者 | 備考 |  |
+| [lissa](https://github.com/boochow/lissa) | boochow instruments | Lissajous output for oscilloscopes | free |
 | [lobit](https://github.com/centrevillage/cv_logue/tree/master/delfx/lobit) | centrevillage |  | free |
 | [pitchshift](https://github.com/centrevillage/cv_logue/tree/master/delfx/pitchshift) | centrevillage |  | free |
 | [reverse](https://github.com/centrevillage/cv_logue/tree/master/delfx/reverse) | centrevillage |  | free |
