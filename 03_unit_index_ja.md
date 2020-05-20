@@ -26,6 +26,7 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [Morph](https://www.dirtboxsynth.com/sd_product/morph/) | Dirtbox Synth | Wavetable oscillator pack | paid |
 | [ORGANism](https://www.dirtboxsynth.com/sd_product/organism/) | Dirtbox Synth | Drawbar organ oscillator | paid |
 | [Origami](https://www.dirtboxsynth.com/sd_product/origami/) | Dirtbox Synth|Wavefolding oscillator | free\* |
+| [Physiq](https://www.dirtboxsynth.com/sd_product/physiq/) | Dirtbox Synth | Digital waveguide oscillator | paid |
 | [PWG](https://www.dirtboxsynth.com/sd_product/pwg-parametric-waveform-generator/) | Dirtbox Synth | Parametric waveform generator | paid |
 | [SUPAwave](https://www.dirtboxsynth.com/sd_product/supawave/) | Dirtbox Synth | | paid |
 | [Blinds](https://edouard.digital/) | Edouard Digital | PWM for any waveform | paid |
@@ -78,6 +79,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | 名前 | 開発者 | 備考 |  |
 | [AMPit](https://www.dirtboxsynth.com/sd_product/ampit/) | Dirtbox Synth | distortion | paid |
 | [Basic Autopanner](https://www.dirtboxsynth.com/sd_product/basic-autopanner/) | Dirtbox Synth | Simple auto-panning | paid |
+| [FILTAstep](https://www.dirtboxsynth.com/sd_product/filterstep/) | Dirtbox Synth | Tempo sync'ed sequence filter | paid |
 | [Filter Pack](https://www.dirtboxsynth.com/sd_product/filter-pack/) | Dirtbox Synth | Low pass, high pass, band pass & band reject | paid |
 | [Pan and Tremolo Pack](https://www.dirtboxsynth.com/sd_product/pan-and-tremolo-pack/) | Dirtbox Synth | Panner & tremolo | paid |
 | [Resonance](https://www.dirtboxsynth.com/sd_product/resonance/) | Dirtbox Synth | Dual combo filter | paid |
