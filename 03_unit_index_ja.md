@@ -30,6 +30,7 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [Warped](https://docs.google.com/document/d/1YxjCAL9CeEhrf-EpedUzAHMjk6ilYbJGoIHQFXSDfEY) | Ghost Time Games | A lo-fi oscillator inspired by Boards of Canada | free |
 | [1973](http://hammondeggsmusic.ca/logueplugins/1973.html) | Hammond Eggs Music | Single osc., dual filter, emulation of miniKorg 700 | donation | 
 | [Chips2.0](http://hammondeggsmusic.ca/logueplugins/chips2.html) | Hammond Eggs Music | Chiptune oscillator with PWM, arpeg., and noise drums | donation | 
+| [Divide](http://hammondeggsmusic.ca/logueplugins/divide.html) | Hammond Eggs Music | 12 note top octave style divider oscillator | donation |
 | [Duet](http://hammondeggsmusic.ca/logueplugins/duet.html) | Hammond Eggs Music | Dual osc. dual lfo. saw+saw or saw+pwm | donation |
 | [Extra](http://hammondeggsmusic.ca/logueplugins/extra.html) | Hammond Eggs Music | Paraphonic voice expander | donation |
 | [Percy](http://hammondeggsmusic.ca/logueplugins/percy.html) | Hammond Eggs Music | Sample based percussive organ | donation |
