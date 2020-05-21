@@ -62,13 +62,16 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [Tube](https://www.sinevibes.com/korgtube/) | Sinevibes | Resonator modeling synthesis | paid |
 | [Turbo](https://www.sinevibes.com/korgturbo/) | Sinevibes | Variable waveshaping synthesis | paid | 
 | [Staub](https://www.staub-audio.com/products/staub/) | Staub Audio | Rave hoover sound | paid |
-| [Beats](https://www.soundmangling.com/2020/03/22/beats-for-minilogue-xd/) | Tim Shoebridge | 28 beat-making sounds inc. kick, snares, toms and more | paid | 
-| [Fold](https://www.soundmangling.com/2020/01/04/fold-for-minilogue-xd/) | Tim Shoebridge | Analogue wave-folding emulation | paid | 
-| [One](https://www.soundmangling.com/2019/08/11/one-for-minilogue-xd/) | Tim Shoebridge | Moog One waveform morphing | paid | 
-| [Pluck](https://www.soundmangling.com/2019/08/11/pluck-for-minilogue-xd/) | Tim Shoebridge | Karplus Strong | paid |
-| [String](https://www.soundmangling.com/2019/08/11/string-for-minilogue-xd/) | Tim Shoebridge | 7 oscillator 1980's analogue string emulation | paid |
-| [Two](https://www.soundmangling.com/2019/08/11/two-for-minilogue-xd/) | Tim Shoebridge | Waveform mixing and phase modulation | paid |
-| [Three](https://www.soundmangling.com/2019/11/10/three-for-minilogue-xd/) | Tim Shoebridge | Three waves, three EGs | paid |
+| [Beats](https://www.soundmangling.com/2020/05/14/beats-user-oscillator/) | Tim Shoebridge | 28 beat-making sounds inc. kick, snares, toms and more | paid | 
+| [Chord](https://www.soundmangling.com/2020/05/14/chord-user-oscillator/) | Tim Shoebridge | Four waveforms and four sets of four chord changes | paid | 
+| [Drone](https://www.soundmangling.com/2020/05/14/drone-user-oscillator/) | Tim Shoebridge | | paid | 
+| [Fold](https://www.soundmangling.com/2020/05/14/fold-user-oscillator/) | Tim Shoebridge | Analogue wave-folding emulation | paid | 
+| [Octave](https://www.soundmangling.com/2020/05/14/octave-user-oscillator/) | Tim Shoebridge | | paid | 
+| [One](https://www.soundmangling.com/2020/05/14/one-user-oscillator/) | Tim Shoebridge | Moog One style waveform morphing | paid | 
+| [Pluck](https://www.soundmangling.com/2020/05/14/pluck-v2-user-oscillator/) | Tim Shoebridge | Karplus Strong | paid |
+| [String](https://www.soundmangling.com/2020/05/14/string-user-oscillator/) | Tim Shoebridge | 7 oscillator 1980's analogue string emulation | paid |
+| [Three](https://www.soundmangling.com/2020/05/14/three-user-oscillator/) | Tim Shoebridge | Three waves, three EGs | paid |
+| [Two](https://www.soundmangling.com/2020/05/14/two-user-oscillator/) | Tim Shoebridge | Waveform mixing and phase modulation | paid |
 | [vbass](https://github.com/tweeeeeak/nts) | Tweeeeeak | Volca Bass style triple oscillator | free |
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | donation |
 
