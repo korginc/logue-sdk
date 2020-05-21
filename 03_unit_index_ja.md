@@ -79,7 +79,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | 名前 | 開発者 | 備考 |  |
 | [AMPit](https://www.dirtboxsynth.com/sd_product/ampit/) | Dirtbox Synth | distortion | paid |
 | [Basic Autopanner](https://www.dirtboxsynth.com/sd_product/basic-autopanner/) | Dirtbox Synth | Simple auto-panning | paid |
-| [FILTAstep](https://www.dirtboxsynth.com/sd_product/filterstep/) | Dirtbox Synth | Tempo sync'ed sequence filter | paid |
+| [FILTAstep](https://www.dirtboxsynth.com/sd_product/filtastep/) | Dirtbox Synth | Tempo sync'ed sequence filter | paid |
 | [Filter Pack](https://www.dirtboxsynth.com/sd_product/filter-pack/) | Dirtbox Synth | Low pass, high pass, band pass & band reject | paid |
 | [Pan and Tremolo Pack](https://www.dirtboxsynth.com/sd_product/pan-and-tremolo-pack/) | Dirtbox Synth | Panner & tremolo | paid |
 | [Resonance](https://www.dirtboxsynth.com/sd_product/resonance/) | Dirtbox Synth | Dual combo filter | paid |
