@@ -41,6 +41,7 @@ This is a list of existing user contributed and paid oscillator/effect units mad
 | [Souper](http://hammondeggsmusic.ca/logueplugins/souper.html) | Hammond Eggs Music | 5+5 oscillator supersaw | donation |
 | [Organ](https://github.com/len/korg-prologue/tree/master/src/organ) | len | 5 draw bars, similar to Vox Super Continental | free | 
 | [Pluck](https://github.com/len/korg-prologue/tree/master/src/pluck) | len | Karplus Strong | free |
+| [Morpheus](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Example implementation of custom wavetable inspired by WaveEdit | free |
 | [Supersaw](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Saw with unison (pseudo-polyphony on NTS-1) | free |
 | [FastSaw](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Optimized Saw with unison (pseudo-polyphony on NTS-1) | free |
 | [MO2 add](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits additive mode | free |
