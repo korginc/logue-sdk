@@ -16,6 +16,7 @@ This is a list of existing user contributed and paid oscillator/effect units mad
 | [Wavesweep](https://www.2getheraudio.com/korg-multi-engine/wavesweep-oscillator/) | 2getheraudio | Sweep through logue SDK wavetables | paid |
 | [Hoovic](https://blog.boochow.com/logue/hoovic) | boochow instruments | Hoover sound | paid |
 | [picture](https://github.com/boochow/picture) | boochow instruments | Picture display for oscilloscopes (requires Lissa delay effect) | free |
+| [Cain++](https://cain-synthesizer.com/cain) | Cain Synthesizers | Karplus-Strong oscillator | donation |
 | [Cain CZ](https://cain-synthesizer.com/cain-cz-2) | Cain Synthesizers | Phase distortion oscillator inspired by the Casio Cosmo synthesizer | donation |
 | [KRYSTAL](https://cain-synthesizer.com/krystal) | Cain Synthesizers | Shatter model oscillator | donation |
 | [mist](https://github.com/centrevillage/cv_logue/tree/master/osc/mist) | centrevillage | Unstable Harmonic Oscillator | free |
