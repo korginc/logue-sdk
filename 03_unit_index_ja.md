@@ -29,7 +29,8 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [Physiq](https://www.dirtboxsynth.com/sd_product/physiq/) | Dirtbox Synth | Digital waveguide oscillator | paid |
 | [PWG](https://www.dirtboxsynth.com/sd_product/pwg-parametric-waveform-generator/) | Dirtbox Synth | Parametric waveform generator | paid |
 | [SUPAwave](https://www.dirtboxsynth.com/sd_product/supawave/) | Dirtbox Synth | | paid |
-| [Blinds](https://edouard.digital/) | Edouard Digital | PWM for any waveform | paid |
+| [Blinds](https://edouard.digital/blinds/) | Edouard Digital | PWM for any waveform | paid |
+| [JP-Booo](https://edouard.digital/jp-booo/) | Edouard Digital | Super saw oscillator inspired by the JP-8000 | paid |
 | [Step](https://docs.google.com/document/d/1C7NdMjTZy9QDjQYifAx3eBuY1trysD7Hhh1_DvkqkHo) | Ghost Time Games | An experimental stepping oscillator | free |
 | [Warped](https://docs.google.com/document/d/1YxjCAL9CeEhrf-EpedUzAHMjk6ilYbJGoIHQFXSDfEY) | Ghost Time Games | A lo-fi oscillator inspired by Boards of Canada | free |
 | [1973](http://hammondeggsmusic.ca/logueplugins/1973.html) | Hammond Eggs Music | Single osc., dual filter, emulation of miniKorg 700 | donation | 
