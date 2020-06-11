@@ -63,6 +63,7 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [Scan](https://rolllogsounds.com) | Roll-Log Sounds | Wavetable scanning | free |
 | [Syng](https://rolllogsounds.com) | Roll-Log Sounds | Vocal formant oscillator | paid |
 | [Bent](https://www.sinevibes.com/korgbent/) | Sinevibes | Bent-wave modulation synthesis | paid |
+| [Groove](https://www.sinevibes.com/korggroove/) | Sinevibes | Multitimbral bass and drum machine | paid |
 | [Tube](https://www.sinevibes.com/korgtube/) | Sinevibes | Resonator modeling synthesis | paid |
 | [Turbo](https://www.sinevibes.com/korgturbo/) | Sinevibes | Variable waveshaping synthesis | paid | 
 | [Staub](https://www.staub-audio.com/products/staub/) | Staub Audio | Rave hoover sound | paid |
