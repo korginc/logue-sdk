@@ -661,7 +661,7 @@ float fasterlog2f(float x) {
  */
 static inline __attribute__((optimize("Ofast"), always_inline))
 float fastlogf(float x) {
-  return 0.69314718f * fastlog2f(x);
+  return M_LN2 * fastlog2f(x);
 }
 
 /** "Fast" natural logarithm approximation, valid for positive x as precision allows.
@@ -669,7 +669,7 @@ float fastlogf(float x) {
  */
 static inline __attribute__((optimize("Ofast"), always_inline))
 float fasterlogf(float x) {
-  return 0.69314718f * fasterlog2f(x);
+  return M_LN2 * fasterlog2f(x);
 }
 
 /** "Fast" power of 2 approximation, valid for x in [ -126, ... as precision allows.
@@ -789,7 +789,8 @@ float ampdbf(const float amp) {
  */
 static inline __attribute__((optimize("Ofast"), always_inline))
 float fasterampdbf(const float amp) {
-  return 20.f*fasterlog2f(amp)/fasterlog2f(10);
+  static const float c = 3.3219280948873626f; // 20.f / log2f(10);
+  return c*fasterlog2f(amp);
 }
 
 /** dB to ampltitude
@@ -803,7 +804,7 @@ float dbampf(const float db) {
  */
 static inline __attribute__((optimize("Ofast"), always_inline))
 float fasterdbampf(const float db) {
-  return 20.f*fasterpowf(10.f, 0.05f*db);
+  return fasterpowf(10.f, 0.05f*db);
 }
 
 /** @} */
