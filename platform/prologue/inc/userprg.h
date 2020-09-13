@@ -47,58 +47,45 @@
 extern "C" {
 #endif
 
-  /**
+   /**
    * Module categories.
    */
-  enum {
-    /** Dummy category, may be used in future. */
-    k_user_module_global = 0U,
-    /** Modulation effects */
-    k_user_module_modfx,
-    /** Delay effects */
-    k_user_module_delfx,
-    /** Reverb effects */
-    k_user_module_revfx,
-    /** Oscillators */
-    k_user_module_osc,
-    k_num_user_modules,
-  };
-
+#define k_user_module_global 0U  /** Dummy category, may be used in future. */
+#define k_user_module_modfx  1U  /** Modulation effects */
+#define k_user_module_delfx  2U  /** Delay effects */
+#define k_user_module_revfx  3U  /** Reverb effects */
+#define k_user_module_osc    4U  /** Oscillators */
+#define k_num_user_modules   5U
+  
   /**
    * prologue specific platform/module pairs. Passed to user code via initialization callback.
    */
-  enum {
-    k_user_target_prologue        = (1U<<8),
-    k_user_target_prologue_global = (1U<<8) | k_user_module_global,
-    k_user_target_prologue_modfx  = (1U<<8) | k_user_module_modfx,
-    k_user_target_prologue_delfx  = (1U<<8) | k_user_module_delfx,
-    k_user_target_prologue_revfx  = (1U<<8) | k_user_module_revfx,
-    k_user_target_prologue_osc    = (1U<<8) | k_user_module_osc,
-  };
+#define k_user_target_prologue        ((1U<<8))
+#define k_user_target_prologue_global ((1U<<8) | #define k_user_module_global)
+#define k_user_target_prologue_modfx  ((1U<<8) | #define k_user_module_modfx)
+#define k_user_target_prologue_delfx  ((1U<<8) | #define k_user_module_delfx)
+#define k_user_target_prologue_revfx  ((1U<<8) | #define k_user_module_revfx)
+#define k_user_target_prologue_osc    ((1U<<8) | #define k_user_module_osc)
 
   /**
    * minilogue xd specific platform/module pairs. Passed to user code via initialization callback.
    */
-  enum {
-    k_user_target_miniloguexd        = (2U<<8),
-    k_user_target_miniloguexd_global = (2U<<8) | k_user_module_global,
-    k_user_target_miniloguexd_modfx  = (2U<<8) | k_user_module_modfx,
-    k_user_target_miniloguexd_delfx  = (2U<<8) | k_user_module_delfx,
-    k_user_target_miniloguexd_revfx  = (2U<<8) | k_user_module_revfx,
-    k_user_target_miniloguexd_osc    = (2U<<8) | k_user_module_osc,
-  };
+#define k_user_target_miniloguexd        ((2U<<8))
+#define k_user_target_miniloguexd_global ((2U<<8) | #define k_user_module_global)
+#define k_user_target_miniloguexd_modfx  ((2U<<8) | #define k_user_module_modfx)
+#define k_user_target_miniloguexd_delfx  ((2U<<8) | #define k_user_module_delfx)
+#define k_user_target_miniloguexd_revfx  ((2U<<8) | #define k_user_module_revfx)
+#define k_user_target_miniloguexd_osc    ((2U<<8) | #define k_user_module_osc)
 
   /**
    * Nu:Tekt NTS-1 digital specific platform/module pairs. Passed to user code via initialization callback.
    */
-  enum {
-    k_user_target_nutektdigital        = (3U<<8),
-    k_user_target_nutektdigital_global = (3U<<8) | k_user_module_global,
-    k_user_target_nutektdigital_modfx  = (3U<<8) | k_user_module_modfx,
-    k_user_target_nutektdigital_delfx  = (3U<<8) | k_user_module_delfx,
-    k_user_target_nutektdigital_revfx  = (3U<<8) | k_user_module_revfx,
-    k_user_target_nutektdigital_osc    = (3U<<8) | k_user_module_osc,
-  };
+#define k_user_target_nutektdigital        ((3U<<8))
+#define k_user_target_nutektdigital_global ((3U<<8) | #define k_user_module_global)
+#define k_user_target_nutektdigital_modfx  ((3U<<8) | #define k_user_module_modfx)
+#define k_user_target_nutektdigital_delfx  ((3U<<8) | #define k_user_module_delfx)
+#define k_user_target_nutektdigital_revfx  ((3U<<8) | #define k_user_module_revfx)
+#define k_user_target_nutektdigital_osc    ((3U<<8) | #define k_user_module_osc)
 
   /** Target platform for this user code */
 #define USER_TARGET_PLATFORM      (k_user_target_prologue)
@@ -118,10 +105,8 @@ extern "C" {
    *  Minor: additions only   (7bits, cap to 99)
    *  Sub:   bugfixes only    (7bits, cap to 99)
    */
-  enum {
-    k_user_api_1_0_0 = ((1U<<16) | (0U<<8) | (0U)),
-    k_user_api_1_1_0 = ((1U<<16) | (1U<<8) | (0U))
-  };
+#define k_user_api_1_0_0 ((1U<<16) | (0U<<8) | (0U))
+#define k_user_api_1_1_0 ((1U<<16) | (1U<<8) | (0U))
 
   /** API version targeted by this code */
 #define USER_API_VERSION    (k_user_api_1_1_0)
