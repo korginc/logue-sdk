@@ -20,7 +20,9 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [picture](https://github.com/boochow/picture) | boochow instruments | Picture display for oscilloscopes (requires Lissa delay effect) | free |
 | [Cain++](https://cain-synthesizer.com/cain) | Cain Synthesizers | Karplus-Strong oscillator | donation |
 | [Cain CZ](https://cain-synthesizer.com/cain-cz-2) | Cain Synthesizers | Phase distortion oscillator inspired by the Casio Cosmo synthesizer | donation |
+| [Human](https://cain-synthesizer.com/human) | Cain Synthesizers | A vowel oscillator | donation |
 | [KRYSTAL](https://cain-synthesizer.com/krystal) | Cain Synthesizers | Shatter model oscillator | donation |
+| [WTF](https://cain-synthesizer.com/wtf) | Cain Synthesizers | A strange name for an oscillator, but as soon as you try it out that will most probably be what’s on your mind | donation |
 | [mist](https://github.com/centrevillage/cv_logue/tree/master/osc/mist) | centrevillage | Unstable Harmonic Oscillator | free |
 | [fnord](https://github.com/damnatron/logue-sdk/tree/master/platform/prologue/contrib/prlgunit) | damnatron | 3 operator FM | free |
 | [morph](https://github.com/damnatron/logue-sdk/tree/master/platform/prologue/contrib/prlgunit) | damnatron | Morphing between sawtooth, square, sine | free |
@@ -85,6 +87,8 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 ## モジュレーション
 
 | 名前 | 開発者 | 備考 |  |
+| [3DC](https://www.cain-synthesizer.com/effects) | Cain Synthesizers | 3 delay line chorus | donation |
+| [Cain D](https://www.cain-synthesizer.com/effects) | Cain Synthesizers | Subtler chorus | donation |
 | [AMPit](https://www.dirtboxsynth.com/sd_product/ampit/) | Dirtbox Synth | distortion | paid |
 | [Basic Autopanner](https://www.dirtboxsynth.com/sd_product/basic-autopanner/) | Dirtbox Synth | Simple auto-panning | paid |
 | [FILTAstep](https://www.dirtboxsynth.com/sd_product/filtastep/) | Dirtbox Synth | Tempo sync'ed sequence filter | paid |
