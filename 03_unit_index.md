@@ -72,6 +72,7 @@ This is a list of existing user contributed and paid oscillator/effect units mad
 | [Syng](https://rolllogsounds.com) | Roll-Log Sounds | Vocal formant oscillator | paid |
 | [Bent](https://www.sinevibes.com/korgbent/) | Sinevibes | Bent-wave modulation synthesis | paid |
 | [Groove](https://www.sinevibes.com/korggroove/) | Sinevibes | Multitimbral bass and drum machine | paid |
+| [Node](https://www.sinevibes.com/korgnode/) | Sinevibes | Four-operator FM synthesis engine | paid |
 | [Tube](https://www.sinevibes.com/korgtube/) | Sinevibes | Resonator modeling synthesis | paid |
 | [Turbo](https://www.sinevibes.com/korgturbo/) | Sinevibes | Variable waveshaping synthesis | paid | 
 | [Staub](https://www.staub-audio.com/products/staub/) | Staub Audio | Rave hoover sound | paid |
@@ -114,10 +115,12 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | free |
 | [cvRing](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Stereo ring modulation effect tuned to V/Oct | donation |
 | [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | donation |
+| [Blend](https://www.sinevibes.com/korgblend/) | Sinevibes | Parabolic wave modulated multi-voice chorus | paid |
 | [Corrosion](https://www.sinevibes.com/korgcorrosion/) | Sinevibes | Multi-algorithm distortion processor | paid |
 | [DCM8](https://www.sinevibes.com/korgdcm8/) | Sinevibes | Sample rate and bit depth reducer | paid |
 | [Dipole](https://www.sinevibes.com/korgdipole/) | Sinevibes | Through-Zero Flanger | paid |
 | [Drift](https://www.sinevibes.com/korgdrift/ ) | Sinevibes | Physically modelled stereo panner based on Lorenz osc. | paid |
+| [Finite](https://www.sinevibes.com/korgfinite/ ) | Sinevibes | Granular pitch shifter | paid |
 | [Ring](https://www.sinevibes.com/korgring/ ) | Sinevibes | 2x oversampling ring modulator | paid |
 | [Shift](https://www.sinevibes.com/korgshift/ ) | Sinevibes | Analog-modelled Bode frequency shifter | paid |
 | [SVF](https://www.sinevibes.com/korgsvf/) | Sinevibes | State-variable filter 4 pole, -24dB/oct, resonant | paid |
@@ -151,6 +154,7 @@ _Note: The delay effect section can contain effects that perform other functions
 | [LogReverse](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Reverse delay with manual mode | donation |
 | [LogLooper](https://gum.co/rolllog_free_pack) | Roll-log Sounds | 25.9 seconds looper/sampler | donation |
 | [Smoke](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Graunular freeze/delay | donation |
+| [Dispersion](https://www.sinevibes.com/korgdispersion/) | Sinevibes | Bouncing ball delay | paid |
 | [Rerun](https://www.sinevibes.com/korgrerun/) | Sinevibes | Self-randomizing audio repeater | paid |
 | [Time](https://www.sinevibes.com/korgtime/) | Sinevibes | Ultra wide range delay/looper | paid |
 
