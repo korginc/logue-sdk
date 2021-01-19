@@ -116,6 +116,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [Shift](https://www.sinevibes.com/korgshift/ ) | Sinevibes | Analog-modelled Bode frequency shifter | paid |
 | [SVF](https://www.sinevibes.com/korgsvf/) | Sinevibes | State-variable filter 4 pole, -24dB/oct, resonant | paid |
 | [Whirl](https://www.sinevibes.com/korgwhirl/) | Sinevibes | Barber-pole phaser based on Bode frequency shifter | paid |
+| [autopan](https://github.com/tmlbl/autopan) | Tim Lebel | Basic autopan effect | free |
 
 _Note: 追加,訂正，リンク切れについては *logue-sdk@korg.co.jp* までご連絡下さい._
 
