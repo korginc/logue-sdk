@@ -15,8 +15,10 @@ layout: default_ja
     {{ content }}
   </div>
 
+  {%- if page.last_modified_on -%}
   <div class="date">
-    <p> Last updated on {{ page.date | date: '%B %d, %Y' }}</p>
+    <p> Last updated on {{ page.last_modified_on | date: '%B %d, %Y' }}</p>
   </div>
+  {%- endif -%}
   
 </article>
