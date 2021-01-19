@@ -77,6 +77,7 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [Staub](https://www.staub-audio.com/products/staub/) | Staub Audio | Rave hoover sound | paid |
 | [Beats](https://www.soundmangling.com/2020/05/14/beats-user-oscillator/) | Tim Shoebridge | 28 beat-making sounds inc. kick, snares, toms and more | paid | 
 | [Chord](https://www.soundmangling.com/2020/05/14/chord-user-oscillator/) | Tim Shoebridge | Four waveforms and four sets of four chord changes | paid | 
+| [Digital Waveform](https://www.soundmangling.com/2020/09/15/digital-waveform-user-oscillator/) | Tim Shoebridge | Attempt to recreate the sounds and capabilities of the legendary DW-8000 hybrid poly synth | paid |
 | [Drone](https://www.soundmangling.com/2020/05/14/drone-user-oscillator/) | Tim Shoebridge | | paid | 
 | [Fold](https://www.soundmangling.com/2020/05/14/fold-user-oscillator/) | Tim Shoebridge | Analogue wave-folding emulation | paid | 
 | [Octave](https://www.soundmangling.com/2020/05/14/octave-user-oscillator/) | Tim Shoebridge | | paid | 
@@ -85,6 +86,7 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [String](https://www.soundmangling.com/2020/05/14/string-user-oscillator/) | Tim Shoebridge | 7 oscillator 1980's analogue string emulation | paid |
 | [Three](https://www.soundmangling.com/2020/05/14/three-user-oscillator/) | Tim Shoebridge | Three waves, three EGs | paid |
 | [Two](https://www.soundmangling.com/2020/05/14/two-user-oscillator/) | Tim Shoebridge | Waveform mixing and phase modulation | paid |
+| [Vector](https://www.soundmangling.com/2020/10/17/vector-synthesis-user-oscillator/) | Tim Shoebridge | Attempt to recreate the basic capabilities of legendary vector synthesisers such as the Sequential Prophet VS and Korg Wavestation | paid |
 | [vbass](https://github.com/tweeeeeak/nts) | Tweeeeeak | Volca Bass style triple oscillator | free |
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | donation |
 
