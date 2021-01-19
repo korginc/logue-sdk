@@ -48,6 +48,7 @@ This is a list of existing user contributed and paid oscillator/effect units mad
 | [Morpheus](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Example implementation of custom wavetable inspired by WaveEdit | free |
 | [Supersaw](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Saw with unison (pseudo-polyphony on NTS-1) | free |
 | [FastSaw](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Optimized Saw with unison (pseudo-polyphony on NTS-1) | free |
+| [FMxx](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | 6/4-operator FM oscillator series with up to 4 Yamaha DX7/DX21/DX11-series voice banks suport | free |
 | [MO2 add](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits additive mode | free |
 | [MO2 fm](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits FM mode | free |
 | [MO2 grn](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits granular mode | free |
