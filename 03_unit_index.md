@@ -2,6 +2,7 @@
 layout: page
 title: Unit Index
 permalink: /unit-index/
+last_modified_on: 2021-01-19 12:35:00 +9000
 ---
 
 This is a list of existing user contributed and paid oscillator/effect units made with the logue SDK. It is not exhaustive, but we do our best to list everything here. For additions or corrections please contact us at *logue-sdk@korg.co.jp*.

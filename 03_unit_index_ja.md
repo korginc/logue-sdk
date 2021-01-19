@@ -4,6 +4,7 @@ title: Unit Index
 title_long: ユニット一覧
 permalink: /ja/unit-index/
 language: ja
+last_modified_on: 2021-01-19 12:35:00 +9000
 ---
 
 logue SDKで作られたユーザーオシレーターとエフェクトのリストです. 無償のものと有償のものがあります. 全てを網羅しているわけでは有りませんが, できるだけ沢山リストできるよう努力します. 追加,訂正，リンク切れについては *logue-sdk@korg.co.jp* までご連絡下さい.
