@@ -45,6 +45,8 @@ logue SDKで作られたユーザーオシレーターとエフェクトのリ�
 | [Percy](http://hammondeggsmusic.ca/logueplugins/percy.html) | Hammond Eggs Music | Sample based percussive organ | donation |
 | [Shapes](http://hammondeggsmusic.ca/logueplugins/shapes.html) | Hammond Eggs Music | Smoothly transition between common wave shapes | donation |
 | [Souper](http://hammondeggsmusic.ca/logueplugins/souper.html) | Hammond Eggs Music | 5+5 oscillator supersaw | donation |
+| [chords-osc](http://github.com/hypercubed-music/nts-1) | Hypercubed Music | A 12-voice chord oscillator | free |
+| [osc-808](http://github.com/hypercubed-music/nts-1) | Hypercubed Music | A simple 808-style bass oscilator | free |
 | [Organ](https://github.com/len/korg-prologue/tree/master/src/organ) | len | 5 draw bars, similar to Vox Super Continental | free | 
 | [Pluck](https://github.com/len/korg-prologue/tree/master/src/pluck) | len | Karplus Strong | free |
 | [Morpheus](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Example implementation of custom wavetable inspired by WaveEdit | free |
@@ -99,6 +101,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [Buckets](http://hammondeggsmusic.ca/logueplugins/buckets.html) | Hammond Eggs Music | 70's style BBD chorus | donation |
 | [Hera2.0](http://hammondeggsmusic.ca/logueplugins/hera2.html) | Hammond Eggs Music | 80's style chorus | donation |
 | [WahWah Gate](http://hammondeggsmusic.ca/logueplugins/wahwahgate.html) | Hammond Eggs Music | Gated wah wah effect | donation |
+| [distort-mod](http://github.com/hypercubed-music/nts-1) | Hypercubed Music | Simple distortion/clip effect | free |
 | [Crusher](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Bit crusher and decimator | free |
 | [Gator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style gate arpeggiator | free |
 | [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | free |
