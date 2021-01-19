@@ -157,6 +157,12 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 _Note: The reverb effect section can contain effects that perform other functions than reverberation, see descriptions below._
 
 | Name | Developer | Description |  |
+| [Breathe](http://hammondeggsmusic.ca/logueplugins/breathe.html) | Hammond Eggs Music | low pass auto-filter modulating deep reverb| donation |
+| [Cathedral](http://hammondeggsmusic.ca/logueplugins/cathedral.html) | Hammond Eggs Music | fixed low pass long time deep reverb | donation |
+| [Haze](http://hammondeggsmusic.ca/logueplugins/cathedral.html) | Hammond Eggs Music | fixed high pass long time deep reverb | donation |
+| [Mist](http://hammondeggsmusic.ca/logueplugins/cathedral.html) | Hammond Eggs Music | fixed high pass half time deep reverb | donation |
+| [Sniff](http://hammondeggsmusic.ca/logueplugins/breathe.html) | Hammond Eggs Music | high pass auto-filter modulating deep reverb| donation |
+| [Theatre](http://hammondeggsmusic.ca/logueplugins/cathedral.html) | Hammond Eggs Music | fixed low pass half time deep reverb | donation |
 | [Crusher](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Bit crusher and decimator | free |
 | [Gator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style gate arpeggiator | free |
 | [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | free |
