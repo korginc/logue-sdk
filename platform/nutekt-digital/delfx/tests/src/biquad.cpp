@@ -9,9 +9,8 @@
  *
  */
 
-#include "userdelfx.h"
-
-#include "biquad.hpp"
+#include <logue/userdelfx.h>
+#include <logue/dsp/biquad.hpp>
 
 static dsp::BiQuad s_bq_l, s_bq_r;
 
@@ -142,4 +141,3 @@ void DELFX_PARAM(uint8_t index, int32_t value)
     break;
   }
 }
-

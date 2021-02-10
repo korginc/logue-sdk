@@ -38,7 +38,7 @@
  *
  */
 
-#include "userosc.h"
+#include <logue/userosc.h>
 
 typedef struct State {
   float w0;
@@ -137,4 +137,3 @@ void OSC_PARAM(uint16_t index, uint16_t value)
     break;
   }
 }
-

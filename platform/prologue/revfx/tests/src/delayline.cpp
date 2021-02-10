@@ -9,9 +9,8 @@
  *
  */
 
-#include "userrevfx.h"
-
-#include "delayline.hpp"
+#include <logue/userrevfx.h>
+#include <logue/dsp/delayline.hpp>
 
 static dsp::DelayLine s_delay;
 
@@ -71,4 +70,3 @@ void REVFX_PARAM(uint8_t index, int32_t value)
     break;
   }
 }
-

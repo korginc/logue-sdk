@@ -32,9 +32,9 @@
 
 //*/
 
-#include "fixed_math.h"
-#include "int_math.h"
-#include "float_math.h"
+#include "../utils/fixed_math.h"
+#include "../utils/int_math.h"
+#include "../utils/float_math.h"
 
 /**
  * @file    simplelfo.hpp

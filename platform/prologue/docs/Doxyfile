@@ -830,21 +830,21 @@ WARN_LOGFILE           =
 # Note: If this tag is empty the current directory is searched.
 
 INPUT                  = ./doxy.h \
-                         ../inc/userprg.h \
-                         ../inc/dsp/biquad.hpp \
-                         ../inc/dsp/delayline.hpp \
-                         ../inc/dsp/simplelfo.hpp \
-                         ../inc/userdelfx.h \
-                         ../inc/usermodfx.h \
-                         ../inc/userrevfx.h \
-                         ../inc/fx_api.h \
-                         ../inc/userosc.h \ 
-                         ../inc/osc_api.h \
-                         ../inc/utils/buffer_ops.h \
-                         ../inc/utils/cortexm4.h \
-                         ../inc/utils/int_math.h \
-                         ../inc/utils/fixed_math.h \
-                         ../inc/utils/float_math.h                         
+                         ../logue/userprg.h \
+                         ../logue/dsp/biquad.hpp \
+                         ../logue/dsp/delayline.hpp \
+                         ../logue/dsp/simplelfo.hpp \
+                         ../logue/userdelfx.h \
+                         ../logue/usermodfx.h \
+                         ../logue/userrevfx.h \
+                         ../logue/fx_api.h \
+                         ../logue/userosc.h \ 
+                         ../logue/osc_api.h \
+                         ../logue/utils/buffer_ops.h \
+                         ../logue/utils/cortexm4.h \
+                         ../logue/utils/int_math.h \
+                         ../logue/utils/fixed_math.h \
+                         ../logue/utils/float_math.h                         
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

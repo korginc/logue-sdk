@@ -9,9 +9,8 @@
  *
  */
 
-#include "userrevfx.h"
-
-#include "biquad.hpp"
+#include <logue/userrevfx.h>
+#include <logue/dsp/biquad.hpp>
 
 static dsp::BiQuad s_bq_l, s_bq_r;
 
@@ -141,4 +140,3 @@ void REVFX_PARAM(uint8_t index, int32_t value)
     break;
   }
 }
-

@@ -39,8 +39,8 @@
  *
  */
 
-#include "userosc.h"
-#include "biquad.hpp"
+#include <logue/userosc.h>
+#include <logue/dsp/biquad.hpp>
 
 struct Waves {
 

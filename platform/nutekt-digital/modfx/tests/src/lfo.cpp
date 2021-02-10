@@ -9,9 +9,8 @@
  *
  */
 
-#include "usermodfx.h"
-
-#include "simplelfo.hpp"
+#include <logue/usermodfx.h>
+#include <logue/dsp/simplelfo.hpp>
 
 static dsp::SimpleLFO s_lfo;
 
@@ -137,4 +136,3 @@ void MODFX_PARAM(uint8_t index, int32_t value)
     break;
   }
 }
-

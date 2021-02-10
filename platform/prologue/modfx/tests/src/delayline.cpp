@@ -9,9 +9,8 @@
  *
  */
 
-#include "usermodfx.h"
-
-#include "delayline.hpp"
+#include <logue/usermodfx.h>
+#include <logue/dsp/delayline.hpp>
 
 static dsp::DualDelayLine s_delay;
 
@@ -71,4 +70,3 @@ void MODFX_PARAM(uint8_t index, int32_t value)
     break;
   }
 }
-

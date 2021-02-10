@@ -45,9 +45,9 @@
 #ifndef __fx_api_h
 #define __fx_api_h
 
-#include "float_math.h"
-#include "int_math.h"
-#include "fixed_math.h"
+#include "utils/float_math.h"
+#include "utils/int_math.h"
+#include "utils/fixed_math.h"
 
 #ifdef __cplusplus
 extern "C" {

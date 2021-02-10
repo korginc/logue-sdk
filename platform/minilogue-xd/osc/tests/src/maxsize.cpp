@@ -38,7 +38,7 @@
  *
  */
 
-#include "userosc.h"
+#include <logue/userosc.h>
 
 #define k_pad_size 0x1f25
 
@@ -160,4 +160,3 @@ void OSC_PARAM(uint16_t index, uint16_t value)
     break;
   }
 }
-

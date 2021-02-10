@@ -45,9 +45,9 @@
 #ifndef __fx_api_h
 #define __fx_api_h
 
-#include "float_math.h"
-#include "int_math.h"
-#include "fixed_math.h"
+#include "utils/float_math.h"
+#include "utils/int_math.h"
+#include "utils/fixed_math.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -116,6 +116,7 @@ extern "C" {
   /**
    * @name   Sine half-wave
    * @note   Wrap and negate for phase >= 0.5
+   * @todo   Replace by full period wave and simplify scan code
    * @{ 
    */
   
@@ -155,6 +156,7 @@ extern "C" {
    * @return     Result of sin(2*pi*x).
    */
   __fast_inline float fx_sinuf(uint32_t x) {
+    //TODO
     (void)x;
     return 0.f;
   }

@@ -9,9 +9,8 @@
  *
  */
 
-#include "userrevfx.h"
-
-#include "simplelfo.hpp"
+#include <logue/userrevfx.h>
+#include <logue/dsp/simplelfo.hpp>
 
 static dsp::SimpleLFO s_lfo;
 
@@ -135,4 +134,3 @@ void REVFX_PARAM(uint8_t index, int32_t value)
     break;
   }
 }
-

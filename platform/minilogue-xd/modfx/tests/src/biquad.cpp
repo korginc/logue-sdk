@@ -9,9 +9,8 @@
  *
  */
 
-#include "usermodfx.h"
-
-#include "biquad.hpp"
+#include <logue/usermodfx.h>
+#include <logue/dsp/biquad.hpp>
 
 static dsp::BiQuad s_bq_l, s_bq_r;
 static dsp::BiQuad s_bqs_l, s_bqs_r;
@@ -151,4 +150,3 @@ void MODFX_PARAM(uint8_t index, int32_t value)
     break;
   }
 }
-

@@ -38,7 +38,7 @@
  *
  */
 
-#include "userosc.h"
+#include <logue/userosc.h>
 #include "waves.hpp"
 
 static Waves s_waves;
@@ -211,4 +211,3 @@ void OSC_PARAM(uint16_t index, uint16_t value)
     break;
   }
 }
-
