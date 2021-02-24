@@ -65,4 +65,4 @@ _Note: for minilogue xd the extension will be *.mnlgxdunit*, for NuTekt NTS-1 di
 ### Using *unit* Files
 
 *.prlgunit*, *.mnlgxdunit*, and  *.ntkdigunit* files are simple zip files containing the binary payload for the custom oscillator or effect and a metadata file describing it.
-They can be loaded onto a device matching the target platform using the [logue-cli utility](https://github.com/korginc/logue-sdk/tools/logue-cli/) or the Librarian application for that device (see product page on [KORG's official website](https://korg.com)).
+They can be loaded onto a device matching the target platform using the [logue-cli utility](https://github.com/korginc/logue-sdk/tree/master/tools/logue-cli) or the Librarian application for that device (see product page on [KORG's official website](https://korg.com)).
