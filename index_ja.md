@@ -65,4 +65,4 @@ Done
 ### *「unit」* ファイルの操作と使い方
 
 *.prlgunit*, *.mnlgxdunit*, and  *.ntkdigunit* ファイルは自作コンテンツのバイナリデータ本体とメタデータを含む簡潔なパッケージファイルです. 
-このファイルは [logue-cli utility](https://github.com/korginc/logue-sdk/tools/logue-cli/) もしくは 製品の Librarian application ([KORG ウエブサイト](https://korg.com)の製品ページに参考) 経由でアップロードすることが出来ます.
+このファイルは [logue-cli utility](https://github.com/korginc/logue-sdk/tree/master/tools/logue-cli) もしくは 製品の Librarian application ([KORG ウエブサイト](https://korg.com)の製品ページに参考) 経由でアップロードすることが出来ます.
