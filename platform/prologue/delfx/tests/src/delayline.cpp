@@ -59,13 +59,13 @@ void DELFX_PARAM(uint8_t index, int32_t value)
   const float valf = q31_to_f32(value);
   switch (index) {
   case k_user_delfx_param_time:
-    break;
-  case k_user_delfx_param_depth:
     s_len = 1 + valf * valf * 1.f * 47999.f; // up to 1sec delay
     break;
-  case k_user_delfx_param_shift_depth:
+  case k_user_delfx_param_depth:
     // Rescale to add notch around 0.5f
     s_mix = (valf <= 0.49f) ? 1.02040816326530612244f * valf : (valf >= 0.51f) ? 0.5f + 1.02f * (valf-0.51f) : 0.5f;
+    break;
+  case k_user_delfx_param_shift_depth:
     break;
   default:
     break;
