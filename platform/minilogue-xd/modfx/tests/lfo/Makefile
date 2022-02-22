@@ -48,7 +48,7 @@ include ./project.mk
 MCU = cortex-m4
 
 GCC_TARGET = arm-none-eabi-
-GCC_BIN_PATH = $(TOOLSDIR)/gcc/gcc-arm-none-eabi-5_4-2016q3/bin
+GCC_BIN_PATH = $(TOOLSDIR)/gcc/gcc-arm-none-eabi-10.3-2021.10/bin
 
 CC   = $(GCC_BIN_PATH)/$(GCC_TARGET)gcc
 CXXC = $(GCC_BIN_PATH)/$(GCC_TARGET)g++

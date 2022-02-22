@@ -35,16 +35,16 @@ SCRIPT_DIR="$(pwd)/$(dirname $0)"
 pushd ${SCRIPT_DIR} 2>&1 > /dev/null
 
 PKGNAME="gcc-arm-none-eabi"
-VERSION="5-2016-q3"
+VERSION="10.3-2021.10"
 
-ARCHIVE_URL="https://developer.arm.com/-/media/Files/downloads/gnu-rm/5_4-2016q3/gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2"
-ARCHIVE_SHA1="e87bbefaccbb43d30c084faeb945f4e96e7ec780"
-ARCHIVE_NAME="gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2"
+ARCHIVE_URL="https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2"
+ARCHIVE_SHA1="3d7cc8285cafcd63f65f8b2576f4ca4affddf15b"
+ARCHIVE_NAME="gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2"
 
 if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-    echo ">> Assuming Linux on intel 32 bit platform."
+    echo ">> Assuming Linux on intel 64 bit platform."
 else
-    echo ">> This script is meant for Linux (intel 32 bit)."
+    echo ">> This script is meant for Linux (intel 64 bit)."
     popd 2>&1 > /dev/null
     exit 1
 fi

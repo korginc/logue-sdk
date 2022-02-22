@@ -35,11 +35,11 @@ SCRIPT_DIR="$(pwd)/$(dirname $0)"
 pushd ${SCRIPT_DIR} 2>&1 > /dev/null
 
 PKGNAME="gcc-arm-none-eabi"
-VERSION="5-2016-q3"
+VERSION="10.3-2021.10"
 
-ARCHIVE_URL="https://developer.arm.com/-/media/Files/downloads/gnu-rm/5_4-2016q3/gcc-arm-none-eabi-5_4-2016q3-20160926-mac.tar.bz2"
-ARCHIVE_SHA1="defb787491a64d24f25b2e3c190170f735d4f14d"
-ARCHIVE_NAME="gcc-arm-none-eabi-5_4-2016q3-20160926-mac.tar.bz2"
+ARCHIVE_URL="https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2"
+ARCHIVE_SHA1="9a4598c98c986edc2b62c75b152b98421943833c"
+ARCHIVE_NAME="gcc-arm-none-eabi-10.3-2021.10-mac.tar.bz2"
 
 if [[ "${OSTYPE}" == "darwin"* ]]; then
     echo ">> Assuming OSX 64 bit platform."

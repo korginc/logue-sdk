@@ -35,12 +35,12 @@ SCRIPT_DIR="$(pwd)/$(dirname $0)"
 pushd ${SCRIPT_DIR} 2>&1 > /dev/null
 
 PKGNAME="gcc-arm-none-eabi"
-VERSION="5-2016-q3"
+VERSION="10.3-2021.10"
 
-ARCHIVE_URL="https://developer.arm.com/-/media/Files/downloads/gnu-rm/5_4-2016q3/gcc-arm-none-eabi-5_4-2016q3-20160926-win32-zip.zip"
-ARCHIVE_SHA1="f6c05562b5f031bf79ec13c6f7311245c717be1b"
-ARCHIVE_NAME="gcc-arm-none-eabi-5_4-2016q3-20160926-win32.zip"
-UNPACKED_NAME="gcc-arm-none-eabi-5_4-2016q3"
+ARCHIVE_URL="https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.zip"
+ARCHIVE_SHA1="72b73ef724b72260f842bb4d5fe6aa264e3e5b74"
+ARCHIVE_NAME="gcc-arm-none-eabi-10.3-2021.10-win32.zip"
+UNPACKED_NAME="gcc-arm-none-eabi-10.3-2021.10"
 
 if [[ "${OSTYPE}" == "msys" ]]; then
     echo ">> Assuming msys platform."
