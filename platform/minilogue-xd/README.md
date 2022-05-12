@@ -12,13 +12,15 @@ Firmware version >= 2.00 is required to run user units built with SDK version 1.
 
 #### Overall Structure:
  * [inc/](inc/) : Common headers.
- * [osc/](osc/) : Custom oscillator project template.
- * [modfx/](modfx/) : Custom modulation effect project template.
- * [delfx/](delfx/) : Custom delay effect project template.
- * [revfx/](revfx/) : Custom reverb effect project template.
- * [demos/](demos/) : Demo projects.
+ * [dummy-osc/](dummy-osc/) : Custom oscillator project template.
+ * [dummy-modfx/](dummy-modfx/) : Custom modulation effect project template.
+ * [dummy-delfx/](dummy-delfx/) : Custom delay effect project template.
+ * [dummy-revfx/](dummy-revfx/) : Custom reverb effect project template.
+ * [waves/](waves/) : Waves demo oscillator project.
 
 ### Setting up the Development Environment
+
+#### Legacy Method
 
  1. Clone this repository and initialize/update submodules.
 
@@ -33,14 +35,20 @@ Firmware version >= 2.00 is required to run user units built with SDK version 1.
     2. [Info-ZIP](../../tools/zip)
     3. [logue-cli](../../tools/logue-cli) (optional)
 
+#### Docker Build Environment
+
+ Refer to [Docker-based Build Environment](../../docker).
+ 
 ### Building the Demo Oscillator (Waves)
 
-Waves is a morphing wavetable oscillator that uses the wavetables provided by the custom oscillator API. It is a good example of how to use API functions, declare edit menu parameters and use parameter values of various types. See [demos/waves/](demos/waves/) for code and details.
+Waves is a morphing wavetable oscillator that uses the wavetables provided by the custom oscillator API. It is a good example of how to use API functions, declare edit menu parameters and use parameter values of various types. See [waves/](waves/) for code and details.
+
+#### Build Using Legacy Method
 
  1. move into the project directory.
  
 ```
-$ cd logue-sdk/platform/minilogue-xd/demos/waves/
+$ cd logue-sdk/platform/minilogue-xd/waves/
 ```
  2. type `make` to build the project.
 
@@ -65,6 +73,60 @@ Packaging to ./waves.mnlgxdunit
 Done
 ```
  3. As the *Packaging...* line indicates, a *.mnlgxdunit* file will be generated. This is the final product.
+ 
+#### Build Using Docker Container
+
+ 1. Execute [docker/run_interactive.sh](../../docker/run_interactive.sh)
+
+```
+ $ docker/run_interactive.sh
+ user@logue-sdk $ 
+ ```
+
+ 1.1. (optional) List buildable projects
+
+```
+user@logue-sdk:~$ build -l --minilogue-xd
+- minilogue-xd/dummy-delfx
+- minilogue-xd/dummy-modfx
+- minilogue-xd/dummy-osc
+- minilogue-xd/dummy-revfx
+- minilogue-xd/waves
+ ```
+
+ 2. Use the build command with the the desired project's path (E.g. `minilogue-xd/waves`)
+
+```
+ user@logue-sdk:~$ build minilogue-xd/waves
+ >> Initializing minilogue-xd development environment.
+ Note: run 'env -r' to reset the environment
+ >> Building /workspace/minilogue-xd/waves
+ Compiler Options
+ /usr/bin/arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT -g -Os -mlittle-endian -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -fcheck-new -std=c11 -mstructure-size-boundary=8 -W -Wall -Wextra -Wa,-alms=/workspace/minilogue-xd/waves/build/lst/ -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -I. -I/workspace/minilogue-xd/waves/inc -I/workspace/minilogue-xd/waves/inc/api -I/workspace/minilogue-xd/inc -I/workspace/minilogue-xd/inc/dsp -I/workspace/minilogue-xd/inc/utils -I/workspace/ext/CMSIS/CMSIS/Include
+ 
+ Compiling _unit.c
+ Compiling waves.cpp
+ cc1: warning: option '-mstructure-size-boundary' is deprecated
+ Linking /workspace/minilogue-xd/waves/build/waves.elf
+ Creating /workspace/minilogue-xd/waves/build/waves.hex
+ Creating /workspace/minilogue-xd/waves/build/waves.bin
+ Creating /workspace/minilogue-xd/waves/build/waves.dmp
+ Creating /workspace/minilogue-xd/waves/build/waves.list
+ 
+    text	   data	    bss	    dec	    hex	filename
+    2032	      4	    144	   2180	    884	/workspace/minilogue-xd/waves/build/waves.elf
+ 
+ Done
+ 
+ >> Installing /workspace/minilogue-xd/waves
+ Packaging to /workspace/minilogue-xd/waves/build/waves.mnlgxdunit
+ Deploying to /workspace/minilogue-xd/waves/waves.mnlgxdunit
+ Done
+ 
+ >> Resetting environment
+ >> Cleaning up minilogue-xd development environment.
+
+ ```
  
 ### Using *unit* Files
 

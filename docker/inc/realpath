@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+#
+# Replacement for 'realpath' command that is unavailable on macos systems with no coreutils installed
+# Adapted from: https://stackoverflow.com/a/18443300
+#
+
+realpath() (
+  pushd "$(dirname "$1")" 2>&1 > /dev/null
+  local LINK=$(readlink "$(basename "$1")")
+  while [ "$LINK" ]; do
+    cd "$(dirname "$LINK")"
+    LINK=$(readlink "$(basename "$1")")
+  done
+  local REALPATH="$PWD/$(basename "$1")"
+  popd 2>&1 > /dev/null
+  echo "$REALPATH"
+)
+

@@ -1,0 +1,633 @@
+#!/usr/bin/bash
+
+#
+#    build - Wrapper script to perform build for various platforms
+#
+
+#
+#    BSD 3-Clause License
+#
+#    Copyright (c) 2022, KORG INC.
+#    All rights reserved.
+#
+#    Redistribution and use in source and binary forms, with or without
+#    modification, are permitted provided that the following conditions are met:
+#
+#    * Redistributions of source code must retain the above copyright notice, this
+#      list of conditions and the following disclaimer.
+#
+#    * Redistributions in binary form must reproduce the above copyright notice,
+#      this list of conditions and the following disclaimer in the documentation
+#      and/or other materials provided with the distribution.
+#
+#    * Neither the name of the copyright holder nor the names of its
+#      contributors may be used to endorse or promote products derived from
+#      this software without specific prior written permission.
+#
+#    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+#    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+#    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+#    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+#    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+#    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+if [ "$(type -t env)" != "function" ]; then
+    source /app/env
+fi
+
+ACTION="build"
+
+OPT_ALL=""
+OPT_FORCE=""
+
+OPT_DRUMLOGUE=""
+OPT_MINILOUGEXD=""
+OPT_NTS1=""
+OPT_PROLOGUE=""
+
+PLATFORM_ROOT="/workspace"
+
+PLATFORMS=("drumlogue"
+           "minilogue-xd"
+           "nutekt-digital"
+           "prologue"
+          )
+
+# declare -A PLATFORM_REG
+
+# PLATFORM_REG[drumlogue,key]="drumlogue"
+# PLATFORM_REG[minilogue-xd,key]="minilogue-xd"
+# PLATFORM_REG[nts-1,key]="nutekt-digital"
+# PLATFORM_REG[prologue,key]="prologue"
+
+CPU_CORES=$(lscpu -p=CPU | tail -1)
+((CPU_CORES = CPU_CORES + 1))
+
+short_desc () {
+    echo -n "Wrapper script to build logue SDK unit projects."
+}
+
+usage () {
+    echo "Usage: $0 [OPTIONS] [UNIT_PROJECT_PATH]"
+    echo ""
+    echo "$(short_desc)"
+    echo ""
+    echo "Options:"
+    echo " -l, --list            list valid unit projects"
+    echo " -c, --clean           only clean projects"
+    echo " -a, --all             select all valid unit projects"
+    echo "     --drumlogue       select drumlogue unit projects"
+    echo "     --minilogue-xd    select minilogue-xd unit projects"
+    echo "     --nutekt-digital  select nts-1 unit projects"
+    echo "     --nts-1           alias for --nutekt-digital"
+    echo "     --prologue        select prologue unit projects"
+    echo " -f, --force           force clean project before building"
+    echo "     --install-dir=DIR install built units to specified directory"
+    echo " -h, --help            display this help"
+    echo ""
+    echo "Arguments:"
+    echo "[UNIT_PROJECT_PATH]    specify path (relative to /workspace) to the unit project to build/clean"
+    echo ""
+    echo "Notes:"
+    echo " * UNIT_PROJECT_PATH and platform selection options are mutually exclusive."
+    echo " * -a/-all is overriden by platform selection options if specified."
+    echo ""
+}
+
+err () { echo "[Err] $@" 1>&2; }
+warn () { echo "[Warn] $@" 1>&2; }
+
+## platform_for_project project_path
+platform_for_project() {
+    if [ $# -lt 1 ]; then
+        err "Missing arguments for platform_for_project(project_path)"
+        return 127
+    fi
+
+    local project_path="$1"
+    
+    if [ -r "${project_path}/Makefile" ] && [ -r "${project_path}/manifest.json" ] && [ -r "${project_path}/project.mk" ]; then
+        local platform="$(grep platform "${project_path}/manifest.json" | sed 's|.*: "\([^"]*\).*|\1|')"
+
+        $(for p in ${PLATFORMS[@]}; do [ "${p}" == "${platform}" ] && exit 0; done; exit 1)
+        if [ $? -ne 0 ]; then
+            err "Unknown platform '${platform}' detected"
+            return 1
+        fi
+
+        echo "${platform}"
+        
+        return 0
+
+    elif [ -r "${project_path}/Makefile" ] && [ -r "${project_path}/config.mk" ]; then
+        ## TODO: current header format does not explicit target platform which prevents us from parsing properly from here.
+        ##       since no other platforms yet have this structure we can assume drumlogue for now.
+        echo "drumlogue"
+        return 0
+    fi
+
+    err "Unknown platform"
+    
+    return 1
+}
+
+## is_valid_project platform project_path
+is_valid_project () {
+    if [ $# -lt 2 ]; then
+        err "Missing arguments for is_valid_project(platform, project_path)"
+        return 127
+    fi
+
+    local platform="$1"
+    local project_path="$2"
+
+    if [ ! -d ${project_path} ]; then
+        return 1 ## valid projects are directories
+    fi
+    
+    case ${platform} in
+        drumlogue)
+            [ -r "${project_path}/Makefile" ] && [ -r "${project_path}/config.mk" ] && return 0 
+            ;;
+        *)
+            [ -r "${project_path}/Makefile" ] && [ -r "${project_path}/manifest.json" ] && [ -r "${project_path}/project.mk" ] && [ $(grep platform "${project_path}/manifest.json" | sed 's|.*: "\([^"]*\).*|\1|') ==  ${platform} ] && return 0 
+            ;;
+    esac
+    
+    return 1 ## not a valid project
+}
+
+## build_project platform project_path
+build_project () {
+    if [ $# -lt 2 ]; then
+        err "Missing arguments for build_project(platform, project_path)"
+        return 127
+    fi
+
+    local platform="$1"
+    local project_path="$2"
+    
+    is_valid_project "${platform}" "${project_path}"
+    if [ $? -ne 0 ]; then
+        err "Project at '${project_path}' does not seem valid"
+        return 2
+    fi
+
+    local env_name="${platform}"
+    if [ "${platform}" == "nutekt-digital" ]; then
+        env_name="nts-1" ## TODO: should standardize to nts-1, but also limit breakage of old system
+    fi
+    
+    if [ "${__DEV_ENV}" != "${env_name}" ]; then
+        env "${env_name}"
+        if [ $? -ne 0 ]; then
+            err "Could not load development environment for ${platform}..."
+            return 3
+        fi
+    fi
+    
+    local install_args=""
+    
+    if [ ! -z "${install_path}" ]; then
+        if [ ! -e "${install_path}" ]; then
+            mkdir -p "${install_path}"
+            if [ $? -ne 0]; then
+                err "Could not create install path at '${install_path}'"
+                return 4
+            fi
+        fi
+
+        if [ ! -d "${install_path}" ]; then
+            err "Install path at '${install_path}' is not a directory"
+            return 5
+        fi
+
+        install_args="INSTALLDIR=\"${install_path}\""
+    fi
+    
+    pushd "${project_path}" 2>&1 >/dev/null
+
+    if [ ! -z "${OPT_FORCE}" ]; then
+        echo ">> Force clean ${project_path}"
+        make clean
+    fi
+    
+    echo ">> Building ${project_path}"
+    make -j${CPU_CORES}
+
+    echo ">> Installing ${project_path}"
+    make ${install_args} install
+    
+    popd 2>&1 >/dev/null
+    
+    return 0
+}
+
+## clean_project platform project_path
+clean_project () {
+    if [ $# -lt 2 ]; then
+        err "Missing arguments for clean_project(platform, project_path)"
+        return 127
+    fi
+
+    local platform="$1"
+    local project_path="$2"
+    
+    is_valid_project "${platform}" "${project_path}"
+    if [ $? -ne 0 ]; then
+        err "Project at '${project_path}' does not seem valid"
+        return 2
+    fi
+
+    local env_name="${platform}"
+    if [ "${platform}" == "nutekt-digital" ]; then
+        env_name="nts-1" ## TODO: should standardize to nts-1, but also limit breakage of old system
+    fi
+    
+    if [ "${__DEV_ENV}" != "${env_name}" ]; then
+        env "${env_name}"
+        if [ $? -ne 0 ]; then
+            err "Could not load development environment for ${platform}..."
+            return 3
+        fi
+    fi
+    
+    pushd "${project_path}" 2>&1 >/dev/null
+
+    echo ">> Cleaning ${project_path}"
+    make clean
+    
+    popd 2>&1 >/dev/null
+    
+    return 0
+}
+
+## list_projects platform 
+list_projects () {
+    if [ $# -lt 1 ]; then
+        err "Missing arguments for list_projects(platform)"
+        return 127
+    fi
+
+    local platform="$1"
+    
+    local platform_path="${PLATFORM_ROOT}/${platform}"
+
+    if [ ! -d ${platform_path} ]; then
+        err "Could not find platform root directory at '${platform_path}'"
+        return 1
+    fi
+    
+    for f in ${platform_path}/*; do
+        local f_name=$(basename ${f})
+        
+        is_valid_project "${platform}" "${f}"
+        if [ $? -ne 0 ]; then
+            continue
+        fi
+
+        echo "- ${platform}/${f_name}"
+    done
+
+    return 0
+}
+
+## build_platform platform
+build_platform () {
+    if [ $# -lt 1 ]; then
+        err "Missing arguments for build_platform(platform)"
+        return 127
+    fi
+    
+    local platform="$1"
+    
+    local platform_path="${PLATFORM_ROOT}/${platform}"
+
+    if [ ! -d ${platform_path} ]; then
+        err "Could not find platform root directory at '${platform_path}'"
+        return 1
+    fi
+    
+    for f in ${platform_path}/*; do
+        local f_name=$(basename ${f})
+
+        is_valid_project "${platform}" "${f}"
+        if [ $? -ne 0 ]; then
+            continue
+        fi
+        
+        build_project "${platform}" "${f}"
+        local res=$?
+        if [ $res -ne 0 ]; then
+            echo ""
+            return $res
+        fi
+    done
+
+    return 0
+}
+
+## clean_platform platform
+clean_platform () {
+    if [ $# -lt 1 ]; then
+        err "Missing arguments for clean_platform(platform)"
+        return 127
+    fi
+    
+    local platform="$1"
+    
+    local platform_path="${PLATFORM_ROOT}/${platform}"
+
+    if [ ! -d ${platform_path} ]; then
+        err "Could not find platform root directory at '${platform_path}'"
+        return 1
+    fi
+    
+    for f in ${platform_path}/*; do
+        local f_name=$(basename ${f})
+
+        is_valid_project "${platform}" "${f}"
+        if [ $? -ne 0 ]; then
+            continue
+        fi
+        
+        clean_project "${platform}" "${f}"
+        local res=$?
+        if [ $res -ne 0 ]; then
+            return $res
+        fi
+    done
+
+    return 0
+}
+
+### Main ##########################
+
+for o in "$@"; do
+    case ${o} in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        --short-desc)
+            short_desc
+            exit 0
+            ;;
+        -l|--list)
+            ACTION="list"
+            shift
+            ;;
+        -c|--clean)
+            ACTION="clean"
+            shift
+            ;;
+        -a|--all)
+            OPT_ALL="yes"
+            shift
+            ;;
+        -f|--force)
+            OPT_FORCE="yes"
+            shift
+            ;;
+        --drumlogue)
+            OPT_DRUMLOGUE="yes"
+            shift
+            ;;
+        --minilogue-xd)
+            OPT_MINILOGUEXD="yes"
+            shift
+            ;;
+        --nutekt-digital|--nts-1)
+            OPT_NTS1="yes"
+            shift
+            ;;
+        --prologue)
+            OPT_PROLOGUE="yes"
+            shift
+            ;;
+        --install-dir=*)
+            install_path=$(realpath "${o#*=}")
+            shift
+            ;;
+        -*)
+            ## unknown option
+            shift
+            ;;
+        *)
+            ## assume project path relative to platform root
+            project_rel_path=${o}
+            break
+            ;;
+    esac
+done
+
+COMBINED_PLATFORM_OPTS="${OPT_DRUMLOGUE}${OPT_MINILOGUEXD}${OPT_NTS1}${OPT_PROLOGUE}"
+
+if [ ! -z "${OPT_ALL}" ] && [ ! -z "${COMBINED_PLATFORM_OPTS}" ]; then
+    warn "-a/--all overriden by platform selection options"
+    OPT_ALL="" ## Override
+fi
+
+if [ ! -z "${project_rel_path}" ] && [ "${ACTION}" == "list" ]; then
+    err "List option incompatible with explicit project path argument '${project_rel_path}'"
+    exit 127
+fi
+
+if [ ! -z "${project_rel_path}" ] && [ ! -z "${COMBINED_PLATFORM_OPTS}" ]; then
+    err "Platform selection options incompatible with explicit project path argument '${project_rel_path}'"
+    exit 127
+fi
+
+if [ ! -z "${project_rel_path}" ] && [ ! -z "${OPT_ALL}" ]; then
+    err "Explicit project path argument '${project_rel_path}' incompatible with -a/--all"
+    exit 127
+fi
+
+if [ "${ACTION}" == "build" ]; then
+
+    if [ -z "${project_rel_path}" ] && [ -z "${COMBINED_PLATFORM_OPTS}" ]; then
+        ## If no target specified to build assume all
+        OPT_ALL="yes"
+    fi
+    
+    if [ ! -z "${OPT_ALL}" ]; then
+        echo ">> Building all detected projects"
+        for p in ${PLATFORMS[@]}; do
+            build_platform ${p}
+            if [ $? -ne 0 ]; then
+                echo ">> Build error occurred, aborting."
+                exit 2
+            fi
+        done
+        
+    else
+        if [ ! -z "${OPT_DRUMLOGUE}" ]; then
+            echo ">> Building 'drumlogue' projects"
+            build_platform drumlogue
+            if [ $? -ne 0 ]; then
+                echo ">> Build error occurred, aborting."
+                exit 2
+            fi
+        fi
+
+        if [ ! -z "${OPT_MINILOGUEXD}" ]; then
+            echo ">> Building 'minilogue-xd' projects"
+            build_platform minilogue-xd
+            if [ $? -ne 0 ]; then
+                echo ">> Build error occurred, aborting."
+                exit 2
+            fi
+        fi
+
+        if [ ! -z "${OPT_NTS1}" ]; then
+            echo ">> Building 'nts-1' projects"
+            build_platform nutekt-digital ## TODO: need to regularize to nts-1
+            if [ $? -ne 0 ]; then
+                echo ">> Build error occurred, aborting."
+                exit 2
+            fi
+        fi
+
+        if [ ! -z "${OPT_PROLOGUE}" ]; then
+            echo ">> Building 'prologue' projects"
+            build_platform prologue
+            if [ $? -ne 0 ]; then
+                echo ">> Build error occurred, aborting."
+                exit 2
+            fi
+        fi
+
+        if [ ! -z "${project_rel_path}" ]; then
+            
+            project_path="${PLATFORM_ROOT}/${project_rel_path}"
+
+            platform=$(platform_for_project "${project_path}")
+            if [ -z "${platform}" ]; then
+                err "Failed to identify project platform, aborting build."
+                exit 2
+            fi
+            
+            build_project "${platform}" "${project_path}"
+            if [ $? -ne 0 ]; then
+                exit 2
+            fi
+        fi  
+    fi
+
+    ## Reset development environment
+    env -r
+
+elif [ "${ACTION}" == "clean" ]; then
+
+    res=0
+
+    if [ -z "${project_rel_path}" ] && [ -z "${COMBINED_PLATFORM_OPTS}" ]; then
+        ## If no target specified to clean assume all
+        OPT_ALL="yes"
+    fi
+    
+    if [ ! -z "${OPT_ALL}" ]; then
+        echo ">> Cleaning all detected projects"
+        for p in ${PLATFORMS[@]}; do
+            clean_platform ${p}
+            if [ $? -ne 0 ]; then
+                echo ">> Clean error occurred..."
+                res=2
+            fi
+        done
+        
+    else
+        if [ ! -z "${OPT_DRUMLOGUE}" ]; then
+            echo ">> Cleaning 'drumlogue' projects"
+            clean_platform drumlogue
+            if [ $? -ne 0 ]; then
+                echo ">> Clean error occurred..."
+                res=2
+            fi
+        fi
+
+        if [ ! -z "${OPT_MINILOGUEXD}" ]; then
+            echo ">> Cleaning 'minilogue-xd' projects"
+            clean_platform minilogue-xd
+            if [ $? -ne 0 ]; then
+                echo ">> Clean error occurred..."
+                res=2
+            fi
+        fi
+
+        if [ ! -z "${OPT_NTS1}" ]; then
+            echo ">> Cleaning 'nts-1' projects"
+            clean_platform nutekt-digital
+            if [ $? -ne 0 ]; then
+                echo ">> Clean error occurred..."
+                res=2
+            fi
+        fi
+
+        if [ ! -z "${OPT_PROLOGUE}" ]; then
+            echo ">> Cleaning 'prologue' projects"
+            clean_platform prologue
+            if [ $? -ne 0 ]; then
+                echo ">> Clean error occurred..."
+                res=2
+            fi
+        fi
+
+        if [ ! -z "${project_rel_path}" ]; then
+            
+            project_path="${PLATFORM_ROOT}/${project_rel_path}"
+
+            platform=$(platform_for_project "${project_path}")
+            if [ -z "${platform}" ]; then
+                err "Failed to identify project platform, aborting cleaning."
+                exit 2
+            fi
+            
+            clean_project "${platform}" "${project_path}"
+            if [ $? -ne 0 ]; then
+                echo ">> Clean error occurred..."
+                exit 2
+            fi
+        fi  
+    fi
+
+    ## Reset development environment
+    env -r
+    
+    exit ${res}
+    
+elif [ "${ACTION}" == "list" ]; then
+    
+    if [ ! -z "${COMBINED_PLATFORM_OPTS}" ]; then
+        if [ ! -z "${OPT_DRUMLOGUE}" ]; then
+            list_projects drumlogue
+        fi
+
+        if [ ! -z "${OPT_MINILOGUEXD}" ]; then
+            list_projects minilogue-xd
+        fi
+
+        if [ ! -z "${OPT_NTS1}" ]; then
+            list_projects nutekt-digital
+        fi
+
+        if [ ! -z "${OPT_PROLOGUE}" ]; then
+            list_projects prologue
+        fi
+    else
+        for p in ${PLATFORMS[@]}; do
+            list_projects ${p}
+        done        
+    fi
+    
+else
+    err "Undefined action '${ACTION}'"
+    exit 1
+fi
+
+

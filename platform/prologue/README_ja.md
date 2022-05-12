@@ -2,7 +2,7 @@
 
 ### 概要
 
-下記ディレクトリに [prologue synthesizer](https://www.korg.com/products/synthesizers/prologue) で使用できる自作オシレーターやエフェクトのビルドに必要なファイルが全て揃っています.
+下記ディレクトリに [prologue synthesizer](https://www.korg.com/jp/products/synthesizers/prologue/) で使用できる自作オシレーターやエフェクトのビルドに必要なファイルが全て揃っています.
 
 #### 互換性に関して
 
@@ -10,13 +10,15 @@ SDK version 1.1-0 でビルドされた user units (ビルド済みのカスタ�
 
 #### 全体の構造:
  * [inc/](inc/) : ヘッダファイル
- * [osc/](osc/) : 自作オシレーターのテンプレートプロジェクト
- * [modfx/](modfx/) : 自作モジュレーション・エフェクトのテンプレートプロジェクト
- * [delfx/](delfx/) : 自作ディレイ・エフェクトのテンプレートプロジェクト
- * [revfx/](revfx/) : 自作リバーブ・エフェクトのテンプレートプロジェクト
- * [demos/](demos/) : デモプロジェクト
+ * [dummy-osc/](dummy-osc/) : 自作オシレーターのテンプレートプロジェクト
+ * [dummy-modfx/](dummy-modfx/) : 自作モジュレーション・エフェクトのテンプレートプロジェクト
+ * [dummy-delfx/](dummy-delfx/) : 自作ディレイ・エフェクトのテンプレートプロジェクト
+ * [dummy-revfx/](dummy-revfx/) : 自作リバーブ・エフェクトのテンプレートプロジェクト
+ * [waves/](waves/) : デモオシレータープロジェクト
 
 ### 開発環境の設定
+
+#### 従来の方法（Dockerを使用しない方法）
 
  1. このリポジトリをクローンし, 初期化とサブモジュールのアップデートを行います.
 
@@ -31,14 +33,20 @@ SDK version 1.1-0 でビルドされた user units (ビルド済みのカスタ�
     2. [Info-ZIP](../../tools/zip)
     3. [logue-cli](../../tools/logue-cli) (optional)
 
+### Docker開発環境（推奨）
+
+[Docker-based Build Environment](../../docker) をご参照ください.
+
 ### デモプロジェクトのビルド （Waves）
 
-Waves はlogue-sdkのオシレーターAPIで提供されているウェーブテーブルを使用したモーフィング・ウェーブテーブル・オシレーターです. APIの機能やパラメーターの使い方を学ぶ上で良いリファレンスになるでしょう. ソースコードや詳細は [demos/waves/](demos/waves/) を見て下さい.
+Waves はlogue-sdkのオシレーターAPIで提供されているウェーブテーブルを使用したモーフィング・ウェーブテーブル・オシレーターです. APIの機能やパラメーターの使い方を学ぶ上で良いリファレンスになるでしょう. ソースコードや詳細は [waves/](waves/) にあります.
+
+#### 従来のビルド手法（Dockerを使用しない方法）
 
  1. プロジェクトのディレクトリに移動します.
  
 ```
-$ cd logue-sdk/platform/prologue/demos/waves/
+$ cd logue-sdk/platform/prologue/waves/
 ```
  2. プロジェクをビルドするために `make` を実行します.
  
@@ -64,9 +72,62 @@ Done
 ```
  3. *Packaging...* という表示の通り,  *.prlgunit* というファイルが生成されます. これがビルド成果物となります.
  
+#### Docker Containerを使用したビルド
+
+ 1. [docker/run_interactive.sh](../../docker/run_interactive.sh) を実行します.
+
+```
+ $ docker/run_interactive.sh
+ user@logue-sdk $ 
+ ```
+
+ 1.1. (オプション) ビルド可能なプロジェクトを表示したい場合は下記コマンドを実行します.
+
+```
+user@logue-sdk:~$ build -l --prologue
+- prologue/dummy-delfx
+- prologue/dummy-modfx
+- prologue/dummy-osc
+- prologue/dummy-revfx
+- prologue/waves
+ ```
+
+ 2. ビルドしたいプロジェクトのパスを指定し, ビルドコマンドを実行します (下記は `prologue/waves` をビルドする例です).
+
+```
+ user@logue-sdk:~$ build prologue/waves
+ >> Initializing prologue development environment.
+ Note: run 'env -r' to reset the environment
+ >> Building /workspace/prologue/waves
+ Compiler Options
+ /usr/bin/arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT -g -Os -mlittle-endian -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -fcheck-new -std=c11 -mstructure-size-boundary=8 -W -Wall -Wextra -Wa,-alms=/workspace/prologue/waves/build/lst/ -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -I. -I/workspace/prologue/waves/inc -I/workspace/prologue/waves/inc/api -I/workspace/prologue/inc -I/workspace/prologue/inc/dsp -I/workspace/prologue/inc/utils -I/workspace/ext/CMSIS/CMSIS/Include
+
+ Compiling _unit.c
+ Compiling waves.cpp
+ cc1: warning: option '-mstructure-size-boundary' is deprecated
+ Linking /workspace/prologue/waves/build/waves.elf
+ Creating /workspace/prologue/waves/build/waves.bin
+ Creating /workspace/prologue/waves/build/waves.hex
+ Creating /workspace/prologue/waves/build/waves.dmp
+ Creating /workspace/prologue/waves/build/waves.list
+ 
+    text	   data	    bss	    dec	    hex	filename
+    2032	      4	    144	   2180	    884	/workspace/prologue/waves/build/waves.elf
+ 
+ Done
+ 
+ >> Installing /workspace/prologue/waves
+ Packaging to /workspace/prologue/waves/build/waves.prlgunit
+ Deploying to /workspace/prologue/waves/waves.prlgunit
+ Done
+ 
+ >> Resetting environment
+ >> Cleaning up prologue development environment.
+ ```
+
 ###  「unit」ファイルの操作と使い方
 
-*.prlgunit* ファイルは自作コンテンツのバイナリデータ本体とメタデータを含む簡潔なパッケージファイルです. このファイルは [logue-cli utility](../../tools/logue-cli/) もしくは [Librarian application](https://www.korg.com/products/synthesizers/prologue/librarian_contents.php) 経由で [prologue](https://www.korg.com/products/synthesizers/prologue) (もしくは [development board](../../devboards/))  にアップロードすることが出来ます.
+*.prlgunit* ファイルは自作コンテンツのバイナリデータ本体とメタデータを含む簡潔なパッケージファイルです. このファイルは [logue-cli utility](../../tools/logue-cli/) もしくは [Librarian application](https://www.korg.com/jp/products/synthesizers/prologue/librarian_contents.php) 経由で [prologue](https://www.korg.com/jp/products/synthesizers/prologue/index.php) (もしくは [development board](../../devboards/))  にアップロードすることが出来ます.
 
 ## 新しいプロジェクトを作る
 

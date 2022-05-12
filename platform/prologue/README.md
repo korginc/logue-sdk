@@ -12,13 +12,15 @@ Firmware version >= 2.00 is required to run user units built with SDK version 1.
 
 #### Overall Structure:
  * [inc/](inc/) : Common headers.
- * [osc/](osc/) : Custom oscillator project template.
- * [modfx/](modfx/) : Custom modulation effect project template.
- * [delfx/](delfx/) : Custom delay effect project template.
- * [revfx/](revfx/) : Custom reverb effect project template.
- * [demos/](demos/) : Demo projects.
+ * [dummy-osc/](dummy-osc/) : Custom oscillator project template.
+ * [dummy-modfx/](dummy-modfx/) : Custom modulation effect project template.
+ * [dummy-delfx/](dummy-delfx/) : Custom delay effect project template.
+ * [dummy-revfx/](dummy-revfx/) : Custom reverb effect project template.
+ * [waves/](waves/) : Waves demo oscillator projects.
 
 ### Setting up the Development Environment
+
+#### Legacy Method
 
  1. Clone this repository and initialize/update submodules.
 
@@ -33,14 +35,20 @@ Firmware version >= 2.00 is required to run user units built with SDK version 1.
     2. [Info-ZIP](../../tools/zip)
     3. [logue-cli](../../tools/logue-cli) (optional)
 
+#### Docker Build Environment
+
+ Refer to [Docker-based Build Environment](../../docker).
+ 
 ### Building the Demo Oscillator (Waves)
 
-Waves is a morphing wavetable oscillator that uses the wavetables provided by the custom oscillator API. It is a good example of how to use API functions, declare edit menu parameters and use parameter values of various types. See [demos/waves/](demos/waves/) for code and details.
+Waves is a morphing wavetable oscillator that uses the wavetables provided by the custom oscillator API. It is a good example of how to use API functions, declare edit menu parameters and use parameter values of various types. See [waves/](waves/) for code and details.
+
+#### Build Using Legacy Method
 
  1. move into the project directory.
  
 ```
-$ cd logue-sdk/platform/prologue/demos/waves/
+$ cd logue-sdk/platform/prologue/waves/
 ```
  2. type `make` to build the project.
  
@@ -65,7 +73,60 @@ Packaging to ./waves.prlgunit
 Done
 ```
  3. As the *Packaging...* line indicates, a *.prlgunit* file will be generated. This is the final product.
+
+#### Build Using Docker Container
+
+ 1. Execute [docker/run_interactive.sh](../../docker/run_interactive.sh)
+
+```
+ $ docker/run_interactive.sh
+ user@logue-sdk $ 
+ ```
+
+ 1.1. (optional) List buildable projects
+
+```
+user@logue-sdk:~$ build -l --prologue
+- prologue/dummy-delfx
+- prologue/dummy-modfx
+- prologue/dummy-osc
+- prologue/dummy-revfx
+- prologue/waves
+ ```
+
+ 2. Use the build command with the the desired project's path (E.g. `prologue/waves`)
+
+```
+ user@logue-sdk:~$ build prologue/waves
+ >> Initializing prologue development environment.
+ Note: run 'env -r' to reset the environment
+ >> Building /workspace/prologue/waves
+ Compiler Options
+ /usr/bin/arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT -g -Os -mlittle-endian -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -fcheck-new -std=c11 -mstructure-size-boundary=8 -W -Wall -Wextra -Wa,-alms=/workspace/prologue/waves/build/lst/ -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -I. -I/workspace/prologue/waves/inc -I/workspace/prologue/waves/inc/api -I/workspace/prologue/inc -I/workspace/prologue/inc/dsp -I/workspace/prologue/inc/utils -I/workspace/ext/CMSIS/CMSIS/Include
+
+ Compiling _unit.c
+ Compiling waves.cpp
+ cc1: warning: option '-mstructure-size-boundary' is deprecated
+ Linking /workspace/prologue/waves/build/waves.elf
+ Creating /workspace/prologue/waves/build/waves.bin
+ Creating /workspace/prologue/waves/build/waves.hex
+ Creating /workspace/prologue/waves/build/waves.dmp
+ Creating /workspace/prologue/waves/build/waves.list
  
+    text	   data	    bss	    dec	    hex	filename
+    2032	      4	    144	   2180	    884	/workspace/prologue/waves/build/waves.elf
+ 
+ Done
+ 
+ >> Installing /workspace/prologue/waves
+ Packaging to /workspace/prologue/waves/build/waves.prlgunit
+ Deploying to /workspace/prologue/waves/waves.prlgunit
+ Done
+ 
+ >> Resetting environment
+ >> Cleaning up prologue development environment.
+ ```
+
 ### Using *unit* Files
 
 *.prlgunit* files are simple zip files containing the binary payload for the custom oscillator or effect and a metadata file.

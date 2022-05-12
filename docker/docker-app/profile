@@ -1,0 +1,10 @@
+
+PATH=/app/commands:${PATH}
+
+source /app/env
+
+alias ls='ls --color=auto'
+alias ll='ls -la --color=auto'
+alias l.='ls -d .* --color=auto'
+
+alias grep='grep --color'

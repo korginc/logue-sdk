@@ -1,0 +1,130 @@
+#
+#    env - Defines functions to prepare environment for various platform builds
+#
+#    Note: Need to source this from the shell that will be used for the builds.
+#
+
+#
+#    BSD 3-Clause License
+#
+#    Copyright (c) 2022, KORG INC.
+#    All rights reserved.
+#
+#    Redistribution and use in source and binary forms, with or without
+#    modification, are permitted provided that the following conditions are met:
+#
+#    * Redistributions of source code must retain the above copyright notice, this
+#      list of conditions and the following disclaimer.
+#
+#    * Redistributions in binary form must reproduce the above copyright notice,
+#      this list of conditions and the following disclaimer in the documentation
+#      and/or other materials provided with the distribution.
+#
+#    * Neither the name of the copyright holder nor the names of its
+#      contributors may be used to endorse or promote products derived from
+#      this software without specific prior written permission.
+#
+#    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+#    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+#    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+#    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+#    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+#    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+ENV_ROOT_DIR="/app"
+
+env_short_desc () {
+    echo -n "Prepare environment for target platform builds."
+}
+
+env_usage () {
+        echo "Usage: env [OPTION] [ENV]"
+        echo ""
+        echo "$(env_short_desc)"
+        echo ""
+        echo "Options:"
+        echo " -l, --list    list available environments"
+        echo " -r, --reset   reset current environment"
+        echo " -h, --help    display this help"
+        echo ""
+}
+
+env_list () {
+          echo "Available build environments:"
+          for e in $(find "${ENV_ROOT_DIR}" -name environment -exec dirname {} \;); do
+              echo "- $(basename ${e})"
+          done
+}
+
+env () {
+    if [ $# -lt 1 ]; then
+        env_usage
+        return 1
+    fi
+    
+    local env_name=""
+    
+    for o in "$@"; do
+        case ${o} in
+            -h|--help)
+                env_usage
+                return 0
+                ;;
+            -l|--list)
+                env_list
+                return 0
+                ;;
+            -r|--reset)
+                echo ">> Resetting environment"
+                [ "$(type -t reset_env)" == "function" ] && reset_env
+                [ ! -z "${__DEV_ENV}" ] && unset __DEV_ENV
+                return 0
+                ;;
+            -*)
+                ## unknown option
+                shift
+                ;;
+            *)
+                ## assume environment name
+                env_name=${o}
+                break
+                ;;
+        esac
+    done
+
+    if [ -z "${env_name}" ]; then
+        echo "[Err] Environment not specified..." 1>&2
+        env_usage
+        return 1
+    fi
+    
+    local env_path="${ENV_ROOT_DIR}/${env_name}/environment"
+    
+    if [ ! -r "${env_path}" ]; then
+        echo "[Err] Invalid environment (${env_path})" 1>&2
+        echo ""
+        env_list
+        echo ""
+        return 2
+    fi
+
+    if [ ! -z "${__DEV_ENV}" ]; then
+        echo "[Warn] '${__DEV_ENV}' development environment already loaded." 1>&2
+        echo ">> Resetting environment"
+        reset_env
+        unset __DEV_ENV
+    fi
+    
+    source "${env_path}"
+
+    export __DEV_ENV="${env_name}"
+
+    echo "Note: run 'env -r' to reset the environment"
+    
+    return 0
+}

@@ -2,7 +2,7 @@
 
 ### 概要
 
-下記ディレクトリに [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1) で使用できる自作オシレーターやエフェクトのビルドに必要なファイルが全て揃っています.
+下記ディレクトリに [Nu:Tekt NTS-1 digital kit](https://www.korg.com/jp/products/dj/nts_1) で使用できる自作オシレーターやエフェクトのビルドに必要なファイルが全て揃っています.
 
 #### 互換性に関して
 
@@ -10,13 +10,15 @@ SDK version 1.1-0 でビルドされた user units (ビルド済みのカスタ�
 
 #### 全体の構造:
  * [inc/](inc/) : ヘッダファイル
- * [osc/](osc/) : 自作オシレーターのテンプレートプロジェクト
- * [modfx/](modfx/) : 自作モジュレーション・エフェクトのテンプレートプロジェクト
- * [delfx/](delfx/) : 自作ディレイ・エフェクトのテンプレートプロジェクト
- * [revfx/](revfx/) : 自作リバーブ・エフェクトのテンプレートプロジェクト
- * [demos/](demos/) : デモプロジェクト
+ * [dummy-osc/](dummy-osc/) : 自作オシレーターのテンプレートプロジェクト
+ * [dummy-modfx/](dummy-modfx/) : 自作モジュレーション・エフェクトのテンプレートプロジェクト
+ * [dummy-delfx/](dummy-delfx/) : 自作ディレイ・エフェクトのテンプレートプロジェクト
+ * [dummy-revfx/](dummy-revfx/) : 自作リバーブ・エフェクトのテンプレートプロジェクト
+ * [waves/](waves/) : デモオシレータープロジェクト
 
 ### 開発環境の設定
+
+#### 従来の方法（Dockerを使用しない方法）
 
  1. このリポジトリをクローンし, 初期化とサブモジュールのアップデートを行います.
 
@@ -31,15 +33,20 @@ SDK version 1.1-0 でビルドされた user units (ビルド済みのカスタ�
     2. [Info-ZIP](../../tools/zip)
     3. [logue-cli](../../tools/logue-cli) (optional)
 
+### Docker開発環境
+
+[Docker-based Build Environment](../../docker) をご参照ください.
+
 ### デモプロジェクトのビルド （Waves）
 
-Waves はlogue-sdkのオシレーターAPIで提供されているウェーブテーブルを使用したモーフィング・ウェーブテーブル・オシレーターです. APIの機能やパラメーターの使い方を学ぶ上で良いリファレンスになるでしょう. ソースコードや詳細は [demos/waves/](demos/waves/) を見て下さい.
+Waves はlogue-sdkのオシレーターAPIで提供されているウェーブテーブルを使用したモーフィング・ウェーブテーブル・オシレーターです. APIの機能やパラメーターの使い方を学ぶ上で良いリファレンスになるでしょう. ソースコードや詳細は [waves/](waves/) をご参照ください.
+
+#### 従来のビルド手法（Dockerを使用しない方法）
 
  1. プロジェクトのディレクトリに移動します.
- 
 
 ```
-$ cd logue-sdk/platform/nutekt-digital/demos/waves/
+$ cd logue-sdk/platform/nutekt-digital/waves/
 ```
  2. プロジェクをビルドするために `make` を実行します.
  
@@ -65,9 +72,63 @@ Done
 ```
  3. *Packaging...* という表示の通り,  *.ntkdigunit* というファイルが生成されます. これがビルド成果物となります.
  
+ #### Docker Containerを使用したビルド
+
+ 1. [docker/run_interactive.sh](../../docker/run_interactive.sh) を実行します.
+
+
+```
+ $ docker/run_interactive.sh
+ user@logue-sdk $ 
+ ```
+
+ 1.1. (オプション) ビルド可能なプロジェクトを表示したい場合は下記コマンドを実行します.
+
+```
+user@logue-sdk:~$ build -l --nutekt-digital
+- nutekt-digital/dummy-delfx
+- nutekt-digital/dummy-modfx
+- nutekt-digital/dummy-osc
+- nutekt-digital/dummy-revfx
+- nutekt-digital/waves
+ ```
+
+ 2. ビルドしたいプロジェクトのパスを指定し, ビルドコマンドを実行します (下記は `nutekt-digital/waves` をビルドする例です).
+
+```
+ user@logue-sdk:~$ build nutekt-digital/waves
+ >> Initializing NTS-1 development environment.
+ Note: run 'env -r' to reset the environment
+ >> Building /workspace/nutekt-digital/waves
+ Compiler Options
+ /usr/bin/arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT -g -Os -mlittle-endian -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -fcheck-new -std=c11 -mstructure-size-boundary=8 -W -Wall -Wextra -Wa,-alms=/workspace/nutekt-digital/waves/build/lst/ -DSTM32F446xE -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -I. -I/workspace/nutekt-digital/waves/inc -I/workspace/nutekt-digital/waves/inc/api -I/workspace/nutekt-digital/inc -I/workspace/nutekt-digital/inc/dsp -I/workspace/nutekt-digital/inc/utils -I/workspace/ext/CMSIS/CMSIS/Include
+ 
+ Compiling _unit.c
+ Compiling waves.cpp
+ cc1: warning: option '-mstructure-size-boundary' is deprecated
+ Linking /workspace/nutekt-digital/waves/build/waves.elf
+ Creating /workspace/nutekt-digital/waves/build/waves.hex
+ Creating /workspace/nutekt-digital/waves/build/waves.bin
+ Creating /workspace/nutekt-digital/waves/build/waves.dmp
+ Creating /workspace/nutekt-digital/waves/build/waves.list
+ 
+    text	   data	    bss	    dec	    hex	filename
+    2032	      4	    144	   2180	    884	/workspace/nutekt-digital/waves/build/waves.elf
+ 
+ Done
+ 
+ >> Installing /workspace/nutekt-digital/waves
+ Packaging to /workspace/nutekt-digital/waves/build/waves.ntkdigunit
+ Deploying to /workspace/nutekt-digital/waves/waves.ntkdigunit
+ Done
+ 
+ >> Resetting environment
+ >> Cleaning up NTS-1 development environment.
+ ```
+ 
 ###  「unit」ファイルの操作と使い方
 
-*.ntkdigunit* ファイルは自作コンテンツのバイナリデータ本体とメタデータを含む簡潔なパッケージファイルです. このファイルは [logue-cli utility](../../tools/logue-cli/) もしくは [Librarian application](https://www.korg.com/products/dj/nts_1/librarian_contents.php) 経由で [Nu:Tekt NTS-1 digital](https://www.korg.com/products/dj/nts_1) にアップロードすることが出来ます.
+*.ntkdigunit* ファイルは自作コンテンツのバイナリデータ本体とメタデータを含む簡潔なパッケージファイルです. このファイルは [logue-cli utility](../../tools/logue-cli/) もしくは [Librarian application](https://www.korg.com/jp/products/dj/nts_1/librarian_contents.php) 経由で [Nu:Tekt NTS-1 digital](https://www.korg.com/jp/products/dj/nts_1) にアップロードすることが出来ます.
 
 ## 新しいプロジェクトを作る
 

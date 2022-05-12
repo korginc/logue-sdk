@@ -1,0 +1,21 @@
+{
+    "header" : 
+    {
+        "platform" : "minilogue-xd",
+        "module" : "osc",
+        "api" : "1.1-0",
+        "dev_id" : 0,
+        "prg_id" : 0,
+        "version" : "1.0-0",
+        "name" : "dummy",
+        "num_param" : 6,
+        "params" : [
+            ["dummy0",    0, 100, "%"],
+            ["dummy1",    0, 100, "%"],
+            ["dummy2",    0, 100, "%"],
+            ["dummy3",    0, 100, "%"],
+            ["dummy4", -100, 100, "%"],
+            ["dummy5",    0, 10,  ""]            
+          ]
+    }
+}

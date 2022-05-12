@@ -1,0 +1,36 @@
+#!/usr/bin/bash
+
+_USER="user"
+_GROUP="user"
+
+sudo bash<<EOF
+_MOUNT_UID=\$(stat --format="%u" /workspace)
+_MOUNT_GID=\$(stat --format="%g" /workspace)
+
+if [ \${_MOUNT_GID} -ne 0 ] && [ "$(id -g ${_USER})" != "\${_MOUNT_GID}" ]; then
+    groupmod -g \${_MOUNT_GID} ${_GROUP}
+    [ $? -ne 0 ] && echo "[Err] Could not correctly remap group gid to match /workspace ownership..." 1>&2 && exit 1
+fi
+
+if [ \${_MOUNT_UID} -ne 0 ] && [ "$(id -u ${_USER})" != "\${_MOUNT_UID}" ]; then
+    # Make sure user has same uid/gid as owner of /workspace
+    # Note: includes a workaround to make sure files in /workspace are not forcibly chown'd by usermod
+    
+    mkdir /tmp/dummy && usermod -d /tmp/dummy ${_USER} && usermod -u \${_MOUNT_UID} -g \${_MOUNT_GID} ${_USER}
+    [ $? -ne 0 ] && echo "[Err] Could not correctly remap user uid/gid to match /workspace ownership..." 1>&2 && exit 1
+    
+    usermod -d /workspace ${_USER} && rm -rf /tmp/dummy
+    [ $? -ne 0 ] && echo "[Err] Failed to re-set user home directory..." 1>&2 && exit 1
+fi
+
+if [ ! -e /workspace/.profile ]; then 
+   cp /root/.profile /workspace/.profile && chown ${_USER}:${_USER} /workspace/.profile
+   [ $?  -ne 0 ] && echo "[Warn] Failed to initialize .profile in home directory..." 1>&2
+fi
+
+exit 0
+EOF
+[ $? -ne 0 ] && exit 1
+
+su -l ${_USER} -c '"$0" "$@"' -- "$@"
+
