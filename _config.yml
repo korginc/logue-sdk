@@ -17,9 +17,9 @@ title: logue SDK
 author: KORG inc.
 email:
 description: > # this means to ignore newlines until "baseurl:"
- The logue SDK is a C/C++ software development kit and API that
- allows to create custom oscillators and effects for the KORG prologue,
- minilogue xd and NuTekt NTS-1 digital kit synthesizers
+ The logue SDK is a software development kit and API that
+ allows to create custom oscillators, synths, and effects for the KORG prologue,
+ minilogue xd, NuTekt NTS-1 digital kit and drumlogue
 
 baseurl: "/" # the subpath of your site, e.g. /blog
 url: "https://korginc.github.io/logue-sdk" # the base hostname & protocol for your site, e.g. http://example.com

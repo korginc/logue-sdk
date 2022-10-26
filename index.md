@@ -4,65 +4,59 @@
 layout: home
 ---
 
-The *logue SDK* is a C/C++ software development kit and API that allows to create custom oscillators and effects for the KORG [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd) and [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1) synthesizers.
+The *logue SDK* is a software development kit and API that allows to create custom oscillators, synths, and effects for the KORG [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1) and [drumlogue](https://www.korg.com/products/drums/drumlogue).
 
-## Quick Start
+Singular pieces of custom content created with the SDK are commonly refered to as *units*. Each target platform can support certain unit types and not others, depending on the instrument's design and signal path.
 
-### Installing the logue SDK
+## prologue, minilogue-xd, and NTS-1
 
- * Clone the [git repository](https://github.com/korginc/logue-sdk) and initialize/update submodules.
+Four types of custom units can be created for these platforms: oscillators, modulation effects, delay effects, and reverb effects. 
 
-```
-$ git clone https://github.com/korginc/logue-sdk.git
-$ cd logue-sdk
-$ git submodule update --init
-```
- * Install toolchain: [GNU Arm Embedded Toolchain](https://github.com/korginc/logue-sdk/tree/master/tools/gcc)
- * Install other utilties:
-    * [GNU Make](https://github.com/korginc/logue-sdk/tree/master/tools/make)
-    * [Info-ZIP](https://github.com/korginc/logue-sdk/tree/master/tools/zip)
-    * [logue-cli](https://github.com/korginc/logue-sdk/tree/master/tools/logue-cli) (optional)
+These platforms' APIs are essentially the same and are binary compatible. However, in order to compensate for performance differences, custom units should be optimized and built for each platform separately.
 
-### Building the Demo Oscillator (Waves)
+### Oscillators
 
-Waves is a morphing wavetable oscillator that uses the wavetables provided by the custom oscillator API. It is a good example of how to use API functions, declare edit menu parameters and use parameter values of various types.
+Custom oscillators are self contained sound generators, which are expected to provide a steady audio signal via a buffer processing callback. These are processed as part of the target platform's voice structure, meaning that articulation and filtering is already taken care of, the oscillator need only to provide a waveform according to the specified pitch information, and other available parameters.
 
- * move into the project directory.
+### Modulation Effects
 
-```
-$ cd logue-sdk/platform/prologue/demos/waves/
-```
+Modulation effects are insert effects processed after voice articulation and filtering, and before delay and reverb effects. Note that in order to support the [prologue](https://www.korg.com/products/synthesizers/prologue)'s dual timbre feature, the API provides two processing buffers which must be handled in the same manner. On [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd) and [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1), the second buffer can be safely ignored.
 
-  _Note: replace "prologue" in the path with the target platform of your choice_
+### Delay and Reverb Effects
 
- * type `make` to build the project.
+Delay and reverb effects are both send effects that are processed after the modulation effects. On the [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd), and [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1), custom delay and reverb effects are loaded into the same runtime, hence when both delay and reverb effects are enabled, only one of them can be a custom effect. However, any combination of internal and custom delay and reverb effects is allowed.
+
+### Further Platform Details
+
+ Refer to the following README files for further details:
  
- ```
-$ make
-Compiler Options
-../../../../tools/gcc/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT -g -Os -mlittle-endian -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -fcheck-new -std=c11 -mstructure-size-boundary=8 -W -Wall -Wextra -Wa,-alms=./build/lst/ -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -I. -I./inc -I./inc/api -I../../inc -I../../inc/dsp -I../../inc/utils -I../../../ext/CMSIS/CMSIS/Include
-    
-Compiling _unit.c
-Compiling waves.cpp
-Linking build/waves.elf
-Creating build/waves.hex
-Creating build/waves.bin
-Creating build/waves.dmp
+ * [prologue platform](https://github.com/korginc/logue-sdk/tree/master/platform/prologue/README.md)
+ * [minilogue-xd platform](https://github.com/korginc/logue-sdk/tree/master/platform/minilogue-xd/README.md)
+ * [NTS-1 platform](https://github.com/korginc/logue-sdk/tree/master/platform/nutekt-digital/README.md)
 
-   text	   data	    bss	    dec	    hex	filename
-   2304	      4	    144	   2452	    994	build/waves.elf
+## drumlogue
 
-Creating build/waves.list
-Packaging to ./waves.prlgunit
- 
-Done
-```
-    
- * As the *Packaging...* line indicates, a *.prlgunit* file will be generated. This is the final product.
+Four types of custom units can be created for this platform: synths, delay effects, reverb effects, and master effects.
 
-_Note: for minilogue xd the extension will be *.mnlgxdunit*, for NuTekt NTS-1 digital it will be *.ntkdigunit*_
+The [drumlogue](https://www.korg.com/products/drums/drumlogue) custom unit API is not compatible with previously discussed target platforms, however there are similarities in the core API structure which should make porting units from one platform to the other relatively straightforward.
 
-### Using *unit* Files
+### Synths
 
-*.prlgunit*, *.mnlgxdunit*, and  *.ntkdigunit* files are simple zip files containing the binary payload for the custom oscillator or effect and a metadata file describing it.
-They can be loaded onto a device matching the target platform using the [logue-cli utility](https://github.com/korginc/logue-sdk/tools/logue-cli/) or the Librarian application for that device (see product page on [KORG's official website](https://korg.com)).
+Custom synths are self contained sound generators that are also responsible for voice articulation and filtering (if applicable). These are processed as an individual synth part within the [drumlogue](https://www.korg.com/products/drums/drumlogue)'s multi engine section.
+
+### Delay Effects
+
+Delay effects are executed in a dedicated runtime environment, and process a dedicated send bus. The output can be mixed back before or after the master effect and can also be routed to the reverb effect.
+
+### Reverb Effects
+
+Reverb effects are executed in a dedicated runtime environment, and process a dedicated send bus. The output can be mixed back before or after the master effect.
+
+### Master Effects
+
+Master effects are inline effects that can be bypassed on a per-part basis. The API also allows using the optional sidechain send bus.
+
+### Further Platform Details
+
+ Refer to the [drumlogue platform README](https://github.com/korginc/logue-sdk/tree/master/platform/drumlogue/README.md) for further details.
+

@@ -5,64 +5,60 @@ layout: home_ja
 permalink: /ja/
 ---
 
-*logue SDK* とは KORG [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1) 等のシンセサイザーで使用可能な自作オシレーターやエフェクトを作成可能な C/C++ のソフト開発キットとAPIです。
+*logue SDK* とは KORG [prologue](https://www.korg.com/jp/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/jp/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/jp/products/dj/nts_1), [drumlogue](https://www.korg.com/jp/products/drums/drumlogue/) のカスタムオシレーターやシンセ, エフェクトを作成可能なソフト開発キットとAPIです.
 
-## Quick Start
+SDKで作成された単一のカスタムコンテンツは *"ユニット"* と呼ばれます. 各プラットフォームは製品の設計と信号経路に応じた特定のユニットに対応しており, 他のユニットには対応しないことがあります.
 
-### 開発環境の設定
+## prologueとminilogue-xd, NTS-1
 
- * [リポジトリ](https://github.com/korginc/logue-sdk)をクローンし, 初期化とサブモジュールのアップデートを行います.
+これらの機種では, オシレーター, モジュレーションエフェクト, ディレイエフェクト, リバーブエフェクトの4種類のカスタムユニットを作成することができます.
 
-```
- $ git clone https://github.com/korginc/logue-sdk.git
- $ cd logue-sdk
- $ git submodule update --init
- ```
- * 必要なツールチェーンをインストールします: [GNU Arm Embedded Toolchain](https://github.com/korginc/logue-sdk/tree/master/tools/gcc)
- * その他のユーティリティをインストールします:
-    * [GNU Make](https://github.com/korginc/logue-sdk/tree/master/tools/make)
-    * [Info-ZIP](https://github.com/korginc/logue-sdk/tree/master/tools/zip)
-    * [logue-cli](https://github.com/korginc/logue-sdk/tree/master/tools/logue-cli) (optional)
+これらの機種のAPIは基本的に同じものでありバイナリ互換性があります. しかし機種間でスペックに違いがあるため, カスタムユニットは各機種ごとに個別に最適化しビルドする必要があります.
 
-### デモプロジェクトのビルド （Waves）
+### カスタムオシレーター
 
-Waves はlogue-sdkのオシレーターAPIで提供されているウェーブテーブルを使用したモーフィング・ウェーブテーブル・オシレーターです. APIの機能やパラメーターの使い方を学ぶ上で良いリファレンスになるでしょう. 
+カスタムオシレーターは, バッファ処理コールバックを介して安定したオーディオ信号を提供することが期待される自己完結型のサウンドジェネレーターです.
+これらは各機種のボイス構造の一部で動作するため, アーティキュレーションとフィルター処理はすでにおこなわれており, オシレーターは指定されたピッチ情報とその他の利用可能なパラメータに従って波形を提供するだけでよいのです.
 
- * プロジェクトのディレクトリに移動します.
- 
-```
-$ cd logue-sdk/platform/nutekt-digital/demos/waves/
-```
-_Note: パスの中にある "prologue" を対象のプラットフォーム名に置き換えてください._
+### モジュレーションエフェクト
 
- * プロジェクをビルドするために `make` を実行します.
- 
-```
-$ make
-Compiler Options
-../../../../tools/gcc/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT -g -Os -mlittle-endian -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -fcheck-new -std=c11 -mstructure-size-boundary=8 -W -Wall -Wextra -Wa,-alms=./build/lst/ -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -I. -I./inc -I./inc/api -I../../inc -I../../inc/dsp -I../../inc/utils -I../../../ext/CMSIS/CMSIS/Include
-    
-Compiling _unit.c
-Compiling waves.cpp
-Linking build/waves.elf
-Creating build/waves.hex
-Creating build/waves.bin
-Creating build/waves.dmp
+モジュレーションエフェクトは、ボイスのアーティキュレーションとフィルタリングの後, ディレイとリバーブエフェクトの前に処理されるインサートエフェクトです.
+[prologue](https://www.korg.com/jp/products/synthesizers/prologue) ではデュアルティンバー機能をサポートするために, APIは二つのバッファーを提供し, 同様の処理をする必要であることに注意してください. [minilogue xd](https://www.korg.com/jp/products/synthesizers/minilogue_xd) と [Nu:Tekt NTS-1 digital kit](https://www.korg.com/jp/products/dj/nts_1) では二つ目のバッファーは安全に省略することができます.
 
-   text	   data	    bss	    dec	    hex	filename
-   2304	      4	    144	   2452	    994	build/waves.elf
+### ディレイエフェクトとリバーブエフェクト
 
-Creating build/waves.list
-Packaging to ./waves.prlgunit
- 
-Done
-```
-    
- * *Packaging...* という表示の通り,  *.prlgunit* というファイルが生成されます. これがビルド成果物となります.
+ディレイエフェクトとリバーブエフェクトは, どちらもモジュレーションエフェクトの後に処理されるセンドエフェクトです.  [prologue](https://www.korg.com/jp/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/jp/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/jp/products/dj/nts_1) ではカスタムディレイとリバーブエフェクトが同じランタイムにロードされるため, ディレイとリバーブの両方が有効であってもカスタムエフェクトは片方だけしか使用することができません. ただし内部エフェクトとカスタムディレイ, リバーブエフェクトは自由に組み合わせることができます.
 
-    _Note: 拡張子は minilogue xd の場合 *.mnlgxdunit*, Nu:Tekt NTS-1 digital の場合 *.ntkdigunit* となります._
+### 各プラットフォームの詳細
 
-### *「unit」* ファイルの操作と使い方
+より詳しい情報は下記のREADMEファイルに記載しています.
 
-*.prlgunit*, *.mnlgxdunit*, and  *.ntkdigunit* ファイルは自作コンテンツのバイナリデータ本体とメタデータを含む簡潔なパッケージファイルです. 
-このファイルは [logue-cli utility](https://github.com/korginc/logue-sdk/tools/logue-cli/) もしくは 製品の Librarian application ([KORG ウエブサイト](https://korg.com)の製品ページに参考) 経由でアップロードすることが出来ます.
+ * [prologue platform](https://github.com/korginc/logue-sdk/tree/master/platform/prologue/README_ja.md)
+ * [minilogue-xd platform](https://github.com/korginc/logue-sdk/tree/master/platform/minilogue-xd/README_ja.md)
+ * [NTS-1 platform](https://github.com/korginc/logue-sdk/tree/master/platform/nutekt-digital/README_ja.md)
+
+## drumlogue
+
+[drumlogue](https://www.korg.com/jp/products/drums/drumlogue) では, シンセ, ディレイエフェクト, リバーブエフェクト, マスターエフェクトの4種類のカスタムユニットを作成することができます.
+
+[drumlogue](https://www.korg.com/jp/products/drums/drumlogue) のカスタムユニットAPIは, 上記のほかのターゲットプラットフォームとの互換性はありません. しかしコアAPI構造には類似点があるため, ユニットは比較的容易に移植できるはずです.
+
+### カスタムシンセ
+
+カスタムシンセは, ボイスのアーティキュレーションとフィルタリング（該当する場合）を担当する自己完結型のサウンドジェネレーターです. これらは [drumlogue](https://www.korg.com/jp/products/drums/drumlogue) のマルチエンジンセクションで個々のシンセパートとして処理されます.
+
+### ディレイエフェクト
+
+ディレイエフェクトは専用のランタイム環境で実行され, 専用のセンドバスを処理します. 出力はマスターエフェクトの前または後にミックスバックすることができ, リバーブエフェクトへのルーティングも可能です.
+
+### リバーブエフェクト
+
+リバーブエフェクトは専用のランタイム環境で実行され, 専用のセンドバスを処理します. 出力はマスターエフェクトの前または後にミックスバックすることができます.
+
+### マスターエフェクト
+
+マスターエフェクトはインラインエフェクトで, パートごとにバイパスすることができます. またAPIではオプションのサイドチェインセンドバスを使用することも可能です.
+
+### 詳細な情報
+
+ より詳細な情報は [drumlogue platform README](https://github.com/korginc/logue-sdk/tree/master/platform/drumlogue/README_ja.md) ファイルをご参照ください.
