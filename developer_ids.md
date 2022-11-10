@@ -26,4 +26,4 @@
  | dev_id | Developer | 
  | --- | --- | 
  | 0x53564253 ('SVBS') | [Sinevibes](https://sinevib.es) |
-
+ | 0x45444F55 ('EDOU') | [Edouard Digital](https://edouard.digital) |
