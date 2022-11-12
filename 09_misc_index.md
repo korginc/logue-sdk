@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Miscelaneous
+title: Miscellaneous
 title_long: Miscelaneaous
 permalink: /unit-index/misc/
 last_modified_on: 2022-10-27 12:35:00 +9000
