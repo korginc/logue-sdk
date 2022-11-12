@@ -27,4 +27,4 @@
  | --- | --- | 
  | 0x53564253 ('SVBS') | [Sinevibes](https://sinevib.es) |
  | 0x656B7544 ('ekuD') | [Oleg Burdaev](https://github.com/dukesrg) |
-
+ | 0x45444F55 ('EDOU') | [Edouard Digital](https://edouard.digital) |
