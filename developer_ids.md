@@ -26,4 +26,5 @@
  | dev_id | Developer | 
  | --- | --- | 
  | 0x53564253 ('SVBS') | [Sinevibes](https://sinevib.es) |
+ | 0x656B7544 ('ekuD') | [Oleg Burdaev](https://github.com/dukesrg) |
 
