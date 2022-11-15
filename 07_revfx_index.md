@@ -13,7 +13,8 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 _Note: The reverb effect section can contain effects that perform other functions than reverberation, see descriptions below._
 
 | Name | Developer | Description | Platforms | |
-| [Freeverb](https://github.com/boochow/freeverb-logue/releases) | boochow instruments | Freeverb public domain reverberator port | pro, xd, nts-1 | free |
+| [Freeverb](https://github.com/boochow/freeverb-logue) | boochow instruments | Freeverb public domain reverberator port | pro, xd, nts-1 | free |
+| [Schroeder](https://github.com/boochow/schroeder) | boochow instruments | Basic schroeder reverberator | pro, xd, nts-1 | free |
 | [Breathe](http://hammondeggsmusic.ca/logueplugins/breathe.html) | Hammond Eggs Music | low pass auto-filter modulating deep reverb| pro, xd, nts-1 | donation |
 | [Cathedral](http://hammondeggsmusic.ca/logueplugins/cathedral.html) | Hammond Eggs Music | fixed low pass long time deep reverb | pro, xd, nts-1 | donation |
 | [Haze](http://hammondeggsmusic.ca/logueplugins/cathedral.html) | Hammond Eggs Music | fixed high pass long time deep reverb | pro, xd, nts-1 | donation |

@@ -14,6 +14,7 @@ _Note: The delay effect section can contain effects that perform other functions
 
 | Name | Developer | Description | Platforms | |
 | [lissa](https://github.com/boochow/lissa) | boochow instruments | Lissajous output for oscilloscopes | pro, xd, nts-1 | free |
+| [veryshort](https://github.com/boochow/veryshort) | boochow instruments | Very short delay, comb filter | pro, xd, nts-1 | free |
 | [lobit](https://github.com/centrevillage/cv_logue/tree/master/delfx/lobit) | centrevillage |  | pro, xd, nts-1 | free |
 | [pitchshift](https://github.com/centrevillage/cv_logue/tree/master/delfx/pitchshift) | centrevillage |  | pro, xd, nts-1 | free |
 | [reverse](https://github.com/centrevillage/cv_logue/tree/master/delfx/reverse) | centrevillage |  | pro, xd, nts-1 | free |

@@ -13,8 +13,8 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 
 | 名前 | 開発者 | 備考 | プラットフォーム |  |
 | [Leslie](https://www.2getheraudio.com/korg-multi-engine/b3-organ/) | 2getheraudio | Leslie effect to be paired with B3 Organ | pro, xd, nts-1 | 有料 |
-| [MasterVol2](https://github.com/boochow/MasterVol2/releases) | boochow instruments | Secondary master volume | pro, xd, nts-1 | 無料 |
-| [Teleconf](https://github.com/boochow/teleconf/releases/tag/v1.0) | boochow instruments | G.711 A-law codec emulation | pro, xd, nts-1 | 無料 |
+| [MasterVol2](https://github.com/boochow/MasterVol2) | boochow instruments | Secondary master volume | pro, xd, nts-1 | 無料 |
+| [Teleconf](https://github.com/boochow/teleconf) | boochow instruments | G.711 A-law codec emulation | pro, xd, nts-1 | 無料 |
 | [3DC](https://www.cain-synthesizer.com/effects) | Cain Synthesizers | 3 delay line chorus | pro, xd, nts-1 | 寄付 |
 | [Cain D](https://www.cain-synthesizer.com/effects) | Cain Synthesizers | Subtler chorus | pro, xd, nts-1 | 寄付 |
 | [AMPit](https://www.dirtboxsynth.com/sd_product/ampit/) | Dirtbox Synth | distortion | pro, xd, nts-1 | 有料 |
