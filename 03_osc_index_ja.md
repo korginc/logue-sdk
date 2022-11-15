@@ -21,6 +21,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [picture](https://github.com/boochow/picture) | boochow instruments | Picture display for oscilloscopes (requires Lissa delay effect) | pro, xd, nts-1 | 無料 |
 | [Pulsaw](https://blog.boochow.com/logue/pulsaw) | boochow instruments | Juno DCO emulation | pro, xd, nts-1 | 有料 |
 | [Waves2](https://github.com/boochow/Waves2) | boochow instruments | Waves2 is the oscillator which can control its harmonics | pro, xd, nts-1 | 無料 |
+| [Ruismaker](https://ruismaker.com/korg/) | Bram Bos | Analog drum oscillator | nts-1 | 無料 |
 | [Cain++](https://cain-synthesizer.com/cain) | Cain Synthesizers | Karplus-Strong oscillator | pro, xd, nts-1 | 寄付 |
 | [Cain CZ](https://cain-synthesizer.com/cain-cz-2) | Cain Synthesizers | Phase distortion oscillator inspired by the Casio Cosmo synthesizer | pro, xd, nts-1 | 寄付 |
 | [Cain CZ2](https://cain-synthesizer.com/cain-cz2) | Cain Synthesizers | Vastly advanced version of Cain CZ | pro, xd, nts-1 | 寄付 |
