@@ -101,6 +101,8 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Three](https://www.soundmangling.com/2020/05/14/three-user-oscillator/) | Tim Shoebridge | Three waves, three EGs | pro, xd, nts-1 | paid |
 | [Two](https://www.soundmangling.com/2020/05/14/two-user-oscillator/) | Tim Shoebridge | Waveform mixing and phase modulation | pro, xd, nts-1 | paid |
 | [Vector Synthesis](https://www.soundmangling.com/2020/10/17/vector-synthesis-user-oscillator/) | Tim Shoebridge | Attempt to recreate the basic capabilities of legendary vector synthesisers such as the Sequential Prophet VS and Korg Wavestation | pro, xd, nts-1 | paid |
+| [fusion](https://tsoniq.com/software/korg/fusion/) | tsoniq | Virtual analog synth voice | pro, xd | free, paid |
+| [unity](https://tsoniq.com/software/korg/unity/) | tsoniq | 15 waveform generators, overdrive, and resonant HPF | pro, xd, nts-1 | free |
 | [vbass](https://github.com/tweeeeeak/nts) | Tweeeeeak | Volca Bass style triple oscillator | nts-1 | free |
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | pro, xd, nts-1 | donation |
 
