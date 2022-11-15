@@ -196,10 +196,10 @@ Field descriptions:
  * `.header_size` : Size of the header structure. Should be left as defined in the template provided.
  * `.target` : Defines the target platform and module. The value provided by the template should be kept, but make sure that the module defined matches the actual intended target unit module. (synth: k\_unit\_module\_synth, delfx: k\_unit\_module\_delfx, revfx: k\_unit\_module\_revfx, masterfx: k\_unit\_module\_masterfx)
  * `.api` : logue SDK API version against which the unit is being built. The default template value ensures the current API value at build time will be used.
- * `.dev_id` : A unique developer identifier as a low endian 32bit unsigned integer. See [Developer Identifier](#developer-identifier) for details.
- * `.unit_id` : An identifier for the unit itself as a low endian 32bit unsigned integer. This identifier must only be unique within the scope of a given developer identifier.
- * `.version` : The version for the current unit as a low endian 32bit unsigned integer, with major in the upper 16 bits, minor and patch number in the two lower bytes, respectively. (e.g.: v1.2.3 -> 0x00010203U)
- * `.name` : Name for the current unit, as displayed on the device when loaded. Nul-terminated array of maximum 13 7bit ASCII characters. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#$%&'()*+,-.:;<=>@`".
+ * `.dev_id` : A unique developer identifier as a low endian 32-bit unsigned integer. See [Developer Identifier](#developer-identifier) for details.
+ * `.unit_id` : An identifier for the unit itself as a low endian 32-bit unsigned integer. This identifier must only be unique within the scope of a given developer identifier.
+ * `.version` : The version for the current unit as a low endian 32-bit unsigned integer, with major in the upper 16 bits, minor and patch number in the two lower bytes, respectively. (e.g.: v1.2.3 -> 0x00010203U)
+ * `.name` : Name for the current unit, as displayed on the device when loaded. Nul-terminated array of maximum 13 7-bit ASCII characters. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#$%&'()*+,-.:;<=>@`".
  * `.num_presets` : Number of exposed presets by the unit. See [Presets](#presets) for details.
  * `.num_params` : Number of exposed parameters by the unit. Up to 24 parameters can be exposed.
  * `.params` : Array of parameter descriptors. See [Parameter Descriptors](#parameter-descriptors) for details. 
@@ -210,7 +210,7 @@ Field descriptions:
 
 ### Developer Identifier
 
- Developers must choose a unique identifier (32bit unsigned integer) in order to allow proper identification of units.
+ Developers must choose a unique identifier (32-bit unsigned integer) in order to allow proper identification of units.
  A list of known identifiers is available [here](../../developer_ids.md), it is however not necessarily exhaustive.
  
  *Note* The following developer identifiers are reserved and should not be used: 0x00000000, 0x4B4F5247 (KORG), 0x6B6F7267 (korg), or any upper/lower case combination of the previous two.
@@ -240,7 +240,7 @@ Field descriptions:
  * `frac` allows to specify the fractional part of the parameter value. This value will be interpreted as number of fractional bits or decimals depending on the `frac_mode` value.
  * `frac_mode` determines the type of fractional value being described. When set to `0`, values will be assumed to be fixed point with the lower `frac` bits representing the fractional part. When set to `1`, values will be assumed to include a fractional part that is multiplied by 10 times `frac` number of decimals, allowing for base 10 fractional increment/decrements.
  * `reserved` should be set to 0 at all times.
- * `name` allows for a 12 character name. Should be nul-terminated and 7bit ASCII encoded. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#$%&'()*+,-.:;<=>@`".
+ * `name` allows for a 12 character name. Should be nul-terminated and 7-bit ASCII encoded. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#$%&'()*+,-.:;<=>@`".
  
  *Note* `min`, `max`, `center` and `init` values must be take into account the `frac` and `frac_mode` values.
 
@@ -308,24 +308,24 @@ All units must provide an implementation for the following functions. However, a
  * `__unit_callback void unit_suspend()` : Called when a unit is being suspended. For instance, when the currently active unit is being swapped for a different unit. Usually followed by a call to `unit_reset()`.
  * `__unit_callback void unit_render(const float * in, float * out, uint32_t frames)` : Audio rendering callback. Synth units should ignore the `in` argument. Input/output buffer geometry information is provided via the `unit_runtime_desc_t` argument of `unit_init(..)`.
  * `__unit_callback uint8_t unit_get_preset_index()` : Should return the preset index currently used by the unit.
- * `__unit_callback const char * unit_get_preset_name(uint8_t index)` : Called to obtain the name of given preset index. The returned value should point to a nul-terminated 7bit ASCII C string of maximum X characters. The displayable characters are the same as for the unit name.
+ * `__unit_callback const char * unit_get_preset_name(uint8_t index)` : Called to obtain the name of given preset index. The returned value should point to a nul-terminated 7-bit ASCII C string of maximum X characters. The displayable characters are the same as for the unit name.
  * `__unit_callback void unit_load_preset(uint8_t index)` : Called to load the preset designated by the specified index. See [Presets](#presets) for details.
  * `__unit_callback int32_t unit_get_param_value(uint8_t index)` : Called to obtain the current value of the parameter designated by the specified index.
- * `__unit_callback const char * unit_get_param_str_value(uint8_t index, int32_t value)` : Called to obtain the string representation of the specified value, for a `k_unit_param_type_strings` typed parameter. The returned value should point to a nul-terminated 7bit ASCII C string of maximum X characters. It can be safely assumed that the C string pointer will not be cached or reused after `unit_get_param_str_value(..)` is called again, and thus the same memory area can be reused across calls (if convenient).
+ * `__unit_callback const char * unit_get_param_str_value(uint8_t index, int32_t value)` : Called to obtain the string representation of the specified value, for a `k_unit_param_type_strings` typed parameter. The returned value should point to a nul-terminated 7-bit ASCII C string of maximum X characters. It can be safely assumed that the C string pointer will not be cached or reused after `unit_get_param_str_value(..)` is called again, and thus the same memory area can be reused across calls (if convenient).
  * `__unit_callback const uint8_t * unit_get_param_bmp_value(uint8_t index, int32_t value)` : Called to obtain the bitmap representation of the specified value, for a `k_unit_param_type_bitmaps` typed parameter. It can be safely assumed that the pointer will not be cached or reused after `unit_get_param_bmp_value(..)` is called again, and thus the same memory area can be reused across calls (if convenient). For details concerning bitmap data format see [Bitmaps](#bitmaps).
- * `__unit_callback void unit_set_param_value(uint8_t index, int32_t value)` : Called to set the current value of the parameter designated by the specified index. Note that for the drumlogue values are stored as 16bit integers, but to avoid future API changes, they are passed as 32bit integers. For additional safety, make sure to bound check values as per the min/max values declared in the header.
- * `__unit_callback void unit_set_tempo(uint32_t tempo)` : Called when a tempo change occurs. The tempo is formatted in fixed point format, with the BPM integer part in the upper 16bits, and fractional part in the lower 16bits (low endian). Care should be taken to keep CPU load as low as possible when handling tempo changes as this handler may be called frequently especially if externally synced.
+ * `__unit_callback void unit_set_param_value(uint8_t index, int32_t value)` : Called to set the current value of the parameter designated by the specified index. Note that for the drumlogue values are stored as 16-bit integers, but to avoid future API changes, they are passed as 32bit integers. For additional safety, make sure to bound check values as per the min/max values declared in the header.
+ * `__unit_callback void unit_set_tempo(uint32_t tempo)` : Called when a tempo change occurs. The tempo is formatted in fixed point format, with the BPM integer part in the upper 16 bits, and fractional part in the lower 16 bits (low endian). Care should be taken to keep CPU load as low as possible when handling tempo changes as this handler may be called frequently especially if externally synced.
  
 ### Synth Unit Specific Functions
  
- * `__unit_callback void unit_note_on(uint8_t note, uint8_t velocity)` : Called upon MIDI note on events, and upon internal sequencer gate on events if an explicit `unit_gate_on(..)` handler is not provided, in which case note will be set to 0xFFU.
+ * `__unit_callback void unit_note_on(uint8_t note, uint8_t velocity)` : Called upon MIDI note on events, and upon internal sequencer gate on events if an explicit `unit_gate_on(..)` handler is not provided, in which case note will be set to 0xFFU. `velocity` is a 7-bit value.
  * `__unit_callback void unit_note_off(uint8_t note)` : Called upon MIDI note off events, and upon internal sequencer gate off events if an explicit `unit_gate_off(..)` handler is not provided, in which case note will be set to 0xFFU.
- * `__unit_callback void unit_gate_on(uint8_t velocity)` (optional) : If provided, will be called upon internal sequencer gate on events.
+ * `__unit_callback void unit_gate_on(uint8_t velocity)` (optional) : If provided, will be called upon internal sequencer gate on events. `velocity` is a 7-bit value.
  * `__unit_callback void unit_gate_off(void)` (optional) : If provided, will be called upon internal sequencer gate off events.
  * `__unit_callback void unit_all_note_off(void)` : When called all active notes should be deactivated and enveloppe generators reset.
- * `__unit_callback void unit_pitch_bend(uint16_t bend)` : Called upon MIDI pitch bend events.
- * `__unit_callback void unit_channel_pressure(uint8_t pressure)` : Called upon MIDI channel pressure events.
- * `__unit_callback void unit_aftertouch(uint8_t note, uint8_t aftertouch)` : Called upon MIDI aftertouch events.
+ * `__unit_callback void unit_pitch_bend(uint16_t bend)` : Called upon MIDI pitch bend event. `bend` is a 14-bit value with neutral center at 0x2000U. Sensitivity can be defined according to the unit's needs.
+ * `__unit_callback void unit_channel_pressure(uint8_t pressure)` : Called upon MIDI channel pressure events. `pressure` is a 7-bit value.
+ * `__unit_callback void unit_aftertouch(uint8_t note, uint8_t aftertouch)` : Called upon MIDI aftertouch events. `afterotuch` is a 7-bit value.
  
 ### Runtime Descriptor 
 
@@ -389,7 +389,7 @@ All units must provide an implementation for the following functions. However, a
 
 ### Strings
 
- Strings provided via `unit_get_param_str_value(..)` should be nul terminated C character arrays of 7bit ASCII characters from the following list: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#$%&'()*+,-.:;<=>@`".
+ Strings provided via `unit_get_param_str_value(..)` should be nul terminated C character arrays of 7-bit ASCII characters from the following list: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#$%&'()*+,-.:;<=>@`".
  
  Parameter value strings can be effectively up to 32 characters long, however, the displayable area is narrow and strings that exceed the area will be truncated with `...`.
 
