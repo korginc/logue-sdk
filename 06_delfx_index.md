@@ -19,6 +19,7 @@ _Note: The delay effect section can contain effects that perform other functions
 | [reverse](https://github.com/centrevillage/cv_logue/tree/master/delfx/reverse) | centrevillage |  | pro, xd, nts-1 | free |
 | [stutter](https://github.com/centrevillage/cv_logue/tree/master/delfx/stutter) | centrevillage |  | pro, xd, nts-1 | free |
 | [Exotic Delay Pack](https://www.dirtboxsynth.com/sd_product/exotic-delay-pack/) | Dirtbox Synth | Modulated, rising, falling, _sick_ delays | pro, xd, nts-1 | paid |
+| [Slinky](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | Modulated delay | pro, xd, nts-1 | donation |
 | [Arrhh!](http://hammondeggsmusic.ca/logueplugins/arrhh.html) | Hammond Eggs Music | A vocal formant filter delay FX | pro, xd, nts-1 | donation |
 | [Grit](http://hammondeggsmusic.ca/logueplugins/grit.html) | Hammond Eggs Music | A gritty analog style echo effect | pro, xd, nts-1 | donation |
 | [pseudo](http://hammondeggsmusic.ca/logueplugins/pseudo.html) | Hammond Eggs Music | A unique mono looper with adjustable stereo playback spread | pro, xd, nts-1 | donation |

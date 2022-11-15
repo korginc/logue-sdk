@@ -41,8 +41,11 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Blinds](https://edouard.digital/blinds/) | Edouard Digital | PWM for any waveform | pro, xd, nts-1 | paid |
 | [JP-Booo](https://edouard.digital/jp-booo/) | Edouard Digital | Super saw oscillator inspired by the JP-8000 | pro, xd, nts-1 | paid |
 | [MOsc](https://github.com/GuillaumeElias/Nutekt-MOSC) | Guillaume Elias | Multi oscillator | nts-1 | free |
-| [Step](https://docs.google.com/document/d/1C7NdMjTZy9QDjQYifAx3eBuY1trysD7Hhh1_DvkqkHo) | Ghost Time Games | An experimental stepping oscillator | pro, xd, nts-1 | free |
-| [Warped](https://docs.google.com/document/d/1YxjCAL9CeEhrf-EpedUzAHMjk6ilYbJGoIHQFXSDfEY) | Ghost Time Games | A lo-fi oscillator inspired by Boards of Canada | pro, xd, nts-1 | free |
+| [Clang](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | Metallic oscillator | pro, xd, nts-1 | donation |
+| [Lapse](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | Stacked LFO drone generator | pro, xd, nts-1 | donation |
+| [Sneq](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | Polyrhythmic pattern generator | pro, xd, nts-1 | donation |
+| [Step](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | An experimental stepping oscillator | pro, xd, nts-1 | donation |
+| [Warped](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | A lo-fi oscillator inspired by Boards of Canada | pro, xd, nts-1 | donation |
 | [1973](http://hammondeggsmusic.ca/logueplugins/1973.html) | Hammond Eggs Music | Single osc., dual filter, emulation of miniKorg 700 | pro, xd, nts-1 | donation |
 | [Chips2.0](http://hammondeggsmusic.ca/logueplugins/chips2.html) | Hammond Eggs Music | Chiptune oscillator with PWM, arpeg., and noise drums | pro, xd, nts-1 | donation |
 | [Divide](http://hammondeggsmusic.ca/logueplugins/divide.html) | Hammond Eggs Music | 12 note top octave style divider oscillator | pro, xd, nts-1 | donation |
