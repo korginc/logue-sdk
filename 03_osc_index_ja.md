@@ -63,6 +63,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [Betty](https://github.com/ulmert/betty) | Jacob Ulmert | Random rhythm generator, 3-voice poly, 12 samples | nts-1 | 無料 |
 | [Bobby](https://github.com/ulmert/bobby) | Jacob Ulmert | Glitchy 8/12-bit sample based drum machine | nts-1 | 無料 |
 | [Magic forest](https://github.com/ulmert/magicforest) | Jacob Ulmert | Lo-fi forest ambience generator | nts-1 | 無料 |
+| [Plaits](https://github.com/john-k-walton/Prologue-Oscillators) | John Walton | Variation of Mutable Instruments Plaits port | pro, xd, nts-1 | 無料 |
 | [Anthologue](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | 6 VCO oscillator | pro, xd, nts-1 | 無料 |
 | [Morpheus](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Example implementation of custom wavetable inspired by WaveEdit | pro, xd, nts-1 | 無料 |
 | [Supersaw](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Saw with unison (pseudo-polyphony on NTS-1) | pro, xd, nts-1 | 無料 |

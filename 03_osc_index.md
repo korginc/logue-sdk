@@ -60,6 +60,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Betty](https://github.com/ulmert/betty) | Jacob Ulmert | Random rhythm generator, 3-voice poly, 12 samples | nts-1 | free |
 | [Bobby](https://github.com/ulmert/bobby) | Jacob Ulmert | Glitchy 8/12-bit sample based drum machine | nts-1 | free |
 | [Magic forest](https://github.com/ulmert/magicforest) | Jacob Ulmert | Lo-fi forest ambience generator | nts-1 | free |
+| [Plaits](https://github.com/john-k-walton/Prologue-Oscillators) | John Walton | Variation of Mutable Instruments Plaits port | pro, xd, nts-1 | free |
 | [Organ](https://github.com/len/korg-prologue/tree/master/src/organ) | len | 5 draw bars, similar to Vox Super Continental | pro | free |
 | [Pluck](https://github.com/len/korg-prologue/tree/master/src/pluck) | len | Karplus Strong | pro | free |
 | [Anthologue](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | 6 VCO oscillator | pro, xd, nts-1 | free |
