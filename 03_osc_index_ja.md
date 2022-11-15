@@ -42,11 +42,11 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [Blinds](https://edouard.digital/blinds/) | Edouard Digital | PWM for any waveform | pro, xd, nts-1 | 有料 |
 | [JP-Booo](https://edouard.digital/jp-booo/) | Edouard Digital | Super saw oscillator inspired by the JP-8000 | pro, xd, nts-1 | 有料 |
 | [MOsc](https://github.com/GuillaumeElias/Nutekt-MOSC) | Guillaume Elias | Multi oscillator | nts-1 | 無料 |
-| [Clang](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | Metallic oscillator | pro, xd, nts-1 | 寄付 |
-| [Lapse](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | Stacked LFO drone generator | pro, xd, nts-1 | 寄付 |
-| [Sneq](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | Polyrhythmic pattern generator | pro, xd, nts-1 | 寄付 |
-| [Step](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | An experimental stepping oscillator | pro, xd, nts-1 | 寄付 |
-| [Warped](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | A lo-fi oscillator inspired by Boards of Canada | pro, xd, nts-1 | 寄付 |
+| [Clang](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/devlog/303932/clang-a-metallic-oscillator) | Ghost Time | Metallic oscillator | pro, xd, nts-1 | 寄付 |
+| [Lapse](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/devlog/193527/lapse-stacked-lfo-drone-generator) | Ghost Time | Stacked LFO drone generator | pro, xd, nts-1 | 寄付 |
+| [Sneq](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/devlog/193466/sneq-polyrhythm-pattern-generator) | Ghost Time | Polyrhythmic pattern generator | pro, xd, nts-1 | 寄付 |
+| [Step](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/devlog/193526/step-per-key-arpeggiator) | Ghost Time | An experimental stepping oscillator | pro, xd, nts-1 | 寄付 |
+| [Warped](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/devlog/193525/warped-boc-inspired-lo-fi-oscillator) | Ghost Time | A lo-fi oscillator inspired by Boards of Canada | pro, xd, nts-1 | 寄付 |
 | [1973](http://hammondeggsmusic.ca/logueplugins/1973.html) | Hammond Eggs Music | Single osc., dual filter, emulation of miniKorg 700 | pro, xd, nts-1 | 寄付 | 
 | [Chips2.0](http://hammondeggsmusic.ca/logueplugins/chips2.html) | Hammond Eggs Music | Chiptune oscillator with PWM, arpeg., and noise drums | pro, xd, nts-1 | 寄付 | 
 | [Divide](http://hammondeggsmusic.ca/logueplugins/divide.html) | Hammond Eggs Music | 12 note top octave style divider oscillator | pro, xd, nts-1 | 寄付 |

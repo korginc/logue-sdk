@@ -23,7 +23,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [Filter Pack](https://www.dirtboxsynth.com/sd_product/filter-pack/) | Dirtbox Synth | Low pass, high pass, band pass & band reject | pro, xd, nts-1 | 有料 |
 | [Pan and Tremolo Pack](https://www.dirtboxsynth.com/sd_product/pan-and-tremolo-pack/) | Dirtbox Synth | Panner & tremolo | pro, xd, nts-1 | 有料 |
 | [Resonance](https://www.dirtboxsynth.com/sd_product/resonance/) | Dirtbox Synth | Dual combo filter | pro, xd, nts-1 | 有料 |
-| [Waver](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | Warbly mod effect | pro, xd, nts-1 | 寄付 |
+| [Waver](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/devlog/218653/waver-a-warbly-mod-effect) | Ghost Time | Warbly mod effect | pro, xd, nts-1 | 寄付 |
 | [Buckets](http://hammondeggsmusic.ca/logueplugins/buckets.html) | Hammond Eggs Music | 70's style BBD chorus | pro, xd, nts-1 | 寄付 |
 | [Cabernet](http://hammondeggsmusic.ca/logueplugins/cabernet.html) | Hammond Eggs Music | overdrive / distortion plugin with an optional cabinet simulator | pro, xd, nts-1 | 寄付 |
 | [Hera2.0](http://hammondeggsmusic.ca/logueplugins/hera2.html) | Hammond Eggs Music | 80's style chorus | pro, xd, nts-1 | 寄付 |

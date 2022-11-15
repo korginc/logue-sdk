@@ -20,7 +20,7 @@ _Note: ディレイエフェクトセクションには, ディレイ以外の�
 | [reverse](https://github.com/centrevillage/cv_logue/tree/master/delfx/reverse) | centrevillage |  | pro, xd, nts-1 | 無料 |
 | [stutter](https://github.com/centrevillage/cv_logue/tree/master/delfx/stutter) | centrevillage |  | pro, xd, nts-1 | 無料 |
 | [Exotic Delay Pack](https://www.dirtboxsynth.com/sd_product/exotic-delay-pack/) | Dirtbox Synth | Modulated, rising, falling, _sick_ delays | pro, xd, nts-1 | 有料 |
-| [Slinky](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/purchase) | Ghost Time | Modulated delay | pro, xd, nts-1 | 寄付 |
+| [Slinky](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/devlog/219231/slinky-a-modulated-delay-effect) | Ghost Time | Modulated delay | pro, xd, nts-1 | 寄付 |
 | [Arrhh!](http://hammondeggsmusic.ca/logueplugins/arrhh.html) | Hammond Eggs Music | A vocal formant filter delay FX | pro, xd, nts-1 | 寄付 |
 | [Grit](http://hammondeggsmusic.ca/logueplugins/grit.html) | Hammond Eggs Music | A gritty analog style echo effect | pro, xd, nts-1 | 寄付 |
 | [pseudo](http://hammondeggsmusic.ca/logueplugins/pseudo.html) | Hammond Eggs Music | A unique mono looper with adjustable stereo playback spread | pro, xd, nts-1 | 寄付 |
