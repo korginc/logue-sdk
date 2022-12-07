@@ -29,3 +29,4 @@
  | 0x656B7544 ('ekuD') | [Oleg Burdaev](https://github.com/dukesrg) |
  | 0x45444F55 ('EDOU') | [Edouard Digital](https://edouard.digital) |
  | 0x434E5452 ('CNTR') | [centrevillage](https://centrevillage.net) |
+ | 0x65676773 ('eggs') | [hammondeggsmusic](https://hammondeggsmusic.ca) |
