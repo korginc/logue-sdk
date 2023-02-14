@@ -55,3 +55,11 @@ tools/emscripten/emsdk
 *.dSYM/
 *.su
 
+# Temporary files
+.sudo_as_admin_successful
+.hushlogin
+.drumlogue.env_backup
+
+# WSL
+.profile
+.bash_history
