@@ -12,5 +12,5 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 
 | Name | Developer | Description | Platforms | |
 | Nano | Sinevibes |             | drum | built-in |
-| Resonator | Deborah Pickett | Karplus-Strong resonator synth | drum | |
+| [Resonator](https://www.icemoonprison.com/blog/?p=780) | Deborah Pickett | Karplus-Strong resonator synth | drum | free |
 
