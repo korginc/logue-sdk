@@ -13,4 +13,5 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 
 | 名前 | 開発者 | 備考 | プラットフォーム | |
 | Nano | Sinevibes |             | drum | 内蔵 |
+| Resonator | Deborah Pickett | Karplus-Strong レゾネーターシンセ | drum | |
 
