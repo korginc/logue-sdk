@@ -30,3 +30,4 @@
  | 0x45444F55 ('EDOU') | [Edouard Digital](https://edouard.digital) |
  | 0x434E5452 ('CNTR') | [centrevillage](https://centrevillage.net) |
  | 0x65676773 ('eggs') | [hammondeggsmusic](https://hammondeggsmusic.ca) |
+ | 0x4361644C ('CadL') | [CtrlAltDelete](https://ctrl-alt-delete.co.uk) |
