@@ -27,8 +27,11 @@ The Docker-based build environment packages together all the tools required to b
 
 #### Windows Notes
 
- On Windows (10/11) the [Windows Subsystem for Linux (WSL2)](https://learn.microsoft.com/en-us/windows/wsl/) must be installed.
+ On Windows (10/11) the [Windows Subsystem for Linux (WSL2)](https://learn.microsoft.com/en-us/windows/wsl/) must be installed, including a Linux distribution.
  This is a prerequisite for Docker, and to be able to make use of convenience bash scripts (detailed below) in powershell and command prompt.
+ When cloning the repository, make sure that the Git setting `core.autocrlf` is set to `input`, otherwise none of the setup scripts or build scripts will run.
+ When running the convenience bash scripts you must run `wsl` or `bash` in powershell and command prompt to get to a bash prompt, otherwise they will be launched in Git Bash, 
+ which doesn't have the TTY support required for `run_cmd.sh` and `run_interactive.sh`.
 
 ### Interactive Shell
 
