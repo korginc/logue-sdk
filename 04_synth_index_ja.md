@@ -13,4 +13,5 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 
 | 名前 | 開発者 | 備考 | プラットフォーム | |
 | Nano | Sinevibes |             | drum | 内蔵 |
+| [Resonator](https://www.icemoonprison.com/blog/?p=780) | Deborah Pickett | Karplus-Strong resonator synth | drum | 無料 |
 
