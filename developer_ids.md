@@ -30,3 +30,4 @@
  | 0x45444F55 ('EDOU') | [Edouard Digital](https://edouard.digital) |
  | 0x434E5452 ('CNTR') | [centrevillage](https://centrevillage.net) |
  | 0x65676773 ('eggs') | [hammondeggsmusic](https://hammondeggsmusic.ca) |
+ | 0x54534F4E ('TSON') | [tSoniq](https://tsoniq.com) |
