@@ -33,3 +33,4 @@
  | 0x54534F4E ('TSON') | [tSoniq](https://tsoniq.com) |
  | 0x46747a6c ('Ftzl') | [Deborah Pickett](https://www.icemoonprison.com/blog/?page_id=777) |
  | 0x4361644C ('CadL') | [CtrlAltDelete](https://ctrl-alt-delete.co.uk) |
+ | 0x42636877 ('Bchw') | [boochow instruments](https://blog.boochow.com/logue) |
