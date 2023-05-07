@@ -13,4 +13,5 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | Name | Developer | Description | Platforms | |
 | Nano | Sinevibes |             | drum | built-in |
 | [Resonator](https://www.icemoonprison.com/blog/?p=780) | Deborah Pickett | Karplus-Strong resonator synth | drum | free |
+| [CHSynth](https://ctrl-alt-delete.co.uk/wp/free-korg-drumlogue-synth/) | CtrlAltDelete | Chord Synth | drum | free |
 
