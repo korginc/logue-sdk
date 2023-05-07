@@ -26,8 +26,8 @@ class MasterFX {
   /* Lifecycle Methods. */
   /*===========================================================================*/
 
-  MasterFX(void);
-  virtual ~MasterFX(void);
+  MasterFX(void) {}
+  virtual ~MasterFX(void) {}
 
   inline int8_t Init(const unit_runtime_desc_t * desc) {
     // Check compatibility of samplerate with unit, for drumlogue should be 48000
