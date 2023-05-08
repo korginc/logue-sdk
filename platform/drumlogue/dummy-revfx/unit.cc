@@ -7,8 +7,7 @@
  *
  */
 
-#include "unit.h"
-
+#include "unit.h"    // Note: Include common definitions for all units
 #include "reverb.h"  // Note: Include custom reverb code
 
 static Reverb s_reverb_instance;            // Note: In this case, actual instance of custom reverb object.

@@ -15,6 +15,8 @@
 
 #include <arm_neon.h>
 
+#include "unit.h"  // Note: Include common definitions for all units
+
 class Synth {
  public:
   /*===========================================================================*/
