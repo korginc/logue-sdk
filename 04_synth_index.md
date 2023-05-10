@@ -11,6 +11,7 @@ nav_order: 2
 _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp or submit a pull request modifying the table below_
 
 | Name | Developer | Description | Platforms | |
+| [AutoChord](https://centrevillage.net/products/18) | centrevillage | Automatic Chord Synthesizer | drum | paid |
 | [minitone](https://boochow.gumroad.com/l/minitone) | boochow instruments | monophonic VA synth | drum | free |
 | [CHSynth](https://ctrl-alt-delete.co.uk/wp/free-korg-drumlogue-synth/) | CtrlAltDelete | Chord Synth | drum | free |
 | [Resonator](https://www.icemoonprison.com/blog/?p=780) | Deborah Pickett | Karplus-Strong resonator synth | drum | free |
