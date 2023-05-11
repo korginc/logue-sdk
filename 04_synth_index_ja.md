@@ -12,8 +12,8 @@ nav_order: 2
 _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp までご連絡下さい._
 
 | 名前 | 開発者 | 備考 | プラットフォーム | |
-| [AutoChord](https://centrevillage.net/products/18) | centrevillage | Automatic Chord Synthesizer | drum | 有料 |
 | [minitone](https://boochow.gumroad.com/l/minitone) | boochow instruments | monophonic VA synth | drum | 無料 |
+| [AutoChord](https://centrevillage.net/products/18) | centrevillage | Automatic Chord Synthesizer | drum | 有料 |
 | [CHSynth](https://ctrl-alt-delete.co.uk/wp/free-korg-drumlogue-synth/) | CtrlAltDelete | Chord Synth | drum | 無料 |
 | [Resonator](https://www.icemoonprison.com/blog/?p=780) | Deborah Pickett | Karplus-Strong resonator synth | drum | 無料 |
 | [FM64](https://github.com/dukesrg/logue-sdk) | Oleg Burdaev | 6-operator FM oscillator with DX7/DX21/DX11-series voice banks suport | drum | 無料 |
