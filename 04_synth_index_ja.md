@@ -4,7 +4,7 @@ title: Synths
 title_long: シンセユニット覧
 permalink: /ja/unit-index/synth/
 language: ja
-last_modified_on: 2023-05-08 13:55:00 +9000
+last_modified_on: 2023-05-11 14:45:00 +9000
 parent: Unit Index
 nav_order: 2
 ---
