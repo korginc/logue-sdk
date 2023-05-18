@@ -11,6 +11,7 @@ nav_order: 2
 _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp or submit a pull request modifying the table below_
 
 | Name | Developer | Description | Platforms | |
+| [maxisynth](https://github.com/boochow/maxisynth) | boochow instruments | sample unit using Maximilian library | drum | free |
 | [minitone](https://boochow.gumroad.com/l/minitone) | boochow instruments | monophonic VA synth | drum | free |
 | [AutoChord](https://centrevillage.net/products/18) | centrevillage | Automatic Chord Synthesizer | drum | paid |
 | [CHSynth](https://ctrl-alt-delete.co.uk/wp/free-korg-drumlogue-synth/) | CtrlAltDelete | Chord Synth | drum | free |
