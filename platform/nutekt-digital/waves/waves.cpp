@@ -40,6 +40,7 @@
 
 #include "userosc.h"
 #include "waves.hpp"
+typedef __uint32_t uint32_t; //VSCode understanding of __uint32_t
 
 static Waves s_waves;
 

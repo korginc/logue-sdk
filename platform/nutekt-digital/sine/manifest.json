@@ -1,0 +1,21 @@
+{
+    "header" : 
+    {
+        "platform" : "nutekt-digital",
+        "module" : "osc",
+        "api" : "1.1-0",
+        "dev_id" : 0,
+        "prg_id" : 0,
+        "version" : "1.0-0",
+        "name" : "B3 ORGAN",
+        "num_param" : 6,
+        "params" : [
+            ["1,3",    0, 88, "%"],
+            ["2,4",    0, 88, "%"],
+            ["harmx3",    0, 88, "%"],
+            ["harmx4",    0, 88, "%"],
+            ["harmx5", 0, 8, "%"],
+            ["perc",    -50, 50,  "%"]            
+          ]
+    }
+}
