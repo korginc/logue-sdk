@@ -7,10 +7,11 @@
         "dev_id" : 0,
         "prg_id" : 0,
         "version" : "1.0-0",
-        "name" : "Basic Sine",
-        "num_param" : 1,
+        "name" : "B3 0rgan",
+        "num_param" : 2,
         "params" : [
-            ["1,3",    0, 88, "%"]          
+            ["1,3",    0, 88, "%"],
+            ["2,4",    0, 88, "%"]        
           ]
     }
 }
