@@ -6,7 +6,7 @@ PROJECT = B3
 
 UCSRC =
 
-UCXXSRC = b3.cpp
+UCXXSRC = organ.cpp
 
 UINCDIR =
 
