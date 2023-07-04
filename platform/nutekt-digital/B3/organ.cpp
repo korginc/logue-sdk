@@ -73,10 +73,13 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   s_state.harmxNum[4] = 4;
   s_state.harmxNum[5] = 6;
   s_state.harmxNum[6] = 8;
-  for (int i = 0; i < 7; i++)
-  {
-    s_state.harmxlvl[i] = i < 4 ? 1.f : 0.f;
-  }
+  s_state.harmxlvl[0] = 0.f;
+  s_state.harmxlvl[1] = 1.f;
+  s_state.harmxlvl[2] = 1.f;
+  s_state.harmxlvl[3] = 1.f;
+  s_state.harmxlvl[4] = 0.f;
+  s_state.harmxlvl[5] = 0.f;
+  s_state.harmxlvl[6] = 0.f;
 }
 
 void OSC_CYCLE(const user_osc_param_t *const params,
@@ -109,7 +112,7 @@ void OSC_CYCLE(const user_osc_param_t *const params,
       accumulator += osc_sinf(phase * harmx * foldbackRatio) * harmxLvl;
     }
 
-    *(y) = f32_to_q31(accumulator * .14f);
+    *(y) = f32_to_q31(accumulator * .23f);
 
     phase += w0; // advance phase
 
