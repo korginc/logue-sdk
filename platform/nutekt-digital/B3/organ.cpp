@@ -47,8 +47,8 @@ typedef struct State
   float phase;
   float percAmount; // positive nad negative for harm
   float percEnv;    // trending towards zero, make usre to turn off zero math
-  float harmxlvl[9];
-  uint8_t harmxNum[9];
+  float harmxlvl[7];
+  uint8_t harmxNum[7];
   uint8_t flags;
 } State;
 
@@ -66,6 +66,17 @@ void OSC_INIT(uint32_t platform, uint32_t api)
   s_state.w0 = 0.f;
   s_state.phase = 0.f;
   s_state.flags = k_flags_none;
+  s_state.harmxNum[0] = 0;
+  s_state.harmxNum[1] = 1;
+  s_state.harmxNum[2] = 2;
+  s_state.harmxNum[3] = 3;
+  s_state.harmxNum[4] = 4;
+  s_state.harmxNum[5] = 6;
+  s_state.harmxNum[6] = 8;
+  for (int i = 0; i < 7; i++)
+  {
+    s_state.harmxlvl[i] = i < 4 ? 1.f : 0.f;
+  }
 }
 
 void OSC_CYCLE(const user_osc_param_t *const params,
@@ -87,20 +98,23 @@ void OSC_CYCLE(const user_osc_param_t *const params,
   {
     float accumulator = 0.f;
     float foldbackRatio = 1.f;
-    for (float i = 1; i < 4; i++)
+    for (int i = 1; i < 7; i++)
     {
-      if (freq * i * foldbackRatio > fbFreq)
+      float harmx = s_state.harmxNum[i];
+      float harmxLvl = s_state.harmxlvl[i];
+      if (freq * harmx * foldbackRatio > fbFreq)
       {
         foldbackRatio *= 0.5f;
       }
-      accumulator += osc_sinf(phase * i * foldbackRatio);
+      accumulator += osc_sinf(phase * harmx * foldbackRatio) * harmxLvl;
     }
 
-    *(y) = f32_to_q31(accumulator * .1f);
+    *(y) = f32_to_q31(accumulator * .14f);
 
     phase += w0; // advance phase
 
-    if (phase > 8.f){ // wraps phase, larger to accomodate foldback. 
+    if (phase > 8.f)
+    {               // wraps phase, larger to accomodate foldback.
       phase -= 8.f; // larger numbers have larger phase error, but prevent foldback bugs
     }
   }
@@ -120,34 +134,30 @@ void OSC_NOTEOFF(const user_osc_param_t *const params)
   (void)params;
 }
 
-float smallIntToFloat(uint32_t value)
-{
-  return value * .1f;
-};
-
 void OSC_PARAM(uint16_t index, uint16_t value)
 {
-  // const float valf = param_val_to_f32(value);
+  const float valf = param_val_to_f32(value);
 
   switch (index)
   {
   case k_user_osc_param_id1:
-  {
-    // s_state.harm1 = smallIntToFloat(value / 10);
-    // s_state.harm2 = smallIntToFloat(value % 10);
-  }
-  break;
+    s_state.harmxlvl[1] = valf;
+    break;
   case k_user_osc_param_id2:
-  {
-    // s_state.harm3 = smallIntToFloat(value / 10);
-    // s_state.harm4 = smallIntToFloat(value % 10);
-  }
-  break;
-
+    s_state.harmxlvl[2] = valf;
+    break;
   case k_user_osc_param_id3:
+    s_state.harmxlvl[3] = valf;
+    break;
   case k_user_osc_param_id4:
+    s_state.harmxlvl[4] = valf;
+    break;
   case k_user_osc_param_id5:
+    s_state.harmxlvl[5] = valf;
+    break;
   case k_user_osc_param_id6:
+    s_state.harmxlvl[6] = valf;
+    break;
     break;
   case k_user_osc_param_shape:
     break;
