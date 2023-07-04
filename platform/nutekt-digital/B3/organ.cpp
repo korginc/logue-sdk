@@ -76,21 +76,33 @@ void OSC_CYCLE(const user_osc_param_t *const params,
   s_state.flags = k_flags_none;
 
   const float w0 = s_state.w0 = osc_w0f_for_note((params->pitch) >> 8, params->pitch & 0xFF);
+  const float freq = osc_notehzf((params->pitch) >> 8);
   float phase = s_state.phase;
+  const float fbFreq = 5930.f; // actual highest note is 5924.62Hz
 
   q31_t *__restrict y = (q31_t *)yn;
   const q31_t *y_e = y + frames;
 
   for (; y != y_e; y++)
   {
-    float accumulator = osc_sinf(phase);
-    accumulator += osc_sinf(phase * 2.f);
-    accumulator += osc_sinf(phase * 3.f);
+    float accumulator = 0.f;
+    float foldbackRatio = 1.f;
+    for (float i = 1; i < 4; i++)
+    {
+      if (freq * i * foldbackRatio > fbFreq)
+      {
+        foldbackRatio *= 0.5f;
+      }
+      accumulator += osc_sinf(phase * i * foldbackRatio);
+    }
 
-    *(y) = f32_to_q31(accumulator * .3f);
+    *(y) = f32_to_q31(accumulator * .1f);
 
-    phase += w0;
-    phase -= (uint32_t)phase; // I think this wraps the phase?
+    phase += w0; // advance phase
+
+    if (phase > 8.f){ // wraps phase, larger to accomodate foldback. 
+      phase -= 8.f; // larger numbers have larger phase error, but prevent foldback bugs
+    }
   }
 
   s_state.phase = phase;
