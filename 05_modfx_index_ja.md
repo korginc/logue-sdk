@@ -4,7 +4,7 @@ title: Modulation Effects
 title_long: モジュレーションユニット覧
 permalink: /ja/unit-index/modfx/
 language: ja
-last_modified_on: 2022-10-27 12:35:00 +9000
+last_modified_on: 2023-07-25 9:00:00 +9000
 parent: Unit Index
 nav_order: 2
 ---
@@ -41,9 +41,11 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [Dipole](https://www.sinevibes.com/korgdipole/) | Sinevibes | Through-Zero Flanger | pro, xd, nts-1 | 有料 |
 | [Drift](https://www.sinevibes.com/korgdrift/ ) | Sinevibes | Physically modelled stereo panner based on Lorenz osc. | pro, xd, nts-1 | 有料 |
 | [Finite](https://www.sinevibes.com/korgfinite/ ) | Sinevibes | Granular pitch shifter | pro, xd, nts-1 | 有料 |
+| [Isomer](https://www.sinevibes.com/korgisomer/ ) | Sinevibes | Tempo synced ensemble delay | pro, xd, nts-1 | 有料 |
 | [Ring](https://www.sinevibes.com/korgring/ ) | Sinevibes | 2x oversampling ring modulator | pro, xd, nts-1 | 有料 |
 | [Shift](https://www.sinevibes.com/korgshift/ ) | Sinevibes | Analog-modelled Bode frequency shifter | pro, xd, nts-1 | 有料 |
 | [SVF](https://www.sinevibes.com/korgsvf/) | Sinevibes | State-variable filter 4 pole, -24dB/oct, resonant | pro, xd, nts-1 | 有料 |
+| [Vibrant](https://www.sinevibes.com/korgvibrant/ ) | Sinevibes | Two pole APF based deep phaser | pro, xd, nts-1 | 無料 |
 | [Whirl](https://www.sinevibes.com/korgwhirl/) | Sinevibes | Barber-pole phaser based on Bode frequency shifter | pro, xd, nts-1 | 有料 |
 | [autopan](https://github.com/tmlbl/autopan) | Tim Lebel | Basic autopan effect | pro, xd, nts-1 | 無料 |
 

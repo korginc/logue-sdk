@@ -3,7 +3,7 @@ layout: page
 title: Reverb Effects
 title_long: Reverb Effect Units
 permalink: /unit-index/revfx/
-last_modified_on: 2022-10-27 12:35:00 +9000
+last_modified_on: 2023-07-25 09:00:00 +9000
 parent: Unit Index
 nav_order: 2
 ---
@@ -28,4 +28,6 @@ _Note: The reverb effect section can contain effects that perform other function
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | free |
 | [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | pro, xd, nts-1 | donation |
 | [Albedo](https://www.sinevibes.com/korgalbedo/) | Sinevibes | Granular cloud reverb | pro, xd, nts-1 | paid |
+| [Hollow](https://www.sinevibes.com/korghollow/) | Sinevibes | FDN based vast space reverb | pro, xd, nts-1 | paid |
+| [Luminance](https://www.sinevibes.com/korgluminance/) | Sinevibes | FDN based shimmer reverb | pro, xd, nts-1 | paid |
 
