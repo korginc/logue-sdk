@@ -3,7 +3,7 @@ layout: page
 title: Delay Effects
 title_long: Delay Effect Units
 permalink: /unit-index/delfx/
-last_modified_on: 2022-10-27 12:35:00 +9000
+last_modified_on: 2023-10-23 08:50:00 +9000
 parent: Unit Index
 nav_order: 2
 ---
@@ -13,6 +13,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 _Note: The delay effect section can contain effects that perform other functions than delay, see descriptions below._
 
 | Name | Developer | Description | Platforms | |
+| [Delay Lab](https://boochow.gumroad.com/l/delaylab) | boochow instruments | A delay unit mainly for flanger/chorus. | drum | free/donation |
 | [lissa](https://github.com/boochow/lissa) | boochow instruments | Lissajous output for oscilloscopes | pro, xd, nts-1 | free |
 | [veryshort](https://github.com/boochow/veryshort) | boochow instruments | Very short delay, comb filter | pro, xd, nts-1 | free |
 | [lobit](https://github.com/centrevillage/cv_logue/tree/master/delfx/lobit) | centrevillage |  | pro, xd, nts-1 | free |
