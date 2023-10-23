@@ -11,10 +11,6 @@ nav_order: 2
 _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp or submit a pull request modifying the table below_
 
 | Name | Developer | Description | Platforms | |
-| [B3 Organ](https://www.2getheraudio.com/korg-multi-engine/b3-organ/) | 2getheraudio | Organ emulation, to be paired with Leslie effect | pro, xd, nts-1 | paid |
-| [Supersaw](https://www.2getheraudio.com/korg-multi-engine/supersaw-oscillator/) | 2getheraudio | 7 sawtooths and morphing filter | pro, xd, nts-1 | paid |
-| [Tarabbia](https://www.2getheraudio.com/korg-multi-engine/tarabbia-oscillator/) | 2getheraudio | Continuous saw-square morphing with unison mode | pro, xd, nts-1 | paid |
-| [Wavesweep](https://www.2getheraudio.com/korg-multi-engine/wavesweep-oscillator/) | 2getheraudio | Sweep through logue SDK wavetables | pro, xd, nts-1 | paid |
 | [Alpha One](https://blog.boochow.com/logue/alpha1) | boochow instruments | Alpha-Juno DCO emulation | pro, xd, nts-1 | paid |
 | [Hoovic](https://blog.boochow.com/logue/hoovic) | boochow instruments | Hoover sound | pro, xd, nts-1 | paid |
 | [picture](https://github.com/boochow/picture) | boochow instruments | Picture display for oscilloscopes (requires Lissa delay effect) | pro, xd, nts-1 | free |
