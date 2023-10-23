@@ -39,7 +39,6 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Dipole](https://www.sinevibes.com/korgdipole/) | Sinevibes | Through-Zero Flanger | pro, xd, nts-1 | paid |
 | [Drift](https://www.sinevibes.com/korgdrift/ ) | Sinevibes | Physically modelled stereo panner based on Lorenz osc. | pro, xd, nts-1 | paid |
 | [Finite](https://www.sinevibes.com/korgfinite/ ) | Sinevibes | Granular pitch shifter | pro, xd, nts-1 | paid |
-| [Isomer](https://www.sinevibes.com/korgisomer/ ) | Sinevibes | Tempo synced ensemble delay | pro, xd, nts-1 | paid |
 | [Ring](https://www.sinevibes.com/korgring/ ) | Sinevibes | 2x oversampling ring modulator | pro, xd, nts-1 | paid |
 | [Shift](https://www.sinevibes.com/korgshift/ ) | Sinevibes | Analog-modelled Bode frequency shifter | pro, xd, nts-1 | paid |
 | [SVF](https://www.sinevibes.com/korgsvf/) | Sinevibes | State-variable filter 4 pole, -24dB/oct, resonant | pro, xd, nts-1 | paid |

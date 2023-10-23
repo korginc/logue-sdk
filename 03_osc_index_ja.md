@@ -86,6 +86,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [SW12](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | 12-voice paraphonic oscillator | nts-1 | 寄付 |
 | [Syng](https://rolllogsounds.gumroad.com/) | Roll-Log Sounds | Vocal formant oscillator | pro, xd | 有料 |
 | [Bent](https://www.sinevibes.com/korgbent/) | Sinevibes | Bent-wave modulation synthesis | pro, xd, nts-1 | 有料 |
+| [Dense](https://www.sinevibes.com/korgdense/) | Sinevibes | Vintage virtual analog oscillator | pro, xd, nts-1 | 有料 |
 | [Groove](https://www.sinevibes.com/korggroove/) | Sinevibes | Multitimbral bass and drum machine | pro, xd, nts-1 | 有料 |
 | [Node](https://www.sinevibes.com/korgnode/) | Sinevibes | Four-operator FM synthesis engine | pro, xd, nts-1 | 有料 |
 | [Odds](https://www.sinevibes.com/korgodds/) | Sinevibes | Stochastic control synthesis | pro, xd, nts-1 | 有料 |
