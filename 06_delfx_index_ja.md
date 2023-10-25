@@ -4,7 +4,7 @@ title: Delay Effects
 title_long: ディレイユニット覧
 permalink: /ja/unit-index/delfx/
 language: ja
-last_modified_on: 2023-10-23 08:50:00 +9000
+last_modified_on: 2023-10-23 09:10:23 +9000
 parent: Unit Index
 nav_order: 2
 ---
