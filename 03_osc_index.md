@@ -55,6 +55,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Souper2](http://hammondeggsmusic.ca/logueplugins/souper2.html) | Hammond Eggs Music | 5+5 oscillator supersaw | pro, xd, nts-1 | donation |
 | [chords-osc](http://github.com/hypercubed-music/nts-1) | Hypercubed Music | A 12-voice chord oscillator | nts-1 | free |
 | [osc-808](http://github.com/hypercubed-music/nts-1) | Hypercubed Music | A simple 808-style bass oscilator | nts-1 | free |
+| [NOISE](https://www.jabunaudio.com/news/introducing-noise-a-custom-white-noise-user-oscillator-for-the-korg-nutekt-nts-1-digital-synth-kit-free-download-or-donation) | JabunAudio | White noise source with soft-clipper for NTS-1 | nts-1 | donation |
 | [Betty](https://github.com/ulmert/betty) | Jacob Ulmert | Random rhythm generator, 3-voice poly, 12 samples | nts-1 | free |
 | [Bobby](https://github.com/ulmert/bobby) | Jacob Ulmert | Glitchy 8/12-bit sample based drum machine | nts-1 | free |
 | [Magic forest](https://github.com/ulmert/magicforest) | Jacob Ulmert | Lo-fi forest ambience generator | nts-1 | free |

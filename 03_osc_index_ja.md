@@ -58,6 +58,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [osc-808](http://github.com/hypercubed-music/nts-1) | Hypercubed Music | A simple 808-style bass oscilator | nts-1 | 無料 |
 | [Organ](https://github.com/len/korg-prologue/tree/master/src/organ) | len | 5 draw bars, similar to Vox Super Continental | pro | 無料 | 
 | [Pluck](https://github.com/len/korg-prologue/tree/master/src/pluck) | len | Karplus Strong | pro | 無料 |
+| [NOISE](https://www.jabunaudio.com/news/introducing-noise-a-custom-white-noise-user-oscillator-for-the-korg-nutekt-nts-1-digital-synth-kit-free-download-or-donation) | JabunAudio | White noise source with soft-clipper for NTS-1 | nts-1 | 寄付 |
 | [Betty](https://github.com/ulmert/betty) | Jacob Ulmert | Random rhythm generator, 3-voice poly, 12 samples | nts-1 | 無料 |
 | [Bobby](https://github.com/ulmert/bobby) | Jacob Ulmert | Glitchy 8/12-bit sample based drum machine | nts-1 | 無料 |
 | [Magic forest](https://github.com/ulmert/magicforest) | Jacob Ulmert | Lo-fi forest ambience generator | nts-1 | 無料 |
