@@ -3,7 +3,7 @@ layout: page
 title: Oscillators
 title_long: Oscillator Units
 permalink: /unit-index/osc/
-last_modified_on: 2023-10-23 09:10:23 +9000
+last_modified_on: 2023-12-20 16:38:23 +9000
 parent: Unit Index
 nav_order: 2
 ---
@@ -106,6 +106,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Vector Synthesis](https://www.soundmangling.com/2020/10/17/vector-synthesis-user-oscillator/) | Tim Shoebridge | Attempt to recreate the basic capabilities of legendary vector synthesisers such as the Sequential Prophet VS and Korg Wavestation | pro, xd, nts-1 | paid |
 | [fusion](https://tsoniq.com/software/korg/fusion/) | tsoniq | Virtual analog synth voice | pro, xd | free, paid |
 | [unity](https://tsoniq.com/software/korg/unity/) | tsoniq | 15 waveform generators, overdrive, and resonant HPF | pro, xd, nts-1 | free |
+| [viper](https://tsoniq.com/software/korg/viper/) | tsoniq | waveforms and wavetables from classic hybrid synthesisers | pro, xd, nts-1 | paid |
 | [J6](https://github.com/tweeeeeak/nts) | Tweeeeeak | Chord player and sequencer inspired by the J-6 synthesizer | nts-1 | free |
 | [Proba-B](https://github.com/tweeeeeak/nts) | Tweeeeeak | Probability sequencer based oscillator | nts-1 | free |
 | [ROAT](https://github.com/tweeeeeak/nts) | Tweeeeeak | 8-bit experimental oscillator inspired by the "Rumble of Ancient Times" synthesizer | nts-1 | free |
