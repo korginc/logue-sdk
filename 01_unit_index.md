@@ -13,5 +13,6 @@ The unit index has been split into pages for each unit type:
  * [Delay Effects](06_delfx_index.md)
  * [Reverb Effects](07_revfx_index.md)
  * [Master Effects](08_masterfx_index.md)
- * [Miscellaneous](09_misc_index.md)
+ * [Generic Effects](09_genericfx_index.md)
+ * [Miscellaneous](10_misc_index.md)
 

@@ -15,4 +15,6 @@ has_children: true
  * [ディレーエフェクト](06_delfx_index_ja.md)
  * [リバーブエフェクト](07_revfx_index_ja.md)
  * [マスターエフェクト](08_masterfx_index_ja.md)
- * [その他](09_misc_index_ja.md)
+ * [ジェネリックエフェクト](09_genericfx_index_ja.md)
+ * [その他](10_misc_index_ja.md)
+ 

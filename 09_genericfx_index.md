@@ -1,9 +1,9 @@
 ---
 layout: page
-title: Master Effects
-title_long: Master Effect Units
-permalink: /unit-index/masterfx/
-last_modified_on: 2022-10-27 12:35:00 +9000
+title: Generic Effects
+title_long: Generic Effect Units
+permalink: /unit-index/genericfx/
+last_modified_on: 2024-01-23 11:45:00 +9000
 parent: Unit Index
 nav_order: 2
 ---
