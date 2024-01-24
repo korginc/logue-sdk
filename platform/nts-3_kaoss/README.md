@@ -181,7 +181,7 @@ Making build/dummy-genericfx.nts3unit
 Deploying to ./dummy-genericfx.nts3unit
 Done
 ```
- 4. As the *Deploying...* line indicates, a *.nts1mkiiunit* file will be generated. This is the final product.
+ 4. As the *Deploying...* line indicates, a *.nts3unit* file will be generated. This is the final product.
  
  *TIP*: The install directory can be defined by setting the `INSTALLDIR` environment variable.
 
@@ -422,7 +422,7 @@ All units must provide an implementation for the following functions. However, a
  * `__unit_callback void unit_render(const float * in, float * out, uint32_t frames)` : Audio rendering callback. Input/output buffer geometry information is provided via the `unit_runtime_desc_t` argument of `unit_init(..)`.
  * `__unit_callback int32_t unit_get_param_value(uint8_t index)` : Called to obtain the current value of the parameter designated by the specified index.
  * `__unit_callback const char * unit_get_param_str_value(uint8_t index, int32_t value)` : Called to obtain the string representation of the specified value, for a `k_unit_param_type_strings` typed parameter. The returned value should point to a nul-terminated 7-bit ASCII C string of maximum X characters. It can be safely assumed that the C string pointer will not be cached or reused until `unit_get_param_str_value(..)` is called again, and thus the same memory area can be reused across calls (if convenient).
- * `__unit_callback void unit_set_param_value(uint8_t index, int32_t value)` : Called to set the current value of the parameter designated by the specified index. Note that for the NTS-1 digital kit mkII values are stored as 16-bit integers, but to avoid future API changes, they are passed as 32bit integers. For additional safety, make sure to bound check values as per the min/max values declared in the header.
+ * `__unit_callback void unit_set_param_value(uint8_t index, int32_t value)` : Called to set the current value of the parameter designated by the specified index. Note that for the NTS-3 kaoss pad kit values are stored as 16-bit integers, but to avoid future API changes, they are passed as 32bit integers. For additional safety, make sure to bound check values as per the min/max values declared in the header.
  * `__unit_callback void unit_set_tempo(uint32_t tempo)` : Called when a tempo change occurs. The tempo is formatted in fixed point format, with the BPM integer part in the upper 16 bits, and fractional part in the lower 16 bits (low endian). Care should be taken to keep CPU load as low as possible when handling tempo changes as this handler may be called frequently especially if externally synced.
  * `__unit_callback void unit_tempo_4ppqn_tick_func(uint32_t counter)` : After initialization, the callback may be called at any time to notify the unit of a clock event (4PPQN interval, ie: 16th notes with regards to tempo).
  
