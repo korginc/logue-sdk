@@ -4,7 +4,7 @@
 layout: home
 ---
 
-The *logue SDK* is a software development kit and API that allows to create custom oscillators, synths, and effects for the KORG [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1), [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/dj/nts_1_mk2), [Nu:Tekt NTS-3 kaoss pad kit](https://www.korg.com/products/dj/nts_3) and [drumlogue](https://www.korg.com/products/drums/drumlogue).
+The *logue SDK* is a software development kit and API that allows to create custom oscillators, synths, and effects for the KORG [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1), [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/synthesizers/nts_1_mk2), [Nu:Tekt NTS-3 kaoss pad kit](https://www.korg.com/products/dj/nts_3) and [drumlogue](https://www.korg.com/products/drums/drumlogue).
 
 Singular pieces of custom content created with the SDK are commonly refered to as *units*. Each target platform can support certain unit types and not others, depending on the instrument's design and signal path.
 
@@ -24,7 +24,7 @@ Modulation effects are insert effects processed after voice articulation and fil
 
 To support the [prologue](https://www.korg.com/products/synthesizers/prologue)'s dual timbre feature, the API provides two processing buffers which must be handled in the same manner. On [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd) and [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1), the second buffer can be safely ignored. 
 
-On the [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/dj/nts_1_mk2), the second buffer is not present and the processing API has been uniformized with that of other effects.
+On the [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/synthesizers/nts_1_mk2), the second buffer is not present and the processing API has been uniformized with that of other effects.
 
 ### Delay and Reverb Effects
 
@@ -32,7 +32,7 @@ Delay and reverb effects are both send effects that are processed after the modu
 
 On the [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd), and [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1), custom delay and reverb effects are loaded into the same runtime, hence when both delay and reverb effects are enabled, only one of them can be a custom effect. However, any combination of internal and custom delay and reverb effects is allowed.
 
-On the [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/dj/nts_1_mk2), delay and reverb runtimes are independent from each other and thus units can be loaded without restrictions.
+On the [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/synthesizers/nts_1_mk2), delay and reverb runtimes are independent from each other and thus units can be loaded without restrictions.
 
 ### Binary Compatibility
 

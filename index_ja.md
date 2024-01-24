@@ -5,7 +5,7 @@ layout: home_ja
 permalink: /ja/
 ---
 
-*logue SDK* とは KORG [prologue](https://www.korg.com/jp/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/jp/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/jp/products/dj/nts_1), [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/jp/products/dj/nts_1_mk2), [Nu:Tekt NTS-3 kaoss pad kit](https://www.korg.com/jp/products/dj/nts_3), [drumlogue](https://www.korg.com/jp/products/drums/drumlogue/) のカスタムオシレーターやシンセ, エフェクトを作成可能なソフト開発キットとAPIです.
+*logue SDK* とは KORG [prologue](https://www.korg.com/jp/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/jp/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/jp/products/dj/nts_1), [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/jp/products/synthesizers/nts_1_mk2), [Nu:Tekt NTS-3 kaoss pad kit](https://www.korg.com/jp/products/dj/nts_3), [drumlogue](https://www.korg.com/jp/products/drums/drumlogue/) のカスタムオシレーターやシンセ, エフェクトを作成可能なソフト開発キットとAPIです.
 
 SDKで作成された単一のカスタムコンテンツは *"ユニット"* と呼ばれます. 各プラットフォームは製品の設計と信号経路に応じた特定のユニットに対応しており, 他のユニットには対応しないことがあります.
 
@@ -23,13 +23,13 @@ SDKで作成された単一のカスタムコンテンツは *"ユニット"* �
 モジュレーションエフェクトは、ボイスのアーティキュレーションとフィルタリングの後, ディレイとリバーブエフェクトの前に処理されるインサートエフェクトです.
 [prologue](https://www.korg.com/jp/products/synthesizers/prologue) ではデュアルティンバー機能をサポートするために, APIは二つのバッファーを提供し, 同様の処理をする必要であることに注意してください. [minilogue xd](https://www.korg.com/jp/products/synthesizers/minilogue_xd) と [Nu:Tekt NTS-1 digital kit](https://www.korg.com/jp/products/dj/nts_1) では二つ目のバッファーは安全に省略することができます.
 
-[Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/jp/products/dj/nts_1_mk2)ではAPIが他のエフェクトと統一されて, 2つ目のバッファーは存在しません.
+[Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/jp/products/synthesizers/nts_1_mk2)ではAPIが他のエフェクトと統一されて, 2つ目のバッファーは存在しません.
 
 ### ディレイエフェクトとリバーブエフェクト
 
 ディレイエフェクトとリバーブエフェクトは, どちらもモジュレーションエフェクトの後に処理されるセンドエフェクトです.  [prologue](https://www.korg.com/jp/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/jp/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/jp/products/dj/nts_1) ではカスタムディレイとリバーブエフェクトが同じランタイムにロードされるため, ディレイとリバーブの両方が有効であってもカスタムエフェクトは片方だけしか使用することができません. ただし内部エフェクトとカスタムディレイ, リバーブエフェクトは自由に組み合わせることができます.
 
-[Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/jp/products/dj/nts_1_mk2)では, ディレーとリバーブそれぞれの個別ランタイムがあるため, 制限なく利用できます.
+[Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/jp/products/synthesizers/nts_1_mk2)では, ディレーとリバーブそれぞれの個別ランタイムがあるため, 制限なく利用できます.
 
 ### バイナリ互換性について
 
