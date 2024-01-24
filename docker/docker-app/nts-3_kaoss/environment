@@ -1,0 +1,171 @@
+#
+# Set development environment for NTS-1 mkii
+#
+
+#
+#    BSD 3-Clause License
+#
+#    Copyright (c) 2022, KORG INC.
+#    All rights reserved.
+#
+#    Redistribution and use in source and binary forms, with or without
+#    modification, are permitted provided that the following conditions are met:
+#
+#    * Redistributions of source code must retain the above copyright notice, this
+#      list of conditions and the following disclaimer.
+#
+#    * Redistributions in binary form must reproduce the above copyright notice,
+#      this list of conditions and the following disclaimer in the documentation
+#      and/or other materials provided with the distribution.
+#
+#    * Neither the name of the copyright holder nor the names of its
+#      contributors may be used to endorse or promote products derived from
+#      this software without specific prior written permission.
+#
+#    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+#    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+#    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+#    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+#    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+#    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+__nts3_kaoss_set_env () {
+    if [ -z ${__NTS3_KAOSS_DEV_ENV} ] ; then
+
+        # Generate unique session id
+        [ ! -x "$(which uuidgen)" ] && echo "Error: Cannot find uuidgen in \$PATH. Required to save/recover sessions..." && return 1
+        local uuid=$(uuidgen)
+        
+        local env_backup_dir="${HOME}/.nts3_kaoss.env_backup"
+        mkdir -p "${env_backup_dir}"
+        [ $? -ne 0 ] && echo "Error: Could not create env. backup directory (${env_backup_dir}). Wrong permissions?" && return 1
+
+        # Save environment
+        [ -z "$(set +o | grep '\-o posix')" ] && posix_set=1 && set -o posix
+        export PS1=${PS1} # make sure prompt is exported so we can recover it
+        export -p > "${env_backup_dir}/session_${uuid}"
+        [ ! -z $posix_set ] && set +o posix
+        
+        # Set session id and prevent multiple includes
+        export __NTS3_KAOSS_DEV_ENV="${uuid}"
+
+        # Configure environment
+        
+        export APP_PREFIX=/app/nts-3_kaoss
+        export PLATFORM_PREFIX=/workspace
+        export PLATFORMDIR="${PLATFORM_PREFIX}/nts-3_kaoss"
+        export TOOLSDIR="${APP_PREFIX}"
+        export EXTDIR="${PLATFORM_PREFIX}/ext"
+        export GCC_BIN_PATH="/usr/bin" ## Note: using stock gcc-arm-none-eabi package
+        
+        export OLD_PATH=${PATH}
+        ## Note: would normally export new path but no additions required at the moment
+        
+        # Set prompt to indicate current env
+        export OLD_PS1=${PS1}
+        export PS1='\[\e[31m\][nts3_kaoss] \[\e[0m\]\w $ '
+    fi
+}
+
+# __is_backlisted(var_name)
+__is_blacklisted () {
+    case ${1} in
+        PWD|OLDPWD|SHELL|STORAGE|USER|HOME|-*)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+__unset() {
+    __is_blacklisted "${1%%=*}" || unset -v "${1%%=*}"
+}
+ 
+
+__export() {
+    __is_blacklisted "${1%%=*}" || export "$@"
+}
+
+
+# __recover_env(backup_path)
+__recover_env () {
+    local path=${1}
+    
+    [ ! -r "${path}" ] && echo "Error: No such file (${path})" && return 1
+
+    [ -z "$(set +o | grep '\-o posix')" ] && posix_set=1 && set -o posix
+    
+    local unset_code="$(export -p | sed 's|export|__unset|;')"
+    local export_code="$(sed 's|export|__export|;' ${path})"
+
+    eval "${unset_code}${export_code}"
+        
+    [ ! -z $posix_set ] && set +o posix
+    
+    return 0
+}
+
+__nts3_kaoss_reset_env () {
+    if [ ! -z ${__NTS3_KAOSS_DEV_ENV} ] ; then
+        
+        # Recover session id
+        local uuid="${__NTS3_KAOSS_DEV_ENV}"
+        
+        # Check for backed up environment
+        local env_backup_dir="${HOME}/.nts3_kaoss.env_backup"
+        local env_backup_path="${env_backup_dir}/session_${uuid}"
+        if [ ! -r "${env_backup_path}" ]; then
+            echo "Warning: Could not find backup environment at ${env_backup_path}, attempting manual revert..."
+            set -x
+
+            unset APP_PREFIX
+            unset PLATFORM_PREFIX
+            unset PLATFORMDIR
+            unset TOOLSDIR
+            unset EXTDIR
+            unset GCC_BIN_PATH
+            
+            export PATH=${OLD_PATH}
+            unset OLD_PATH
+            
+            unset __NTS3_KAOSS_DEV_ENV
+            
+            # Set prompt to indicate current env
+            export PS1="${OLD_PS1}"
+            unset OLD_PS1
+            
+            set +x
+            return 0
+        fi
+
+        # Recover saved environment
+        __recover_env "${env_backup_path}"
+        if [ $? -eq 0 ]; then
+            rm -f "${env_backup_path}"            
+        fi
+    fi
+}
+
+reset_env () {
+    echo ">> Cleaning up NTS-3 kaoss development environment."
+    __nts3_kaoss_reset_env
+    unset -f __is_blacklisted
+    unset -f __unset
+    unset -f __export
+    unset -f __recover_env
+    unset -f __nts3_kaoss_reset_env
+    unset -f reset_env
+}
+
+# ---- Main ---------------------
+
+echo ">> Initializing NTS-3 kaoss development environment."
+__nts3_kaoss_set_env
+unset -f __nts3_kaoss_set_env

@@ -48,6 +48,8 @@ OPT_FORCE=""
 OPT_DRUMLOGUE=""
 OPT_MINILOUGEXD=""
 OPT_NTS1=""
+OPT_NTS1_MKII=""
+OPT_NTS3=""
 OPT_PROLOGUE=""
 
 PLATFORM_ROOT="/workspace"
@@ -56,6 +58,8 @@ PLATFORMS=("drumlogue"
            "minilogue-xd"
            "nutekt-digital"
            "prologue"
+           "nts-1_mkii"
+           "nts-3_kaoss"
           )
 
 # declare -A PLATFORM_REG
@@ -63,6 +67,8 @@ PLATFORMS=("drumlogue"
 # PLATFORM_REG[drumlogue,key]="drumlogue"
 # PLATFORM_REG[minilogue-xd,key]="minilogue-xd"
 # PLATFORM_REG[nts-1,key]="nutekt-digital"
+# PLATFORM_REG[nts-1_mkii,key]="nts-1_mkii"
+# PLATFORM_REG[nts-3_kaoss,key]="nts-3_kaoss"
 # PLATFORM_REG[prologue,key]="prologue"
 
 CPU_CORES=$(lscpu -p=CPU | tail -1)
@@ -85,6 +91,8 @@ usage () {
     echo "     --minilogue-xd    select minilogue-xd unit projects"
     echo "     --nutekt-digital  select nts-1 unit projects"
     echo "     --nts-1           alias for --nutekt-digital"
+    echo "     --nts-1_mkii      select nts-1 mkii unit projects"
+    echo "     --nts-3           select nts-3 unit projects"
     echo "     --prologue        select prologue unit projects"
     echo " -f, --force           force clean project before building"
     echo "     --install-dir=DIR install built units to specified directory"
@@ -94,8 +102,8 @@ usage () {
     echo "[UNIT_PROJECT_PATH]    specify path (relative to /workspace) to the unit project to build/clean"
     echo ""
     echo "Notes:"
-    echo " * UNIT_PROJECT_PATH and platform selection options are mutually exclusive."
-    echo " * -a/-all is overriden by platform selection options if specified."
+    echo " * UNIT_PROJECT_PATH is incompatible with multiple platform selection options and -a/--all."
+    echo " * -a/--all is overriden by platform selection options if specified."
     echo ""
 }
 
@@ -125,12 +133,50 @@ platform_for_project() {
         return 0
 
     elif [ -r "${project_path}/Makefile" ] && [ -r "${project_path}/config.mk" ]; then
-        ## TODO: current header format does not explicit target platform which prevents us from parsing properly from here.
-        ##       since no other platforms yet have this structure we can assume drumlogue for now.
-        echo "drumlogue"
-        return 0
-    fi
 
+        ## See if a platform was explicitly selected
+        local mult_platform_sel="${OPT_DRUMLOGUE}${OPT_MINILOGUEXD}${OPT_NTS1}${OPT_NTS1_MKII}${OPT_NTS3}${OPT_PROLOGUE}"
+        if [ ! -z "${mult_platform_sel}" ]; then
+            if [ "${mult_platform_sel}" == "yes" ]; then
+                ## Single platform is selected
+                if [ ! -z "${OPT_DRUMLOGUE}" ]; then
+                    echo "drumlogue"
+                    return 0
+                fi
+                if [ ! -z "${OPT_NTS1_MKII}" ]; then
+                    echo "nts-1_mkii"
+                    return 0
+                fi
+                if [ ! -z "${OPT_NTS3}" ]; then
+                    echo "nts-3_kaoss"
+                    return 0
+                fi
+            fi
+        fi
+        
+        ## Fallback to checking parent directory to match platform
+        local parent_dir_name=$(basename $(dirname "${project_path}"))
+
+        case ${parent_dir_name} in
+            drumlogue)
+                echo "${parent_dir_name}"
+                return 0
+                ;;
+            nts-1_mkii)
+                echo "${parent_dir_name}"
+                return 0
+                ;;
+            nts-3_kaoss)
+                echo "${parent_dir_name}"
+                return 0
+                ;;
+            *)
+                ;;
+        esac
+
+        err "Could not identify target platform for ${project_path}. Use --drumlogue, --nts-1_mkii, or --nts-3 option flag to clear ambiguity."
+    fi
+    
     err "Unknown platform"
     
     return 1
@@ -152,6 +198,12 @@ is_valid_project () {
     
     case ${platform} in
         drumlogue)
+            [ -r "${project_path}/Makefile" ] && [ -r "${project_path}/config.mk" ] && return 0 
+            ;;
+        nts-1_mkii)
+            [ -r "${project_path}/Makefile" ] && [ -r "${project_path}/config.mk" ] && return 0 
+            ;;
+        nts-3_kaoss)
             [ -r "${project_path}/Makefile" ] && [ -r "${project_path}/config.mk" ] && return 0 
             ;;
         *)
@@ -406,6 +458,14 @@ for o in "$@"; do
             OPT_NTS1="yes"
             shift
             ;;
+        --nts-1_mkii)
+            OPT_NTS1_MKII="yes"
+            shift
+            ;;
+        --nts-3)
+            OPT_NTS3="yes"
+            shift
+            ;;
         --prologue)
             OPT_PROLOGUE="yes"
             shift
@@ -426,7 +486,7 @@ for o in "$@"; do
     esac
 done
 
-COMBINED_PLATFORM_OPTS="${OPT_DRUMLOGUE}${OPT_MINILOGUEXD}${OPT_NTS1}${OPT_PROLOGUE}"
+COMBINED_PLATFORM_OPTS="${OPT_DRUMLOGUE}${OPT_MINILOGUEXD}${OPT_NTS1}${OPT_NTS1_MKII}${OPT_NTS3}${OPT_PROLOGUE}"
 
 if [ ! -z "${OPT_ALL}" ] && [ ! -z "${COMBINED_PLATFORM_OPTS}" ]; then
     warn "-a/--all overriden by platform selection options"
@@ -438,8 +498,8 @@ if [ ! -z "${project_rel_path}" ] && [ "${ACTION}" == "list" ]; then
     exit 127
 fi
 
-if [ ! -z "${project_rel_path}" ] && [ ! -z "${COMBINED_PLATFORM_OPTS}" ]; then
-    err "Platform selection options incompatible with explicit project path argument '${project_rel_path}'"
+if [ ! -z "${project_rel_path}" ] && [ ! -z "${COMBINED_PLATFORM_OPTS}" ] && [ "${COMBINED_PLATFORM_OPTS}" != "yes" ]; then
+    err "Multiple platform selection options incompatible with explicit project path argument '${project_rel_path}'"
     exit 127
 fi
 
@@ -464,7 +524,19 @@ if [ "${ACTION}" == "build" ]; then
                 exit 2
             fi
         done
+    elif [ ! -z "${project_rel_path}" ]; then     
+        project_path="${PLATFORM_ROOT}/${project_rel_path}"
         
+        platform=$(platform_for_project "${project_path}")
+        if [ -z "${platform}" ]; then
+            err "Failed to identify project platform, aborting build."
+            exit 2
+        fi
+        
+        build_project "${platform}" "${project_path}"
+        if [ $? -ne 0 ]; then
+            exit 2
+        fi
     else
         if [ ! -z "${OPT_DRUMLOGUE}" ]; then
             echo ">> Building 'drumlogue' projects"
@@ -493,6 +565,24 @@ if [ "${ACTION}" == "build" ]; then
             fi
         fi
 
+        if [ ! -z "${OPT_NTS1_MKII}" ]; then
+            echo ">> Building 'nts-1 mkii' projects"
+            build_platform nts-1_mkii
+            if [ $? -ne 0 ]; then
+                echo ">> Build error occurred, aborting."
+                exit 2
+            fi
+        fi
+
+        if [ ! -z "${OPT_NTS3}" ]; then
+            echo ">> Building 'nts-3' projects"
+            build_platform nts-3_kaoss
+            if [ $? -ne 0 ]; then
+                echo ">> Build error occurred, aborting."
+                exit 2
+            fi
+        fi
+        
         if [ ! -z "${OPT_PROLOGUE}" ]; then
             echo ">> Building 'prologue' projects"
             build_platform prologue
@@ -501,22 +591,6 @@ if [ "${ACTION}" == "build" ]; then
                 exit 2
             fi
         fi
-
-        if [ ! -z "${project_rel_path}" ]; then
-            
-            project_path="${PLATFORM_ROOT}/${project_rel_path}"
-
-            platform=$(platform_for_project "${project_path}")
-            if [ -z "${platform}" ]; then
-                err "Failed to identify project platform, aborting build."
-                exit 2
-            fi
-            
-            build_project "${platform}" "${project_path}"
-            if [ $? -ne 0 ]; then
-                exit 2
-            fi
-        fi  
     fi
 
     ## Reset development environment
@@ -540,7 +614,20 @@ elif [ "${ACTION}" == "clean" ]; then
                 res=2
             fi
         done
+    elif [ ! -z "${project_rel_path}" ]; then
+        project_path="${PLATFORM_ROOT}/${project_rel_path}"
         
+        platform=$(platform_for_project "${project_path}")
+        if [ -z "${platform}" ]; then
+            err "Failed to identify project platform, aborting cleaning."
+            exit 2
+        fi
+        
+        clean_project "${platform}" "${project_path}"
+        if [ $? -ne 0 ]; then
+            echo ">> Clean error occurred..."
+            exit 2
+        fi  
     else
         if [ ! -z "${OPT_DRUMLOGUE}" ]; then
             echo ">> Cleaning 'drumlogue' projects"
@@ -569,6 +656,24 @@ elif [ "${ACTION}" == "clean" ]; then
             fi
         fi
 
+        if [ ! -z "${OPT_NTS1_MKII}" ]; then
+            echo ">> Cleaning 'nts-1 mkii' projects"
+            clean_platform nts-1_mkii
+            if [ $? -ne 0 ]; then
+                echo ">> Clean error occurred..."
+                res=2
+            fi
+        fi
+
+        if [ ! -z "${OPT_NTS3}" ]; then
+            echo ">> Cleaning 'nts-3' projects"
+            clean_platform nts-3_kaoss
+            if [ $? -ne 0 ]; then
+                echo ">> Clean error occurred..."
+                res=2
+            fi
+        fi
+        
         if [ ! -z "${OPT_PROLOGUE}" ]; then
             echo ">> Cleaning 'prologue' projects"
             clean_platform prologue
@@ -577,23 +682,6 @@ elif [ "${ACTION}" == "clean" ]; then
                 res=2
             fi
         fi
-
-        if [ ! -z "${project_rel_path}" ]; then
-            
-            project_path="${PLATFORM_ROOT}/${project_rel_path}"
-
-            platform=$(platform_for_project "${project_path}")
-            if [ -z "${platform}" ]; then
-                err "Failed to identify project platform, aborting cleaning."
-                exit 2
-            fi
-            
-            clean_project "${platform}" "${project_path}"
-            if [ $? -ne 0 ]; then
-                echo ">> Clean error occurred..."
-                exit 2
-            fi
-        fi  
     fi
 
     ## Reset development environment
@@ -616,6 +704,14 @@ elif [ "${ACTION}" == "list" ]; then
             list_projects nutekt-digital
         fi
 
+        if [ ! -z "${OPT_NTS1_MKII}" ]; then
+            list_projects nts-1_mkii
+        fi
+
+        if [ ! -z "${OPT_NTS3}" ]; then
+            list_projects nts-3_kaoss
+        fi
+        
         if [ ! -z "${OPT_PROLOGUE}" ]; then
             list_projects prologue
         fi

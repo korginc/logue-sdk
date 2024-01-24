@@ -31,4 +31,4 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-./get_gcc_5_4-2016q3_msys.sh && ./get_gcc_10_3-2021_10_msys.sh
+./get_gcc_5_4-2016q3_macos.sh && ./get_gcc_10_3-2021_10_macos.sh
