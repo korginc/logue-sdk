@@ -4,7 +4,7 @@
 
 ### Overview
 
-This directory contains all source files needed to build custom oscillators and effects for the [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/dj/nts_1_mk2) synthesizer.
+This directory contains all source files needed to build custom oscillators and effects for the [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/synthesizers/nts_1_mk2) synthesizer.
 
 #### Compatibility Notes
 
@@ -246,7 +246,7 @@ Done
 
 ### Using *unit* Files
 
-*.nts1mkiiunit* files can be loaded onto a [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/dj/nts_1_mk2) via either the [KORG Kontrol Editor]() (pending release), or the new [loguecli]() (pending release).
+*.nts1mkiiunit* files can be loaded onto a [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/synthesizers/nts_1_mk2) via either the [KORG Kontrol Editor]() (pending release), or the new [loguecli]() (pending release).
 
 Loaded units will appear in slot number order at the end of their respective module's selection list on the device.
 
