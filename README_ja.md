@@ -2,7 +2,7 @@
 
 [English](./README.md)
 
-このリポジトリには [prologue](https://www.korg.com/jp/products/synthesizers/prologue/), [minilogue xd](https://www.korg.com/jp/products/synthesizers/minilogue_xd/), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/jp/products/dj/nts_1/) , [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/dj/nts_1_mk2) synthesizers　, the [Nu:Tekt NTS-3 kaoss pad kit](https://www.korg.com/products/dj/nts_3) , and [drumlogue](https://www.korg.com/jp/products/drums/drumlogue/) の6製品で使用できる自作オシレーターやエフェクトのビルドに必要なファイルが全て揃っています.
+このリポジトリには [prologue](https://www.korg.com/jp/products/synthesizers/prologue/), [minilogue xd](https://www.korg.com/jp/products/synthesizers/minilogue_xd/), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/jp/products/dj/nts_1/) , [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/jp/products/synthesizers/nts_1_mk2) synthesizers　, the [Nu:Tekt NTS-3 kaoss pad kit](https://www.korg.com/jp/products/dj/nts_3) , and [drumlogue](https://www.korg.com/jp/products/drums/drumlogue/) の6製品で使用できる自作オシレーターやエフェクトのビルドに必要なファイルが全て揃っています.
 
 ## まずは使ってみよう
 
