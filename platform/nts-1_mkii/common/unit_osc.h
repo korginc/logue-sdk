@@ -50,16 +50,30 @@
 extern "C" {
 #endif
 
+  /**
+   * Oscillator input usage states
+   */
+  enum {
+    k_runtime_osc_input_unused = 0U,
+    k_runtime_osc_input_used,
+  };
+
+  /**
+   * Pointer to notify_input_usage(uint8_t usage), used to notify the runtime that oscillator is using the audio input or not.
+   * Note: the runtime assumes audio input is unused by default
+   */
+  typedef void (*unit_runtime_osc_notify_input_usage_ptr)(uint8_t);
+  
   /** Oscillator specific unit runtime context. */
   typedef struct unit_runtime_osc_context {
-    int32_t  shape_lfo;
-    uint16_t pitch;	// 0x0000 ~ 0x9000?
-    uint16_t cutoff;	// 0x0000 ~ 0x1fff
-    uint16_t resonance;	// 0x0000 ~ 0x1fff	
-    uint8_t  amp_eg_phase;
-    uint8_t  amp_eg_state:3;
+    int32_t  shape_lfo;      // Shape LFO signal encoded in Q31 fixed point format
+    uint16_t pitch;          // Upper 8 bits: note, Lower 8 bits: inter-note fraction
+    uint16_t cutoff;         // Unused. Future.
+    uint16_t resonance;      // Unused. Future.
+    uint8_t  amp_eg_phase;   // Unused. Future.
+    uint8_t  amp_eg_state:3; // Unused. Future.
     uint8_t  padding0:5;
-    uint8_t  padding1[4];
+    unit_runtime_osc_notify_input_usage_ptr notify_input_usage;
   } unit_runtime_osc_context_t;
 
   /** Exposed parameters with fixed/direct UI controls. */

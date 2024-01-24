@@ -446,19 +446,27 @@ The oscillator runtime provides realtime information to the oscillator:
   /** Oscillator specific unit runtime context. */
   typedef struct unit_runtime_osc_context {
     int32_t  shape_lfo;
-    uint16_t pitch;	// 0x0000 ~ 0x9000?
-    uint16_t cutoff;	// 0x0000 ~ 0x1fff
-    uint16_t resonance;	// 0x0000 ~ 0x1fff	
+    uint16_t pitch;
+    uint16_t cutoff;
+    uint16_t resonance;
     uint8_t  amp_eg_phase;
     uint8_t  amp_eg_state:3;
     uint8_t  padding0:5;
-    uint8_t  padding1[4];
+    unit_runtime_osc_notify_input_usage_ptr notify_input_usage;
   } unit_runtime_osc_context_t;
 ```
 
+ * `shape_lfo` : Shape LFO signal encoded in Q31 fixed point format.
+ * `pitch` : Note encoded in upper 8 bits, inter-note fraction in lower 8 bits. Can be passed to `osc_w0f_for_note(note, mod)` to obtain a phase increment value in [0, 1]. Pitch LFO signal is already applied.
+ * `cutoff` : Currently unused.
+ * `resonance` : Currently unused.
+ * `amp_eg_phase` : Currently unused.
+ * `amp_eg_state` : Currently unused.
+ * `notify_input_usage` (`void notify_input_usage(uint8_t usage)`) Allows to notify the runtime that the oscillator is actively using the audio input. (0: unused, 1: used) The runtime assumes the audio input is unused by default.
+
 Other module runtimes do not provide specific realtime information.
 
-#### Callable API Functions
+#### Other Callable API Functions
 
  * `sdram_alloc` (`uint8_t *sdram_alloc(size_t size)`) allocates buffers of external memory. The allocation should be done during initialization of the unit. (Recommended: ensure 4 byte alignment)
  * `sdram_free` (`void sdram_free(const uint8_t *mem)`) frees external memory buffer previously allocated via `sdram_alloc`.
