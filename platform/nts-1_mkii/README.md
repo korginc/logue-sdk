@@ -1,10 +1,10 @@
 ## Nu:Tekt NTS-1 digital kit mkII SDK Source and Template Projects
 
-[日本語]() (準備中)　<!-- (./README_ja.md) -->
+[日本語](./README_ja.md)
 
 ### Overview
 
-This directory contains all source files needed to build custom oscillators and effects for the [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/synthesizers/nts_1_mk2) synthesizer.
+This directory contains all source files needed to build custom oscillators and effects for the [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/us/products/synthesizers/nts_1_mk2/) synthesizer.
 
 #### Compatibility Notes
 
@@ -371,7 +371,7 @@ Field descriptions:
   * `k_unit_param_type_db` : Describes a decibel value. 
   * `k_unit_param_type_cents` : Describes a pitch cents value. 
   * `k_unit_param_type_semi` : Describes a pitch semitone value. 
-  * `k_unit_param_type_oct` : Describes a pitch semitone value. 
+  * `k_unit_param_type_oct` : Describes a pitch octave value. 
   * `k_unit_param_type_hertz` : Describes a Hertz value. 
   * `k_unit_param_type_khertz` : Describes a kilo Hertz value. 
   * `k_unit_param_type_bpm` : Describes a beat per minute value.
