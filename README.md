@@ -37,6 +37,17 @@ However, developers are encouraged to optimize their units for each target platf
 * [tools/](tools/) : Installation location and documentation for tools required to build projects and manipulate built products. Can be ignored if using the docker container.
 * [devboards/](devboards/) : Information and files related to limited edition development boards.
 
+## Installation
+
+#### OSX & Linux
+1. Clone the project with ```git clone https://github.com/korginc/logue-sdk.git```
+2. Go into project directory and run ```git submodule update --init``` (installs CMSIS dependency)
+3. Install the necessary tools (see [tools/](tools/))
+
+To see if your the SDK has been set-up properly:
+- Go to [platform/minilogue-xd/demos/waves/](platform/minilogue-xd/demos/waves/)
+- run ```make```
+
 ## Sharing your Oscillators/Effects with us
 
 To show us your work please reach out to *logue-sdk@korg.co.jp*.
