@@ -22,13 +22,19 @@ _Note: MSYS2 installers for Windows can be found at [https://www.msys2.org/](htt
 
 #### Manual Procedure: GnuWin
 
-A Windows build of Info-Zip 3.0 is also available from [GnuWin's sourceforge page](https://sourceforge.net/projects/gnuwin32/files/zip/3.0/)
+A Windows build of Info-Zip 3.0 is also available from [GnuWin's sourceforge zip page](https://sourceforge.net/projects/gnuwin32/files/zip/3.0/).
 
-If using this option, install the required files in this directory following this structure:
+bzip2.dll is required to execute zip.exe. Download from [GnuWin's sourceforge bzip2 page](http://gnuwin32.sourceforge.net/packages/bzip2.htm)
+
+If using this option, install the required files(bin/ contents of above 2 zipped filed) in this directory following this structure:
 
 ```
 zip/
    |
    +-- bin/zip.exe
+   +-- bin/bzip2.dll
+   .
+   .
+   .
 ```
 _e.g.: `zip.exe` should be located in a subdirectory named `bin`._
