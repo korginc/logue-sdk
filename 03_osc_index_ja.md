@@ -114,4 +114,5 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [ROAT](https://github.com/tweeeeeak/nts) | Tweeeeeak | 8-bit experimental oscillator inspired by the "Rumble of Ancient Times" synthesizer | nts-1 | 無料 |
 | [vbass](https://github.com/tweeeeeak/nts) | Tweeeeeak | Volca Bass style triple oscillator | nts-1 | 無料 |
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | pro, xd, nts-1 | 寄付 |
+| [Pitchy](https://boochow.gumroad.com/l/pithcy) | boochow instruments | pitch shifter oscillator | nts-1 mkii | 無料 |
 
