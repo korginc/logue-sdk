@@ -4,7 +4,7 @@ title: Oscillators
 title_long: オシレーターユニット覧
 permalink: /ja/unit-index/osc/
 language: ja
-last_modified_on: 2023-12-20 16:38:23 +9000
+last_modified_on: 2024-03-27 18:40:49 +9000
 parent: Unit Index
 nav_order: 2
 ---
