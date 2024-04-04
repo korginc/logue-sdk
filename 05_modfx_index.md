@@ -3,7 +3,7 @@ layout: page
 title: Modulation Effects
 title_long: Modulation Effect Units
 permalink: /unit-index/modfx/
-last_modified_on: 2023-10-23 09:10:23 +9000
+last_modified_on: 2024-04-04 17:24:23 +9000
 parent: Unit Index
 nav_order: 2
 ---
@@ -11,8 +11,8 @@ nav_order: 2
 _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp or submit a pull request modifying the table below_
 
 | Name | Developer | Description | Platforms | |
-| [MasterVol2](https://github.com/boochow/MasterVol2) | boochow instruments | Secondary master volume | pro, xd, nts-1 | free |
-| [Teleconf](https://github.com/boochow/teleconf) | boochow instruments | G.711 A-law codec emulation | pro, xd, nts-1 | free |
+| [MasterVol2](https://github.com/boochow/MasterVol2) | boochow instruments | Secondary master volume | pro, xd, nts-1, nts-1 mkII | free |
+| [Teleconf](https://github.com/boochow/teleconf) | boochow instruments | G.711 A-law codec emulation | pro, xd, nts-1, nts-1 mkII | free |
 | [3DC](https://www.cain-synthesizer.com/effects) | Cain Synthesizers | 3 delay line chorus | pro, xd, nts-1 | donation |
 | [Cain D](https://www.cain-synthesizer.com/effects) | Cain Synthesizers | Subtler chorus | pro, xd, nts-1 | donation |
 | [AMPit](https://www.dirtboxsynth.com/sd_product/ampit/) | Dirtbox Synth | distortion | pro, xd, nts-1 | paid |
