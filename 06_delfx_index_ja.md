@@ -16,7 +16,7 @@ _Note: ディレイエフェクトセクションには, ディレイ以外の�
 | 名前 | 開発者 | 備考 | プラットフォーム |  |
 | [Delay Lab](https://boochow.gumroad.com/l/delaylab) | boochow instruments | A delay unit mainly for flanger/chorus. | drum | 無料/寄付 |
 | [lissa](https://github.com/boochow/lissa) | boochow instruments | Lissajous output for oscilloscopes | pro, xd, nts-1 | 無料 |
-| [veryshort](https://github.com/boochow/veryshort) | boochow instruments | Very short delay, comb filter | pro, xd, nts-1 | 無料 |
+| [veryshort](https://github.com/boochow/veryshort) | boochow instruments | Very short delay, comb filter | pro, xd, nts-1, nts-1 mkII | 無料 |
 | [lobit](https://github.com/centrevillage/cv_logue/tree/master/delfx/lobit) | centrevillage |  | pro, xd, nts-1 | 無料 |
 | [pitchshift](https://github.com/centrevillage/cv_logue/tree/master/delfx/pitchshift) | centrevillage |  | pro, xd, nts-1 | 無料 |
 | [reverse](https://github.com/centrevillage/cv_logue/tree/master/delfx/reverse) | centrevillage |  | pro, xd, nts-1 | 無料 |
