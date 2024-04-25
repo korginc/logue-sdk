@@ -17,6 +17,8 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [AutoChord](https://centrevillage.net/products/18) | centrevillage | Automatic Chord Synthesizer | drum | paid |
 | [CHSynth](https://ctrl-alt-delete.co.uk/wp/free-korg-drumlogue-synth/) | CtrlAltDelete | Chord Synth | drum | free |
 | [Resonator](https://www.icemoonprison.com/blog/?p=780) | Deborah Pickett | Karplus-Strong resonator synth | drum | free |
-| [FM64](https://github.com/dukesrg/logue-sdk) | Oleg Burdaev | 6-operator FM oscillator with DX7/DX21/DX11-series voice banks suport | drum | free |
+| [FM64](https://dukesrg.github.io/logue-sdk) | Oleg Burdaev | 6-operator FM synth with DX7/DX21/DX11-series voice banks suport | drum | free |
+| [Tesseract](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | 4-dimensional vector synth with customizable waveforms | drum | free |
+| [loguePADS](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Sample-based synths set | drum | free |
 | Nano | Sinevibes |             | drum | built-in |
 
