@@ -4,7 +4,7 @@ title: Oscillators
 title_long: オシレーターユニット覧
 permalink: /ja/unit-index/osc/
 language: ja
-last_modified_on: 2024-03-27 18:40:49 +9000
+last_modified_on: 2024-05-07 18:04:34 +9000 
 parent: Unit Index
 nav_order: 2
 ---
@@ -115,4 +115,5 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [vbass](https://github.com/tweeeeeak/nts) | Tweeeeeak | Volca Bass style triple oscillator | nts-1 | 無料 |
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | pro, xd, nts-1 | 寄付 |
 | [Pitchy](https://boochow.gumroad.com/l/pithcy) | boochow instruments | pitch shifter oscillator | nts-1 mkii | 無料 |
+  [Lily](https://boochow.gumroad.com/l/lily) | boochow instruments | oscillator unit based on Mutable Instruments Braids | nts-1 mkii | 無料 |
 
