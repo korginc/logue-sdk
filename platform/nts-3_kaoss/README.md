@@ -1,6 +1,6 @@
 ## Nu:Tekt NTS-3 kaoss pad kit SDK Source and Template Projects
 
-[日本語]() (準備中)　<!-- (./README_ja.md) -->
+[日本語](./README_ja.md)
 
 ### Overview
 
@@ -256,7 +256,7 @@ Loaded units will appear in slot number order at the end of the effects selectio
 
 ## Creating a New Project
 
-1. Create a copy of a template project directory for the module you are targetting (synth/delfx/revfx/masterfx) and rename it to your convenience inside the *platform/nts-3_kaoss/* directory.
+1. Create a copy of a template project directory (`dummy-genericfx/`) and rename it to your convenience inside the *platform/nts-3_kaoss/* directory.
 2. Customize your project build by editing *config.mk*. See the [config.mk](#config-mk) section for details.
 3. Adapt the provided *header.c* template to match your project needs. See the [header.c](#header-c) section for details.
 4. Adapt the provided *unit.cc* template to integrate your code with the unit API. See the [unit.cc](#unit-cc) section for details.
@@ -285,7 +285,7 @@ The *header.c* file is similar to the role played by the *manifest.json* file on
 Field descriptions:
 
  * `.header_size` : Size of the header structure. Should be left as defined in the template provided.
- * `.target` : Defines the target platform and module. The value provided by the template should be kept, but make sure that the module defined matches the actual intended target unit module. (osc: k\_unit\_module\_osc, modfx: k\_unit\_module\_modfx, delfx: k\_unit\_module\_delfx, revfx: k\_unit\_module\_revfx)
+ * `.target` : Defines the target platform and module. The value provided by the template should be kept, but make sure that the module defined matches the actual intended target unit module. (k\_unit\_module\_genericfx)
  * `.api` : logue SDK API version against which the unit is being built. The default template value ensures the current API value at build time will be used.
  * `.dev_id` : A unique developer identifier as a low endian 32-bit unsigned integer. See [Developer Identifier](#developer-identifier) for details.
  * `.unit_id` : An identifier for the unit itself as a low endian 32-bit unsigned integer. This identifier must only be unique within the scope of a given developer identifier.
@@ -408,7 +408,7 @@ When `k_genericfx_curve_bipolar` is set, the curves above are aligned to and ref
 
 ## Unit API Overview
 
-Here's an overview of the API for synth and effect units.
+Here's an overview of the API for generic effect units.
 
 ### Essential Functions
 
