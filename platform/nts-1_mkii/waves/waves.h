@@ -434,8 +434,8 @@ public:
   inline void AllNoteOff() {
   }
 
-  inline void PitchBend(uint8_t bend) {
-    (uint8_t)bend;
+  inline void PitchBend(uint16_t bend) {
+    (uint16_t)bend;
   }
 
   inline void ChannelPressure(uint8_t press) {
