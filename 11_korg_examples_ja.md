@@ -2,7 +2,7 @@
 layout: page
 title: KORG Examples
 title_long: KORG Examples
-permalink: /unit-index/korg_examples/
+permalink: /ja/unit-index/korg_examples/
 language: ja
 last_modified_on: 2024-06-12 14:59:19 +9000
 parent: Unit Index
