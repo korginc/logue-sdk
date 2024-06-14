@@ -10,6 +10,8 @@ nav_order: 2
 
 These are examples of logue units created by KORG DIY CLUB, a group of KORG employees who love DIY and consist of software engineers and non-software engineers.
 
+[日本語](11_korg_examples_ja.md)
+
 
 | Name | Developer | Description | Platforms | Downloads |
 | ---- | ---- | ---- | ---- | ---- |

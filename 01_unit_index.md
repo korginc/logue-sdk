@@ -16,3 +16,5 @@ The unit index has been split into pages for each unit type:
  * [Generic Effects](09_genericfx_index.md)
  * [Miscellaneous](10_misc_index.md)
 
+Unit Examples by KORG DIY CLUB
+ * [KORG Examples](11_korg_examples.md)

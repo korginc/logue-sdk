@@ -87,3 +87,8 @@ Master effects are inline effects that can be bypassed on a per-part basis. The 
 
  Refer to the [drumlogue platform README](https://github.com/korginc/logue-sdk/tree/master/platform/drumlogue/README.md) for further details.
 
+## Examples by KORG DIY CLUB
+
+[KORG Examples](11_korg_examples_ja.md)
+
+These are examples of logue units created by KORG DIY CLUB, a group of KORG employees who love DIY and consist of software engineers and non-software engineers.
