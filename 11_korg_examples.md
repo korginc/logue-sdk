@@ -3,13 +3,22 @@ layout: page
 title: KORG Examples
 title_long: KORG Examples
 permalink: /unit-index/korg_examples/
+<<<<<<< HEAD
 last_modified_on: 2024-06-12 14:59:19 +9000
+=======
+last_modified_on: 2024-06-14 12:25:33 +9000
+>>>>>>> upstream_ghpages
 parent: Unit Index
 nav_order: 2
 ---
 
 These are examples of logue units created by KORG DIY CLUB, a group of KORG employees who love DIY and consist of software engineers and non-software engineers.
 
+<<<<<<< HEAD
+=======
+[日本語](11_korg_examples_ja.md)
+
+>>>>>>> upstream_ghpages
 
 | Name | Developer | Description | Platforms | Downloads |
 | ---- | ---- | ---- | ---- | ---- |
@@ -19,7 +28,11 @@ These are examples of logue units created by KORG DIY CLUB, a group of KORG empl
 | rnd_pm_perc | oka/<br>KORG DIY CLUB | Random Phase Modulation Percussion | nts-1mkii | [unit](KORG_Examples/nts1mkii/rnd_pm_perc/rnd_pm_perc.nts1mkiiunit)<br>[source code](KORG_Examples/nts1mkii/rnd_pm_perc/rnd_pm_perc.zip) |
 | rnd_glitch_gate | oka/<br>KORG DIY CLUB | Random Glitch Gate FX (delfx) | nts-1mkii | [unit](KORG_Examples/nts1mkii/rnd_glitch_gate/rnd_glitch_gate.nts1mkiiunit)<br>[source code](KORG_Examples/nts1mkii/rnd_glitch_gate/rnd_glitch_gate.zip) |
 | LtBK | mngw/<br>KORG DIY CLUB | Bass & Kick Generator (osc) | nts-1mkii | [unit](KORG_Examples/nts1mkii/LtBK/ltbk.nts1mkiiunit)<br>[Readme](KORG_Examples/nts1mkii/LtBK/LtBK_manual.zip) |
+<<<<<<< HEAD
 | mp-osc | KORG DIY CLUB | Mono/Poly-style Oscillator | nts-1mkii | [unit](filepath)<br>[Readme](KORG_Examples/nts1mkii/) |
+=======
+| mp-osc | KORG DIY CLUB | Mono/Poly-style Oscillator<br>*Required: Global Option Legato=0 | nts-1mkii | [unit](KORG_Examples/nts1mkii/mp-osc/mp-osc.nts1mkiiunit)<br>[Readme](KORG_Examples/nts1mkii/mp-osc/readme.zip) |
+>>>>>>> upstream_ghpages
 | pendant | xia/<br>KORG DIY CLUB | Vector Phaseshaping Synthesis | nts-1mkii | [unit](KORG_Examples/nts1mkii/pendant/pendant.nts1mkiiunit)<br>[source code](KORG_Examples/nts1mkii/pendant/pendant_1.01.zip) |
 | gate reverb | hiroki matsui/<br>KORG DIY CLUB | Example of using SDRAM for delay lines | nts-3kaoss | [unit](KORG_Examples/nts3kaoss/gate_reverb/gatereverb.nts3unit) <br> [source code](KORG_Examples/nts3kaoss/gate_reverb/gate_reverb.zip) |
 | x-to-note example| KORG DIY CLUB | Example of converting from trackpad position to notes | nts-3kaoss | [source code](KORG_Examples/nts3kaoss/x-to-note/x-to-note.zip) |
