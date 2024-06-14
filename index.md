@@ -89,6 +89,6 @@ Master effects are inline effects that can be bypassed on a per-part basis. The 
 
 ## Examples by KORG DIY CLUB
 
-[KORG Examples](11_korg_examples_ja.md)
+[KORG Examples](11_korg_examples.md)
 
 These are examples of logue units created by KORG DIY CLUB, a group of KORG employees who love DIY and consist of software engineers and non-software engineers.
