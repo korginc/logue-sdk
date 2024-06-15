@@ -208,8 +208,7 @@ class Pendant {
     for (; out_p != out_e; in_p += 2, out_p += 1) {
       // Process/generate samples here
 
-      w += w0;
-      w = modff(w, nullptr); // take fractional parts to prevent overflow
+      
 
       float deflection_point_target = linintf(clip01f(p.shape+lfo), 0.5f, 0.1f);
       // float deflection_point_target = linintf(p.shape, 0.5f, 0.1f);
@@ -239,8 +238,8 @@ class Pendant {
       }
 
       // late phasor update
-      // w += w0;
-      // w = modff(w, nullptr); // take fractional parts to prevent overflow
+      w += w0;
+      w = modff(w, nullptr); // take fractional part to prevent overflow
 
     }
   }
@@ -335,7 +334,7 @@ class Pendant {
   }
 
   inline void AllNoteOff() {
-    // w = 0.f; // phase reset does not make initial clicking disappear
+    w = 0.f; // note: phase reset does not make initial clicking disappear
   }
 
   inline void PitchBend(uint8_t bend) {
@@ -367,7 +366,7 @@ class Pendant {
 
   Params params_;
 
-  float w; // phasor in [0,1]
+  float w{0.f}; // phasor in [0,1]
   float deflection_point{0.5f};
   float value{0.5f};
   float position{0.f};
