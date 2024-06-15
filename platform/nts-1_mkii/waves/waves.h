@@ -420,10 +420,7 @@ public:
 
   inline void NoteOn(uint8_t note, uint8_t velo) {
     (void)velo;
-    
-    // Schedule phase reset
-    state_.flags.fetch_or(State::k_flag_reset);
-    
+
     // TODO: should we still fully rely on osc context pitch?
   }
 
@@ -432,6 +429,9 @@ public:
   }
 
   inline void AllNoteOff() {
+    // Schedule phase reset
+    state_.flags.fetch_or(State::k_flag_reset);
+    
   }
 
   inline void PitchBend(uint8_t bend) {
