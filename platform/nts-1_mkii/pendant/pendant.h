@@ -40,9 +40,6 @@
  *
  */
 
-//TODO: how to use shape_lfo?
-//TODO: remove click noise at noteOn and noteOff
-
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
@@ -74,27 +71,6 @@ float my_wt(float w, float pos)
     return linintf(pos, osc_bl_sqrf(w, lpf), osc_bl_sawf(w, lpf));
   }
 }
-
-// fast_inline float my_sinf(float w, float p)
-// {
-//   return osc_sinf(w);
-// }
-
-// fast_inline float my_parf(float w, float p)
-// {
-//   return osc_bl2_parf(w, p);
-// }
-
-// fast_inline float my_sqrf(float w, float p)
-// {
-//   return osc_bl2_sqrf(w, p);
-// }
-
-// fast_inline float my_sawf(float w, float p)
-// {
-//   return osc_bl2_sawf(w, p);
-// }
-
 
 class Pendant {
  public:
