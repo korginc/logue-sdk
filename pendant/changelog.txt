@@ -1,0 +1,8 @@
+[1.00]
+- initial version
+
+[1.01]
+- fix clicking when turning up the alt knob from 0 
+- increase parameter smoothing
+- change dev_id and unit_id
+
