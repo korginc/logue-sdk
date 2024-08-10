@@ -6,8 +6,7 @@
  *
  */
 
-#include "unit.h"  // Note: Include common definitions for all units
-
+#include "unit.h"   // Note: Include common definitions for all units
 #include "delay.h"  // Note: Include custom delay code
 
 static Delay s_delay_instance;              // Note: In this case, actual instance of custom delay object.

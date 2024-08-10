@@ -128,10 +128,12 @@ The `env` command is used to initialize the build environment for a given target
 ```
  user@logue-sdk:~$ env -l
  Available build environments:
- - drumlogue
+ - nts-3_kaoss
  - minilogue-xd
+ - nts-1_mkii
  - prologue
  - nts-1
+ - drumlogue
 
  user@logue-sdk:~$ env drumlogue
  >> Initializing drumlogue development environment.
@@ -191,6 +193,8 @@ The `build` command can be used to build projects for any platform. Unless more 
       --minilogue-xd    select minilogue-xd unit projects
       --nutekt-digital  select nts-1 unit projects
       --nts-1           alias for --nutekt-digital
+      --nts-1_mkii      select nts-1 mkii unit projects
+      --nts-3           select nts-3 unit projects
       --prologue        select prologue unit projects
   -f, --force           force clean project before building
       --install-dir=DIR install built units to specified directory
@@ -229,6 +233,12 @@ The `build` command can be used to build projects for any platform. Unless more 
  - prologue/dummy-osc
  - prologue/dummy-revfx
  - prologue/waves
+ - nts-1_mkii/dummy-delfx
+ - nts-1_mkii/dummy-modfx
+ - nts-1_mkii/dummy-osc
+ - nts-1_mkii/dummy-revfx
+ - nts-1_mkii/waves
+ - nts-3_kaoss/dummy-genericfx
 ```
 
  * Building a specific project

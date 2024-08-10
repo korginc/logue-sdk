@@ -6,11 +6,10 @@
  *
  */
 
-#include "unit.h"  // Note: Include common definitions for all units
-
 #include <cstddef>
 #include <cstdint>
 
+#include "unit.h"   // Note: Include common definitions for all units
 #include "synth.h"  // Note: Include custom master fx code
 
 static Synth s_synth_instance;              // Note: In this case, actual instance of custom master fx object.

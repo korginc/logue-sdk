@@ -14,6 +14,8 @@
 
 #include <arm_neon.h>
 
+#include "unit.h"  // Note: Include common definitions for all units
+
 class Delay {
  public:
   /*===========================================================================*/
@@ -24,8 +26,8 @@ class Delay {
   /* Lifecycle Methods. */
   /*===========================================================================*/
 
-  Delay(void);
-  virtual ~Delay(void);
+  Delay(void) {}
+  virtual ~Delay(void) {}
 
   inline int8_t Init(const unit_runtime_desc_t * desc) {
     // Check compatibility of samplerate with unit, for drumlogue should be 48000

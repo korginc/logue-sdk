@@ -6,8 +6,7 @@
  *
  */
 
-#include "unit.h"  // Note: Include common definitions for all units
-
+#include "unit.h"      // Note: Include common definitions for all units
 #include "masterfx.h"  // Note: Include custom master fx code
 
 static MasterFX s_master_instance;          // Note: In this case, actual instance of custom master fx object.

@@ -49,29 +49,36 @@ Waves はlogue-sdkのオシレーターAPIで提供されているウェーブ�
 ```
 $ cd logue-sdk/platform/minilogue-xd/waves/
 ```
+
  2. プロジェクをビルドするために `make` を実行します.
  
 ```
 $ make
 Compiler Options
-../../../../tools/gcc/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT -g -Os -mlittle-endian -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -fcheck-new -std=c11 -mstructure-size-boundary=8 -W -Wall -Wextra -Wa,-alms=./build/lst/ -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -I. -I./inc -I./inc/api -I../../inc -I../../inc/dsp -I../../inc/utils -I../../../ext/CMSIS/CMSIS/Include
+<path>/logue-sdk/tools/gcc/gcc-arm-none-eabi-5_4-2016q3/bin/arm-none-eabi-gcc -c -mcpu=cortex-m4 -mthumb -mno-thumb-interwork -DTHUMB_NO_INTERWORKING -DTHUMB_PRESENT -g -Os -mlittle-endian -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -fcheck-new -std=c11 -mstructure-size-boundary=8 -W -Wall -Wextra -Wa,-alms=<path>/logue-sdk/platform/minilogue-xd/waves/build/lst/ -DSTM32F401xC -DCORTEX_USE_FPU=TRUE -DARM_MATH_CM4 -D__FPU_PRESENT -I. -I<path>/logue-sdk/platform/minilogue-xd/waves/inc -I<path>/logue-sdk/platform/minilogue-xd/waves/inc/api -I<path>/logue-sdk/platform/minilogue-xd/inc -I<path>/logue-sdk/platform/minilogue-xd/inc/dsp -I<path>/logue-sdk/platform/minilogue-xd/inc/utils -I<path>/logue-sdk/platform/minilogue-xd/../ext/CMSIS/CMSIS/Include
 
 Compiling _unit.c
 Compiling waves.cpp
-Linking build/waves.elf
-Creating build/waves.hex
-Creating build/waves.bin
-Creating build/waves.dmp
+Linking <path>/logue-sdk/platform/minilogue-xd/waves/build/waves.elf
+Creating <path>/logue-sdk/platform/minilogue-xd/waves/build/waves.hex
+Creating <path>/logue-sdk/platform/minilogue-xd/waves/build/waves.bin
+Creating <path>/logue-sdk/platform/minilogue-xd/waves/build/waves.dmp
 
    text	   data	    bss	    dec	    hex	filename
-   2304	      4	    144	   2452	    994	build/waves.elf
+   2040	      4	    144	   2188	    88c	<path>/logue-sdk/platform/minilogue-xd/waves/build/waves.elf
 
-Creating build/waves.list
-Packaging to ./waves.mnlgxdunit
-
+Creating <path>/logue-sdk/platform/minilogue-xd/waves/build/waves.list
 Done
 ```
- 3. *Packaging...* という表示の通り,  *.mnlgxdunit* というファイルが生成されます. これがビルド成果物となります.
+ 3. 最終パッケージファイル (*.mnlgxdunit*)を作成するために`make install`を実行します.
+ 
+ ```
+ $ make install
+Packaging to <path>/logue-sdk/platform/minilogue-xd/waves/build/waves.mnlgxdunit
+Deploying to <path>/logue-sdk/platform/minilogue-xd/waves/waves.mnlgxdunit
+Done
+ ```
+ 4. *.mnlgxdunit* ファイルが生成されます. これがビルド成果物となります.
  
 #### Docker Containerを使用したビルド
 

@@ -11,9 +11,12 @@
 *.obj
 *.elf
 
-# Temporary directories
+# Temporary files/directories
 **/.dep/**
 **/build/**
+.*.env_backup
+.profile
+.bash_history
 tools/gcc/gcc-arm-none-eabi-*
 tools/emscripten/emsdk
 
@@ -50,6 +53,9 @@ tools/emscripten/emsdk
 *.prlgunit
 *.mnlgxdunit
 *.ntkdigunit
+*.drmlgunit
+*.nts1mkiiunit
+*.nts3unit
 
 # Debug files
 *.dSYM/

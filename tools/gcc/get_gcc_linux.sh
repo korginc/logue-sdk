@@ -2,7 +2,7 @@
 #
 # BSD 3-Clause License
 #
-# Copyright (c) 2018, KORG INC.
+# Copyright (c) 2018-2022, KORG INC.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,64 +30,5 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-SCRIPT_DIR="$(pwd)/$(dirname $0)"
 
-pushd ${SCRIPT_DIR} 2>&1 > /dev/null
-
-PKGNAME="gcc-arm-none-eabi"
-VERSION="5-2016-q3"
-
-ARCHIVE_URL="https://developer.arm.com/-/media/Files/downloads/gnu-rm/5_4-2016q3/gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2"
-ARCHIVE_SHA1="e87bbefaccbb43d30c084faeb945f4e96e7ec780"
-ARCHIVE_NAME="gcc-arm-none-eabi-5_4-2016q3-20160926-linux.tar.bz2"
-
-if [[ "${OSTYPE}" == "linux-gnu" ]]; then
-    echo ">> Assuming Linux on intel 32 bit platform."
-else
-    echo ">> This script is meant for Linux (intel 32 bit)."
-    popd 2>&1 > /dev/null
-    exit 1
-fi
-
-# assert_success(fail_msg)
-assert_success() {
-    [[ $? -eq 0 ]] && return 0
-    [[ ! -z "$1" ]] && echo "Error: $1" 
-    popd 2>&1 > /dev/null
-    return 1
-}
-
-AWK=$(which awk) || assert_success "dependency not found..." || exit $?
-
-CURL=$(which curl) || assert_success "dependency not found..." || exit $?
-
-TAR=$(which tar) || assert_success "dependency not found..." || exit $?
-
-SHA1SUM=$(which sha1sum) || assert_success "dependency not found..." || exit $?
-
-# test_sha1sum(sha1, path_to_file)
-test_sha1sum() {
-    SHA1=$(${SHA1SUM} "$2" | ${AWK} '{print $1};')
-    [[ "${SHA1}" != "$1" ]] && return 1
-    return 0
-}
-
-if [[ ! -f "${ARCHIVE_NAME}" ]]; then
-    echo ">> Downloading..."
-    ${CURL} -# -L -o "${ARCHIVE_NAME}" "${ARCHIVE_URL}"
-    assert_success "Download of ${ARCHIVE_NAME} failed..." || exit $?
-fi
-
-test_sha1sum "${ARCHIVE_SHA1}" "${ARCHIVE_NAME}"
-assert_success "SHA1 mismatch. Try redownloading the archive..." || exit $?
-
-echo ">> Unpacking..."
-${TAR} -jxf "${ARCHIVE_NAME}"
-assert_success "Could not unpack archive..." || exit $?
-
-echo ">> Cleaning up..."
-rm -f "${ARCHIVE_NAME}"
-assert_success "Could not delete temporary archive..." || exit $?
-
-popd 2>&1 > /dev/null
-
+./get_gcc_5_4-2016q3_linux.sh && ./get_gcc_10_3-2021_10_linux.sh
