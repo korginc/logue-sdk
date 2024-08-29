@@ -1,0 +1,12 @@
+■ logue SDK Generic FX "0xFF(Zero-cross Flip Flop)" User Manual
+
+・Overview
+
+This effect inverts the waveform around the zero-crossing area.
+When applied to monophonic sounds, it produces a wavefold-like tone.
+When used as a Master FX, it creates a destructive sound, particularly emphasizing the lower frequencies.
+
+・Parameters
+
+X: Expands the range of inversion.
+Y: Alters the response speed of the inversion.
