@@ -29,5 +29,5 @@ nav_order: 2
 | ML SQUARE OSC | KORG DIY CLUB | metal_harmoをもとにした6レイヤーの矩形波オシレーター | nts-3kaoss | [unit](KORG_Examples/nts3kaoss/ml_square_osc/ml_square_osc.nts3unit) |
 | 0xFF | mngw/KORG DIY CLUB | ゼロクロス周辺で波形を反転させるエフェクト | nts-3kaoss | [unit](KORG_Examples/nts3kaoss/0xFF/0xFF.nts3unit)<br>[source code](KORG_Examples/nts3kaoss/0xFF/0xFF.zip) |
 | FMDrum | xia/KORG DIY CLUB | NTS-3のためのFM Drum Unit | nts-3kaoss | [unit](KORG_Examples/nts3kaoss/FMDrum/FMDrum.nts3unit)<br>[Readme](KORG_Examples/nts3kaoss/FMDrum/README.zip) |
-| unisaw | xia/KORG DIY CLUB | Supersawライクな三角波オシレーター | nts-1mkii | [unit](KORG_Examples/nts1mkii/unisaw/unisaw.nts1mkiiunit)<br>[Readme](KORG_Examples/nts1mkii/unisaw/README.zip) |
+| unisaw | xia/KORG DIY CLUB | Supersawライクな鋸歯状波オシレーター | nts-1mkii | [unit](KORG_Examples/nts1mkii/unisaw/unisaw.nts1mkiiunit)<br>[Readme](KORG_Examples/nts1mkii/unisaw/README.zip) |
 | nts3-osc-harmonics | Fabian/KORG Berlin | 西海岸シンセシスにおけるハーモニック・ジェネレーターに<br>インスパイアされたオシレーター | nts-3kaoss | [unit](KORG_Examples/nts3kaoss/nts-3-osc-harmonics/nts3-osc-harmonics.nts3unit)<br>[source code](KORG_Examples/nts3kaoss/nts-3-osc-harmonics/nts3-osc-harmonics.zip) |
