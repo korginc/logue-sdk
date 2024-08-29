@@ -4,7 +4,7 @@ title: KORG Examples
 title_long: KORG Examples
 permalink: /ja/unit-index/korg_examples/
 language: ja
-last_modified_on: 2024-06-14 12:25:43 +9000
+last_modified_on: 2024-08-29 14:22:25
 parent: Unit Index
 nav_order: 2
 ---
@@ -12,7 +12,6 @@ nav_order: 2
 ソフトウェアエンジニアから非ソフトウェアエンジニアまで, こよなくDIYを愛するKORG社員たち (KORG DIY CLUB)によるユニットの作例です。
 
 [English](11_korg_examples.md)
-
 
 | 名前 | 開発者 | 説明 | プラットフォーム | Downloads |
 | ---- | ---- | ---- | ---- | ---- |
@@ -28,3 +27,7 @@ nav_order: 2
 | x-to-note example| KORG DIY CLUB | タッチ・パッドの位置からノート（ピッチ）を計算する例 | nts-3kaoss | [source code](KORG_Examples/nts3kaoss/x-to-note/x-to-note.zip) |
 | 3d-pwc-chaos | hamatani/<br>KORG DIY CLUB | 3D piecewise-constant chaos oscillator | nts-3kaoss | [unit](KORG_Examples/nts3kaoss/3d-chaos/3d-chaos.nts3unit)<br>[source code](KORG_Examples/nts3kaoss/3d-chaos/3d-chaos.zip) |
 | ML SQUARE OSC | KORG DIY CLUB | metal_harmoをもとにした6レイヤーの矩形波オシレーター | nts-3kaoss | [unit](KORG_Examples/nts3kaoss/ml_square_osc/ml_square_osc.nts3unit) |
+| 0xFF | mngw/KORG DIY CLUB | ゼロクロス周辺で波形を反転させるエフェクト | nts-3kaoss | [unit](KORG_Examples/nts3kaoss/0xFF/0xFF.nts3unit)<br>[source code](KORG_Examples/nts3kaoss/0xFF/0xFF.zip) |
+| FMDrum | xia/KORG DIY CLUB | NTS-3のためのFM Drum Unit | nts-3kaoss | [unit](KORG_Examples/nts3kaoss/FMDrum/FMDrum.nts1mkiiunit)<br>[Readme](KORG_Examples/nts3kaoss/FMDrum/README.txt) |
+| unisaw | xia/KORG DIY CLUB | Supersawライクな三角波オシレーター | nts-1mkii | [unit](KORG_Examples/nts1mkii/unisaw/unisaw.nts1mkiiunit)<br>[Readme](KORG_Examples/nts1mkii/unisaw/README.txt) |
+| nts3-osc-harmonics | Fabian/KORG Berlin | 西海岸シンセシスにおけるハーモニック・ジェネレーターに<br>インスパイアされたオシレーター | nts-3kaoss | [unit](KORG_Examples/nts3kaoss/nts3-osc-harmonics/nts3-osc-harmonics.nts3unit)<br>[source code](KORG_Examples/nts3kaoss/nts3-osc-harmonics/nts3-osc-harmonics.zip) |
