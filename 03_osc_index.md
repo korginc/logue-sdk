@@ -3,7 +3,7 @@ layout: page
 title: Oscillators
 title_long: Oscillator Units
 permalink: /unit-index/osc/
-last_modified_on: 2024-05-07 18:04:44 +9000
+last_modified_on: 2024-09-10 17:26:19
 parent: Unit Index
 nav_order: 2
 ---
@@ -13,8 +13,11 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | Name | Developer | Description | Platforms | |
 | [Alpha One](https://blog.boochow.com/logue/alpha1) | boochow instruments | Alpha-Juno DCO emulation | pro, xd, nts-1 | paid |
 | [Hoovic](https://blog.boochow.com/logue/hoovic) | boochow instruments | Hoover sound | pro, xd, nts-1 | paid |
+| [Lily](https://boochow.gumroad.com/l/lily) | boochow instruments | oscillator unit based on Mutable Instruments Braids | nts-1 mkii | free |
 | [picture](https://github.com/boochow/picture) | boochow instruments | Picture display for oscilloscopes (requires Lissa delay effect) | pro, xd, nts-1 | free |
+| [Pitchy](https://boochow.gumroad.com/l/pithcy) | boochow instruments | pitch shifter oscillator | nts-1 mkii | free |
 | [Pulsaw](https://blog.boochow.com/logue/pulsaw) | boochow instruments | Juno DCO emulation | pro, xd, nts-1 | paid |
+| [Vocoder](https://boochow.gumroad.com/l/vocoder_nts1) | boochow instruments | channel vocoder with 5-voice paraphonic osc | nts-1_mkii | free |
 | [Waves2](https://github.com/boochow/Waves2) | boochow instruments | Waves2 is the oscillator which can control its harmonics | pro, xd, nts-1 | free |
 | [Ruismaker](https://ruismaker.com/korg/) | Bram Bos | Analog drum oscillator | nts-1 | free |
 | [Cain++](https://cain-synthesizer.com/cain) | Cain Synthesizers | Karplus-Strong oscillator | pro, xd, nts-1 | donation |
@@ -113,6 +116,4 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [ROAT](https://github.com/tweeeeeak/nts) | Tweeeeeak | 8-bit experimental oscillator inspired by the "Rumble of Ancient Times" synthesizer | nts-1 | free |
 | [vbass](https://github.com/tweeeeeak/nts) | Tweeeeeak | Volca Bass style triple oscillator | nts-1 | free |
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | pro, xd, nts-1 | donation |
-| [Pitchy](https://boochow.gumroad.com/l/pithcy) | boochow instruments | pitch shifter oscillator | nts-1 mkii | free |
-  [Lily](https://boochow.gumroad.com/l/lily) | boochow instruments | oscillator unit based on Mutable Instruments Braids | nts-1 mkii | free |
-
+|

@@ -4,7 +4,7 @@ title: Oscillators
 title_long: オシレーターユニット覧
 permalink: /ja/unit-index/osc/
 language: ja
-last_modified_on: 2024-05-07 18:04:34 +9000 
+last_modified_on: 2024-09-10 17:26:08
 parent: Unit Index
 nav_order: 2
 ---
@@ -14,8 +14,11 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | 名前 | 開発者 | 備考 | プラットフォーム |　|
 | [Alpha One](https://blog.boochow.com/logue/alpha1) | boochow instruments | Alpha-Juno DCO emulation | pro, xd, nts-1 | 有料 |
 | [Hoovic](https://blog.boochow.com/logue/hoovic) | boochow instruments | Hoover sound | pro, xd, nts-1 | 有料 |
+| [Lily](https://boochow.gumroad.com/l/lily) | boochow instruments | oscillator unit based on Mutable Instruments Braids | nts-1 mkii | 無料 |
 | [picture](https://github.com/boochow/picture) | boochow instruments | Picture display for oscilloscopes (requires Lissa delay effect) | pro, xd, nts-1 | 無料 |
+| [Pitchy](https://boochow.gumroad.com/l/pithcy) | boochow instruments | pitch shifter oscillator | nts-1 mkii | 無料 |
 | [Pulsaw](https://blog.boochow.com/logue/pulsaw) | boochow instruments | Juno DCO emulation | pro, xd, nts-1 | 有料 |
+| [Vocoder](https://boochow.gumroad.com/l/vocoder_nts1) | boochow instruments | channel vocoder with 5-voice paraphonic osc | nts-1_mkii | 無料 |
 | [Waves2](https://github.com/boochow/Waves2) | boochow instruments | Waves2 is the oscillator which can control its harmonics | pro, xd, nts-1 | 無料 |
 | [Ruismaker](https://ruismaker.com/korg/) | Bram Bos | Analog drum oscillator | nts-1 | 無料 |
 | [Cain++](https://cain-synthesizer.com/cain) | Cain Synthesizers | Karplus-Strong oscillator | pro, xd, nts-1 | 寄付 |
@@ -114,6 +117,3 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [ROAT](https://github.com/tweeeeeak/nts) | Tweeeeeak | 8-bit experimental oscillator inspired by the "Rumble of Ancient Times" synthesizer | nts-1 | 無料 |
 | [vbass](https://github.com/tweeeeeak/nts) | Tweeeeeak | Volca Bass style triple oscillator | nts-1 | 無料 |
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | pro, xd, nts-1 | 寄付 |
-| [Pitchy](https://boochow.gumroad.com/l/pithcy) | boochow instruments | pitch shifter oscillator | nts-1 mkii | 無料 |
-  [Lily](https://boochow.gumroad.com/l/lily) | boochow instruments | oscillator unit based on Mutable Instruments Braids | nts-1 mkii | 無料 |
-
