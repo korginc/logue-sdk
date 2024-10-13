@@ -3,7 +3,7 @@ layout: page
 title: Modulation Effects
 title_long: Modulation Effect Units
 permalink: /unit-index/modfx/
-last_modified_on: 2024-04-04 17:24:23 +9000
+last_modified_on: 2024-10-13 20:30:00
 parent: Unit Index
 nav_order: 2
 ---
@@ -29,6 +29,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [distort-mod](http://github.com/hypercubed-music/nts-1) | Hypercubed Music | Simple distortion/clip effect | pro, xd, nts-1 | free |
 | [Crusher](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Bit crusher and decimator | pro, xd, nts-1 | free |
 | [Gator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style gate arpeggiator | pro, xd, nts-1 | free |
+| [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3 | free |
 | [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | pro, xd, nts-1 | free |
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | free |
 | [cvRing](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Stereo ring modulation effect tuned to V/Oct | pro, xd, nts-1 | donation |

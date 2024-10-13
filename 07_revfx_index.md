@@ -3,7 +3,7 @@ layout: page
 title: Reverb Effects
 title_long: Reverb Effect Units
 permalink: /unit-index/revfx/
-last_modified_on: 2024-09-10 17:23:21
+last_modified_on: 2024-10-13 20:30:00
 parent: Unit Index
 nav_order: 2
 ---
@@ -23,6 +23,7 @@ _Note: The reverb effect section can contain effects that perform other function
 | [Theatre](http://hammondeggsmusic.ca/logueplugins/cathedral.html) | Hammond Eggs Music | fixed low pass half time deep reverb | pro, xd, nts-1 | donation |
 | [Crusher](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Bit crusher and decimator | pro, xd, nts-1 | free |
 | [Gator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style gate arpeggiator | pro, xd, nts-1 | free |
+| [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3 | free |
 | [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | pro, xd, nts-1 | free |
 | [Looper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style loop recorder | pro, xd, nts-1 | free |
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | free |

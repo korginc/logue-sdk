@@ -4,7 +4,7 @@ title: Oscillators
 title_long: オシレーターユニット覧
 permalink: /ja/unit-index/osc/
 language: ja
-last_modified_on: 2024-09-10 17:26:08
+last_modified_on: 2024-10-13 20:30:00
 parent: Unit Index
 nav_order: 2
 ---
@@ -71,6 +71,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [Supersaw](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Saw with unison (pseudo-polyphony on NTS-1) | pro, xd, nts-1 | 無料 |
 | [FastSaw](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Optimized Saw with unison (pseudo-polyphony on NTS-1) | pro, xd, nts-1 | 無料 |
 | [FMxx](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | 6/4-operator FM oscillator series with up to 4 Yamaha DX7/DX21/DX11-series voice banks suport | pro, xd, nts-1 | 無料 |
+| [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3 | 無料 |
 | [MO2 add](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits additive mode | pro, xd, nts-1 | 無料 |
 | [MO2 fm](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits FM mode | pro, xd, nts-1 | 無料 |
 | [MO2 grn](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits granular mode | pro, xd, nts-1 | 無料 |

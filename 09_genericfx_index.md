@@ -3,7 +3,7 @@ layout: page
 title: Generic Effects
 title_long: Generic Effect Units
 permalink: /unit-index/genericfx/
-last_modified_on: 2024-09-10 17:17:38
+last_modified_on: 2024-10-13 20:30:00
 parent: Unit Index
 nav_order: 2
 ---
@@ -13,4 +13,4 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | Name | Developer | Description | Platforms | |
 | [Vocoder](https://boochow.gumroad.com/l/vocoder_nts3) | boochow instruments | channel vocoder with 5-voice paraphonic osc | nts-3 | free |
 | [Freeverb](https://github.com/boochow/freeverb-logue) | boochow instruments | Freeverb public domain reverberator port | pro, xd, nts-1, nts-1 mkii, drum, nts-3 | free |
-
+| [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3 | free |
