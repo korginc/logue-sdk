@@ -3,7 +3,7 @@ layout: page
 title: Oscillators
 title_long: Oscillator Units
 permalink: /unit-index/osc/
-last_modified_on: 2024-10-13 20:30:00
+last_modified_on: 2024-10-22 09:45:30
 parent: Unit Index
 nav_order: 2
 ---
@@ -14,6 +14,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Alpha One](https://blog.boochow.com/logue/alpha1) | boochow instruments | Alpha-Juno DCO emulation | pro, xd, nts-1 | paid |
 | [Hoovic](https://blog.boochow.com/logue/hoovic) | boochow instruments | Hoover sound | pro, xd, nts-1, nts-1 mkii | paid |
 | [Lily](https://boochow.gumroad.com/l/lily) | boochow instruments | oscillator unit based on Mutable Instruments Braids | nts-1 mkii | free |
+| [Lily](https://boochow.gumroad.com/l/lily-logue) | boochow instruments | oscillator unit based on Mutable Instruments Braids | pro, xd, nts-1 | free |
 | [picture](https://github.com/boochow/picture) | boochow instruments | Picture display for oscilloscopes (requires Lissa delay effect) | pro, xd, nts-1 | free |
 | [Pitchy](https://boochow.gumroad.com/l/pithcy) | boochow instruments | pitch shifter oscillator | nts-1 mkii | free |
 | [Pulsaw](https://blog.boochow.com/logue/pulsaw) | boochow instruments | Juno DCO emulation | pro, xd, nts-1 | paid |
