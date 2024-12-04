@@ -37,3 +37,5 @@
  | 0x42636877 ('Bchw') | [boochow instruments](https://blog.boochow.com/logue) |
  | 0x6d726672 ('mrfr') | [Eugene Chernyh](https://github.com/mrf-r) |
  | 0x6C63776B ('lcwk') | [techno-cat](https://techno-cat.github.io) |
+ | 0x696b7556 ('Vuki') | [Greg Vuki](https://multimed.org/~greg/) |
+ 
