@@ -119,3 +119,5 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [ROAT](https://github.com/tweeeeeak/nts) | Tweeeeeak | 8-bit experimental oscillator inspired by the "Rumble of Ancient Times" synthesizer | nts-1 | 無料 |
 | [vbass](https://github.com/tweeeeeak/nts) | Tweeeeeak | Volca Bass style triple oscillator | nts-1 | 無料 |
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | pro, xd, nts-1 | 寄付 |
+| [WvTable](https://github.com/vuki/WvTable-logue/) | Greg Vuki | Wavetable oscillator based on waves and wavetables from PPG WAVE | pro, xd, nts-1 | 無料 |
+| [VoxHumana](https://github.com/vuki/VoxHumana-Minilogue-xd/) | Greg Vuki | Simulation of the Vox Humana preset from Polymoog | pro, xd, nts-1 | 無料 |
