@@ -3,7 +3,7 @@ layout: page
 title: Synths
 title_long: Synth Units
 permalink: /unit-index/synth/
-last_modified_on: 2023-06-12 07:45:00 +9000
+last_modified_on: 2025-02-26 15:11:23
 parent: Unit Index
 nav_order: 2
 ---
@@ -11,9 +11,9 @@ nav_order: 2
 _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp or submit a pull request modifying the table below_
 
 | Name | Developer | Description | Platforms | |
-| [Lillian](https://boochow.gumroad.com/l/lillian) | boochow instruments | Synth unit based on Mutable Instruments Braids | drum | free |
+| [Lillian](https://blog.boochow.com/logue/lillian) | boochow instruments | Synth unit based on Mutable Instruments Braids | drum | free |
 | [maxisynth](https://github.com/boochow/maxisynth) | boochow instruments | Sample unit using Maximilian library | drum | free |
-| [minitone](https://boochow.gumroad.com/l/minitone) | boochow instruments | Monophonic VA synth | drum | free |
+| [minitone](https://blog.boochow.com/logue/minitone) | boochow instruments | Monophonic VA synth | drum | free |
 | [AutoChord](https://centrevillage.net/products/18) | centrevillage | Automatic Chord Synthesizer | drum | paid |
 | [CHSynth](https://ctrl-alt-delete.co.uk/wp/free-korg-drumlogue-synth/) | CtrlAltDelete | Chord Synth | drum | free |
 | [Resonator](https://www.icemoonprison.com/blog/?p=780) | Deborah Pickett | Karplus-Strong resonator synth | drum | free |

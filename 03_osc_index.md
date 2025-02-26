@@ -3,7 +3,7 @@ layout: page
 title: Oscillators
 title_long: Oscillator Units
 permalink: /unit-index/osc/
-last_modified_on: 2024-10-22 09:45:30
+last_modified_on: 2025-02-26 15:08:31
 parent: Unit Index
 nav_order: 2
 ---
@@ -13,12 +13,12 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | Name | Developer | Description | Platforms | |
 | [Alpha One](https://blog.boochow.com/logue/alpha1) | boochow instruments | Alpha-Juno DCO emulation | pro, xd, nts-1 | paid |
 | [Hoovic](https://blog.boochow.com/logue/hoovic) | boochow instruments | Hoover sound | pro, xd, nts-1, nts-1 mkii | paid |
-| [Lily](https://boochow.gumroad.com/l/lily) | boochow instruments | oscillator unit based on Mutable Instruments Braids | nts-1 mkii | free |
-| [Lily](https://boochow.gumroad.com/l/lily-logue) | boochow instruments | oscillator unit based on Mutable Instruments Braids | pro, xd, nts-1 | free |
+| [Lily](https://blog.boochow.com/logue/lily) | boochow instruments | oscillator unit based on Mutable Instruments Braids | nts-1 mkii | free |
+| [Lily](https://blog.boochow.com/logue/lily-logue) | boochow instruments | oscillator unit based on Mutable Instruments Braids | pro, xd, nts-1 | free |
 | [picture](https://github.com/boochow/picture) | boochow instruments | Picture display for oscilloscopes (requires Lissa delay effect) | pro, xd, nts-1 | free |
-| [Pitchy](https://boochow.gumroad.com/l/pithcy) | boochow instruments | pitch shifter oscillator | nts-1 mkii | free |
+| [Pitchy](https://blog.boochow.com/logue/pitchy) | boochow instruments | pitch shifter oscillator | nts-1 mkii | free |
 | [Pulsaw](https://blog.boochow.com/logue/pulsaw) | boochow instruments | Juno DCO emulation | pro, xd, nts-1 | paid |
-| [Vocoder](https://boochow.gumroad.com/l/vocoder_nts1) | boochow instruments | channel vocoder with 5-voice paraphonic osc | nts-1_mkii | free |
+| [Vocoder](https://blog.boochow.com/logue/vocoder_nts1) | boochow instruments | channel vocoder with 5-voice paraphonic osc | nts-1_mkii | free |
 | [Waves2](https://github.com/boochow/Waves2) | boochow instruments | Waves2 is the oscillator which can control its harmonics | pro, xd, nts-1, nts-1 mkii | free |
 | [Ruismaker](https://ruismaker.com/korg/) | Bram Bos | Analog drum oscillator | nts-1 | free |
 | [Cain++](https://cain-synthesizer.com/cain) | Cain Synthesizers | Karplus-Strong oscillator | pro, xd, nts-1 | donation |
@@ -120,4 +120,3 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | pro, xd, nts-1 | donation |
 | [WvTable](https://github.com/vuki/WvTable-logue/) | Greg Vuki | Wavetable oscillator based on waves and wavetables from PPG WAVE | pro, xd, nts-1 | free |
 | [VoxHumana](https://github.com/vuki/VoxHumana-Minilogue-xd/) | Greg Vuki | Simulation of the Vox Humana preset from Polymoog | pro, xd, nts-1 | free |
-|
