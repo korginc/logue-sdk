@@ -38,3 +38,4 @@
  | 0x6d726672 ('mrfr') | [Eugene Chernyh](https://github.com/mrf-r) |
  | 0x6C63776B ('lcwk') | [techno-cat](https://techno-cat.github.io) |
  | 0x74776565 ('twee') | [Tweeeeeak!](https://github.com/tweeeeeak/nts) |
+ | 0x696b7556 ('Vuki') | [Greg Vuki](https://multimed.org/~greg/) |
