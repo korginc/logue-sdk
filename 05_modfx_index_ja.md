@@ -4,7 +4,7 @@ title: Modulation Effects
 title_long: モジュレーションユニット覧
 permalink: /ja/unit-index/modfx/
 language: ja
-last_modified_on: 2024-10-13 20:30:00
+last_modified_on: 2025-02-26 14:57:20
 parent: Unit Index
 nav_order: 2
 ---
@@ -12,6 +12,7 @@ nav_order: 2
 _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp までご連絡下さい._
 
 | 名前 | 開発者 | 備考 | プラットフォーム |  |
+| [Metronome](https://beatnicster.booth.pm/items/6558042) | Beatnicster | Simple metronome | nts-1 mkII | 寄付 |
 | [MasterVol2](https://github.com/boochow/MasterVol2) | boochow instruments | Secondary master volume | pro, xd, nts-1, nts-1 mkII | 無料 |
 | [Teleconf](https://github.com/boochow/teleconf) | boochow instruments | G.711 A-law codec emulation | pro, xd, nts-1, nts-1 mkII | 無料 |
 | [3DC](https://www.cain-synthesizer.com/effects) | Cain Synthesizers | 3 delay line chorus | pro, xd, nts-1 | 寄付 |
