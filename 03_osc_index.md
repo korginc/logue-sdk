@@ -3,7 +3,7 @@ layout: page
 title: Oscillators
 title_long: Oscillator Units
 permalink: /unit-index/osc/
-last_modified_on: 2025-02-26 15:08:31
+last_modified_on: 2025-02-27 17:15:18
 parent: Unit Index
 nav_order: 2
 ---
@@ -82,6 +82,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [MO2 va](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits VA mode | pro, xd, nts-1 | free |
 | [MO2 wsh](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits waveshaping mode | pro, xd, nts-1 | free |
 | [MO2 wta-wtf](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits wavetable modes | pro, xd, nts-1 | free |
+| [BEAST](https://www.platinumaudiolab.com/beast) | Platinum Audiolab | Vintage analog style oscillator inspired by Minimoog, SEM and ARP2600 synths | pro, xd, nts-1 | paid |
 | [2DTB](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | 2D wavetable oscillator | pro, xd, nts-1 | donation |
 | [FBFM](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | Feedback FM oscillator | pro, xd, nts-1 | donation |
 | [FRFM](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | Band limited fractional ratio FM | pro, xd, nts-1 | donation |

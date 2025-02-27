@@ -4,7 +4,7 @@ title: Oscillators
 title_long: オシレーターユニット覧
 permalink: /ja/unit-index/osc/
 language: ja
-last_modified_on: 2025-02-26 15:10:04
+last_modified_on: 2025-02-27 17:15:54
 parent: Unit Index
 nav_order: 2
 ---
@@ -83,6 +83,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [MO2 va](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits VA mode | pro, xd, nts-1 | 無料 |
 | [MO2 wsh](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits waveshaping mode | pro, xd, nts-1 | 無料 |
 | [MO2 wta-wtf](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits wavetable modes | pro, xd, nts-1 | 無料 |
+| [BEAST](https://www.platinumaudiolab.com/beast) | Platinum Audiolab | Vintage analog style oscillator inspired by Minimoog, SEM and ARP2600 synths | pro, xd, nts-1 | 有料 |
 | [2DTB](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | 2D wavetable oscillator | pro, xd, nts-1 | 寄付 |
 | [FBFM](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | Feedback FM oscillator | pro, xd, nts-1 | 寄付 |
 | [FRFM](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | Band limited fractional ratio FM | pro, xd, nts-1 | 寄付 |
