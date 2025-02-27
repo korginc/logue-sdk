@@ -48,6 +48,8 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Step](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/devlog/193526/step-per-key-arpeggiator) | Ghost Time | An experimental stepping oscillator | pro, xd, nts-1 | donation |
 | [Warped](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/devlog/193525/warped-boc-inspired-lo-fi-oscillator) | Ghost Time | A lo-fi oscillator inspired by Boards of Canada | pro, xd, nts-1 | donation |
 | [Ubersaw](https://github.com/GrahamJamesKeane/UberSaw) | Graham Keane | JP-8000 supersaw emulation | nts-1 | free | 
+| [WvTable](https://github.com/vuki/WvTable-logue/) | Greg Vuki | Wavetable oscillator based on waves and wavetables from PPG WAVE | pro, xd, nts-1 | free |
+| [VoxHumana](https://github.com/vuki/VoxHumana-Minilogue-xd/) | Greg Vuki | Simulation of the Vox Humana preset from Polymoog | pro, xd, nts-1 | free |
 | [1973](http://hammondeggsmusic.ca/logueplugins/1973.html) | Hammond Eggs Music | Single osc., dual filter, emulation of miniKorg 700 | pro, xd, nts-1 | donation |
 | [Chips2.0](http://hammondeggsmusic.ca/logueplugins/chips2.html) | Hammond Eggs Music | Chiptune oscillator with PWM, arpeg., and noise drums | pro, xd, nts-1 | donation |
 | [Divide](http://hammondeggsmusic.ca/logueplugins/divide.html) | Hammond Eggs Music | 12 note top octave style divider oscillator | pro, xd, nts-1 | donation |
@@ -118,5 +120,3 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [ROAT](https://github.com/tweeeeeak/nts) | Tweeeeeak | 8-bit experimental oscillator inspired by the "Rumble of Ancient Times" synthesizer | nts-1 | free |
 | [vbass](https://github.com/tweeeeeak/nts) | Tweeeeeak | Volca Bass style triple oscillator | nts-1 | free |
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | pro, xd, nts-1 | donation |
-| [WvTable](https://github.com/vuki/WvTable-logue/) | Greg Vuki | Wavetable oscillator based on waves and wavetables from PPG WAVE | pro, xd, nts-1 | free |
-| [VoxHumana](https://github.com/vuki/VoxHumana-Minilogue-xd/) | Greg Vuki | Simulation of the Vox Humana preset from Polymoog | pro, xd, nts-1 | free |
