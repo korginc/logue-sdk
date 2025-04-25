@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+#
+# checks OS in which script is launched
+# adapted from https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux
+
+function get_machine() {
+    unameOut="$(uname -s)"
+    case "$unameOut" in
+        Linux*)     machine=Linux;;
+        Darwin*)    machine=Mac;;
+        CYGWIN*)    machine=Cygwin;;
+        MINGW*)     machine=MinGw;;
+        MSYS_NT*)   machine=MSys;;
+        *)          machine="UNKNOWN:${unameOut}"
+    esac
+    echo "$machine"
+}
+
+function get_OS() {
+    case "$(get_machine)" in
+        Linux*)     os=Linux;;
+        Mac*)       os=Mac;;
+        Cygwin*)    os=Windows;;
+        MinGw*)     os=Windows;;
+        MSys*)      os=Windows;;
+        *)          os="Unknown";;
+    esac
+    echo "$os"
+}

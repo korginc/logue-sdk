@@ -41,6 +41,7 @@
 
 SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
+source ${SCRIPT_DIR}/inc/os
 if [ -z "$(command -v realpath)" ]; then
     source ${SCRIPT_DIR}/inc/realpath
 fi
@@ -117,4 +118,9 @@ if [ -z "${CMD}" ]; then
     exit 2
 fi
 
-docker run --rm -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}
+ENTRYPOINT="/app/interactive_entry"
+if [ "$(get_OS)" = "Windows" ]; then 
+    ENTRYPOINT="/${ENTRYPOINT}"
+fi
+
+docker run --rm --mount "type=bind,src=${PLATFORM_PATH},target=/workspace" -h logue-sdk -it "${IMAGE_NAME}:${IMAGE_VERSION}" "${ENTRYPOINT}" ${CMD}
