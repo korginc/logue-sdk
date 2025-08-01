@@ -150,12 +150,21 @@ class Osc {
 
     // Caching current parameter values. Consider interpolating sensitive parameters.
     // const Params p = params_;
+
+    // get osc pitch from context
+    const unit_runtime_osc_context_t *ctxt = static_cast<const unit_runtime_osc_context_t *>(runtime_desc_.hooks.runtime_context);
+    float w0 = osc_w0f_for_note((ctxt->pitch)>>8, ctxt->pitch & 0xFF);
+    float lfo = q31_to_f32(ctxt->shape_lfo); // TODO: Apply shape_lfo to the shape parameter
     
     for (; out_p != out_e; in_p += 2, out_p += 1) {
       // Process/generate samples here
       
-      // Note: this is a dummy unit only to demonstrate APIs, only outputting silence.
-      *out_p = 0.f; // sample
+      // update oscillator phase
+      w += w0;
+      w = fmodf(w, 1.f); // take fractional part to prevent overflow
+
+      // Note: this is a dummy unit only to demonstrate APIs, only outputting sin wave
+      *out_p = osc_sinf(w);
     }
   }
 
@@ -280,6 +289,8 @@ class Osc {
   unit_runtime_desc_t runtime_desc_;
 
   Params params_;
+
+  float w{0.f}; // phasor in [0.0,1.0)
 
   /*===========================================================================*/
   /* Private Methods. */
