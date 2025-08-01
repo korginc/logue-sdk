@@ -48,7 +48,9 @@
 #include "attributes.h"
 #include "utils/float_math.h"
 #include "utils/int_math.h"
+#ifndef __EMSCRIPTEN__
 #include "utils/fixed_math.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
