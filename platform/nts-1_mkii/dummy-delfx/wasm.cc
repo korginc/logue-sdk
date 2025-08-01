@@ -229,7 +229,7 @@ void AudioWorkletProcessorCreated(EMSCRIPTEN_WEBAUDIO_T audioContext, bool succe
     return; // Check browser console in a debug build for detailed errors
 
   ram.resize(processor.getBufferSize());
-  processor.init(ram.data()); // TODO: test this works
+  processor.init(ram.data());
 
   // single mono input, single stereo output
   int outputChannelCounts[1] = {2};
