@@ -61,31 +61,31 @@ extern "C" {
    * prologue specific platform/module pairs. Passed to user code via initialization callback.
    */
 #define k_user_target_prologue        ((1U<<8))
-#define k_user_target_prologue_global ((1U<<8) | #define k_user_module_global)
-#define k_user_target_prologue_modfx  ((1U<<8) | #define k_user_module_modfx)
-#define k_user_target_prologue_delfx  ((1U<<8) | #define k_user_module_delfx)
-#define k_user_target_prologue_revfx  ((1U<<8) | #define k_user_module_revfx)
-#define k_user_target_prologue_osc    ((1U<<8) | #define k_user_module_osc)
+#define k_user_target_prologue_global ((1U<<8) | k_user_module_global)
+#define k_user_target_prologue_modfx  ((1U<<8) | k_user_module_modfx)
+#define k_user_target_prologue_delfx  ((1U<<8) | k_user_module_delfx)
+#define k_user_target_prologue_revfx  ((1U<<8) | k_user_module_revfx)
+#define k_user_target_prologue_osc    ((1U<<8) | k_user_module_osc)
 
   /**
    * minilogue xd specific platform/module pairs. Passed to user code via initialization callback.
    */
 #define k_user_target_miniloguexd        ((2U<<8))
-#define k_user_target_miniloguexd_global ((2U<<8) | #define k_user_module_global)
-#define k_user_target_miniloguexd_modfx  ((2U<<8) | #define k_user_module_modfx)
-#define k_user_target_miniloguexd_delfx  ((2U<<8) | #define k_user_module_delfx)
-#define k_user_target_miniloguexd_revfx  ((2U<<8) | #define k_user_module_revfx)
-#define k_user_target_miniloguexd_osc    ((2U<<8) | #define k_user_module_osc)
+#define k_user_target_miniloguexd_global ((2U<<8) | k_user_module_global)
+#define k_user_target_miniloguexd_modfx  ((2U<<8) | k_user_module_modfx)
+#define k_user_target_miniloguexd_delfx  ((2U<<8) | k_user_module_delfx)
+#define k_user_target_miniloguexd_revfx  ((2U<<8) | k_user_module_revfx)
+#define k_user_target_miniloguexd_osc    ((2U<<8) | k_user_module_osc)
 
   /**
    * Nu:Tekt NTS-1 digital specific platform/module pairs. Passed to user code via initialization callback.
    */
 #define k_user_target_nutektdigital        ((3U<<8))
-#define k_user_target_nutektdigital_global ((3U<<8) | #define k_user_module_global)
-#define k_user_target_nutektdigital_modfx  ((3U<<8) | #define k_user_module_modfx)
-#define k_user_target_nutektdigital_delfx  ((3U<<8) | #define k_user_module_delfx)
-#define k_user_target_nutektdigital_revfx  ((3U<<8) | #define k_user_module_revfx)
-#define k_user_target_nutektdigital_osc    ((3U<<8) | #define k_user_module_osc)
+#define k_user_target_nutektdigital_global ((3U<<8) | k_user_module_global)
+#define k_user_target_nutektdigital_modfx  ((3U<<8) | k_user_module_modfx)
+#define k_user_target_nutektdigital_delfx  ((3U<<8) | k_user_module_delfx)
+#define k_user_target_nutektdigital_revfx  ((3U<<8) | k_user_module_revfx)
+#define k_user_target_nutektdigital_osc    ((3U<<8) | k_user_module_osc)
 
   /** Target platform for this user code */
 #define USER_TARGET_PLATFORM      (k_user_target_nutektdigital)
