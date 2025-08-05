@@ -14,9 +14,6 @@ public:
     // subclass can override this function to claim more (or less) RAM
     virtual uint32_t getBufferSize() const { return 0x8000U; } // default 128 KB
 
-    Processor() = default;
-    ~Processor() = default;
-
     virtual void init(float *allocated_buffer) = 0;
 
     virtual void process(const float *__restrict in, float *__restrict out, uint32_t frames, uint32_t outChannels) = 0;

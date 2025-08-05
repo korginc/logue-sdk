@@ -11,7 +11,7 @@ cd tools/emsdk
 ``
 
 # how to compile to wasm and test in browser
-Inside your normal project directory, instead of `make instal` which creates a hardware specific unit file, run
+Inside your normal project directory, instead of `make install` which creates a hardware specific unit file, run
 
 ``
 make wasm
