@@ -40,7 +40,7 @@ The same effect unit can be loaded multiple times using different runtimes.
 
  Refer to [Docker-based Build Environment](../../docker).
 
-#### Legacy Method
+#### Manual Method
 
  1. Clone this repository and initialize/update submodules.
 

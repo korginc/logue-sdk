@@ -20,7 +20,7 @@ Firmware version >= 2.00 is required to run user units built with SDK version 1.
 
 ### Setting up the Development Environment
 
-#### Legacy Method
+#### Manual Method
 
  1. Clone this repository and initialize/update submodules.
 
