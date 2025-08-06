@@ -103,16 +103,16 @@
       }
 
       function createSlider(wasmProcessor, param, mapping, index) {
-        const container = document.createElement("div");
+        let container = document.createElement("div");
 
-        const label = document.createElement("label");
+        let label = document.createElement("label");
         label.textContent = param.name.toLowerCase();
         label.style.display = "inline-block";
         label.style.width = "100px";
         label.style.marginRight = "10px";
         container.appendChild(label);
 
-        const param_slider = document.createElement("input");
+        let param_slider = document.createElement("input");
         param_slider.type = "range";
         param_slider.min = param.min;
         param_slider.max = param.max;
@@ -123,7 +123,7 @@
         param_slider.style.marginRight = "10px";
         container.appendChild(param_slider);
 
-        const value_string = document.createElement("span");
+        let value_string = document.createElement("span");
         value_string.textContent = Module.getParameterValueString(index, param_slider.value);
         container.appendChild(value_string);
 
@@ -140,15 +140,15 @@
 
         // for NTS-3 
         if (mapping.assign === Module.ParamAssign.X) {
-          const xyPad = document.getElementById("XYPad");
+          let xyPad = document.getElementById("XYPad");
           param_slider.value = mapping.init;
           // param_slider.dispatchEvent(new Event('input'));
 
           function updateXParamFromXYPad(event) {
             if (event.buttons !== 1) return;
-            const rect = xyPad.getBoundingClientRect();
-            const x_normalized = Math.min(Math.max(event.clientX - rect.left, 0), xyPad.width) / xyPad.width;
-            const curved0to1 = Module.applyCurveToParameter0to1(x_normalized, mapping.curve, mapping.unipolar);
+            let rect = xyPad.getBoundingClientRect();
+            let x_normalized = Math.min(Math.max(event.clientX - rect.left, 0), xyPad.width) / xyPad.width;
+            let curved0to1 = Module.applyCurveToParameter0to1(x_normalized, mapping.curve, mapping.unipolar);
             param_slider.value = curved0to1 * (mapping.max - mapping.min) + mapping.min;
             param_slider.dispatchEvent(new Event('input'));
           }
@@ -157,15 +157,15 @@
           xyPad.addEventListener("mousedown", updateXParamFromXYPad);
         }
         else if (mapping.assign === Module.ParamAssign.Y) {
-          const xyPad = document.getElementById("XYPad");
+          let xyPad = document.getElementById("XYPad");
           param_slider.value = mapping.init;
           // param_slider.dispatchEvent(new Event('input'));
 
           function updateYParamFromXYPad(event) {
             if (event.buttons !== 1) return;
-            const rect = xyPad.getBoundingClientRect();
-            const y_nomalized = 1.0 - Math.min(Math.max(event.clientY - rect.top, 0), xyPad.height) / xyPad.height;
-            const curved0to1 = Module.applyCurveToParameter0to1(y_nomalized, mapping.curve, mapping.unipolar);
+            let rect = xyPad.getBoundingClientRect();
+            let y_nomalized = 1.0 - Math.min(Math.max(event.clientY - rect.top, 0), xyPad.height) / xyPad.height;
+            let curved0to1 = Module.applyCurveToParameter0to1(y_nomalized, mapping.curve, mapping.unipolar);
             param_slider.value = curved0to1 * (mapping.max - mapping.min) + mapping.min;
             param_slider.dispatchEvent(new Event('input'));
           }
@@ -255,7 +255,7 @@
 
       // keyboard osc
       let currentOctave = 3;
-      var keyboard = new QwertyHancock({
+      let keyboard = new QwertyHancock({
         id: "keyboard",
         width: 512,
         height: 64,
@@ -414,8 +414,8 @@
       }
 
       // XY Pad
-      const xyPad = document.getElementById("XYPad");
-      const holdButton = document.getElementById("XYPadHold");
+      let xyPad = document.getElementById("XYPad");
+      let holdButton = document.getElementById("XYPadHold");
       let xyPadHold = false;
       holdButton.onclick = function () {
         xyPadHold = !xyPadHold;
@@ -428,13 +428,13 @@
       };
 
       function updateXYPad(event, phase) {
-        const rect = xyPad.getBoundingClientRect();
-        const x = Math.min(Math.max(event.clientX - rect.left, 0), xyPad.width);
-        const y = Math.min(Math.max(event.clientY - rect.top, 0), xyPad.height);
+        let rect = xyPad.getBoundingClientRect();
+        let x = Math.min(Math.max(event.clientX - rect.left, 0), xyPad.width);
+        let y = Math.min(Math.max(event.clientY - rect.top, 0), xyPad.height);
 
         Module.touchEvent(phase, x / xyPad.width, y / xyPad.height);
 
-        const ctx = xyPad.getContext("2d");
+        let ctx = xyPad.getContext("2d");
         ctx.clearRect(0, 0, xyPad.width, xyPad.height);
         if (phase !== Module.TouchEvent.Ended) {
           ctx.clearRect(0, 0, xyPad.width, xyPad.height);
@@ -460,7 +460,7 @@
         if (!xyPadHold) {
           // dryGain.gain.value = 1.0;
           // wetGain.gain.value = 0.0;
-          const e = window.event;
+          let e = window.event;
           updateXYPad(e, Module.TouchEvent.Ended);
         }
       });
@@ -469,8 +469,8 @@
       let parameters = Module.getValidParameters();
       let mappings = Module.getDefaultMapping();
       for (let i = 0; i < parameters.size(); ++i) {
-        const param = parameters.get(i);
-        const mapping = mappings.get(i);
+        let param = parameters.get(i);
+        let mapping = mappings.get(i);
         createSlider(wasmProcessor, param, mapping, i);
       }
     };

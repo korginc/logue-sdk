@@ -57,16 +57,16 @@
       }
 
       function createSlider(wasmProcessor, param, index) {
-        const container = document.createElement("div");
+        let container = document.createElement("div");
 
-        const label = document.createElement("label");
+        let label = document.createElement("label");
         label.textContent = param.name.toLowerCase();
         label.style.display = "inline-block";
         label.style.width = "100px";
         label.style.marginRight = "10px";
         container.appendChild(label);
 
-        const input = document.createElement("input");
+        let input = document.createElement("input");
         input.type = "range";
         input.min = param.min;
         input.max = param.max;
@@ -77,7 +77,7 @@
         input.style.marginRight = "10px";
         container.appendChild(input);
 
-        const value_string = document.createElement("span");
+        let value_string = document.createElement("span");
         value_string.textContent = Module.getParameterValueString(index, input.value);
         container.appendChild(value_string);
 
@@ -151,7 +151,7 @@
 
       // keyboard osc
       let currentOctave = 3;
-      var keyboard = new QwertyHancock({
+      let keyboard = new QwertyHancock({
         id: "keyboard",
         width: 512,
         height: 64,
@@ -298,7 +298,7 @@
       // audio processor parameters
       let parameters = Module.getValidParameters();
       for (let i = 0; i < parameters.size(); ++i) {
-        const param = parameters.get(i);
+        let param = parameters.get(i);
         createSlider(wasmProcessor, param, i);
       }
     };
