@@ -53,7 +53,7 @@ const __unit_header unit_header_t unit_header = {
     .num_params = 4,                                       // Number of valid parameter descriptors. (max. 11)
     
     .params = {
-        // Format: min, max, center, default, type, frac. bits, frac. mode, <reserved>, name
+        // Format: min, max, center (unused), default, type, frac. bits, frac. mode, <reserved>, name
 
         // See common/runtime.h for type enum and unit_param_t structure
 
