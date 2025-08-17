@@ -77,3 +77,12 @@ SDKで作成された単一のカスタムコンテンツは *"ユニット"* �
 ### 詳細な情報
 
  より詳細な情報は [drumlogue platform README](https://github.com/korginc/logue-sdk/tree/master/platform/drumlogue/README_ja.md) ファイルをご参照ください.
+
+
+## KORG DIY CLUB Examples
+
+[KORG Examples](11_korg_examples_ja.md)
+
+ソフトウェアエンジニアから非ソフトウェアエンジニアまで, こよなくDIYを愛するKORG社員たち (KORG DIY CLUB)によるユニットの作例を公開しています。
+*.prlgunit*, *.mnlgxdunit*, and  *.ntkdigunit* ファイルは自作コンテンツのバイナリデータ本体とメタデータを含む簡潔なパッケージファイルです. 
+このファイルは [logue-cli utility](https://github.com/korginc/logue-sdk/tree/master/tools/logue-cli) もしくは 製品の Librarian application ([KORG ウエブサイト](https://korg.com)の製品ページに参考) 経由でアップロードすることが出来ます.

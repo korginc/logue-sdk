@@ -4,7 +4,7 @@ title: Oscillators
 title_long: オシレーターユニット覧
 permalink: /ja/unit-index/osc/
 language: ja
-last_modified_on: 2024-05-07 18:04:34 +9000 
+last_modified_on: 2025-02-27 17:15:54
 parent: Unit Index
 nav_order: 2
 ---
@@ -13,10 +13,14 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 
 | 名前 | 開発者 | 備考 | プラットフォーム |　|
 | [Alpha One](https://blog.boochow.com/logue/alpha1) | boochow instruments | Alpha-Juno DCO emulation | pro, xd, nts-1 | 有料 |
-| [Hoovic](https://blog.boochow.com/logue/hoovic) | boochow instruments | Hoover sound | pro, xd, nts-1 | 有料 |
+| [Hoovic](https://blog.boochow.com/logue/hoovic) | boochow instruments | Hoover sound | pro, xd, nts-1, nts-1 mkii | 有料 |
+| [Lily](https://blog.boochow.com/logue/lily) | boochow instruments | oscillator unit based on Mutable Instruments Braids | nts-1 mkii | 無料 |
+| [Lily](https://blog.boochow.com/logue/lily-logue) | boochow instruments | oscillator unit based on Mutable Instruments Braids | pro, xd, nts-1 | 無料 |
 | [picture](https://github.com/boochow/picture) | boochow instruments | Picture display for oscilloscopes (requires Lissa delay effect) | pro, xd, nts-1 | 無料 |
+| [Pitchy](https://blog.boochow.com/logue/pitchy) | boochow instruments | pitch shifter oscillator | nts-1 mkii | 無料 |
 | [Pulsaw](https://blog.boochow.com/logue/pulsaw) | boochow instruments | Juno DCO emulation | pro, xd, nts-1 | 有料 |
-| [Waves2](https://github.com/boochow/Waves2) | boochow instruments | Waves2 is the oscillator which can control its harmonics | pro, xd, nts-1 | 無料 |
+| [Vocoder](https://blog.boochow.com/logue/vocoder_nts1) | boochow instruments | channel vocoder with 5-voice paraphonic osc | nts-1_mkii | 無料 |
+| [Waves2](https://github.com/boochow/Waves2) | boochow instruments | Waves2 is the oscillator which can control its harmonics | pro, xd, nts-1, nts-1 mkii | 無料 |
 | [Ruismaker](https://ruismaker.com/korg/) | Bram Bos | Analog drum oscillator | nts-1 | 無料 |
 | [Cain++](https://cain-synthesizer.com/cain) | Cain Synthesizers | Karplus-Strong oscillator | pro, xd, nts-1 | 寄付 |
 | [Cain CZ](https://cain-synthesizer.com/cain-cz-2) | Cain Synthesizers | Phase distortion oscillator inspired by the Casio Cosmo synthesizer | pro, xd, nts-1 | 寄付 |
@@ -45,6 +49,8 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [Step](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/devlog/193526/step-per-key-arpeggiator) | Ghost Time | An experimental stepping oscillator | pro, xd, nts-1 | 寄付 |
 | [Warped](https://ghosttime.itch.io/ghost-time-custom-oscillators-for-the-logue-family/devlog/193525/warped-boc-inspired-lo-fi-oscillator) | Ghost Time | A lo-fi oscillator inspired by Boards of Canada | pro, xd, nts-1 | 寄付 |
 | [Ubersaw](https://github.com/GrahamJamesKeane/UberSaw) | Graham Keane | JP-8000 supersaw emulation | nts-1 | 無料 | 
+| [WvTable](https://github.com/vuki/WvTable-logue/) | Greg Vuki | Wavetable oscillator based on waves and wavetables from PPG WAVE | pro, xd, nts-1 | 無料 |
+| [VoxHumana](https://github.com/vuki/VoxHumana-Minilogue-xd/) | Greg Vuki | Simulation of the Vox Humana preset from Polymoog | pro, xd, nts-1 | 無料 |
 | [1973](http://hammondeggsmusic.ca/logueplugins/1973.html) | Hammond Eggs Music | Single osc., dual filter, emulation of miniKorg 700 | pro, xd, nts-1 | 寄付 | 
 | [Chips2.0](http://hammondeggsmusic.ca/logueplugins/chips2.html) | Hammond Eggs Music | Chiptune oscillator with PWM, arpeg., and noise drums | pro, xd, nts-1 | 寄付 | 
 | [Divide](http://hammondeggsmusic.ca/logueplugins/divide.html) | Hammond Eggs Music | 12 note top octave style divider oscillator | pro, xd, nts-1 | 寄付 |
@@ -68,6 +74,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [Supersaw](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Saw with unison (pseudo-polyphony on NTS-1) | pro, xd, nts-1 | 無料 |
 | [FastSaw](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Optimized Saw with unison (pseudo-polyphony on NTS-1) | pro, xd, nts-1 | 無料 |
 | [FMxx](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | 6/4-operator FM oscillator series with up to 4 Yamaha DX7/DX21/DX11-series voice banks suport | pro, xd, nts-1 | 無料 |
+| [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3 | 無料 |
 | [MO2 add](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits additive mode | pro, xd, nts-1 | 無料 |
 | [MO2 fm](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits FM mode | pro, xd, nts-1 | 無料 |
 | [MO2 grn](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits granular mode | pro, xd, nts-1 | 無料 |
@@ -76,6 +83,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [MO2 va](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits VA mode | pro, xd, nts-1 | 無料 |
 | [MO2 wsh](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits waveshaping mode | pro, xd, nts-1 | 無料 |
 | [MO2 wta-wtf](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits wavetable modes | pro, xd, nts-1 | 無料 |
+| [BEAST](https://www.platinumaudiolab.com/beast) | Platinum Audiolab | Vintage analog style oscillator inspired by Minimoog, SEM and ARP2600 synths | pro, xd, nts-1 | 有料 |
 | [2DTB](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | 2D wavetable oscillator | pro, xd, nts-1 | 寄付 |
 | [FBFM](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | Feedback FM oscillator | pro, xd, nts-1 | 寄付 |
 | [FRFM](https://gum.co/rolllog_nts1_pack) | Roll-Log Sounds | Band limited fractional ratio FM | pro, xd, nts-1 | 寄付 |
@@ -114,6 +122,4 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [ROAT](https://github.com/tweeeeeak/nts) | Tweeeeeak | 8-bit experimental oscillator inspired by the "Rumble of Ancient Times" synthesizer | nts-1 | 無料 |
 | [vbass](https://github.com/tweeeeeak/nts) | Tweeeeeak | Volca Bass style triple oscillator | nts-1 | 無料 |
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | pro, xd, nts-1 | 寄付 |
-| [Pitchy](https://boochow.gumroad.com/l/pithcy) | boochow instruments | pitch shifter oscillator | nts-1 mkii | 無料 |
-  [Lily](https://boochow.gumroad.com/l/lily) | boochow instruments | oscillator unit based on Mutable Instruments Braids | nts-1 mkii | 無料 |
-
+| [FunFM](https://github.com/mrf-r/FunFM-logue) | Eugene Chernyh | 2 alias supressed FM operators with variable waveshape | pro, xd, nts-1 | 無料 |

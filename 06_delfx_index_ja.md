@@ -4,7 +4,7 @@ title: Delay Effects
 title_long: ディレイユニット覧
 permalink: /ja/unit-index/delfx/
 language: ja
-last_modified_on: 2024-04-04 17:30:07 +9000
+last_modified_on: 2025-02-26 15:13:15
 parent: Unit Index
 nav_order: 2
 ---
@@ -14,7 +14,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 _Note: ディレイエフェクトセクションには, ディレイ以外の機能を持つエフェクトを入れることができます. 備考欄をご覧ください._
 
 | 名前 | 開発者 | 備考 | プラットフォーム |  |
-| [Delay Lab](https://boochow.gumroad.com/l/delaylab) | boochow instruments | A delay unit mainly for flanger/chorus. | drum | 無料/寄付 |
+| [Delay Lab](https://blog.boochow.com/logue/delaylab) | boochow instruments | A delay unit mainly for flanger/chorus. | drum | 無料/寄付 |
 | [lissa](https://github.com/boochow/lissa) | boochow instruments | Lissajous output for oscilloscopes | pro, xd, nts-1 | 無料 |
 | [veryshort](https://github.com/boochow/veryshort) | boochow instruments | Very short delay, comb filter | pro, xd, nts-1, nts-1 mkII | 無料 |
 | [lobit](https://github.com/centrevillage/cv_logue/tree/master/delfx/lobit) | centrevillage |  | pro, xd, nts-1 | 無料 |
@@ -30,6 +30,7 @@ _Note: ディレイエフェクトセクションには, ディレイ以外の�
 | [while(1)](http://hammondeggsmusic.ca/logueplugins/while1.html) | Hammond Eggs Music | A versatile looper / metronome | pro, xd, nts-1 | 寄付 |
 | [Crusher](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Bit crusher and decimator | pro, xd, nts-1 | 無料 |
 | [Gator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style gate arpeggiator | pro, xd, nts-1 | 無料 |
+| [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3 | 無料 |
 | [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | pro, xd, nts-1 | 無料 |
 | [Looper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style loop recorder | pro, xd, nts-1 | 無料 |
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | 無料 |

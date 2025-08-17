@@ -4,7 +4,7 @@ title: Modulation Effects
 title_long: モジュレーションユニット覧
 permalink: /ja/unit-index/modfx/
 language: ja
-last_modified_on: 2024-04-04 17:26:28 +9000
+last_modified_on: 2025-02-26 14:57:20
 parent: Unit Index
 nav_order: 2
 ---
@@ -12,6 +12,7 @@ nav_order: 2
 _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp までご連絡下さい._
 
 | 名前 | 開発者 | 備考 | プラットフォーム |  |
+| [Metronome](https://beatnicster.booth.pm/items/6558042) | Beatnicster | Simple metronome | nts-1 mkII | 寄付 |
 | [MasterVol2](https://github.com/boochow/MasterVol2) | boochow instruments | Secondary master volume | pro, xd, nts-1, nts-1 mkII | 無料 |
 | [Teleconf](https://github.com/boochow/teleconf) | boochow instruments | G.711 A-law codec emulation | pro, xd, nts-1, nts-1 mkII | 無料 |
 | [3DC](https://www.cain-synthesizer.com/effects) | Cain Synthesizers | 3 delay line chorus | pro, xd, nts-1 | 寄付 |
@@ -30,6 +31,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [distort-mod](http://github.com/hypercubed-music/nts-1) | Hypercubed Music | Simple distortion/clip effect | pro, xd, nts-1 | 無料 |
 | [Crusher](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Bit crusher and decimator | pro, xd, nts-1 | 無料 |
 | [Gator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style gate arpeggiator | pro, xd, nts-1 | 無料 |
+| [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3 | 無料 |
 | [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | pro, xd, nts-1 | 無料 |
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | 無料 |
 | [cvRing](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Stereo ring modulation effect tuned to V/Oct | pro, xd, nts-1 | 寄付 |

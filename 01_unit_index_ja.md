@@ -18,3 +18,5 @@ has_children: true
  * [ジェネリックエフェクト](09_genericfx_index_ja.md)
  * [その他](10_misc_index_ja.md)
  
+KORG DIY CLUBによる作例
+ * [KORG Examples](11_korg_examples_jp.md)

@@ -3,7 +3,7 @@ layout: page
 title: Delay Effects
 title_long: Delay Effect Units
 permalink: /unit-index/delfx/
-last_modified_on: 2024-04-04 17:29:54 +9000
+last_modified_on: 2025-02-26 15:12:39
 parent: Unit Index
 nav_order: 2
 ---
@@ -13,7 +13,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 _Note: The delay effect section can contain effects that perform other functions than delay, see descriptions below._
 
 | Name | Developer | Description | Platforms | |
-| [Delay Lab](https://boochow.gumroad.com/l/delaylab) | boochow instruments | A delay unit mainly for flanger/chorus. | drum | free/donation |
+| [Delay Lab](https://blog.boochow.com/logue/delaylab) | boochow instruments | A delay unit mainly for flanger/chorus. | drum | free/donation |
 | [lissa](https://github.com/boochow/lissa) | boochow instruments | Lissajous output for oscilloscopes | pro, xd, nts-1 | free |
 | [veryshort](https://github.com/boochow/veryshort) | boochow instruments | Very short delay, comb filter | pro, xd, nts-1, nts-1 mkII | free |
 | [lobit](https://github.com/centrevillage/cv_logue/tree/master/delfx/lobit) | centrevillage |  | pro, xd, nts-1 | free |
@@ -29,6 +29,7 @@ _Note: The delay effect section can contain effects that perform other functions
 | [while(1)](http://hammondeggsmusic.ca/logueplugins/while1.html) | Hammond Eggs Music | A versatile looper / metronome | pro, xd, nts-1 | donation |
 | [Crusher](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Bit crusher and decimator | pro, xd, nts-1 | free |
 | [Gator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style gate arpeggiator | pro, xd, nts-1 | free |
+| [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3 | free |
 | [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | pro, xd, nts-1 | free |
 | [Looper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style loop recorder | pro, xd, nts-1 | free |
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | free |

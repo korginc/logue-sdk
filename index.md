@@ -87,3 +87,10 @@ Master effects are inline effects that can be bypassed on a per-part basis. The 
 
  Refer to the [drumlogue platform README](https://github.com/korginc/logue-sdk/tree/master/platform/drumlogue/README.md) for further details.
 
+## Examples by KORG DIY CLUB
+
+[KORG Examples](11_korg_examples.md)
+
+These are examples of logue units created by KORG DIY CLUB, a group of KORG employees who love DIY and consist of software engineers and non-software engineers.
+*.prlgunit*, *.mnlgxdunit*, and  *.ntkdigunit* files are simple zip files containing the binary payload for the custom oscillator or effect and a metadata file describing it.
+They can be loaded onto a device matching the target platform using the [logue-cli utility](https://github.com/korginc/logue-sdk/tree/master/tools/logue-cli) or the Librarian application for that device (see product page on [KORG's official website](https://korg.com)).
