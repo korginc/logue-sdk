@@ -37,7 +37,8 @@
 #
 
 if [ "$(type -t env)" != "function" ]; then
-    source /app/env
+    # source /app/env
+    source /mnt/d/app/env
 fi
 
 short_desc () {

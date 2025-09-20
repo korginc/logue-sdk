@@ -55,16 +55,26 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y coreutils sudo ma
 
 # Common files
 COPY ./profile /root/.profile
-COPY ./env /app/env
-COPY ./interactive_entry /app/
-COPY ./cmd_entry /app/
-COPY ./VERSION /app/
-COPY ./commands/* /app/commands/
+## COPY ./env /app/env
+COPY ./env /mnt/d/app/env
+## COPY ./interactive_entry /app/
+COPY ./interactive_entry /mnt/d/app/
+## COPY ./cmd_entry /app/
+COPY ./cmd_entry /mnt/d/app/
+## COPY ./VERSION /app/
+COPY ./VERSION /mnt/d/app/
+## COPY ./commands/* /app/commands/
+COPY ./commands/* /mnt/d/app/commands/
 
 # drumlogue specific files
-COPY ./drumlogue/environment /app/drumlogue/
-COPY ./builder/get_drumlogue_toolchain.sh /app/drumlogue/
-RUN /bin/bash -c "/app/drumlogue/get_drumlogue_toolchain.sh && rm /app/drumlogue/get_drumlogue_toolchain.sh"
+## COPY ./drumlogue/environment /app/drumlogue/
+COPY ./drumlogue/environment /mnt/d/app/drumlogue/
+##COPY ./drumlogue/environment /app/drumlogue/
+COPY ./drumlogue/environment /mnt/d/app/drumlogue/
+COPY ./builder/get_drumlogue_toolchain.sh /mnt/d/app/drumlogue/
+## NOTE commenting out because in my WSL environment te /app/drumlogue/ path is actually /mnt/d/app/drumlogue/.
+## So I performed the actions expected by the following bash script manually
+RUN /bin/bash -c "/mnt/d/app/drumlogue/get_drumlogue_toolchain.sh && rm /mnt/d/app/drumlogue/get_drumlogue_toolchain.sh"
 
 # minilogue-xd specific files
 COPY ./minilogue-xd/environment /app/minilogue-xd/

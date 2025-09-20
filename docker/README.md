@@ -6,6 +6,19 @@
 
 The Docker-based build environment packages together all the tools required to build logue SDK units for any of the supported platforms, provides some convenience tools to simplify bulk project building and allows to build in consistent environment independent from the host operating system.
 
+#### Windows Notes
+
+ On Windows (10/11) the [Windows Subsystem for Linux (WSL2)](https://learn.microsoft.com/en-us/windows/wsl/) must be installed.
+ This is a prerequisite for Docker, and to be able to make use of convenience bash scripts (detailed below) in powershell and command prompt.
+ So, in Windows enviroment:
+ 1. Launch **WSL** from *Start* icon
+ 2. Go to the choosen directory where you want to install the SDK, e.g.
+ 
+ ```
+ $ cd /mnt/d/my/path
+```
+ 3. Update the scripts to correct paths (e.g. /app/ => /mnt/c/app/)
+
 ### Setup
 
  1. [Install Docker](https://docs.docker.com/get-docker/) (Note: Docker Desktop is not specifically required, [installing Docker Engine](https://docs.docker.com/engine/install/) is sufficient)
@@ -16,6 +29,17 @@ The Docker-based build environment packages together all the tools required to b
  $ cd logue-sdk
  $ git submodule update --init
  ```
+ 2. - For Windows WST only: Convert scripts from dos to unix:
+  ```
+ $ sudo apt-get install dos2unix
+ $ dos2unix ./*
+ $ dos2unix inc/*
+ $ dos2unix docker-app/*
+ $ dos2unix docker-app/builder/*
+ $ dos2unix docker-app/commands/*
+ $ dos2unix docker-app/drumlogue/*
+ 
+```
  
  3. Build the container.
  ```
@@ -24,11 +48,6 @@ The Docker-based build environment packages together all the tools required to b
  
  [...]
  ```
-
-#### Windows Notes
-
- On Windows (10/11) the [Windows Subsystem for Linux (WSL2)](https://learn.microsoft.com/en-us/windows/wsl/) must be installed.
- This is a prerequisite for Docker, and to be able to make use of convenience bash scripts (detailed below) in powershell and command prompt.
 
 ### Interactive Shell
 

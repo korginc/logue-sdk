@@ -36,7 +36,8 @@
 #    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-ENV_ROOT_DIR="/app"
+#ENV_ROOT_DIR="/app"
+ENV_ROOT_DIR="/mnt/d/app"
 
 env_short_desc () {
     echo -n "Prepare environment for target platform builds."

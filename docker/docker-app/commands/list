@@ -37,10 +37,11 @@
 #
 
 if [ "$(type -t env)" != "function" ]; then
-    source /app/env
+    # source /app/env
+    source /mnt/d/app/env
 fi
 
-COMMANDS_PATH="/app/commands"
+COMMANDS_PATH="/mnt/d/app/commands"
 
 short_desc () {
     echo -n "List available logue SDK related commands."
