@@ -10,8 +10,6 @@
 #include "Noise.h"
 #include "Resonator.h"
 #include "tuple"
-#include "Limiter.h"
-#include "Comb.h"
 
 class Models;
 

@@ -6,9 +6,9 @@
  *
  */
 
-#include "unit.h"  // Note: Include common definitions for all units
+#include "../common/unit.h"  // Note: Include common definitions for all units
 
-#include <cstddef>
+#include <string.h>
 #include <cstdint>
 
 #include "ripplerx.h"  // Note: Include custom master fx code
@@ -137,5 +137,5 @@ __unit_callback uint8_t unit_get_preset_index() {
 /* Called to obtain the name of given preset index. The returned value should point to a nul-terminated 7-bit ASCII C string of maximum X characters.
  The displayable characters are the same as for the unit name.*/
 __unit_callback const char * unit_get_preset_name(uint8_t idx) {
-  return Resonator::getPresetName(idx);
+  return s_synth_instance.getPresetName(idx);
 }

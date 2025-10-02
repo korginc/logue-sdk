@@ -9,17 +9,24 @@
 *
 */
 
-#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <array>
+#include <memory>
 #include <vector>
-#include "runtime.h"
+#include "../common/runtime.h"
 #include <arm_neon.h>
 #include "constants.h"
 #include "Voice.h"
+#include "Limiter.h"
+#include "Comb.h"
 #include "Resonator.h"
 #include "Models.h"
+
+/** This class is the equivalent of the origin pluginProcessor the
+ * original RipplerX code, now it's a synth instance.
+ *
+ */
 
 class RipplerX
 {
@@ -27,7 +34,6 @@ class RipplerX
     /*===========================================================================*/
     /* Public Data Structures/Types. */
     /*===========================================================================*/
-
 
     /*===========================================================================*/
     /* Lifecycle Methods. */
@@ -52,8 +58,6 @@ class RipplerX
         // create intruments
         for (size_t i = 0; i < polyphony; ++i) {
             voices.push_back(std::make_unique<Voice>(*models));
-            voices[i].comb.init(c_sampleRate);
-            voices[i].limiter.init(c_sampleRate);
         }
 
         // private variables (state vars set at constructor)
@@ -70,7 +74,7 @@ class RipplerX
         m_get_num_samples_for_bank_ptr = desc->get_num_samples_for_bank;
         m_get_sample = desc->get_sample;
 
-        // Initial parameter values, editable one are indented and matching
+        // Initial parameter values, editable ones are indented and matching
         // with header.c, plus others that are characterizing each "program"
             parameters[mallet_mix] = 0.0f;
         parameters[mallet_res] = 8;
@@ -89,7 +93,7 @@ class RipplerX
         parameters[a_radius] = 0.5f;
         parameters[a_coarse] = 0.0f;
             parameters[a_fine] = 0.0f;  // -99.0 . 99.0
-            parameters[b_on] = 0;   // false, off as Drumlogue cannot edit them
+            parameters[b_on] = 0;   // false, off as Drumlogue has not enough user editable params
             parameters[b_model] = 0;
             parameters[b_partials] = c_partials[3];
             parameters[b_decay] = 1.0f;
@@ -128,9 +132,11 @@ class RipplerX
             parameters[ab_split] = 0.01f;   // 0.0f, 1.0f
         parameters[gain] = 0;
 
+        comb.init(getSampleRate());
+        limiter.init(getSampleRate());
 
         resetLastModels();
-        // clearVoices();
+        clearVoices();
         // onSlider();
 
         return k_unit_err_none;
@@ -161,24 +167,24 @@ class RipplerX
 
     inline void Render(float * __restrict outBuffer, size_t frames) {
 
-        auto a_on = (bool)getParameterValue(a_on);
-        auto b_on = (bool)getParameterValue(b_on);
-        auto mallet_mix = (float32_t)getParameterValue(mallet_mix);
-        auto mallet_res = (float32_t)getParameterValue(mallet_res);
-        auto vel_mallet_mix = (float32_t)getParameterValue(vel_mallet_mix);
-        auto vel_mallet_res = (float32_t)getParameterValue(vel_mallet_res);
-        auto noise_mix = getParameterValue(noise_mix);
+        bool a_on = (bool)getParameterValue(a_on);
+        bool b_on = (bool)getParameterValue(b_on);
+        float32_t mallet_mix = (float32_t)getParameterValue(mallet_mix);
+        float32_t mallet_res = (float32_t)getParameterValue(mallet_res);
+        float32_t vel_mallet_mix = (float32_t)getParameterValue(vel_mallet_mix);
+        float32_t vel_mallet_res = (float32_t)getParameterValue(vel_mallet_res);
+        float32_t noise_mix = getParameterValue(noise_mix);
         // auto noise_mix_range = getParameterValue(noise_mix);
         // noise_mix = noise_mix_range.convertTo0to1(noise_mix);  //not needed (?)
-        auto noise_res = getParameterValue(noise_res);
+        float32_t noise_res = getParameterValue(noise_res);
         // auto noise_res_range = getParameterValue(noise_res); // Paramater value already set in percentage
         // noise_res = noise_res_range.convertTo0to1(noise_res);
-        auto vel_noise_mix = getParameterValue(vel_noise_mix);
-        auto vel_noise_res = getParameterValue(vel_noise_res);
-        auto serial = (bool)getParameterValue(couple);
-        auto ab_mix = (float32_t)getParameterValue(ab_mix);
-        auto gain = (float32_t)getParameterValue(gain);
-        auto couple = (bool)getParameterValue(couple);
+        float32_t vel_noise_mix = getParameterValue(vel_noise_mix);
+        float32_t vel_noise_res = getParameterValue(vel_noise_res);
+        bool serial = (bool)getParameterValue(couple);
+        float32_t ab_mix = (float32_t)getParameterValue(ab_mix);
+        float32_t gain = (float32_t)getParameterValue(gain);
+        bool couple = (bool)getParameterValue(couple);
         gain = pow(10.0, gain / 20.0);
 
         // TODO NoteOn?
@@ -202,13 +208,13 @@ class RipplerX
                     // Mono sample
                     audioIn = vdup_n_f32(m_samplePointer[m_sampleIndex]);
                 }
-                audioIn = vmul_n_f32(audioIn, sampleGain);
+                audioIn = vmul_n_f32(audioIn, gain);    // TODO, create sampleGain as original resonator?
                 m_sampleIndex += m_sampleChannels;  //only usage of m_sampleIndex
             } else {
                 audioIn = vdup_n_f32(0.0f);
             }
 
-            for (int i = 0; i < polyphony; ++i)   //FOR PORTING in resonator orig. this is done at Render, which is the caller
+            for (size_t i = 0; i < polyphony; ++i)   //FOR PORTING in resonator orig. this is done at Render, which is the caller
             {
                 Voice& voice = *voices[i];
                 float32x2_t resOut = vdup_n_f32(0.0f);
@@ -291,7 +297,7 @@ class RipplerX
                     parameters[gain] = value;
                     break;
                 case c_parameterSampleBank:
-                if (value < c_sampleBankElements)
+                if ((size_t)value < c_sampleBankElements)
                         m_sampleBank = value;
                     break;
                 case c_parameterSampleNumber:
@@ -310,11 +316,11 @@ class RipplerX
                     parameters[vel_mallet_stiff] = value;
                     break;
                 case c_parameterModel:
-                    if (value < c_modelElements)
+                    if ((size_t)value < c_modelElements)
                         parameters[a_model] = value;
                     break;
                 case c_parameterPartials:
-                    if (value < c_partialElements)
+                    if ((size_t)value < c_partialElements)
                         parameters[a_partials] = c_partials(a_partials, value);
                     break;
                 case c_parameterDecay:
@@ -351,7 +357,7 @@ class RipplerX
                     parameters[noise_res] = value;
                     break;
                 case c_parameterNoiseFilterMode:
-                    if (value < c_noiseFilterModeElements)
+                    if ((size_t)value < c_noiseFilterModeElements)
                         parameters[noise_filter_mode] = value;
                     break;
                 case c_parameterNoiseFilterFreq:
@@ -382,76 +388,76 @@ class RipplerX
         if (index < c_parameterTotal)
         {
             switch(index) {
-                case c_parameterProgramName = 0:
+                case c_parameterProgramName:
                     return m_currentProgram;
                     break;
-                case c_parameterGain = 1:
+                case c_parameterGain:
                     return parameters[gain];
                     break;
-                case c_parameterSampleBank = 2:
+                case c_parameterSampleBank:
                     return m_sampleBank;
                     break;
-                case c_parameterSampleNumber = 3:
+                case c_parameterSampleNumber:
                     return m_sampleNumber;
                     break;
-                case c_parameterMalletResonance = 4:
+                case c_parameterMalletResonance:
                     return parameters[mallet_res];
                     break;
-                case c_parameterMalletStifness = 5:
+                case c_parameterMalletStifness:
                     return parameters[mallet_stiff];
                     break;
-                case c_parameterVelocityMalletResonance = 6:
+                case c_parameterVelocityMalletResonance:
                     return parameters[vel_mallet_res];
                     break;
-                case c_parameterVelocityMalletStifness = 7:
+                case c_parameterVelocityMalletStifness:
                     return parameters[vel_mallet_stiff];
                     break;
-                case c_parameterModel = 8:
+                case c_parameterModel:
                     return parameters[a_model];
                     break;
-                case c_parameterPartials = 9:
+                case c_parameterPartials:
                     return parameters[a_partials];
                     break;
-                case c_parameterDecay = 10:
+                case c_parameterDecay:
                     return parameters[a_decay];
                     break;
-                case c_parameterMaterial = 11:
+                case c_parameterMaterial:
                     return parameters[a_damp];
                     break;
-                case c_parameterTone = 12:
+                case c_parameterTone:
                     return parameters[a_tone];
                     break;
-                case c_parameterHitPosition = 13:
+                case c_parameterHitPosition:
                     return parameters[a_hit];
                     break;
-                case c_parameterRelease = 14:
+                case c_parameterRelease:
                     return parameters[a_rel];
                     break;
-                case c_parameterInharmonic = 15:
+                case c_parameterInharmonic:
                     return parameters[a_inharm];
                     break;
-                case c_parameterFilterCutoff = 16:
+                case c_parameterFilterCutoff:
                     return parameters[a_cut];
                     break;
-                case c_parameterTubeRadius = 17:
+                case c_parameterTubeRadius:
                     return parameters[a_radius];
                     break;
-                case c_parameterCoarsePitch = 18:
+                case c_parameterCoarsePitch:
                     return parameters[a_coarse];
                     break;
-                case c_parameterNoiseMix = 19:
+                case c_parameterNoiseMix:
                     return parameters[noise_mix];
                     break;
-                case c_parameterNoiseResonance = 20:
+                case c_parameterNoiseResonance:
                     return parameters[noise_res];
                     break;
-                case c_parameterNoiseFilterMode = 21:
+                case c_parameterNoiseFilterMode:
                     return parameters[noise_filter_mode];
                     break;
-                case c_parameterNoiseFilterFreq = 22:
+                case c_parameterNoiseFilterFreq:
                     return parameters[noise_filter_freq];
                     break;
-                case c_parameterNoiseFilterQ = 23:
+                case c_parameterNoiseFilterQ:
                     return parameters[noise_filter_q];
                     break;
                 default:
@@ -468,24 +474,19 @@ class RipplerX
         //       It can be assumed that caller will have copied or used the string
         //       before the next call to getParameterStrValue
         case c_parameterSampleBank:
-            if (value < 0 || value >= c_sampleBankElements)
-            return nullptr;
+            if (value < 0 || (size_t)value >= c_sampleBankElements)
             return c_sampleBankName[value];
         case c_parameterProgramName:
             if (value < 0 || value >= last_program)
-            return nullptr;
             return c_programName[value];
         case c_parameterModel:
-            if (value < 0 || value >= c_modelElements)
-            return nullptr;
+            if (value < 0 || (size_t)value >= c_modelElements)
             return c_modelName[value];
         case c_parameterPartials:
-            if (value < 0 || value >= c_partialElements)
-            return nullptr;
+            if (value < 0 || (size_t)value >= c_partialElements)
             return c_partialsName[value];
         case c_parameterNoiseFilterMode:
-            if (value < 0 || value >= c_noiseFilterModeElements)
-            return nullptr;
+            if (value < 0 || (size_t)value >= c_noiseFilterModeElements)
             return c_noiseFilterModeName[value];
         default:
             break;
@@ -564,7 +565,10 @@ class RipplerX
         (void)aftertouch;
     }
 
-    inline void LoadPreset(uint8_t idx) { (void)idx; }
+    inline void LoadPreset(uint8_t idx) {
+        (void)idx;
+        setCurrentProgram(idx); // TODO review this
+    }
 
     inline uint8_t getPresetIndex() const { return 0; }
 
@@ -593,7 +597,7 @@ class RipplerX
         // Note: String memory must be accessible even after function returned.
         //       It can be assumed that caller will have copied or used the string
         //       before the next call to getPresetName
-        return nullptr;
+        return c_programName[idx];
     }
 
     private:
@@ -635,10 +639,10 @@ class RipplerX
     }
 
     /** this can be called via enum with program name! */
-    inline const void setCurrentProgram (int index)
+    inline const void setCurrentProgram(int index)
     {
         m_currentProgram = index;
-
+        // programs are in constants.h
         parameters = programs[index];
 
         // TODO?
@@ -651,22 +655,27 @@ class RipplerX
     /*===========================================================================*/
     std::vector<std::unique_ptr<Voice>> voices;
     std::unique_ptr<Models> models;
-    Comb comb{};
+    Comb    comb{};
     Limiter limiter{};
-      // equivalent to m_voice
+    // equivalent to m_voice
     int     nvoice = 0; // next voice to use
 
     // Parameters, both editable and not
     // no need to define each of them, the enum will detect them exactly
     // float32_t parameters[last_param];
-    std::array<float32_t, last_param> parameters;  // store all the params, either editable or not and access them via enum
+    std::array<float32_t, last_param> parameters;  // parameter values can be found in constants-h
 
     // state variables - prefer static default instead of initialization as there's just one possible value
-    bool     m_initialized = false;
-    bool     m_gate = false;
-    size_t   m_framesSinceNoteOn = SIZE_MAX; // Voice stealing
-    uint8_t  m_currentProgram = 0;
-    uint8_t  m_note = 60;
+    bool      m_initialized = false;
+    bool      m_gate = false;
+    size_t    m_framesSinceNoteOn = SIZE_MAX; // Voice stealing
+    uint8_t   m_currentProgram = 0;
+    uint8_t   m_note = 60;
+    float32_t scale = 1.0f; // UI scale
+    uint8_t   last_a_model = -1;
+    uint8_t   last_b_model = -1;
+    uint8_t   last_a_partials = -1;
+    uint8_t   last_b_partials = -1;
 
     // sample management
     uint8_t  m_sampleBank = 0;  // parameter editable
@@ -674,7 +683,7 @@ class RipplerX
     // see Init
     uint8_t  m_sampleChannels; // From sample_wrapper
     size_t   m_sampleFrames; // From sample_wrapper
-    const float * m_samplePointer; // From sample_wrapper
+    const float32_t * m_samplePointer; // From sample_wrapper
     uint16_t m_sampleStart = 0;
     size_t   m_sampleIndex; // Counts in float*, stride == channels
     size_t   m_sampleEnd = 1000; // 100%. Counts in float*, stride == channels

@@ -93,6 +93,8 @@ const char* const c_noiseFilterModeName[c_noiseFilterModeElements] = {
 /*
     55 parameters, only a subset are editable.
     all the others will be accessed via an array of floats
+    Programs will hold a set of these, to be accesses as
+    index of array
 */
 enum Parameters : uint8_t {
     a_coarse,
