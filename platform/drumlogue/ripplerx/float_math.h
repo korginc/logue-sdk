@@ -678,7 +678,7 @@ float fasterlog2f(float x) {
   return y - 126.94269504f;
 }
 
-/** "Fast" natural logarithm approximation, valid for positive x as precision allows.
+/** "Fast" natural logarithm (log) approximation, valid for positive x as precision allows.
  * @note Adapted from Paul Mineiro's FastFloat
  */
 static inline __attribute__((optimize("Ofast"), always_inline))

@@ -243,7 +243,7 @@ void Voice::applyPitch(std::array<float32_t, 64>& model, float32_t factor)
 
 /* called by Voice::trigger and Voice::release, plus ::onSlider()
  * see above original code, completly commented out in favour
- * of a new call which unrolls the calculate frquency shift call
+ * of a new call which unrolls the calculate frequency shift call
  * check comments and refactoring steps on above commented code
  */
 void Voice::updateResonators()

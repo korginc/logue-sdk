@@ -10,18 +10,18 @@ Resonator::Resonator()
 }
 
 // called by original plugin::onSlider() => TODO
-void Resonator::setParams(float32_t _srate, bool _on, int model, int _partials, float32_t _decay, float32_t damp, float32_t tone, float32_t hit,
-	float32_t _rel, float32_t inharm, float32_t _cut, float32_t _radius, float32_t vel_decay, float32_t vel_hit, float32_t vel_inharm)
+void Resonator::setParams(float32_t _srate, bool _on, int _model, int _partials, float32_t _decay,
+    float32_t _damp, float32_t tone, float32_t hit,	float32_t _rel, float32_t _inharm, float32_t _cut,
+    float32_t _radius, float32_t vel_decay, float32_t vel_hit, float32_t vel_inharm)
 {
 	on = _on;
-	nmodel = model;
+	nmodel = _model;
 	npartials = _partials;
 	decay = _decay;
 	radius = _radius;
 	srate = _srate;
 	cut = _cut;
 
-	// TODO
 	auto freq = 20.0 * fasterpowf(20000.0 / 20.0, cut < 0.0 ? 1 + cut : cut); // map 1..0 to 20..20000, with inverse scale for negative norm;
 	if (_cut < 0.0) {
 		filter.lp(srate, freq, 0.707);
@@ -30,10 +30,10 @@ void Resonator::setParams(float32_t _srate, bool _on, int model, int _partials, 
 		filter.hp(srate, freq, 0.707);
     }
 	for (Partial& partial : partials) {
-		partial.damp = damp;
+		partial.damp = _damp;
 		partial.decay = decay;
 		partial.hit = hit;
-		partial.inharm = inharm;
+		partial.inharm = _inharm;
 		partial.rel = _rel;
 		partial.tone = tone;
 		partial.vel_decay = vel_decay;
@@ -44,7 +44,7 @@ void Resonator::setParams(float32_t _srate, bool _on, int model, int _partials, 
 
 	waveguide.decay = decay;
 	waveguide.radius = vmov_n_f32(radius);
-	waveguide.is_closed = model == ModelNames::ClosedTube;
+	waveguide.is_closed = _model == ModelNames::ClosedTube;
 	waveguide.srate = srate;
 	waveguide.vel_decay = vel_decay;
 	waveguide.rel = _rel;

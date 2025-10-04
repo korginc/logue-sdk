@@ -20,7 +20,6 @@
 #include "Voice.h"
 #include "Limiter.h"
 #include "Comb.h"
-#include "Resonator.h"
 #include "Models.h"
 
 /** This class is the equivalent of the origin pluginProcessor the
@@ -54,7 +53,7 @@ class RipplerX
         // Note: if need to allocate some memory can do it here and return k_unit_err_memory if getting allocation errors
 
 
-        models = std::make_unique<Models>();
+        // models = std::make_unique<Models>();
         // create intruments
         for (size_t i = 0; i < polyphony; ++i) {
             voices.push_back(std::make_unique<Voice>(*models));
@@ -74,6 +73,19 @@ class RipplerX
         m_get_num_samples_for_bank_ptr = desc->get_num_samples_for_bank;
         m_get_sample = desc->get_sample;
 
+        loadParameters();
+
+        comb.init(getSampleRate());
+        limiter.init(getSampleRate());
+
+        resetLastModels();
+        clearVoices();
+        prepareToPlay();    // this is equivalent to onSlider() in the original plugin
+
+        return k_unit_err_none;
+    }
+
+    inline void loadParameters() {
         // Initial parameter values, editable ones are indented and matching
         // with header.c, plus others that are characterizing each "program"
             parameters[mallet_mix] = 0.0f;
@@ -131,15 +143,6 @@ class RipplerX
             parameters[ab_mix] = 0.5f;
             parameters[ab_split] = 0.01f;   // 0.0f, 1.0f
         parameters[gain] = 0;
-
-        comb.init(getSampleRate());
-        limiter.init(getSampleRate());
-
-        resetLastModels();
-        clearVoices();
-        // onSlider();
-
-        return k_unit_err_none;
     }
 
     inline void Teardown() {
@@ -167,24 +170,24 @@ class RipplerX
 
     inline void Render(float * __restrict outBuffer, size_t frames) {
 
-        bool a_on = (bool)getParameterValue(a_on);
-        bool b_on = (bool)getParameterValue(b_on);
-        float32_t mallet_mix = (float32_t)getParameterValue(mallet_mix);
-        float32_t mallet_res = (float32_t)getParameterValue(mallet_res);
-        float32_t vel_mallet_mix = (float32_t)getParameterValue(vel_mallet_mix);
-        float32_t vel_mallet_res = (float32_t)getParameterValue(vel_mallet_res);
-        float32_t noise_mix = getParameterValue(noise_mix);
-        // auto noise_mix_range = getParameterValue(noise_mix);
+        bool a_on = (bool)getParameterValue(Parameters::a_on);
+        bool b_on = (bool)getParameterValue(Parameters::b_on);
+        float32_t mallet_mix = (float32_t)getParameterValue(Parameters::mallet_mix);
+        float32_t mallet_res = (float32_t)getParameterValue(Parameters::mallet_res);
+        float32_t vel_mallet_mix = (float32_t)getParameterValue(Parameters::vel_mallet_mix);
+        float32_t vel_mallet_res = (float32_t)getParameterValue(Parameters::vel_mallet_res);
+        float32_t noise_mix = getParameterValue(Parameters::noise_mix);
+        // auto noise_mix_range = getParameterValue(Parameters::noise_mix);
         // noise_mix = noise_mix_range.convertTo0to1(noise_mix);  //not needed (?)
-        float32_t noise_res = getParameterValue(noise_res);
-        // auto noise_res_range = getParameterValue(noise_res); // Paramater value already set in percentage
+        float32_t noise_res = getParameterValue(Parameters::noise_res);
+        // auto noise_res_range = getParameterValue(Parameters::noise_res); // Paramater value already set in percentage
         // noise_res = noise_res_range.convertTo0to1(noise_res);
-        float32_t vel_noise_mix = getParameterValue(vel_noise_mix);
-        float32_t vel_noise_res = getParameterValue(vel_noise_res);
-        bool serial = (bool)getParameterValue(couple);
-        float32_t ab_mix = (float32_t)getParameterValue(ab_mix);
-        float32_t gain = (float32_t)getParameterValue(gain);
-        bool couple = (bool)getParameterValue(couple);
+        float32_t vel_noise_mix = getParameterValue(Parameters::vel_noise_mix);
+        float32_t vel_noise_res = getParameterValue(Parameters::vel_noise_res);
+        bool serial = (bool)getParameterValue(Parameters::couple);
+        float32_t ab_mix = (float32_t)getParameterValue(Parameters::ab_mix);
+        float32_t gain = (float32_t)getParameterValue(Parameters::gain);
+        bool couple = (bool)getParameterValue(Parameters::couple);
         gain = pow(10.0, gain / 20.0);
 
         // TODO NoteOn?
@@ -213,45 +216,47 @@ class RipplerX
             } else {
                 audioIn = vdup_n_f32(0.0f);
             }
-
-            for (size_t i = 0; i < polyphony; ++i)   //FOR PORTING in resonator orig. this is done at Render, which is the caller
+            //FOR PORTING in resonator orig. this is done at Render, which is the caller
+            // for (size_t i = 0; i < polyphony; ++i)
+            for (auto& voice : voices)
             {
-                Voice& voice = *voices[i];
+                // Voice& voice = *voices[i];
                 float32x2_t resOut = vdup_n_f32(0.0f);
 
-                auto msample = voice.mallet.process(); // process mallet
+                auto msample = voice->mallet.process(); // process mallet
                 if (msample) {
                     // dirOut += msample * fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel);
-                    dirOut = vfma_f32(dirOut, msample, vmin_f32(1.0, vfma_f32(mallet_mix, vel_mallet_mix, voice.vel)));
+                    dirOut = vfma_f32(dirOut, msample, vmin_f32(1.0, vfma_f32(mallet_mix, vel_mallet_mix, voice->vel)));
                     // resOut += msample * fmin(1.0, mallet_res + vel_mallet_res * voice.vel);
-                    resOut = vfma_f32(resOut, msample, vmin_f32(1.0, vfma_f32(mallet_res, vel_mallet_mix, voice.vel)));
+                    resOut = vfma_f32(resOut, msample, vmin_f32(1.0, vfma_f32(mallet_res, vel_mallet_mix, voice->vel)));
                 }
 
-                if (audioIn && voice.isPressed)  //TODO isPressed
+                if (audioIn && voice->isPressed) // NoteOn => voice.trigger
                 resOut += audioIn;
 
-                float32x2_t nsample = voice.noise.process(); // process noise
+                float32x2_t nsample = voice->noise.process(); // process noise
+                // TODO remove scaling to 0-1, make parameteer directly in that range
                 if (nsample) {
                     // dirOut += nsample * (float32_t)noise_mix_range.convertFrom0to1(fmin(1.f, noise_mix + vel_noise_mix * (float)voice.vel));
-                    dirOut = vfma_f32(nsample, (float32_t)noise_mix_range.convertFrom0to1(vmin_f32(1.f, vfma_f32(noise_mix, vel_noise_mix,
-                                                                                                              (float)voice.vel))), dirOut);
+                    dirOut = vfma_f32(nsample, (float32_t)noise_mix.convertFrom0to1(vmin_f32(1.f, vfma_f32(noise_mix, vel_noise_mix,
+                                                                                                              (float)voice->vel))), dirOut);
                     // resOut += nsample * (float32_t)noise_res_range.convertFrom0to1(fmin(1.f, noise_res + vel_noise_res * (float)voice.vel));
-                    resOut = vfma_f32(nsample, (float32_t)noise_res_range.convertFrom0to1(vmin_f32(1.f, vfma_f32(noise_res, vel_noise_res,
-                                                                                                              (float)voice.vel))), resOut);
+                    resOut = vfma_f32(nsample, (float32_t)noise_res.convertFrom0to1(vmin_f32(1.f, vfma_f32(noise_res, vel_noise_res,
+                                                                                                              (float)voice->vel))), resOut);
                 }
 
                 auto out_from_a = 0.0; // output from voice A into B in case of resonator serial coupling
                 if (a_on) {
-                    auto out = voice.resA.process(resOut);  //TODO add Neon assembler APIs into process?
-                    if (voice.resA.cut > 20.0001) out = voice.resA.filter.df1(out);
+                    auto out = voice->resA.process(resOut);
+                    if (voice->resA.cut > 20.0001) out = voice->resA.filter.df1(out);
                     resAOut = vadd_f32(out, resAOut);
                     out_from_a = out;
                 }
 
                 if (b_on) {
-                    auto out = voice.resB.process(a_on && couple ? out_from_a : resOut);
-                    if (voice.resB.cut > 20.0001)
-                    out = voice.resB.filter.df1(out);
+                    auto out = voice->resB.process(a_on && couple ? out_from_a : resOut);
+                    if (voice->resB.cut > 20.0001)
+                    out = voice->resB.filter.df1(out);
                     resBOut = vadd_f32(out, resBOut);
                 }
             }   // end for polyphony
@@ -267,9 +272,9 @@ class RipplerX
             auto totalOut = vmla_n_f32(dirOut, resOut, gain); // dirOut + resOut * gain
             float32x2_t split;
             // auto [spl0, spl1] =  voice.comb.process(totalOut);
-            split =  voice.comb.process(totalOut);  // TODO correct this
+            split =  voice->comb.process(totalOut);  // TODO correct this
             // auto [left, right] = voice.limiter.process(split);
-            float32x2_t channels = voice.limiter.process(split);
+            float32x2_t channels = voice->limiter.process(split);
 
             // Add current float32x2 to output buffer.
             float32x2_t old = vld1_f32(outBuffer);  // load existing buffer from pointer
@@ -285,6 +290,11 @@ class RipplerX
     // Read parameter from user (6 pages listed in header.c)
     // I suppose that's the same as onSlider() of the original PluginProcessor
     inline void setParameter(uint8_t index, int32_t value) {
+        bool noiseChanged = false;
+        bool pitchChanged = false;
+        bool resonatorChangedA = false;
+        bool resonatorChangedB = false;
+        bool couplingChanged = false;
         if (index < c_parameterTotal)
         {
             switch(index) {
@@ -316,73 +326,108 @@ class RipplerX
                     parameters[vel_mallet_stiff] = value;
                     break;
                 case c_parameterModel:
-                    if ((size_t)value < c_modelElements)
+                    if ((size_t)value < c_modelElements){
                         parameters[a_model] = value;
-                    break;
+                        resonatorChangedA = true;}
+                        break;
                 case c_parameterPartials:
-                    if ((size_t)value < c_partialElements)
+                    if ((size_t)value < c_partialElements){
                         parameters[a_partials] = c_partials(a_partials, value);
+                        resonatorChangedA = true;}
                     break;
                 case c_parameterDecay:
                     parameters[a_decay] = value;
+                    resonatorChangedA = true;
                     break;
                 case c_parameterMaterial:
                     parameters[a_damp] = value;
+                    resonatorChangedA = true;
                     break;
                 case c_parameterTone:
                     parameters[a_tone] = value;
+                    resonatorChangedA = true;
                     break;
                 case c_parameterHitPosition:
                     parameters[a_hit] = value;
+                    resonatorChangedA = true;
                     break;
                 case c_parameterRelease:
                     parameters[a_rel] = value;
+                    resonatorChangedA = true;
                     break;
                 case c_parameterInharmonic:
                     parameters[a_inharm] = value;
+                    resonatorChangedA = true;
                     break;
                 case c_parameterFilterCutoff:
                     parameters[a_cut] = value;
+                    resonatorChangedA = true;
                     break;
                 case c_parameterTubeRadius:
                     parameters[a_radius] = value;
+                    resonatorChangedA = true;
                     break;
                 case c_parameterCoarsePitch:
                     parameters[a_coarse] = value;
+                    pitchChanged = true;
                     break;
                 case c_parameterNoiseMix:
                     parameters[noise_mix] = value;
+                    noiseChanged = true;
                     break;
-                case c_parameterNoiseResonance:
+                    case c_parameterNoiseResonance:
                     parameters[noise_res] = value;
+                    noiseChanged = true;
                     break;
                 case c_parameterNoiseFilterMode:
-                    if ((size_t)value < c_noiseFilterModeElements)
+                    if ((size_t)value < c_noiseFilterModeElements){
                         parameters[noise_filter_mode] = value;
-                    break;
-                case c_parameterNoiseFilterFreq:
-                    parameters[noise_filter_freq] = value;
+                        noiseChanged = true;}
+                        break;
+                    case c_parameterNoiseFilterFreq:
+                        parameters[noise_filter_freq] = value;
+                        noiseChanged = true;
                     break;
                 case c_parameterNoiseFilterQ:
                     parameters[noise_filter_q] = value;
+                    noiseChanged = true;
                     break;
                 default:
                     break;
             }
         }
+        prepareToPlay(noiseChanged, pitchChanged, resonatorChangedA, resonatorChangedB, couplingChanged);
     }
 
-    // TODO as OnSlider ? Or put everything above in setParameter?
-
-    // for (int i = 0; i < polyphony; i++) {
-    //     Voice& voice = *voices[i];
-    //     voice.noise.init(srate, noise_filter_mode, noise_filter_freq, noise_filter_q, noise_att, noise_dec, noise_sus, noise_rel);
-    //     voice.setPitch(a_coarse, b_coarse, a_fine, b_fine);
-    //     voice.resA.setParams(srate, a_on, a_model, a_partials, a_decay, a_damp, a_tone, a_hit, a_rel, a_inharm, a_cut, a_radius, vel_a_decay, vel_a_hit, vel_a_inharm);
-    //     voice.resB.setParams(srate, b_on, b_model, b_partials, b_decay, b_damp, b_tone, b_hit, b_rel, b_inharm, b_cut, b_radius, vel_b_decay, vel_b_hit, vel_b_inharm);
-    //     voice.setCoupling(couple, split);
-    //     voice.updateResonators();
-    // }
+    inline void prepareToPlay(bool noiseChanged = true, bool pitchChanged = true,
+        bool resonatorChangedA = true, bool resonatorChangedB = true,
+        bool couplingChanged = true) {
+        // Originally from OnSlider() of the original PluginProcessor
+        auto srate = getSampleRate();
+        for (auto& voice : voices) {
+            // Voice& voice = *voices[i];
+            if (noiseChanged) {
+                voice->noise.init(srate, parameters[noise_filter_mode], parameters[noise_filter_freq], parameters[noise_filter_q], parameters[noise_att], parameters[noise_dec], parameters[noise_sus], parameters[noise_rel]);
+            }
+            // in this moment only a_coarse can be editable, b_coarse and a_fine, b_fine are not
+            // editable in Drumlogue due to lack of parameters. Keep model default.
+            if (pitchChanged) {
+                voice->setPitch(parameters[a_coarse], parameters[b_coarse], parameters[a_fine], parameters[b_fine]);
+            }
+            if (resonatorChangedA) {
+                voice->resA.setParams(srate, parameters[a_on], parameters[a_model], parameters[a_partials], parameters[a_decay], parameters[a_damp], parameters[a_tone], parameters[a_hit], parameters[a_rel], parameters[a_inharm], parameters[a_cut], parameters[a_radius], parameters[vel_a_decay], parameters[vel_a_hit], parameters[vel_a_inharm]);
+            }
+            if (resonatorChangedB) {
+                voice->resB.setParams(srate, parameters[b_on], parameters[b_model], parameters[b_partials], parameters[b_decay], parameters[b_damp], parameters[b_tone], parameters[b_hit], parameters[b_rel], parameters[b_inharm], parameters[b_cut], parameters[b_radius], parameters[vel_b_decay], parameters[vel_b_hit], parameters[vel_b_inharm]);
+            }
+            if (couplingChanged) {
+                voice->setCoupling(parameters[couple], parameters[split]);
+            }
+            // not enough parameters to change resonator B, keep model default
+            if (resonatorChangedA || resonatorChangedB)
+                voice->updateResonators();
+        }
+    }
 
     inline int32_t getParameterValue(uint8_t index) const {
         if (index < c_parameterTotal)
@@ -474,19 +519,19 @@ class RipplerX
         //       It can be assumed that caller will have copied or used the string
         //       before the next call to getParameterStrValue
         case c_parameterSampleBank:
-            if (value < 0 || (size_t)value >= c_sampleBankElements)
+            if (value >= 0 && (size_t)value < c_sampleBankElements)
             return c_sampleBankName[value];
         case c_parameterProgramName:
-            if (value < 0 || value >= last_program)
+            if (value >= 0 && value < last_program)
             return c_programName[value];
         case c_parameterModel:
-            if (value < 0 || (size_t)value >= c_modelElements)
+            if (value >= 0 && (size_t)value < c_modelElements)
             return c_modelName[value];
         case c_parameterPartials:
-            if (value < 0 || (size_t)value >= c_partialElements)
+            if (value >= 0 && (size_t)value < c_partialElements)
             return c_partialsName[value];
         case c_parameterNoiseFilterMode:
-            if (value < 0 || (size_t)value >= c_noiseFilterModeElements)
+            if (value >= 0 && (size_t)value < c_noiseFilterModeElements)
             return c_noiseFilterModeName[value];
         default:
             break;
@@ -508,6 +553,7 @@ class RipplerX
             return nullptr;
         }
 
+    // TODO get note from unit.cc?
     inline void NoteOn(uint8_t note, uint8_t velocity) {
         auto srate = getSampleRate();
         Voice& voice = *voices[nvoice];
@@ -524,19 +570,20 @@ class RipplerX
         }
 
         // used to calculate the malletFreq for the trigger
-        auto mallet_stiff = (float32_t)getParameterValue(mallet_stiff);
-        auto vel_mallet_stiff = (float32_t)getParameterValue(vel_mallet_stiff);
-        auto malletFreq = fmin(5000.0, exp(log(mallet_stiff) + velocity / 127.0 * vel_mallet_stiff * (log(5000.0) - log(100.0))));
+        auto mallet_stiff = (float32_t)getParameterValue(Parameters::mallet_stiff);
+        auto vel_mallet_stiff = (float32_t)getParameterValue(Parameters::vel_mallet_stiff);
+        // auto malletFreq = fmin(5000.0, exp(log(mallet_stiff) + velocity / 127.0 * vel_mallet_stiff * (log(5000.0) - log(100.0))));
+        auto malletFreq = fmin(5000.0, e_expf(fasterlogf(mallet_stiff) + velocity * vel_mallet_stiff * c_malletStiffnessCorrectionFactor));
 
         voice.trigger(srate, note, velocity / 127.0, malletFreq);
     }
 
     inline void NoteOff(uint8_t note) {
         m_gate = false;
-        for (int i = 0; i < polyphony; ++i) {
-            Voice& voice = *voices[i];
-            if (voice.note == note || note == 0xFF) {
-                voice.release();
+        for (auto& voice : voices)
+        {
+            if (voice->note == note || note == 0xFF) {
+                voice->release();
             }
         }
     }
@@ -583,8 +630,9 @@ class RipplerX
 
     inline void clearVoices()
     {
-        for (int i = 0; i < polyphony; ++i) {
-            voices[i].clear();
+        for (auto& voice : voices)
+        {
+            voice->clear();
         }
     }
 
@@ -645,7 +693,6 @@ class RipplerX
         // programs are in constants.h
         parameters = programs[index];
 
-        // TODO?
         clearVoices();
         resetLastModels();
     }
@@ -654,7 +701,7 @@ class RipplerX
     /* Private Member Variables. */
     /*===========================================================================*/
     std::vector<std::unique_ptr<Voice>> voices;
-    std::unique_ptr<Models> models;
+    std::unique_ptr<Models> models = std::make_unique<Models>();
     Comb    comb{};
     Limiter limiter{};
     // equivalent to m_voice
@@ -662,8 +709,7 @@ class RipplerX
 
     // Parameters, both editable and not
     // no need to define each of them, the enum will detect them exactly
-    // float32_t parameters[last_param];
-    std::array<float32_t, last_param> parameters;  // parameter values can be found in constants-h
+    std::array<float32_t, last_param> parameters;  // parameter values can be found in constants.h
 
     // state variables - prefer static default instead of initialization as there's just one possible value
     bool      m_initialized = false;
@@ -671,7 +717,7 @@ class RipplerX
     size_t    m_framesSinceNoteOn = SIZE_MAX; // Voice stealing
     uint8_t   m_currentProgram = 0;
     uint8_t   m_note = 60;
-    float32_t scale = 1.0f; // UI scale
+    float32_t scale = 1.0f; // TODO make this editable?
     uint8_t   last_a_model = -1;
     uint8_t   last_b_model = -1;
     uint8_t   last_a_partials = -1;
@@ -680,17 +726,18 @@ class RipplerX
     // sample management
     uint8_t  m_sampleBank = 0;  // parameter editable
     uint8_t  m_sampleNumber = 1; // parameter editable
-    // see Init
-    uint8_t  m_sampleChannels; // From sample_wrapper
-    size_t   m_sampleFrames; // From sample_wrapper
+    // see Init for default - adding initial values to avoid potential issues
+    const sample_wrapper_t * sampleWrapper = nullptr; // set at NoteOn  TODO
+    uint8_t  m_sampleChannels = 0; // From sample_wrapper
+    size_t   m_sampleFrames = 0; // From sample_wrapper
     const float32_t * m_samplePointer; // From sample_wrapper
     uint16_t m_sampleStart = 0;
-    size_t   m_sampleIndex; // Counts in float*, stride == channels
+    size_t   m_sampleIndex = 0; // Counts in float*, stride == channels
     size_t   m_sampleEnd = 1000; // 100%. Counts in float*, stride == channels
     // Functions from unit runtime
-    unit_runtime_get_num_sample_banks_ptr m_get_num_sample_banks_ptr;
-    unit_runtime_get_num_samples_for_bank_ptr m_get_num_samples_for_bank_ptr;
-    unit_runtime_get_sample_ptr m_get_sample;
+    unit_runtime_get_num_sample_banks_ptr m_get_num_sample_banks_ptr = nullptr;
+    unit_runtime_get_num_samples_for_bank_ptr m_get_num_samples_for_bank_ptr = nullptr;
+    unit_runtime_get_sample_ptr m_get_sample = nullptr;
 
     /*===========================================================================*/
     /* Constants. */

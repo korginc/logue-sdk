@@ -7,6 +7,7 @@
 
 constexpr size_t c_sampleRate = 48000;
 constexpr float  c_semitoneFrequencyRatio = 1.0594630944f; // pow(2.0f, 1.0f/12.0f);
+constexpr float  c_malletStiffnessCorrectionFactor = 0.03080333075140272487101378573158f; // (log(5000.0) - log(100.0)) / 127
 constexpr size_t polyphony = 8; /**< equivalent to c_numVoices for porting */
 constexpr size_t c_numVoices = polyphony;
 constexpr size_t c_max_partials = 64;  // TODO

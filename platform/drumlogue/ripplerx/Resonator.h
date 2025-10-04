@@ -19,8 +19,9 @@ public:
 	Resonator();
 	~Resonator() {};
 
-	void setParams(float32_t srate, bool on, int model, int partials, float32_t decay, float32_t damp, float32_t tone, float32_t hit,
-		float32_t rel, float32_t inharm, float32_t cut,float32_t radius, float32_t vel_decay, float32_t vel_hit, float32_t vel_inharm);
+	void setParams(float32_t _srate, bool _on, int _model, int _partials, float32_t _decay,
+        float32_t _damp, float32_t tone, float32_t hit,	float32_t _rel, float32_t _inharm, float32_t _cut,
+        float32_t _radius, float32_t vel_decay, float32_t vel_hit, float32_t vel_inharm);
 
 	void activate();
 	void update(float32_t frequency, float32_t vel, bool isRelease, std::array<float32_t, 64> _model);
