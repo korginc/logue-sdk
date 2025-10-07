@@ -67,3 +67,6 @@ tools/gcc/gcc-arm-none-eabi-*
 
 # Mac ds_store
 .DS_Store
+
+# Mac ds_store
+.DS_Store

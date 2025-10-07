@@ -40,7 +40,7 @@ Firmware version >= 1.0.0 is required to run user units built with SDK version 2
 
  Refer to [Docker-based Build Environment](../../docker).
 
-#### Legacy Method
+#### Manual Method
 
  1. Clone this repository and initialize/update submodules.
 
