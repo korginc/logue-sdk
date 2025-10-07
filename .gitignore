@@ -18,7 +18,7 @@
 .profile
 .bash_history
 tools/gcc/gcc-arm-none-eabi-*
-tools/emscripten/emsdk
+**/sim
 
 # Doxygen documentation
 **/docs/html
@@ -56,8 +56,14 @@ tools/emscripten/emsdk
 *.drmlgunit
 *.nts1mkiiunit
 *.nts3unit
+*.mk2unit
 
 # Debug files
 *.dSYM/
 *.su
 
+# VS Code config
+.vscode/
+
+# Mac ds_store
+.DS_Store

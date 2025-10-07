@@ -29,7 +29,7 @@ A possibility is to obtain the source package from the link above and manually b
 
 #### MSYS2
 
-If you have MSYS2 installed you can run `./get_gcc_msys.sh` to download each recommended gcc versions and unpack them automatically.
+If you have MSYS2 installed you can run `./get_gcc_msys2.sh` to download and unpack gcc automatically.
 
 _Note 1: MSYS2 installers for Windows can be found at [https://www.msys2.org/](https://www.msys2.org/)_
 

@@ -1,3 +1,6 @@
 [submodule "platform/ext/CMSIS"]
 	path = platform/ext/CMSIS
 	url = https://github.com/ARM-software/CMSIS.git
+[submodule "tools/emsdk"]
+	path = tools/emsdk
+	url = https://github.com/emscripten-core/emsdk.git
