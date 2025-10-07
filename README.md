@@ -18,6 +18,7 @@ To download ready to use oscillators and effects, refer to the [Unit Index](http
 | drumlogue                      | v2.0.0             | >= v1.0.0                | ARM Cortex-A7 | ELF 32-bit LSB shared object, ARM, EABI5 v1 (SYSV), dynamic |
 | Nu:Tekt NTS-1 digital kit mkII | v2.0.0             | >= v1.0.0                | ARM Cortex-M7 | ELF 32-bit LSB shared object, ARM, EABI5 v1 (SYSV), dynamic |
 | Nu:Tekt NTS-3 kaoss pad kit    | v2.0.0             | >= v1.0.0                | ARM Cortex-M7 | ELF 32-bit LSB shared object, ARM, EABI5 v1 (SYSV), dynamic |
+| microKORG2                     | v2.0.0             | >= v1.0.0                | ARM Cortex-A7 | ELF 32-bit LSB shared object, ARM, EABI5 v1 (SYSV), dynamic |
 
 #### Binary Compatibility
 
@@ -32,6 +33,7 @@ However, developers are encouraged to optimize their units for each target platf
 * [platform/drumlogue/](platform/drumlogue/) : *drumlogue* specific files and templates.
 * [platform/nts-1_mkii/](platform/nts-1_mkii/) : *Nu:Tekt NTS-1 digital kit mkII* specific files, templates and demo projects.
 * [platform/nts-3_kaoss/](platform/nts-3_kaoss/) : *Nu:Tekt NTS-3 kaoss pad kit* specific files, templates and demo projects.
+* [platform/microkorg2/](platform/microkorg2/) : *microKORG2* specific files, templates and demo projects.
 * [platform/ext/](platform/ext/) : External dependencies and submodules.
 * [docker/](docker/) : Sources for a docker container that allows building projects for any platform in a more host OS agnostic way.
 * [tools/](tools/) : Installation location and documentation for tools required to build projects and manipulate built products. Can be ignored if using the docker container.
@@ -44,5 +46,6 @@ To show us your work please reach out to *logue-sdk@korg.co.jp*.
 ## Support
 
 The SDK is provided as-is, no technical support will be provided by KORG.
+For community support, please visit our discord at https://discord.com/invite/pqW5VpdQkZ
 
 
