@@ -1,5 +1,7 @@
 # logue-sdk 
 
+[![Discord](https://img.shields.io/discord/1037767234803740694?logo=discord&label=Discord)](https://discord.com/invite/pqW5VpdQkZ)
+
 [日本語](./README_ja.md)
 
 This repository contains all the files and tools needed to build custom oscillators and effects for the [prologue](https://www.korg.com/products/synthesizers/prologue), [minilogue xd](https://www.korg.com/products/synthesizers/minilogue_xd), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/products/dj/nts_1), [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/products/synthesizers/nts_1_mk2) synthesizers, the [Nu:Tekt NTS-3 kaoss pad kit](https://www.korg.com/products/dj/nts_3), and [drumlogue](https://www.korg.com/products/drums/drumlogue) drum machine.
