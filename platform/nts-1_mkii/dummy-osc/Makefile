@@ -139,7 +139,7 @@ LIBDIR := $(patsubst %,-I%,$(DLIBDIR) $(ULIBDIR))
 #
 SANDBOXDIR ?= $(PROJECT_ROOT)/../../../websim
 WASMSRC := wasm.cc $(UCSRC) $(UCXXSRC) $(wildcard $(PROJECT_ROOT)/../../../websim/dsp/*.c) $(wildcard $(PROJECT_ROOT)/../../../websim/dsp/*.cpp)
-WASMDIR := sim
+WASMDIR := $(PROJECT_ROOT)/sim
 DINCDIR += $(TOOLSDIR)/emsdk/upstream/emscripten/system/include
 EMCC_BIN_PATH := $(TOOLSDIR)/emsdk/upstream/emscripten
 
