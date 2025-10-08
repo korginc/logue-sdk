@@ -94,9 +94,6 @@
       }
 
       // audio graph
-      context = emscriptenGetAudioObject(context);
-      wasmProcessor = emscriptenGetAudioObject(wasmProcessor);
-
       // let oscillator = new OscillatorNode(context, { frequency: 440.0 });
       let envelope = new GainNode(context, { gain: 0.0 });
       let volume = new GainNode(context, { gain: 0.1 })

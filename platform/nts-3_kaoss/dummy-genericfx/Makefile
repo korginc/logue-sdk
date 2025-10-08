@@ -251,14 +251,12 @@ wasm:
 	@cp -r $(SANDBOXDIR)/scripts $(WASMDIR)/
 	@cp -r $(SANDBOXDIR)/images $(WASMDIR)/
 	@$(EMCC_BIN_PATH)/emcc -Wno-unknown-attributes $(INCDIR) \
-		-s INITIAL_MEMORY=64MB \
-		-s ALLOW_MEMORY_GROWTH=1 \
 		-s AUDIO_WORKLET=1 \
 		-s WASM_WORKERS=1 \
 		-lembind \
 		--shell-file $(SANDBOXDIR)/xypad.html \
 		--emrun \
-		-O1 \
+		-O2 \
 		$(WASMSRC) \
 		-o $(WASMDIR)/$(PROJECT).html
 	@echo Done

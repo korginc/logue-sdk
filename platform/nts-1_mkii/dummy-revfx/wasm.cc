@@ -241,7 +241,7 @@ void AudioWorkletProcessorCreated(EMSCRIPTEN_WEBAUDIO_T audioContext, bool succe
   EMSCRIPTEN_AUDIO_WORKLET_NODE_T wasmAudioWorklet = emscripten_create_wasm_audio_worklet_node(audioContext,
                                                                                                "logue-fx", &options, &ProcessAudio, 0);
 
-  EM_ASM({ setupWebAudioAndUI($0, $1); }, audioContext, wasmAudioWorklet);
+  EM_ASM({ setupWebAudioAndUI(emscriptenGetAudioObject($0), emscriptenGetAudioObject($1)); }, audioContext, wasmAudioWorklet);
 }
 
 void AudioThreadInitialized(EMSCRIPTEN_WEBAUDIO_T audioContext, bool success, void *userData)
@@ -277,10 +277,13 @@ int main()
 
   EMSCRIPTEN_WEBAUDIO_T context = emscripten_create_audio_context(&attrs);
 
+  int sample_rate = emscripten_audio_context_sample_rate(context);
   int frame_size = emscripten_audio_context_quantum_size(context);
-  printf("Sample rate: %d\n", SAMPLE_RATE);
+  printf("Sample rate: %d\n", sample_rate);
   printf("Frame size: %d\n", frame_size);
 
   emscripten_start_wasm_audio_worklet_thread_async(context, audioThreadStack, sizeof(audioThreadStack),
                                                    &AudioThreadInitialized, 0);
+
+  emscripten_exit_with_live_runtime();
 }
