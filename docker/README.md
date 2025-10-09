@@ -6,6 +6,15 @@
 
 The Docker-based build environment packages together all the tools required to build logue SDK units for any of the supported platforms, provides some convenience tools to simplify bulk project building and allows to build in consistent environment independent from the host operating system.
 
+### how to fix CLRF errors on Windows
+
+After you have cloned logue-sdk, make sure to change change local git config core.autocrlf to input instead of true. 
+
+Inside logue-sdk directory, 
+```
+git config core.autocrlf input
+```
+
 ### Setup
 
  1. [Install Docker](https://docs.docker.com/get-docker/) (Note: Docker Desktop is not specifically required, [installing Docker Engine](https://docs.docker.com/engine/install/) is sufficient)
