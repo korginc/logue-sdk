@@ -8,7 +8,7 @@ The Docker-based build environment packages together all the tools required to b
 
 ### how to fix CLRF errors on Windows
 
-After you have cloned logue-sdk, make sure to change change local git config core.autocrlf to input instead of true. 
+After you have cloned logue-sdk, make sure to change local git config core.autocrlf to input instead of true. 
 
 Inside logue-sdk directory, 
 ```
