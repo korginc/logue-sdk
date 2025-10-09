@@ -91,8 +91,6 @@ std::string getParameterValueString(int index, int value)
   case k_unit_param_type_strings:
     return processor.getParameterStrValue(index, value);
     break;
-  case k_unit_param_type_reserved0:
-    break;
   case k_unit_param_type_drywet:
     suffix = "%";
     break;
