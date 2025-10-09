@@ -1048,9 +1048,9 @@
  #if defined(NEON_SIMD_FP)
    return vtrn_f32(a, b);
  #else
-   const float32x2x2_t v;
-   v.val[0] = {{a.val[0], b.val[0]}};
-   v.val[1] = {{a.val[1], b.val[1]}};
+    float32x2x2_t v;
+   v.val[0] = (float32x2_t){{a.val[0], b.val[0]}};
+   v.val[1] = (float32x2_t){{a.val[1], b.val[1]}};
    return v;
  #endif
  }
@@ -1061,9 +1061,9 @@
  #if defined(NEON_SIMD_FP)
    return vtrnq_f32(a, b);
  #else
-   const float32x4x2_t v;
-   v.val[0] = {{a.val[0], b.val[0], a.val[2], b.val[2]}};
-   v.val[1] = {{a.val[1], b.val[1], a.val[3], b.val[3]}};
+    float32x4x2_t v;
+   v.val[0] = (float32x4_t){{a.val[0], b.val[0], a.val[2], b.val[2]}};
+   v.val[1] = (float32x4_t){{a.val[1], b.val[1], a.val[3], b.val[3]}};
    return v;
  #endif
  }
@@ -1076,9 +1076,9 @@
  #if defined(NEON_SIMD_FP)
    return vzip_f32(a, b);
  #else
-   const float32x2x2_t v;
-   v.val[0] = {{a.val[0], b.val[0]}};
-   v.val[1] = {{a.val[1], b.val[1]}};
+    float32x2x2_t v;
+   v.val[0] = (float32x2_t){{a.val[0], b.val[0]}};
+   v.val[1] = (float32x2_t){{a.val[1], b.val[1]}};
    return v;
  #endif
  }
@@ -1089,9 +1089,9 @@
  #if defined(NEON_SIMD_FP)
    return vzipq_f32(a, b);
  #else
-   const float32x4x2_t v;
-   v.val[0] = {{a.val[0], b.val[0], a.val[1], b.val[1]}};
-   v.val[1] = {{a.val[2], b.val[2], a.val[3], b.val[3]}};
+    float32x4x2_t v;
+   v.val[0] = (float32x4_t){{a.val[0], b.val[0], a.val[1], b.val[1]}};
+   v.val[1] = (float32x4_t){{a.val[2], b.val[2], a.val[3], b.val[3]}};
    return v;
  #endif
  }
@@ -1104,9 +1104,9 @@
  #if defined(NEON_SIMD_FP)
    return vuzp_f32(a, b);
  #else
-   const float32x2x2_t v;
-   v.val[0] = {{a.val[0], b.val[0]}};
-   v.val[1] = {{a.val[1], b.val[1]}};
+    float32x2x2_t v;
+   v.val[0] = (float32x2_t){{a.val[0], b.val[0]}};
+   v.val[1] = (float32x2_t){{a.val[1], b.val[1]}};
    return v;
  #endif
  }
@@ -1117,9 +1117,9 @@
  #if defined(NEON_SIMD_FP)
    return vuzpq_f32(a, b);
  #else
-   const float32x4x2_t v;
-   v.val[0] = {{a.val[0], a.val[2], b.val[0], b.val[2]}};
-   v.val[1] = {{a.val[1], a.val[3], b.val[1], b.val[3]}};
+    float32x4x2_t v;
+   v.val[0] = (float32x4_t){{a.val[0], a.val[2], b.val[0], b.val[2]}};
+   v.val[1] = (float32x4_t){{a.val[1], a.val[3], b.val[1], b.val[3]}};
    return v;
  #endif
  }

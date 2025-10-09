@@ -1821,7 +1821,7 @@
  #if defined(NEON_SIMD_INT)
    return vmin_s32(max, vmax_s32(min, x));
  #else
-   const int2x2_t tmp = {{(x.val[0] > max.val[0]) ? max.val[0] : (x.val[0] < min.val[0]) ? min.val[0] : x.val[0],
+   const int32x2_t tmp = {{(x.val[0] > max.val[0]) ? max.val[0] : (x.val[0] < min.val[0]) ? min.val[0] : x.val[0],
                           (x.val[1] > max.val[1]) ? max.val[1] : (x.val[1] < min.val[1]) ? min.val[1] : x.val[1]}};
    return tmp;
  #endif
