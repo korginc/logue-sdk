@@ -16,6 +16,9 @@ COMMON_SRC_PATH ?= $(realpath $(PROJECT_ROOT)/../common/)
 # Installation directory
 INSTALLDIR ?= $(PROJECT_ROOT)
 
+# Tools directory
+TOOLSDIR ?= $(PROJECT_ROOT)/../../../tools
+
 # Files common to all platforms 
 PLATFORM_COMMON_PATH ?= $(realpath $(PROJECT_ROOT)/../../common/)
 
@@ -276,11 +279,20 @@ CXXFLAGS += -MMD -MP -MF .dep/$(@F).d
 VPATH     := $(SRCPATHS)
 
 ##############################################################################
+# WebAssembly compiler and binding tools
+#
+SANDBOXDIR ?= $(PROJECT_ROOT)/../../../websim
+WASMSRC := wasm.cc $(CSRC) $(CXXSRC) $(wildcard $(PROJECT_ROOT)/../../../websim/dsp/*.c) $(wildcard $(PROJECT_ROOT)/../../../websim/dsp/*.cpp)
+WASMDIR := $(PROJECT_ROOT)/sim
+DINCDIR += $(TOOLSDIR)/emsdk/upstream/emscripten/system/include
+EMCC_BIN_PATH := $(TOOLSDIR)/emsdk/upstream/emscripten
+
+##############################################################################
 # Deduce File Ownership for Build Products
 #
-
-USER_ID := $(strip $(shell stat -c %u .))
-GROUP_ID := $(strip $(shell stat -c %g .))
+# Use POSIX-friendly id to get numeric UID/GID (works on macOS/BSD/Linux)
+USER_ID := $(strip $(shell id -u))
+GROUP_ID := $(strip $(shell id -g))
 
 ##############################################################################
 # Rules
@@ -422,10 +434,31 @@ install: | $(OBJS) $(OUTFILES)
 	@echo Done
 	@echo
 
+
+wasm:
+	@echo Building WebAssembly audio processor
+	@mkdir -p $(WASMDIR)
+	@cp -r $(SANDBOXDIR)/samples $(WASMDIR)/
+	@cp -r $(SANDBOXDIR)/scripts $(WASMDIR)/
+	@cp -r $(SANDBOXDIR)/images $(WASMDIR)/
+	@$(EMCC_BIN_PATH)/emcc -Wno-unknown-attributes $(IINCDIR) \
+		-s AUDIO_WORKLET=1 \
+		-s WASM_WORKERS=1 \
+		-lembind \
+		--shell-file $(SANDBOXDIR)/fx.html \
+		--emrun \
+		-O2 \
+		$(WASMSRC) \
+		-o $(WASMDIR)/$(PROJECT).html
+	@echo Done
+	@echo Opening the sandbox
+	@$(EMCC_BIN_PATH)/emrun --browser chrome --serve_after_close $(WASMDIR)/$(PROJECT).html
+
+
 clean: CLEAN_RULE_HOOK
 	@echo
 	@echo Cleaning
-	-rm -fR .dep $(BUILDDIR) $(PROJECT_ROOT)/$(PROJECT).mk2unit
+	-rm -fR .dep $(BUILDDIR) $(PROJECT_ROOT)/$(PROJECT).mk2unit $(WASMDIR)
 	@echo
 	@echo Done
 	@echo

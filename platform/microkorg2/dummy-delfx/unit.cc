@@ -43,59 +43,104 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "utils/buffer_ops.h" // for buf_clr_f32()
+#include "utils/int_math.h"   // for clipminmaxi32()
+
 #include "delay.h"
 
-static Delay s_delay_instance;
-static unit_runtime_desc_t s_runtime_desc;
+static Delay s_processor_instance;
+static int32_t cached_values[UNIT_DELFX_MAX_PARAM_COUNT]; // cached parameter values passed from hardware
 
-__attribute__((used)) int8_t unit_init(const unit_runtime_desc_t * desc) {
+__unit_callback int8_t unit_init(const unit_runtime_desc_t *desc)
+{
+  // s_runtime_desc = *desc;
   if (!desc)
     return k_unit_err_undef;
 
+  // Note: make sure the unit is being loaded to the correct platform/module target
   if (desc->target != unit_header.target)
     return k_unit_err_target;
+
+  // Note: check API compatibility with the one this unit was built against
   if (!UNIT_API_IS_COMPAT(desc->api))
     return k_unit_err_api_version;
 
-  s_runtime_desc = *desc;
+  // Check compatibility of samplerate with unit, for NTS-1 MKII should be 48000
+  if (desc->samplerate != s_processor_instance.getSampleRate())
+    return k_unit_err_samplerate;
 
-  return s_delay_instance.Init(desc);
+  // Check compatibility of frame geometry
+  if (desc->input_channels != 2 || desc->output_channels != 2) // should be stereo input/output
+    return k_unit_err_geometry;
+
+  // If SDRAM buffers are required they must be allocated here
+  if (!desc->hooks.sdram_alloc)
+    return k_unit_err_memory;
+  float *allocated_buffer_ = (float *)desc->hooks.sdram_alloc(s_processor_instance.getBufferSize() * sizeof(float));
+  if (!allocated_buffer_)
+    return k_unit_err_memory;
+
+  // microkorg2 handles buffer clearing
+  // buf_clr_f32(m, BUFFER_LENGTH);
+
+  // initialize cached parameters to defaults
+  for (int id = 0; id < UNIT_DELFX_MAX_PARAM_COUNT; ++id)
+  {
+    cached_values[id] = static_cast<int32_t>(unit_header.params[id].init);
+  }
+
+  s_processor_instance.init(allocated_buffer_);
+
+  return k_unit_err_none;
 }
 
-__attribute__((used)) void unit_teardown() {
-  s_delay_instance.Teardown();
+__unit_callback void unit_teardown()
+{
+  s_processor_instance.teardown();
 }
 
-__attribute__((used)) void unit_reset() {
-  s_delay_instance.Reset();
+__unit_callback void unit_reset()
+{
+  s_processor_instance.reset();
 }
 
-__attribute__((used)) void unit_resume() {
-  s_delay_instance.Resume();
+__unit_callback void unit_resume()
+{
+  s_processor_instance.resume();
 }
 
-__attribute__((used)) void unit_suspend() {
-  s_delay_instance.Suspend();
+__unit_callback void unit_suspend()
+{
+  s_processor_instance.suspend();
 }
 
-__attribute__((used)) void unit_render(const float * in, float * out, uint32_t frames) {
-  (void)in;
-  s_delay_instance.Process(in, out, frames);
+__unit_callback void unit_render(const float *in, float *out, uint32_t frames)
+{
+  // s_processor_instance.Process(in, out, frames);
+  s_processor_instance.process(in, out, frames, 2);
 }
 
-__attribute__((used)) void unit_set_param_value(uint8_t id, int32_t value) {
-  s_delay_instance.setParameter(id, value);
+__unit_callback void unit_set_param_value(uint8_t id, int32_t value)
+{
+  value = clipminmaxi32(unit_header.params[id].min, value, unit_header.params[id].max);
+  cached_values[id] = value;
+  s_processor_instance.setParameter(id, value);
 }
 
-__attribute__((used)) int32_t unit_get_param_value(uint8_t id) {
-  return s_delay_instance.getParameterValue(id);
+__unit_callback int32_t unit_get_param_value(uint8_t id)
+{
+  return cached_values[id];
 }
 
-__attribute__((used)) const char * unit_get_param_str_value(uint8_t id,
-                                                            int32_t value) {
-  return s_delay_instance.getParameterStrValue(id, value);
+__unit_callback const char *unit_get_param_str_value(uint8_t id, int32_t value)
+{
+  value = clipminmaxi32(unit_header.params[id].min, value, unit_header.params[id].max); // just in case
+  return s_processor_instance.getParameterStrValue(id, value);
 }
 
-__attribute__((used)) void unit_set_tempo(uint32_t tempo) {
-  s_delay_instance.setTempo(tempo);
+#ifdef ALLOW_DEPRECATED_FUNCTIONS_API_2_1_0
+__unit_callback void unit_set_tempo(uint32_t tempo)
+{
+  s_processor_instance.setTempo(tempo);
 }
+#endif

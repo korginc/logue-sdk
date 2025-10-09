@@ -20,16 +20,15 @@ const __unit_header unit_header_t unit_header = {
     .version = 0x00010000U,                                // This unit's version: major.minor.patch (major<<16 minor<<8 patch).
     .name = "Dummy",                                       // Name for this unit, will be displayed on device
     .num_presets = 0,                                      // Number of internal presets this unit has
-    .num_params = 8,                                       // Number of parameters for this unit, max 24
+    .num_params = 4,                                       // Number of parameters for this unit, max 24
     .params = {
         // Format: min, max, center, default, type, fractional, frac. type, <reserved>, name
-
         // See common/runtime.h for type enum and unit_param_t structure
 
         // Page 1
         {0,     1023,  0, 256, k_unit_param_type_none, 1, 0, 0, {"Time"}},
         {0,     1023,  0, 256, k_unit_param_type_none, 1, 0, 0, {"Depth"}},
-        {-1000, 1000,  0,  63, k_unit_param_type_none, 1, 1, 0, {"Mix"}},
+        {-1000, 1000,  0,  0, k_unit_param_type_none, 1, 1, 0, {"Mix"}},
 
         // Page 2
         {0, 3, 0, 1, k_unit_param_type_strings, 0, 0, 0, {"Param4"}}, // Example of a strings type parameter
