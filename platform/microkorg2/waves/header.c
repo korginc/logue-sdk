@@ -38,7 +38,7 @@ const __unit_header unit_header_t unit_header = {
     {0, WAVE_B_CNT-1,   0, 0, k_unit_param_type_enum,    0, 0, 0, {"WAVE B"}},
     {0, SUB_WAVE_CNT-1, 0, 0, k_unit_param_type_enum,    0, 0, 0, {"SUB WAVE"}},
     {0, 1000,           0, 0, k_unit_param_type_percent, 1, 1, 0, {"RING MIX"}},
-    {0, 1000,           0, 0, k_unit_param_type_percent, 1, 1, 0, {"BIT CRUSH"}},
+    {0, 1000,           0, 0, k_unit_param_type_percent, 1, 1, 0, {"BIT CRSH"}},
     {0, 1000,           0, 250, k_unit_param_type_percent, 1, 1, 0, {"DRIFT"}},
 
     // page 3
