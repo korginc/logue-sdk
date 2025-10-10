@@ -43,9 +43,7 @@
 #include <cstddef>
 #include <cstdint>
 
-// #include "utils/buffer_ops.h" // for buf_clr_f32()
 #include "utils/int_math.h"   // for clipminmaxi32()
-
 #include "delay.h"
 
 static Delay s_processor_instance;
@@ -53,7 +51,6 @@ static int32_t cached_values[UNIT_DELFX_MAX_PARAM_COUNT]; // cached parameter va
 
 __unit_callback int8_t unit_init(const unit_runtime_desc_t *desc)
 {
-  // s_runtime_desc = *desc;
   if (!desc)
     return k_unit_err_undef;
 

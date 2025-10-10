@@ -47,29 +47,33 @@
 
 #include "utils/buffer_ops.h" // for buf_clr_f32()
 #include "utils/int_math.h"   // for clipminmaxi32()
+#ifndef __EMSCRIPTEN__
 #include "utils/mk2_utils.h"
+#endif
 #include "runtime.h"
 #include "unit_modfx.h"
 #include "macros.h"
+#include "processor.h"
 
-class ModFx {
- public:
+class ModFx : public Processor
+{
+public:
   /*===========================================================================*/
   /* Public Data Structures/Types/Enums. */
   /*===========================================================================*/
 
-  enum {
-    BUFFER_LENGTH = MODFX_MEMORY_SIZE,
+  uint32_t getBufferSize() const override final { return MODFX_MEMORY_SIZE; }
+
+  enum
+  {
+    TIME = 0U,
+    DEPTH,
+    PARAM3,
+    NUM_PARAMS
   };
 
-  enum {
-    kTime = 0U,
-    kDepth,
-    kParam3,
-    kNumParams
-  };
-  
-  enum {
+  enum
+  {
     PARAM3_VALUE0 = 0,
     PARAM3_VALUE1,
     PARAM3_VALUE2,
@@ -77,145 +81,64 @@ class ModFx {
     NUM_PARAM3_VALUES,
   };
 
-  /*===========================================================================*/
-  /* Lifecycle Methods. */
-  /*===========================================================================*/
-
-  ModFx(void):
-  mTempo(120),
-  mTime(0),
-  mDepth(0),
-  allocated_buffer_(nullptr)
+  // Note: Make sure default param values correspond to declarations in header.c
+  struct Params
   {
+    float time;
+    float depth;
+    uint32_t param3;
 
-  }
-
-  ~ModFx(void) 
-  {} // Note: will never actually be called for statically allocated instances
-
-  inline int8_t Init(const unit_runtime_desc_t * desc) {
-    if (!desc)
-      return k_unit_err_undef;
-    
-    // Note: make sure the unit is being loaded to the correct platform/module target
-    if (desc->target != unit_header.target)
-      return k_unit_err_target;
-    
-    // Note: check API compatibility with the one this unit was built against
-    if (!UNIT_API_IS_COMPAT(desc->api))
-      return k_unit_err_api_version;
-    
-    // Check compatibility of samplerate with unit, for NTS-1 MKII should be 48000
-    if (desc->samplerate != 48000)
-      return k_unit_err_samplerate;
-
-    // Check compatibility of frame geometry
-    if (desc->input_channels != 2 || desc->output_channels != 2)  // should be stereo input/output
-      return k_unit_err_geometry;
-
-    // If SDRAM buffers are required they must be allocated here
-    if (!desc->hooks.sdram_alloc)
-      return k_unit_err_memory;
-    float *m = (float *)desc->hooks.sdram_alloc(BUFFER_LENGTH * sizeof(float));
-    if (!m)
-      return k_unit_err_memory;
-
-    // microkorg2 handles buffer clearing
-    // buf_clr_f32(m, BUFFER_LENGTH);
-
-    allocated_buffer_ = m;
-    
-    // Cache the runtime descriptor for later use
-    runtime_desc_ = *desc;
-
-    buf_clr_u32(reinterpret_cast<uint32_t *>(params_), kNumParams);
-    
-    return k_unit_err_none;
-  }
-
-  inline void Teardown() {
-    // Note: buffers allocated via sdram_alloc are automatically freed after unit teardown
-    // Note: cleanup and release resources if any
-    allocated_buffer_ = nullptr;
-  }
-
-  inline void Reset() {
-    // Note: Reset effect state, excluding exposed parameter values.
-  }
-
-  inline void Resume() {
-    // Note: Effect will resume and exit suspend state. Usually means the synth
-    // was selected and the render callback will be called again
-
-    // Note: If it is required to clear large memory buffers, consider setting a flag
-    //       and trigger an asynchronous progressive clear on the audio thread (Process() handler)
-  }
-
-  inline void Suspend() {
-    // Note: Effect will enter suspend state. Usually means another effect was
-    // selected and thus the render callback will not be called
-  }
-
-  /*===========================================================================*/
-  /* Other Public Methods. */
-  /*===========================================================================*/
-
-  fast_inline void Process(const float * in, float * out, size_t frames) 
-  {
-    const float * __restrict in_p = in;
-    float * __restrict out_p = out;
-    const float * out_e = out_p + (frames << 1);  // assuming stereo output
-
-    for (; out_p != out_e; in_p += 2, out_p += 2) {
-      // Process samples here
-      
-      // Note: this is a dummy unit only to demonstrate APIs, only passing through audio
-      out_p[0] = in_p[0]; // left sample
-      out_p[1] = in_p[1]; // right sample
+    void reset()
+    {
+      time = 0.25f;
+      depth = 0.25f;
+      param3 = 1;
     }
-  }
 
-  inline void setParameter(uint8_t index, int32_t value) 
+    Params() { reset(); }
+  };
+
+  inline void setParameter(uint8_t index, int32_t value) override final
   {
-    params_[index] = value;
     switch (index)
     {
-      case kTime:
-      {
-        // 10bit 0-1023 parameter
-        mTime = param_10bit_to_f32(value); // 0 .. 1023 -> 0.0 .. 1.0
-        break;
-      }
-      case kDepth:
-      {
-        // 10bit 0-1023 parameter
-        mDepth = param_10bit_to_f32(value); // 0 .. 1023 -> 0.0 .. 1.0
-        break;
-      }
-      default:
-        break;
+    case TIME:
+    {
+      // 10bit 0-1023 parameter
+      params_.time = param_10bit_to_f32(value); // 0 .. 1023 -> 0.0 .. 1.0
+      break;
+    }
+    case DEPTH:
+    {
+      // 10bit 0-1023 parameter
+      params_.depth = param_10bit_to_f32(value); // 0 .. 1023 -> 0.0 .. 1.0
+      break;
+    }
+    case PARAM3:
+      params_.param3 = value;
+      break;
+
+    default:
+      break;
     }
   }
 
-  inline int32_t getParameterValue(uint8_t index) const
+  inline const char *getParameterStrValue(uint8_t index, int32_t value) const override final
   {
-    return params_[index];
-  }
-
-  inline const char * getParameterStrValue(uint8_t index, int32_t value) const {
     // Note: String memory must be accessible even after function returned.
     //       It can be assumed that caller will have copied or used the string
     //       before the next call to getParameterStrValue
-    
-    static const char * param3_strings[NUM_PARAM3_VALUES] = {
-      "VAL 0",
-      "VAL 1",
-      "VAL 2",
-      "VAL 3",
+
+    static const char *param3_strings[NUM_PARAM3_VALUES] = {
+        "VAL 0",
+        "VAL 1",
+        "VAL 2",
+        "VAL 3",
     };
-    
-    switch (index) {
-    case kParam3:
+
+    switch (index)
+    {
+    case PARAM3:
       if (value >= PARAM3_VALUE0 && value < NUM_PARAM3_VALUES)
         return param3_strings[value];
       break;
@@ -226,40 +149,42 @@ class ModFx {
     return nullptr;
   }
 
-  inline void setTempo(uint32_t tempo) {
-    mTempo = (tempo >> 16) + (tempo & 0xFFFF) / static_cast<float>(0x10000);
+  /*===========================================================================*/
+  /* Lifecycle Methods. */
+  /*===========================================================================*/
+
+  void init(float *allocated_buffer) override final
+  {
+    buffer_ = allocated_buffer;
+    params_.reset();
   }
 
-  inline void tempo4ppqnTick(uint32_t counter) {
-    (void)counter;
+  void teardown() override final { buffer_ = nullptr; }
+
+  /*===========================================================================*/
+  /* Other Public Methods. */
+  /*===========================================================================*/
+
+  fast_inline void process(const float *__restrict in, float *__restrict out, uint32_t frames, uint32_t outChannels) override final
+  {
+    // Caching current parameter values. Consider smoothing sensitive parameters in audio loop
+    const Params p = params_;
+
+    for (const float *out_end = out + frames * outChannels; out != out_end; in += 2, out += outChannels)
+    {
+      // Process samples here
+
+      // pass through
+      out[0] = in[0]; // left sample
+      out[1] = in[1]; // right sample
+    }
   }
 
   /*===========================================================================*/
   /* Static Members. */
   /*===========================================================================*/
-  
- private:
-  /*===========================================================================*/
-  /* Private Member Variables. */
-  /*===========================================================================*/
 
-  std::atomic_uint_fast32_t flags_;
-
-  unit_runtime_desc_t runtime_desc_;
-
-  float mTempo;
-
-  int32_t params_[kNumParams];
-  float mTime;
-  float mDepth;
-
-  float * allocated_buffer_;
-  
-  /*===========================================================================*/
-  /* Private Methods. */
-  /*===========================================================================*/
-
-  /*===========================================================================*/
-  /* Constants. */
-  /*===========================================================================*/
+private:
+  float *buffer_;
+  Params params_;
 };
