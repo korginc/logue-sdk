@@ -61,7 +61,7 @@ extern "C" {
     k_num_unit_revfx_fixed_param_id
   };
 
-#define UNIT_REVFX_MAX_PARAM_COUNT (11)
+#define UNIT_REVFX_MAX_PARAM_COUNT (8)
   
 #ifdef __cplusplus
 } // extern "C"

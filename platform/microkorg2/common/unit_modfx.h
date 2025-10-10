@@ -59,8 +59,6 @@ extern "C" {
     k_unit_modfx_fixed_param_depth,
     k_num_unit_modfx_fixed_param_id
   };
-
-#define UNIT_MODFX_MAX_PARAM_COUNT (8)
   
 #ifdef __cplusplus
 } // extern "C"
