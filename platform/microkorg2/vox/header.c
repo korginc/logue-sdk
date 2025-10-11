@@ -19,7 +19,7 @@ const __unit_header unit_header_t unit_header = {
     .unit_id = 0x4U,                                       // Id for this unit, should be unique within the scope of a given dev_id
     .version = 0x00010000U,                                // This unit's version: major.minor.patch (major<<16 minor<<8 patch).
     .name = "vox",                                         // Name for this unit, will be displayed on device
-    .num_params = 13,                                      // Number of parameters for this unit, max 24
+    .num_params = 13,                                      // Number of parameters for this unit, max 13
     .params = {
         // Format: min, max, center, default, type, fractional, frac. type, <reserved>, name
 

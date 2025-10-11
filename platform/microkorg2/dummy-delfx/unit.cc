@@ -34,7 +34,7 @@
 /*
  *  File: unit.cc
  *
- *  NTS-1 mkII delay effect unit interface
+ *  microkorg2 delay effect unit interface
  *
  */
 
