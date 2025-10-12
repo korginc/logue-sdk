@@ -110,7 +110,7 @@ class Osc {
       return k_unit_err_samplerate;
 
     // Check compatibility of frame geometry
-    if (desc->input_channels != 2 || desc->output_channels != 2)  // should be stereo input/output
+    if (desc->input_channels != 0 || desc->output_channels != 8)  // should be 0 inputs and 8 outputs
       return k_unit_err_geometry;
 
     // If SDRAM buffers are required they must be allocated here
