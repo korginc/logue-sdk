@@ -122,3 +122,4 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [vbass](https://github.com/tweeeeeak/nts) | Tweeeeeak | Volca Bass style triple oscillator | nts-1 | free |
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | pro, xd, nts-1 | donation |
 | [FunFM](https://github.com/mrf-r/FunFM-logue) | Eugene Chernyh | 2 alias supressed FM operators with variable waveshape | pro, xd, nts-1 | free |
+| [Acidbass Mini](https://payhip.com/b/2oNU4) | Frostmod Audio | monophonic acid bass synthesizer | nts-1 mkii | donation |
