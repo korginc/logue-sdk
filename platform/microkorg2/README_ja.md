@@ -354,7 +354,6 @@ Reverb fxのREVERBページとEXTRAページでは最大8つのパラメータ�
  * `__unit_callback const char * unit_get_param_str_value(uint8_t index, int32_t value)` : `k_unit_param_type_strings`型のパラメーターのカスタム文字列を取得するために呼ばれる関数です. 戻り値はNULL終端の7ビットASCII文字列を指すポインターにしてください. このポインターは `unit_get_param_str_value(..)`が再び呼び出されるまでキャッシュ/再利用されることはありません.
  * `__unit_callback void unit_set_param_value(uint8_t index, int32_t value)` : 引数で指定されたインデックスのパラメーターの現在の値を設定するために呼ばれる関数です. microKORG2では値は16ビット整数として保存されますが, 将来的なAPIの互換性を担保するため32ビット整数として値が渡されていることに注意してください. 安全性を高めるため, ヘッダーで宣言したmin/maxの値に従って, 値のチェックと丸め込みを実施してください.
  * `__unit_callback void unit_set_tempo(uint32_t tempo)` : テンポが変更された時に呼び出される関数です. テンポは固定小数点でフォーマットされ, 上位16ビットが整数部分, 下位16ビット（ローエンディアン）が小数部分になります. この関数は外部デバイスとテンポ同期しているときに頻繁に呼び出される可能性があるため, テンポ変更を処理する際にはCPU負荷を可能な限り低く保つように注意してください.
- * `__unit_callback void unit_tempo_4ppqn_tick_func(uint32_t counter)` : 初期化後, 4PPQNインターバル（16分音符）のクロック・イベントをユニットに通知するためにいつでも呼び出すことができる関数です.
  
 ### microKORG2で使用可能な関数（オプション）
  * `__unit_callback void unit_platform_exclusive(uint8_t messageId, void * data, uint32_t dataSize)` : オシレーター・ユニットのバーチャル・パッチ・モジュレーションを含むmicroKORG2特有の関数です.
