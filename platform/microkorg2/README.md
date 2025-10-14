@@ -247,7 +247,7 @@ Field descriptions:
  * `.dev_id` : A unique developer identifier as a low endian 32-bit unsigned integer. See [Developer Identifier](#developer-identifier) for details.
  * `.unit_id` : An identifier for the unit itself as a low endian 32-bit unsigned integer. This identifier must only be unique within the scope of a given developer identifier.
  * `.version` : The version for the current unit as a low endian 32-bit unsigned integer, with major in the upper 16 bits, minor and patch number in the two lower bytes, respectively. (e.g.: v1.2.3 -> 0x00010203U)
- * `.name` : Name for the current unit, as displayed on the device when loaded. Nul-terminated array of maximum 19 7-bit ASCII characters. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._`".
+ * `.name` : Name for the current unit, as displayed on the device when loaded. Nul-terminated array of maximum 8 7-bit ASCII characters. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._`".
  * `.num_params` : Number of exposed parameters by the unit. This value depends on the target module. Refer to UNIT\_XXX\_MAX\_PARAM\_COUNT in common headers for exact value, where XXX is the target module.
  * `.params` : Array of parameter descriptors. See [Parameter Descriptors](#parameter-descriptors) for details. 
  
