@@ -55,7 +55,7 @@
 extern "C" {
 #endif
   
-  #define OSC_MEMORY_SIZE_BYTES 0x4000
+  #define OSC_MEMORY_SIZE_BYTES 0x2000
   #define OSC_MEMORY_SIZE (OSC_MEMORY_SIZE_BYTES >> 2) // assumes 32 bit data type
   #define UNIT_OSC_MAX_PARAM_COUNT (13)
 
