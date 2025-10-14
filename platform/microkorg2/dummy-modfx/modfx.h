@@ -230,10 +230,6 @@ class ModFx {
     mTempo = (tempo >> 16) + (tempo & 0xFFFF) / static_cast<float>(0x10000);
   }
 
-  inline void tempo4ppqnTick(uint32_t counter) {
-    (void)counter;
-  }
-
   /*===========================================================================*/
   /* Static Members. */
   /*===========================================================================*/
