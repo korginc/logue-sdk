@@ -105,12 +105,12 @@ class Osc {
     if (!UNIT_API_IS_COMPAT(desc->api))
       return k_unit_err_api_version;
     
-    // Check compatibility of samplerate with unit, for NTS-1 MKII should be 48000
+    // Check compatibility of samplerate with unit, for microkorg2 should be 48000
     if (desc->samplerate != 48000)
       return k_unit_err_samplerate;
 
     // Check compatibility of frame geometry
-    if (desc->input_channels != 2 || desc->output_channels != 2)  // should be stereo input/output
+    if (desc->input_channels != 0 || desc->output_channels != 8)  // should be 0 inputs and 8 outputs
       return k_unit_err_geometry;
 
     // If SDRAM buffers are required they must be allocated here

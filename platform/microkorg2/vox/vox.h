@@ -246,17 +246,6 @@ public:
     return nullptr;
   }
 
-  inline void AllNoteOff() {}
-
-  inline void PitchBend(uint16_t bend) { (void)bend; }
-
-  inline void ChannelPressure(uint8_t pressure) { (void)pressure; }
-
-  inline void Aftertouch(uint8_t note, uint8_t aftertouch) {
-    (void)note;
-    (void)aftertouch;
-  }
-
   /*===========================================================================*/
   /* Static Members. */
   /*===========================================================================*/
