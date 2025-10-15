@@ -34,6 +34,15 @@ git config core.autocrlf input
  [...]
  ```
 
+ Alternatively, grab this [container image](https://hub.docker.com/r/xiashj/logue-sdk) from Docker Hub.
+
+ ```
+ docker pull xiashj/logue-sdk
+ ```
+ 
+ or simply search "logue-sdk" inside Docker Desktop and press "Pull".
+
+
 #### Windows Notes
 
  On Windows (10/11) the [Windows Subsystem for Linux (WSL2)](https://learn.microsoft.com/en-us/windows/wsl/) must be installed, including a Linux distribution.

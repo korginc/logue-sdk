@@ -34,6 +34,13 @@ git config core.autocrlf input
  
  [...]
  ```
+ あるいは、Docker Hubからこの[コンテナイメージ](https://hub.docker.com/r/xiashj/logue-sdk)をダウンロードします。
+
+ ```
+ docker pull xiashj/logue-sdk
+ ```
+ Docker Desktopから「logue-sdk」を検索して「Pull」を押してもダウンロードできます。
+
 
 #### Windowsでの注意点
 
