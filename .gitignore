@@ -12,13 +12,13 @@
 *.elf
 
 # Temporary files/directories
-**/.dep/**
-**/build/**
+**/.dep
+**/build
+**/sim
 .*.env_backup
 .profile
 .bash_history
 tools/gcc/gcc-arm-none-eabi-*
-**/sim
 
 # Doxygen documentation
 **/docs/html
