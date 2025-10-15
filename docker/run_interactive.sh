@@ -103,5 +103,5 @@ if [ ! -d "${PLATFORM_PATH}" ]; then
     exit 1
 fi
 
-docker run --rm -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/interactive_entry
+docker run --rm --platform=linux/amd64 -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/interactive_entry
 

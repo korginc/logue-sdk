@@ -124,4 +124,4 @@ if [ -z "${CMD}" ]; then
     exit 2
 fi
 
-docker run --rm -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}
+docker run --rm --platform=linux/amd64 -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}
