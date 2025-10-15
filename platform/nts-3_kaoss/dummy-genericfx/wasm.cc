@@ -272,8 +272,6 @@ std::string getParameterValueString(int index, int value)
   case k_unit_param_type_strings:
     return processor.getParameterStrValue(index, value);
     break;
-  case k_unit_param_type_reserved0:
-    break;
   case k_unit_param_type_drywet:
     suffix = "%";
     break;
@@ -352,9 +350,9 @@ enum class TouchEvent
   Ended,
 }; // stationary and canceled are ambiguous so ignore them
 
-void touchEvent(TouchEvent phase, uint32_t x, uint32_t y)
+void touchEvent(TouchEvent phase, float x, float y)
 {
-  processor.touchEvent(0, static_cast<uint8_t>(phase), x, y);
+  processor.touchEvent(0, static_cast<uint8_t>(phase), static_cast<uint32_t>(x * 1023), static_cast<uint32_t>((1.f - y) * 1023));
 }
 
 // bind unit parameters
