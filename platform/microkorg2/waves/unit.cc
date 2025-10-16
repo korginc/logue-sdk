@@ -87,15 +87,6 @@ __attribute__((used)) uint8_t unit_get_preset_index() {
   return s_waves_instance.getPresetIndex();
 }
 
-__attribute__((used)) const char * unit_get_preset_name(uint8_t idx) {
-  switch (idx)
-  {
-    case 0:
-      return "Waves";
-      break;
-  }
-}
-
 __attribute__((used)) void unit_platform_exclusive(uint8_t messageId, void * data, uint32_t dataSize)
 {
   s_waves_instance.unit_platform_exclusive(messageId, data, dataSize);
