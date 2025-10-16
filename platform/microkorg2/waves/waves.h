@@ -327,6 +327,8 @@ public:
 
   inline const char * getParameterStrValue(uint8_t index, int32_t value) const 
   {
+    (void)index;
+    (void)value;
     return nullptr;
   }
   inline const uint8_t * getParameterBmpValue(uint8_t index,

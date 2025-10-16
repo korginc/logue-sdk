@@ -236,6 +236,7 @@ public:
 
   inline const char * getParameterStrValue(uint8_t index, int32_t value) const 
   {
+    (void)value;
     switch (index) 
     {
       case kParamMidCutoff:
