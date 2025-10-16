@@ -250,6 +250,7 @@ wasm:
 	@cp -r $(SANDBOXDIR)/samples $(WASMDIR)/
 	@cp -r $(SANDBOXDIR)/scripts $(WASMDIR)/
 	@cp -r $(SANDBOXDIR)/images $(WASMDIR)/
+	@cp -r $(WASMSRC) $(WASMDIR)/
 	@$(EMCC_BIN_PATH)/emcc -Wno-unknown-attributes $(INCDIR) \
 		-s AUDIO_WORKLET=1 \
 		-s WASM_WORKERS=1 \
@@ -257,6 +258,7 @@ wasm:
 		--shell-file $(SANDBOXDIR)/fx.html \
 		--emrun \
 		-O2 \
+		-g -fdebug-compilation-dir='..' \
 		$(WASMSRC) \
 		-o $(WASMDIR)/$(PROJECT).html
 	@echo Done
