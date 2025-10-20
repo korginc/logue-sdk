@@ -146,14 +146,13 @@ __unit_callback void unit_touch_event(uint8_t id, uint8_t phase, uint32_t x, uin
   s_effect_instance.touchEvent(id, phase, x, y);
 }
 
-#ifdef ALLOW_DEPRECATED_FUNCTIONS_API_2_1_0
 __unit_callback void unit_set_tempo(uint32_t tempo)
 {
-  s_effect_instance.setTempo(tempo);
+  float bpm = (tempo >> 16) + (tempo & 0xFFFF) / static_cast<float>(0x10000);
+  s_effect_instance.setTempo(bpm);
 }
 
 __unit_callback void unit_tempo_4ppqn_tick(uint32_t counter)
 {
   s_effect_instance.tempo4ppqnTick(counter);
 }
-#endif

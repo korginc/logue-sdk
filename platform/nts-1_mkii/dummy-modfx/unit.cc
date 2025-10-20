@@ -142,14 +142,13 @@ __unit_callback const char *unit_get_param_str_value(uint8_t id, int32_t value)
   return s_processor_instance.getParameterStrValue(id, value);
 }
 
-#ifdef ALLOW_DEPRECATED_FUNCTIONS_API_2_1_0
 __unit_callback void unit_set_tempo(uint32_t tempo)
 {
-  s_processor_instance.setTempo(tempo);
+  float bpm = (tempo >> 16) + (tempo & 0xFFFF) / static_cast<float>(0x10000);
+  s_processor_instance.setTempo(bpm);
 }
 
 __unit_callback void unit_tempo_4ppqn_tick(uint32_t counter)
 {
   s_processor_instance.tempo4ppqnTick(counter);
 }
-#endif

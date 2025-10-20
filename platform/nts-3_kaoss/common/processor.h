@@ -61,31 +61,28 @@ public:
         (void)y;
     }
 
-    // deprecated, use context-based pitch instead
-    [[deprecated]] virtual void pitchBend(uint8_t bend)
+    virtual void pitchBend(uint8_t bend)
     {
         (void)bend;
     }
 
-    [[deprecated]] virtual void channelPressure(uint8_t press)
+    virtual void channelPressure(uint8_t press)
     {
         (void)press;
     }
 
-    [[deprecated]] virtual void aftertouch(uint8_t note, uint8_t press)
+    virtual void aftertouch(uint8_t note, uint8_t press)
     {
         (void)note;
         (void)press;
     }
 
-    // deprecated, use fx_get_bpmf() instead
-    [[deprecated]] virtual void setTempo(uint32_t tempo)
+    virtual void setTempo(float tempo)
     {
-        // const float bpmf = (tempo >> 16) + (tempo & 0xFFFF) / static_cast<float>(0x10000);
         (void)tempo;
     }
 
-    [[deprecated]] virtual void tempo4ppqnTick(uint32_t counter)
+    virtual void tempo4ppqnTick(uint32_t counter)
     {
         (void)counter;
     }

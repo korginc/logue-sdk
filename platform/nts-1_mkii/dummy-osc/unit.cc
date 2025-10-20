@@ -152,11 +152,10 @@ __unit_callback void unit_all_note_off()
   s_osc_instance.allNoteOff();
 }
 
-#ifdef ALLOW_DEPRECATED_FUNCTIONS_API_2_1_0
-
 __unit_callback void unit_set_tempo(uint32_t tempo)
 {
-  s_osc_instance.setTempo(tempo);
+  float bpm = (tempo >> 16) + (tempo & 0xFFFF) / static_cast<float>(0x10000);
+  s_osc_instance.setTempo(bpm);
 }
 
 __unit_callback void unit_tempo_4ppqn_tick(uint32_t counter)
@@ -178,4 +177,3 @@ __unit_callback void unit_aftertouch(uint8_t note, uint8_t press)
 {
   s_osc_instance.aftertouch(note, press);
 }
-#endif
