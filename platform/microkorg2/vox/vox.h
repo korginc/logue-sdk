@@ -188,13 +188,13 @@ public:
 
       case kMk2QuarterVoices:
       {
-        ProcessOscx2(ctxt, out, frames);
+        ProcessOscx2(ctxt, 0, out, frames);
         break;
       }
 
       case kMk2SingleVoice:
       {
-        ProcessOscx1(ctxt, out, frames);
+        ProcessOscx1(ctxt, 0, out, frames);
         break;
       }
       default:
@@ -563,9 +563,8 @@ public:
     WriteUnitModDatax4(ctxt, filterOut, voiceNum);
   }
 
-  void ProcessOscx2(const unit_runtime_osc_context_t * ctxt, float * out, size_t frames)
+  void ProcessOscx2(const unit_runtime_osc_context_t * ctxt, int voiceNum, float * out, size_t frames)
   {
-    const uint32_t voiceNum = 0;
     GenerateWaveX2(voiceNum, frames);
     GenerateNoiseX2(voiceNum, frames);
 
@@ -582,9 +581,8 @@ public:
     WriteUnitModDatax2(ctxt, filterOut, 0);
   }
 
-  void ProcessOscx1(const unit_runtime_osc_context_t * ctxt, float * out, size_t frames)
+  void ProcessOscx1(const unit_runtime_osc_context_t * ctxt, int voiceNum, float * out, size_t frames)
   {
-    const uint32_t voiceNum = 0;
     GenerateWaveX1(voiceNum, frames);
     GenerateNoiseX1(voiceNum, frames);
 
