@@ -423,4 +423,39 @@ Other module runtimes do not provide specific realtime information.
 ### Strings
 
  Strings provided via `unit_get_param_str_value(..)` should be nul terminated C character arrays of 7-bit ASCII characters from the following list: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._`".
- 
+
+#### Oscillator Output
+ For efficiency, the microKORG2 runs one oscillator instance per timbre and expects the output to be written into the provided buffer as interlaced data. The number of voices expected, buffer location, and interlacing are all defined by the data provided in the oscillator runtime context. There are helper functions `write_oscillator_output_x1`/`write_oscillator_output_x2`/`write_oscillator_output_x4` and `GetBufferOffset` that handle the necessary calculations and writing. See `waves.h` or `vox.h` for examples. 
+
+ The microKORG2 has a maximum of eight voices, processed with as much parallelization as possible. However, depending on settings like Timbre Mode and Vocoder on/off the maximum number of voices can change, in turn affecting how each voice is interlaced. The chart below describes this behavior in detail.
+
+ # Single Timbre | Vocoder Off | Hard Tune/Harmonizer Off
+ 8 voices, interlaced in groups of 4
+ Voices 0 ~ 3 : bufferOffset =   0 | voiceOffset = 0 | voiceLimit = 8 | outputStride = 4
+ Voices 5 ~ 7 : bufferOffset = 256 | voiceOffset = 0 | voiceLimit = 8 | outputStride = 4
+
+ # Dual Timbre | Vocoder Off | Hard Tune/Harmonizer Off
+ 8 voices, interlaced in groups of 4
+ Voices 0 ~ 3 : bufferOffset =   0 | voiceOffset = 0 | voiceLimit = 4 | outputStride = 4
+ Voices 5 ~ 7 : bufferOffset = 256 | voiceOffset = 0 | voiceLimit = 4 | outputStride = 4
+
+ # Single Timbre | Vocoder On / Keyboard Mode | Hard Tune/Harmonizer Off
+ 4 voices, interlaced in groups of 4
+ Voices 0 ~ 3 : bufferOffset =   0 | voiceOffset = 0 | voiceLimit = 4 | outputStride = 4
+
+ # Dual Timbre | Vocoder On / Keyboard Mode | Hard Tune/Harmonizer Off
+ 4 voices, interlaced in groups of 2
+ Voices 0 ~ 1 : bufferOffset =   0 | voiceOffset = 0 | voiceLimit = 2 | outputStride = 4
+ Voices 2 ~ 3 : bufferOffset =   0 | voiceOffset = 2 | voiceLimit = 2 | outputStride = 4
+
+ # Single Timbre | Vocoder On / Scale Mode | Hard Tune/Harmonizer Off
+ 2 voices, interlaced in groups of 2
+ Voices 0 ~ 1 : bufferOffset =   0 | voiceOffset = 0 | voiceLimit = 2 | outputStride = 2
+
+ # Dual Timbre | Vocoder On / Scale Mode | Hard Tune/Harmonizer Off
+ 2 voices, interlaced in groups of 1
+ Voice  0     : bufferOffset =   0 | voiceOffset = 0 | voiceLimit = 1 | outputStride = 2
+ Voice  1     : bufferOffset =   0 | voiceOffset = 1 | voiceLimit = 1 | outputStride = 2
+
+# Any Timbre Setting | Vocoder N/A | Hard Tune/Harmonizer On
+ Oscillators are not processed when the Hard Tune or Harmonizer is on.
