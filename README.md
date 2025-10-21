@@ -10,6 +10,8 @@ This repository contains all the files and tools needed to build custom oscillat
 
 To download ready to use oscillators and effects, refer to the [Unit Index](https://korginc.github.io/logue-sdk/unit-index/) and follow instructions on the developer's website.
 
+There is an easier to navigate unit index page called [logue-SDK-filter](https://logue-sdk.vercel.app/).
+
 ## Platforms and Compatibility
 
 | Product                        | Latest SDK Version | Minimum Firmware Version | CPU Arch.     | Unit Format                                                 |
