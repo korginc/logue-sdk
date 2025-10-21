@@ -247,7 +247,7 @@ Field descriptions:
  * `.dev_id` : A unique developer identifier as a low endian 32-bit unsigned integer. See [Developer Identifier](#developer-identifier) for details.
  * `.unit_id` : An identifier for the unit itself as a low endian 32-bit unsigned integer. This identifier must only be unique within the scope of a given developer identifier.
  * `.version` : The version for the current unit as a low endian 32-bit unsigned integer, with major in the upper 16 bits, minor and patch number in the two lower bytes, respectively. (e.g.: v1.2.3 -> 0x00010203U)
- * `.name` : Name for the current unit, as displayed on the device when loaded. Nul-terminated array of maximum 8 7-bit ASCII characters. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._`".
+ * `.name` : Name for the current unit, as displayed on the device when loaded. Nul-terminated array of maximum 8 7-bit ASCII characters. Valid characters are: "`` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._!"#$%&'()*+,/:;<=>?@[]^`~``".
  * `.num_params` : Number of exposed parameters by the unit. This value depends on the target module. Refer to UNIT\_XXX\_MAX\_PARAM\_COUNT in common headers for exact value, where XXX is the target module.
  * `.params` : Array of parameter descriptors. See [Parameter Descriptors](#parameter-descriptors) for details. 
  
@@ -287,7 +287,7 @@ Field descriptions:
  * `frac` allows to specify the fractional part of the parameter value. This value will be interpreted as number of fractional bits or decimals depending on the `frac_mode` value.
  * `frac_mode` determines the type of fractional value being described. When set to `0`, values will be assumed to be fixed point with the lower `frac` bits representing the fractional part. When set to `1`, values will be assumed to include a fractional part that is multiplied by 10 times `frac` number of decimals, allowing for base 10 fractional increment/decrements.
  * `reserved` should be set to 0 at all times.
- * `name` allows for a 8 character name. Should be nul-terminated and 7-bit ASCII encoded. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._`".
+ * `name` allows for a 8 character name. Should be nul-terminated and 7-bit ASCII encoded. Valid characters are: "`` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._!"#$%&'()*+,/:;<=>?@[]^`~``".
  
  *Note* `min`, `max`, `center` and `init` values must take into account the `frac` and `frac_mode` values.
 
@@ -422,7 +422,7 @@ Other module runtimes do not provide specific realtime information.
 
 ### Strings
 
- Strings provided via `unit_get_param_str_value(..)` should be nul terminated C character arrays of 7-bit ASCII characters from the following list: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._`".
+ Strings provided via `unit_get_param_str_value(..)` should be nul terminated C character arrays of 7-bit ASCII characters from the following list: "`` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._!"#$%&'()*+,/:;<=>?@[]^`~``".
 
 #### Oscillator Output
  For efficiency, the microKORG2 runs one oscillator instance per timbre and expects the output to be written into the provided buffer as interlaced data. The number of voices expected, buffer location, and interlacing are all defined by the data provided in the oscillator runtime context. There are helper functions `write_oscillator_output_x1`/`write_oscillator_output_x2`/`write_oscillator_output_x4` and `GetBufferOffset` that handle the necessary calculations and writing. See `waves.h` or `vox.h` for examples. 
