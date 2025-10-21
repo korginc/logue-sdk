@@ -35,16 +35,17 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | free |
 | [cvRing](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Stereo ring modulation effect tuned to V/Oct | pro, xd, nts-1 | donation |
 | [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | pro, xd, nts-1 | donation |
-| [Blend](https://www.sinevibes.com/korgblend/) | Sinevibes | Parabolic wave modulated multi-voice chorus | pro, xd, nts-1 | paid |
-| [Corrosion](https://www.sinevibes.com/korgcorrosion/) | Sinevibes | Multi-algorithm distortion processor | pro, xd, nts-1 | paid |
-| [DCM8](https://www.sinevibes.com/korgdcm8/) | Sinevibes | Sample rate and bit depth reducer | pro, xd, nts-1 | paid |
-| [Dipole](https://www.sinevibes.com/korgdipole/) | Sinevibes | Through-Zero Flanger | pro, xd, nts-1 | paid |
-| [Drift](https://www.sinevibes.com/korgdrift/ ) | Sinevibes | Physically modelled stereo panner based on Lorenz osc. | pro, xd, nts-1 | paid |
-| [Finite](https://www.sinevibes.com/korgfinite/ ) | Sinevibes | Granular pitch shifter | pro, xd, nts-1 | paid |
+| [Blend](https://www.sinevibes.com/korgblend/) | Sinevibes | Parabolic wave modulated multi-voice chorus | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [Corrosion](https://www.sinevibes.com/korgcorrosion/) | Sinevibes | Multi-algorithm distortion processor | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [DCM8](https://www.sinevibes.com/korgdcm8/) | Sinevibes | Sample rate and bit depth reducer | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [Dipole](https://www.sinevibes.com/korgdipole/) | Sinevibes | Through-Zero Flanger | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [Drift](https://www.sinevibes.com/korgdrift/ ) | Sinevibes | Physically modelled stereo panner based on Lorenz osc. | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [Finite](https://www.sinevibes.com/korgfinite/ ) | Sinevibes | Granular pitch shifter | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [Ring](https://www.sinevibes.com/korgring/ ) | Sinevibes | 2x oversampling ring modulator | pro, xd, nts-1 | paid |
-| [Shift](https://www.sinevibes.com/korgshift/ ) | Sinevibes | Analog-modelled Bode frequency shifter | pro, xd, nts-1 | paid |
+| [Shift](https://www.sinevibes.com/korgshift/ ) | Sinevibes | Analog-modelled Bode frequency shifter | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [SVF](https://www.sinevibes.com/korgsvf/) | Sinevibes | State-variable filter 4 pole, -24dB/oct, resonant | pro, xd, nts-1 | paid |
-| [Vibrant](https://www.sinevibes.com/korgvibrant/ ) | Sinevibes | Two pole APF based deep phaser | pro, xd, nts-1 | paid |
-| [Whirl](https://www.sinevibes.com/korgwhirl/) | Sinevibes | Barber-pole phaser based on Bode frequency shifter | pro, xd, nts-1 | paid |
+| [Vibrant](https://www.sinevibes.com/korgvibrant/ ) | Sinevibes | Two pole APF based deep phaser | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [Whirl](https://www.sinevibes.com/korgwhirl/) | Sinevibes | Barber-pole phaser based on Bode frequency shifter | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [Eternal](https://www.sinevibes.com/korgeternal/) | Sinevibes | Barber-pole flanger | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [Stator](https://www.sinevibes.com/korgstator/) | Sinevibes | Tape wobble simulator | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [autopan](https://github.com/tmlbl/autopan) | Tim Lebel | Basic autopan effect | pro, xd, nts-1 | free |
-

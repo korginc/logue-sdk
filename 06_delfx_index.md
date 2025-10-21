@@ -39,7 +39,7 @@ _Note: The delay effect section can contain effects that perform other functions
 | [Smoke](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Graunular freeze/delay | pro, xd, nts-1 | donation |
 | [Dispersion](https://www.sinevibes.com/korgdispersion/) | Sinevibes | Bouncing ball delay | pro, xd, nts-1 | paid |
 | [Droplet](https://www.sinevibes.com/korgdroplet/) | Sinevibes | Rain drop delay | pro, xd, nts-1 | paid |
-| [Isomer](https://www.sinevibes.com/korgisomer/ ) | Sinevibes | Tempo synced ensemble delay | pro, xd, nts-1 | paid |
-| [Rerun](https://www.sinevibes.com/korgrerun/) | Sinevibes | Self-randomizing audio repeater | pro, xd, nts-1 | paid |
 | [Time](https://www.sinevibes.com/korgtime/) | Sinevibes | Ultra wide range delay/looper | pro, xd, nts-1 | paid |
-
+| [Isomer](https://www.sinevibes.com/korgisomer/ ) | Sinevibes | Tempo synced ensemble delay | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [Rerun](https://www.sinevibes.com/korgrerun/) | Sinevibes | Self-randomizing audio repeater | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [Integer](https://www.sinevibes.com/korginteger/) | Sinevibes | Digital-analog buffer delay | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |

@@ -101,6 +101,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [Odds](https://www.sinevibes.com/korgodds/) | Sinevibes | Stochastic control synthesis | pro, xd, nts-1 | 有料 |
 | [Tube](https://www.sinevibes.com/korgtube/) | Sinevibes | Resonator modeling synthesis | pro, xd, nts-1 | 有料 |
 | [Turbo](https://www.sinevibes.com/korgturbo/) | Sinevibes | Variable waveshaping synthesis | pro, xd, nts-1 | 有料 | 
+| [Flare](https://www.sinevibes.com/korgflare/) | Sinevibes | Additive synthesis oscillator | pro, xd, nts-1 | 有料 |
 | [Staub](https://www.staub-audio.com/products/staub/) | Staub Audio | Rave hoover sound | pro, xd, nts-1 | 有料 |
 | [Beats](https://www.soundmangling.com/2020/05/14/beats-user-oscillator/) | Tim Shoebridge | 28 beat-making sounds inc. kick, snares, toms and more | pro, xd, nts-1 | 有料 | 
 | [Chord](https://www.soundmangling.com/2020/05/14/chord-user-oscillator/) | Tim Shoebridge | Four waveforms and four sets of four chord changes | pro, xd, nts-1 | 有料 | 

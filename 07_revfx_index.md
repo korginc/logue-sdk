@@ -28,7 +28,6 @@ _Note: The reverb effect section can contain effects that perform other function
 | [Looper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style loop recorder | pro, xd, nts-1 | free |
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | free |
 | [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | pro, xd, nts-1 | donation |
-| [Albedo](https://www.sinevibes.com/korgalbedo/) | Sinevibes | Granular cloud reverb | pro, xd, nts-1 | paid |
-| [Hollow](https://www.sinevibes.com/korghollow/) | Sinevibes | FDN based vast space reverb | pro, xd, nts-1 | paid |
-| [Luminance](https://www.sinevibes.com/korgluminance/) | Sinevibes | FDN based shimmer reverb | pro, xd, nts-1 | paid |
-
+| [Albedo](https://www.sinevibes.com/korgalbedo/) | Sinevibes | Granular cloud reverb | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [Hollow](https://www.sinevibes.com/korghollow/) | Sinevibes | FDN based vast space reverb | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [Luminance](https://www.sinevibes.com/korgluminance/) | Sinevibes | FDN based shimmer reverb | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
