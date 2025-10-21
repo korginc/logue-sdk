@@ -232,7 +232,6 @@ class Vibrato
 
     UpdateParameters();
 
-    float dbg[16];
     const float samplerate = mRuntimeDesc.samplerate * 0.001;
     for (; out_p != out_e; in_p += 2, out_p += 2)
     {
@@ -276,13 +275,6 @@ class Vibrato
       // bass boost
       float32x2_t bassBoostOut = mBassBoostFilter.process_fo_x2(compressorOut);
 
-      dbg[0] = dry.a;
-      dbg[1] = mLfoZ[0];
-      dbg[2] = delayTimeL;
-      dbg[3] = delayTimeR;
-      dbg[4] = delayOutL;
-      dbg[5] = delayOutR;
-      
       f32x2_str(out_p, bassBoostOut);
     }
   }
