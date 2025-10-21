@@ -289,7 +289,7 @@ Done
  * `.dev_id` : 開発者を識別するための固有のIDです. ローエンディアンの32ビット符号なし整数で表現されます. 詳細は[開発者ID](#開発者id)のセクションをご参照ください.
  * `.unit_id` : ユニットを識別するための固有のIDです. ローエンディアンの32ビット符号なし整数で表現されます. 同一の`dev_id`の範囲内では, ユニットごとに異なる固有の`unit_id`を設定してください.
  * `.version` : ユニットのバージョンをローエンディアンの32ビット符号なし整数で記述することができます. 上位16ビットにメジャー・バージョン番号を, 下位２バイトにそれぞれマイナー・バージョン番号とパッチ番号を設定できます (例: v1.2.3 -> 0x00010203U).
- * `.name` : ロード時にデバイスに表示されるユニットの名前を指定します. ASCIIのNULL終端配列で最大18文字です. 次の文字を使うことができます: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._`".
+ * `.name` : ロード時にデバイスに表示されるユニットの名前を指定します. ASCIIのNULL終端配列で最大18文字です. 次の文字を使うことができます: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_`".
  * `.num_params` : ユニットの公開パラメーターの数です. この値はモジュールごとに異なり, common headerの UNIT\_XXX\_MAX\_PARAM\_COUNT に正確な値があります(XXXがターゲットとなるモジュールを示します).
  * `.params` : パラメーター記述子の配列です. 詳細は[パラメーター記述子](#パラメーター記述子)のセクションをご参照ください.
 
@@ -370,7 +370,7 @@ NTS-3 kaoss pad kitのGeneric FXは, (`.default_mappings`) 各エフェクト・
  * `frac`でパラメーターの小数部分を設定できます. この値は`frac_mode`の値に応じて小数ビット数または小数として解釈されます. 
  * `frac_mode`で記述される小数値のタイプを決定します. `0`に設定すると値は固定小数点となり, `frac`で指定されたビットが小数部を表します. `1`に設定すると値は`frac`の10倍を乗じたの小数部分を含むとみなされ,基数10の小数の増減が可能になります.
  * `reserved` は常に0に設定してください.
- * `name`には21文字の名前を付けることができます. 値はNULL終端で7ビットのASCIIフォーマットである必要があり, 次の文字をサポートしています "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._`".
+ * `name`には21文字の名前を付けることができます. 値はNULL終端で7ビットのASCIIフォーマットである必要があり, 次の文字をサポートしています "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_`".
  
  *Note* `min`, `max`, `center` ,`init`の値は`frac`と`frac_mode`の値を考慮して設定する必要があります.
 
@@ -493,5 +493,5 @@ NTS-3 kaoss pad kitのGeneric Fxのランタイムは, 追加の情報をユニ�
 
 ### 文字列
 
- `unit_get_param_str_value(..)`関数で扱う文字列は, NULL終端の7ビットASCII文字である必要があり, 次の文字がサポートされています: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._`".
+ `unit_get_param_str_value(..)`関数で扱う文字列は, NULL終端の7ビットASCII文字である必要があり, 次の文字がサポートされています: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_`".
  
