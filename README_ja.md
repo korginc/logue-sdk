@@ -8,6 +8,7 @@
 
 既に公開されているオシレーターやエフェクトの情報は [Unit Index](https://korginc.github.io/logue-sdk/ja/unit-index/) にあります.
 具体的な入手方法については各デベロッパーのウェブサイトにてご確認下さい.
+[logue-SDK-filter](https://logue-sdk.vercel.app/) という、より検索しやすいユニットインデックスページもあります。
 
 ## プラットフォームと互換性に関して
 
@@ -46,5 +47,6 @@ prologue, minilogue xd, Nu:Tekt NTS-1 dgital kitの3製品のために作成さ�
 ## サポート
 
 KORGはlogue-sdkに関しての技術的なサポートを提供しません.
+
 
 
