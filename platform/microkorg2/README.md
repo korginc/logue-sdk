@@ -8,7 +8,7 @@ This directory contains all source files needed to build custom oscillators and 
 
 #### Compatibility Notes
 
-Firmware version >= 2.0.0 is required to run user units built with SDK version 2.0.0.
+Firmware version >= 2.0.0 is required to run user units built with SDK version 2.1.0.
 
 #### Directory Structure:
 
