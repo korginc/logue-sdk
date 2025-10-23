@@ -299,8 +299,23 @@ Field descriptions:
  
 ##### Oscillator Parameters
  
- Up to 13 parameters are accessible via the OSC1/2/3 pages. They are assigned in order from left to right, page 1 ~ 3
+ Up to 13 parameters are accessible via the OSC1/2/3 pages. They are assigned in order from left to right, page 1 ~ 3.
+
+### Oscillator modulation
+
+ Oscillators receive a buffer of 10 modulation sources once per frame, with individual modulation values for up to eight voices per modulation source (depending on the current polyphony). These values can be accessed using the helper functions `GetModDepth` and `GetModData`. To access the modulation data, add `kMk2PlatformExclusiveModData` as a case in the `unit_platform_exclusive` function. To display a name for your custom modulation destination in the virtual patch, add `kMk2PlatformExclusiveModDestName` as a case in `unit_platform_exclusive` and write the name in the buffer provided by `GetModDestNameData`. See [vox](vox/vox.h) or [vox](waves/waves.h) for examples. 
  
+##### Effect Parameter Behavior
+
+ By default, the effect parameters match the behavior of the internal fx. This means that when changing fx, the current page 1 parameters will be applied to the target effect, while the page 2 parameters are completely independent. It also means that the three page 1 parameteters are available as modulation destinations in the virtual patch. Both of these behaviors can be controlled by changing the setting of the reserved parameter in the header, as described below.
+
+|                    Enum                      | Value |   Behavior   |
+|----------------------------------------------|-------|--------------|
+| kMk2FxParamModeBasic                         |     0 | The same as internal fx. Page 1 parameter values are copied from previously selected fx, and parameters are modulatable via the virtual patch. |
+| kMk2FxParamModeIgnoreKnobState               |     1 | Page 1 parameter values are _not_ copied from the previously selected fx, and parameters are modulatable via the virtual patch. |
+| kMk2FxParamModeIgnoreModulation              |     2 | Page 1 parameter values are copied from the previously selected fx, and parameters are _not_ modulatable via the virtual patch. |
+| kMk2FxParamModeIgnoreKnobStateAndModulation  |     3 | Page 1 parameter values are _not_ copied from the previously selected fx, and parameters are _not_ modulatable via the virtual patch. |
+
 ##### Modulation Effect Parameters
  
  Up to 8 parameters are accessible via the MOD and EXTRA pages of the Mod fx. The three MOD parameters can be modulated via the virtual patch, and will inherit the parameter values of the previously selected effect (the same behavior as the internal effects) unless otherwise specified by the "reserved" bit in the header. The kMk2FxParamModeXX enums in FxDefines.h can be used to make this configuration more transparent.
@@ -312,6 +327,7 @@ Field descriptions:
 ##### Reverb Effect Parameters
  
  Up to 8 parameters are accessible via the REVERB and EXTRA pages of the Reverb fx. The three REVERB parameters can be modulated via the virtual patch, and will inherit the parameter values of the previously selected effect (the same behavior as the internal effects) unless otherwise specified by the "reserved" bit in the header. The kMk2FxParamModeXX enums in FxDefines.h can be used to make this configuration more transparent.
+
 
 #### Parameter Types
 
