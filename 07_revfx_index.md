@@ -23,7 +23,7 @@ _Note: The reverb effect section can contain effects that perform other function
 | [Theatre](http://hammondeggsmusic.ca/logueplugins/cathedral.html) | Hammond Eggs Music | fixed low pass half time deep reverb | pro, xd, nts-1 | donation |
 | [Crusher](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Bit crusher and decimator | pro, xd, nts-1 | free |
 | [Gator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style gate arpeggiator | pro, xd, nts-1 | free |
-| [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3 | free |
+| [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3, microkorg2 | free |
 | [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | pro, xd, nts-1 | free |
 | [Looper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style loop recorder | pro, xd, nts-1 | free |
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | free |

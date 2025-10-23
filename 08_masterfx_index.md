@@ -11,5 +11,5 @@ nav_order: 2
 _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp_
 
 | Name | Developer | Description | Platforms | |
-| [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3 | free |
+| [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | drum | free |
 
