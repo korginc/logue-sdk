@@ -576,7 +576,7 @@ public:
       filterOut = mFormantFilter1.process_so_x2(sample, mFormantCoeffs[0], voiceNum);
       filterOut = float32x2_add(filterOut, mFormantFilter2.process_so_x2(sample, mFormantCoeffs[1], voiceNum));
       filterOut = float32x2_add(filterOut, mFormantFilter3.process_so_x2(sample, mFormantCoeffs[2], voiceNum));
-      write_oscillator_output_x2(out, filterOut, offset, ctxt->outputStride, ctxt->voiceOffset, i);
+      write_oscillator_output_x2(out, filterOut, offset, ctxt->outputStride, i, ctxt->voiceOffset);
     }
     WriteUnitModDatax2(ctxt, filterOut, 0);
   }

@@ -48,7 +48,7 @@ void write_oscillator_output_x4(float * buffer, float32x4_t sample, const uint32
 }
 
 static inline __attribute__((optimize("Ofast"),always_inline))
-void write_oscillator_output_x2(float * buffer, float32x2_t sample, const uint32_t offset, const uint32_t stride, const uint32_t channel, const uint32_t index)
+void write_oscillator_output_x2(float * buffer, float32x2_t sample, const uint32_t offset, const uint32_t stride, const uint32_t index, const uint32_t channel)
 {
     f32x2_str(&buffer[offset + ((index * stride) + channel)], sample);
 }
