@@ -251,7 +251,7 @@ wasm:
 	@cp -r $(SANDBOXDIR)/scripts $(WASMDIR)/
 	@cp -r $(SANDBOXDIR)/images $(WASMDIR)/
 	@cp -r $(WASMSRC) $(WASMDIR)/
-	@$(EMCC_BIN_PATH)/emcc -Wno-unknown-attributes $(INCDIR) \
+	@$(EMCC_BIN_PATH)/emcc -Wno-unknown-attributes -Wno-limited-postlink-optimizations $(INCDIR) \
 		-s AUDIO_WORKLET=1 \
 		-s WASM_WORKERS=1 \
 		-lembind \
