@@ -38,9 +38,10 @@
  *
  */
 
+#include "osc.h"
 #include "unit_osc.h"       // base definitions for osc units
-#include "osc.h"          // custom osc code
 #include "utils/int_math.h" // clipminmaxi32()
+// #include <algorithm>        // std::fill
 
 static Osc s_osc_instance;                              // Note: In this example, actual instance of custom osc object.
 static int32_t cached_values[UNIT_OSC_MAX_PARAM_COUNT]; // cached parameter values passed from hardware
@@ -51,21 +52,22 @@ static const unit_runtime_osc_context_t *context;
 #define q31_to_f32(q) ((float)(q) * q31_to_f32_c)
 
 // ---- Callbacks exposed to runtime ----------------------------------------------
+
 __unit_callback int8_t unit_init(const unit_runtime_desc_t *desc)
 {
   if (!desc)
     return k_unit_err_undef;
 
-  // note: make sure the unit is being loaded to the correct platform/module target
+  // Note: make sure the unit is being loaded to the correct platform/module target
   if (desc->target != unit_header.target)
     return k_unit_err_target;
 
-  // note: check API compatibility with the one this unit was built against
+  // Note: check API compatibility with the one this unit was built against
   if (!UNIT_API_IS_COMPAT(desc->api))
     return k_unit_err_api_version;
 
-  // check compatibility of samplerate with unit, for NTS-1 MKII should be 48000
-  if (desc->samplerate != 48000)
+  // Check compatibility of samplerate with unit
+  if (desc->samplerate != s_osc_instance.getSampleRate())
     return k_unit_err_samplerate;
 
   // Check compatibility of frame geometry
@@ -81,8 +83,6 @@ __unit_callback int8_t unit_init(const unit_runtime_desc_t *desc)
   {
     cached_values[id] = static_cast<int32_t>(unit_header.params[id].init);
   }
-
-  s_osc_instance.init(nullptr);
 
   return k_unit_err_none;
 }

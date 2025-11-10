@@ -40,9 +40,9 @@
  */
 
 #include "reverb.h"
-#include "unit_revfx.h" // base definitions for delfx units
-
+#include "unit_revfx.h"     // base definitions for revfx units
 #include "utils/int_math.h" // clipminmaxi32()
+#include <algorithm>        // std::fill
 
 static Reverb s_processor_instance; // actual instance of custom delay object
 
@@ -74,14 +74,20 @@ __unit_callback int8_t unit_init(const unit_runtime_desc_t *desc)
   // If SDRAM buffers are required they must be allocated here
   if (!desc->hooks.sdram_alloc)
     return k_unit_err_memory;
-  float *allocated_buffer_ = (float *)desc->hooks.sdram_alloc(s_processor_instance.getBufferSize() * sizeof(float));
-  if (!allocated_buffer_)
-    return k_unit_err_memory;
 
-  // Make sure buffer is cleared
-  for (int i = 0; i < s_processor_instance.getBufferSize(); ++i)
+  if (s_processor_instance.getBufferSize() > 0)
   {
-    allocated_buffer_[i] = 0.f;
+    float *allocated_buffer_ = (float *)desc->hooks.sdram_alloc(s_processor_instance.getBufferSize() * sizeof(float));
+    if (!allocated_buffer_)
+      return k_unit_err_memory;
+
+    // clear buffer
+    std::fill(allocated_buffer_, allocated_buffer_ + s_processor_instance.getBufferSize(), 0.f);
+    s_processor_instance.init(allocated_buffer_);
+  }
+  else
+  {
+    s_processor_instance.init(nullptr);
   }
 
   // initialize cached parameters to defaults
@@ -89,8 +95,6 @@ __unit_callback int8_t unit_init(const unit_runtime_desc_t *desc)
   {
     cached_values[id] = static_cast<int32_t>(unit_header.params[id].init);
   }
-
-  s_processor_instance.init(allocated_buffer_);
 
   return k_unit_err_none;
 }

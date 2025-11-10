@@ -38,12 +38,15 @@
  *
  */
 
-#include "unit_osc.h"       // Note: Include base definitions for osc units
-#include "osc.h"            // Note: Include custom osc code
+#include "osc.h"
+#include "unit_osc.h"       // base definitions for osc units
 #include "utils/int_math.h" // clipminmaxi32()
+// #include <algorithm>        // std::fill
 
-static Osc s_osc_instance;                              // Note: In this example, actual instance of custom osc object.
+static Osc s_osc_instance; // Note: In this example, actual instance of custom osc object.
+
 static int32_t cached_values[UNIT_OSC_MAX_PARAM_COUNT]; // cached parameter values passed from hardware
+
 static const unit_runtime_osc_context_t *context;
 
 // from fixed_math.h
@@ -51,21 +54,22 @@ static const unit_runtime_osc_context_t *context;
 #define q31_to_f32(q) ((float)(q) * q31_to_f32_c)
 
 // ---- Callbacks exposed to runtime ----------------------------------------------
+
 __unit_callback int8_t unit_init(const unit_runtime_desc_t *desc)
 {
   if (!desc)
     return k_unit_err_undef;
 
-  // note: make sure the unit is being loaded to the correct platform/module target
+  // Note: make sure the unit is being loaded to the correct platform/module target
   if (desc->target != unit_header.target)
     return k_unit_err_target;
 
-  // note: check API compatibility with the one this unit was built against
+  // Note: check API compatibility with the one this unit was built against
   if (!UNIT_API_IS_COMPAT(desc->api))
     return k_unit_err_api_version;
 
-  // check compatibility of samplerate with unit, for NTS-1 MKII should be 48000
-  if (desc->samplerate != 48000)
+  // Check compatibility of samplerate with unit
+  if (desc->samplerate != s_osc_instance.getSampleRate())
     return k_unit_err_samplerate;
 
   // Check compatibility of frame geometry
@@ -73,16 +77,15 @@ __unit_callback int8_t unit_init(const unit_runtime_desc_t *desc)
   if (desc->input_channels != 2 || desc->output_channels != 1) // should be stereo input / mono output
     return k_unit_err_geometry;
 
-  // cache the context for later use
-  context = static_cast<const unit_runtime_osc_context_t *>(desc->hooks.runtime_context);
+  // If SDRAM buffers are required they must be allocated here
+  if (!desc->hooks.sdram_alloc)
+    return k_unit_err_memory;
 
   // initialize cached parameters to defaults
   for (int id = 0; id < UNIT_OSC_MAX_PARAM_COUNT; ++id)
   {
     cached_values[id] = static_cast<int32_t>(unit_header.params[id].init);
   }
-
-  s_osc_instance.init(nullptr);
 
   return k_unit_err_none;
 }
