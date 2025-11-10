@@ -23,11 +23,14 @@ static float BPM_WASM = 120.f;
 void fx_set_bpm(float bpm)
 {
   BPM_WASM = bpm;
+  processor.setTempo(bpm);
 }
+
 uint16_t fx_get_bpm(void)
 {
   return static_cast<int>(BPM_WASM * 10.f);
 }
+
 float fx_get_bpmf(void)
 {
   return BPM_WASM;
@@ -161,7 +164,7 @@ std::vector<AudioWorkletParameter> getValidParameters()
 
 void setOscPitch(float f0)
 {
-  processor.setPitch(f0/static_cast<float>(SAMPLE_RATE));
+  processor.setPitch(f0 / static_cast<float>(SAMPLE_RATE));
 }
 
 // bind unit parameters
