@@ -120,7 +120,7 @@ __unit_callback void unit_suspend()
 
 __unit_callback void unit_render(const float *in, float *out, uint32_t frames)
 {
-  s_processor_instance.process(in, out, frames, 2);
+  s_processor_instance.process(in, out, frames);
 }
 
 __unit_callback void unit_set_param_value(uint8_t id, int32_t value)

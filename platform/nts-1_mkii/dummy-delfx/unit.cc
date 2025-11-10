@@ -39,9 +39,9 @@
  */
 
 #include "delay.h"
-#include "unit_delfx.h" // base definitions for delfx units
+#include "unit_delfx.h"     // base definitions for delfx units
 #include "utils/int_math.h" // clipminmaxi32()
-#include <algorithm> // std::fill
+#include <algorithm>        // std::fill
 
 static Delay s_processor_instance; // actual instance of custom delay object
 
@@ -120,7 +120,7 @@ __unit_callback void unit_suspend()
 
 __unit_callback void unit_render(const float *in, float *out, uint32_t frames)
 {
-  s_processor_instance.process(in, out, frames, 2);
+  s_processor_instance.process(in, out, frames);
 }
 
 __unit_callback void unit_set_param_value(uint8_t id, int32_t value)

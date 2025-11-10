@@ -192,7 +192,7 @@ public:
     state_.lfo = lfo;
   }
 
-  void process(const float *__restrict in, float *__restrict out, uint32_t frames, uint32_t outChannels) override final
+  void process(const float *__restrict in, float *__restrict out, uint32_t frames) override final
   {
     State &s = state_;
     const Params p = params_;

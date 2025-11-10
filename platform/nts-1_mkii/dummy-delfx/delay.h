@@ -148,12 +148,12 @@ public:
   void teardown() override final { buffer_ = nullptr; }
 
   // audio processing callbacks
-  void process(const float *__restrict in, float *__restrict out, uint32_t frames, uint32_t outChannels) override final
+  void process(const float *__restrict in, float *__restrict out, uint32_t frames) override final
   {
     // Caching current parameter values. Consider smoothing sensitive parameters in audio loop
     const Params p = params_;
 
-    for (const float *out_end = out + frames * outChannels; out != out_end; in += 2, out += outChannels)
+    for (const float *out_end = out + frames * 2; out != out_end; in += 2, out += 2)
     {
       // Process samples here
 

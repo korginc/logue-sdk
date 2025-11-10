@@ -212,7 +212,7 @@ bool ProcessAudio(int numInputs, const AudioSampleFrame *inputs,
   }
 
   // emscripten_log(EM_LOG_CONSOLE, "bpm=%d", fx_get_bpm());
-  processor.process(interleavedIn.data(), interleavedOut.data(), WEB_AUDIO_FRAME_SIZE, 2);
+  processor.process(interleavedIn.data(), interleavedOut.data(), WEB_AUDIO_FRAME_SIZE);
 
   // de-interleave output buffer
   for (int i = 0; i < WEB_AUDIO_FRAME_SIZE; ++i)

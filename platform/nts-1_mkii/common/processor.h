@@ -16,7 +16,7 @@ public:
 
     virtual void init(float *allocated_buffer) = 0;
 
-    virtual void process(const float *__restrict in, float *__restrict out, uint32_t frames, uint32_t outChannels) = 0;
+    virtual void process(const float *__restrict in, float *__restrict out, uint32_t frames) = 0;
 
     // note: the deconstructor will not be called for the static instance
     // so make sure to free any resources in this function

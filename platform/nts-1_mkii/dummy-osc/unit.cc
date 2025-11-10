@@ -77,9 +77,8 @@ __unit_callback int8_t unit_init(const unit_runtime_desc_t *desc)
   if (desc->input_channels != 2 || desc->output_channels != 1) // should be stereo input / mono output
     return k_unit_err_geometry;
 
-  // If SDRAM buffers are required they must be allocated here
-  if (!desc->hooks.sdram_alloc)
-    return k_unit_err_memory;
+  // cache the context for later use
+  context = static_cast<const unit_runtime_osc_context_t *>(desc->hooks.runtime_context);
 
   // initialize cached parameters to defaults
   for (int id = 0; id < UNIT_OSC_MAX_PARAM_COUNT; ++id)
@@ -114,7 +113,7 @@ __unit_callback void unit_render(const float *in, float *out, uint32_t frames)
 {
   s_osc_instance.setPitch(osc_w0f_for_note((context->pitch) >> 8, context->pitch & 0xFF));
   s_osc_instance.setShapeLfo(q31_to_f32(context->shape_lfo));
-  s_osc_instance.process(in, out, frames, 1);
+  s_osc_instance.process(in, out, frames);
 }
 
 __unit_callback void unit_set_param_value(uint8_t id, int32_t value)
