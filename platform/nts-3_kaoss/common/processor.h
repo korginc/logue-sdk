@@ -26,7 +26,10 @@ public:
     virtual void setParameter(uint8_t id, int32_t value) = 0;
 
     // for string type parameters
-    virtual const char *getParameterStrValue(uint8_t id, int32_t value) const = 0;
+    virtual const char *getParameterStrValue(uint8_t id, int32_t value) const
+    {
+        return nullptr;
+    }
 
     // reset effect state, excluding exposed parameter values
     virtual void reset() {}

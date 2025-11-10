@@ -128,7 +128,7 @@ public:
   }
 
   // life-cycle methods
-  virtual void init(float *) override final
+  void init(float *) override final
   {
     params_.reset();
     phasor_ = 0.f;
