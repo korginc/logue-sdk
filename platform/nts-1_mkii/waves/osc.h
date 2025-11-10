@@ -180,7 +180,6 @@ public:
     state_.reset();
   }
 
-
   // set frequency in digital w (w = f/samplerate, 0.5 is Nyquist)
   void setPitch(float w0)
   {
@@ -285,22 +284,22 @@ private:
       k_flag_reset = 1 << 6
     };
 
-    const float *wave_a = wavesA[0];                // selected wave a data
-    const float *wave_b = wavesD[0];                // selected wave b data
-    const float *sub_wave = wavesA[0];              // selected sub wave data
-    float phi_a = 0.f;                              // wave a phase
-    float phi_b = 0.f;                              // wave b phase
-    float phi_sub = 0.f;                            // sub wave phase
-    float w0_a = 440.f * k_samplerate_recipf;       // wave a phase increment
-    float w0_b = 440.f * k_samplerate_recipf;       // wave b phase increment
-    float w0_sub = 220.f * k_samplerate_recipf;     // sub wave phase increment
-    float lfo = 0.f;                                // target lfo value
-    float lfoz = 0.f;                               // current interpolated lfo value
-    float dither = 0.f;                             // dithering amount before bit reduction
-    float bit_res = 1.f;                            // bit depth scaling factor
-    float bit_res_recip = 1.f;                      // bit depth scaling reciprocal, returns signal to 0.-1.f after scaling/rounding
-    float imperfection;                             // tuning imperfection
-    std::atomic_uint_fast32_t flags = k_flags_none; // flags passed to audio processing thread
+    const float *wave_a = wavesA[0];               // selected wave a data
+    const float *wave_b = wavesD[0];               // selected wave b data
+    const float *sub_wave = wavesA[0];             // selected sub wave data
+    float phi_a = 0.f;                             // wave a phase
+    float phi_b = 0.f;                             // wave b phase
+    float phi_sub = 0.f;                           // sub wave phase
+    float w0_a = 440.f * k_samplerate_recipf;      // wave a phase increment
+    float w0_b = 440.f * k_samplerate_recipf;      // wave b phase increment
+    float w0_sub = 220.f * k_samplerate_recipf;    // sub wave phase increment
+    float lfo = 0.f;                               // target lfo value
+    float lfoz = 0.f;                              // current interpolated lfo value
+    float dither = 0.f;                            // dithering amount before bit reduction
+    float bit_res = 1.f;                           // bit depth scaling factor
+    float bit_res_recip = 1.f;                     // bit depth scaling reciprocal, returns signal to 0.-1.f after scaling/rounding
+    float imperfection;                            // tuning imperfection
+    std::atomic_uint_fast32_t flags{k_flags_none}; // flags passed to audio processing thread
 
     State(void)
     {
