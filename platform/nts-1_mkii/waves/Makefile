@@ -135,6 +135,15 @@ LIBS := $(DLIBS) $(ULIBS)
 LIBDIR := $(patsubst %,-I%,$(DLIBDIR) $(ULIBDIR))
 
 ##############################################################################
+# WebAssembly compiler and binding tools
+#
+SANDBOXDIR ?= $(PROJECT_ROOT)/../../../websim
+WASMSRC := wasm.cc $(UCSRC) $(UCXXSRC) $(wildcard $(PROJECT_ROOT)/../../../websim/dsp/*.c) $(wildcard $(PROJECT_ROOT)/../../../websim/dsp/*.cpp)
+WASMDIR := $(PROJECT_ROOT)/sim
+DINCDIR += $(TOOLSDIR)/emsdk/upstream/emscripten/system/include
+EMCC_BIN_PATH := $(TOOLSDIR)/emsdk/upstream/emscripten
+
+##############################################################################
 # Compiler flags
 #
 
@@ -220,7 +229,7 @@ $(BUILDDIR)/%.elf: $(OBJS) $(LDSCRIPT)
 
 clean:
 	@echo Cleaning
-	-rm -fR $(PROJECT_ROOT)/.dep $(BUILDDIR) $(PROJECT_ROOT)/$(PRODUCT)
+	-rm -fR $(PROJECT_ROOT)/.dep $(BUILDDIR) $(PROJECT_ROOT)/$(PRODUCT) $(WASMDIR)
 	@echo Done
 	@echo
 
@@ -235,3 +244,23 @@ install: $(BUILDDIR)/$(PRODUCT)
 	@echo Done
 	@echo
 
+wasm:
+	@echo Building WebAssembly audio processor
+	@mkdir -p $(WASMDIR)
+	@cp -r $(SANDBOXDIR)/samples $(WASMDIR)/
+	@cp -r $(SANDBOXDIR)/scripts $(WASMDIR)/
+	@cp -r $(SANDBOXDIR)/images $(WASMDIR)/
+	@cp -r $(WASMSRC) $(WASMDIR)/
+	@$(EMCC_BIN_PATH)/emcc -Wno-unknown-attributes -Wno-limited-postlink-optimizations $(INCDIR) \
+		-s AUDIO_WORKLET=1 \
+		-s WASM_WORKERS=1 \
+		-lembind \
+		--shell-file $(SANDBOXDIR)/osc.html \
+		--emrun \
+		-O2 \
+		-g -fdebug-compilation-dir='..' \
+		$(WASMSRC) \
+		-o $(WASMDIR)/$(PROJECT).html
+	@echo Done
+	@echo Opening the sandbox
+	@$(EMCC_BIN_PATH)/emrun --browser chrome --serve_after_close $(WASMDIR)/$(PROJECT).html
