@@ -22,6 +22,11 @@
 #include "Comb.h"
 #include "Models.h"
 
+#ifdef Voice
+#undef Voice
+#endif
+class Voice; // forward declaration to guard against include-order/macro issues
+
 /** This class is the equivalent of the origin pluginProcessor the
  * original RipplerX code, now it's a synth instance.
  *
@@ -40,7 +45,7 @@ class RipplerX
 
     RipplerX() {};
     ~RipplerX() {};
-    // taken from the original PluginProcessor()
+    // called at unit_init - taken from the original PluginProcessor()
     inline int8_t Init(const unit_runtime_desc_t * desc) {
         // Check compatibility of samplerate with unit, for drumlogue should be 48000
         if (desc->samplerate != c_sampleRate)
@@ -52,15 +57,14 @@ class RipplerX
 
         // Note: if need to allocate some memory can do it here and return k_unit_err_memory if getting allocation errors
 
-
-        // models = std::make_unique<Models>();
+        models = std::make_shared<Models>();
         // create intruments
         for (size_t i = 0; i < polyphony; ++i) {
             voices.push_back(std::make_unique<Voice>(*models));
         }
 
         // private variables (state vars set at constructor)
-        m_currentProgram = 0;
+        // m_currentProgram = 0;    //done at LoadPreset
         m_note = 60;
         // sample management
         m_sampleBank = 0;
@@ -73,27 +77,30 @@ class RipplerX
         m_get_num_samples_for_bank_ptr = desc->get_num_samples_for_bank;
         m_get_sample = desc->get_sample;
 
-        loadParameters();
+        // loadDefaultProgramParameters();
+        LoadPreset(0);
 
         comb.init(getSampleRate());
         limiter.init(getSampleRate());
 
         resetLastModels();
-        clearVoices();
-        prepareToPlay();    // this is equivalent to onSlider() in the original plugin
+        // this is equivalent to onSlider() in the original plugin NOTE: done at LoadPreset
+        // clearVoices();
+        // prepareToPlay();
 
         return k_unit_err_none;
     }
 
-    inline void loadParameters() {
+    // NOTE: does this make any sense?
+    inline void loadDefaultProgramParameters() {
         // Initial parameter values, editable ones are indented and matching
         // with header.c, plus others that are characterizing each "program"
             parameters[mallet_mix] = 0.0f;
         parameters[mallet_res] = 8;
         parameters[mallet_stiff] = 600;
             parameters[a_on] = 1;   // true
-        parameters[a_model] = 3;    // TODO - "Squared"
-        parameters[a_partials] = c_partials[3]; // TODO check this value
+        parameters[a_model] = ModelNames::Squared;
+        parameters[a_partials] = c_partials[3]; // in constructor of RipplerXAudioProcessor
         parameters[a_decay] = 10;   // 1%
         parameters[a_damp] = 0;
         parameters[a_tone] = 0;
@@ -105,7 +112,7 @@ class RipplerX
         parameters[a_radius] = 0.5f;
         parameters[a_coarse] = 0.0f;
             parameters[a_fine] = 0.0f;  // -99.0 . 99.0
-            parameters[b_on] = 0;   // false, off as Drumlogue has not enough user editable params
+            parameters[b_on] = 0;   // default is off as Drumlogue has not enough user editable params - will be switched on by program
             parameters[b_model] = 0;
             parameters[b_partials] = c_partials[3];
             parameters[b_decay] = 1.0f;
@@ -512,7 +519,7 @@ class RipplerX
         return 0;
     }
 
-    inline const char * getParameterStrValue(uint8_t index, int32_t value) const {
+    inline const char *getParameterStrValue(uint8_t index, int32_t value) const {
         (void)value;
         switch (index) {
         // Note: String memory must be accessible even after function returned.
@@ -553,14 +560,14 @@ class RipplerX
             return nullptr;
         }
 
-    // TODO get note from unit.cc?
-    inline void NoteOn(uint8_t note, uint8_t velocity) {
-        auto srate = getSampleRate();
-        Voice& voice = *voices[nvoice];
-        nvoice = (nvoice + 1) % polyphony;
+        // TODO get note from unit.cc? onNote in PluginProcessor
+        inline void NoteOn(uint8_t note, uint8_t velocity) {
+          auto srate = getSampleRate();
+          Voice & voice = *voices[nvoice];
+          nvoice = (nvoice + 1) % polyphony;
 
-        // Sample
-        if (sampleWrapper) {
+          // Sample
+          if (sampleWrapper) {
             // Copy values we care about out of sampleWrapper before it changes.
             m_sampleChannels = sampleWrapper->channels;
             m_sampleFrames = sampleWrapper->frames;
@@ -578,6 +585,7 @@ class RipplerX
         voice.trigger(srate, note, velocity / 127.0, malletFreq);
     }
 
+    // offNote in PluginProcessor
     inline void NoteOff(uint8_t note) {
         m_gate = false;
         for (auto& voice : voices)
@@ -617,7 +625,7 @@ class RipplerX
         setCurrentProgram(idx); // TODO review this
     }
 
-    inline uint8_t getPresetIndex() const { return 0; }
+    inline uint8_t getPresetIndex() const { return m_currentProgram; }
 
     // Reset last models and last partials so they don't trigger changes onSlider()
     inline void resetLastModels()
@@ -698,10 +706,9 @@ class RipplerX
     }
 
     /*===========================================================================*/
-    /* Private Member Variables. */
-    /*===========================================================================*/
     std::vector<std::unique_ptr<Voice>> voices;
-    std::unique_ptr<Models> models = std::make_unique<Models>();
+    /*===========================================================================*/
+    std::shared_ptr<Models> models;
     Comb    comb{};
     Limiter limiter{};
     // equivalent to m_voice
@@ -746,5 +753,15 @@ class RipplerX
     static const char* const c_modelName[c_modelElements];
     static const char* const c_partialsName[c_partialElements];
     static const char* const c_noiseFilterModeName[c_noiseFilterModeElements];
-    static const char* const c_programName[last_program];
+    static const char * const c_programName[last_program];
 }; // end class RipplerX
+
+
+// Definitions that point the class static arrays to the globals in constants.h.
+// Place in the header after the class (or better: move into ripplerx.cpp).
+// Requires constants.h to define the global arrays with the same names.
+inline const char* const RipplerX::c_sampleBankName[c_sampleBankElements] = ::c_sampleBankName;
+inline const char* const RipplerX::c_modelName[c_modelElements] = ::c_modelName;
+inline const char* const RipplerX::c_partialsName[c_partialElements] = ::c_partialsName;
+inline const char* const RipplerX::c_noiseFilterModeName[c_noiseFilterModeElements] = ::c_noiseFilterModeName;
+inline const char * const RipplerX::c_programName[last_program] = ::c_programName;

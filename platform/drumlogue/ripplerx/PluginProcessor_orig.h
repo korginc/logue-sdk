@@ -105,10 +105,11 @@ private:
     juce::ApplicationProperties settings;
     std::vector<MIDIMsg> midi;
     std::vector<std::unique_ptr<Voice>> voices;
+    std::unique_ptr<Models> models;
     int nvoice = 0; // next voice to use
     Comb comb{};
     Limiter limiter{};
-    
+
 
 
     //==============================================================================
