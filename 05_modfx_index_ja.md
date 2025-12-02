@@ -33,6 +33,7 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [Gator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style gate arpeggiator | pro, xd, nts-1 | 無料 |
 | [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3, microkorg2 | 無料 |
 | [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | pro, xd, nts-1 | 無料 |
+| [Vault](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Program librarian utility | microkorg2 | 無料 |
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | 無料 |
 | [cvRing](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Stereo ring modulation effect tuned to V/Oct | pro, xd, nts-1 | 寄付 |
 | [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | pro, xd, nts-1 | 寄付 |

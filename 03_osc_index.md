@@ -74,6 +74,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [FastSaw](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | Optimized Saw with unison (pseudo-polyphony on NTS-1) | pro, xd, nts-1 | free |
 | [FMxx](https://github.com/dukesrg/logue-osc) | Oleg Burdaev | 6/4-operator FM oscillator series with up to 4 Yamaha DX7/DX21/DX11-series voice banks suport | pro, xd, nts-1 | free |
 | [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii | free |
+| [Vault](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Program librarian utility | microkorg2 | free |
 | [MO2 add](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits additive mode | pro, xd, nts-1 | free |
 | [MO2 fm](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits FM mode | pro, xd, nts-1 | free |
 | [MO2 grn](https://github.com/peterall/eurorack-prologue/releases) | Peter Allwin | Port of Mutable Instruments Plaits granular mode | pro, xd, nts-1 | free |

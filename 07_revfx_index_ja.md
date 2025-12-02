@@ -27,6 +27,7 @@ _Note: リバーブエフェクトセクションには, リバーブ以外の�
 | [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3, microkorg2 | 無料 |
 | [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | pro, xd, nts-1 | 無料 |
 | [Looper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style loop recorder | pro, xd, nts-1 | 無料 |
+| [Vault](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Program librarian utility | drum, microkorg2 | 無料 |
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | 無料 |
 | [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | pro, xd, nts-1 | 寄付 |
 | [Albedo](https://www.sinevibes.com/korgalbedo/) | Sinevibes | Granular cloud reverb | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | 有料 |

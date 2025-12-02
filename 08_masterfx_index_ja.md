@@ -13,4 +13,5 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 
 | 名前 | 開発者 | 備考 | プラットフォーム |  |
 | [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | drum | 無料 |
+| [Vault](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Program librarian utility | drum | 無料 |
 

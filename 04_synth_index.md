@@ -20,6 +20,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [FM64](https://dukesrg.github.io/logue-sdk) | Oleg Burdaev | 6-operator FM synth with DX7/DX21/DX11-series voice banks suport | drum | free |
 | [Tesseract](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | 4-dimensional vector synth with customizable waveforms | drum | free |
 | [loguePADS](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Sample-based synths set | drum | free |
+| [Vault](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Program librarian utility | drum | free |
 | [Riffline](https://payhip.com/b/aidtV) | FrostMod Audio | 4 voice polyphonic supersaw synthesizer | drum | donation |
 | [Acidbass](https://payhip.com/b/lr6Nk) | FrostMod Audio |  monophonic acid bass synthesizer | drum | donation |
 | Nano | Sinevibes |             | drum | built-in |

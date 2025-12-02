@@ -32,6 +32,7 @@ _Note: The delay effect section can contain effects that perform other functions
 | [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | nts-1 mkii, drum, nts-3, microkorg2 | free |
 | [Hyper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Unison effect inspired by supersaw/hypersaw | pro, xd, nts-1 | free |
 | [Looper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style loop recorder | pro, xd, nts-1 | free |
+| [Vault](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Program librarian utility | drum, microkorg2 | free |
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | free |
 | [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | pro, xd, nts-1 | donation |
 | [LogReverse](https://gum.co/rolllog_free_pack) | Roll-log Sounds | Reverse delay with manual mode | pro, xd, nts-1 | donation |
