@@ -29,6 +29,7 @@ _Note: リバーブエフェクトセクションには, リバーブ以外の�
 | [Looper](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Kaossilator-style loop recorder | pro, xd, nts-1 | 無料 |
 | [Vibrator](https://github.com/dukesrg/logue-fx) | Oleg Burdaev | Frequency vibrator and pitch shift | pro, xd, nts-1 | 無料 |
 | [Del-8](https://gum.co/logueMill_del_8) | Roll-log Sounds | User-configurable 8-bit mod delay | pro, xd, nts-1 | 寄付 |
+| [Clouds Reverb](https://cldmnky.github.io/drumlogue-units/units/clouds-revfx/) | cldmnky | Lush, atmospheric reverb based on Mutable Instruments Clouds | drum | 無料/寄付 |
 | [Albedo](https://www.sinevibes.com/korgalbedo/) | Sinevibes | Granular cloud reverb | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | 有料 |
 | [Hollow](https://www.sinevibes.com/korghollow/) | Sinevibes | FDN based vast space reverb | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | 有料 |
 | [Luminance](https://www.sinevibes.com/korgluminance/) | Sinevibes | FDN based shimmer reverb | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | 有料 |
