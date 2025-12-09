@@ -327,8 +327,6 @@ public:
 
   inline const char * getParameterStrValue(uint8_t index, int32_t value) const 
   {
-    (void)index;
-    (void)value;
     return nullptr;
   }
   inline const uint8_t * getParameterBmpValue(uint8_t index,
@@ -371,9 +369,24 @@ public:
     {
       case kMk2PlatformExclusiveModData:
       {
-        float * voiceFreqData = GetModData(data);
-        const int modDestIndexMax = dataSize;
-        buf_cpy_f32(&voiceFreqData[clipmaxi32(ctxt->voiceLimit * kModDestShape, modDestIndexMax)], state_.shapeMod, ctxt->voiceLimit);
+        float * modDepth = GetModDepth(data);
+        int32_t * index = GetModIndex(data);
+
+        buf_clr_f32(state_.shapeMod, kMk2MaxVoices);
+
+        float * shapeMod = state_.shapeMod;
+        for(int voice = 0; voice < ctxt->voiceLimit; voice+=4)
+        {
+          for(int modDest = 0; modDest < kNumModDest; modDest++)
+          {
+            if(index[modDest] != kModDestShape) continue;
+
+            float32x4_t currentValue = f32x4_ld(&shapeMod[voice]);
+            float * modData = GetModSourceData(data, modDest, ctxt->voiceLimit, voice);
+            currentValue = float32x4_fmulscaladd(currentValue, f32x4_ld(modData), modDepth[modDest]);
+            f32x4_str(&shapeMod[voice], currentValue);
+          }
+        }
         break;
       }
     

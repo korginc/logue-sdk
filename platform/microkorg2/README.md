@@ -303,7 +303,9 @@ Field descriptions:
 
 ### Oscillator modulation
 
- Oscillators receive a buffer of 10 modulation sources once per frame, with individual modulation values for up to eight voices per modulation source (depending on the current polyphony). These values can be accessed using the helper functions `GetModDepth` and `GetModData`. To access the modulation data, add `kMk2PlatformExclusiveModData` as a case in the `unit_platform_exclusive` function. To display a name for your custom modulation destination in the virtual patch, add `kMk2PlatformExclusiveModDestName` as a case in `unit_platform_exclusive` and write the name in the buffer provided by `GetModDestNameData`. See [vox](vox/vox.h) or [vox](waves/waves.h) for examples. 
+ Oscillators receive a buffer of data for each voice from up to six modulation sources (one per virtual patch assignment) once per frame, along with the depth values corresponding to each virtual patch assignment. These values can be accessed using the helper functions `GetModDepth` and `GetModData`. To access the modulation data, add `kMk2PlatformExclusiveModData` as a case in the `unit_platform_exclusive` function. To display a name for your custom modulation destination in the virtual patch, add `kMk2PlatformExclusiveModDestName` as a case in `unit_platform_exclusive` and write the name in the buffer provided by `GetModDestNameData`. 
+ Please be aware that multiple sources can be assigned to the same destination and the same source can be assigned to the same destination multiple times. All modulation data and depth values are normalized to -1 ~ 1.
+ See [vox](vox/vox.h) or [vox](waves/waves.h) for examples. 
  
 ##### Effect Parameter Behavior
 

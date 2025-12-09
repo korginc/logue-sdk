@@ -327,35 +327,65 @@ public:
       case kMk2PlatformExclusiveModData:
       {
         float * modDepth = GetModDepth(data);
-        float * modData = GetModData(data);
+        int32_t * index = GetModIndex(data);
 
-        // copy data to work buffers
-        buf_cpy_f32(&modData[ctxt->voiceLimit * kModDestSyllable], mSyllableMod, ctxt->voiceLimit);
-        buf_cpy_f32(&modData[ctxt->voiceLimit * kModDestFormant], mFormantMod, ctxt->voiceLimit);
-        buf_cpy_f32(&modData[ctxt->voiceLimit * kModDestResonance], mResoMod, ctxt->voiceLimit);
-        buf_cpy_f32(&modData[ctxt->voiceLimit * kModDestShape], mShapeMod, ctxt->voiceLimit);
-        buf_cpy_f32(&modData[ctxt->voiceLimit * kModDestPitch], mPitchMod, ctxt->voiceLimit);
-        buf_cpy_f32(&modData[ctxt->voiceLimit * kModDestNoise], mNoiseLevelMod, ctxt->voiceLimit);
+        // clear old data
+        buf_clr_f32(mSyllableMod, kMk2MaxVoices);
+        buf_clr_f32(mFormantMod, kMk2MaxVoices);
+        buf_clr_f32(mResoMod, kMk2MaxVoices);
+        buf_clr_f32(mShapeMod, kMk2MaxVoices);
+        buf_clr_f32(mPitchMod, kMk2MaxVoices);
+        buf_clr_f32(mNoiseLevelMod, kMk2MaxVoices);
 
-        // apply depth (just calculate all 8 voices for simplicity, even though not every voice is necessarily being used)
-        int numVoices = kMk2MaxVoices;
-
-        // pitch mod range is very wide, so apply curve to make this parameter more useful
-        const float range = float(PitchModDepthCurveTableSize - 1);
-        const float pitchModDepthParam = si_fabsf(modDepth[kModDestPitch]) * range;
-        const uint32_t pitchModDepthIndex = static_cast<uint32_t>(pitchModDepthParam);
-        const float pitchModDepth = linintf(pitchModDepthParam - pitchModDepthIndex, 
-                                            mPitchModDepthCurve[pitchModDepthIndex], 
-                                            mPitchModDepthCurve[pitchModDepthIndex + 1]);
-
-        for(int i = 0; i < numVoices; i+=4)
+        // generate array of destinations
+        float * destinationBuffers[kNumModDest] = 
         {
-          f32x4_str(&mSyllableMod[i], float32x4_mulscal(f32x4_ld(&mSyllableMod[i]), modDepth[kModDestSyllable]));
-          f32x4_str(&mFormantMod[i], float32x4_mulscal(f32x4_ld(&mFormantMod[i]), modDepth[kModDestFormant]));
-          f32x4_str(&mResoMod[i], float32x4_mulscal(f32x4_ld(&mResoMod[i]), modDepth[kModDestResonance]));
-          f32x4_str(&mShapeMod[i], float32x4_mulscal(f32x4_ld(&mShapeMod[i]), modDepth[kModDestShape]));
-          f32x4_str(&mPitchMod[i], float32x4_mulscal(f32x4_ld(&mPitchMod[i]), pitchModDepth));          
-          f32x4_str(&mNoiseLevelMod[i], float32x4_mulscal(f32x4_ld(&mNoiseLevelMod[i]), modDepth[kModDestNoise]));          
+          mSyllableMod,
+          mFormantMod,
+          mResoMod,
+          mShapeMod,
+          mPitchMod,
+          mNoiseLevelMod
+        };
+
+        float * dests[kNumMk2ModSrc];
+        for(int i = 0; i < kNumMk2ModSrc; i++)
+        {
+          // using a dummy buffer (mNoAssign) here allows us to vectorize the later calculations
+          // without worrying about nullptrs or applying unwanted modulation to parameters
+          dests[i] = (index[i] < kNumModDest) ? destinationBuffers[index[i]] : mNoAssign;
+        }
+
+        float depths[kNumMk2ModSrc];
+        const float pitchTableRange = float(PitchModDepthCurveTableSize - 1);
+        for(int i = 0; i < kNumMk2ModSrc; i++)
+        {
+          if(index[i] == kModDestPitch)
+          {
+            // Pitch mod range is very wide, so apply curve to make this parameter more useful.
+            const float pitchModDepthParam = si_fabsf(modDepth[i]) * pitchTableRange;
+            const uint32_t pitchModDepthIndex = static_cast<uint32_t>(pitchModDepthParam);
+            const float pitchModDepth = linintf(pitchModDepthParam - pitchModDepthIndex, 
+                                                mPitchModDepthCurve[pitchModDepthIndex], 
+                                                mPitchModDepthCurve[pitchModDepthIndex + 1]);
+            depths[i] = pitchModDepth;
+          }
+          else
+          {
+            depths[i] = modDepth[i];
+          }
+        }
+
+        for(int voice = 0; voice < ctxt->voiceLimit; voice+=4)
+        {
+          for(int modDest = 0; modDest < kNumModDest; modDest++)
+          {
+            float * curr = dests[modDest];
+            float32x4_t currentValue = f32x4_ld(&curr[voice]);
+            float * modData = GetModSourceData(data, modDest, ctxt->voiceLimit, voice);
+            currentValue = float32x4_fmulscaladd(currentValue, f32x4_ld(modData), depths[modDest]);
+            f32x4_str(&curr[voice], currentValue);
+          }
         }
         break;
       }
@@ -489,6 +519,7 @@ public:
   float mWaveLevelZ[kMk2MaxVoices];
 
   // mod
+  float mNoAssign[kMk2MaxVoices];
   float mSyllableMod[kMk2MaxVoices];
   float mFormantMod[kMk2MaxVoices];
   float mResoMod[kMk2MaxVoices];
@@ -576,7 +607,7 @@ public:
       filterOut = mFormantFilter1.process_so_x2(sample, mFormantCoeffs[0], voiceNum);
       filterOut = float32x2_add(filterOut, mFormantFilter2.process_so_x2(sample, mFormantCoeffs[1], voiceNum));
       filterOut = float32x2_add(filterOut, mFormantFilter3.process_so_x2(sample, mFormantCoeffs[2], voiceNum));
-      write_oscillator_output_x2(out, filterOut, offset, ctxt->outputStride, i, ctxt->voiceOffset);
+      write_oscillator_output_x2(out, filterOut, offset, ctxt->outputStride, ctxt->voiceOffset, i);
     }
     WriteUnitModDatax2(ctxt, filterOut, 0);
   }
