@@ -42,16 +42,31 @@ int32_t * GetCurrentBufferOutputStrideData(void * data)
   return static_cast<int32_t *>(data);
 }
 
+int32_t * GetModIndex(void * data)
+{
+  return static_cast<int32_t *>(data);
+}
+
 float * GetModDepth(void * data)
 {
-  return static_cast<float *>(data);
+  // depth data is stored after index
+  return static_cast<float *>(data) + kNumMk2ModSrc;
 }
 
 float * GetModData(void * data)
 {
-  // shift num mod dest up by 1 to account for 2 timbres
-  const uint32_t offset = (kNumModDest << 1);
+  // mod data is stored after depth and index values
+  const uint32_t offset = (kNumMk2ModSrc * 2);
   return (static_cast<float *>(data) + offset);
+}
+
+float * GetModSourceData(void * data, int sourceIndex, int numVoices, int voice)
+{
+  // mod data is stored after depth and index values
+  const uint32_t dataOffset = (kNumMk2ModSrc * 2);
+  const uint32_t sourceOffset = sourceIndex * numVoices;
+  float * dataPtr = static_cast<float *>(data);
+  return (dataPtr + (dataOffset + sourceOffset + voice));
 }
 
 char * GetModDestNameData(void * data)
