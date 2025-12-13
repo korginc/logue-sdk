@@ -30,14 +30,16 @@ public:
 	void setCoupling(bool _couple, float32_t _split);
 	void updateResonators();
 
-	int note = 0;
+	int       note = 0;
+	bool      isRelease = false;
+	bool      isPressed = false; // used for audioIn
+	bool      couple = false;
+	bool      m_initialized = false;
+	bool      m_gate = false;
+	size_t    m_framesSinceNoteOn = SIZE_MAX; // Voice stealing
 	float32_t freq = 0.0;
 	float32_t vel = 0.0;
-	bool isRelease = false;
-	bool isPressed = false; // used for audioIn
-	bool couple = false;
 	float32_t split = 0.0;
-
 	float32_t aPitchFactor = 1.0;
 	float32_t bPitchFactor = 1.0;
 

@@ -28,7 +28,8 @@
  *
  */
 
-class RipplerX {
+class RipplerX
+{
     public:
     /*===========================================================================*/
     /* Public Data Structures/Types. */
@@ -52,7 +53,7 @@ class RipplerX {
 
         // Note: if need to allocate some memory can do it here and return k_unit_err_memory if getting allocation errors
 
-        models = new Models(); // Allocate Models
+        models = new Models(); // Allocate Models (remove smart pointers)
         for (size_t i = 0; i < polyphony; ++i) {
             voices[i] = new Voice(*models); // Allocate each Voice
         }
@@ -77,10 +78,10 @@ class RipplerX {
         comb.init(getSampleRate());
         limiter.init(getSampleRate());
 
-        // resetLastModels();  // done by setCurrentProgram
-        // this is equivalent to onSlider() in the original plugin NOTE: done at LoadPreset
+        Reset();
+        // resetLastModels();
         // clearVoices();
-        // prepareToPlay();
+        prepareToPlay();
 
         return k_unit_err_none;
     }
@@ -148,7 +149,7 @@ class RipplerX {
 
     inline void Teardown() {
         // Note: cleanup and release resources if any
-                // Delete allocated voices
+        // Delete allocated voices
         for (size_t i = 0; i < polyphony; ++i) {
             delete voices[i];
         }
@@ -159,7 +160,6 @@ class RipplerX {
         // Note: Reset synth state. I.e.: Clear filter memory, reset oscillator
         // phase etc.
         clearVoices();
-        prepareToPlay();
         resetLastModels();
     }
 
@@ -176,8 +176,9 @@ class RipplerX {
     /*===========================================================================*/
     /* Other Public Methods. */
     /*===========================================================================*/
-
-    inline void Render(float * __restrict outBuffer, size_t frames) {
+    // this should be equivalent to processBlockByType in PluginProcessor_orig.cpp
+    inline void Render(float * __restrict outBuffer, size_t frames)
+    {
 
         bool a_on = (bool)getParameterValue(Parameters::a_on);
         bool b_on = (bool)getParameterValue(Parameters::b_on);
@@ -201,17 +202,17 @@ class RipplerX {
 
         // TODO NoteOn?
 
-        // TODO: neon vectorization is used for stereo channels or for processing two samples at once?
+        // TODO: is neon vectorization used for stereo channels or for processing two samples at once?
         // In this case it's for stereo channels processing
         // Using float32x2_t for two channels (left and right)
         // Process block per frame
         // Other option is to use float32x4_t and process 4 samples at once (2 stereo frames)
         // Also the voices / polyphony processing can be vectorized
-        // Let's revie the original PluginProcessor_orig.cpp processBlockByType function and render function and so on
+        // Let's review the original PluginProcessor_orig.cpp processBlockByType function and render function and so on
         // Let's take inspiration also from resorator_orig.h that I know it's working for drumlogue
         // but I have to review if it's really optimized for ARM vectorization
         // For each frame in batch:
-        for (size_t i = 0; i < frames; i++) {
+        for (size_t i = 0; i < frames; i++) {   // TODO review frames. process batch (see orig resonator) or single (for loop)?
             // Set all lanes to same value
             float32x2_t dirOut  = vdup_n_f32(0.0f);  // direct output per sample (sum of all voices)
             float32x2_t resAOut = vdup_n_f32(0.0f);  // resonator A output
@@ -219,7 +220,7 @@ class RipplerX {
             // Action and Mixing stage
             float32x2_t audioIn;  //FOR PORTING as excitation
 
-            // Sample, until it runs out. (from original resonator)
+            // Sample, until it runs out. (from resonator_orig.h)
             if (m_sampleIndex < m_sampleEnd)
             {
                 if (m_sampleChannels == 2) {
@@ -229,7 +230,7 @@ class RipplerX {
                     // Mono sample
                     audioIn = vdup_n_f32(m_samplePointer[m_sampleIndex]);
                 }
-                audioIn = vmul_n_f32(audioIn, gain);    // TODO, create sampleGain as original resonator?
+                audioIn = vmul_n_f32(audioIn, gain);    // TODO, create sampleGain as resonator_orig.h?
                 m_sampleIndex += m_sampleChannels;  //only usage of m_sampleIndex
             } else {
                 audioIn = vdup_n_f32(0.0f);
@@ -238,6 +239,7 @@ class RipplerX {
             // for (size_t i = 0; i < polyphony; ++i)
             for (auto& voice : voices)
             {
+                if (!voice->m_initialized) continue; // skip uninitialized voices
                 float32x2_t resOut = vdup_n_f32(0.0f);
 
                 float32x2_t msample = voice->mallet.process(); // process mallet
@@ -276,6 +278,7 @@ class RipplerX {
                         out = voice->resB.filter.df1(out);
                     resBOut = vadd_f32(out, resBOut);
                 }
+                voice->m_framesSinceNoteOn++; // Voice stealing - TODO check according to for loop change
             }   // end for polyphony
 
             // two floats as one per channel
@@ -300,7 +303,6 @@ class RipplerX {
             outBuffer += 2; // move pointer by two positions for each sample, as we process two values at once, one per channel
 
         }   // end for frames
-        m_framesSinceNoteOn += frames;  // For voice stealing.
     }
 
     // Read parameter from user (6 pages listed in header.c)
@@ -318,6 +320,11 @@ class RipplerX {
                     // load whole set of parameters according to pre-calculated program model
                     if (value < last_program)
                         setCurrentProgram(value);
+                        noiseChanged = true;
+                        pitchChanged = true;
+                        resonatorChangedA = true;
+                        resonatorChangedB = true;
+                        couplingChanged = true;
                     break;
                 case c_parameterGain:
                     parameters[gain] = value;
@@ -348,7 +355,8 @@ class RipplerX {
                         break;
                 case c_parameterPartials:   // from original OnSlider()
                     if ((size_t)value < c_partialElements){
-                        parameters[a_partials] = c_partials(a_partials, value);
+                        // only A partials can be changed by user. B partials by program/model only
+                        parameters[a_partials] = c_partials[value];
                         resonatorChangedA = true;}
                     break;
                 case c_parameterDecay:
@@ -413,6 +421,7 @@ class RipplerX {
             }
         }
         prepareToPlay(noiseChanged, pitchChanged, resonatorChangedA, resonatorChangedB, couplingChanged);
+        Reset(); // to reset voice states and models after parameter change
     }
 
     inline void prepareToPlay(bool noiseChanged = true, bool pitchChanged = true,
@@ -421,19 +430,18 @@ class RipplerX {
         // Originally from OnSlider() of the original PluginProcessor
         // NOTE: Even if a_ratio and b_ratio are not editable in this version of mine
         // different model may have different default ratio.
-        // TODO: review this part
         if (last_a_model != parameters[a_model])
         {
-            if (a_model == ModelNames::Beam) models->recalcBeam(true, a_ratio);
-            else if (a_model == ModelNames::Membrane) models->recalcMembrane(true, a_ratio);
-            else if (a_model == ModelNames::Plate) models->recalcPlate(true, a_ratio);
+            if (parameters[a_model] == ModelNames::Beam) models->recalcBeam(true, parameters[a_ratio]);
+            else if (parameters[a_model] == ModelNames::Membrane) models->recalcMembrane(true, parameters[a_ratio]);
+            else if (parameters[a_model] == ModelNames::Plate) models->recalcPlate(true, parameters[a_ratio]);
 
         }
         if (last_b_model != parameters[b_model])
         {
-            if (b_model == ModelNames::Beam) models->recalcBeam(false, b_ratio);
-            else if (b_model == ModelNames::Membrane) models->recalcMembrane(false, b_ratio);
-            else if (b_model == ModelNames::Plate) models->recalcPlate(false, b_ratio);
+            if (parameters[b_model] == ModelNames::Beam) models->recalcBeam(false, parameters[b_ratio]);
+            else if (parameters[b_model] == ModelNames::Membrane) models->recalcMembrane(false, parameters[b_ratio]);
+            else if (parameters[b_model] == ModelNames::Plate) models->recalcPlate(false, parameters[b_ratio]);
 
         }
         auto srate = getSampleRate();
@@ -572,54 +580,63 @@ class RipplerX {
         return nullptr;
     }
 
-    inline const uint8_t * getParameterBmpValue(uint8_t index,
-        int32_t value) const {
-            (void)value;
-            switch (index) {
-                // Note: Bitmap memory must be accessible even after function returned.
-                //       It can be assumed that caller will have copied or used the bitmap
-                //       before the next call to getParameterBmpValue
-                // Note: Not yet implemented upstream
-                default:
-                break;
-            }
-            return nullptr;
+    inline const uint8_t * getParameterBmpValue(uint8_t index, int32_t value) const {
+        (void)value;
+        switch (index) {
+            // Note: Bitmap memory must be accessible even after function returned.
+            //       It can be assumed that caller will have copied or used the bitmap
+            //       before the next call to getParameterBmpValue
+            // Note: Not yet implemented upstream
+            default:
+            break;
         }
+        return nullptr;
+    }
 
-        // TODO get note from unit.cc? onNote in PluginProcessor
-        inline void NoteOn(uint8_t note, uint8_t velocity) {
-          auto srate = getSampleRate();
-          Voice & voice = *voices[nvoice];
-          nvoice = (nvoice + 1) % polyphony;
+    // TODO get note from unit.cc? onNote in PluginProcessor
+    inline void NoteOn(uint8_t note, uint8_t velocity) {
+        auto srate = getSampleRate();
 
-          // Sample
-          if (sampleWrapper) {
+        // resonator_orig.h is:
+        // size_t voice = nextVoiceNumber();  // TODO check this
+        Voice & voice = *voices[nvoice];
+        nvoice = (nvoice + 1) % polyphony;
+
+        // Sample - from resonator_orig.h - TODO check this
+        const sample_wrapper_t* sampleWrapper = GetSample(m_sampleBank, m_sampleNumber - 1);
+
+        if (sampleWrapper) {
             // Copy values we care about out of sampleWrapper before it changes.
             m_sampleChannels = sampleWrapper->channels;
             m_sampleFrames = sampleWrapper->frames;
-            m_samplePointer = sampleWrapper->sample_ptr;
+            m_samplePointer = sampleWrapper->sample_ptr;    // from common/sample_wrapper.h
             m_sampleIndex = sampleWrapper->frames * m_sampleChannels * sampleStart / 1000;
             m_sampleEnd = sampleWrapper->frames * m_sampleChannels * sampleEnd / 1000;
         }
+        // from resonator_orig.h
+        voice.m_initialized = (sampleWrapper != nullptr);
+        voice.m_gate = true;
+        voice.m_framesSinceNoteOn = 0;  // Note stealing
 
         // used to calculate the malletFreq for the trigger
         auto mallet_stiff = (float32_t)getParameterValue(Parameters::mallet_stiff);
         auto vel_mallet_stiff = (float32_t)getParameterValue(Parameters::vel_mallet_stiff);
         // auto malletFreq = fmin(5000.0, exp(log(mallet_stiff) + velocity / 127.0 * vel_mallet_stiff * (log(5000.0) - log(100.0))));
         auto malletFreq = fmin(5000.0, e_expf(fasterlogf(mallet_stiff) + velocity * vel_mallet_stiff * c_malletStiffnessCorrectionFactor));
-
+        // equivalent to noteOn in resonator_orig.h
         voice.trigger(srate, note, velocity / 127.0, malletFreq);
     }
 
     // offNote in PluginProcessor
     inline void NoteOff(uint8_t note) {
-        m_gate = false;
         for (auto& voice : voices)
         {
+            voice.m_gate = false;
             if (voice->note == note || note == 0xFF) {
                 voice->release();
             }
         }
+        Reset();
     }
     // Gate should be set by the step sequencer or MIDI input
     // play chromatically only via MIDI
@@ -637,7 +654,8 @@ class RipplerX {
 
     inline void PitchBend(uint16_t bend)
     {
-        if (m_gate) parameters[a_fine] = bend;  // TODO convert to -99 - 99
+        // if (m_gate)  // gate is now per voice; bend is for resonator A only
+        parameters[a_fine] = bend;  // TODO convert to -99 - 99
     }
 
     inline void ChannelPressure(uint8_t pressure) { (void)pressure; }
@@ -698,13 +716,7 @@ class RipplerX {
         return c_sampleRate;
     }
 
-    inline const size_t getFramesSinceNoteOn() {
-        if (!m_initialized) return SIZE_MAX;
-        return m_framesSinceNoteOn;
-    }
-
     size_t nextVoiceNumber();
-
 
     /** this can be called via enum with program name!
     * store from programs to parameters the whole set of values
@@ -714,7 +726,6 @@ class RipplerX {
         m_currentProgram = index;
         // programs are in constants.h
         parameters = programs[index];
-        Reset();
     }
 
     /*===========================================================================*/
@@ -734,11 +745,7 @@ class RipplerX {
     * parameter list can be found in constants.h
     */
     std::array<float32_t, last_param> parameters;
-
     // state variables - prefer static default instead of initialization as there's just one possible value
-    bool      m_initialized = false;
-    bool      m_gate = false;
-    size_t    m_framesSinceNoteOn = SIZE_MAX; // Voice stealing
     uint8_t   m_currentProgram = 0;
     uint8_t   m_note = 60;
     float32_t scale = 1.0f; // TODO make this editable?
@@ -748,20 +755,20 @@ class RipplerX {
     uint8_t   last_b_partials = -1;
 
     // sample management
-    uint8_t  m_sampleBank = 0;  // parameter editable
-    uint8_t  m_sampleNumber = 1; // parameter editable
+    uint8_t   m_sampleBank = 0;  // parameter editable
+    uint8_t   m_sampleNumber = 1; // parameter editable
     // see Init for default - adding initial values to avoid potential issues
     const sample_wrapper_t * sampleWrapper = nullptr; // set at NoteOn  TODO
-    uint8_t  m_sampleChannels = 0; // From sample_wrapper
-    size_t   m_sampleFrames = 0; // From sample_wrapper
+    uint8_t   m_sampleChannels = 0; // From sample_wrapper
+    size_t    m_sampleFrames = 0; // From sample_wrapper
     const float32_t * m_samplePointer; // From sample_wrapper
-    uint16_t m_sampleStart = 0;
-    size_t   m_sampleIndex = 0; // Counts in float*, stride == channels
-    size_t   m_sampleEnd = 1000; // 100%. Counts in float*, stride == channels
+    uint16_t  m_sampleStart = 0;
+    size_t    m_sampleIndex = 0; // Counts in float*, stride == channels
+    size_t    m_sampleEnd = 1000; // 100%. Counts in float*, stride == channels
     // Functions from unit runtime
-    unit_runtime_get_num_sample_banks_ptr m_get_num_sample_banks_ptr = nullptr;
-    unit_runtime_get_num_samples_for_bank_ptr m_get_num_samples_for_bank_ptr = nullptr;
-    unit_runtime_get_sample_ptr m_get_sample = nullptr;
+    unit_runtime_get_num_sample_banks_ptr       m_get_num_sample_banks_ptr = nullptr;
+    unit_runtime_get_num_samples_for_bank_ptr   m_get_num_samples_for_bank_ptr = nullptr;
+    unit_runtime_get_sample_ptr                 m_get_sample = nullptr;
 
     /*===========================================================================*/
     /* Constants. */
@@ -769,7 +776,8 @@ class RipplerX {
     static const char* const c_sampleBankName[c_sampleBankElements];
     static const char* const c_modelName[c_modelElements];
     static const char* const c_partialsName[c_partialElements];
-    static const int c_partials[c_partialElements];
     static const char* const c_noiseFilterModeName[c_noiseFilterModeElements];
-    static const char * const c_programName[last_program];
+    static const char* const c_programName[last_program];
 }; // end class RipplerX
+
+/*===========================================================================*/

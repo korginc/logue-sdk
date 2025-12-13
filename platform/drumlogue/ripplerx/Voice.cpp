@@ -59,6 +59,13 @@ void Voice::applyPitch(std::array<float32_t, 64>& model, float32_t factor)
         ratio *= factor;
 }
 
+inline size_t Voice::getFramesSinceNoteOn() const {
+    if (!m_initialized) return SIZE_MAX;
+    return m_framesSinceNoteOn;
+}
+
+
+
 /** NOTE for semplification purposes this function has been moved
  * completely inside calcFrequencyShifts()
  *  NOTE 2 : now also calcFrequencyShifts() has been absorbed in order to make
