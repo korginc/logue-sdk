@@ -22,18 +22,13 @@
 #include "Comb.h"
 #include "Models.h"
 
-#ifdef Voice
-#undef Voice
-#endif
-class Voice; // forward declaration to guard against include-order/macro issues
 
 /** This class is the equivalent of the origin pluginProcessor the
  * original RipplerX code, now it's a synth instance.
  *
  */
 
-class RipplerX
-{
+class RipplerX {
     public:
     /*===========================================================================*/
     /* Public Data Structures/Types. */
@@ -57,10 +52,9 @@ class RipplerX
 
         // Note: if need to allocate some memory can do it here and return k_unit_err_memory if getting allocation errors
 
-        models = std::make_shared<Models>();
-        // create intruments
+        models = new Models(); // Allocate Models
         for (size_t i = 0; i < polyphony; ++i) {
-            voices.push_back(std::make_unique<Voice>(*models));
+            voices[i] = new Voice(*models); // Allocate each Voice
         }
 
         // private variables (state vars set at constructor)
@@ -83,7 +77,7 @@ class RipplerX
         comb.init(getSampleRate());
         limiter.init(getSampleRate());
 
-        resetLastModels();
+        // resetLastModels();  // done by setCurrentProgram
         // this is equivalent to onSlider() in the original plugin NOTE: done at LoadPreset
         // clearVoices();
         // prepareToPlay();
@@ -154,11 +148,19 @@ class RipplerX
 
     inline void Teardown() {
         // Note: cleanup and release resources if any
+                // Delete allocated voices
+        for (size_t i = 0; i < polyphony; ++i) {
+            delete voices[i];
+        }
+        delete models; // Delete Models
     }
 
     inline void Reset() {
         // Note: Reset synth state. I.e.: Clear filter memory, reset oscillator
         // phase etc.
+        clearVoices();
+        prepareToPlay();
+        resetLastModels();
     }
 
     inline void Resume() {
@@ -199,6 +201,15 @@ class RipplerX
 
         // TODO NoteOn?
 
+        // TODO: neon vectorization is used for stereo channels or for processing two samples at once?
+        // In this case it's for stereo channels processing
+        // Using float32x2_t for two channels (left and right)
+        // Process block per frame
+        // Other option is to use float32x4_t and process 4 samples at once (2 stereo frames)
+        // Also the voices / polyphony processing can be vectorized
+        // Let's revie the original PluginProcessor_orig.cpp processBlockByType function and render function and so on
+        // Let's take inspiration also from resorator_orig.h that I know it's working for drumlogue
+        // but I have to review if it's really optimized for ARM vectorization
         // For each frame in batch:
         for (size_t i = 0; i < frames; i++) {
             // Set all lanes to same value
@@ -227,10 +238,9 @@ class RipplerX
             // for (size_t i = 0; i < polyphony; ++i)
             for (auto& voice : voices)
             {
-                // Voice& voice = *voices[i];
                 float32x2_t resOut = vdup_n_f32(0.0f);
 
-                auto msample = voice->mallet.process(); // process mallet
+                float32x2_t msample = voice->mallet.process(); // process mallet
                 if (msample) {
                     // dirOut += msample * fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel);
                     dirOut = vfma_f32(dirOut, msample, vmin_f32(1.0, vfma_f32(mallet_mix, vel_mallet_mix, voice->vel)));
@@ -263,7 +273,7 @@ class RipplerX
                 if (b_on) {
                     auto out = voice->resB.process(a_on && couple ? out_from_a : resOut);
                     if (voice->resB.cut > 20.0001)
-                    out = voice->resB.filter.df1(out);
+                        out = voice->resB.filter.df1(out);
                     resBOut = vadd_f32(out, resBOut);
                 }
             }   // end for polyphony
@@ -277,11 +287,10 @@ class RipplerX
 
             // TODO if GAIN will be not an user editable parameter this operation can be skipped?
             auto totalOut = vmla_n_f32(dirOut, resOut, gain); // dirOut + resOut * gain
-            float32x2_t split;
-            // auto [spl0, spl1] =  voice.comb.process(totalOut);
-            split =  voice->comb.process(totalOut);  // TODO correct this
-            // auto [left, right] = voice.limiter.process(split);
-            float32x2_t channels = voice->limiter.process(split);
+            // auto [spl0, spl1] =  comb.process(totalOut);
+            float32x2_t split = comb.process(totalOut);  // process comb filter, returns stereo float32x2_t
+            // auto [left, right] = limiter.process(split);
+            float32x2_t channels = limiter.process(split);
 
             // Add current float32x2 to output buffer.
             float32x2_t old = vld1_f32(outBuffer);  // load existing buffer from pointer
@@ -337,7 +346,7 @@ class RipplerX
                         parameters[a_model] = value;
                         resonatorChangedA = true;}
                         break;
-                case c_parameterPartials:
+                case c_parameterPartials:   // from original OnSlider()
                     if ((size_t)value < c_partialElements){
                         parameters[a_partials] = c_partials(a_partials, value);
                         resonatorChangedA = true;}
@@ -410,6 +419,23 @@ class RipplerX
         bool resonatorChangedA = true, bool resonatorChangedB = true,
         bool couplingChanged = true) {
         // Originally from OnSlider() of the original PluginProcessor
+        // NOTE: Even if a_ratio and b_ratio are not editable in this version of mine
+        // different model may have different default ratio.
+        // TODO: review this part
+        if (last_a_model != parameters[a_model])
+        {
+            if (a_model == ModelNames::Beam) models->recalcBeam(true, a_ratio);
+            else if (a_model == ModelNames::Membrane) models->recalcMembrane(true, a_ratio);
+            else if (a_model == ModelNames::Plate) models->recalcPlate(true, a_ratio);
+
+        }
+        if (last_b_model != parameters[b_model])
+        {
+            if (b_model == ModelNames::Beam) models->recalcBeam(false, b_ratio);
+            else if (b_model == ModelNames::Membrane) models->recalcMembrane(false, b_ratio);
+            else if (b_model == ModelNames::Plate) models->recalcPlate(false, b_ratio);
+
+        }
         auto srate = getSampleRate();
         for (auto& voice : voices) {
             // Voice& voice = *voices[i];
@@ -595,6 +621,7 @@ class RipplerX
             }
         }
     }
+    // Gate should be set by the step sequencer or MIDI input
     // play chromatically only via MIDI
     inline void GateOn(uint8_t velocity) {
         NoteOn(m_note, velocity);   //TODO m_note - see Note (Gate mode) in header.c
@@ -676,47 +703,37 @@ class RipplerX
         return m_framesSinceNoteOn;
     }
 
-    size_t nextVoiceNumber()
-    {
-        size_t longestFramesSinceNoteOn = 0;
-        size_t bestVoice = 0;
+    size_t nextVoiceNumber();
 
-        for (size_t i = 1; i < c_numVoices; i++)
-        {
-            size_t thisVoiceFramesSinceNoteOn = voices[i].getFramesSinceNoteOn();
-            if (thisVoiceFramesSinceNoteOn > longestFramesSinceNoteOn)
-            {
-                longestFramesSinceNoteOn = thisVoiceFramesSinceNoteOn;
-                bestVoice = i;
-            }
-        }
 
-        return bestVoice;
-    }
-
-    /** this can be called via enum with program name! */
-    inline const void setCurrentProgram(int index)
+    /** this can be called via enum with program name!
+    * store from programs to parameters the whole set of values
+    */
+    inline void setCurrentProgram(int index)
     {
         m_currentProgram = index;
         // programs are in constants.h
         parameters = programs[index];
-
-        clearVoices();
-        resetLastModels();
+        Reset();
     }
 
     /*===========================================================================*/
-    std::vector<std::unique_ptr<Voice>> voices;
-    /*===========================================================================*/
-    std::shared_ptr<Models> models;
+    // Use raw pointers instead of smart pointers
+    Voice* voices[polyphony];
+    Models* models; // Raw pointer for Models
     Comb    comb{};
     Limiter limiter{};
     // equivalent to m_voice
     int     nvoice = 0; // next voice to use
 
-    // Parameters, both editable and not
-    // no need to define each of them, the enum will detect them exactly
-    std::array<float32_t, last_param> parameters;  // parameter values can be found in constants.h
+    /**
+    * Parameters, both editable and not
+    * no need to define each of them, the enum will detect them exactly
+    * Static array: association between values and it's eaning is done via
+    * enum values stored by setCurrentProgram().
+    * parameter list can be found in constants.h
+    */
+    std::array<float32_t, last_param> parameters;
 
     // state variables - prefer static default instead of initialization as there's just one possible value
     bool      m_initialized = false;
@@ -752,16 +769,7 @@ class RipplerX
     static const char* const c_sampleBankName[c_sampleBankElements];
     static const char* const c_modelName[c_modelElements];
     static const char* const c_partialsName[c_partialElements];
+    static const int c_partials[c_partialElements];
     static const char* const c_noiseFilterModeName[c_noiseFilterModeElements];
     static const char * const c_programName[last_program];
 }; // end class RipplerX
-
-
-// Definitions that point the class static arrays to the globals in constants.h.
-// Place in the header after the class (or better: move into ripplerx.cpp).
-// Requires constants.h to define the global arrays with the same names.
-inline const char* const RipplerX::c_sampleBankName[c_sampleBankElements] = ::c_sampleBankName;
-inline const char* const RipplerX::c_modelName[c_modelElements] = ::c_modelName;
-inline const char* const RipplerX::c_partialsName[c_partialElements] = ::c_partialsName;
-inline const char* const RipplerX::c_noiseFilterModeName[c_noiseFilterModeElements] = ::c_noiseFilterModeName;
-inline const char * const RipplerX::c_programName[last_program] = ::c_programName;

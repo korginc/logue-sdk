@@ -1,0 +1,42 @@
+CompileFlags:
+  Add:
+    - -xc++
+    - c
+    - --target=arm-unknown-linux-gnueabihf
+    - -IE:\Fede\drumlogue\arm-unknown-linux-gnueabihf\arm-unknown-linux-gnueabihf\sysroot\usr\include
+    - -IE:\Fede\drumlogue\arm-unknown-linux-gnueabihf\arm-unknown-linux-gnueabihf\include\c++\6.5.0
+    - -IE:\Fede\drumlogue\arm-unknown-linux-gnueabihf\arm-unknown-linux-gnueabihf\include\c++\6.5.0\parallel
+    - -IE:\Fede\drumlogue\arm-unknown-linux-gnueabihf\arm-unknown-linux-gnueabihf\include\c++\6.5.0\arm-unknown-linux-gnueabihf
+    - -IE:\Fede\drumlogue\arm-unknown-linux-gnueabihf\arm-unknown-linux-gnueabihf\include
+    - -IE:\Fede\drumlogue\arm-unknown-linux-gnueabihf\include
+    - -march=armv7-a
+    - -mtune=cortex-a7
+    - -marm
+    - -Os
+    - -flto
+    - -mfloat-abi=hard
+    - -mfpu=neon-vfpv4
+    - -ftree-vectorizer-verbose=4
+    - -funsafe-math-optimizations
+    - -fsigned-char
+    - -fno-stack-protector
+    - -fstrict-aliasing
+    - -falign-functions=16
+    - -fno-math-errno
+    - -fomit-frame-pointer
+    - -finline-limit=9999999999
+    - -std=gnu++14
+    - -W
+    - -Wall
+    - -Wextra
+    - -fPIC
+    - -Wa
+    - -D__arm__ -D__cortex_a7__ -D__ARM_FP__=0x8 -D__NEON__ -D__LOGUE_DRUMLOGUE_RIPPLERX__=1 -D__STDC_CONSTANT_MACROS -D__STDC_LIMIT_MACROS -D_FORTIFY_SOURCE=2 -D_GLIBCXX_USE_C99 -D_GLIBCXX_USE_C99_MATH_TR1 -D_GLIBCXX_HAVE_LONG_LONG -D_REENTRANT -D__linux__ -D__unix__ -D_LINUX -D__USE_LARGEFILE64 -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -D_GNU_SOURCE -D__STDC_UTF_16__ -D__STDC_UTF_32__ -D__cplusplus=201402L
+    - -ffunction-sections
+    - -MMD
+    - -MP
+    - -I.
+    - -I/workspace/drumlogue/common
+    - -Wno-error=unused-command-line-argument
+Index:
+  StandardLibrary: true

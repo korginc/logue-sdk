@@ -1,17 +1,10 @@
 #pragma once
-#include <cstddef>
-#include <cstdint>
-#include <array>
-#include "arm_neon.h"
-#include "float_math.h"
-
-constexpr size_t c_sampleRate = 48000;
 constexpr float  c_semitoneFrequencyRatio = 1.0594630944f; // pow(2.0f, 1.0f/12.0f);
 constexpr float  c_malletStiffnessCorrectionFactor = 0.03080333075140272487101378573158f; // (log(5000.0) - log(100.0)) / 127
 constexpr size_t polyphony = 8; /**< equivalent to c_numVoices for porting */
 constexpr size_t c_numVoices = polyphony;
 constexpr size_t c_max_partials = 64;  // TODO
-
+constexpr uint32_t c_sampleRate = 48000;
 // these are the index of the parameters got from header.c
 // page 1
 constexpr size_t c_parameterProgramName = 0;
@@ -50,46 +43,6 @@ constexpr size_t c_sampleBankElements = 7;
 constexpr size_t c_modelElements = 9;
 constexpr size_t c_partialElements = 5;
 constexpr size_t c_noiseFilterModeElements = 3;
-
-// this is pointed by header.c parameter
-const char* const c_sampleBankName[c_sampleBankElements] = {
-  "CH",
-  "OH",
-  "RS",
-  "CP",
-  "MISC",
-  "USER",
-  "EXP"
-};
-
-
-// this is pointed by header.c parameter
-const char* const c_modelName[c_modelElements] = {
-    "String",
-    "Beam",
-    "Squared",
-    "Membrane",
-    "Plate",
-    "Drumhead",
-    "Marimba",
-    "Open Tube",
-    "Closed Tube"
-};
-
-// this is pointed by header.c getParameter
-const char* const c_partialsName[c_partialElements] = {
-    "4", "8", "16", "32", "64"
-};
-const int c_partials[c_partialElements] = {
-    4, 8, 16, 32, 64
-};
-
-// this is pointed by header.c parameter
-const char* const c_noiseFilterModeName[c_noiseFilterModeElements] = {
-    "LP",
-    "BP",
-    "HP"
-};
 
 /*
     55 parameters, only a subset are editable.
@@ -186,39 +139,6 @@ enum  Program : uint8_t {
     Tubes,
     Vibes,
     last_program
-};
-
-
-// this is pointed by header.c parameter
-const char* const c_programName[Program::last_program] = {
-  "Bells",
-  "Bells2",
-  "Bong",
-  "Cans",
-  "Crash",
-  "Crystal",
-  "DoorBell",
-  "Fifths",
-  "Fight",
-  "Flute",
-  "Gong",
-  "Harp",
-  "Harpsi",
-  "Init",
-  "Kalimba",
-  "KeyRing",
-  "Marimba",
-  "OldClock",
-  "Ride",
-  "Ride2",
-  "Sankyo",
-  "Sink",
-  "Stars",
-  "Strings",
-  "Tabla",
-  "Tabla2",
-  "Tubes",
-  "Vibes"
 };
 
 
