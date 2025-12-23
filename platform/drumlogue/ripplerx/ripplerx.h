@@ -198,9 +198,8 @@ class RipplerX
         float32_t ab_mix = (float32_t)getParameterValue(Parameters::ab_mix);
         float32_t gain = (float32_t)getParameterValue(Parameters::gain);
         bool couple = (bool)getParameterValue(Parameters::couple);
-        gain = pow(10.0, gain / 20.0);
+        gain = fasterpowf(10.0, gain / 20.0);
 
-        // TODO NoteOn?
 
         // TODO: is neon vectorization used for stereo channels or for processing two samples at once?
         // In this case it's for stereo channels processing
@@ -212,7 +211,7 @@ class RipplerX
         // Let's take inspiration also from resorator_orig.h that I know it's working for drumlogue
         // but I have to review if it's really optimized for ARM vectorization
         // For each frame in batch:
-        for (size_t i = 0; i < frames; i++) {   // TODO review frames. process batch (see orig resonator) or single (for loop)?
+        for (size_t i = 0; i < frames; i++) {   // TODO: review frames. process batch (see orig resonator) or single (for loop)?
             // Set all lanes to same value
             float32x2_t dirOut  = vdup_n_f32(0.0f);  // direct output per sample (sum of all voices)
             float32x2_t resAOut = vdup_n_f32(0.0f);  // resonator A output
@@ -230,7 +229,7 @@ class RipplerX
                     // Mono sample
                     audioIn = vdup_n_f32(m_samplePointer[m_sampleIndex]);
                 }
-                audioIn = vmul_n_f32(audioIn, gain);    // TODO, create sampleGain as resonator_orig.h?
+                audioIn = vmul_n_f32(audioIn, gain);    // TODO: create sampleGain as resonator_orig.h?
                 m_sampleIndex += m_sampleChannels;  //only usage of m_sampleIndex
             } else {
                 audioIn = vdup_n_f32(0.0f);
@@ -254,7 +253,7 @@ class RipplerX
                 resOut += audioIn;
 
                 float32x2_t nsample = voice->noise.process(); // process noise
-                // TODO remove scaling to 0-1, make parameteer directly in that range
+                // TODO: remove scaling to 0-1, make parameter directly in that range
                 if (nsample) {
                     // dirOut += nsample * (float32_t)noise_mix_range.convertFrom0to1(fmin(1.f, noise_mix + vel_noise_mix * (float)voice.vel));
                     dirOut = vfma_f32(nsample, (float32_t)noise_mix.convertFrom0to1(vmin_f32(1.f, vfma_f32(noise_mix, vel_noise_mix,
@@ -278,7 +277,7 @@ class RipplerX
                         out = voice->resB.filter.df1(out);
                     resBOut = vadd_f32(out, resBOut);
                 }
-                voice->m_framesSinceNoteOn += frames; // TODO check this - Voice stealing - TODO check according to for loop change
+                voice->m_framesSinceNoteOn += frames; // TODO: check this - Voice stealing - TODO: check according to for loop change
             }   // end for polyphony
 
             // two floats as one per channel
@@ -288,7 +287,7 @@ class RipplerX
             else
                 resOut = vadd_f32(resAOut, resBOut); // one of them is turned off, just sum the two
 
-            // TODO if GAIN will be not an user editable parameter this operation can be skipped?
+            // TODO: if GAIN will be not an user editable parameter this operation can be skipped?
             auto totalOut = vmla_n_f32(dirOut, resOut, gain); // dirOut + resOut * gain
             // auto [spl0, spl1] =  comb.process(totalOut);
             float32x2_t split = comb.process(totalOut);  // process comb filter, returns stereo float32x2_t
@@ -327,7 +326,7 @@ class RipplerX
                     couplingChanged = true;
                     break;
                 case c_parameterGain:
-                    parameters[gain] = value;
+                    parameters[gain] = fasterpowf(10.0, value / 20.0);  // it's  in Render
                     break;
                 case c_parameterSampleBank:
                 if ((size_t)value < c_sampleBankElements)
@@ -593,16 +592,16 @@ class RipplerX
         return nullptr;
     }
 
-    // TODO get note from unit.cc? onNote in PluginProcessor
+    // onNote in PluginProcessor_orig.cpp
     inline void NoteOn(uint8_t note, uint8_t velocity) {
         auto srate = getSampleRate();
 
         nvoice = nextVoiceNumber();  // this is from resonator_orig.h
         Voice & voice = *voices[nvoice];
-        // nvoice = (nvoice + 1) % polyphony;   // this is from ripplerX
+        // nvoice = (nvoice + 1) % polyphony;   // this is from PluginProcessor_orig.cpp
 
-        // TODO check voice gate and reset?
-
+        // TODO: check voice gate and reset what?
+        m_note = note;  // for GateOn/GateOff
         voice->note = note;
 
         // Sample - from resonator_orig.h
@@ -632,7 +631,7 @@ class RipplerX
         voice.trigger(srate, note, velocity / 127.0, malletFreq);
     }
 
-    // offNote in PluginProcessor
+    // offNote in PluginProcessor_orig.cpp
     inline void NoteOff(uint8_t note) {
         for (auto& voice : voices)
         {
@@ -646,7 +645,7 @@ class RipplerX
     // Gate should be set by the step sequencer or MIDI input
     // play chromatically only via MIDI
     inline void GateOn(uint8_t velocity) {
-        NoteOn(m_note, velocity);   //TODO m_note - see Note (Gate mode) in header.c
+        NoteOn(m_note, velocity);
     }
 
     inline void GateOff() {
@@ -656,11 +655,14 @@ class RipplerX
     inline void AllNoteOff() {
         NoteOff(0xFF);
     }
-
+    // merge from resonator_orig.h and PluginProcessor_orig.cpp
     inline void PitchBend(uint16_t bend)
     {
-        // if (m_gate)  // gate is now per voice; bend is for resonator A only
-        parameters[a_fine] = bend;  // TODO convert to -99 - 99
+        // if (m_gate)
+        // gate is now per voice; bend is for resonator A only
+        // according to render in resonator_orig.h, bend is between 0 and 0x4000, with 0x2000 as center (no bend)
+        // RipplerX uses -99 to 99 for fine pitch, so we convert
+        parameters[a_fine] = (bend - 0x2000) * 100 / 0x2000;
         prepareToPlay(false, true, false, false, false);
         pithchChanged = false;
     }
@@ -674,7 +676,7 @@ class RipplerX
 
     inline void LoadPreset(uint8_t idx) {
         (void)idx;
-        setCurrentProgram(idx); // TODO review this
+        setCurrentProgram(idx); // TODO: review this
     }
 
     inline uint8_t getPresetIndex() const { return m_currentProgram; }
@@ -756,7 +758,7 @@ class RipplerX
     // state variables - prefer static default instead of initialization as there's just one possible value
     uint8_t   m_currentProgram = 0;
     uint8_t   m_note = 60;
-    float32_t scale = 1.0f; // TODO make this editable?
+    float32_t scale = 1.0f; // TODO: make this editable?
     uint8_t   last_a_model = -1;
     uint8_t   last_b_model = -1;
     uint8_t   last_a_partials = -1;
@@ -766,7 +768,7 @@ class RipplerX
     uint8_t   m_sampleBank = 0;  // parameter editable
     uint8_t   m_sampleNumber = 1; // parameter editable
     // see Init for default - adding initial values to avoid potential issues
-    const sample_wrapper_t * sampleWrapper = nullptr; // set at NoteOn  TODO
+    const sample_wrapper_t * sampleWrapper = nullptr; // set at NoteOn
     uint8_t   m_sampleChannels = 0; // From sample_wrapper
     size_t    m_sampleFrames = 0; // From sample_wrapper
     const float32_t * m_samplePointer; // From sample_wrapper

@@ -54,7 +54,7 @@ __unit_callback void unit_suspend() {
 }
 /* Audio rendering callback. Synth units should ignore the `in` argument.
 Input/output buffer geometry information is provided via the `unit_runtime_desc_t` argument of `unit_init(..)`.*/
-// FOR PORTING: I think that matches with ipplerXAudioProcessor::processBlockByType
+// FOR PORTING: I think that matches with RipplerXAudioProcessor::processBlockByType
 __unit_callback void unit_render(const float * in, float * out, uint32_t frames) {
   (void)in;
   memset(out, 0, frames * 2 * sizeof(float));

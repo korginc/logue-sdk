@@ -15,7 +15,7 @@
 constexpr size_t c_numVoices = 8; /**< equivalent to polyphony */
 constexpr size_t c_delayLineFrames = 10000;
 constexpr size_t c_dispersionStages = 4;
-
+/**< this is enum actually */
 constexpr size_t c_parameterResonatorNote = 0;
 constexpr size_t c_parameterResonatorPitchBendRange = 1;
 constexpr size_t c_parameterLevelVelocitySensitivity = 2;
