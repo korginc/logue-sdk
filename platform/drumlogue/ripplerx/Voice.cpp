@@ -55,16 +55,28 @@ void Voice::setPitch(float32_t a_coarse, float32_t b_coarse, float32_t a_fine, f
 
 void Voice::applyPitch(std::array<float32_t, 64>& model, float32_t factor)
 {
-    for (float32_t& ratio : model)
-        ratio *= factor;
+    // for (float32_t& ratio : model)
+    //     ratio *= factor;
+
+    float32x4_t a0, a1, a2, a3;
+    for (size_t i = 0; i < 64; i += 16) {
+        // load from model
+        a0 = vld1q_f32(&model[i]);
+        a1 = vld1q_f32(&model[i] + 4);
+        a2 = vld1q_f32(&model[i] + 8);
+        a3 = vld1q_f32(&model[i] + 12);
+        a0 = vmulq_n_f32(a0, factor);
+        a1 = vmulq_n_f32(a1, factor);
+        a2 = vmulq_n_f32(a2, factor);
+        a3 = vmulq_n_f32(a3, factor);
+        // Store the results into model
+        vst1q_f32(&model[i], a0);
+        vst1q_f32(&model[i] + 4, a1);
+        vst1q_f32(&model[i] + 8, a2);
+        vst1q_f32(&model[i] + 12, a3);
+    }
+
 }
-
-inline size_t Voice::getFramesSinceNoteOn() const {
-    if (!m_initialized) return SIZE_MAX;
-    return m_framesSinceNoteOn;
-}
-
-
 
 /** NOTE for semplification purposes this function has been moved
  * completely inside calcFrequencyShifts()

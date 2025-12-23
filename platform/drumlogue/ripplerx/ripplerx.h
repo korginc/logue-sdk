@@ -278,7 +278,7 @@ class RipplerX
                         out = voice->resB.filter.df1(out);
                     resBOut = vadd_f32(out, resBOut);
                 }
-                voice->m_framesSinceNoteOn++; // Voice stealing - TODO check according to for loop change
+                voice->m_framesSinceNoteOn += frames; // TODO check this - Voice stealing - TODO check according to for loop change
             }   // end for polyphony
 
             // two floats as one per channel
@@ -320,11 +320,11 @@ class RipplerX
                     // load whole set of parameters according to pre-calculated program model
                     if (value < last_program)
                         setCurrentProgram(value);
-                        noiseChanged = true;
-                        pitchChanged = true;
-                        resonatorChangedA = true;
-                        resonatorChangedB = true;
-                        couplingChanged = true;
+                    noiseChanged = true;
+                    pitchChanged = true;
+                    resonatorChangedA = true;
+                    resonatorChangedB = true;
+                    couplingChanged = true;
                     break;
                 case c_parameterGain:
                     parameters[gain] = value;
@@ -597,12 +597,15 @@ class RipplerX
     inline void NoteOn(uint8_t note, uint8_t velocity) {
         auto srate = getSampleRate();
 
-        // resonator_orig.h is:
-        // size_t voice = nextVoiceNumber();  // TODO check this
+        nvoice = nextVoiceNumber();  // this is from resonator_orig.h
         Voice & voice = *voices[nvoice];
-        nvoice = (nvoice + 1) % polyphony;
+        // nvoice = (nvoice + 1) % polyphony;   // this is from ripplerX
 
-        // Sample - from resonator_orig.h - TODO check this
+        // TODO check voice gate and reset?
+
+        voice->note = note;
+
+        // Sample - from resonator_orig.h
         const sample_wrapper_t* sampleWrapper = GetSample(m_sampleBank, m_sampleNumber - 1);
 
         if (sampleWrapper) {
@@ -613,11 +616,13 @@ class RipplerX
             m_sampleIndex = sampleWrapper->frames * m_sampleChannels * sampleStart / 1000;
             m_sampleEnd = sampleWrapper->frames * m_sampleChannels * sampleEnd / 1000;
         }
+
         // from resonator_orig.h
         voice.m_initialized = (sampleWrapper != nullptr);
         voice.m_gate = true;
         voice.m_framesSinceNoteOn = 0;  // Note stealing
 
+        // from ripplerX.h
         // used to calculate the malletFreq for the trigger
         auto mallet_stiff = (float32_t)getParameterValue(Parameters::mallet_stiff);
         auto vel_mallet_stiff = (float32_t)getParameterValue(Parameters::vel_mallet_stiff);
@@ -656,6 +661,8 @@ class RipplerX
     {
         // if (m_gate)  // gate is now per voice; bend is for resonator A only
         parameters[a_fine] = bend;  // TODO convert to -99 - 99
+        prepareToPlay(false, true, false, false, false);
+        pithchChanged = false;
     }
 
     inline void ChannelPressure(uint8_t pressure) { (void)pressure; }
@@ -706,6 +713,7 @@ class RipplerX
     /*===========================================================================*/
     /* Private Methods. */
     /*===========================================================================*/
+    // from resonator_orig.h
     inline const sample_wrapper_t* GetSample(size_t bank, size_t number) {
         if (bank >= m_get_num_sample_banks_ptr()) return nullptr;
         if (number >= m_get_num_samples_for_bank_ptr(bank)) return nullptr;

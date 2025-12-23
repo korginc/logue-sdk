@@ -29,6 +29,10 @@ public:
 	std::tuple<std::array<float32_t, 64>, std::array<float32_t, 64>> calcFrequencyShifts();
 	void setCoupling(bool _couple, float32_t _split);
 	void updateResonators();
+	inline size_t getFramesSinceNoteOn() const {
+		if (!m_initialized) return SIZE_MAX;
+		return m_framesSinceNoteOn;
+	}
 
 	int       note = 0;
 	bool      isRelease = false;
