@@ -179,7 +179,6 @@ class RipplerX
     // this should be equivalent to processBlockByType in PluginProcessor_orig.cpp
     inline void Render(float * __restrict outBuffer, size_t frames)
     {
-
         bool a_on = (bool)getParameterValue(Parameters::a_on);
         bool b_on = (bool)getParameterValue(Parameters::b_on);
         float32_t mallet_mix = (float32_t)getParameterValue(Parameters::mallet_mix);
@@ -198,7 +197,7 @@ class RipplerX
         float32_t ab_mix = (float32_t)getParameterValue(Parameters::ab_mix);
         float32_t gain = (float32_t)getParameterValue(Parameters::gain);
         bool couple = (bool)getParameterValue(Parameters::couple);
-        gain = fasterpowf(10.0, gain / 20.0);
+        // gain = pow(10.0, gain / 20.0);   // it's precomputed at parameter change
 
 
         // TODO: is neon vectorization used for stereo channels or for processing two samples at once?
@@ -211,7 +210,7 @@ class RipplerX
         // Let's take inspiration also from resorator_orig.h that I know it's working for drumlogue
         // but I have to review if it's really optimized for ARM vectorization
         // For each frame in batch:
-        for (size_t i = 0; i < frames; i++) {   // TODO: review frames. process batch (see orig resonator) or single (for loop)?
+        for (size_t i = 0; i < frames; i++) {   // TODO: review frames. process batch (see resonator_orig) or single (for loop)?
             // Set all lanes to same value
             float32x2_t dirOut  = vdup_n_f32(0.0f);  // direct output per sample (sum of all voices)
             float32x2_t resAOut = vdup_n_f32(0.0f);  // resonator A output
@@ -234,50 +233,50 @@ class RipplerX
             } else {
                 audioIn = vdup_n_f32(0.0f);
             }
-            //FOR PORTING in resonator orig. this is done at Render, which is the caller
-            // for (size_t i = 0; i < polyphony; ++i)
-            for (auto& voice : voices)
+            //same as polyphony loop in original processBlockByType
+            for (size_t i = 0; i < c_numVoices; ++i)
             {
-                if (!voice->m_initialized) continue; // skip uninitialized voices
+                Voice & voice = *voices[i];
+                if (!voice.m_initialized) continue; // skip uninitialized voices
                 float32x2_t resOut = vdup_n_f32(0.0f);
 
-                float32x2_t msample = voice->mallet.process(); // process mallet
+                float32x2_t msample = voice.mallet.process(); // process mallet
                 if (msample) {
                     // dirOut += msample * fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel);
-                    dirOut = vfma_f32(dirOut, msample, vmin_f32(1.0, vfma_f32(mallet_mix, vel_mallet_mix, voice->vel)));
+                    dirOut = vfma_f32(dirOut, msample, vmin_f32(1.0, vfma_f32(mallet_mix, vel_mallet_mix, voice.vel)));
                     // resOut += msample * fmin(1.0, mallet_res + vel_mallet_res * voice.vel);
-                    resOut = vfma_f32(resOut, msample, vmin_f32(1.0, vfma_f32(mallet_res, vel_mallet_mix, voice->vel)));
+                    resOut = vfma_f32(resOut, msample, vmin_f32(1.0, vfma_f32(mallet_res, vel_mallet_mix, voice.vel)));
                 }
 
-                if (audioIn && voice->isPressed) // NoteOn => voice.trigger
+                if (audioIn && voice.isPressed) // NoteOn => voice.trigger
                 resOut += audioIn;
 
-                float32x2_t nsample = voice->noise.process(); // process noise
+                float32x2_t nsample = voice.noise.process(); // process noise
                 // TODO: remove scaling to 0-1, make parameter directly in that range
                 if (nsample) {
                     // dirOut += nsample * (float32_t)noise_mix_range.convertFrom0to1(fmin(1.f, noise_mix + vel_noise_mix * (float)voice.vel));
                     dirOut = vfma_f32(nsample, (float32_t)noise_mix.convertFrom0to1(vmin_f32(1.f, vfma_f32(noise_mix, vel_noise_mix,
-                                                                                                              (float)voice->vel))), dirOut);
+                                                                                                              (float)voice.vel))), dirOut);
                     // resOut += nsample * (float32_t)noise_res_range.convertFrom0to1(fmin(1.f, noise_res + vel_noise_res * (float)voice.vel));
                     resOut = vfma_f32(nsample, (float32_t)noise_res.convertFrom0to1(vmin_f32(1.f, vfma_f32(noise_res, vel_noise_res,
-                                                                                                              (float)voice->vel))), resOut);
+                                                                                                              (float)voice.vel))), resOut);
                 }
 
                 auto out_from_a = 0.0; // output from voice A into B in case of resonator serial coupling
                 if (a_on) {
-                    auto out = voice->resA.process(resOut);
-                    if (voice->resA.cut > 20.0001) out = voice->resA.filter.df1(out);
+                    auto out = voice.resA.process(resOut);
+                    if (voice.resA.cut > 20.0001) out = voice.resA.filter.df1(out);
                     resAOut = vadd_f32(out, resAOut);
                     out_from_a = out;
                 }
 
                 if (b_on) {
-                    auto out = voice->resB.process(a_on && couple ? out_from_a : resOut);
-                    if (voice->resB.cut > 20.0001)
-                        out = voice->resB.filter.df1(out);
+                    auto out = voice.resB.process(a_on && couple ? out_from_a : resOut);
+                    if (voice.resB.cut > 20.0001)
+                        out = voice.resB.filter.df1(out);
                     resBOut = vadd_f32(out, resBOut);
                 }
-                voice->m_framesSinceNoteOn += frames; // TODO: check this - Voice stealing - TODO: check according to for loop change
+                voice.m_framesSinceNoteOn += frames; // TODO: check this - Voice stealing - TODO: check according to for loop change
             }   // end for polyphony
 
             // two floats as one per channel
@@ -326,7 +325,7 @@ class RipplerX
                     couplingChanged = true;
                     break;
                 case c_parameterGain:
-                    parameters[gain] = fasterpowf(10.0, value / 20.0);  // it's  in Render
+                    parameters[gain] = fasterpowf(10.0, value / 20.0);  // it's faster than do calculation in Render, which should be "hard real time"
                     break;
                 case c_parameterSampleBank:
                 if ((size_t)value < c_sampleBankElements)
@@ -444,28 +443,38 @@ class RipplerX
 
         }
         auto srate = getSampleRate();
-        for (auto& voice : voices) {
-            // Voice& voice = *voices[i];
+        for (size_t i = 0; i < c_numVoices; ++i) {
+            Voice& voice = *voices[i];
             if (noiseChanged) {
-                voice->noise.init(srate, parameters[noise_filter_mode], parameters[noise_filter_freq], parameters[noise_filter_q], parameters[noise_att], parameters[noise_dec], parameters[noise_sus], parameters[noise_rel]);
+                voice.noise.init(srate,
+                    parameters[noise_filter_mode],
+                    parameters[noise_filter_freq],
+                    parameters[noise_filter_q],
+                    parameters[noise_att],
+                    parameters[noise_dec],
+                    parameters[noise_sus],
+                    parameters[noise_rel],
+                    parameters[vel_noise_freq],
+                    parameters[vel_noise_q]
+                );
             }
             // in this moment only a_coarse can be editable, b_coarse and a_fine, b_fine are not
             // editable in Drumlogue due to lack of parameters. Keep model default.
             if (pitchChanged) {
-                voice->setPitch(parameters[a_coarse], parameters[b_coarse], parameters[a_fine], parameters[b_fine]);
+                voice.setPitch(parameters[a_coarse], parameters[b_coarse], parameters[a_fine], parameters[b_fine]);
             }
             if (resonatorChangedA) {
-                voice->resA.setParams(srate, parameters[a_on], parameters[a_model], parameters[a_partials], parameters[a_decay], parameters[a_damp], parameters[a_tone], parameters[a_hit], parameters[a_rel], parameters[a_inharm], parameters[a_cut], parameters[a_radius], parameters[vel_a_decay], parameters[vel_a_hit], parameters[vel_a_inharm]);
+                voice.resA.setParams(srate, parameters[a_on], parameters[a_model], parameters[a_partials], parameters[a_decay], parameters[a_damp], parameters[a_tone], parameters[a_hit], parameters[a_rel], parameters[a_inharm], parameters[a_cut], parameters[a_radius], parameters[vel_a_decay], parameters[vel_a_hit], parameters[vel_a_inharm]);
             }
             if (resonatorChangedB) {
-                voice->resB.setParams(srate, parameters[b_on], parameters[b_model], parameters[b_partials], parameters[b_decay], parameters[b_damp], parameters[b_tone], parameters[b_hit], parameters[b_rel], parameters[b_inharm], parameters[b_cut], parameters[b_radius], parameters[vel_b_decay], parameters[vel_b_hit], parameters[vel_b_inharm]);
+                voice.resB.setParams(srate, parameters[b_on], parameters[b_model], parameters[b_partials], parameters[b_decay], parameters[b_damp], parameters[b_tone], parameters[b_hit], parameters[b_rel], parameters[b_inharm], parameters[b_cut], parameters[b_radius], parameters[vel_b_decay], parameters[vel_b_hit], parameters[vel_b_inharm]);
             }
             if (couplingChanged) {
-                voice->setCoupling(parameters[couple], parameters[split]);
+                voice.setCoupling(parameters[couple], parameters[split]);
             }
             // not enough parameters to change resonator B, keep model default
             if (resonatorChangedA || resonatorChangedB)
-                voice->updateResonators();
+                voice.updateResonators();
         }
     }
 
@@ -602,7 +611,7 @@ class RipplerX
 
         // TODO: check voice gate and reset what?
         m_note = note;  // for GateOn/GateOff
-        voice->note = note;
+        voice.note = note;
 
         // Sample - from resonator_orig.h
         const sample_wrapper_t* sampleWrapper = GetSample(m_sampleBank, m_sampleNumber - 1);
@@ -636,8 +645,8 @@ class RipplerX
         for (auto& voice : voices)
         {
             voice.m_gate = false;
-            if (voice->note == note || note == 0xFF) {
-                voice->release();
+            if (voice.note == note || note == 0xFF) {
+                voice.release();
             }
         }
         Reset();
@@ -694,7 +703,7 @@ class RipplerX
     {
         for (auto& voice : voices)
         {
-            voice->clear();
+            voice.clear();
         }
     }
 
