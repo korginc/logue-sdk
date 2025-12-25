@@ -78,7 +78,7 @@ class RipplerX
         comb.init(getSampleRate());
         limiter.init(getSampleRate());
 
-        Reset();
+        Reset();	// at init Reset is mandatory to update the last model used
         // resetLastModels();
         // clearVoices();
         prepareToPlay();
@@ -216,7 +216,7 @@ class RipplerX
             float32x2_t resAOut = vdup_n_f32(0.0f);  // resonator A output
             float32x2_t resBOut = vdup_n_f32(0.0f);  // resonator B output
             // Action and Mixing stage
-            float32x2_t audioIn;  //FOR PORTING as excitation
+            float32x2_t audioIn;  //FOR PORTING as excitation in resonator_orig.h
 
             // Sample, until it runs out. (from resonator_orig.h)
             if (m_sampleIndex < m_sampleEnd)
@@ -422,6 +422,8 @@ class RipplerX
         Reset(); // to reset voice states and models after parameter change
     }
 
+	// This must be done before Reset(), as the the latter will update the last model used
+	// but at the Init()
     inline void prepareToPlay(bool noiseChanged = true, bool pitchChanged = true,
         bool resonatorChangedA = true, bool resonatorChangedB = true,
         bool couplingChanged = true) {
@@ -470,7 +472,7 @@ class RipplerX
                 voice.resB.setParams(srate, parameters[b_on], parameters[b_model], parameters[b_partials], parameters[b_decay], parameters[b_damp], parameters[b_tone], parameters[b_hit], parameters[b_rel], parameters[b_inharm], parameters[b_cut], parameters[b_radius], parameters[vel_b_decay], parameters[vel_b_hit], parameters[vel_b_inharm]);
             }
             if (couplingChanged) {
-                voice.setCoupling(parameters[couple], parameters[split]);
+                voice.setCoupling(parameters[couple], parameters[ab_split]);
             }
             // not enough parameters to change resonator B, keep model default
             if (resonatorChangedA || resonatorChangedB)
@@ -621,8 +623,8 @@ class RipplerX
             m_sampleChannels = sampleWrapper->channels;
             m_sampleFrames = sampleWrapper->frames;
             m_samplePointer = sampleWrapper->sample_ptr;    // from common/sample_wrapper.h
-            m_sampleIndex = sampleWrapper->frames * m_sampleChannels * sampleStart / 1000;
-            m_sampleEnd = sampleWrapper->frames * m_sampleChannels * sampleEnd / 1000;
+            m_sampleIndex = sampleWrapper->frames * m_sampleChannels * m_sampleStart / 1000;
+            m_sampleEnd = sampleWrapper->frames * m_sampleChannels * m_sampleEnd / 1000;
         }
 
         // from resonator_orig.h
@@ -644,9 +646,9 @@ class RipplerX
     inline void NoteOff(uint8_t note) {
         for (auto& voice : voices)
         {
-            voice.m_gate = false;
-            if (voice.note == note || note == 0xFF) {
-                voice.release();
+            voice->m_gate = false;
+            if (voice->note == note || note == 0xFF) {
+                voice->release();
             }
         }
         Reset();
@@ -673,7 +675,6 @@ class RipplerX
         // RipplerX uses -99 to 99 for fine pitch, so we convert
         parameters[a_fine] = (bend - 0x2000) * 100 / 0x2000;
         prepareToPlay(false, true, false, false, false);
-        pithchChanged = false;
     }
 
     inline void ChannelPressure(uint8_t pressure) { (void)pressure; }
@@ -703,7 +704,7 @@ class RipplerX
     {
         for (auto& voice : voices)
         {
-            voice.clear();
+            voice->clear();
         }
     }
 
@@ -781,7 +782,7 @@ class RipplerX
     uint8_t   m_sampleChannels = 0; // From sample_wrapper
     size_t    m_sampleFrames = 0; // From sample_wrapper
     const float32_t * m_samplePointer; // From sample_wrapper
-    uint16_t  m_sampleStart = 0;
+    uint16_t  m_sampleStart = 0; // NOTE: this is not editable, see c_parameterSampleStart in resonator_orig.h
     size_t    m_sampleIndex = 0; // Counts in float*, stride == channels
     size_t    m_sampleEnd = 1000; // 100%. Counts in float*, stride == channels
     // Functions from unit runtime

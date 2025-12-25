@@ -1,6 +1,7 @@
 #include "float_math.h"
 #include "Voice.h"
 #include "Models.h"
+#include "constants.h"
 
 /* called by Voice::trigger*/
 float32_t Voice::note2freq(int _note)
@@ -10,28 +11,83 @@ float32_t Voice::note2freq(int _note)
 
 // Set freq note, prepares mallet, noise generator, resonators, to be used at actual trigger
 // Called by onNote(MIDIMsg msg)
-void Voice::trigger(float32_t srate, int _note, float32_t _vel, float32_t malletFreq)
+// Triggers mallet and noise generator
+void Voice::trigger(/**uint64_t timestamp,*/ float32_t srate, int _note,
+		float32_t _vel, /**MalletType malletType, */float32_t malletFreq/** TODO:,
+		float32_t malletKTrack, bool skip_fade*/)
 {
-    resA.clear();
-    resB.clear();
-    note = _note;
-    isRelease = false;
-    isPressed = true;
-    vel = _vel;
-    freq = note2freq(note);
-    mallet.trigger(kImpulse, srate, malletFreq);    // TODO merge version of Ripplerx from 1.5.0 onward
-    noise.attack(_vel);
-    if (resA.on) resA.activate();
-    if (resB.on) resB.activate();
-    updateResonators();
+	resA.clear();
+	resB.clear();
+	note = _note;
+	/** TODO;
+	srate = _srate;
+	malletType = _malletType;
+	malletFreq = _malletFreq;
+
+	newVel = _vel;
+	newNote = _note;
+	newFreq = note2freq(newNote);
+	malletKtrack = _mallet_ktrack;
+	*/
+	isRelease = false;
+	isPressed = true;
+	vel = _vel;
+	freq = note2freq(note);
+	mallet.trigger(srate, malletFreq);
+	noise.attack(_vel);
+	/** TODO:
+	pressed_ts = timestamp;
+
+	// fade out active voice before re-triggering
+	if (skip_fadeout) {
+		triggerStart(false);
+	}
+	else if (((resA.on && resA.active) || (resB.on && resB.active))) {
+		isFading = true;
+		fadeTotalSamples = (int)(c_repeatNoteFadeMs * 0.001 * srate);
+		fadeSamples = fadeTotalSamples;
+		updateResonators();
+	}
+	else {
+		triggerStart(true);
+	}
 }
 
-void Voice::release()
+float32_t Voice::fadeOut()
 {
-    isRelease = true;
-    isPressed = false;
-    noise.release();
-    updateResonators();
+	fadeSamples--;
+	if (fadeSamples <= 0) {
+		isFading = false;
+		triggerStart(true);
+	}
+	return isFading ? (double)fadeSamples / (double)fadeTotalSamples : 1.0;
+}
+
+void Voice::triggerStart(bool reset)
+{
+	if (reset) {
+		resA.clear();
+		resB.clear();
+	}
+	note = newNote;
+	vel = newVel;
+	freq = newFreq;
+
+	mallet.trigger(malletType, srate, malletFreq, note, malletKtrack);
+	noise.attack(vel);
+	*/
+	if (resA.on) resA.activate();
+	if (resB.on) resB.activate();
+	updateResonators();
+}
+
+void Voice::release(/**uint64_t timestamp*/)
+{
+	isRelease = true;
+	isPressed = false;
+	//TODO: release_ts = timestamp;
+	noise.release();
+	updateResonators();
 }
 
 void Voice::clear()
@@ -52,7 +108,13 @@ void Voice::setPitch(float32_t a_coarse, float32_t b_coarse, float32_t a_fine, f
     aPitchFactor = fasterpowf(2.0, (a_coarse + a_fine / 100.0) / 12.0);
     bPitchFactor = fasterpowf(2.0, (b_coarse + b_fine / 100.0) / 12.0);
 }
-
+/**< TODO:
+void Voice::setRatio(float32_t _a_ratio, float32_t _b_ratio)
+{
+	a_ratio = _a_ratio;
+	b_ratio = _b_ratio;
+}
+*/
 void Voice::applyPitch(std::array<float32_t, 64>& model, float32_t factor)
 {
     // for (float32_t& ratio : model)
@@ -75,8 +137,7 @@ void Voice::applyPitch(std::array<float32_t, 64>& model, float32_t factor)
         vst1q_f32(&model[i] + 8, a2);
         vst1q_f32(&model[i] + 12, a3);
     }
-
-}
+// TODO: Voice::processOscillators(bool isA)
 
 /** NOTE for semplification purposes this function has been moved
  * completely inside calcFrequencyShifts()
@@ -97,8 +158,8 @@ void Voice::applyPitch(std::array<float32_t, 64>& model, float32_t factor)
     // we want to make this as fast as possible
     // Some  refactoring of the return value is possible as:
     //     fmax(fa, fb) - w => fmax(fa, fb) - (avg + sqrt()) => fmax(fa, fb) - ((fa + fb) / 2.0 + sqrt())
-    //     case a => fa - fa/2 - fb/2 - sqrt() = fa/2 - fb/2 - sqrt()
-    //     case b => fb - fa/2 - fb/2 - sqrt() = fb/2 - fa/2 - sqrt()
+    //     case a is greater => fa - fa/2 - fb/2 - sqrt() = fa/2 - fb/2 - sqrt()
+    //     case b is greater => fb - fa/2 - fb/2 - sqrt() = fb/2 - fa/2 - sqrt()
     // both cases are covered by: abs(fa - fb)*0.5 - sqrt(...)
 
     // now let's expand again the square root:
@@ -110,10 +171,11 @@ void Voice::applyPitch(std::array<float32_t, 64>& model, float32_t factor)
     // so fabs(fmax(fa, fb) - w) will be
     //   fabs( dx - sqrt( dx^2 + dy^2 ) )
     //
-    // It's self evident that sqr(a^2+b^2) > a (in Real numbers realm), so the absolute value is this:
+    // It's self evident that sqr(a^2+b^2) > a (in Real numbers realm), and let's consider only the positive solutions of the sqrt
+    // so the absolute value is this:
     //   sqrt( dx^2 + dy^2 ) - dx
     //
-    // now let's face the square root: it's an the euclidean distance
+    // now let's face the square root itself: it's an the euclidean distance
     // i.e. [sqr((y2-y1)^2 + (x2-x1)^2)] where dy=abs(y2-y1)
     // that can be approximated by (dy > dx) ? (0.4 * dx + 0.96 * dy) : (0.96 * dx + 0.4 * dy)
     // let's formulate like this:
@@ -126,7 +188,7 @@ void Voice::applyPitch(std::array<float32_t, 64>& model, float32_t factor)
     // where dx=abs(fa - fb)*0.5 and dy=(k*0.4)
     //
     // let's go back to the caller => calcFrequencyShifts
-// }
+}
 
 /**
 * When resonators are coupled in serial a frequency split is applied
@@ -138,21 +200,28 @@ void Voice::applyPitch(std::array<float32_t, 64>& model, float32_t factor)
 *
 * NOTE 2 : MOVED COMPLETELY TO updateResonators !!!!
 */
-// std::tuple<std::array<float32_t, 64>, std::array<float32_t, 64>> Voice::calcFrequencyShifts()
-// {
-//     // load the model into local copy
-//     std::array<float32_t, 64> aModel = models.aModels[resA.nmodel];
-//     std::array<float32_t, 64> bModel = models.bModels[resB.nmodel];
-//     // create the output with default value
-//     std::array<float32_t, 64> aShifts = aModel;
-//     std::array<float32_t, 64> bShifts = bModel;
-
-
-//     for(size_t i = 0; i < 16; i += 4)
-//     {
-//         if (aPitchFactor != 1.0) applyPitch(aModel, aPitchFactor);
-//         if (bPitchFactor != 1.0) applyPitch(bModel, bPitchFactor);
-//     }
+//std::tuple<std::array<double, 64>, std::array<double,64>> Voice::calcFrequencyShifts(
+//	std::array<double, 64>& aModel,
+//	std::array<double, 64>& bModel
+//) {
+//	std::array<double, 64> aShifts = aModel;
+//	std::array<double, 64> bShifts = bModel;
+//
+//	double fa, fb, shift;
+//	for (int i = 0; i < 64; ++i) {
+//		fa = aModel[i];
+//		for (int j = 0; j < 64; ++j) {
+//			fb = bModel[j];
+//			if (fabs(fa - fb) <= 4.0) {
+//				shift = freqShift(fa * freq, fb * freq) / freq;
+//				aShifts[i] += fa > fb ? shift : -shift;
+//				bShifts[i] += fa > fb ? -shift : shift;
+//			}
+//		}
+//	}
+//
+//	return std::tuple<std::array<double,64>, std::array<double,64>> (aShifts, bShifts);
+//}
 
 //     // if coupling mode is serial apply frequency splitting (from updateResonators())
 //     if (couple && resA.on && resB.on) {
@@ -236,30 +305,33 @@ void Voice::applyPitch(std::array<float32_t, 64>& model, float32_t factor)
  *  NOTE 2 : in order to create seamless fusion of the above refactory
  * this function has been commented out and sustituted with new version below
  */
-// void Voice::updateResonators()
-// {
-    // // std::array<float32_t, 64> aModel;
-    // // std::array<float32_t, 64> bModel;
-
-    // // if coupling mode is serial apply frequency splitting
-    // // if (couple && resA.on && resB.on) {
-    //     auto [aShifts, bShifts] = calcFrequencyShifts();    // this function will load the models and apply pitch. So let's put the coupling mode condtiion there
-    //     // aModel = aShifts;
-    //     // bModel = bShifts;
-    // // }
-    // // else {
-    // //     aModel = aModels[resA.nmodel];
-    // //     bModel = bModels[resB.nmodel];
-    // //     if (aPitchFactor != 1.0) applyPitch(aModel, aPitchFactor);
-    // //     if (bPitchFactor != 1.0) applyPitch(bModel, bPitchFactor);
-    // // }
-
-    // // if (resA.on) resA.update(freq, vel, isRelease, aModel);
-    // // if (resB.on) resB.update(freq, vel, isRelease, bModel);
-    // if (resA.on) resA.update(freq, vel, isRelease, aShifts);
-    // if (resB.on) resB.update(freq, vel, isRelease, bShifts);
-// }
-
+//void Voice::updateResonators()
+//{
+//	std::array<double,64> aModel = models.aModels[resA.nmodel];
+//	std::array<double,64> bModel = models.bModels[resB.nmodel];
+//	std::array<double, 64> aGain = models.getGains((ModalModels)resA.nmodel);
+//	std::array<double, 64> bGain = models.getGains((ModalModels)resB.nmodel);
+//
+//	if (resA.nmodel == ModalModels::Djembe) {
+//		aModel = models.calcDjembe(freq, a_ratio);
+//	}
+//	if (resB.nmodel == ModalModels::Djembe) {
+//		bModel = models.calcDjembe(freq, b_ratio);
+//	}
+//
+//	if (aPitchFactor != 1.0) applyPitch(aModel, aPitchFactor);
+//	if (bPitchFactor != 1.0) applyPitch(bModel, bPitchFactor);
+//
+//	// if coupling mode is serial apply frequency splitting
+//	if (couple && resA.on && resB.on) {
+//		auto [aShifts, bShifts] = calcFrequencyShifts(aModel, bModel);
+//		aModel = aShifts;
+//		bModel = bShifts;
+//	}
+//
+//	if (resA.on) resA.update(freq, vel, isRelease, pitchBend, aModel, aGain);
+//	if (resB.on) resB.update(freq, vel, isRelease, pitchBend, bModel, bGain);
+//}
 /* called by Voice::trigger and Voice::release, plus ::onSlider()
  * see above original code, completly commented out in favour
  * of a new call which unrolls the calculate frequency shift call
@@ -271,16 +343,25 @@ void Voice::updateResonators()
     // load the model into local copy
     std::array<float32_t, 64> aModel = models.aModels[resA.nmodel];
     std::array<float32_t, 64> bModel = models.bModels[resB.nmodel];
+
+    // TODO:
+    //std::array<double, 64> aGain = models.getGains((ModalModels)resA.nmodel);
+	//std::array<double, 64> bGain = models.getGains((ModalModels)resB.nmodel);
+    // TODO:
+	// if (resA.nmodel == ModalModels::Djembe) {
+	// 	aModel = models.calcDjembe(freq, a_ratio);
+	// }
+	// if (resB.nmodel == ModalModels::Djembe) {
+	// 	bModel = models.calcDjembe(freq, b_ratio);
+	// }
+
     // create the output with default value
     std::array<float32_t, 64> aShifts = aModel;
     std::array<float32_t, 64> bShifts = bModel;
 
 
-    for(size_t i = 0; i < 16; i += 4)
-    {
-        if (aPitchFactor != 1.0) applyPitch(aModel, aPitchFactor);
-        if (bPitchFactor != 1.0) applyPitch(bModel, bPitchFactor);
-    }
+    if (aPitchFactor != 1.0) applyPitch(aModel, aPitchFactor);
+    if (bPitchFactor != 1.0) applyPitch(bModel, bPitchFactor);
 
     // if coupling mode is serial apply frequency splitting (from updateResonators())
     if (couple && resA.on && resB.on) {
@@ -320,7 +401,7 @@ void Voice::updateResonators()
             bShifts[i] -= freqShiftOpt;
         }   // end for i
     }   // end res ON
-
+	// TODO: aGain, bGain
     if (resA.on) resA.update(freq, vel, isRelease, aShifts);
     if (resB.on) resB.update(freq, vel, isRelease, bShifts);
 }

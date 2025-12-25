@@ -15,9 +15,16 @@ public:
 	Noise() {};
 	~Noise() {};
 
-	void init(float32_t _srate, int filterMode, float32_t _freq,
-        float32_t _q, float32_t att, float32_t dec,
-        float32_t sus, float32_t rel, float32_t _vel_freq,
+	void init(float32_t _srate,
+		int filterMode,
+		float32_t _freq,
+        float32_t _q,
+		float32_t att,
+		float32_t dec,
+        float32_t sus,
+		float32_t rel,
+		// these two values are not present in the original preset/*.xml files
+		float32_t _vel_freq,
         float32_t _vel_q);
 	float32_t process();
 	void attack(float32_t vel);

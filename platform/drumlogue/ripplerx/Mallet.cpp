@@ -1,16 +1,17 @@
 #include "Mallet.h"
 
-void Mallet::trigger(MalletType _type, float32_t _srate, float32_t freq)
+void Mallet::trigger(/** TODO:MalletType _type, */float32_t srate, float32_t freq)
 {
+	/** TODO:
 	type = _type;
 	srate = _srate;
 
-	if (type == kImpulse) {
-		impulse_filter.bp(srate, freq, 0.707);
-		countdown = (int)(srate / 10.0); // countdown (100ms)
+	if (type == kImpulse) { */
+		filter.bp(srate, freq, 0.707);
+		elapsed = (int)(srate / 10.0); // countdown (100ms)
 		impulse = 1.0;
 		env = e_expff(-100.0 / srate);
-	}
+	//}
 	// else {
 	// 	playback_speed = sampler.wavesrate / srate;
 	// 	playback = 0.0;
@@ -19,22 +20,24 @@ void Mallet::trigger(MalletType _type, float32_t _srate, float32_t freq)
 
 void Mallet::clear()
 {
-	countdown = 0;
+	elapsed = 0;
 	impulse = 0.0;
+	// TODO:
 	// playback = INFINITY;
-	impulse_filter.clear(0.0);
+	// impulse_filter.clear(0.0);
 	// sample_filter.clear(0.0);
 }
 
 float32_t Mallet::process()
 {
-	auto sample = 0.0;
-
-	if (type == kImpulse && countdown > 0) {
-		sample = impulse_filter.df1(impulse) * 2.0;
+	//auto sample = 0.0;
+	//TODO:
+	//if (type == kImpulse && countdown > 0) {
+		if (elapsed == 0) return 0.0;
+		float32_t sample = impulse_filter.df1(impulse) * 2.0;
 		countdown -= 1;
 		impulse *= env;
-	}   // disable sampler for the moment
+	//}   // disable sampler for the moment
 	// else if (type >= kUserFile && playback < sampler.waveform.size()) {
 	// 	sample = sampler.waveCubic(playback);
 	// 	playback += playback_speed * sampler.pitchfactor;
@@ -47,7 +50,7 @@ float32_t Mallet::process()
 	return sample;
 }
 
-// disable sampler for the moment
+//TODO:
 // void Mallet::setFilter(float32_t norm)
 // {
 // 	float32_t freq = 20.0 * fasterpowf(20000.0/20.0, norm < 0.0 ? 1 + norm : norm); // map 1..0 to 20..20000, with inverse scale for negative norm

@@ -7,9 +7,9 @@ size_t RipplerX::nextVoiceNumber()
     size_t longestFramesSinceNoteOn = 0;
     size_t bestVoice = 0;
 
-    for (size_t i = 1; i < c_numVoices; i++)
-    {
-        size_t thisVoiceFramesSinceNoteOn = voices[i].getFramesSinceNoteOn();
+    for (size_t i = 0; i < c_numVoices; ++i) {
+        Voice& voice = *voices[i];
+        size_t thisVoiceFramesSinceNoteOn = voice.getFramesSinceNoteOn();
         if (thisVoiceFramesSinceNoteOn > longestFramesSinceNoteOn)
         {
             longestFramesSinceNoteOn = thisVoiceFramesSinceNoteOn;

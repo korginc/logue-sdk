@@ -1,36 +1,36 @@
 [
     {
-        "directory": "E:\\Fede\\drumlogue\\logue-sdk\\platform\\drumlogue\\ripplerx",
+        "directory": "E:\\Fede\\drumlogue\\logue-sdk-ripplerx\\platform\\drumlogue\\ripplerx",
         "command": "arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common _unit_base.c -o build/obj/_unit_base.o",
         "file": "_unit_base.c"
     },
     {
-        "directory": "E:\\Fede\\drumlogue\\logue-sdk\\platform\\drumlogue\\ripplerx",
+        "directory": "E:\\Fede\\drumlogue\\logue-sdk-ripplerx\\platform\\drumlogue\\ripplerx",
         "command": "arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=../dummy-synth/build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF ../dummy-synth/.dep/build.d -I. -I/workspace/drumlogue/common _unit_base.c -o ../dummy-synth/build/obj/_unit_base.o",
         "file": "_unit_base.c"
     },
     {
-        "directory": "E:\\Fede\\drumlogue\\logue-sdk\\platform\\drumlogue\\ripplerx",
+        "directory": "E:\\Fede\\drumlogue\\logue-sdk-ripplerx\\platform\\drumlogue\\ripplerx",
         "command": "arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common header.c -o build/obj/header.o",
         "file": "header.c"
     },
     {
-        "directory": "E:\\Fede\\drumlogue\\logue-sdk\\platform\\drumlogue\\ripplerx",
+        "directory": "E:\\Fede\\drumlogue\\logue-sdk-ripplerx\\platform\\drumlogue\\ripplerx",
         "command": "arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fconcepts -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -fno-threadsafe-statics -std=gnu++14 -W -Wall -Wextra -Wno-ignored-qualifiers -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common unit.cc -o build/obj/unit.o",
         "file": "unit.c"
     },
     {
-        "directory": "E:\\Fede\\drumlogue\\logue-sdk\\platform\\drumlogue\\ripplerx",
+        "directory": "E:\\Fede\\drumlogue\\logue-sdk-ripplerx\\platform\\drumlogue\\ripplerx",
         "command": "arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o",
         "file": "xxxx.s"
     },
     {
-        "directory": "E:\\Fede\\drumlogue\\logue-sdk\\platform\\drumlogue\\ripplerx",
+        "directory": "E:\\Fede\\drumlogue\\logue-sdk-ripplerx\\platform\\drumlogue\\ripplerx",
         "command": "arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o",
         "file": "xxxx.s"
     },
     {
-        "directory": "E:\\Fede\\drumlogue\\logue-sdk\\platform\\drumlogue\\ripplerx",
+        "directory": "E:\\Fede\\drumlogue\\logue-sdk-ripplerx\\platform\\drumlogue\\ripplerx",
         "command": "arm-unknown-linux-gnueabihf-g++ xxxx.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -shared -Wl,-Map=build/dummy_synth.map,--cref -lm -lc -o build/dummy_synth.elf",
         "file": "xxxx.o"
     }

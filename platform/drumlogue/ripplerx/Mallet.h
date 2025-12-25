@@ -32,24 +32,24 @@ enum MalletType
 class Mallet
 {
 public:
-// removing sampler for the moment
+	// TODO:
 	// Mallet(Sampler& sampler) : sampler(sampler) {};
 	Mallet() {};
 	~Mallet() {};
 
-	void trigger(MalletType type, float32_t srate, float32_t freq);
+	void trigger(/**<MalletType type, */float32_t srate, float32_t freq);
 	void clear();
 	float32_t process();
 
-	void setFilter(float32_t norm);
+	// void setFilter(float32_t norm);
 
-	float32_t srate = 44100.0;
+	// float32_t srate = 44100.0;
 
 	// impulse mallet fields
 	float32_t impulse = 0.0;
-	int countdown = 0;
+	int elapsed = 0;
 	float32_t env = 0.0;
-	Filter impulse_filter{};
+	// Filter impulse_filter{};
 
 	// sample mallet fields
 	// float32_t playback = INFINITY;
@@ -59,5 +59,6 @@ public:
 
 private:
 	// Sampler& sampler;    // disable samples for the moment
-	MalletType type = kImpulse;
+	// MalletType type = kImpulse;
+	Filter filter{};
 };
