@@ -155,7 +155,7 @@ platform_for_project() {
                     return 0
                 fi
                 if [ ! -z "${OPT_MICROKORG2}" ]; then
-                    echo "microkorg 2"
+                    echo "microkorg2"
                     return 0
                 fi
             fi
