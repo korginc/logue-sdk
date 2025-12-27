@@ -378,7 +378,7 @@ public:
 
         for(int voice = 0; voice < ctxt->voiceLimit; voice+=4)
         {
-          for(int modDest = 0; modDest < kNumModDest; modDest++)
+          for(int modDest = 0; modDest < kNumMk2ModSrc; modDest++)
           {
             float * curr = dests[modDest];
             float32x4_t currentValue = f32x4_ld(&curr[voice]);
