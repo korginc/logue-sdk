@@ -176,6 +176,17 @@ class RipplerX
     /*===========================================================================*/
     /* Other Public Methods. */
     /*===========================================================================*/
+    // new method valid for all samples
+    void processMallet(std::array<float32_t, c_numVoices>& msamples, std::array<float32_t, c_numVoices>& velocities)
+    {
+        for (size_t i = 0; i < c_numVoices; ++i)
+            {
+                Voice & voice = *voices[i];
+                msamples[i] = voice.m_initialized ? voice.mallet.process() : 0.0f;
+                velocities[i] = voice.vel;
+            }
+    }
+
     // this should be equivalent to processBlockByType in PluginProcessor_orig.cpp
     inline void Render(float * __restrict outBuffer, size_t frames)
     {
@@ -197,8 +208,11 @@ class RipplerX
         float32_t ab_mix = (float32_t)getParameterValue(Parameters::ab_mix);
         float32_t gain = (float32_t)getParameterValue(Parameters::gain);
         bool couple = (bool)getParameterValue(Parameters::couple);
-        // gain = pow(10.0, gain / 20.0);   // it's precomputed at parameter change
+        // gain = pow(10.0, gain / 20.0);   //NOTE: it's precomputed at parameter change
 
+        std::array<float32_t, c_numVoices> msamples = {0.0f};
+        std::array<float32_t, c_numVoices> velocities = {0.0f};
+        processMallet(msamples, velocities);
 
         // TODO: is neon vectorization used for stereo channels or for processing two samples at once?
         // In this case it's for stereo channels processing
@@ -210,29 +224,59 @@ class RipplerX
         // Let's take inspiration also from resorator_orig.h that I know it's working for drumlogue
         // but I have to review if it's really optimized for ARM vectorization
         // For each frame in batch:
-        for (size_t i = 0; i < frames; i++) {   // TODO: review frames. process batch (see resonator_orig) or single (for loop)?
+        for (size_t frame = 0; frame < frames; frame+=2) {   // NOTE frame is sample in numSamples for PluginProcessor_orig.cpp. Here is different as a sngle frame can have more than one sample (stereo)
             // Set all lanes to same value
-            float32x2_t dirOut  = vdup_n_f32(0.0f);  // direct output per sample (sum of all voices)
-            float32x2_t resAOut = vdup_n_f32(0.0f);  // resonator A output
-            float32x2_t resBOut = vdup_n_f32(0.0f);  // resonator B output
+            float32x4_t dirOut  = vdupq_n_f32(0.0f);  // direct output per sample (sum of all voices)
+            float32x4_t resAOut = vdupq_n_f32(0.0f);  // resonator A output
+            float32x4_t resBOut = vdupq_n_f32(0.0f);  // resonator B output
             // Action and Mixing stage
-            float32x2_t audioIn;  //FOR PORTING as excitation in resonator_orig.h
+            float32x4_t audioIn;  //NOTE: same as excitation in resonator_orig.h
 
-            // Sample, until it runs out. (from resonator_orig.h)
+            // Sample, until it runs out. (from resonator_orig.h). Set at NoteOn
             if (m_sampleIndex < m_sampleEnd)
             {
                 if (m_sampleChannels == 2) {
                     // Stereo sample
-                    audioIn = vld1_f32(&m_samplePointer[m_sampleIndex]);
+                    audioIn = vld1q_f32(&m_samplePointer[m_sampleIndex]);
                 } else {
                     // Mono sample
-                    audioIn = vdup_n_f32(m_samplePointer[m_sampleIndex]);
+                    audioIn = vdupq_n_f32(m_samplePointer[m_sampleIndex]);
                 }
-                audioIn = vmul_n_f32(audioIn, gain);    // TODO: create sampleGain as resonator_orig.h?
+                audioIn = vmulq_n_f32(audioIn, gain);    // TODO: new sampleGain as resonator_orig.h?
                 m_sampleIndex += m_sampleChannels;  //only usage of m_sampleIndex
             } else {
-                audioIn = vdup_n_f32(0.0f);
+                audioIn = vdupq_n_f32(0.0f);
             }
+
+            //same as polyphony loop in original processBlockByType
+            // rework of the lopp below using neon intrinsics
+            for (size_t i = 0; i < c_numVoices / 4; i+=4)    // divide by 4 for float32x4_t
+            {
+                // Voice & voice = *voices[i];
+                float32x4_t dirOut = vdupq_n_f32(0.0f);
+                vfmaq_f32(dirOut,
+                          vld1q_f32(&msamples[i]),
+                          vminq_f32(vdupq_n_f32(1.0f),
+                                        vmlaq_n_f32(vdupq_n_f32(mallet_mix),
+                                                        vld1q_f32(&velocities[i]),
+                                                        vel_mallet_mix
+                                                        )
+                                        )
+                         ); // resOut += msample * fmin(1.0, mallet_res + vel_mallet_res * voice.vel);
+                float32x4_t resOut = vdupq_n_f32(0.0f);
+                vfmaq_f32(resOut,
+                          vld1q_f32(&msamples[i]),
+                          vminq_f32(vdupq_n_f32(1.0f),
+                                        vmlaq_n_f32(vdupq_n_f32(mallet_res),
+                                                        vld1q_f32(&velocities[i]),
+                                                        vel_mallet_res
+                                                        )
+                                        )
+                         ); // resOut += msample * fmin(1.0, mallet_res + vel_mallet_res * voice.vel);
+            }
+
+
+
             //same as polyphony loop in original processBlockByType
             for (size_t i = 0; i < c_numVoices; ++i)
             {
@@ -240,18 +284,18 @@ class RipplerX
                 if (!voice.m_initialized) continue; // skip uninitialized voices
                 float32x2_t resOut = vdup_n_f32(0.0f);
 
-                float32x2_t msample = voice.mallet.process(); // process mallet
-                if (msample) {
+                //float32x2_t msample = voice.mallet.process(); // process mallet - moved outside from frame loop as it's indipendent from frame
+                if (msamples[i]) {
                     // dirOut += msample * fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel);
-                    dirOut = vfma_f32(dirOut, msample, vmin_f32(1.0, vfma_f32(mallet_mix, vel_mallet_mix, voice.vel)));
+                    dirOut = vfma_f32(dirOut, msamples[i], vmin_f32(1.0, vfma_f32(mallet_mix, vel_mallet_mix, voice.vel)));
                     // resOut += msample * fmin(1.0, mallet_res + vel_mallet_res * voice.vel);
-                    resOut = vfma_f32(resOut, msample, vmin_f32(1.0, vfma_f32(mallet_res, vel_mallet_mix, voice.vel)));
+                    resOut = vfma_f32(resOut, msamples[i], vmin_f32(1.0, vfma_f32(mallet_res, vel_mallet_res, voice.vel)));
                 }
 
                 if (audioIn && voice.isPressed) // NoteOn => voice.trigger
-                resOut += audioIn;
+                    resOut += audioIn;
 
-                float32x2_t nsample = voice.noise.process(); // process noise
+                float32x2_t nsample = voice.noise.process(); // process noise - TODO: move this out of frame loop. See above
                 // TODO: remove scaling to 0-1, make parameter directly in that range
                 if (nsample) {
                     // dirOut += nsample * (float32_t)noise_mix_range.convertFrom0to1(fmin(1.f, noise_mix + vel_noise_mix * (float)voice.vel));
@@ -779,8 +823,8 @@ class RipplerX
     uint8_t   m_sampleNumber = 1; // parameter editable
     // see Init for default - adding initial values to avoid potential issues
     const sample_wrapper_t * sampleWrapper = nullptr; // set at NoteOn
-    uint8_t   m_sampleChannels = 0; // From sample_wrapper
-    size_t    m_sampleFrames = 0; // From sample_wrapper
+    uint8_t   m_sampleChannels = 0; // Actual value set by sample_wrapper. 1 Mono, 2 Stereo
+    size_t    m_sampleFrames = 0; // Actual value set by sample_wrapper.
     const float32_t * m_samplePointer; // From sample_wrapper
     uint16_t  m_sampleStart = 0; // NOTE: this is not editable, see c_parameterSampleStart in resonator_orig.h
     size_t    m_sampleIndex = 0; // Counts in float*, stride == channels

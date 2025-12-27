@@ -34,8 +34,8 @@ float32_t Mallet::process()
 	//TODO:
 	//if (type == kImpulse && countdown > 0) {
 		if (elapsed == 0) return 0.0;
-		float32_t sample = impulse_filter.df1(impulse) * 2.0;
-		countdown -= 1;
+		float32_t sample = filter.df1(impulse) * 2.0;
+		elapsed -= 1;
 		impulse *= env;
 	//}   // disable sampler for the moment
 	// else if (type >= kUserFile && playback < sampler.waveform.size()) {
