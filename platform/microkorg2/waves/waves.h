@@ -377,7 +377,7 @@ public:
         float * shapeMod = state_.shapeMod;
         for(int voice = 0; voice < ctxt->voiceLimit; voice+=4)
         {
-          for(int modDest = 0; modDest < kNumModDest; modDest++)
+          for(int modDest = 0; modDest < kNumMk2ModSrc; modDest++)
           {
             if(index[modDest] != kModDestShape) continue;
 
