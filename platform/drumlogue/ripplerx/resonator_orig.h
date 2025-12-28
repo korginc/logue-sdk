@@ -192,7 +192,7 @@ class Resonator {
       float32x2_t dampingState = vld1_f32(m_dampingState);
 
       // For each frame in batch:
-      for (size_t i = 0; i < frames; i++)
+      for (size_t i = 0; i < frames; i++) //NOTE: this index is not used for accessing outBuffer as we use pointer arithmetic
       {
         float32x2_t excitation;
 

@@ -80,7 +80,7 @@ const __unit_header unit_header_t unit_header = {
         // coarse pitch
         {-480, 480, 10, 0, k_unit_param_type_none, 0, 0, 0, {"coarse pitch"}},
         // Noise Mix
-        {0, (1000), 530, 0, k_unit_param_type_percent, 1, 1, 0, {"Noise Mix"}},
+        {0, (1000), 300, 0, k_unit_param_type_percent, 1, 1, 0, {"Noise Mix"}},
         //TODO: vel_noise_freq and vel_noise_q should be here?
 
         // Page 6: Noise II

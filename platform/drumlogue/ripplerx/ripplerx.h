@@ -14,6 +14,7 @@
 #include <array>
 #include <memory>
 #include <vector>
+#include <numeric> // for std::inner_product
 #include "../common/runtime.h"
 #include <arm_neon.h>
 #include "constants.h"
@@ -177,13 +178,34 @@ class RipplerX
     /* Other Public Methods. */
     /*===========================================================================*/
     // new method valid for all samples
-    void processMallet(std::array<float32_t, c_numVoices>& msamples, std::array<float32_t, c_numVoices>& velocities)
+    void processMalletAndNoise(std::vector<float32_t>& msamples,
+        std::vector<float32_t>& mmix,
+        std::vector<float32_t>& mres,
+        std::vector<float32_t>& pressed,
+        std::vector<float32_t>& nsamples,
+        std::vector<float32_t>& nmix,
+        std::vector<float32_t>& nres
+    )
     {
+        float32_t mallet_mix = (float32_t)getParameterValue(Parameters::mallet_mix);
+        float32_t mallet_res = (float32_t)getParameterValue(Parameters::mallet_res);
+        float32_t vel_mallet_mix = (float32_t)getParameterValue(Parameters::vel_mallet_mix);
+        float32_t vel_mallet_res = (float32_t)getParameterValue(Parameters::vel_mallet_res);
+        float32_t noise_mix = getParameterValue(Parameters::noise_mix);
+        float32_t noise_res = getParameterValue(Parameters::noise_res);
+        float32_t vel_noise_mix = getParameterValue(Parameters::vel_noise_mix);
+        float32_t vel_noise_res = getParameterValue(Parameters::vel_noise_res);
         for (size_t i = 0; i < c_numVoices; ++i)
             {
                 Voice & voice = *voices[i];
                 msamples[i] = voice.m_initialized ? voice.mallet.process() : 0.0f;
-                velocities[i] = voice.vel;
+                mmix[i] = fmax(0.0, fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel));
+                mres[i] = fmax(0.0, fmin(1.0, mallet_res + vel_mallet_res * voice.vel));
+                pressed[i] = voice.isPressed ? 1.0f : 0.0f;
+
+                nsamples[i] = voice.noise.process();
+                nmix[i] = fmax(0.0, fmin(1.0, noise_mix + vel_noise_mix * voice.vel)) * 1000.0f;  //I think that 1000 is the equivalent of noise_mix_range.convertFrom0to1, as here we have a range of 0-1000 (see header.cpp, Noise Mix)
+                nres[i] = fmax(0.0, fmin(1.0, noise_res + vel_noise_res * voice.vel)) * 1000.0f;  //I think that 1000 is the equivalent of noise_res_range.convertFrom0to1, as here we have a range of 0-1000 (see header.cpp, Noise Resonance)
             }
     }
 
@@ -192,39 +214,35 @@ class RipplerX
     {
         bool a_on = (bool)getParameterValue(Parameters::a_on);
         bool b_on = (bool)getParameterValue(Parameters::b_on);
-        float32_t mallet_mix = (float32_t)getParameterValue(Parameters::mallet_mix);
-        float32_t mallet_res = (float32_t)getParameterValue(Parameters::mallet_res);
-        float32_t vel_mallet_mix = (float32_t)getParameterValue(Parameters::vel_mallet_mix);
-        float32_t vel_mallet_res = (float32_t)getParameterValue(Parameters::vel_mallet_res);
-        float32_t noise_mix = getParameterValue(Parameters::noise_mix);
+        // float32_t mallet_mix = (float32_t)getParameterValue(Parameters::mallet_mix);
+        // float32_t mallet_res = (float32_t)getParameterValue(Parameters::mallet_res);
+        // float32_t vel_mallet_mix = (float32_t)getParameterValue(Parameters::vel_mallet_mix);
+        // float32_t vel_mallet_res = (float32_t)getParameterValue(Parameters::vel_mallet_res);
+        // float32_t noise_mix = getParameterValue(Parameters::noise_mix);
         // auto noise_mix_range = getParameterValue(Parameters::noise_mix);
         // noise_mix = noise_mix_range.convertTo0to1(noise_mix);  //not needed (?)
-        float32_t noise_res = getParameterValue(Parameters::noise_res);
+        // float32_t noise_res = getParameterValue(Parameters::noise_res);
         // auto noise_res_range = getParameterValue(Parameters::noise_res); // Paramater value already set in percentage
         // noise_res = noise_res_range.convertTo0to1(noise_res);
-        float32_t vel_noise_mix = getParameterValue(Parameters::vel_noise_mix);
-        float32_t vel_noise_res = getParameterValue(Parameters::vel_noise_res);
+        // float32_t vel_noise_mix = getParameterValue(Parameters::vel_noise_mix);
+        // float32_t vel_noise_res = getParameterValue(Parameters::vel_noise_res);
         bool serial = (bool)getParameterValue(Parameters::couple);
         float32_t ab_mix = (float32_t)getParameterValue(Parameters::ab_mix);
         float32_t gain = (float32_t)getParameterValue(Parameters::gain);
         bool couple = (bool)getParameterValue(Parameters::couple);
         // gain = pow(10.0, gain / 20.0);   //NOTE: it's precomputed at parameter change
 
-        std::array<float32_t, c_numVoices> msamples = {0.0f};
-        std::array<float32_t, c_numVoices> velocities = {0.0f};
-        processMallet(msamples, velocities);
+        std::vector<float32_t> msamples(c_numVoices, 0.0f);
+        std::vector<float32_t> mmix(c_numVoices, 0.0f);
+        std::vector<float32_t> mres(c_numVoices, 0.0f);
+        std::vector<float32_t> pressed(c_numVoices, 0.0f);
+        std::vector<float32_t> nsamples(c_numVoices, 0.0f);
+        std::vector<float32_t> nmix(c_numVoices, 0.0f);
+        std::vector<float32_t> nres(c_numVoices, 0.0f);
+        processMalletAndNoise(msamples, mmix, mres, pressed, nsamples, nmix, nres);
 
-        // TODO: is neon vectorization used for stereo channels or for processing two samples at once?
-        // In this case it's for stereo channels processing
-        // Using float32x2_t for two channels (left and right)
-        // Process block per frame
-        // Other option is to use float32x4_t and process 4 samples at once (2 stereo frames)
-        // Also the voices / polyphony processing can be vectorized
-        // Let's review the original PluginProcessor_orig.cpp processBlockByType function and render function and so on
-        // Let's take inspiration also from resorator_orig.h that I know it's working for drumlogue
-        // but I have to review if it's really optimized for ARM vectorization
         // For each frame in batch:
-        for (size_t frame = 0; frame < frames; frame+=2) {   // NOTE frame is sample in numSamples for PluginProcessor_orig.cpp. Here is different as a sngle frame can have more than one sample (stereo)
+        for (size_t frame = 0; frame < frames; frame+=2) {   // NOTE frame is sample for numSamples in PluginProcessor_orig.cpp. Here is different as a single frame can have more than one sample (stereo)
             // Set all lanes to same value
             float32x4_t dirOut  = vdupq_n_f32(0.0f);  // direct output per sample (sum of all voices)
             float32x4_t resAOut = vdupq_n_f32(0.0f);  // resonator A output
@@ -232,51 +250,47 @@ class RipplerX
             // Action and Mixing stage
             float32x4_t audioIn;  //NOTE: same as excitation in resonator_orig.h
 
+            // step 1: get samples
             // Sample, until it runs out. (from resonator_orig.h). Set at NoteOn
             if (m_sampleIndex < m_sampleEnd)
             {
                 if (m_sampleChannels == 2) {
-                    // Stereo sample
+                    // 2 Stereo samples
                     audioIn = vld1q_f32(&m_samplePointer[m_sampleIndex]);
                 } else {
-                    // Mono sample
-                    audioIn = vdupq_n_f32(m_samplePointer[m_sampleIndex]);
+                    // 2 Mono samples duplicated to stereo
+                    audioIn = vcombine_f32(vdup_n_f32(m_samplePointer[m_sampleIndex]), vdup_n_f32(m_samplePointer[m_sampleIndex + 1]));
                 }
                 audioIn = vmulq_n_f32(audioIn, gain);    // TODO: new sampleGain as resonator_orig.h?
-                m_sampleIndex += m_sampleChannels;  //only usage of m_sampleIndex
+                m_sampleIndex += m_sampleChannels * 2;  //only usage of m_sampleIndex
             } else {
                 audioIn = vdupq_n_f32(0.0f);
             }
 
-            //same as polyphony loop in original processBlockByType
-            // rework of the lopp below using neon intrinsics
-            for (size_t i = 0; i < c_numVoices / 4; i+=4)    // divide by 4 for float32x4_t
-            {
-                // Voice & voice = *voices[i];
-                float32x4_t dirOut = vdupq_n_f32(0.0f);
-                vfmaq_f32(dirOut,
-                          vld1q_f32(&msamples[i]),
-                          vminq_f32(vdupq_n_f32(1.0f),
-                                        vmlaq_n_f32(vdupq_n_f32(mallet_mix),
-                                                        vld1q_f32(&velocities[i]),
-                                                        vel_mallet_mix
-                                                        )
-                                        )
-                         ); // resOut += msample * fmin(1.0, mallet_res + vel_mallet_res * voice.vel);
-                float32x4_t resOut = vdupq_n_f32(0.0f);
-                vfmaq_f32(resOut,
-                          vld1q_f32(&msamples[i]),
-                          vminq_f32(vdupq_n_f32(1.0f),
-                                        vmlaq_n_f32(vdupq_n_f32(mallet_res),
-                                                        vld1q_f32(&velocities[i]),
-                                                        vel_mallet_res
-                                                        )
-                                        )
-                         ); // resOut += msample * fmin(1.0, mallet_res + vel_mallet_res * voice.vel);
-            }
+            // step 2: handle polyphony (loop in original processBlockByType in PluginProcessor_orig.cpp)
+            // step 2.1: handle mallet
+            // rework as ARM Cortex v7-A cannot do across vector sum
+            // dirOut += msample * fmax(0.0, fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel));
+            // resOut += msample * fmax(0.0, fmin(1.0, mallet_res + vel_mallet_res * voice.vel));
+
+            float32_t voiceOut_mix = std::inner_product(msamples.begin(), msamples.end(), mmix.begin(), 0.0f);   // std::inner_product multiplies element-wise and sums the results
+            float32_t voiceOut_res = std::inner_product(msamples.begin(), msamples.end(), mres.begin(), 0.0f);
+
+            // step 2.2: add sample input
+            // TODO:
+            // if (audioIn && voice.isPressed) // NoteOn => voice.trigger
+            //     resOut += audioIn;
+
+            // step 2.3: handle noise
+            // dirOut += nsample * (double)noise_mix_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_mix + vel_noise_mix * (float)voice.vel)));
+            //     resOut += nsample * (double)noise_res_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_res + vel_noise_res * (float)voice.vel)));
+
+            float32_t noise_mix = std::inner_product(nsamples.begin(), nsamples.end(), nmix.begin(), 0.0f);   // std::inner_product multiplies element-wise and sums the results
+            float32_t noise_res = std::inner_product(nsamples.begin(), nsamples.end(), nres.begin(), 0.0f);
 
 
 
+            // to be refactored above using neon intrinsics
             //same as polyphony loop in original processBlockByType
             for (size_t i = 0; i < c_numVoices; ++i)
             {

@@ -512,7 +512,7 @@ void RipplerXAudioProcessor::processBlockByType (AudioBuffer<FloatType>& buffer,
     auto vel_mallet_res = (double)params.getRawParameterValue("vel_mallet_res")->load();
     auto noise_mix = params.getRawParameterValue("noise_mix")->load();
     auto noise_mix_range = params.getParameter("noise_mix")->getNormalisableRange();
-    noise_mix = noise_mix_range.convertTo0to1(noise_mix);
+    noise_mix = noise_mix_range.convertTo0to1(noise_mix);   //NOTE: is this really neeed? from the smart pointer at line 49 it looks like that rage is already from 0 to 1
     auto noise_res = params.getRawParameterValue("noise_res")->load();
     auto noise_res_range = params.getParameter("noise_res")->getNormalisableRange();
     noise_res = noise_res_range.convertTo0to1(noise_res);
@@ -566,32 +566,32 @@ void RipplerXAudioProcessor::processBlockByType (AudioBuffer<FloatType>& buffer,
         double dirOut = 0.0; // direct output
         double aOut = 0.0; // resonator A output
         double bOut = 0.0; // resonator B output
-
+        // step 1: get samples
         auto audioIn = 0.0;
         for (int i = 0; i < totalNumInputChannels; ++i)
             audioIn += (double)buffer.getSample(i, sample);
         if (totalNumInputChannels)
             audioIn /= (double)totalNumInputChannels;
-
+        // step 2: handle polyphony
         for (int i = 0; i < polyphony; ++i) {
             Voice& voice = *voices[i];
             double resOut = 0.0;
-
+            // step 2.1: handle mallet
             auto msample = voice.mallet.process(); // process mallet
             if (msample) {
                 dirOut += msample * fmax(0.0, fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel));
                 resOut += msample * fmax(0.0, fmin(1.0, mallet_res + vel_mallet_res * voice.vel));
             }
-
+            // step 2.2: add sample input
             if (audioIn && voice.isPressed)
                 resOut += audioIn;
-
+            // step 2.3: handle noise
             auto nsample = voice.noise.process(); // process noise
             if (nsample) {
                 dirOut += nsample * (double)noise_mix_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_mix + vel_noise_mix * (float)voice.vel)));
                 resOut += nsample * (double)noise_res_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_res + vel_noise_res * (float)voice.vel)));
             }
-
+            // step 2.4: handle resonator A
             auto out_from_a = 0.0; // output from voice A into B in case of resonator serial coupling
             if (a_on) {
                 auto out = voice.resA.process(resOut);
@@ -600,7 +600,7 @@ void RipplerXAudioProcessor::processBlockByType (AudioBuffer<FloatType>& buffer,
                 aOut += out;
                 out_from_a = out;
             }
-
+            // step 2.5: handle resonator B
             if (b_on) {
                 auto out = voice.resB.process(a_on && couple ? out_from_a : resOut);
                 if (voice.resB.cut > 20.0001)
@@ -608,22 +608,24 @@ void RipplerXAudioProcessor::processBlockByType (AudioBuffer<FloatType>& buffer,
                 bOut += out;
             }
         }
-
+        // step 3: mix resonator outputs
         double resOut = 0.0;
         if (a_on && b_on)
             resOut = serial ? bOut : aOut * (1-ab_mix) + bOut * ab_mix;
         else
             resOut = aOut + bOut; // one of them is turned off, just sum the two
-
+        // step 4: total output processing
         double totalOut = dirOut + resOut * gain;
+        // step 5.1: stereo processing, comb filter
         auto [spl0, spl1] = comb.process(totalOut);
+        // step 5.2: stereo processing, limiter
         auto [left, right] = limiter.process(spl0, spl1);
-
+        // step 6: write to output buffer
         for (int channel = 0; channel < totalNumOutputChannels; ++channel)
         {
             buffer.setSample(channel, sample, static_cast<FloatType>(!channel ? left : right));
         }
-    }
+    }   // end of sample loop
 
     float rms = (float)buffer.getRMSLevel(0, 0, buffer.getNumSamples());
     rmsValue.store(rms, std::memory_order_release);
