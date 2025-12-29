@@ -16,7 +16,9 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [minitone](https://blog.boochow.com/logue/minitone) | boochow instruments | Monophonic VA synth | drum | free |
 | [AutoChord](https://centrevillage.net/products/18) | centrevillage | Automatic Chord Synthesizer | drum | paid |
 | [CHSynth](https://ctrl-alt-delete.co.uk/wp/free-korg-drumlogue-synth/) | CtrlAltDelete | Chord Synth | drum | free |
+| [Drupiter](https://cldmnky.github.io/drumlogue-units/units/drupiter-synth/) | cldmnky | Jupiter-8 inspired polyphonic/monophonic synthesizer | drum | free |
 | [Elementish](https://cldmnky.github.io/drumlogue-units/units/elementish-synth/) | cldmnky | Modal synthesis voice with bow, blow, and strike exciters | drum | free |
+| [Pepege-Synth](https://cldmnky.github.io/drumlogue-units/units/pepege-synth/) | cldmnky | 2-voice polyphonic PPG wavetable synthesizer | drum | free |
 | [Resonator](https://www.icemoonprison.com/blog/?p=780) | Deborah Pickett | Karplus-Strong resonator synth | drum | free |
 | [FM64](https://dukesrg.github.io/logue-sdk) | Oleg Burdaev | 6-operator FM synth with DX7/DX21/DX11-series voice banks suport | drum | free |
 | [Tesseract](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | 4-dimensional vector synth with customizable waveforms | drum | free |
