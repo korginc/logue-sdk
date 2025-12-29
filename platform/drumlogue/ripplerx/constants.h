@@ -54,45 +54,57 @@ constexpr size_t c_repeatNoteFadeMs = 1;
 
 
 
-// this is pointed by header.c parameter
-const char* const c_sampleBankName[c_sampleBankElements] = {
-  "CH",
-  "OH",
-  "RS",
-  "CP",
-  "MISC",
-  "USER",
-  "EXP"
-};
+// // this is pointed by header.c parameter
+// const char* const c_sampleBankName[c_sampleBankElements] = {
+//   "CH",
+//   "OH",
+//   "RS",
+//   "CP",
+//   "MISC",
+//   "USER",
+//   "EXP"
+// };
 
 
-// this is pointed by header.c parameter
-const char* const c_modelName[c_modelElements] = {
-    "String",
-    "Beam",
-    "Squared",
-    "Membrane",
-    "Plate",
-    "Drumhead",
-    "Marimba",
-    "Open Tube",
-    "Closed Tube"
-};
+// // this is pointed by header.c parameter
+// const char* const c_modelName[c_modelElements] = {
+//     "String",
+//     "Beam",
+//     "Squared",
+//     "Membrane",
+//     "Plate",
+//     "Drumhead",
+//     "Marimba",
+//     "Open Tube",
+//     "Closed Tube"
+// };
 
-// this is pointed by header.c getParameter
-const char* const c_partialsName[c_partialElements] = {
-    "4", "8", "16", "32", "64"
-};
-const int c_partials[c_partialElements] = {
-    4, 8, 16, 32, 64
-};
+// enum ModelNames : uint8_t {
+// 	String,
+// 	Beam,
+// 	Squared,
+// 	Membrane,
+// 	Plate,
+// 	Drumhead,
+// 	Marimba,
+// 	OpenTube,
+// 	ClosedTube
+// };
 
-// this is pointed by header.c parameter
-const char* const c_noiseFilterModeName[c_noiseFilterModeElements] = {
-    "LP",
-    "BP",
-    "HP"
-};
+// // this is pointed by header.c getParameter
+// const char* const c_partialsName[c_partialElements] = {
+//     "4", "8", "16", "32", "64"
+// };
+// const int c_partials[c_partialElements] = {
+//     4, 8, 16, 32, 64
+// };
+
+// // this is pointed by header.c parameter
+// const char* const c_noiseFilterModeName[c_noiseFilterModeElements] = {
+//     "LP",
+//     "BP",
+//     "HP"
+// };
 
 /*
     55 parameters, only a subset are editable.
@@ -194,37 +206,37 @@ enum  Program : uint8_t {
 };
 
 
-// this is pointed by header.c parameter
-const char* const c_programName[Program::last_program] = {
-  "Bells",
-  "Bells2",
-  "Bong",
-  "Cans",
-  "Crash",
-  "Crystal",
-  "DoorBell",
-  "Fifths",
-  "Fight",
-  "Flute",
-  "Gong",
-  "Harp",
-  "Harpsi",
-  "Init",
-  "Kalimba",
-  "KeyRing",
-  "Marimba",
-  "OldClock",
-  "Ride",
-  "Ride2",
-  "Sankyo",
-  "Sink",
-  "Stars",
-  "Strings",
-  "Tabla",
-  "Tabla2",
-  "Tubes",
-  "Vibes"
-};
+// // this is pointed by header.c parameter
+// const char* const c_programName[Program::last_program] = {
+//   "Bells",
+//   "Bells2",
+//   "Bong",
+//   "Cans",
+//   "Crash",
+//   "Crystal",
+//   "DoorBell",
+//   "Fifths",
+//   "Fight",
+//   "Flute",
+//   "Gong",
+//   "Harp",
+//   "Harpsi",
+//   "Init",
+//   "Kalimba",
+//   "KeyRing",
+//   "Marimba",
+//   "OldClock",
+//   "Ride",
+//   "Ride2",
+//   "Sankyo",
+//   "Sink",
+//   "Stars",
+//   "Strings",
+//   "Tabla",
+//   "Tabla2",
+//   "Tubes",
+//   "Vibes"
+// };
 
 
 /** use table instead of reading XML file and read single param value */

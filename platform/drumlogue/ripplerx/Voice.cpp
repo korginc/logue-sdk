@@ -6,6 +6,7 @@
 /* called by Voice::trigger*/
 float32_t Voice::note2freq(int _note)
 {
+    // MIDI note 69 == A4 == 440.0 Hz - see resonator_orig.h for reference
     return 440 * fasterpowf(2.0, (_note - 69) / 12.0);
 }
 

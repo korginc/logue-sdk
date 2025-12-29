@@ -46,16 +46,16 @@ public:
 		if (!m_initialized) return SIZE_MAX;
 		return m_framesSinceNoteOn;
 	}
-	int       note = 0;
-	float32_t freq = 0.0;
-	float32_t vel = 0.0;
+	int       note = 0;	// MIDI note number - set at trigger time
+	float32_t freq = 0.0;  // frequency in Hz - set at trigger time, from note number
+	float32_t vel = 0.0;  // MIDI velocity 0.0 .. 1.0 - set at trigger time
 	bool      isRelease = false;
 	bool      isPressed = false; // used for audioIn
 	bool      couple = false;
 	//TODO: float32_t malletKtrack = 0.0;
 	float32_t split = 0.0;
 	/**< TODO:
-	float32_t srate = 44100.0;
+	float32_t srate = 44100.0;	// standard audio rate
 	float32_t a_ratio = 1.0; // used to recalculate models
 	float32_t b_ratio = 1.0; // used to recalculate models
 	uint64_t  pressed_ts = 0; // timestamp used to order notes

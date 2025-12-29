@@ -1,18 +1,7 @@
 #pragma once
 #include <array>
 #include "float_math.h"
-
-enum ModelNames {
-	String,
-	Beam,
-	Squared,
-	Membrane,
-	Plate,
-	Drumhead,
-	Marimba_,
-	OpenTube,
-	ClosedTube
-};
+#include "constants.h"
 
 class Models
 {

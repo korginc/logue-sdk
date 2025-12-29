@@ -52,7 +52,7 @@ void Resonator::setParams(float32_t _srate, bool _on, int _model, int _partials,
 
 void Resonator::update(float32_t freq, float32_t vel, bool isRelease, std::array<float32_t,64> model)
 {
-	if (nmodel < 7) {
+	if (nmodel < OpenTube) {
 		for (Partial& partial : partials) {
 			auto idx = partial.k - 1; // clears lnt-arithmetic-overflow warning when accessing _model[k-1] directly
 			partial.update(freq, model[idx], model[model.size() - 1], vel, isRelease);
@@ -68,18 +68,18 @@ void Resonator::activate()
 	silence = 0;
 }
 
-float32x2_t Resonator::process(float32x2_t input)
+float32x4_t Resonator::process(float32x4_t input)
 {
-	float32x2_t out = vmov_n_f32(0.0);
+	float32x4_t out = vdupq_n_f32(0.0);
 
 	if (active) { // use active and silence to turn off strings process if not in use
 		if (nmodel < 7) {
 			for (int p = 0; p < npartials; ++p) {
-				out = vadd_f32(out, partials[p].process(input));
+				out = vaddq_f32(out, partials[p].process(input));
 			}
 		}
 		else
-			out = vadd_f32(out, waveguide.process(input)); // waveguide process
+			out = vaddq_f32(out, waveguide.process(input)); // waveguide process
 	}
 
 	// if (fabs(out) + fabs(input) > 0.00001)

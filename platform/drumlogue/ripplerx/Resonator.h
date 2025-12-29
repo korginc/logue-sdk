@@ -26,7 +26,7 @@ public:
 	void activate();
 	void update(float32_t frequency, float32_t vel, bool isRelease, std::array<float32_t, 64> _model);
 	void clear();
-	float32x2_t process(float32x2_t x);
+	float32x4_t process(float32x4_t input);
 
 	int silence = 0; // counter of samples of silence
 	bool active = false; // returns to false if samples of silence run for a bit

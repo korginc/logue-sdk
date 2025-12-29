@@ -577,7 +577,7 @@ void RipplerXAudioProcessor::processBlockByType (AudioBuffer<FloatType>& buffer,
             Voice& voice = *voices[i];
             double resOut = 0.0;
             // step 2.1: handle mallet
-            auto msample = voice.mallet.process(); // process mallet
+            auto msample = voice.mallet.process(); // process mallet. NOTE: this is sample indipendent so it can be done outside the numSamples loop
             if (msample) {
                 dirOut += msample * fmax(0.0, fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel));
                 resOut += msample * fmax(0.0, fmin(1.0, mallet_res + vel_mallet_res * voice.vel));
@@ -586,7 +586,7 @@ void RipplerXAudioProcessor::processBlockByType (AudioBuffer<FloatType>& buffer,
             if (audioIn && voice.isPressed)
                 resOut += audioIn;
             // step 2.3: handle noise
-            auto nsample = voice.noise.process(); // process noise
+            auto nsample = voice.noise.process(); // process noise. NOTE this indipendent from previous steps, so it's not important the order of the operations, and can be computed before step 2.2
             if (nsample) {
                 dirOut += nsample * (double)noise_mix_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_mix + vel_noise_mix * (float)voice.vel)));
                 resOut += nsample * (double)noise_res_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_res + vel_noise_res * (float)voice.vel)));

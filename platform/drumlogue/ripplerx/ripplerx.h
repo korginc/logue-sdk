@@ -177,16 +177,12 @@ class RipplerX
     /*===========================================================================*/
     /* Other Public Methods. */
     /*===========================================================================*/
-    // new method valid for all samples
-    void processMalletAndNoise(std::vector<float32_t>& msamples,
-        std::vector<float32_t>& mmix,
-        std::vector<float32_t>& mres,
-        std::vector<float32_t>& pressed,
-        std::vector<float32_t>& nsamples,
-        std::vector<float32_t>& nmix,
-        std::vector<float32_t>& nres
-    )
+
+    // this should be equivalent to processBlockByType in PluginProcessor_orig.cpp
+    inline void Render(float * __restrict outBuffer, size_t frames)
     {
+        bool a_on = (bool)getParameterValue(Parameters::a_on);
+        bool b_on = (bool)getParameterValue(Parameters::b_on);
         float32_t mallet_mix = (float32_t)getParameterValue(Parameters::mallet_mix);
         float32_t mallet_res = (float32_t)getParameterValue(Parameters::mallet_res);
         float32_t vel_mallet_mix = (float32_t)getParameterValue(Parameters::vel_mallet_mix);
@@ -195,51 +191,16 @@ class RipplerX
         float32_t noise_res = getParameterValue(Parameters::noise_res);
         float32_t vel_noise_mix = getParameterValue(Parameters::vel_noise_mix);
         float32_t vel_noise_res = getParameterValue(Parameters::vel_noise_res);
-        for (size_t i = 0; i < c_numVoices; ++i)
-            {
-                Voice & voice = *voices[i];
-                msamples[i] = voice.m_initialized ? voice.mallet.process() : 0.0f;
-                mmix[i] = fmax(0.0, fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel));
-                mres[i] = fmax(0.0, fmin(1.0, mallet_res + vel_mallet_res * voice.vel));
-                pressed[i] = voice.isPressed ? 1.0f : 0.0f;
-
-                nsamples[i] = voice.noise.process();
-                nmix[i] = fmax(0.0, fmin(1.0, noise_mix + vel_noise_mix * voice.vel)) * 1000.0f;  //I think that 1000 is the equivalent of noise_mix_range.convertFrom0to1, as here we have a range of 0-1000 (see header.cpp, Noise Mix)
-                nres[i] = fmax(0.0, fmin(1.0, noise_res + vel_noise_res * voice.vel)) * 1000.0f;  //I think that 1000 is the equivalent of noise_res_range.convertFrom0to1, as here we have a range of 0-1000 (see header.cpp, Noise Resonance)
-            }
-    }
-
-    // this should be equivalent to processBlockByType in PluginProcessor_orig.cpp
-    inline void Render(float * __restrict outBuffer, size_t frames)
-    {
-        bool a_on = (bool)getParameterValue(Parameters::a_on);
-        bool b_on = (bool)getParameterValue(Parameters::b_on);
-        // float32_t mallet_mix = (float32_t)getParameterValue(Parameters::mallet_mix);
-        // float32_t mallet_res = (float32_t)getParameterValue(Parameters::mallet_res);
-        // float32_t vel_mallet_mix = (float32_t)getParameterValue(Parameters::vel_mallet_mix);
-        // float32_t vel_mallet_res = (float32_t)getParameterValue(Parameters::vel_mallet_res);
-        // float32_t noise_mix = getParameterValue(Parameters::noise_mix);
         // auto noise_mix_range = getParameterValue(Parameters::noise_mix);
         // noise_mix = noise_mix_range.convertTo0to1(noise_mix);  //not needed (?)
         // float32_t noise_res = getParameterValue(Parameters::noise_res);
         // auto noise_res_range = getParameterValue(Parameters::noise_res); // Paramater value already set in percentage
         // noise_res = noise_res_range.convertTo0to1(noise_res);
-        // float32_t vel_noise_mix = getParameterValue(Parameters::vel_noise_mix);
-        // float32_t vel_noise_res = getParameterValue(Parameters::vel_noise_res);
         bool serial = (bool)getParameterValue(Parameters::couple);
         float32_t ab_mix = (float32_t)getParameterValue(Parameters::ab_mix);
         float32_t gain = (float32_t)getParameterValue(Parameters::gain);
         bool couple = (bool)getParameterValue(Parameters::couple);
         // gain = pow(10.0, gain / 20.0);   //NOTE: it's precomputed at parameter change
-
-        std::vector<float32_t> msamples(c_numVoices, 0.0f);
-        std::vector<float32_t> mmix(c_numVoices, 0.0f);
-        std::vector<float32_t> mres(c_numVoices, 0.0f);
-        std::vector<float32_t> pressed(c_numVoices, 0.0f);
-        std::vector<float32_t> nsamples(c_numVoices, 0.0f);
-        std::vector<float32_t> nmix(c_numVoices, 0.0f);
-        std::vector<float32_t> nres(c_numVoices, 0.0f);
-        processMalletAndNoise(msamples, mmix, mres, pressed, nsamples, nmix, nres);
 
         // For each frame in batch:
         for (size_t frame = 0; frame < frames; frame+=2) {   // NOTE frame is sample for numSamples in PluginProcessor_orig.cpp. Here is different as a single frame can have more than one sample (stereo)
@@ -267,69 +228,47 @@ class RipplerX
                 audioIn = vdupq_n_f32(0.0f);
             }
 
-            // step 2: handle polyphony (loop in original processBlockByType in PluginProcessor_orig.cpp)
-            // step 2.1: handle mallet
-            // rework as ARM Cortex v7-A cannot do across vector sum
-            // dirOut += msample * fmax(0.0, fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel));
-            // resOut += msample * fmax(0.0, fmin(1.0, mallet_res + vel_mallet_res * voice.vel));
-
-            float32_t voiceOut_mix = std::inner_product(msamples.begin(), msamples.end(), mmix.begin(), 0.0f);   // std::inner_product multiplies element-wise and sums the results
-            float32_t voiceOut_res = std::inner_product(msamples.begin(), msamples.end(), mres.begin(), 0.0f);
-
-            // step 2.2: add sample input
-            // TODO:
-            // if (audioIn && voice.isPressed) // NoteOn => voice.trigger
-            //     resOut += audioIn;
-
-            // step 2.3: handle noise
-            // dirOut += nsample * (double)noise_mix_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_mix + vel_noise_mix * (float)voice.vel)));
-            //     resOut += nsample * (double)noise_res_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_res + vel_noise_res * (float)voice.vel)));
-
-            float32_t noise_mix = std::inner_product(nsamples.begin(), nsamples.end(), nmix.begin(), 0.0f);   // std::inner_product multiplies element-wise and sums the results
-            float32_t noise_res = std::inner_product(nsamples.begin(), nsamples.end(), nres.begin(), 0.0f);
-
-
-
-            // to be refactored above using neon intrinsics
-            //same as polyphony loop in original processBlockByType
+            // NOTE: we cannot process all the voices in parallel as we need to sum their outputs,
+            // and each voice has different settings and state.
+            // refactor using neon intrinsics from processBlockByType in PluginProcessor_orig.cpp
             for (size_t i = 0; i < c_numVoices; ++i)
-            {
-                Voice & voice = *voices[i];
-                if (!voice.m_initialized) continue; // skip uninitialized voices
-                float32x2_t resOut = vdup_n_f32(0.0f);
+                {
+                    float32x4_t resOut = vdupq_n_f32(0.0f);
+                    Voice & voice = *voices[i];
+                    float32_t msample = voice.m_initialized ? voice.mallet.process() : 0.0f;
+                    // step 2.1: handle mallet
+                    // dirOut += msample * fmax(0.0, fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel));
+                    // resOut += msample * fmax(0.0, fmin(1.0, mallet_res + vel_mallet_res * voice.vel));
+                    if (msample) {
+                        dirOut = vaddq_f32(dirOut, vmaxq_f32(vdupq_n_f32(0.0), vminq_f32(vdupq_n_f32(1.0), vdupq_n_f32(mallet_mix + vel_mallet_mix * voice.vel))));
+                        resOut = vaddq_f32(resOut, vmaxq_f32(vdupq_n_f32(0.0), vminq_f32(vdupq_n_f32(1.0), vdupq_n_f32(mallet_res + vel_mallet_res * voice.vel))));
+                    }
+                    // step 2.2: add sample input
+                    // if (audioIn && voice.isPressed) // NoteOn => voice.trigger
+                    //     resOut += audioIn;
+                    resOut = vaddq_f32(resOut, voice.isPressed ? audioIn : vdupq_n_f32(0.0f));
 
-                //float32x2_t msample = voice.mallet.process(); // process mallet - moved outside from frame loop as it's indipendent from frame
-                if (msamples[i]) {
-                    // dirOut += msample * fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel);
-                    dirOut = vfma_f32(dirOut, msamples[i], vmin_f32(1.0, vfma_f32(mallet_mix, vel_mallet_mix, voice.vel)));
-                    // resOut += msample * fmin(1.0, mallet_res + vel_mallet_res * voice.vel);
-                    resOut = vfma_f32(resOut, msamples[i], vmin_f32(1.0, vfma_f32(mallet_res, vel_mallet_res, voice.vel)));
+                    // step 2.3: handle noise
+                    // dirOut += nsample * (double)noise_mix_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_mix + vel_noise_mix * (float)voice.vel)));
+                    // resOut += nsample * (double)noise_res_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_res + vel_noise_res * (float)voice.vel)));
+                    float32_t nsample = voice.noise.process();
+                    if (nsample) {
+                        dirOut = vmulq_n_f32(dirOut, nsample * fmax(0.0, fmin(1.0, noise_mix + vel_noise_mix * voice.vel)) * 1000.0f);  //I think that 1000 is the equivalent of noise_mix_range.convertFrom0to1, as here we have a range of 0-1000 (see header.cpp, Noise Mix)
+                        resOut = vmulq_n_f32(resOut, nsample * fmax(0.0, fmin(1.0, noise_res + vel_noise_res * voice.vel)) * 1000.0f);  //I think that 1000 is the equivalent of noise_res_range.convertFrom0to1, as here we have a range of 0-1000 (see header.cpp, Noise Resonance)
+                    }
                 }
 
-                if (audioIn && voice.isPressed) // NoteOn => voice.trigger
-                    resOut += audioIn;
-
-                float32x2_t nsample = voice.noise.process(); // process noise - TODO: move this out of frame loop. See above
-                // TODO: remove scaling to 0-1, make parameter directly in that range
-                if (nsample) {
-                    // dirOut += nsample * (float32_t)noise_mix_range.convertFrom0to1(fmin(1.f, noise_mix + vel_noise_mix * (float)voice.vel));
-                    dirOut = vfma_f32(nsample, (float32_t)noise_mix.convertFrom0to1(vmin_f32(1.f, vfma_f32(noise_mix, vel_noise_mix,
-                                                                                                              (float)voice.vel))), dirOut);
-                    // resOut += nsample * (float32_t)noise_res_range.convertFrom0to1(fmin(1.f, noise_res + vel_noise_res * (float)voice.vel));
-                    resOut = vfma_f32(nsample, (float32_t)noise_res.convertFrom0to1(vmin_f32(1.f, vfma_f32(noise_res, vel_noise_res,
-                                                                                                              (float)voice.vel))), resOut);
-                }
-
-                auto out_from_a = 0.0; // output from voice A into B in case of resonator serial coupling
+                // step 2.4: handle resonator A
+                float32_t out_from_a = 0.0; // output from voice A into B in case of resonator serial coupling
                 if (a_on) {
-                    auto out = voice.resA.process(resOut);
+                    float32_t out = voice.resA.process(resOut);
                     if (voice.resA.cut > 20.0001) out = voice.resA.filter.df1(out);
                     resAOut = vadd_f32(out, resAOut);
                     out_from_a = out;
                 }
 
                 if (b_on) {
-                    auto out = voice.resB.process(a_on && couple ? out_from_a : resOut);
+                    float32_t out = voice.resB.process(a_on && couple ? out_from_a : resOut);
                     if (voice.resB.cut > 20.0001)
                         out = voice.resB.filter.df1(out);
                     resBOut = vadd_f32(out, resBOut);
@@ -715,6 +654,7 @@ class RipplerX
     // play chromatically only via MIDI
     inline void GateOn(uint8_t velocity) {
         NoteOn(m_note, velocity);
+        // TODO: can this be used for multitimbrality? Create an array of x steps/notes/intruments, just one voice?
     }
 
     inline void GateOff() {
