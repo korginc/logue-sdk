@@ -68,6 +68,7 @@ void Resonator::activate()
 	silence = 0;
 }
 
+// input is two stereo samples / four mono samples
 float32x4_t Resonator::process(float32x4_t input)
 {
 	float32x4_t out = vdupq_n_f32(0.0);
@@ -83,11 +84,11 @@ float32x4_t Resonator::process(float32x4_t input)
 	}
 
 	// if (fabs(out) + fabs(input) > 0.00001)
-	if (vget_lane_f32(vadd_f32(vabs_f32(out), vabs_f32(input)), 0) > silence_threshold)
-		silence = 0;
-	else
-        silence++;
-
+	float32x4_t result = vaddq_f32(vabsq_f32(out), vabsq_f32(input));
+	silence += vgetq_lane_f32(result, 0) > c_silence_threshold ? 1 : 0;
+	silence += vgetq_lane_f32(result, 1) > c_silence_threshold ? 1 : 0;
+	silence += vgetq_lane_f32(result, 2) > c_silence_threshold ? 1 : 0;
+	silence += vgetq_lane_f32(result, 3) > c_silence_threshold ? 1 : 0;
 	if (silence >= srate)
 		active = false;
 

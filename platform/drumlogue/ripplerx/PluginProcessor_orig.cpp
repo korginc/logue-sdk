@@ -575,7 +575,7 @@ void RipplerXAudioProcessor::processBlockByType (AudioBuffer<FloatType>& buffer,
         // step 2: handle polyphony
         for (int i = 0; i < polyphony; ++i) {
             Voice& voice = *voices[i];
-            double resOut = 0.0;
+            double resOut = 0.0;    // local
             // step 2.1: handle mallet
             auto msample = voice.mallet.process(); // process mallet. NOTE: this is sample indipendent so it can be done outside the numSamples loop
             if (msample) {
@@ -609,7 +609,7 @@ void RipplerXAudioProcessor::processBlockByType (AudioBuffer<FloatType>& buffer,
             }
         }
         // step 3: mix resonator outputs
-        double resOut = 0.0;
+        double resOut = 0.0;    // global
         if (a_on && b_on)
             resOut = serial ? bOut : aOut * (1-ab_mix) + bOut * ab_mix;
         else
@@ -626,7 +626,7 @@ void RipplerXAudioProcessor::processBlockByType (AudioBuffer<FloatType>& buffer,
             buffer.setSample(channel, sample, static_cast<FloatType>(!channel ? left : right));
         }
     }   // end of sample loop
-
+    // these shall not be ported
     float rms = (float)buffer.getRMSLevel(0, 0, buffer.getNumSamples());
     rmsValue.store(rms, std::memory_order_release);
     midiMessages.clear(); // attempt fix rare crash when clicking the piano keys

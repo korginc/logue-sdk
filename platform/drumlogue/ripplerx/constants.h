@@ -10,7 +10,9 @@ constexpr float  c_semitoneFrequencyRatio = 1.0594630944f; // pow(2.0f, 1.0f/12.
 constexpr float  c_malletStiffnessCorrectionFactor = 0.03080333075140272487101378573158f; // (log(5000.0) - log(100.0)) / 127
 constexpr size_t polyphony = 8; /**< equivalent to c_numVoices for porting - NOTE: since I don't know fast processing is, let's try this value at first */
 constexpr size_t c_numVoices = polyphony;
-constexpr size_t c_max_partials = 64;  // TODO
+constexpr size_t c_max_partials = 64;  // TODO: review this value
+constexpr float32_t c_res_cutoff = 20.0001;
+constexpr float32_t c_silence_threshold = 0.00001;
 
 // these are the index of the parameters got from header.c
 // page 1
@@ -54,57 +56,57 @@ constexpr size_t c_repeatNoteFadeMs = 1;
 
 
 
-// // this is pointed by header.c parameter
-// const char* const c_sampleBankName[c_sampleBankElements] = {
-//   "CH",
-//   "OH",
-//   "RS",
-//   "CP",
-//   "MISC",
-//   "USER",
-//   "EXP"
-// };
+// this is pointed by header.c parameter
+const char* const c_sampleBankName[c_sampleBankElements] = {
+  "CH",
+  "OH",
+  "RS",
+  "CP",
+  "MISC",
+  "USER",
+  "EXP"
+};
 
 
-// // this is pointed by header.c parameter
-// const char* const c_modelName[c_modelElements] = {
-//     "String",
-//     "Beam",
-//     "Squared",
-//     "Membrane",
-//     "Plate",
-//     "Drumhead",
-//     "Marimba",
-//     "Open Tube",
-//     "Closed Tube"
-// };
+// this is pointed by header.c parameter
+const char* const c_modelName[c_modelElements] = {
+    "String",
+    "Beam",
+    "Squared",
+    "Membrane",
+    "Plate",
+    "Drumhead",
+    "Marimba",
+    "Open Tube",
+    "Closed Tube"
+};
 
-// enum ModelNames : uint8_t {
-// 	String,
-// 	Beam,
-// 	Squared,
-// 	Membrane,
-// 	Plate,
-// 	Drumhead,
-// 	Marimba,
-// 	OpenTube,
-// 	ClosedTube
-// };
+enum ModelNames : uint8_t {
+	String,
+	Beam,
+	Squared,
+	Membrane,
+	Plate,
+	Drumhead,
+	Marimba,
+	OpenTube,
+	ClosedTube
+};
 
-// // this is pointed by header.c getParameter
-// const char* const c_partialsName[c_partialElements] = {
-//     "4", "8", "16", "32", "64"
-// };
-// const int c_partials[c_partialElements] = {
-//     4, 8, 16, 32, 64
-// };
+// this is pointed by header.c getParameter
+const char* const c_partialsName[c_partialElements] = {
+    "4", "8", "16", "32", "64"
+};
+const int c_partials[c_partialElements] = {
+    4, 8, 16, 32, 64
+};
 
-// // this is pointed by header.c parameter
-// const char* const c_noiseFilterModeName[c_noiseFilterModeElements] = {
-//     "LP",
-//     "BP",
-//     "HP"
-// };
+// this is pointed by header.c parameter
+const char* const c_noiseFilterModeName[c_noiseFilterModeElements] = {
+    "LP",
+    "BP",
+    "HP"
+};
 
 /*
     55 parameters, only a subset are editable.
@@ -190,7 +192,7 @@ enum  Program : uint8_t {
     Init,
     Kalimba,
     KeyRing,
-    Marimba,
+    Marimba_,
     OldClock,
     Ride,
     Ride2,
@@ -206,37 +208,37 @@ enum  Program : uint8_t {
 };
 
 
-// // this is pointed by header.c parameter
-// const char* const c_programName[Program::last_program] = {
-//   "Bells",
-//   "Bells2",
-//   "Bong",
-//   "Cans",
-//   "Crash",
-//   "Crystal",
-//   "DoorBell",
-//   "Fifths",
-//   "Fight",
-//   "Flute",
-//   "Gong",
-//   "Harp",
-//   "Harpsi",
-//   "Init",
-//   "Kalimba",
-//   "KeyRing",
-//   "Marimba",
-//   "OldClock",
-//   "Ride",
-//   "Ride2",
-//   "Sankyo",
-//   "Sink",
-//   "Stars",
-//   "Strings",
-//   "Tabla",
-//   "Tabla2",
-//   "Tubes",
-//   "Vibes"
-// };
+// this is pointed by header.c parameter
+const char* const c_programName[Program::last_program] = {
+  "Bells",
+  "Bells2",
+  "Bong",
+  "Cans",
+  "Crash",
+  "Crystal",
+  "DoorBell",
+  "Fifths",
+  "Fight",
+  "Flute",
+  "Gong",
+  "Harp",
+  "Harpsi",
+  "Init",
+  "Kalimba",
+  "KeyRing",
+  "Marimba",
+  "OldClock",
+  "Ride",
+  "Ride2",
+  "Sankyo",
+  "Sink",
+  "Stars",
+  "Strings",
+  "Tabla",
+  "Tabla2",
+  "Tubes",
+  "Vibes"
+};
 
 
 /** use table instead of reading XML file and read single param value */

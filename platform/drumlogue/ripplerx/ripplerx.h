@@ -14,7 +14,6 @@
 #include <array>
 #include <memory>
 #include <vector>
-#include <numeric> // for std::inner_product
 #include "../common/runtime.h"
 #include <arm_neon.h>
 #include "constants.h"
@@ -65,8 +64,8 @@ class RipplerX
         // sample management
         m_sampleBank = 0;
         m_sampleNumber = 1;
-        m_sampleStart = 0;
-        m_sampleEnd = 1000;  // 100%
+        m_sampleStart = 0;  // not editable
+        m_sampleEnd = 1000;  // 100% - not editable
 
         // Stash runtime functions to manage samples.
         m_get_num_sample_banks_ptr = desc->get_num_sample_banks;
@@ -203,7 +202,10 @@ class RipplerX
         // gain = pow(10.0, gain / 20.0);   //NOTE: it's precomputed at parameter change
 
         // For each frame in batch:
-        for (size_t frame = 0; frame < frames; frame+=2) {   // NOTE frame is sample for numSamples in PluginProcessor_orig.cpp. Here is different as a single frame can have more than one sample (stereo)
+        // NOTE frame is sample for numSamples in PluginProcessor_orig.cpp.
+        // Here is different as a single frame can have more than one sample (stereo)
+        // So we are loading 2 stereo samples / 4 mono samples at time
+        for (size_t frame = 0; frame < frames; frame+=2) {
             // Set all lanes to same value
             float32x4_t dirOut  = vdupq_n_f32(0.0f);  // direct output per sample (sum of all voices)
             float32x4_t resAOut = vdupq_n_f32(0.0f);  // resonator A output
@@ -230,61 +232,64 @@ class RipplerX
 
             // NOTE: we cannot process all the voices in parallel as we need to sum their outputs,
             // and each voice has different settings and state.
-            // refactor using neon intrinsics from processBlockByType in PluginProcessor_orig.cpp
+            // SO we are processing 4 samples at time (as much as wo stereo output) but for each voice sequentially
+            // insisting to same samples.
+            // Refactor using neon intrinsics from processBlockByType in PluginProcessor_orig.cpp
             for (size_t i = 0; i < c_numVoices; ++i)
-                {
-                    float32x4_t resOut = vdupq_n_f32(0.0f);
-                    Voice & voice = *voices[i];
-                    float32_t msample = voice.m_initialized ? voice.mallet.process() : 0.0f;
-                    // step 2.1: handle mallet
-                    // dirOut += msample * fmax(0.0, fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel));
-                    // resOut += msample * fmax(0.0, fmin(1.0, mallet_res + vel_mallet_res * voice.vel));
-                    if (msample) {
-                        dirOut = vaddq_f32(dirOut, vmaxq_f32(vdupq_n_f32(0.0), vminq_f32(vdupq_n_f32(1.0), vdupq_n_f32(mallet_mix + vel_mallet_mix * voice.vel))));
-                        resOut = vaddq_f32(resOut, vmaxq_f32(vdupq_n_f32(0.0), vminq_f32(vdupq_n_f32(1.0), vdupq_n_f32(mallet_res + vel_mallet_res * voice.vel))));
-                    }
-                    // step 2.2: add sample input
-                    // if (audioIn && voice.isPressed) // NoteOn => voice.trigger
-                    //     resOut += audioIn;
-                    resOut = vaddq_f32(resOut, voice.isPressed ? audioIn : vdupq_n_f32(0.0f));
+            {
+                float32x4_t resOut = vdupq_n_f32(0.0f);
+                Voice & voice = *voices[i];
+                float32_t msample = voice.m_initialized ? voice.mallet.process() : 0.0f;    // TODO move out of frame loop
+                // step 2.1: handle mallet
+                // dirOut += msample * fmax(0.0, fmin(1.0, mallet_mix + vel_mallet_mix * voice.vel));
+                // resOut += msample * fmax(0.0, fmin(1.0, mallet_res + vel_mallet_res * voice.vel));
+                if (msample) {
+                    dirOut = vaddq_f32(dirOut, vmaxq_f32(vdupq_n_f32(0.0), vminq_f32(vdupq_n_f32(1.0), vdupq_n_f32(mallet_mix + vel_mallet_mix * voice.vel))));
+                    resOut = vaddq_f32(resOut, vmaxq_f32(vdupq_n_f32(0.0), vminq_f32(vdupq_n_f32(1.0), vdupq_n_f32(mallet_res + vel_mallet_res * voice.vel))));
+                }
+                // step 2.2: add sample input
+                // if (audioIn && voice.isPressed) // NoteOn => voice.trigger
+                //     resOut += audioIn;
+                resOut = vaddq_f32(resOut, voice.isPressed ? audioIn : vdupq_n_f32(0.0f));
 
-                    // step 2.3: handle noise
-                    // dirOut += nsample * (double)noise_mix_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_mix + vel_noise_mix * (float)voice.vel)));
-                    // resOut += nsample * (double)noise_res_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_res + vel_noise_res * (float)voice.vel)));
-                    float32_t nsample = voice.noise.process();
-                    if (nsample) {
-                        dirOut = vmulq_n_f32(dirOut, nsample * fmax(0.0, fmin(1.0, noise_mix + vel_noise_mix * voice.vel)) * 1000.0f);  //I think that 1000 is the equivalent of noise_mix_range.convertFrom0to1, as here we have a range of 0-1000 (see header.cpp, Noise Mix)
-                        resOut = vmulq_n_f32(resOut, nsample * fmax(0.0, fmin(1.0, noise_res + vel_noise_res * voice.vel)) * 1000.0f);  //I think that 1000 is the equivalent of noise_res_range.convertFrom0to1, as here we have a range of 0-1000 (see header.cpp, Noise Resonance)
-                    }
+                // step 2.3: handle noise
+                // dirOut += nsample * (double)noise_mix_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_mix + vel_noise_mix * (float)voice.vel)));
+                // resOut += nsample * (double)noise_res_range.convertFrom0to1(fmax(0.f, fmin(1.f, noise_res + vel_noise_res * (float)voice.vel)));
+                float32_t nsample = voice.noise.process();
+                if (nsample) {
+                    dirOut = vmulq_n_f32(dirOut, nsample * fmax(0.0, fmin(1.0, noise_mix + vel_noise_mix * voice.vel)) * 1000.0f);  //I think that 1000 is the equivalent of noise_mix_range.convertFrom0to1, as here we have a range of 0-1000 (see header.cpp, Noise Mix)
+                    resOut = vmulq_n_f32(resOut, nsample * fmax(0.0, fmin(1.0, noise_res + vel_noise_res * voice.vel)) * 1000.0f);  //I think that 1000 is the equivalent of noise_res_range.convertFrom0to1, as here we have a range of 0-1000 (see header.cpp, Noise Resonance)
                 }
 
-                // step 2.4: handle resonator A
-                float32_t out_from_a = 0.0; // output from voice A into B in case of resonator serial coupling
+                // // step 2.4: handle resonator A
+                float32x4_t out_from_a = vdupq_n_f32(0.0f); // output from voice A into B in case of resonator serial coupling
                 if (a_on) {
-                    float32_t out = voice.resA.process(resOut);
-                    if (voice.resA.cut > 20.0001) out = voice.resA.filter.df1(out);
-                    resAOut = vadd_f32(out, resAOut);
+                    float32x4_t out = voice.resA.process(resOut); // this resOut contains the input from sample (so must be here in frame loop), mallet, noise
+                    if (voice.resA.cut > c_res_cutoff) out = voice.resA.filter.df1(out);
+                    resAOut = vaddq_f32(out, resAOut);
                     out_from_a = out;
                 }
 
                 if (b_on) {
-                    float32_t out = voice.resB.process(a_on && couple ? out_from_a : resOut);
-                    if (voice.resB.cut > 20.0001)
+                    float32x4_t out = voice.resB.process(a_on && couple ? out_from_a : resOut);
+                    if (voice.resB.cut > c_res_cutoff)
                         out = voice.resB.filter.df1(out);
-                    resBOut = vadd_f32(out, resBOut);
+                    resBOut = vaddq_f32(out, resBOut);
                 }
                 voice.m_framesSinceNoteOn += frames; // TODO: check this - Voice stealing - TODO: check according to for loop change
             }   // end for polyphony
 
-            // two floats as one per channel
-            float32x2_t resOut;
+            // step 3: mix resonator outputs
+            float32x4_t resOut;
             if (a_on && b_on)
-                resOut = serial ? resBOut : vadd_f32(vmul_n_f32(resBOut, ab_mix), vmul_n_f32(resAOut, 1 - ab_mix)); // resAOut * (1-ab_mix) + resBOut * ab_mix;
+                // resAOut * (1-ab_mix) + resBOut * ab_mix;
+                resOut = serial ? resBOut : vaddq_f32(vmulq_n_f32(resBOut, ab_mix), vmulq_n_f32(resAOut, 1 - ab_mix));
             else
-                resOut = vadd_f32(resAOut, resBOut); // one of them is turned off, just sum the two
+                resOut = vaddq_f32(resAOut, resBOut); // one of them is turned off, just sum the two
 
-            // TODO: if GAIN will be not an user editable parameter this operation can be skipped?
-            auto totalOut = vmla_n_f32(dirOut, resOut, gain); // dirOut + resOut * gain
+            // step 4: total output processing
+            // dirOut + resOut * gain
+            float32x4_t totalOut = vmlaq_n_f32(dirOut, resOut, gain);
             // auto [spl0, spl1] =  comb.process(totalOut);
             float32x2_t split = comb.process(totalOut);  // process comb filter, returns stereo float32x2_t
             // auto [left, right] = limiter.process(split);
@@ -295,10 +300,10 @@ class RipplerX
             channels = vadd_f32(old, channels);
             // each voice contributes to single sample, in stereo
             vst1_f32(outBuffer, channels);  // replace existing buffer with new value
-            outBuffer += 2; // move pointer by two positions for each sample, as we process two values at once, one per channel
+            outBuffer += 4; // move pointer by two positions for each sample, as we process two values at once, one per channel
 
         }   // end for frames
-    }
+    }   // end Render()
 
     // Read parameter from user (6 pages listed in header.c)
     // I suppose that's the same as onSlider() of the original PluginProcessor
@@ -787,15 +792,6 @@ class RipplerX
     unit_runtime_get_num_sample_banks_ptr       m_get_num_sample_banks_ptr = nullptr;
     unit_runtime_get_num_samples_for_bank_ptr   m_get_num_samples_for_bank_ptr = nullptr;
     unit_runtime_get_sample_ptr                 m_get_sample = nullptr;
-
-    /*===========================================================================*/
-    /* Constants. */
-    /*===========================================================================*/
-    static const char* const c_sampleBankName[c_sampleBankElements];
-    static const char* const c_modelName[c_modelElements];
-    static const char* const c_partialsName[c_partialElements];
-    static const char* const c_noiseFilterModeName[c_noiseFilterModeElements];
-    static const char* const c_programName[last_program];
 }; // end class RipplerX
 
 /*===========================================================================*/

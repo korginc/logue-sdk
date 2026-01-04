@@ -22,15 +22,13 @@ public:
 	void setParams(float32_t _srate, bool _on, int _model, int _partials, float32_t _decay,
         float32_t _damp, float32_t tone, float32_t hit,	float32_t _rel, float32_t _inharm, float32_t _cut,
         float32_t _radius, float32_t vel_decay, float32_t vel_hit, float32_t vel_inharm);
-
 	void activate();
-	void update(float32_t frequency, float32_t vel, bool isRelease, std::array<float32_t, 64> _model);
 	void clear();
+	void update(float32_t frequency, float32_t vel, bool isRelease, std::array<float32_t, 64> _model);
 	float32x4_t process(float32x4_t input);
 
 	int silence = 0; // counter of samples of silence
 	bool active = false; // returns to false if samples of silence run for a bit
-	float32_t silence_threshold = 0.00001;
 	float32_t srate = 0.0;
 	bool on = false;
 	int nmodel = 0;

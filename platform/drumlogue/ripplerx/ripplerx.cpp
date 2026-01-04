@@ -34,27 +34,6 @@ const char* const RipplerX::c_sampleBankName[c_sampleBankElements] = {
 
 
 // this is pointed by header.c parameter
-const char* const RipplerX::c_modelName[c_modelElements] = {
-    "String",
-    "Beam",
-    "Squared",
-    "Membrane",
-    "Plate",
-    "Drumhead",
-    "Marimba",
-    "Open Tube",
-    "Closed Tube"
-};
-
-// this is pointed by header.c getParameter
-const char* const RipplerX::c_partialsName[c_partialElements] = {
-    "4", "8", "16", "32", "64"
-};
-const int RipplerX::c_partials[c_partialElements] = {
-    4, 8, 16, 32, 64
-};
-
-// this is pointed by header.c parameter
 const char* const RipplerX::c_noiseFilterModeName[c_noiseFilterModeElements] = {
     "LP",
     "BP",
