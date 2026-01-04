@@ -55,14 +55,14 @@ public:
 	}
 
 	// std::tuple<float32_t, float32_t> process(float32_t spl0, float32_t spl1)
-	float32x2_t process(float32x2_t split)
+	float32x4_t process(float32x4_t split)
 	{
 		// auto maxspl = fmax(fabs(spl0), fabs(spl1));
-        float32x2_t temp = vabs_f32(split);
-        temp = vmax_f32(temp, temp);
-        float32_t maxspl;
-        vst1_lane_f32(&maxspl, temp, 0);
-		maxspl = maxspl * maxspl;
+		// maxspl = maxspl * maxspl;
+        float32x4_t temp = vabsq_f32(split);
+        // temp = vmaxq_f32(temp, temp);
+        float32x2_t maxspl = vmax_f32(vget_low_f32(temp), vget_high_f32(temp));
+		maxspl = vmul_f32(maxspl, maxspl);
 
 		runave = maxspl + rmscoef * (runave - maxspl);
 		// auto det = sqrt(fmax(0.0, runave));

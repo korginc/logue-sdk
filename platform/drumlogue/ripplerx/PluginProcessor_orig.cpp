@@ -569,9 +569,9 @@ void RipplerXAudioProcessor::processBlockByType (AudioBuffer<FloatType>& buffer,
         // step 1: get samples
         auto audioIn = 0.0;
         for (int i = 0; i < totalNumInputChannels; ++i)
-            audioIn += (double)buffer.getSample(i, sample);
+            audioIn += (double)buffer.getSample(i, sample); // sum stereo samples
         if (totalNumInputChannels)
-            audioIn /= (double)totalNumInputChannels;
+            audioIn /= (double)totalNumInputChannels;   // equalize
         // step 2: handle polyphony
         for (int i = 0; i < polyphony; ++i) {
             Voice& voice = *voices[i];

@@ -291,9 +291,9 @@ class RipplerX
             // dirOut + resOut * gain
             float32x4_t totalOut = vmlaq_n_f32(dirOut, resOut, gain);
             // auto [spl0, spl1] =  comb.process(totalOut);
-            float32x2_t split = comb.process(totalOut);  // process comb filter, returns stereo float32x2_t
+            float32x4_t split = comb.process(totalOut);  // process comb filter, returns stereo float32x2_t
             // auto [left, right] = limiter.process(split);
-            float32x2_t channels = limiter.process(split);
+            float32x4_t channels = limiter.process(split);
 
             // Add current float32x2 to output buffer.
             float32x2_t old = vld1_f32(outBuffer);  // load existing buffer from pointer
