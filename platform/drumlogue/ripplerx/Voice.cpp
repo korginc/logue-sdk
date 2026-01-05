@@ -1,7 +1,7 @@
 #include "float_math.h"
 #include "Voice.h"
-#include "Models.h"
-#include "constants.h"
+// #include "Models.h"
+// #include "constants.h"
 
 /* called by Voice::trigger*/
 float32_t Voice::note2freq(int _note)

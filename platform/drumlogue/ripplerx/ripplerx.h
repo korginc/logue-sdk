@@ -12,8 +12,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <array>
-#include <memory>
-#include <vector>
 #include "../common/runtime.h"
 #include <arm_neon.h>
 #include "constants.h"
@@ -296,12 +294,11 @@ class RipplerX
             float32x4_t channels = limiter.process(split);
 
             // Add current float32x2 to output buffer.
-            float32x2_t old = vld1_f32(outBuffer);  // load existing buffer from pointer
-            channels = vadd_f32(old, channels);
+            float32x4_t old = vld1q_f32(outBuffer);  // load existing buffer from pointer
+            channels = vaddq_f32(old, channels);
             // each voice contributes to single sample, in stereo
-            vst1_f32(outBuffer, channels);  // replace existing buffer with new value
+            vst1q_f32(outBuffer, channels);  // replace existing buffer with new value
             outBuffer += 4; // move pointer by two positions for each sample, as we process two values at once, one per channel
-
         }   // end for frames
     }   // end Render()
 
