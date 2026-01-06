@@ -9,7 +9,7 @@ Resonator::Resonator()
 	}
 }
 
-// called by original plugin::onSlider() => TODO
+// called by original plugin::onSlider()
 void Resonator::setParams(float32_t _srate, bool _on, int _model, int _partials, float32_t _decay,
     float32_t _damp, float32_t tone, float32_t hit,	float32_t _rel, float32_t _inharm, float32_t _cut,
     float32_t _radius, float32_t vel_decay, float32_t vel_hit, float32_t vel_inharm)
