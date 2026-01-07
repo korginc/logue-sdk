@@ -20,7 +20,7 @@ void Voice::trigger(/**uint64_t timestamp,*/ float32_t srate, int _note,
 	resA.clear();
 	resB.clear();
 	note = _note;
-	/** TODO: c
+	/** TODO: code froze at 1.5.0-2 version
 	srate = _srate;
 	malletType = _malletType;
 	malletFreq = _malletFreq;
