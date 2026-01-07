@@ -47,6 +47,12 @@ public:
     void recalcMembrane(bool resA, float32_t ratio);
     void recalcPlate(bool resA, float32_t ratio);
 
+    // Const getters for safe read-only access to model data
+    const std::array<float32_t, 64>& getBFree() const { return bFree; }
+    const std::array<std::array<float32_t, 64>, 9>& getAModels() const { return aModels; }
+    const std::array<std::array<float32_t, 64>, 9>& getBModels() const { return bModels; }
+
+private:
     std::array<float32_t, 64> bFree;
     std::array<std::array<float32_t, 64>, 9> aModels;
     std::array<std::array<float32_t, 64>, 9> bModels;

@@ -19,17 +19,18 @@ class Sampler
 public:
 	Sampler() {};
 	~Sampler() {};
+/**	-- NOTE: disable for the moment. code froze at 1.5.0-2 version
+void loadSample(string filepath);
+void loadInternalSample(MalletType type);
+void loadSampleFromBinary(std::unique_ptr<juce::InputStream> stream);
+double waveLerp(double pos);
+double waveCubic(double pos);
+void setPitch(double semis);
 
-	void loadSample(juce::String filepath);
-	void loadInternalSample(MalletType type);
-	void loadSampleFromBinary(std::unique_ptr<juce::InputStream> stream);
-	double waveLerp(double pos);
-	double waveCubic(double pos);
-	void setPitch(double semis);
-
-	// sample mallet fields
-	std::vector<double> waveform = {};
-	bool isUserFile = false;
-	double wavesrate = 44100.0;
-	double pitchfactor = 1.0;
+// sample mallet fields
+std::vector<double> waveform = {};
+bool isUserFile = false;
+double wavesrate = 44100.0;
+double pitchfactor = 1.0;
+*/
 };

@@ -12,8 +12,8 @@ public:
 	~Partial() {};
 
 	void update(float32_t freq, float32_t ratio, float32_t ratio_max, float32_t vel, bool isRelease);
-	float32x2_t process(float32x2_t input);
-	void clear();
+	float32x4_t process(float32x4_t input);  // Process 4 samples in parallel
+	void clear();  // Initialize state vectors to zero
 
 	float32_t srate = 0.0;
 	int k = 0; // Partial num
@@ -29,14 +29,15 @@ public:
 	float32_t vel_inharm = 0.0;
 
 private:
-	float32_t b0 = 0.0;
-	float32_t b2 = 0.0;
-	float32_t a0 = 1.0;
-	float32_t a1 = 0.0;
-	float32_t a2 = 0.0;
+	float32_t b0 = 0.0f;
+	float32_t b2 = 0.0f;
+	float32_t a0 = 1.0f;
+	float32_t a1 = 0.0f;
+	float32_t a2 = 0.0f;
 
-	float32x2_t x1 = vmov_n_f32(0.0);
-	float32x2_t x2 = vmov_n_f32(0.0);
-	float32x2_t y1 = vmov_n_f32(0.0);
-	float32x2_t y2 = vmov_n_f32(0.0);
+	// NEON state vectors - initialized via clear() in Resonator
+	float32x4_t x1{};
+	float32x4_t x2{};
+	float32x4_t y1{};
+	float32x4_t y2{};
 };

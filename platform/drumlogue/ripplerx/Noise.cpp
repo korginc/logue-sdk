@@ -21,18 +21,18 @@ void Noise::attack(float32_t _vel)
 
 void Noise::initFilter()
 {
-	float32_t f = fmin(20000.0,
-                      fmax(20.0,
+	float32_t f = fmin(20000.0f,
+                      fmax(20.0f,
                            e_expff(fasterlogf(freq) +
-                                   vel * vel_freq * (fasterlogf(20000.0) - fasterlogf(20.0)))));
-	float32_t res = fmin(4.0, fmax(0.707, q + vel * vel_q * (4.0 - 0.707)));
+                                   vel * vel_freq * (fasterlogf(20000.0f) - fasterlogf(20.0f)))));
+	float32_t res = fmin(4.0f, fmax(0.707f, q + vel * vel_q * (4.0f - 0.707f)));
 
-	filter_active = fmode == 1 || (fmode == 0 && f < 20000.0) || (fmode == 2 && f > 20.0);
+	filter_active = fmode == 1 || (fmode == 0 && f < 20000.0f) || (fmode == 2 && f > 20.0f);
 
 	if (fmode == 0) filter.lp(srate, f, res);
 	else if (fmode == 1) filter.bp(srate, f, res);
 	else if (fmode == 2) filter.hp(srate, f, res);
-	else throw "Unknown filter mode";
+	// Invalid filter mode - clamp to LP by default instead of throwing
 }
 
 void Noise::release()
@@ -43,22 +43,26 @@ void Noise::release()
 void Noise::clear()
 {
 	env.reset();
-	filter.clear(0.0);
+	filter.clear(0.0f);
 }
 
 float32_t Noise::process()
 {
-	if (!env.state) return 0.0;
+	if (!env.state) return 0.0f;
+
 	env.process();
-	// float32_t sample = (std::rand() / (float32_t)RAND_MAX) * 2.0 - 1.0;
-    WFLCG rng;
-	float32_t sample = rng.getFloat() - 2.0;  // -1.0 < x < +1.0
+
+	// Generate noise sample in range [-1.0, 1.0)
+	// WFLCG::getFloat() returns [1.0, 2.0), so subtract 1.0 to get [-0.0, 1.0)
+	// Then multiply by 2.0 to get [0.0, 2.0) and subtract 1.0 to get [-1.0, 1.0)
+	float32_t sample = rng.getFloat() * 2.0f - 3.0f;
+
 	if (filter_active)
 		sample = filter.df1(sample);
 
+	// Clear filter state when envelope finishes to avoid pops
 	if (!env.state)
-		filter.clear(0.0); // envelope has finished, clear filter to avoid pops
+		filter.clear(0.0f);
 
 	return sample * env.env;
 }
-

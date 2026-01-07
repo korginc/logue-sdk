@@ -264,7 +264,7 @@ class RipplerX
                     audioIn = vcombine_f32(mono, mono);
                 }
                 audioIn = vmulq_n_f32(audioIn, gain);
-                m_sampleIndex += m_sampleChannels * 2;
+                m_sampleIndex += m_sampleChannels * 4;
             }
 
             // Process all active voices
@@ -296,9 +296,9 @@ class RipplerX
 
                 if (nsample != 0.0f) {
                     float32_t noise_mix_vel = fmax(0.0f, fmin(1.0f,
-                        noise_mix + vel_noise_mix * voice.vel)) * 1000.0f;
+                        noise_mix + vel_noise_mix * voice.vel));
                     float32_t noise_res_vel = fmax(0.0f, fmin(1.0f,
-                        noise_res + vel_noise_res * voice.vel)) * 1000.0f;
+                        noise_res + vel_noise_res * voice.vel));
 
                     dirOut = vmlaq_n_f32(dirOut, vdupq_n_f32(nsample), noise_mix_vel);
                     resOut = vmlaq_n_f32(resOut, vdupq_n_f32(nsample), noise_res_vel);
@@ -523,29 +523,31 @@ class RipplerX
 
         // Recalculate models if needed
         if (last_a_model != (int32_t)parameters[a_model]) {
-            if (parameters[a_model] == ModelNames::Beam)
-                models->recalcBeam(true, parameters[a_ratio]);
-            else if (parameters[a_model] == ModelNames::Membrane)
-                models->recalcMembrane(true, parameters[a_ratio]);
-            else if (parameters[a_model] == ModelNames::Plate)
-                models->recalcPlate(true, parameters[a_ratio]);
-        }
+            if (parameters[a_ratio] > 0.0f) {
+                if (parameters[a_model] == ModelNames::Beam)
+                    models->recalcBeam(true, parameters[a_ratio]);
+                else if (parameters[a_model] == ModelNames::Membrane)
+                    models->recalcMembrane(true, parameters[a_ratio]);
+                else if (parameters[a_model] == ModelNames::Plate)
+                    models->recalcPlate(true, parameters[a_ratio]);
+            }
 
         if (last_b_model != (int32_t)parameters[b_model]) {
-            if (parameters[b_model] == ModelNames::Beam)
-                models->recalcBeam(false, parameters[b_ratio]);
-            else if (parameters[b_model] == ModelNames::Membrane)
-                models->recalcMembrane(false, parameters[b_ratio]);
-            else if (parameters[b_model] == ModelNames::Plate)
-                models->recalcPlate(false, parameters[b_ratio]);
-        }
+            if (parameters[b_ratio] > 0.0f) {
+                if (parameters[b_model] == ModelNames::Beam)
+                    models->recalcBeam(false, parameters[b_ratio]);
+                else if (parameters[b_model] == ModelNames::Membrane)
+                    models->recalcMembrane(false, parameters[b_ratio]);
+                else if (parameters[b_model] == ModelNames::Plate)
+                    models->recalcPlate(false, parameters[b_ratio]);
+            }
 
         auto srate = getSampleRate();
 
         // ===== OPTIMIZATION: Cache all parameters in struct =====
         // Eliminates repeated array lookups in batch voice update loop
         CachedParameters cached;
-        
+
         cached.resA_on = (bool)parameters[a_on];
         cached.resA_model = (int)parameters[a_model];
         cached.resA_partials = parameters[a_partials];
@@ -739,7 +741,7 @@ class RipplerX
         // Calculate mallet frequency with velocity sensitivity
         auto mallet_stiff = (float32_t)getParameterValue(Parameters::mallet_stiff);
         auto vel_mallet_stiff = (float32_t)getParameterValue(Parameters::vel_mallet_stiff);
-        auto malletFreq = fmin(5000.0, e_expf(fasterlogf(mallet_stiff) + 
+        auto malletFreq = fmin(5000.0, e_expf(fasterlogf(mallet_stiff) +
             velocity * vel_mallet_stiff * c_malletStiffnessCorrectionFactor));
 
         voice.trigger(srate, note, velocity / 127.0f, malletFreq);

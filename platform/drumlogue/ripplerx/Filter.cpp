@@ -3,7 +3,7 @@
 void Filter::lp(float32_t srate, float32_t freq, float32_t q)
 {
 	auto w0 = M_2_PI * fmin(freq / srate, 0.49);
-	auto alpha = fastersinfullf(w0) / 2.0*q;
+	auto alpha = fastersinfullf(w0) / (2.0 * q);
 
 	auto a0 = 1.0 + alpha;
 	auto scale = 1.0 / a0;
@@ -17,12 +17,12 @@ void Filter::lp(float32_t srate, float32_t freq, float32_t q)
 void Filter::bp(float32_t srate, float32_t freq, float32_t q)
 {
 	auto w0 = M_2_PI * fmin(freq / srate, 0.49);
-	auto alpha = fastersinfullf(w0) / 2.0*q;
+	auto alpha = fastersinfullf(w0) / (2.0 * q);
 
 	auto a0 = 1.0 + alpha;
 	auto scale = 1.0 / a0;
 	a1 = fastcosfullf(w0) * -2.0 * scale;
-	a2 = (1 - alpha) * scale;
+	a2 = (1.0 - alpha) * scale;
 
 	b2 = -(b0 = (1 - a2) * 0.5 * q);
 	b1 = 0.0;

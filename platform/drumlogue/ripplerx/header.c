@@ -19,7 +19,7 @@ const __unit_header unit_header_t unit_header = {
     .unit_id = 0x5265736fU,                                // TODO - Id for this unit, should be unique within the scope of a given dev_id
     .version = 0x00010000U,                                // This unit's version: major.minor.patch (major<<16 minor<<8 patch).
     .name = "RipplerX",                                    // Name for this unit, will be displayed on device
-    .num_presets = 25,                                     // Number of internal presets this unit has
+    .num_presets = 28,                                     // Number of internal presets this unit has
     .num_params = 24,                                      // Number of parameters for this unit, max 24
     .params = {
         // Format: min, max, center, default, type, fractional digits, frac. type (fixed/decimal), <reserved>, name
@@ -51,16 +51,16 @@ const __unit_header unit_header_t unit_header = {
         {0, (1000), 0, (0), k_unit_param_type_none, 3, 1, 0, {"Vel Mal Stif"}},
 
         // Page 3: Resonator A-I (B is switched off to lack of parameter pages to handle)
-        //  Model - TODO - "String", "Beam", "Squared", "Membrane", "Plate", "Drumhead", "Marimba", "Open Tube", "Closed Tube"
+        //  Model - "String", "Beam", "Squared", "Membrane", "Plate", "Drumhead", "Marimba", "Open Tube", "Closed Tube"
         {0, 8, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Model"}},
-        //  Partials - TODO -  "4", "8", "16", "32", "64"
+        //  Partials -  "4", "8", "16", "32", "64"
         {0, 4, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Partials"}},
         // Decay
         {0, (1000), 520, (10), k_unit_param_type_none, 1, 1, 0, {"Decay"}},
         // Material (-1.0, 1.0)
         {-10, 10, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Material"}},
 
-        // TODO use ratio in order to update the model?
+        // TODO: use ratio in order to update the model?
 
         // Page 4: Resonator A-II
         // Tone (-1.0, 1.0)

@@ -5,14 +5,15 @@
 static inline void freqs_to_ratio(std::array<float32_t, 64>& model)
 {
     auto f0 = model[0];
+    if (f0 == 0.0f) return;  // Safety check to prevent division by zero
     for (int j = 0; j < 64; ++j) {
         model[j] = model[j] / f0; // freqs to ratio
     }
 }
 
 // =======================================================
-/* TODO called by ::onSlider(), which do not exist on this porting.
-ration is not among the editable parameters, so these shall not be called unless
+/* called by ::onSlider(), which do not exist on this porting.
+ratio is not among the editable parameters, so these shall not be called unless
 it's decided to make ratio parameter editable*/
 void Models::recalcBeam(bool resA, float32_t ratio)
 {
@@ -23,6 +24,7 @@ void Models::recalcBeam(bool resA, float32_t ratio)
     int i = 0;
     for (int m = 1; m <= 8; ++m) {
         for (int n = 1; n <= 8; ++n) {
+            if (i >= 64) break;  // Safety bounds check
             // model[i] = sqrt(fasterpowf(m, 4.0) + fasterpowf(ratio * bFree[i], 4.0));
             model[i] = sqrtsum2acc(pwr_2_of_index[m], fasterpowf(ratio * bFree[i], 2.0));
             i += 1;
@@ -43,6 +45,7 @@ void Models::recalcMembrane(bool resA, float32_t ratio)
     int i = 0;
     for (int m = 1; m <= 8; ++m) {
         for (int n = 1; n <= 8; ++n) {
+            if (i >= 64) break;  // Safety bounds check
             // model[i] = sqrt(fasterpowf(m, 2.0) + fasterpowf(ratio * n, 2.0));
             model[i] = sqrtsum2acc(m, new_ratio[n]);
             i += 1;
@@ -63,6 +66,7 @@ void Models::recalcPlate(bool resA, float32_t ratio)
     int i = 0;
     for (int m = 1; m <= 8; ++m) {
         for (int n = 1; n <= 8; ++n) {
+            if (i >= 64) break;  // Safety bounds check
             model[i] = pwr_2_of_index[m] + new_ratio[n];
             i += 1;
         }

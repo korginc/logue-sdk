@@ -12,7 +12,7 @@ float32_t Envelope::normalizeTension(float32_t t)
 void Envelope::init(float32_t srate, float32_t a, float32_t d, float32_t s, float32_t r, float32_t tensionA, float32_t tensionD, float32_t tensionR) {
 	att = fmax(a, 1.0) * 0.001 * srate;
 	dec = fmax(d, 1.0) * 0.001 * srate;
-	sus = pow(10.0, fmin(s, 0.0) / 20.0);
+	sus = fasterpowf(10.0f, fmin(s, 0.0f) / 20.0f);
 	rel = fmax(r, 1.0) * 0.001 * srate;
 
 	ta = normalizeTension(tensionA);
@@ -61,7 +61,7 @@ void Envelope::attack(float32_t _scale)
 void Envelope::decay()
 {
 	env = scale;
-	state = Release;
+	state = Decay;
 }
 
 void Envelope::sustain()
@@ -90,6 +90,11 @@ int Envelope::process()
 	else if (state == Decay) {
 		env = db + env * dc;
 		if (env <= sus * scale) sustain();
+	}
+
+	else if (state == Sustain) {
+		// Sustain state: hold envelope at sustain level until release is called
+		return state;
 	}
 
 	else if (state == Release) {

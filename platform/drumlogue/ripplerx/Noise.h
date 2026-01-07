@@ -41,6 +41,7 @@ public:
 private:
 	Filter filter{};
 	Envelope env{};
+	WFLCG rng{};		// Persistent RNG instance - initialized once
 	int fmode = 0;
 	float32_t freq = 0.0;
 };

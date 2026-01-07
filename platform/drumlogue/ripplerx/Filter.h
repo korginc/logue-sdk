@@ -14,6 +14,7 @@ public:
 	void bp(float32_t srate, float32_t freq, float32_t q);
 	void hp(float32_t srate, float32_t freq, float32_t q);
 	void clear(float32_t input);
+	void reset() { x0 = x1 = x2 = y0 = y1 = y2 = 0.0f; }
 	float32_t df1(float32_t sample);
 
 private:
@@ -24,6 +25,8 @@ private:
 	float32_t b2 = 0.0;
 	float32_t x0 = 0.0;
 	float32_t x1 = 0.0;
+	float32_t x2 = 0.0;
 	float32_t y0 = 0.0;
 	float32_t y1 = 0.0;
+	float32_t y2 = 0.0;
 };

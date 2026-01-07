@@ -2,59 +2,75 @@
 
 void Partial::update(float32_t f_0, float32_t ratio, float32_t ratio_max, float32_t vel, bool isRelease)
 {
-    // auto inharm_k = fmin(1.0, exp(log(inharm) + vel * vel_inharm * -log(0.0001))) - 0.0001; // normalize velocity contribution on a logarithmic scale
+    // auto inharm_k = fmin(1.0f, exp(log(inharm) + vel * vel_inharm * -log(0.0001f))) - 0.0001f; // normalize velocity contribution on a logarithmic scale
 	auto log_vel = vel * M_TWOLN100;
-	auto inharm_k = fmin(1.0, e_expf(fasterlogf(inharm) + log_vel * vel_inharm)) - 0.0001; // normalize velocity contribution on a fasterlogfarithmic scale
-    inharm_k = fasterSqrt(1 + inharm_k * fasterpow2f(ratio - 1));
+	auto inharm_k = fmin(1.0f, e_expf(fasterlogf(inharm) + log_vel * vel_inharm)) - 0.0001f; // normalize velocity contribution on a logarithmic scale
+    inharm_k = fasterSqrt(1.0f + inharm_k * fasterpow2f(ratio - 1.0f));
 	auto f_k = f_0 * ratio * inharm_k;
 
-    // auto decay_k = fmin(100.0, exp(log(decay) + vel * vel_decay * (log(100.0) - log(0.01)))); // normalize velocity contribution on a logarithmic scale
-	auto decay_k = fmin(100.0, e_expff(fasterlogf(decay) + log_vel * vel_decay)); // normalize velocity contribution on a fasterlogfarithmic scale
+    // auto decay_k = fmin(100.0f, exp(log(decay) + vel * vel_decay * (log(100.0f) - log(0.01f)))); // normalize velocity contribution on a logarithmic scale
+	auto decay_k = fmin(100.0f, e_expff(fasterlogf(decay) + log_vel * vel_decay)); // normalize velocity contribution on a logarithmic scale
 	if (isRelease)
 		decay_k *= rel;
-    // clear
-	if (f_k >= (0.48 * srate) || f_k < 20.0 || decay_k == 0.0) {
-		b0 = b2 = a1 = a2 = 0.0;
-		a0 = 1.0;
+    // clear if out of range
+	const float32_t f_nyquist = 0.48f * srate;
+	const float32_t f_min = 20.0f;
+	const float32_t decay_min = 1.0e-6f;  // Avoid exact zero comparison
+	if (f_k >= f_nyquist || f_k < f_min || decay_k < decay_min) {
+		b0 = b2 = a1 = a2 = 0.0f;
+		a0 = 1.0f;
 		return;
 	}
 
-	auto f_max = fmin(20000.0, f_0 * ratio_max * inharm_k);
+	auto f_max = fmin(20000.0f, f_0 * ratio_max * inharm_k);
 	auto omega = (M_TWOPI * f_k) / srate;
 	auto alpha = M_TWOPI / srate; // aprox 1 sec decay
 
 	// auto damp_k = damp <= 0
-	// 	? fasterpowf(f_0 / f_k, (damp * 2.0))
-	// 	: fasterpowf(f_max / f_k, (damp * 2.0));
+	// 	? fasterpowf(f_0 / f_k, (damp * 2.0f))
+	// 	: fasterpowf(f_max / f_k, (damp * 2.0f));
 	auto damp_k =  fasterpowf((damp <= 0 ? f_0 : f_max) /
-                                         f_k, (damp * 2.0));
+                                         f_k, (damp * 2.0f));
 
 	decay_k /= damp_k;
 
 	auto tone_gain = tone <= 0
 		// ? fasterpowf(f_k / f_0, tone * 12 / 6)
 		// : fasterpowf(f_k / f_max, tone * 12 / 6);
-		? fasterpowf(f_k / f_0, tone * 2)
-		: fasterpowf(f_k / f_max, tone * 2);
-    //auto amp_k = fabs(sin(juce::MathConstants<double>::pi * k * fmin(.5, hit + vel_hit * vel / 2.0)));
-	auto amp_k = 35.0 * si_fabsf(fastersinfullf(M_PI * k * fmin(.5, hit + vel_hit * vel / 2.0)));
+		? fasterpowf(f_k / f_0, tone * 2.0f)
+		: fasterpowf(f_k / f_max, tone * 2.0f);
+    // Velocity modulates hit envelope shaping
+	auto hit_mod = fmin(0.5f, hit + vel * vel_hit * 0.5f);
+	auto amp_k = 35.0f * si_fabsf(fastersinfullf(M_PI * k * hit_mod));
 
 	// Bandpass filter coefficients (normalized)
 	b0 = alpha * tone_gain * amp_k;
 	// b2 = -alpha * tone_gain * amp_k;
 	b2 = -b0;
-	a0 = decay_k ? 1.0 + alpha / decay_k : 0.0;
-	a1 = -2.0 * fastercosfullf(omega);
-	a2 = decay_k ? 1.0 - alpha / decay_k : 0.0;
+	a0 = decay_k > decay_min ? 1.0f + alpha / decay_k : 0.0f;
+	a1 = -2.0f * fastercosfullf(omega);
+	a2 = decay_k > decay_min ? 1.0f - alpha / decay_k : 0.0f;
 }
 
-float32x2_t Partial::process(float32x2_t input)
+float32x4_t Partial::process(float32x4_t input)
 {
-	// auto output = ((b0 * input + b2 * x2) - (a1 * y1 + a2 * y2)) / a0;
-    float32x2_t temp = vmov_n_f32(a0);  // use multiply by reciprocal for division
-	// vmla_f32 = RESULT[I] = a[i] + (b[i] * c[i]) for i = 0 to 1
-    auto output = vmul_f32(vsub_f32( vmla_f32(vmul_n_f32(x2, b2), input, b0),
-    vmla_f32(vmul_n_f32(y2, a2), y1, a1)), vrecpe_f32(temp));
+	// Second-order IIR bandpass filter: output = (b0*x + b2*x2 - a1*y1 - a2*y2) / a0
+	// Process 4 samples using NEON vectorization
+    float32x4_t a0_vec = vdupq_n_f32(a0);
+	float32x4_t b0_vec = vdupq_n_f32(b0);
+	float32x4_t b2_vec = vdupq_n_f32(b2);
+	float32x4_t a1_vec = vdupq_n_f32(a1);
+	float32x4_t a2_vec = vdupq_n_f32(a2);
+
+	// Numerator: b0*x + b2*x2
+    float32x4_t num = vmlaq_f32(vmulq_f32(x2, b2_vec), input, b0_vec);
+    // Feedback: a1*y1 + a2*y2
+    float32x4_t denom_corr = vmlaq_f32(vmulq_f32(y2, a2_vec), y1, a1_vec);
+	// Final: (numerator - feedback) / a0 using reciprocal approximation for audio fidelity
+	// Safe because a0 is validated as non-zero in update()
+	float32x4_t recip_a0 = vrecpeq_f32(a0_vec);
+	float32x4_t output = vmulq_f32(vsubq_f32(num, denom_corr), recip_a0);
+
 	x2 = x1;
 	x1 = input;
 	y2 = y1;
@@ -65,5 +81,5 @@ float32x2_t Partial::process(float32x2_t input)
 
 void Partial::clear()
 {
-	x1 = x2 = y1 = y2 = vmov_n_f32(0.0);
+	x1 = x2 = y1 = y2 = vdupq_n_f32(0.0f);
 }

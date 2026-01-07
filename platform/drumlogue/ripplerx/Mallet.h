@@ -43,22 +43,13 @@ public:
 
 	// void setFilter(float32_t norm);
 
-	// float32_t srate = 44100.0;
+private:
+	// Sampler& sampler;    // disable samples for the moment
+	// MalletType type = kImpulse;
+	Filter filter{};
 
 	// impulse mallet fields
 	float32_t impulse = 0.0;
 	int elapsed = 0;
 	float32_t env = 0.0;
-	// Filter impulse_filter{};
-
-	// sample mallet fields
-	// float32_t playback = INFINITY;
-	// float32_t playback_speed = 1.0;
-	// bool disable_filter = false;
-	// Filter sample_filter{};
-
-private:
-	// Sampler& sampler;    // disable samples for the moment
-	// MalletType type = kImpulse;
-	Filter filter{};
 };

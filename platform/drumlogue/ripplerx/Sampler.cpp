@@ -1,7 +1,6 @@
 #include "Sampler.h"
 
-// -- NOTE: DISABLED FOR THE MOMENT
-
+/** -- NOTE: DISABLED FOR THE MOMENT. code froze at 1.5.0-2 version
 static const InternalSample samples[] = {
 	{ MalletType::kSample1, BinaryData::click1_wav, BinaryData::click1_wavSize },
 	{ MalletType::kSample2, BinaryData::click2_wav, BinaryData::click2_wavSize },
@@ -111,3 +110,4 @@ double Sampler::waveCubic(double pos)
 
 	return ((a * x + b) * x + c) * x + d;
 }
+	*/

@@ -8,6 +8,7 @@ void Mallet::trigger(/** TODO:MalletType _type, */float32_t srate, float32_t fre
 
 	if (type == kImpulse) { */
 		filter.bp(srate, freq, 0.707);
+		filter.reset();
 		elapsed = (int)(srate / 10.0); // countdown (100ms)
 		impulse = 1.0;
 		env = e_expff(-100.0 / srate);
@@ -22,6 +23,7 @@ void Mallet::clear()
 {
 	elapsed = 0;
 	impulse = 0.0;
+	filter.reset();
 	// TODO:
 	// playback = INFINITY;
 	// impulse_filter.clear(0.0);

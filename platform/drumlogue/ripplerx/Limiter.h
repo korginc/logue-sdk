@@ -49,15 +49,15 @@ public:
 		reltime = 0.3;
 		atcoef = e_expff(-1.0 / (attime * srate));
 		relcoef = e_expff(-1.0 / (reltime * srate));
-		rmscoef = vdup_n_f32(e_expff(-1.0 / (rmstime * srate)));
 		rmstime = rms_win / 1000000.0;
+		rmscoef = vdup_n_f32(e_expff(-1.0 / (rmstime * srate)));
 		runave = vdup_n_f32(0.0);
 	}
 
 	inline float32_t calculate_grv(float32_t runave)
 	{
 		// auto det = sqrt(fmax(0.0, runave));
-        auto det = runave > 0 ? 0 : fasterSqrt(runave);
+        auto det = runave > 0 ? fasterSqrt(runave) : 0;
 		// auto overdb = fmax(0.0, capsc * log(det/threshv));
         auto overdb = fmax(0.0, capsc * fasterlogf(det/threshv));
 
@@ -88,7 +88,9 @@ public:
 		runave = vmla_f32(maxspl, rmscoef, vsub_f32(runave, maxspl));
 		float32_t grv0 = calculate_grv(vget_lane_f32(runave, 0));
 		float32_t grv1 = calculate_grv(vget_lane_f32(runave, 1));
-		return vmulq_f32(split, vcombine_f32(vdup_n_f32(grv0), vdup_n_f32(grv1)));
+		float32x2_t grv = vdup_n_f32(grv0);
+		grv = vset_lane_f32(grv1, grv, 1);
+		return vmulq_f32(split, vcombine_f32(grv, grv));
 
 		// auto det = sqrt(fmax(0.0, runave));
 		// auto overdb = fmax(0.0, capsc * log(det/threshv));
