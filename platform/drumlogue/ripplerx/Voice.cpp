@@ -7,7 +7,7 @@
 float32_t Voice::note2freq(int _note)
 {
     // MIDI note 69 == A4 == 440.0 Hz - see resonator_orig.h for reference
-    return 440 * fasterpowf(2.0, (_note - 69) / 12.0);
+    return c_midi_a4_freq * fasterpowf(2.0f, (_note - c_midi_a4_note) / c_semitones_per_octave);
 }
 
 // Set freq note, prepares mallet, noise generator, resonators, to be used at actual trigger
@@ -106,8 +106,8 @@ void Voice::setCoupling(bool _couple, float32_t _split) {
 
 void Voice::setPitch(float32_t a_coarse, float32_t b_coarse, float32_t a_fine, float32_t b_fine)
 {
-    aPitchFactor = fasterpowf(2.0, (a_coarse + a_fine / 100.0) / 12.0);
-    bPitchFactor = fasterpowf(2.0, (b_coarse + b_fine / 100.0) / 12.0);
+    aPitchFactor = fasterpowf(2.0f, (a_coarse + a_fine / c_cents_per_semitone) / c_semitones_per_octave);
+    bPitchFactor = fasterpowf(2.0f, (b_coarse + b_fine / c_cents_per_semitone) / c_semitones_per_octave);
 }
 /**< TODO:
 void Voice::setRatio(float32_t _a_ratio, float32_t _b_ratio)
@@ -340,11 +340,11 @@ void Voice::applyPitch(std::array<float32_t, 64>& model, float32_t factor)
  */
 void Voice::updateResonators()
 {
-    std::array<float32_t, 64> aModel = models.aModels[resA.nmodel];
-    std::array<float32_t, 64> bModel = models.bModels[resB.nmodel];
+    std::array<float32_t, 64> aModel = models.getAModels()[resA.nmodel];
+    std::array<float32_t, 64> bModel = models.getBModels()[resB.nmodel];
 
-    if (aPitchFactor != 1.0) applyPitch(aModel, aPitchFactor);
-    if (bPitchFactor != 1.0) applyPitch(bModel, bPitchFactor);
+    if (aPitchFactor != 1.0f) applyPitch(aModel, aPitchFactor);
+    if (bPitchFactor != 1.0f) applyPitch(bModel, bPitchFactor);
 
     // Initialize shifts AFTER pitch modifications
     std::array<float32_t, 64> aShifts = aModel;
@@ -352,15 +352,15 @@ void Voice::updateResonators()
 
     if (couple && resA.on && resB.on) {
         // Precompute constants once
-        const float32_t k = split * 0.4f / freq;
-        const float32_t dy = k * 0.4f / freq;
-        const float32_t threshold = 2.0f;
+        const float32_t k = split * c_coupling_split_factor / freq;
+        const float32_t dy = k * c_coupling_split_factor / freq;
+        const float32_t threshold = c_coupling_threshold;
 
         // Constants for frequency shift formula
-        const float32_t coeff_dy_04 = 0.4f * dy;
-        const float32_t coeff_dx_06 = 0.6f;
-        const float32_t coeff_max_56 = 0.56f;
-        const float32_t coeff_dy_56 = 0.56f * dy;
+        const float32_t coeff_dy_04 = c_freq_shift_coeff_dy * dy;
+        const float32_t coeff_dx_06 = c_freq_shift_coeff_dx;
+        const float32_t coeff_max_56 = c_freq_shift_coeff_max;
+        const float32_t coeff_dy_56 = c_freq_shift_coeff_max * dy;
 
         // NEON constant vectors (preload once)
         float32x4_t v_threshold = vdupq_n_f32(threshold);
