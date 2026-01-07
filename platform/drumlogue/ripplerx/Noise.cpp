@@ -48,7 +48,7 @@ void Noise::clear()
 
 float32_t Noise::process()
 {
-	if (!env.state) return 0.0f;
+	if (!env.getState()) return 0.0f;
 
 	env.process();
 
@@ -61,8 +61,8 @@ float32_t Noise::process()
 		sample = filter.df1(sample);
 
 	// Clear filter state when envelope finishes to avoid pops
-	if (!env.state)
+	if (!env.getState())
 		filter.clear(0.0f);
 
-	return sample * env.env;
+	return sample * env.getEnv();
 }
