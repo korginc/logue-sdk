@@ -15,7 +15,7 @@ const __unit_header unit_header_t unit_header = {
     .header_size = sizeof(unit_header_t),                  // leave as is, size of this header
     .target = UNIT_TARGET_PLATFORM | k_unit_module_synth,  // target platform and module for this unit
     .api = UNIT_API_VERSION,                               // logue sdk API version against which unit was built
-    .dev_id = 0x46747a6dU,                                 // TODO - developer identifier
+    .dev_id = 0x46654465U,                                 // 'FeDe' - https://github.com/fedemone/logue-sdk
     .unit_id = 0x5265736fU,                                // TODO - Id for this unit, should be unique within the scope of a given dev_id
     .version = 0x00010000U,                                // This unit's version: major.minor.patch (major<<16 minor<<8 patch).
     .name = "RipplerX",                                    // Name for this unit, will be displayed on device
@@ -43,12 +43,12 @@ const __unit_header unit_header_t unit_header = {
         // Page 2: Mallet
         // Mallet resonance
         {0, 10, 0, 8, k_unit_param_type_none, 1, 1, 0, {"Mallet Res"}},
-        // Mallet stifness
-        {100, (5000), 2560, (600), k_unit_param_type_none, 0, 0, 0, {"Mallet Stiff"}},
+        // Mallet stiffness
+        {100, 5000, 2560, 600, k_unit_param_type_none, 0, 0, 0, {"Mallet Stiff"}},
         // Velocity Mallet Resonance
-        {0, (1000), 0, (0), k_unit_param_type_none, 3, 0, 0, {"Vel Mal Res"}},
-        // Velocity Mallet Stifness
-        {0, (1000), 0, (0), k_unit_param_type_none, 3, 1, 0, {"Vel Mal Stif"}},
+        {0, 1000, 0, 0, k_unit_param_type_none, 3, 0, 0, {"Vel Mal Res"}},
+        // Velocity Mallet Stiffness
+        {0, 1000, 0, 0, k_unit_param_type_none, 3, 1, 0, {"Vel Mal Stif"}},
 
         // Page 3: Resonator A-I (B is switched off to lack of parameter pages to handle)
         //  Model - "String", "Beam", "Squared", "Membrane", "Plate", "Drumhead", "Marimba", "Open Tube", "Closed Tube"
@@ -56,7 +56,7 @@ const __unit_header unit_header_t unit_header = {
         //  Partials -  "4", "8", "16", "32", "64"
         {0, 4, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Partials"}},
         // Decay
-        {0, (1000), 520, (10), k_unit_param_type_none, 1, 1, 0, {"Decay"}},
+        {0, 1000, 520, 10, k_unit_param_type_none, 1, 1, 0, {"Decay"}},
         // Material (-1.0, 1.0)
         {-10, 10, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Material"}},
 
@@ -73,22 +73,21 @@ const __unit_header unit_header_t unit_header = {
         {1, 10000, 3000, 1, k_unit_param_type_none, 4, 1, 0, {"Inharmonic"}},
 
         // Page 5: Resonator A-III + Noise-I
-        // filter cutoff (/100)
-        {20, 20000, 16000, 20, k_unit_param_type_khertz, 0, 0, 0, {"LowCut"}},
+        // filter cutoff
+        {20, 20000, 10010, 20, k_unit_param_type_hertz, 0, 0, 0, {"LowCut"}},
         // Tube Radius
         {0, 10, 0, 5, k_unit_param_type_none, 1, 0, 0, {"Tube Radius"}},
-        // coarse pitch
-        {-480, 480, 10, 0, k_unit_param_type_none, 0, 0, 0, {"coarse pitch"}},
+        // Coarse Pitch
+        {-480, 480, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Coarse Pitch"}},
         // Noise Mix
-        {0, (1000), 300, 0, k_unit_param_type_percent, 1, 1, 0, {"Noise Mix"}},
+        {0, 1000, 300, 0, k_unit_param_type_percent, 1, 1, 0, {"Noise Mix"}},
         //TODO: vel_noise_freq and vel_noise_q should be here?
 
         // Page 6: Noise II
         // Noise Resonance
-        // {0, 10000, 3000, 0, k_unit_param_type_none, 4, 1, 0, {"Noise Res"}},
-        {0, (1000), 300, 0, k_unit_param_type_percent, 1, 1, 0, {"Noise Res"}},
-        // Noise Filter Mode - TODO "LP", "BP", "HP"
-        {0, 2, 0, 2, k_unit_param_type_strings, 0, 0, 0, {"Noise Filter"}},
+        {0, 1000, 300, 0, k_unit_param_type_percent, 1, 1, 0, {"Noise Res"}},
+        // Noise Filter Mode: "LP", "BP", "HP"
+        {0, 2, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"Noise Filter"}},
         // Noise Filter Freq
         {20, 20000, 12000, 20, k_unit_param_type_hertz, 0, 0, 0, {"NoiseFiltFrq"}},
         // Noise Filter Q

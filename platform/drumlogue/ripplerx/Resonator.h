@@ -12,6 +12,7 @@
 #include "constants.h"
 
 
+
 /** main class */
 class Resonator
 {

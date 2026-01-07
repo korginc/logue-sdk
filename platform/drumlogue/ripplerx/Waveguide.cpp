@@ -1,4 +1,5 @@
 #include "Waveguide.h"
+#include "constants.h"
 
 // Proper constructor with safe initialization
 Waveguide::Waveguide()
@@ -14,10 +15,10 @@ Waveguide::Waveguide()
 void Waveguide::update(float32_t f_0, float32_t vel, bool isRelease)
 {
 	// Validate frequency to avoid division by zero
-	if (f_0 < 20.0f) f_0 = 20.0f;  // Minimum 20Hz
+	if (f_0 < c_freq_min) f_0 = c_freq_min;
 
 	auto tlen = srate / f_0;
-	if (is_closed) tlen *= 0.5f; // fix closed tube one octave lower
+	if (is_closed) tlen *= c_closed_tube_octave_factor; // fix closed tube one octave lower
 
 	// Safe modulo: ensure tube_len is never zero
 	if (tube_len > 0) {
@@ -27,13 +28,13 @@ void Waveguide::update(float32_t f_0, float32_t vel, bool isRelease)
 
 	// auto decay_k = fmin(100.0f, exp(log(decay) + vel * vel_decay * (log(100.0f) - log(0.01f))));
 	// where (log(100.0f) - log(0.01f)) is 2*log(10) - (-2*log(10)) = 2Log(100)
-	auto decay_k = fmin(100.0f, e_expff(fasterlogf(decay) + (vel * vel_decay * M_TWOLN100)));
+	auto decay_k = fmin(c_decay_max, e_expff(fasterlogf(decay) + (vel * vel_decay * M_TWOLN100)));
 	if (isRelease) decay_k = rel * decay_k;
 
 	// Safe decay calculation with threshold
 	tube_decay = decay_k > 0.0f
-		? e_expff((-M_PI * 125000.0f) / (f_0 * srate * decay_k))
-		: 0.0f;  // ✅ Explicit float suffix
+		? e_expff((-M_PI * c_waveguide_decay_constant) / (f_0 * srate * decay_k))
+		: 0.0f;
 }
 
 float32x4_t Waveguide::process(float32x4_t input)
@@ -53,7 +54,7 @@ float32x4_t Waveguide::process(float32x4_t input)
 	// y = radius * sample + (1.0f - radius) * y1
 	// Using vsubq_f32 for 128-bit subtraction: one_minus_radius = [1, 1, 1, 1] - radius
 	float32x4_t one_minus_radius = vsubq_f32(vdupq_n_f32(1.0f), radius);
-	
+
 	// vmlaq_f32: result = accumulator + (operand1 * operand2)
 	// y = (radius * sample) + ((1.0f - radius) * y1)
 	y = vmlaq_f32(vmulq_f32(radius, sample), y1, one_minus_radius);
@@ -72,12 +73,12 @@ float32x4_t Waveguide::process(float32x4_t input)
 		tube[write_ptr] = vaddq_f32(input, dsample);
 	}
 
-	// Advance pointers with safe wrapping
-	write_ptr = (write_ptr + 1) % tube_len;
-	if (write_ptr < 0) write_ptr = 0;
-	
-	read_ptr = (read_ptr + 1) % tube_len;
-	if (read_ptr < 0) read_ptr = 0;
+	// Advance pointers with optimized wrapping (conditional is faster than modulo)
+	write_ptr++;
+	if (write_ptr >= tube_len) write_ptr = 0;
+
+	read_ptr++;
+	if (read_ptr >= tube_len) read_ptr = 0;
 
 	return dsample;
 }

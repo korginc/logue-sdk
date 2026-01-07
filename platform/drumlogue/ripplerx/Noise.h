@@ -26,7 +26,7 @@ public:
 		// these two values are not present in the original preset/*.xml files
 		float32_t _vel_freq,
         float32_t _vel_q);
-	float32_t process();
+	inline float32_t process();
 	void attack(float32_t vel);
 	void initFilter();
 	void release();

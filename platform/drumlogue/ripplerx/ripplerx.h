@@ -19,6 +19,172 @@
 #include "Comb.h"
 #include "Models.h"
 
+/*==============================================================================
+ * MULTI-TIMBRAL ARCHITECTURE DESIGN (4 PARTS) - FUTURE IMPLEMENTATION
+ *==============================================================================
+ *
+ * OVERVIEW:
+ * Transform RipplerX from mono-timbral (single patch) to multi-timbral
+ * (4 independent parts/patches responding to different MIDI channels).
+ * Each part has independent parameters, voice allocation, and processing.
+ *
+ * ARCHITECTURE APPROACH:
+ *
+ * 1. PART STRUCTURE
+ *    - Create a new class "RipplerXPart" that encapsulates current RipplerX logic
+ *    - RipplerXPart contains:
+ *      * Independent voice pool (e.g., 2 voices per part = 8 voices total)
+ *      * Independent parameter set (all Parameters enum values)
+ *      * Independent Models instance
+ *      * Independent sample bank/number selection
+ *      * Independent effects (comb, limiter) OR shared master effects
+ *    - Current RipplerX class becomes "RipplerXMulti" managing 4 parts
+ *
+ * 2. VOICE ALLOCATION STRATEGIES
+ *    Option A: Fixed allocation (2 voices per part, total 8 voices)
+ *      + Simple implementation, predictable CPU load
+ *      - Wastes voices if some parts inactive
+ *
+ *    Option B: Dynamic pool (8 voices shared, min 1 per active part)
+ *      + More flexible, better voice utilization
+ *      - More complex allocation logic, potential voice stealing conflicts
+ *      - Recommended: Use round-robin within part, then steal oldest from other parts
+ *
+ *    RECOMMENDED: Start with Option A (fixed), add Option B later
+ *
+ * 3. MIDI ROUTING
+ *    - Add MIDI channel filtering in NoteOn/NoteOff/CC handlers
+ *    - Map MIDI channels to parts:
+ *      * Channel 1 → Part 1
+ *      * Channel 2 → Part 2
+ *      * Channel 3 → Part 3
+ *      * Channel 4 → Part 4
+ *      * Omni mode: All channels trigger Part 1 (backward compatible)
+ *    - Add "MIDI Channel" parameter per part (1-4, Omni)
+ *
+ * 4. PARAMETER MANAGEMENT
+ *    - Each part has independent parameter array: part[i].parameters[last_param]
+ *    - UI could switch between parts via "Part Select" parameter (1-4)
+ *    - Current UI edits selected part only
+ *    - Alternatively: Expose subset of parameters per part in different pages
+ *    - Global parameters (shared across parts):
+ *      * Master gain
+ *      * Master effects (limiter settings)
+ *      * Optionally: comb stereo width
+ *
+ * 5. RENDERING STRATEGY
+ *    Option A: Sequential rendering (simpler)
+ *      ```cpp
+ *      for (auto& part : parts) {
+ *          part.renderToBuffer(tempBuffer, frames);
+ *          mixIntoOutput(tempBuffer, outBuffer, part.volume);
+ *      }
+ *      ```
+ *
+ *    Option B: Interleaved rendering (better for cache)
+ *      ```cpp
+ *      for (frame = 0; frame < frames; ++frame) {
+ *          float32x4_t sum = vdupq_n_f32(0.0f);
+ *          for (auto& part : parts) {
+ *              sum = vaddq_f32(sum, part.renderFrame());
+ *          }
+ *          vst1q_f32(&outBuffer[frame*2], sum);
+ *      }
+ *      ```
+ *    RECOMMENDED: Option B with NEON optimization
+ *
+ * 6. MEMORY CONSIDERATIONS
+ *    Current single-part memory:
+ *      - 8 voices × ~2KB = ~16KB
+ *      - 1 Models instance = ~4KB
+ *      - Parameters + state = ~1KB
+ *      Total per part: ~21KB
+ *
+ *    4-part memory (fixed allocation):
+ *      - Total: ~84KB (acceptable for ARM Cortex with 64KB+ RAM)
+ *
+ *    Optimization: Share Models instance across parts if using same model type
+ *      - Check if parts[i].model == parts[j].model, use single instance
+ *      - Saves ~12KB if parts use identical models
+ *
+ * 7. IMPLEMENTATION STEPS
+ *    Step 1: Refactor current RipplerX into RipplerXPart class
+ *            - Move voice management, rendering, parameters to Part
+ *            - Keep MIDI/parameter interface in RipplerX wrapper
+ *
+ *    Step 2: Create RipplerXMulti container
+ *            - Array of 4 RipplerXPart instances: RipplerXPart parts[4]
+ *            - Add part selection logic
+ *            - Route MIDI to appropriate part
+ *
+ *    Step 3: Update Render() to mix all parts
+ *            - Use NEON vectorization for efficient summing
+ *            - Apply master effects after summing
+ *
+ *    Step 4: Extend UI/parameter system
+ *            - Add "Part Select" parameter
+ *            - Add per-part enable/disable
+ *            - Add per-part MIDI channel assignment
+ *            - Add per-part volume/pan
+ *
+ *    Step 5: Add preset management for multi-timbral
+ *            - Save/load all 4 parts as "Multi" preset
+ *            - Allow copying part settings between parts
+ *
+ * 8. CPU OPTIMIZATION STRATEGIES
+ *    - Only process active parts (check if part.hasActiveVoices())
+ *    - Use NEON to process multiple parts simultaneously where possible
+ *    - Consider reducing polyphony per part (e.g., 6 total voices = 1-2 per part)
+ *    - Share Models computation when parts use identical model types
+ *    - Add voice stealing based on envelope state (steal released voices first)
+ *
+ * 9. BACKWARD COMPATIBILITY
+ *    - Single-part mode: Disable parts 2-4, route all MIDI to part 1
+ *    - Load existing presets into part 1 only
+ *    - Add "Mode" parameter: "Mono" (current) vs "Multi" (4-part)
+ *
+ * 10. SUGGESTED CLASS STRUCTURE
+ *     ```cpp
+ *     class RipplerXPart {
+ *         Voice* voices[VOICES_PER_PART];
+ *         Models* models;
+ *         std::array<float32_t, last_param> parameters;
+ *         uint8_t midiChannel;  // 0=Omni, 1-16=specific channel
+ *         bool enabled;
+ *         float32_t volume;
+ *         float32_t pan;
+ *         // ... current RipplerX rendering logic
+ *     };
+ *
+ *     class RipplerXMulti {
+ *         RipplerXPart parts[4];
+ *         uint8_t selectedPart;  // For UI editing
+ *         Limiter masterLimiter;
+ *         Comb masterComb;
+ *
+ *         void Render(float* outBuffer, size_t frames) {
+ *             // Mix all active parts
+ *         }
+ *
+ *         void NoteOn(uint8_t channel, uint8_t note, uint8_t vel) {
+ *             for (auto& part : parts) {
+ *                 if (part.acceptsMidiChannel(channel)) {
+ *                     part.NoteOn(note, vel);
+ *                 }
+ *             }
+ *         }
+ *     };
+ *     ```
+ *
+ * ESTIMATED EFFORT: 2-3 days for basic implementation, 1 week for full features
+ * PERFORMANCE IMPACT: ~2-3x CPU usage (only when multiple parts active)
+ * MEMORY IMPACT: ~84KB total (currently ~21KB)
+ *
+ * NOTE: Test on target hardware (ARM Cortex) to validate real-time performance
+ *       with 4 active parts and maximum polyphony (8 voices total).
+ *
+ *==============================================================================*/
+
 /**
  * RipplerX Synth Engine
  * Optimized polyphonic resonator synthesizer with ARM NEON vectorization
@@ -531,6 +697,7 @@ class RipplerX
                 else if (parameters[a_model] == ModelNames::Plate)
                     models->recalcPlate(true, parameters[a_ratio]);
             }
+        }
 
         if (last_b_model != (int32_t)parameters[b_model]) {
             if (parameters[b_ratio] > 0.0f) {
@@ -541,6 +708,7 @@ class RipplerX
                 else if (parameters[b_model] == ModelNames::Plate)
                     models->recalcPlate(false, parameters[b_ratio]);
             }
+        }
 
         auto srate = getSampleRate();
 

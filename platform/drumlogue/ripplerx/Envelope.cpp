@@ -1,14 +1,6 @@
 #include "float_math.h"
 #include "Envelope.h"
 
-// Normalize tension from [-1,1] to [0.001..1, 100 (linear), 2..1]
-float32_t Envelope::normalizeTension(float32_t t)
-{
-	t += 1.0;
-	return t == 1.0 ? 100.0
-		: t > 1.0 ? 3.001 - t : 0.001 + t;
-}
-
 void Envelope::init(float32_t srate, float32_t a, float32_t d, float32_t s, float32_t r, float32_t tensionA, float32_t tensionD, float32_t tensionR) {
 	att = fmax(a, 1.0) * 0.001 * srate;
 	dec = fmax(d, 1.0) * 0.001 * srate;

@@ -1,4 +1,5 @@
 #include "Partial.h"
+#include "constants.h"
 
 void Partial::update(float32_t f_0, float32_t ratio, float32_t ratio_max, float32_t vel, bool isRelease)
 {
@@ -13,16 +14,14 @@ void Partial::update(float32_t f_0, float32_t ratio, float32_t ratio_max, float3
 	if (isRelease)
 		decay_k *= rel;
     // clear if out of range
-	const float32_t f_nyquist = 0.48f * srate;
-	const float32_t f_min = 20.0f;
-	const float32_t decay_min = 1.0e-6f;  // Avoid exact zero comparison
-	if (f_k >= f_nyquist || f_k < f_min || decay_k < decay_min) {
+	const float32_t f_nyquist = c_nyquist_factor * srate;
+	if (f_k >= f_nyquist || f_k < c_freq_min || decay_k < c_decay_min) {
 		b0 = b2 = a1 = a2 = 0.0f;
 		a0 = 1.0f;
 		return;
 	}
 
-	auto f_max = fmin(20000.0f, f_0 * ratio_max * inharm_k);
+	auto f_max = fmin(c_freq_max, f_0 * ratio_max * inharm_k);
 	auto omega = (M_TWOPI * f_k) / srate;
 	auto alpha = M_TWOPI / srate; // aprox 1 sec decay
 
@@ -47,9 +46,9 @@ void Partial::update(float32_t f_0, float32_t ratio, float32_t ratio_max, float3
 	b0 = alpha * tone_gain * amp_k;
 	// b2 = -alpha * tone_gain * amp_k;
 	b2 = -b0;
-	a0 = decay_k > decay_min ? 1.0f + alpha / decay_k : 0.0f;
+	a0 = decay_k > c_decay_min ? 1.0f + alpha / decay_k : 0.0f;
 	a1 = -2.0f * fastercosfullf(omega);
-	a2 = decay_k > decay_min ? 1.0f - alpha / decay_k : 0.0f;
+	a2 = decay_k > c_decay_min ? 1.0f - alpha / decay_k : 0.0f;
 }
 
 float32x4_t Partial::process(float32x4_t input)

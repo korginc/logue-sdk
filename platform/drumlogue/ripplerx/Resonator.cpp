@@ -23,19 +23,13 @@ void Resonator::setParams(float32_t _srate, bool _on, int _model, int _partials,
 	cut = _cut;
 
 	// Map cut parameter: 1..0 to 20..20000 Hz with inverse scale for negative values
-	// Ratio = 20000/20 = 1000, so freq = 20 * 1000^exponent
-	constexpr float32_t f_min = 20.0f;
-	constexpr float32_t f_max = 20000.0f;
-	constexpr float32_t f_ratio = 1000.0f;  // f_max / f_min
-	constexpr float32_t q_butterworth = 0.707f;  // Butterworth Q = sqrt(2)/2 for maximally flat response
-
-	auto freq = f_min * fasterpowf(f_ratio, cut < 0.0f ? 1.0f + cut : cut);
+	auto freq = c_freq_min * fasterpowf(c_filter_freq_ratio, cut < 0.0f ? 1.0f + cut : cut);
 
 	if (_cut < 0.0f) {
-		filter.lp(srate, freq, q_butterworth);
+		filter.lp(srate, freq, c_butterworth_q);
 	}
 	else {
-		filter.hp(srate, freq, q_butterworth);
+		filter.hp(srate, freq, c_butterworth_q);
     }
 
 	// Update ONLY the active partials, not all 64
@@ -53,7 +47,7 @@ void Resonator::setParams(float32_t _srate, bool _on, int _model, int _partials,
 	}
 
 	waveguide.decay = decay;
-	waveguide.radius = vmov_n_f32(radius);
+	waveguide.radius = vdup_n_f32(radius);
 	waveguide.is_closed = _model == ModelNames::ClosedTube;
 	waveguide.srate = srate;
 	waveguide.vel_decay = vel_decay;
@@ -65,7 +59,7 @@ void Resonator::validateAndSetModel(int _model)
 	// Clamp model to valid range [0, 7] for different resonator types
 	// See ModelNames enum for valid values
 	if (_model < 0) nmodel = 0;
-	else if (_model > OpenTube) nmodel = OpenTube;
+	else if (_model > ModelNames::OpenTube) nmodel = ModelNames::OpenTube;
 	else nmodel = _model;
 }
 
@@ -81,7 +75,7 @@ void Resonator::update(float32_t freq, float32_t vel, bool isRelease, std::array
 {
 	if (nmodel < OpenTube) {
 		// Update each partial with validated bounds
-		for (size_t p = 0; p < partials.size() && p < static_cast<size_t>(npartials); ++p) {
+		for (int p = 0; p < npartials; ++p) {
 			auto idx = partials[p].k - 1; // partial number to array index
 			// Bounds check: ensure idx is within valid range [0, 63]
 			if (idx >= 0 && idx < static_cast<int>(model.size())) {
@@ -111,7 +105,7 @@ float32x4_t Resonator::process(float32x4_t input)
 	if (active) { // use active and silence to turn off strings process if not in use
 		if (nmodel < OpenTube) {
 			// Process through partials with validated bounds
-			for (size_t p = 0; p < partials.size() && p < static_cast<size_t>(npartials); ++p) {
+			for (int p = 0; p < npartials; ++p) {
 				out = vaddq_f32(out, partials[p].process(input));
 			}
 		}
@@ -121,12 +115,15 @@ float32x4_t Resonator::process(float32x4_t input)
 		}
 	}
 
-	// Track silence: count samples below threshold
+	// Track silence: count samples above threshold using NEON horizontal add
 	float32x4_t result = vaddq_f32(vabsq_f32(out), vabsq_f32(input));
-	silence += vgetq_lane_f32(result, 0) > c_silence_threshold ? 1 : 0;
-	silence += vgetq_lane_f32(result, 1) > c_silence_threshold ? 1 : 0;
-	silence += vgetq_lane_f32(result, 2) > c_silence_threshold ? 1 : 0;
-	silence += vgetq_lane_f32(result, 3) > c_silence_threshold ? 1 : 0;
+	// Use horizontal add for efficiency
+	float32x2_t sum_high = vget_high_f32(result);
+	float32x2_t sum_low = vget_low_f32(result);
+	float32x2_t sum_pair = vadd_f32(sum_high, sum_low);
+	float32_t total = vget_lane_f32(vpadd_f32(sum_pair, sum_pair), 0);
+
+	silence += (total > c_silence_threshold * 4.0f) ? 1 : 0;
 
 	// Deactivate if silent for ~1 second
 	if (silence >= static_cast<int>(srate)) {

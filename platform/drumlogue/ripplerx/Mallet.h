@@ -39,7 +39,7 @@ public:
 
 	void trigger(/**<MalletType type, */float32_t srate, float32_t freq);
 	void clear();
-	float32_t process();
+	inline float32_t process();
 
 	// void setFilter(float32_t norm);
 

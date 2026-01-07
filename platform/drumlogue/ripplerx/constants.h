@@ -13,6 +13,39 @@ constexpr size_t c_numVoices = polyphony;
 constexpr size_t c_max_partials = 64;
 constexpr float32_t c_res_cutoff = 20.0001;
 constexpr float32_t c_silence_threshold = 0.00001;
+// Noise filter frequency range constants (pre-computed logs)
+const float32_t c_noise_filter_freq_min = 20.0f;
+const float32_t c_noise_filter_freq_max = 20000.0f;
+const float32_t c_noise_filter_log_min = 2.995732274f;  // fasterlogf(20.0f)
+const float32_t c_noise_filter_log_max = 9.903487553f;  // fasterlogf(20000.0f)
+const float32_t c_noise_filter_log_range = 6.907755279f; // log_max - log_min
+const float32_t c_noise_filter_res_range = 3.293f;  // 4.0 - 0.707
+
+// Partial/resonator constants
+constexpr float32_t c_freq_min = 20.0f;  // Minimum resonator frequency (Hz)
+constexpr float32_t c_freq_max = 20000.0f;  // Maximum resonator frequency (Hz)
+constexpr float32_t c_nyquist_factor = 0.48f;  // Nyquist limit factor (slightly below 0.5 for safety)
+constexpr float32_t c_decay_min = 1.0e-6f;  // Minimum decay threshold to avoid division issues
+constexpr float32_t c_filter_freq_ratio = 1000.0f;  // Ratio f_max/f_min for frequency scaling
+constexpr float32_t c_butterworth_q = 0.707f;  // Butterworth Q = sqrt(2)/2 for maximally flat response
+
+// MIDI and pitch constants
+constexpr float32_t c_midi_a4_freq = 440.0f;  // Frequency of MIDI note A4 (Hz)
+constexpr int c_midi_a4_note = 69;  // MIDI note number for A4
+constexpr float32_t c_semitones_per_octave = 12.0f;  // Number of semitones in an octave
+constexpr float32_t c_cents_per_semitone = 100.0f;  // Number of cents in a semitone
+
+// Voice coupling and frequency shift constants
+constexpr float32_t c_coupling_threshold = 2.0f;  // Frequency difference threshold for coupling
+constexpr float32_t c_coupling_split_factor = 0.4f;  // Split factor for coupling calculation
+constexpr float32_t c_freq_shift_coeff_dy = 0.4f;  // Coefficient for dy term in frequency shift
+constexpr float32_t c_freq_shift_coeff_dx = 0.6f;  // Coefficient for dx term in frequency shift
+constexpr float32_t c_freq_shift_coeff_max = 0.56f;  // Coefficient for max term in frequency shift
+
+// Waveguide constants
+constexpr float32_t c_decay_max = 100.0f;  // Maximum decay value
+constexpr float32_t c_closed_tube_octave_factor = 0.5f;  // Closed tube octave correction (one octave lower)
+constexpr float32_t c_waveguide_decay_constant = 125000.0f;  // Waveguide decay formula constant
 
 // these are the index of the parameters got from header.c
 // page 1
