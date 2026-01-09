@@ -64,8 +64,12 @@
  *    - Add "MIDI Channel" parameter per part (1-4, Omni)
  *
  * 4. PARAMETER MANAGEMENT
+ *    - in order to assign the model parameters accordingly, model/program change over all,
+ *      use the extension of the parameter range. The original ranges are assigned to Part 1,
+ *      value between max1 and max1+span are assigned to Part 2, etc.
+ *    - Alternative UI could switch between parts via "Part Select" parameter (1-4).
+ *      Easier but sacrifices one parameter
  *    - Each part has independent parameter array: part[i].parameters[last_param]
- *    - UI could switch between parts via "Part Select" parameter (1-4)
  *    - Current UI edits selected part only
  *    - Alternatively: Expose subset of parameters per part in different pages
  *    - Global parameters (shared across parts):
@@ -408,8 +412,6 @@ class RipplerX
 
         // Precompute NEON constants (stay in registers across loop)
         const float32x4_t v_zero = vdupq_n_f32(0.0f);
-        const float32x4_t v_one = vdupq_n_f32(1.0f);
-        const float32x4_t v_gain = vdupq_n_f32(gain);
         const float32x4_t v_ab_mix = vdupq_n_f32(ab_mix);
         const float32x4_t v_one_minus_ab_mix = vdupq_n_f32(1.0f - ab_mix);
 
@@ -476,8 +478,8 @@ class RipplerX
 
                 if (a_on) {
                     float32x4_t out = voice.resA.process(resOut);
-                    if (voice.resA.cut > c_res_cutoff)
-                        out = voice.resA.filter.df1(out);
+                    if (voice.resA.getCut() > c_res_cutoff)
+                        out = voice.resA.applyFilter(out);
                     resAOut = vaddq_f32(resAOut, out);
                     out_from_a = out;
                 }
@@ -486,8 +488,8 @@ class RipplerX
                     // Serial coupling: resB input is either resA output or direct resonator input
                     float32x4_t resB_input = (a_on && couple) ? out_from_a : resOut;
                     float32x4_t out = voice.resB.process(resB_input);
-                    if (voice.resB.cut > c_res_cutoff)
-                        out = voice.resB.filter.df1(out);
+                    if (voice.resB.getCut() > c_res_cutoff)
+                        out = voice.resB.applyFilter(out);
                     resBOut = vaddq_f32(resBOut, out);
                 }
 

@@ -77,8 +77,8 @@ void Voice::triggerStart(bool reset)
 	mallet.trigger(malletType, srate, malletFreq, note, malletKtrack);
 	noise.attack(vel);
 	*/
-	if (resA.on) resA.activate();
-	if (resB.on) resB.activate();
+	if (resA.isOn()) resA.activate();
+	if (resB.isOn()) resB.activate();
 	updateResonators();
 }
 
@@ -340,8 +340,8 @@ void Voice::applyPitch(std::array<float32_t, 64>& model, float32_t factor)
  */
 void Voice::updateResonators()
 {
-    std::array<float32_t, 64> aModel = models.getAModels()[resA.nmodel];
-    std::array<float32_t, 64> bModel = models.getBModels()[resB.nmodel];
+    std::array<float32_t, 64> aModel = models.getAModels()[resA.getModel()];
+    std::array<float32_t, 64> bModel = models.getBModels()[resB.getModel()];
 
     if (aPitchFactor != 1.0f) applyPitch(aModel, aPitchFactor);
     if (bPitchFactor != 1.0f) applyPitch(bModel, bPitchFactor);
@@ -350,7 +350,7 @@ void Voice::updateResonators()
     std::array<float32_t, 64> aShifts = aModel;
     std::array<float32_t, 64> bShifts = bModel;
 
-    if (couple && resA.on && resB.on) {
+    if (couple && resA.isOn() && resB.isOn()) {
         // Precompute constants once
         const float32_t k = split * c_coupling_split_factor / freq;
         const float32_t dy = k * c_coupling_split_factor / freq;
@@ -464,6 +464,6 @@ void Voice::updateResonators()
         }
     }
 
-    if (resA.on) resA.update(freq, vel, isRelease, aShifts);
-    if (resB.on) resB.update(freq, vel, isRelease, bShifts);
+    if (resA.isOn()) resA.update(freq, vel, isRelease, aShifts);
+    if (resB.isOn()) resB.update(freq, vel, isRelease, bShifts);
 }

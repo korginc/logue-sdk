@@ -39,7 +39,15 @@ public:
 
 	void trigger(/**<MalletType type, */float32_t srate, float32_t freq);
 	void clear();
-	inline float32_t process();
+	inline float32_t process() {
+		if (elapsed == 0) return 0.0;
+
+		float32_t sample = filter.df1(impulse);
+		impulse *= env;
+		elapsed -= 1;
+
+		return sample;
+	}
 
 	// void setFilter(float32_t norm);
 

@@ -34,6 +34,13 @@ public:
 	int getPartialCount() const { return npartials; }
 	int getSilenceCounter() const { return silence; }
 	bool isOn() const { return on; }
+	float32_t getCut() const { return cut; }
+	
+	// Apply filter to a NEON vector of samples
+	float32x4_t applyFilter(float32x4_t input);
+	
+	// Apply filter to scalar sample
+	float32_t applyFilterScalar(float32_t sample) { return filter.df1(sample); }
 
 private:
 	// State members - protected from external modification

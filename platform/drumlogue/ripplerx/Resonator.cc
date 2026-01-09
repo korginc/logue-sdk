@@ -47,7 +47,7 @@ void Resonator::setParams(float32_t _srate, bool _on, int _model, int _partials,
 	}
 
 	waveguide.decay = decay;
-	waveguide.radius = vdup_n_f32(radius);
+	waveguide.radius = vdupq_n_f32(radius);
 	waveguide.is_closed = _model == ModelNames::ClosedTube;
 	waveguide.srate = srate;
 	waveguide.vel_decay = vel_decay;
@@ -141,4 +141,28 @@ void Resonator::clear()
 	waveguide.clear();
 	filter.clear(0.0f);
 	silence = 0;  // Reset silence counter
+}
+
+float32x4_t Resonator::applyFilter(float32x4_t input)
+{
+	// Extract individual lanes, apply scalar filter, and repack
+	// This is necessary because Filter::df1() operates on scalar samples
+	float32_t lane0 = vgetq_lane_f32(input, 0);
+	float32_t lane1 = vgetq_lane_f32(input, 1);
+	float32_t lane2 = vgetq_lane_f32(input, 2);
+	float32_t lane3 = vgetq_lane_f32(input, 3);
+	
+	lane0 = filter.df1(lane0);
+	lane1 = filter.df1(lane1);
+	lane2 = filter.df1(lane2);
+	lane3 = filter.df1(lane3);
+	
+	// Use vsetq_lane to reconstruct the vector properly
+	float32x4_t result = vdupq_n_f32(0.0f);
+	result = vsetq_lane_f32(lane0, result, 0);
+	result = vsetq_lane_f32(lane1, result, 1);
+	result = vsetq_lane_f32(lane2, result, 2);
+	result = vsetq_lane_f32(lane3, result, 3);
+	
+	return result;
 }

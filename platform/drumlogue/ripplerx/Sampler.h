@@ -1,6 +1,7 @@
 // Copyright 2025 tilr
 // Mallet generator, a simple unit impulse ran through a bandpass filter
 #pragma once
+#include <cstddef>
 #include "Filter.h"
 #include "vector"
 #include "Mallet.h" // TODO circular reference!!

@@ -30,14 +30,3 @@ void Mallet::clear()
 	// impulse_filter.clear(0.0);
 	// sample_filter.clear(0.0);
 }
-
-float32_t Mallet::process()
-{
-	if (elapsed == 0) return 0.0;
-
-	float32_t sample = filter.df1(impulse);
-	impulse *= env;
-	elapsed -= 1;
-
-	return sample;
-}
