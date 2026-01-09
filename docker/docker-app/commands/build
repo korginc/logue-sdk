@@ -52,6 +52,7 @@ OPT_NTS1=""
 OPT_NTS1_MKII=""
 OPT_NTS3=""
 OPT_PROLOGUE=""
+OPT_MICROKORG2=""
 
 PLATFORM_ROOT="/workspace"
 
@@ -61,6 +62,7 @@ PLATFORMS=("drumlogue"
            "prologue"
            "nts-1_mkii"
            "nts-3_kaoss"
+           "microkorg2"
           )
 
 # declare -A PLATFORM_REG
@@ -95,6 +97,7 @@ usage () {
     echo "     --nts-1_mkii      select nts-1 mkii unit projects"
     echo "     --nts-3           select nts-3 unit projects"
     echo "     --prologue        select prologue unit projects"
+    echo "     --microkorg2      select microkorg2 unit projects"
     echo " -f, --force           force clean project before building"
     echo "     --install-dir=DIR install built units to specified directory"
     echo " -h, --help            display this help"
@@ -136,7 +139,7 @@ platform_for_project() {
     elif [ -r "${project_path}/Makefile" ] && [ -r "${project_path}/config.mk" ]; then
 
         ## See if a platform was explicitly selected
-        local mult_platform_sel="${OPT_DRUMLOGUE}${OPT_MINILOGUEXD}${OPT_NTS1}${OPT_NTS1_MKII}${OPT_NTS3}${OPT_PROLOGUE}"
+        local mult_platform_sel="${OPT_DRUMLOGUE}${OPT_MINILOGUEXD}${OPT_NTS1}${OPT_NTS1_MKII}${OPT_NTS3}${OPT_PROLOGUE}${OPT_MICROKORG2}"
         if [ ! -z "${mult_platform_sel}" ]; then
             if [ "${mult_platform_sel}" == "yes" ]; then
                 ## Single platform is selected
@@ -150,6 +153,10 @@ platform_for_project() {
                 fi
                 if [ ! -z "${OPT_NTS3}" ]; then
                     echo "nts-3_kaoss"
+                    return 0
+                fi
+                if [ ! -z "${OPT_MICROKORG2}" ]; then
+                    echo "microkorg2"
                     return 0
                 fi
             fi
@@ -171,11 +178,13 @@ platform_for_project() {
                 echo "${parent_dir_name}"
                 return 0
                 ;;
-            *)
+            microkorg2)
+                echo "${parent_dir_name}"
+                return 0
                 ;;
         esac
 
-        err "Could not identify target platform for ${project_path}. Use --drumlogue, --nts-1_mkii, or --nts-3 option flag to clear ambiguity."
+        err "Could not identify target platform for ${project_path}. Use --drumlogue, --nts-1_mkii, --microkorg2, or --nts-3 option flag to clear ambiguity."
     fi
     
     err "Unknown platform"
@@ -205,6 +214,9 @@ is_valid_project () {
             [ -r "${project_path}/Makefile" ] && [ -r "${project_path}/config.mk" ] && return 0 
             ;;
         nts-3_kaoss)
+            [ -r "${project_path}/Makefile" ] && [ -r "${project_path}/config.mk" ] && return 0 
+            ;;
+        microkorg2)
             [ -r "${project_path}/Makefile" ] && [ -r "${project_path}/config.mk" ] && return 0 
             ;;
         *)
@@ -471,6 +483,10 @@ for o in "$@"; do
             OPT_PROLOGUE="yes"
             shift
             ;;
+        --microkorg2)
+            OPT_MICROKORG2="yes"
+            shift
+            ;;
         --install-dir=*)
             install_path=$(realpath "${o#*=}")
             shift
@@ -487,7 +503,7 @@ for o in "$@"; do
     esac
 done
 
-COMBINED_PLATFORM_OPTS="${OPT_DRUMLOGUE}${OPT_MINILOGUEXD}${OPT_NTS1}${OPT_NTS1_MKII}${OPT_NTS3}${OPT_PROLOGUE}"
+COMBINED_PLATFORM_OPTS="${OPT_DRUMLOGUE}${OPT_MINILOGUEXD}${OPT_NTS1}${OPT_NTS1_MKII}${OPT_NTS3}${OPT_PROLOGUE}${OPT_MICROKORG2}"
 
 if [ ! -z "${OPT_ALL}" ] && [ ! -z "${COMBINED_PLATFORM_OPTS}" ]; then
     warn "-a/--all overriden by platform selection options"
@@ -592,6 +608,15 @@ if [ "${ACTION}" == "build" ]; then
                 exit 2
             fi
         fi
+
+        if [ ! -z "${OPT_MICROKORG2}" ]; then
+            echo ">> Building 'microKORG2' projects"
+            build_platform microkorg2
+            if [ $? -ne 0 ]; then
+                echo ">> Build error occurred, aborting."
+                exit 2
+            fi
+        fi
     fi
 
     ## Reset development environment
@@ -683,6 +708,15 @@ elif [ "${ACTION}" == "clean" ]; then
                 res=2
             fi
         fi
+
+        if [ ! -z "${OPT_MICROKORG2}" ]; then
+            echo ">> Cleaning 'microkorg2' projects"
+            clean_platform microkorg2
+            if [ $? -ne 0 ]; then
+                echo ">> Clean error occurred..."
+                res=2
+            fi
+        fi
     fi
 
     ## Reset development environment
@@ -716,6 +750,10 @@ elif [ "${ACTION}" == "list" ]; then
         if [ ! -z "${OPT_PROLOGUE}" ]; then
             list_projects prologue
         fi
+
+        if [ ! -z "${OPT_MICROKORG2}" ]; then
+            list_projects microkorg2
+        fi
     else
         for p in ${PLATFORMS[@]}; do
             list_projects ${p}
@@ -726,5 +764,3 @@ else
     err "Undefined action '${ACTION}'"
     exit 1
 fi
-
-

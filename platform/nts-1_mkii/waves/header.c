@@ -38,41 +38,41 @@
  *
  */
 
-#include "unit_osc.h"     // Include base definitions for osc units
+#include "unit_osc.h" // Note: Include base definitions for osc units
 
 #include "waves_common.h" // Include common definitions specific to waves oscillator
 
 // ---- Unit header definition  --------------------------------------------------------------------
 
 const __unit_header unit_header_t unit_header = {
-  .header_size = sizeof(unit_header_t),                  // Size of this header. Leave as is.
-  .target = UNIT_TARGET_PLATFORM | k_unit_module_osc,    // Target platform and module pair for this unit
-  .api = UNIT_API_VERSION,                               // API version for which unit was built. See runtime.h
-  .dev_id = 0x4B4F5247U,                                 // Developer ID. See https://github.com/korginc/logue-sdk/blob/master/developer_ids.md
-  .unit_id = 0x050400U,                                  // ID for this unit. Scoped within the context of a given dev_id.
-  .version = 0x00020000U,                                // This unit's version: major.minor.patch (major<<16 minor<<8 patch).
-  .name = "WAVES",                                       // Name for this unit, will be displayed on device
-  .num_params = 8,                                       // Number of valid parameter descriptors. (max. 10)
-  .params = {
-    // Format:
-    // min, max, center, default, type, frac. bits, frac. mode, <reserved>, name
-    
-    // See common/runtime.h for type enum and unit_param_t structure
-    
-    // Fixed/direct UI parameters
-    // A knob    
-    {0, 1023,           0, 0, k_unit_param_type_none,    0, 0, 0, {"SHPE"}},
+    .header_size = sizeof(unit_header_t),               // Size of this header. Leave as is.
+    .target = UNIT_TARGET_PLATFORM | k_unit_module_osc, // Target platform and module pair for this unit
+    .api = UNIT_API_VERSION,                            // API version for which unit was built. See runtime.h
+    .dev_id = 0x4B4F5247U,                              // Developer ID. See https://github.com/korginc/logue-sdk/blob/master/developer_ids.md
+    .unit_id = 0x050400U,                               // ID for this unit. Scoped within the context of a given dev_id.
+    .version = 0x00020000U,                             // This unit's version: major.minor.patch (major<<16 minor<<8 patch).
+    .name = "WAVES",                                    // Name for this unit, will be displayed on device
+    .num_params = 8,                                    // Number of valid parameter descriptors. (max. 10)
+    .params = {
+        // Format:
+        // min, max, center, default, type, frac. bits, frac. mode, <reserved>, name
 
-    // B knob
-    {0, 1023,           0, 0, k_unit_param_type_none,    0, 0, 0, {"SUB"}},
-    
-    // 8 Edit menu parameters
-    {0, WAVE_A_CNT-1,   0, 0, k_unit_param_type_enum,    0, 0, 0, {"WAVE A"}},
-    {0, WAVE_B_CNT-1,   0, 0, k_unit_param_type_enum,    0, 0, 0, {"WAVE B"}},
-    {0, SUB_WAVE_CNT-1, 0, 0, k_unit_param_type_enum,    0, 0, 0, {"SUB WAVE"}},
-    {0, 1000,           0, 0, k_unit_param_type_percent, 1, 1, 0, {"RING MIX"}},
-    {0, 1000,           0, 0, k_unit_param_type_percent, 1, 1, 0, {"BIT CRUSH"}},
-    {0, 1000,           0, 250, k_unit_param_type_percent, 1, 1, 0, {"DRIFT"}},
-    {0, 0,              0, 0, k_unit_param_type_none,    0, 0, 0, {""}},
-    {0, 0,              0, 0, k_unit_param_type_none,    0, 0, 0, {""}}},
+        // See common/runtime.h for type enum and unit_param_t structure
+
+        // Fixed/direct UI parameters
+        // A knob
+        {0, 1023, 0, 0, k_unit_param_type_none, 0, 0, 0, {"SHPE"}},
+
+        // B knob
+        {0, 1023, 0, 0, k_unit_param_type_none, 0, 0, 0, {"SUB"}},
+
+        // 8 Edit menu parameters
+        {0, WAVE_A_CNT - 1, 0, 0, k_unit_param_type_enum, 0, 0, 0, {"WAVE A"}},
+        {0, WAVE_B_CNT - 1, 0, 0, k_unit_param_type_enum, 0, 0, 0, {"WAVE B"}},
+        {0, SUB_WAVE_CNT - 1, 0, 0, k_unit_param_type_enum, 0, 0, 0, {"SUB WAVE"}},
+        {0, 1000, 0, 0, k_unit_param_type_percent, 1, 1, 0, {"RING MIX"}},
+        {0, 1000, 0, 0, k_unit_param_type_percent, 1, 1, 0, {"BIT CRUSH"}},
+        {0, 1000, 0, 250, k_unit_param_type_percent, 1, 1, 0, {"DRIFT"}},
+        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
+        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}}},
 };

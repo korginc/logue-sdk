@@ -6,6 +6,16 @@
 
  Dockerベースのビルド環境は, サポートされている各プラットフォーム用のlogue SDKユニットを構築するために必要なすべてのツールをパッケージ化し, 規模の大きいプロジェクトの構築を簡単にする便利なツールを提供します. このDockerベースの環境を利用することで, ホストOSから独立した一貫的な環境で構築することが可能です.
 
+### CLRF errorに遭遇した時の解決法
+
+logue-sdk をクローンした後は、ローカルのGit設定で core.autocrlf を true ではなく input に変更してください。
+
+logue-sdkのフォルダで、
+
+```
+git config core.autocrlf input
+```
+
 ### セットアップ
 
  1. [Dockerをインストール](https://docs.docker.com/get-docker/) します (Note: Docker Desktopは特に必要なく, [installing Docker Engine](https://docs.docker.com/engine/install/) で十分です).
@@ -24,6 +34,13 @@
  
  [...]
  ```
+ あるいは、Docker Hubからこの[コンテナイメージ](https://hub.docker.com/r/xiashj/logue-sdk)をダウンロードします。
+
+ ```
+ docker pull xiashj/logue-sdk
+ ```
+ Docker Desktopから「logue-sdk」を検索して「Pull」を押してもダウンロードできます。
+
 
 #### Windowsでの注意点
 

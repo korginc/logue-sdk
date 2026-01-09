@@ -81,7 +81,6 @@ public:
     NUM_PARAM3_VALUES,
   };
 
-  
   void setParameter(uint8_t index, int32_t value) override final
   {
     switch (index)
@@ -129,7 +128,7 @@ public:
   }
 
   // life-cycle methods
-  virtual void init(float *) override final
+  void init(float *) override final
   {
     params_.reset();
     phasor_ = 0.f;
@@ -149,12 +148,12 @@ public:
     lfo_ = lfo;
   }
 
-  void process(const float *__restrict in, float *__restrict out, uint32_t frames, uint32_t outChannels) override final
+  void process(const float *__restrict in, float *__restrict out, uint32_t frames) override final
   {
-    // Caching current parameter values. Consider interpolating sensitive parameters.
+    // Caching current parameter values. Consider smoothing sensitive parameters in audio loop
     const Params p = params_;
 
-    for (const float *out_end = out + frames; out != out_end; in += 2, out += outChannels)
+    for (const float *out_end = out + frames; out != out_end; in += 2, out += 1)
     {
       // Process/generate samples here
 

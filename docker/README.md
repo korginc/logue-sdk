@@ -6,18 +6,14 @@
 
 The Docker-based build environment packages together all the tools required to build logue SDK units for any of the supported platforms, provides some convenience tools to simplify bulk project building and allows to build in consistent environment independent from the host operating system.
 
-#### Windows Notes
+### how to fix CLRF errors on Windows
 
- On Windows (10/11) the [Windows Subsystem for Linux (WSL2)](https://learn.microsoft.com/en-us/windows/wsl/) must be installed.
- This is a prerequisite for Docker, and to be able to make use of convenience bash scripts (detailed below) in powershell and command prompt.
- So, in Windows enviroment:
- 1. Launch **WSL** from *Start* icon
- 2. Go to the choosen directory where you want to install the SDK, e.g.
+After you have cloned logue-sdk, make sure to change local git config core.autocrlf to input instead of true. 
 
- ```
- $ cd /mnt/d/my/path
+Inside logue-sdk directory, 
 ```
- 3. Update the scripts to correct paths (e.g. /app/ => /mnt/c/app/)
+git config core.autocrlf input
+```
 
 ### Setup
 
@@ -48,6 +44,23 @@ The Docker-based build environment packages together all the tools required to b
 
  [...]
  ```
+
+ Alternatively, grab this [container image](https://hub.docker.com/r/xiashj/logue-sdk) from Docker Hub.
+
+ ```
+ docker pull xiashj/logue-sdk
+ ```
+ 
+ or simply search "logue-sdk" inside Docker Desktop and press "Pull".
+
+
+#### Windows Notes
+
+ On Windows (10/11) the [Windows Subsystem for Linux (WSL2)](https://learn.microsoft.com/en-us/windows/wsl/) must be installed, including a Linux distribution.
+ This is a prerequisite for Docker, and to be able to make use of convenience bash scripts (detailed below) in powershell and command prompt.
+ When cloning the repository, make sure that the Git setting `core.autocrlf` is set to `input`, otherwise none of the setup scripts or build scripts will run.
+ When running the convenience bash scripts you must run `wsl` or `bash` in powershell and command prompt to get to a bash prompt, otherwise they will be launched in Git Bash, 
+ which doesn't have the TTY support required for `run_cmd.sh` and `run_interactive.sh`.
 
 ### Interactive Shell
 

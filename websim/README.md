@@ -8,6 +8,7 @@ to get emsdk, and then follow the official instruction: https://emscripten.org/d
 ``
 cd tools/emsdk
 ./emsdk install latest
+./emsdk activate latest
 ``
 
 # how to compile to wasm and test in browser
