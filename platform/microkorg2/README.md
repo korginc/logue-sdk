@@ -484,8 +484,8 @@ Other module runtimes do not provide specific realtime information.
  2 voices, interlaced in groups of 1
 | Timbre | Voices | bufferOffset | voiceOffset | voiceLimit | outputStride |
 |--------|--------|--------------|-------------|------------|--------------|
-| 1      | 0 ~ 1  | 0            | 0           | 1          | 2            |
-| 2      | 2 ~ 3  | 0            | 1           | 1          | 2            |
+| 1      | 0      | 0            | 0           | 1          | 2            |
+| 2      | 1      | 0            | 1           | 1          | 2            |
 
 ##### Any Timbre Setting | Vocoder N/A | Hard Tune/Harmonizer On
  Oscillators are not processed when the Hard Tune or Harmonizer is on.
