@@ -12,8 +12,8 @@ PROJECT_TYPE := synth
 # C sources
 CSRC = header.c
 
-# C++ sources - TODO change this!!!
-CXXSRC = unit.cc Envelope.cpp Filter.cpp Mallet.cpp Resonator.cpp Partial.cpp Waveguide.cpp Noise.cpp Voice.cpp
+# C++ sources
+CXXSRC = unit.cc ripplerx.cpp Envelope.cpp Filter.cpp Mallet.cpp Resonator.cpp Partial.cpp Waveguide.cpp Noise.cpp Voice.cpp Models.cpp Sampler.cpp
 
 # List ASM source files here
 ASMSRC =

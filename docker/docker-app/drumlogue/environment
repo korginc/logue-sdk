@@ -57,7 +57,7 @@ __drumlogue_set_env () {
         # Configure environment
 		## FEDE DEBUG: change path for WSL 
         ## export APP_PREFIX="/app/drumlogue"
-        export APP_PREFIX="/mnt/d/app/drumlogue"
+        export APP_PREFIX="/app/drumlogue"
         export BUILD_TARGET_TRIPLE=arm-unknown-linux-gnueabihf
         export TOOLCHAIN_ROOT="${APP_PREFIX}/${BUILD_TARGET_TRIPLE}"
         export CROSS_COMPILE=${BUILD_TARGET_TRIPLE}-

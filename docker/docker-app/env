@@ -37,7 +37,7 @@
 #
 
 #ENV_ROOT_DIR="/app"
-ENV_ROOT_DIR="/mnt/d/app"
+ENV_ROOT_DIR="/app"
 
 env_short_desc () {
     echo -n "Prepare environment for target platform builds."

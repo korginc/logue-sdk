@@ -50,35 +50,43 @@ const __unit_header unit_header_t unit_header = {
         // Velocity Mallet Stiffness
         {0, 1000, 0, 0, k_unit_param_type_none, 3, 1, 0, {"Vel Mal Stif"}},
 
-        // Page 3: Resonator A-I (B is switched off to lack of parameter pages to handle)
+        // Page 3: Resonator A-I (extended ranges encode Resonator B when exceeding A range)
         //  Model - "String", "Beam", "Squared", "Membrane", "Plate", "Drumhead", "Marimba", "Open Tube", "Closed Tube"
-        {0, 8, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Model"}},
+        //  Range doubled: 0..8 -> A, 9..17 -> B (mapped in code)
+        {0, 17, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Model"}},
         //  Partials -  "4", "8", "16", "32", "64"
-        {0, 4, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Partials"}},
+        //  Range doubled: 0..4 -> A, 5..9 -> B (mapped in code)
+        {0, 9, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Partials"}},
         // Decay
-        {0, 1000, 520, 10, k_unit_param_type_none, 1, 1, 0, {"Decay"}},
+        //  Range doubled: 0..1000 -> A, 1001..2000 -> B (mapped in code)
+        {0, 2000, 520, 10, k_unit_param_type_none, 1, 1, 0, {"Decay"}},
         // Material (-1.0, 1.0)
-        {-10, 10, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Material"}},
+        //  Range extended by span (20): [-10..10] -> A, (10..30] -> B (mapped in code)
+        {-10, 30, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Material"}},
 
         // TODO: use ratio in order to update the model?
 
-        // Page 4: Resonator A-II
+        // Page 4: Resonator A-II (extended ranges encode Resonator B)
         // Tone (-1.0, 1.0)
-        {-10, 10, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Tone"}},
+        {-10, 30, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Tone"}},
         // Hit Position (0.02, 0.26)
-        {2, 50, 0, 26, k_unit_param_type_none, 2, 0, 0, {"HitPos"}},
+        //  Span 48 -> A: 2..50, B: 51..98 (mapped in code)
+        {2, 98, 0, 26, k_unit_param_type_none, 2, 0, 0, {"HitPos"}},
         // Release
-        {0, 10, 0, 10, k_unit_param_type_none, 1, 0, 0, {"Release"}},
+        {0, 20, 0, 10, k_unit_param_type_none, 1, 0, 0, {"Release"}},
         // Inharmonic
-        {1, 10000, 3000, 1, k_unit_param_type_none, 4, 1, 0, {"Inharmonic"}},
+        //  Span 9999 -> A: 1..10000, B: 10001..19999 (mapped in code)
+        {1, 19999, 3000, 1, k_unit_param_type_none, 4, 1, 0, {"Inharmonic"}},
 
-        // Page 5: Resonator A-III + Noise-I
+        // Page 5: Resonator A-III (extended) + Noise-I
         // filter cutoff
-        {20, 20000, 10010, 20, k_unit_param_type_hertz, 0, 0, 0, {"LowCut"}},
+        //  Span 19980 -> A: 20..20000, B: 20001..39980 (mapped in code)
+        {20, 39980, 10010, 20, k_unit_param_type_hertz, 0, 0, 0, {"LowCut"}},
         // Tube Radius
-        {0, 10, 0, 5, k_unit_param_type_none, 1, 0, 0, {"Tube Radius"}},
+        {0, 20, 0, 5, k_unit_param_type_none, 1, 0, 0, {"Tube Radius"}},
         // Coarse Pitch
-        {-480, 480, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Coarse Pitch"}},
+        //  Span 960 -> A: -480..480, B: 481..1440 (mapped in code)
+        {-480, 1440, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Coarse Pitch"}},
         // Noise Mix
         {0, 1000, 300, 0, k_unit_param_type_percent, 1, 1, 0, {"Noise Mix"}},
         //TODO: vel_noise_freq and vel_noise_q should be here?

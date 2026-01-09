@@ -96,7 +96,46 @@ if [ ! -d "${PLATFORM_PATH}" ]; then
     exit 1
 fi
 
-## FEDE DEBUG
-# docker run --rm -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/interactive_entry
-docker run --rm -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /mnt/d/app/interactive_entry
+# Normalize path for Docker Desktop on Windows
+# Docker Desktop requires Windows-style paths with forward slashes (e.g., E:/path/to/dir)
+PLATFORM_MOUNT="${PLATFORM_PATH}"
+UNAME_S=$(uname -s 2>/dev/null || echo "")
+
+if [[ "${OSTYPE}" == msys* || "${OSTYPE}" == cygwin* || "${UNAME_S}" =~ MINGW ]]; then
+    # Running in Git Bash/MSYS2 - Docker Desktop on Windows needs E:/path format
+    if command -v cygpath >/dev/null 2>&1; then
+        # Convert to mixed format (E:/path/to/dir) which Docker Desktop understands
+        PLATFORM_MOUNT=$(cygpath -m "${PLATFORM_PATH}")
+    elif [[ "${PLATFORM_PATH}" =~ ^/([a-z])/ ]]; then
+        # Fallback: manually convert /e/path to E:/path
+        DRIVE_LETTER=$(echo "${PLATFORM_PATH:1:1}" | tr '[:lower:]' '[:upper:]')
+        PLATFORM_MOUNT="${DRIVE_LETTER}:${PLATFORM_PATH:2}"
+    else
+        PLATFORM_MOUNT="${PLATFORM_PATH}"
+    fi
+else
+    # Likely running from PowerShell/CMD, try WSL path conversion
+    if [[ "${PLATFORM_PATH}" =~ ^([A-Za-z]): ]]; then
+        # Windows absolute path (e.g., E:/path or E:\path)
+        DRIVE_LETTER=$(echo "${PLATFORM_PATH:0:1}" | tr '[:upper:]' '[:lower:]')
+        REST_PATH=$(echo "${PLATFORM_PATH:2}" | sed 's|\\|/|g')
+        PLATFORM_MOUNT="/mnt/${DRIVE_LETTER}${REST_PATH}"
+    fi
+fi
+
+echo "[Info] Platform path: ${PLATFORM_PATH}"
+echo "[Info] Mount path: ${PLATFORM_MOUNT}"
+echo "[Info] If the mount is empty in the container, ensure Docker Desktop has"
+echo "[Info] file sharing enabled for the drive in Settings > Resources > File Sharing"
+echo ""
+echo "[Info] If you encounter permission errors, run these commands once in the container:"
+echo "       sudo mkdir -p ~/.drumlogue.env_backup"
+echo "       sudo chown -R \$USER:\$USER ~/.drumlogue.env_backup"
+echo ""
+
+# Disable MSYS path conversion for Git Bash on Windows
+# This prevents /app/interactive_entry from being converted to C:/Program Files/Git/app/...
+export MSYS_NO_PATHCONV=1
+
+docker run --rm -v "${PLATFORM_MOUNT}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/interactive_entry
 

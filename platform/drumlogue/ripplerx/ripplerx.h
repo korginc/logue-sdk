@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <array>
+#include <cstdio>
 #include "../common/runtime.h"
 #include <arm_neon.h>
 #include "constants.h"
@@ -584,64 +585,149 @@ class RipplerX
                 parameters[vel_mallet_stiff] = value;
                 break;
 
-            case c_parameterModel:
+            case c_parameterModel: {
                 if ((size_t)value < c_modelElements) {
                     parameters[a_model] = value;
                     resonatorChangedA = true;
+                } else if ((size_t)value < (size_t)(2 * c_modelElements)) {
+                    parameters[b_model] = value - (int32_t)c_modelElements;
+                    resonatorChangedB = true;
                 }
                 break;
+            }
 
-            case c_parameterPartials:
+            case c_parameterPartials: {
                 if ((size_t)value < c_partialElements) {
                     parameters[a_partials] = c_partials[value];
                     resonatorChangedA = true;
+                } else if ((size_t)value < (size_t)(2 * c_partialElements)) {
+                    parameters[b_partials] = c_partials[value - (int32_t)c_partialElements];
+                    resonatorChangedB = true;
                 }
                 break;
+            }
 
-            case c_parameterDecay:
-                parameters[a_decay] = value;
-                resonatorChangedA = true;
+            case c_parameterDecay: {
+                const int32_t maxA = 1000; // original A max
+                if (value <= maxA) {
+                    parameters[a_decay] = value;
+                    resonatorChangedA = true;
+                } else if (value <= (maxA * 2)) {
+                    parameters[b_decay] = value - maxA;
+                    resonatorChangedB = true;
+                }
                 break;
+            }
 
-            case c_parameterMaterial:
-                parameters[a_damp] = value;
-                resonatorChangedA = true;
+            case c_parameterMaterial: {
+                const int32_t minA = -10;
+                const int32_t maxA = 10;
+                const int32_t span = maxA - minA; // 20
+                if (value <= maxA) {
+                    parameters[a_damp] = value;
+                    resonatorChangedA = true;
+                } else if (value <= (maxA + span)) {
+                    parameters[b_damp] = value - span;
+                    resonatorChangedB = true;
+                }
                 break;
+            }
 
-            case c_parameterTone:
-                parameters[a_tone] = value;
-                resonatorChangedA = true;
+            case c_parameterTone: {
+                const int32_t minA = -10;
+                const int32_t maxA = 10;
+                const int32_t span = maxA - minA; // 20
+                if (value <= maxA) {
+                    parameters[a_tone] = value;
+                    resonatorChangedA = true;
+                } else if (value <= (maxA + span)) {
+                    parameters[b_tone] = value - span;
+                    resonatorChangedB = true;
+                }
                 break;
+            }
 
-            case c_parameterHitPosition:
-                parameters[a_hit] = value;
-                resonatorChangedA = true;
+            case c_parameterHitPosition: {
+                const int32_t minA = 2;
+                const int32_t maxA = 50;
+                const int32_t span = maxA - minA; // 48
+                if (value <= maxA) {
+                    parameters[a_hit] = value;
+                    resonatorChangedA = true;
+                } else if (value <= (maxA + span)) {
+                    parameters[b_hit] = value - span;
+                    resonatorChangedB = true;
+                }
                 break;
+            }
 
-            case c_parameterRelease:
-                parameters[a_rel] = value;
-                resonatorChangedA = true;
+            case c_parameterRelease: {
+                const int32_t maxA = 10;
+                const int32_t span = 10;
+                if (value <= maxA) {
+                    parameters[a_rel] = value;
+                    resonatorChangedA = true;
+                } else if (value <= (maxA + span)) {
+                    parameters[b_rel] = value - span;
+                    resonatorChangedB = true;
+                }
                 break;
+            }
 
-            case c_parameterInharmonic:
-                parameters[a_inharm] = value;
-                resonatorChangedA = true;
+            case c_parameterInharmonic: {
+                const int32_t minA = 1;
+                const int32_t maxA = 10000;
+                const int32_t span = maxA - minA; // 9999
+                if (value <= maxA) {
+                    parameters[a_inharm] = value;
+                    resonatorChangedA = true;
+                } else if (value <= (maxA + span)) {
+                    parameters[b_inharm] = value - span;
+                    resonatorChangedB = true;
+                }
                 break;
+            }
 
-            case c_parameterFilterCutoff:
-                parameters[a_cut] = value;
-                resonatorChangedA = true;
+            case c_parameterFilterCutoff: {
+                const int32_t minA = 20;
+                const int32_t maxA = 20000;
+                const int32_t span = maxA - minA; // 19980
+                if (value <= maxA) {
+                    parameters[a_cut] = value;
+                    resonatorChangedA = true;
+                } else if (value <= (maxA + span)) {
+                    parameters[b_cut] = value - span;
+                    resonatorChangedB = true;
+                }
                 break;
+            }
 
-            case c_parameterTubeRadius:
-                parameters[a_radius] = value;
-                resonatorChangedA = true;
+            case c_parameterTubeRadius: {
+                const int32_t maxA = 10;
+                const int32_t span = 10;
+                if (value <= maxA) {
+                    parameters[a_radius] = value;
+                    resonatorChangedA = true;
+                } else if (value <= (maxA + span)) {
+                    parameters[b_radius] = value - span;
+                    resonatorChangedB = true;
+                }
                 break;
+            }
 
-            case c_parameterCoarsePitch:
-                parameters[a_coarse] = value;
-                pitchChanged = true;
+            case c_parameterCoarsePitch: {
+                const int32_t minA = -480;
+                const int32_t maxA = 480;
+                const int32_t span = maxA - minA; // 960
+                if (value <= maxA) {
+                    parameters[a_coarse] = value;
+                    pitchChanged = true;
+                } else if (value <= (maxA + span)) {
+                    parameters[b_coarse] = value - span;
+                    pitchChanged = true;
+                }
                 break;
+            }
 
             case c_parameterNoiseMix:
                 parameters[noise_mix] = value;
@@ -813,35 +899,51 @@ class RipplerX
             return 0;
 
         switch(index) {
-            case c_parameterProgramName:    return m_currentProgram;
-            case c_parameterGain:           return parameters[gain];
-            case c_parameterSampleBank:     return m_sampleBank;
-            case c_parameterSampleNumber:   return m_sampleNumber;
-            case c_parameterMalletResonance: return parameters[mallet_res];
-            case c_parameterMalletStifness: return parameters[mallet_stiff];
+            case c_parameterProgramName:             return m_currentProgram;
+            case c_parameterGain:                    return parameters[gain];
+            case c_parameterSampleBank:              return m_sampleBank;
+            case c_parameterSampleNumber:            return m_sampleNumber;
+            case c_parameterMalletResonance:         return parameters[mallet_res];
+            case c_parameterMalletStifness:          return parameters[mallet_stiff];
             case c_parameterVelocityMalletResonance: return parameters[vel_mallet_res];
-            case c_parameterVelocityMalletStifness: return parameters[vel_mallet_stiff];
-            case c_parameterModel:          return parameters[a_model];
-            case c_parameterPartials:       return parameters[a_partials];
-            case c_parameterDecay:          return parameters[a_decay];
-            case c_parameterMaterial:       return parameters[a_damp];
-            case c_parameterTone:           return parameters[a_tone];
-            case c_parameterHitPosition:    return parameters[a_hit];
-            case c_parameterRelease:        return parameters[a_rel];
-            case c_parameterInharmonic:     return parameters[a_inharm];
-            case c_parameterFilterCutoff:   return parameters[a_cut];
-            case c_parameterTubeRadius:     return parameters[a_radius];
-            case c_parameterCoarsePitch:    return parameters[a_coarse];
-            case c_parameterNoiseMix:       return parameters[noise_mix];
-            case c_parameterNoiseResonance: return parameters[noise_res];
-            case c_parameterNoiseFilterMode: return parameters[noise_filter_mode];
-            case c_parameterNoiseFilterFreq: return parameters[noise_filter_freq];
-            case c_parameterNoiseFilterQ:   return parameters[noise_filter_q];
-            default:                        return 0;
+            case c_parameterVelocityMalletStifness:  return parameters[vel_mallet_stiff];
+            case c_parameterModel:                   return parameters[a_model];
+            case c_parameterPartials:                return parameters[a_partials];
+            case c_parameterDecay:                   return parameters[a_decay];
+            case c_parameterMaterial:                return parameters[a_damp];
+            case c_parameterTone:                    return parameters[a_tone];
+            case c_parameterHitPosition:             return parameters[a_hit];
+            case c_parameterRelease:                 return parameters[a_rel];
+            case c_parameterInharmonic:              return parameters[a_inharm];
+            case c_parameterFilterCutoff:            return parameters[a_cut];
+            case c_parameterTubeRadius:              return parameters[a_radius];
+            case c_parameterCoarsePitch:             return parameters[a_coarse];
+            case c_parameterNoiseMix:                return parameters[noise_mix];
+            case c_parameterNoiseResonance:          return parameters[noise_res];
+            case c_parameterNoiseFilterMode:         return parameters[noise_filter_mode];
+            case c_parameterNoiseFilterFreq:         return parameters[noise_filter_freq];
+            case c_parameterNoiseFilterQ:            return parameters[noise_filter_q];
+            default:                                return 0;
         }
     }
 
     inline const char *getParameterStrValue(uint8_t index, int32_t value) const {
+        // Optional visual cue to distinguish A vs B for extended ranges
+        static constexpr bool k_showABMarkers = true;
+        static constexpr bool k_showABMarkersNumeric = true;
+        auto fmt_num = [](char* buf, size_t n, const char* prefix, int32_t scaled, int decimals, const char* suffix) {
+            if (decimals <= 0) {
+                std::snprintf(buf, n, "%s%d%s", prefix, scaled, (suffix ? suffix : ""));
+            } else if (decimals == 1) {
+                std::snprintf(buf, n, "%s%.1f%s", prefix, (double)scaled / 10.0, (suffix ? suffix : ""));
+            } else if (decimals == 2) {
+                std::snprintf(buf, n, "%s%.2f%s", prefix, (double)scaled / 100.0, (suffix ? suffix : ""));
+            } else if (decimals == 3) {
+                std::snprintf(buf, n, "%s%.3f%s", prefix, (double)scaled / 1000.0, (suffix ? suffix : ""));
+            } else {
+                std::snprintf(buf, n, "%s%.4f%s", prefix, (double)scaled / 10000.0, (suffix ? suffix : ""));
+            }
+        };
         switch (index) {
             case c_parameterSampleBank:
                 if (value >= 0 && (size_t)value < c_sampleBankElements)
@@ -852,17 +954,116 @@ class RipplerX
                     return c_programName[value];
                 break;
             case c_parameterModel:
-                if (value >= 0 && (size_t)value < c_modelElements)
-                    return c_modelName[value];
+                if (value >= 0) {
+                    if ((size_t)value < c_modelElements) {
+                        if (!k_showABMarkers) return c_modelName[value];
+                        static char s_modelBuf[32];
+                        std::snprintf(s_modelBuf, sizeof(s_modelBuf), "A:%s", c_modelName[value]);
+                        return s_modelBuf;
+                    }
+                    if ((size_t)value < (size_t)(2 * c_modelElements)) {
+                        int base = value - (int32_t)c_modelElements;
+                        if (!k_showABMarkers) return c_modelName[base];
+                        static char s_modelBuf[32];
+                        std::snprintf(s_modelBuf, sizeof(s_modelBuf), "B:%s", c_modelName[base]);
+                        return s_modelBuf;
+                    }
+                }
                 break;
             case c_parameterPartials:
-                if (value >= 0 && (size_t)value < c_partialElements)
-                    return c_partialsName[value];
+                if (value >= 0) {
+                    if ((size_t)value < c_partialElements) {
+                        if (!k_showABMarkers) return c_partialsName[value];
+                        static char s_partialsBuf[32];
+                        std::snprintf(s_partialsBuf, sizeof(s_partialsBuf), "A:%s", c_partialsName[value]);
+                        return s_partialsBuf;
+                    }
+                    if ((size_t)value < (size_t)(2 * c_partialElements)) {
+                        int base = value - (int32_t)c_partialElements;
+                        if (!k_showABMarkers) return c_partialsName[base];
+                        static char s_partialsBuf[32];
+                        std::snprintf(s_partialsBuf, sizeof(s_partialsBuf), "B:%s", c_partialsName[base]);
+                        return s_partialsBuf;
+                    }
+                }
                 break;
             case c_parameterNoiseFilterMode:
                 if (value >= 0 && (size_t)value < c_noiseFilterModeElements)
                     return c_noiseFilterModeName[value];
                 break;
+            case c_parameterDecay: {
+                if (!k_showABMarkersNumeric) break;
+                static char s_numBuf[32];
+                const int32_t maxA = 1000; // 0..1000 (0.1 resolution)
+                const int32_t span = 1000;
+                if (value <= maxA) { fmt_num(s_numBuf, sizeof(s_numBuf), "A:", value, 1, ""); return s_numBuf; }
+                if (value <= maxA + span) { fmt_num(s_numBuf, sizeof(s_numBuf), "B:", value - span, 1, ""); return s_numBuf; }
+                break;
+            }
+            case c_parameterMaterial: {
+                if (!k_showABMarkersNumeric) break;
+                static char s_numBuf[32];
+                const int32_t minA = -10, maxA = 10, span = maxA - minA; // 20
+                if (value <= maxA) { fmt_num(s_numBuf, sizeof(s_numBuf), "A:", value, 1, ""); return s_numBuf; }
+                if (value <= maxA + span) { fmt_num(s_numBuf, sizeof(s_numBuf), "B:", value - span, 1, ""); return s_numBuf; }
+                break;
+            }
+            case c_parameterTone: {
+                if (!k_showABMarkersNumeric) break;
+                static char s_numBuf[32];
+                const int32_t minA = -10, maxA = 10, span = maxA - minA; // 20
+                if (value <= maxA) { fmt_num(s_numBuf, sizeof(s_numBuf), "A:", value, 1, ""); return s_numBuf; }
+                if (value <= maxA + span) { fmt_num(s_numBuf, sizeof(s_numBuf), "B:", value - span, 1, ""); return s_numBuf; }
+                break;
+            }
+            case c_parameterHitPosition: {
+                if (!k_showABMarkersNumeric) break;
+                static char s_numBuf[32];
+                const int32_t minA = 2, maxA = 50, span = maxA - minA; // 48
+                if (value <= maxA) { fmt_num(s_numBuf, sizeof(s_numBuf), "A:", value, 2, ""); return s_numBuf; }
+                if (value <= maxA + span) { fmt_num(s_numBuf, sizeof(s_numBuf), "B:", value - span, 2, ""); return s_numBuf; }
+                break;
+            }
+            case c_parameterRelease: {
+                if (!k_showABMarkersNumeric) break;
+                static char s_numBuf[32];
+                const int32_t maxA = 10, span = 10;
+                if (value <= maxA) { fmt_num(s_numBuf, sizeof(s_numBuf), "A:", value, 1, ""); return s_numBuf; }
+                if (value <= maxA + span) { fmt_num(s_numBuf, sizeof(s_numBuf), "B:", value - span, 1, ""); return s_numBuf; }
+                break;
+            }
+            case c_parameterInharmonic: {
+                if (!k_showABMarkersNumeric) break;
+                static char s_numBuf[32];
+                const int32_t minA = 1, maxA = 10000, span = maxA - minA; // 9999
+                if (value <= maxA) { fmt_num(s_numBuf, sizeof(s_numBuf), "A:", value, 4, ""); return s_numBuf; }
+                if (value <= maxA + span) { fmt_num(s_numBuf, sizeof(s_numBuf), "B:", value - span, 4, ""); return s_numBuf; }
+                break;
+            }
+            case c_parameterFilterCutoff: {
+                if (!k_showABMarkersNumeric) break;
+                static char s_numBuf[32];
+                const int32_t minA = 20, maxA = 20000, span = maxA - minA; // 19980
+                if (value <= maxA) { fmt_num(s_numBuf, sizeof(s_numBuf), "A:", value, 0, " Hz"); return s_numBuf; }
+                if (value <= maxA + span) { fmt_num(s_numBuf, sizeof(s_numBuf), "B:", value - span, 0, " Hz"); return s_numBuf; }
+                break;
+            }
+            case c_parameterTubeRadius: {
+                if (!k_showABMarkersNumeric) break;
+                static char s_numBuf[32];
+                const int32_t maxA = 10, span = 10;
+                if (value <= maxA) { fmt_num(s_numBuf, sizeof(s_numBuf), "A:", value, 1, ""); return s_numBuf; }
+                if (value <= maxA + span) { fmt_num(s_numBuf, sizeof(s_numBuf), "B:", value - span, 1, ""); return s_numBuf; }
+                break;
+            }
+            case c_parameterCoarsePitch: {
+                if (!k_showABMarkersNumeric) break;
+                static char s_numBuf[32];
+                const int32_t minA = -480, maxA = 480, span = maxA - minA; // 960
+                if (value <= maxA) { fmt_num(s_numBuf, sizeof(s_numBuf), "A:", value, 0, ""); return s_numBuf; }
+                if (value <= maxA + span) { fmt_num(s_numBuf, sizeof(s_numBuf), "B:", value - span, 0, ""); return s_numBuf; }
+                break;
+            }
             default:
                 break;
         }
