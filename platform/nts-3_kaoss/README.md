@@ -290,7 +290,7 @@ Field descriptions:
  * `.dev_id` : A unique developer identifier as a low endian 32-bit unsigned integer. See [Developer Identifier](#developer-identifier) for details.
  * `.unit_id` : An identifier for the unit itself as a low endian 32-bit unsigned integer. This identifier must only be unique within the scope of a given developer identifier.
  * `.version` : The version for the current unit as a low endian 32-bit unsigned integer, with major in the upper 16 bits, minor and patch number in the two lower bytes, respectively. (e.g.: v1.2.3 -> 0x00010203U)
- * `.name` : Name for the current unit, as displayed on the device when loaded. Nul-terminated array of maximum 19 7-bit ASCII characters. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._`".
+ * `.name` : Name for the current unit, as displayed on the device when loaded. Nul-terminated array of maximum 19 7-bit ASCII characters. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_`".
  * `.num_params` : Number of exposed parameters by the unit. Should be set to 8. (See UNIT\_MAX\_PARAM\_COUNT in `common/runtime.h`).
  * `.params` : Array of parameter descriptors. See [Parameter Descriptors](#parameter-descriptors) for details. 
  
@@ -371,7 +371,7 @@ When `k_genericfx_curve_bipolar` is set, the curves above are aligned to and ref
  * `frac` allows to specify the fractional part of the parameter value. This value will be interpreted as number of fractional bits or decimals depending on the `frac_mode` value.
  * `frac_mode` determines the type of fractional value being described. When set to `0`, values will be assumed to be fixed point with the lower `frac` bits representing the fractional part. When set to `1`, values will be assumed to include a fractional part that is multiplied by 10 times `frac` number of decimals, allowing for base 10 fractional increment/decrements.
  * `reserved` should be set to 0 at all times.
- * `name` allows for a 21 character name. Should be nul-terminated and 7-bit ASCII encoded. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._`".
+ * `name` allows for a 21 character name. Should be nul-terminated and 7-bit ASCII encoded. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_`".
  
  *Note* `min`, `max`, `center` and `init` values must take into account the `frac` and `frac_mode` values.
 
@@ -494,5 +494,5 @@ The NTS-3 kaoss pad kit genericfx runtimes also provide additional contextual in
 
 ### Strings
 
- Strings provided via `unit_get_param_str_value(..)` should be nul terminated C character arrays of 7-bit ASCII characters from the following list: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._`".
+ Strings provided via `unit_get_param_str_value(..)` should be nul terminated C character arrays of 7-bit ASCII characters from the following list: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_`".
  

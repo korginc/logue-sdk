@@ -41,8 +41,6 @@
 #ifndef WAVES_COMMON_H_
 #define WAVES_COMMON_H_
 
-#include "unit_osc.h"
-
 #define WAVE_A_CNT (k_waves_a_cnt + k_waves_b_cnt + k_waves_c_cnt)
 #define WAVE_B_CNT (k_waves_d_cnt + k_waves_e_cnt + k_waves_f_cnt)
 #define SUB_WAVE_CNT (k_waves_a_cnt)

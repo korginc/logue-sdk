@@ -38,9 +38,9 @@
  *
  */
 #include "effect.h"
-#include "unit_genericfx.h" // base definitions for genericfx units
-
+#include "unit_genericfx.h" // base definitions for delfx units
 #include "utils/int_math.h" // clipminmaxi32()
+#include <algorithm>        // std::fill
 
 static Effect s_effect_instance; // Note: In this example, actual effect instance.
 
@@ -72,14 +72,20 @@ __unit_callback int8_t unit_init(const unit_runtime_desc_t *desc)
   // If SDRAM buffers are required they must be allocated here
   if (!desc->hooks.sdram_alloc)
     return k_unit_err_memory;
-  float *allocated_buffer_ = (float *)desc->hooks.sdram_alloc(s_effect_instance.getBufferSize() * sizeof(float));
-  if (!allocated_buffer_)
-    return k_unit_err_memory;
 
-  // Make sure buffer is cleared
-  for (int i = 0; i < s_effect_instance.getBufferSize(); ++i)
+  if (s_effect_instance.getBufferSize() > 0)
   {
-    allocated_buffer_[i] = 0.f;
+    float *allocated_buffer_ = (float *)desc->hooks.sdram_alloc(s_effect_instance.getBufferSize() * sizeof(float));
+    if (!allocated_buffer_)
+      return k_unit_err_memory;
+
+    // clear buffer
+    std::fill(allocated_buffer_, allocated_buffer_ + s_effect_instance.getBufferSize(), 0.f);
+    s_effect_instance.init(allocated_buffer_);
+  }
+  else
+  {
+    s_effect_instance.init(nullptr);
   }
 
   // initialize cached parameters to defaults
@@ -87,8 +93,6 @@ __unit_callback int8_t unit_init(const unit_runtime_desc_t *desc)
   {
     cached_values[id] = static_cast<int32_t>(unit_header.common.params[id].init);
   }
-
-  s_effect_instance.init(allocated_buffer_);
 
   return k_unit_err_none;
 }
@@ -115,7 +119,7 @@ __unit_callback void unit_suspend()
 
 __unit_callback void unit_render(const float *in, float *out, uint32_t frames)
 {
-  s_effect_instance.process(in, out, frames, 2);
+  s_effect_instance.process(in, out, frames);
 }
 
 __unit_callback void unit_set_param_value(uint8_t id, int32_t value)
@@ -146,14 +150,13 @@ __unit_callback void unit_touch_event(uint8_t id, uint8_t phase, uint32_t x, uin
   s_effect_instance.touchEvent(id, phase, x, y);
 }
 
-#ifdef ALLOW_DEPRECATED_FUNCTIONS_API_2_1_0
 __unit_callback void unit_set_tempo(uint32_t tempo)
 {
-  s_effect_instance.setTempo(tempo);
+  float bpm = (tempo >> 16) + (tempo & 0xFFFF) / static_cast<float>(0x10000);
+  s_effect_instance.setTempo(bpm);
 }
 
 __unit_callback void unit_tempo_4ppqn_tick(uint32_t counter)
 {
   s_effect_instance.tempo4ppqnTick(counter);
 }
-#endif

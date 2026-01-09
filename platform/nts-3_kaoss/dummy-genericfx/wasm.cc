@@ -25,6 +25,7 @@ static float BPM_WASM = 120.f;
 void fx_set_bpm(float bpm)
 {
   BPM_WASM = bpm;
+  processor.setTempo(bpm);
 }
 
 uint16_t fx_get_bpm(void)
@@ -272,8 +273,6 @@ std::string getParameterValueString(int index, int value)
   case k_unit_param_type_strings:
     return processor.getParameterStrValue(index, value);
     break;
-  case k_unit_param_type_reserved0:
-    break;
   case k_unit_param_type_drywet:
     suffix = "%";
     break;
@@ -352,9 +351,9 @@ enum class TouchEvent
   Ended,
 }; // stationary and canceled are ambiguous so ignore them
 
-void touchEvent(TouchEvent phase, uint32_t x, uint32_t y)
+void touchEvent(TouchEvent phase, float x, float y)
 {
-  processor.touchEvent(0, static_cast<uint8_t>(phase), x, y);
+  processor.touchEvent(0, static_cast<uint8_t>(phase), static_cast<uint32_t>(x * 1023), static_cast<uint32_t>((1.f - y) * 1023));
 }
 
 // bind unit parameters
@@ -440,7 +439,7 @@ bool ProcessAudio(int numInputs, const AudioSampleFrame *inputs,
   }
 
   // emscripten_log(EM_LOG_CONSOLE, "bpm=%d", fx_get_bpm());
-  processor.process(interleavedIn.data(), interleavedOut.data(), WEB_AUDIO_FRAME_SIZE, 2);
+  processor.process(interleavedIn.data(), interleavedOut.data(), WEB_AUDIO_FRAME_SIZE);
 
   // de-interleave output buffer
   for (int i = 0; i < WEB_AUDIO_FRAME_SIZE; ++i)
@@ -469,7 +468,7 @@ void AudioWorkletProcessorCreated(EMSCRIPTEN_WEBAUDIO_T audioContext, bool succe
   EMSCRIPTEN_AUDIO_WORKLET_NODE_T wasmAudioWorklet = emscripten_create_wasm_audio_worklet_node(audioContext,
                                                                                                "logue-fx", &options, &ProcessAudio, 0);
 
-  EM_ASM({ setupWebAudioAndUI($0, $1); }, audioContext, wasmAudioWorklet);
+  EM_ASM({ setupWebAudioAndUI(emscriptenGetAudioObject($0), emscriptenGetAudioObject($1)); }, audioContext, wasmAudioWorklet);
 }
 
 void AudioThreadInitialized(EMSCRIPTEN_WEBAUDIO_T audioContext, bool success, void *userData)
@@ -504,10 +503,13 @@ int main()
 
   EMSCRIPTEN_WEBAUDIO_T context = emscripten_create_audio_context(&attrs);
 
+  int sample_rate = emscripten_audio_context_sample_rate(context);
   int frame_size = emscripten_audio_context_quantum_size(context);
-  printf("Sample rate: %d\n", SAMPLE_RATE);
+  printf("Sample rate: %d\n", sample_rate);
   printf("Frame size: %d\n", frame_size);
 
   emscripten_start_wasm_audio_worklet_thread_async(context, audioThreadStack, sizeof(audioThreadStack),
                                                    &AudioThreadInitialized, 0);
+
+  emscripten_exit_with_live_runtime();
 }

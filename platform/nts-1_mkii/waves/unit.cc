@@ -38,78 +38,142 @@
  *
  */
 
-#include "unit_osc.h"          // Include base definitions for osc units
+#include "osc.h"
+#include "unit_osc.h"       // base definitions for osc units
+#include "utils/int_math.h" // clipminmaxi32()
+// #include <algorithm>        // std::fill
 
-#include "waves.h"             // Include custom osc code
+static Osc s_osc_instance;                              // Note: In this example, actual instance of custom osc object.
+static int32_t cached_values[UNIT_OSC_MAX_PARAM_COUNT]; // cached parameter values passed from hardware
+static const unit_runtime_osc_context_t *context;
 
-static Waves s_waves_instance; // In this case, actual instance of custom osc object.
+// from fixed_math.h
+#define q31_to_f32_c 4.65661287307739e-010f
+#define q31_to_f32(q) ((float)(q) * q31_to_f32_c)
 
 // ---- Callbacks exposed to runtime ----------------------------------------------
 
-__unit_callback int8_t unit_init(const unit_runtime_desc_t * desc) {  
-  return s_waves_instance.Init(desc);
+__unit_callback int8_t unit_init(const unit_runtime_desc_t *desc)
+{
+  if (!desc)
+    return k_unit_err_undef;
+
+  // Note: make sure the unit is being loaded to the correct platform/module target
+  if (desc->target != unit_header.target)
+    return k_unit_err_target;
+
+  // Note: check API compatibility with the one this unit was built against
+  if (!UNIT_API_IS_COMPAT(desc->api))
+    return k_unit_err_api_version;
+
+  // Check compatibility of samplerate with unit
+  if (desc->samplerate != s_osc_instance.getSampleRate())
+    return k_unit_err_samplerate;
+
+  // Check compatibility of frame geometry
+  // note: NTS-1 mkII oscillators can make use of the audio input depending on the routing options in global settings, see product documentation for details.
+  if (desc->input_channels != 2 || desc->output_channels != 1) // should be stereo input / mono output
+    return k_unit_err_geometry;
+
+  // cache the context for later use
+  context = static_cast<const unit_runtime_osc_context_t *>(desc->hooks.runtime_context);
+
+  // initialize cached parameters to defaults
+  for (int id = 0; id < UNIT_OSC_MAX_PARAM_COUNT; ++id)
+  {
+    cached_values[id] = static_cast<int32_t>(unit_header.params[id].init);
+  }
+
+  return k_unit_err_none;
 }
 
-__unit_callback void unit_teardown() {
-  s_waves_instance.Teardown();
+__unit_callback void unit_teardown()
+{
+  s_osc_instance.teardown();
 }
 
-__unit_callback void unit_reset() {
-  s_waves_instance.Reset();
+__unit_callback void unit_reset()
+{
+  s_osc_instance.reset();
 }
 
-__unit_callback void unit_resume() {
-  s_waves_instance.Resume();
+__unit_callback void unit_resume()
+{
+  s_osc_instance.resume();
 }
 
-__unit_callback void unit_suspend() {
-  s_waves_instance.Suspend();
+__unit_callback void unit_suspend()
+{
+  s_osc_instance.suspend();
 }
 
-__unit_callback void unit_render(const float * in, float * out, uint32_t frames) {
-  s_waves_instance.Process(in, out, frames);
+__unit_callback void unit_render(const float *in, float *out, uint32_t frames)
+{
+  s_osc_instance.setPitch(osc_w0f_for_note((context->pitch) >> 8, context->pitch & 0xFF));
+  s_osc_instance.setShapeLfo(q31_to_f32(context->shape_lfo));
+  s_osc_instance.process(in, out, frames);
 }
 
-__unit_callback void unit_set_param_value(uint8_t id, int32_t value) {
-  s_waves_instance.setParameter(id, value);
+__unit_callback void unit_set_param_value(uint8_t id, int32_t value)
+{
+  // clip to valid range as defined in header
+  value = clipminmaxi32(unit_header.params[id].min, value, unit_header.params[id].max);
+
+  // cache value for unit_get_param_value(id)
+  cached_values[id] = value;
+
+  s_osc_instance.setParameter(id, value);
 }
 
-__unit_callback int32_t unit_get_param_value(uint8_t id) {
-  return s_waves_instance.getParameterValue(id);
+__unit_callback int32_t unit_get_param_value(uint8_t id)
+{
+  // just return the cached value
+  return cached_values[id];
 }
 
-__unit_callback const char * unit_get_param_str_value(uint8_t id, int32_t value) {
-  return s_waves_instance.getParameterStrValue(id, value);
+__unit_callback const char *unit_get_param_str_value(uint8_t id, int32_t value)
+{
+  value = clipminmaxi32(unit_header.params[id].min, value, unit_header.params[id].max); // just in case
+  return s_osc_instance.getParameterStrValue(id, value);
 }
 
-__unit_callback void unit_set_tempo(uint32_t tempo) {
-  (void)tempo;
+__unit_callback void unit_note_on(uint8_t note, uint8_t velo)
+{
+  s_osc_instance.noteOn(note, velo);
 }
 
-__unit_callback void unit_tempo_4ppqn_tick(uint32_t counter) {
-  (void)counter;
+__unit_callback void unit_note_off(uint8_t note)
+{
+  s_osc_instance.noteOff(note);
 }
 
-__unit_callback void unit_note_on(uint8_t note, uint8_t velo) {
-  s_waves_instance.NoteOn(note, velo);
+__unit_callback void unit_all_note_off()
+{
+  s_osc_instance.allNoteOff();
 }
 
-__unit_callback void unit_note_off(uint8_t note) {
-  s_waves_instance.NoteOff(note);
+__unit_callback void unit_set_tempo(uint32_t tempo)
+{
+  float bpm = (tempo >> 16) + (tempo & 0xFFFF) / static_cast<float>(0x10000);
+  s_osc_instance.setTempo(bpm);
 }
 
-__unit_callback void unit_all_note_off() {
-  s_waves_instance.AllNoteOff();
+__unit_callback void unit_tempo_4ppqn_tick(uint32_t counter)
+{
+  s_osc_instance.tempo4ppqnTick(counter);
 }
 
-__unit_callback void unit_pitch_bend(uint16_t bend) {
-  s_waves_instance.PitchBend(bend);
+__unit_callback void unit_pitch_bend(uint16_t bend)
+{
+  s_osc_instance.pitchBend(bend);
 }
 
-__unit_callback void unit_channel_pressure(uint8_t press) {
-  s_waves_instance.ChannelPressure(press);
+__unit_callback void unit_channel_pressure(uint8_t press)
+{
+  s_osc_instance.channelPressure(press);
 }
 
-__unit_callback void unit_aftertouch(uint8_t note, uint8_t press) {
-  s_waves_instance.AfterTouch(note, press);
+__unit_callback void unit_aftertouch(uint8_t note, uint8_t press)
+{
+  s_osc_instance.aftertouch(note, press);
 }

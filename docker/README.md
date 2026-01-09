@@ -6,6 +6,15 @@
 
 The Docker-based build environment packages together all the tools required to build logue SDK units for any of the supported platforms, provides some convenience tools to simplify bulk project building and allows to build in consistent environment independent from the host operating system.
 
+### how to fix CLRF errors on Windows
+
+After you have cloned logue-sdk, make sure to change local git config core.autocrlf to input instead of true. 
+
+Inside logue-sdk directory, 
+```
+git config core.autocrlf input
+```
+
 ### Setup
 
  1. [Install Docker](https://docs.docker.com/get-docker/) (Note: Docker Desktop is not specifically required, [installing Docker Engine](https://docs.docker.com/engine/install/) is sufficient)
@@ -16,31 +25,54 @@ The Docker-based build environment packages together all the tools required to b
  $ cd logue-sdk
  $ git submodule update --init
  ```
- 
+ 2. - For Windows WST only: Convert scripts from dos to unix:
+  ```
+ $ sudo apt-get install dos2unix
+ $ dos2unix ./*
+ $ dos2unix inc/*
+ $ dos2unix docker-app/*
+ $ dos2unix docker-app/builder/*
+ $ dos2unix docker-app/commands/*
+ $ dos2unix docker-app/drumlogue/*
+
+```
+
  3. Build the container.
  ```
  $ cd docker
  $ ./build_image.sh
- 
+
  [...]
  ```
 
+ Alternatively, grab this [container image](https://hub.docker.com/r/xiashj/logue-sdk) from Docker Hub.
+
+ ```
+ docker pull xiashj/logue-sdk
+ ```
+ 
+ or simply search "logue-sdk" inside Docker Desktop and press "Pull".
+
+
 #### Windows Notes
 
- On Windows (10/11) the [Windows Subsystem for Linux (WSL2)](https://learn.microsoft.com/en-us/windows/wsl/) must be installed.
+ On Windows (10/11) the [Windows Subsystem for Linux (WSL2)](https://learn.microsoft.com/en-us/windows/wsl/) must be installed, including a Linux distribution.
  This is a prerequisite for Docker, and to be able to make use of convenience bash scripts (detailed below) in powershell and command prompt.
+ When cloning the repository, make sure that the Git setting `core.autocrlf` is set to `input`, otherwise none of the setup scripts or build scripts will run.
+ When running the convenience bash scripts you must run `wsl` or `bash` in powershell and command prompt to get to a bash prompt, otherwise they will be launched in Git Bash, 
+ which doesn't have the TTY support required for `run_cmd.sh` and `run_interactive.sh`.
 
 ### Interactive Shell
 
 The `run_interactive.sh` script allows to perform multiple operations without systematically re-instantiating the Docker instance.
 
-This method is mainly useful when performing manual builds during the development process. 
+This method is mainly useful when performing manual builds during the development process.
 
  1. Execute [run_interactive.sh](./run_interactive.sh)
 
 ```
  $ ./run_interactive.sh
- user@logue-sdk $ 
+ user@logue-sdk $
  ```
 
  The following commands are then available:
@@ -52,7 +84,7 @@ This method is mainly useful when performing manual builds during the developmen
  - build : Wrapper script to build logue SDK unit projects.
  - list : List available logue SDK related commands.
  ```
- 
+
 ### Single Command Execution
 
 The `run_cmd.sh` script allows to run a single command within a logue SDK Docker container.
@@ -69,13 +101,13 @@ Note that when using this method each command execution implies spinning up new 
  - env : Prepare environment for target platform builds.
  - build : Wrapper script to build logue SDK unit projects.
  - list : List available logue SDK related commands.
- 
+
  $ ./run_cmd.sh build -l --drumlogue
  - drumlogue/dummy-delfx
  - drumlogue/dummy-masterfx
  - drumlogue/dummy-revfx
  - drumlogue/dummy-synth
- 
+
  $ ./run_cmd.sh build drumlogue/dummy-synth
  >> Initializing drumlogue development environment.
  Note: run 'env -r' to reset the environment
@@ -90,17 +122,17 @@ Note that when using this method each command execution implies spinning up new 
  Creating build/dummy_synth.bin
  Creating build/dummy_synth.dmp
  Creating build/dummy_synth.list
- 
- 
+
+
  Done
- 
+
     text	   data	    bss	    dec	    hex	filename
     3267	    316	      8	   3591	    e07	build/dummy_synth.drmlgunit
  >> Installing /workspace/drumlogue/dummy-synth
  Deploying to /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
- 
+
  Done
- 
+
  >> Resetting environment
  >> Cleaning up drumlogue development environment.
  ```
@@ -114,9 +146,9 @@ The `env` command is used to initialize the build environment for a given target
 ```
  user@logue-sdk $ env -h
  Usage: env [OPTION] [ENV]
- 
+
  Prepare environment for target platform builds.
- 
+
  Options:
   -l, --list    list available environments
   -r, --reset   reset current environment
@@ -148,25 +180,25 @@ The `env` command is used to initialize the build environment for a given target
  arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
  arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
  arm-unknown-linux-gnueabihf-g++ xxxx.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -shared -Wl,-Map=build/dummy_synth.map,--cref -lm -lc -o build/dummy_synth.elf
- 
+
  Compiling header.c
  Compiling _unit_base.c
  Compiling unit.cc
- 
+
  Linking build/dummy_synth.drmlgunit
  Stripping build/dummy_synth.drmlgunit
  Creating build/dummy_synth.hex
  Creating build/dummy_synth.bin
  Creating build/dummy_synth.dmp
- 
+
     text	   data	    bss	    dec	    hex	filename
     3267	    316	      8	   3591	    e07	build/dummy_synth.drmlgunit
  Creating build/dummy_synth.list
- 
+
  Done
- 
+
  [...]
- 
+
  [drumlogue] ~ $ env -r
  >> Resetting environment
  >> Cleaning up drumlogue development environment.
@@ -182,9 +214,9 @@ The `build` command can be used to build projects for any platform. Unless more 
 ```
  user@logue-sdk:~$ build -h
  Usage: /app/commands/build [OPTIONS] [UNIT_PROJECT_PATH]
- 
+
  Wrapper script to build logue SDK unit projects.
- 
+
  Options:
   -l, --list            list valid unit projects
   -c, --clean           only clean projects
@@ -199,10 +231,10 @@ The `build` command can be used to build projects for any platform. Unless more 
   -f, --force           force clean project before building
       --install-dir=DIR install built units to specified directory
   -h, --help            display this help
- 
+
  Arguments:
  [UNIT_PROJECT_PATH]    specify path (relative to /workspace) to the unit project to build/clean
- 
+
  Notes:
   * UNIT_PROJECT_PATH and platform selection options are mutually exclusive.
   * -a/-all is overriden by platform selection options if specified.
@@ -241,6 +273,44 @@ The `build` command can be used to build projects for any platform. Unless more 
  - nts-3_kaoss/dummy-genericfx
 ```
 
+#### Windows Troubleshooting Notes
+
+If you're on **Windows with Docker Desktop using WSL2 backend** and encounter mount errors when running `build -l` (e.g., `[Err] Could not find platform root directory at '/workspace/drumlogue'`), the issue is likely that Docker Desktop's WSL2 distro cannot access your project drive. This is particularly common when your SDK is on an external drive (USB, SD card, etc.).
+
+**Solution:**
+
+1. **Mount your drive in WSL2** (if not auto-mounted):
+   - From PowerShell (as Administrator):
+   ```powershell
+   wsl --cd / mkdir -p /mnt/e
+   wsl --cd / mount -t drvfs E: /mnt/e
+   ```
+   (Replace `E:` with your actual drive letter)
+
+2. **Mount your drive in Docker Desktop's internal WSL distro:**
+   ```powershell
+   wsl -d docker-desktop sh -c "mkdir -p /mnt/e && mount -t drvfs E: /mnt/e"
+   ```
+
+3. **Clean Docker cache** (if paths have been cached):
+   ```powershell
+   docker system prune -a --volumes
+   docker run --rm -v /mnt/e/path/to/your/platform:/test alpine ls /test
+   ```
+   Verify that this shows your actual platform directories, not an empty mount.
+
+4. **Rebuild the container:**
+   ```bash
+   ./build_image.sh
+   ```
+
+5. **Run the interactive shell again:**
+   ```bash
+   ./run_interactive.sh
+   ```
+
+**Note:** These WSL2 mounts are temporary and will be lost on restart or if you unplug an external drive. For external drives, you may need to repeat steps 1-2 after each boot.
+
  * Building a specific project
 
 ```
@@ -258,60 +328,60 @@ arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -
  Compiling header.c
  Compiling _unit_base.c
  Compiling unit.cc
- 
+
  Linking build/dummy_synth.drmlgunit
  Stripping build/dummy_synth.drmlgunit
  Creating build/dummy_synth.hex
  Creating build/dummy_synth.bin
  Creating build/dummy_synth.dmp
  Creating build/dummy_synth.list
- 
+
     text	   data	    bss	    dec	    hex	filename
     3267	    316	      8	   3591	    e07	build/dummy_synth.drmlgunit
- 
+
  Done
 
  >> Installing /workspace/drumlogue/dummy-synth
  Deploying to /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
- 
+
  Done
- 
+
  >> Resetting environment
  >> Cleaning up drumlogue development environment.
  ```
- 
+
  * Cleaning a specific project
- 
+
 ```
  user@logue-sdk:~$ build -c drumlogue/dummy-synth
  >> Initializing drumlogue development environment.
  Note: run 'env -r' to reset the environment
  >> Cleaning /workspace/drumlogue/dummy-synth
- 
+
  Cleaning
  rm -fR .dep build /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
- 
+
  Done
- 
+
  >> Resetting environment
  >> Cleaning up drumlogue development environment.
   ```
- 
+
  * Build all nutekt-digital (nts-1) projects
- 
+
 ```
  user@logue-sdk:~$ build --nts-1
- 
+
  [...]
   ```
-  
+
  * Clean all nutekt-digital (nts-1) projects
- 
-``` 
+
+```
  user@logue-sdk:~$ build -c --nts-1
- 
+
  [...]
- 
+
  ```
 
 

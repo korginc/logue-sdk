@@ -139,7 +139,7 @@ LIBDIR := $(patsubst %,-I%,$(DLIBDIR) $(ULIBDIR))
 #
 SANDBOXDIR ?= $(PROJECT_ROOT)/../../../websim
 WASMSRC := wasm.cc $(UCSRC) $(UCXXSRC) $(wildcard $(PROJECT_ROOT)/../../../websim/dsp/*.c) $(wildcard $(PROJECT_ROOT)/../../../websim/dsp/*.cpp)
-WASMDIR := sim
+WASMDIR := $(PROJECT_ROOT)/sim
 DINCDIR += $(TOOLSDIR)/emsdk/upstream/emscripten/system/include
 EMCC_BIN_PATH := $(TOOLSDIR)/emsdk/upstream/emscripten
 
@@ -250,15 +250,15 @@ wasm:
 	@cp -r $(SANDBOXDIR)/samples $(WASMDIR)/
 	@cp -r $(SANDBOXDIR)/scripts $(WASMDIR)/
 	@cp -r $(SANDBOXDIR)/images $(WASMDIR)/
-	@$(EMCC_BIN_PATH)/emcc -Wno-unknown-attributes $(INCDIR) \
-		-s INITIAL_MEMORY=64MB \
-		-s ALLOW_MEMORY_GROWTH=1 \
+	@cp -r $(WASMSRC) $(WASMDIR)/
+	@$(EMCC_BIN_PATH)/emcc -Wno-unknown-attributes -Wno-limited-postlink-optimizations $(INCDIR) \
 		-s AUDIO_WORKLET=1 \
 		-s WASM_WORKERS=1 \
 		-lembind \
 		--shell-file $(SANDBOXDIR)/osc.html \
 		--emrun \
-		-O1 \
+		-O2 \
+		-g -fdebug-compilation-dir='..' \
 		$(WASMSRC) \
 		-o $(WASMDIR)/$(PROJECT).html
 	@echo Done

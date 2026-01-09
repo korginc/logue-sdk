@@ -45,8 +45,15 @@ if [ -z "$(command -v realpath)" ]; then
     source ${SCRIPT_DIR}/inc/realpath
 fi
 
-IMAGE_NAME="logue-sdk-dev-env"
 IMAGE_VERSION="latest"
+IMAGE_NAME_DEFAULT="xiashj/logue-sdk"
+IMAGE_NAME_FALLBACK="logue-sdk-dev-env"
+
+if docker image inspect "${IMAGE_NAME_DEFAULT}:${IMAGE_VERSION}" >/dev/null 2>&1; then
+    IMAGE_NAME="${IMAGE_NAME_DEFAULT}"
+else
+    IMAGE_NAME="${IMAGE_NAME_FALLBACK}"
+fi
 PLATFORM_PATH=$(realpath "${SCRIPT_DIR}/../platform")
 
 OPT_LIST=""
@@ -117,4 +124,6 @@ if [ -z "${CMD}" ]; then
     exit 2
 fi
 
+## FEDE DEBUG
+# docker run --rm -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}
 docker run --rm -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}

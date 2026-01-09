@@ -1,0 +1,166 @@
+#
+# Set development environment for microkorg2
+#
+
+#
+#    BSD 3-Clause License
+#
+#    Copyright (c) 2022, KORG INC.
+#    All rights reserved.
+#
+#    Redistribution and use in source and binary forms, with or without
+#    modification, are permitted provided that the following conditions are met:
+#
+#    * Redistributions of source code must retain the above copyright notice, this
+#      list of conditions and the following disclaimer.
+#
+#    * Redistributions in binary form must reproduce the above copyright notice,
+#      this list of conditions and the following disclaimer in the documentation
+#      and/or other materials provided with the distribution.
+#
+#    * Neither the name of the copyright holder nor the names of its
+#      contributors may be used to endorse or promote products derived from
+#      this software without specific prior written permission.
+#
+#    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+#    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+#    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+#    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+#    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+#    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+#    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+#    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+__microkorg2_set_env () {
+    if [ -z ${__MICROKORG2_DEV_ENV} ] ; then
+
+        # Generate unique session id
+        [ ! -x "$(which uuidgen)" ] && echo "Error: Cannot find uuidgen in \$PATH. Required to save/recover sessions..." && return 1
+        local uuid=$(uuidgen)
+        
+        local env_backup_dir="${HOME}/.microkorg2.env_backup"
+        mkdir -p "${env_backup_dir}"
+        [ $? -ne 0 ] && echo "Error: Could not create env. backup directory (${env_backup_dir}). Wrong permissions?" && return 1
+
+        # Save environment
+        [ -z "$(set +o | grep '\-o posix')" ] && posix_set=1 && set -o posix
+        export PS1=${PS1} # make sure prompt is exported so we can recover it
+        export -p > "${env_backup_dir}/session_${uuid}"
+        [ ! -z $posix_set ] && set +o posix
+        
+        # Set session id and prevent multiple includes
+        export __MICROKORG2_DEV_ENV="${uuid}"
+
+        # Configure environment
+        export APP_PREFIX="/app/microkorg2"
+        export BUILD_TARGET_TRIPLE=arm-unknown-linux-gnueabihf
+        export TOOLCHAIN_ROOT="${APP_PREFIX}/${BUILD_TARGET_TRIPLE}"
+        export CROSS_COMPILE=${BUILD_TARGET_TRIPLE}-
+
+        export OLD_PATH=${PATH}
+        export PATH=${TOOLCHAIN_ROOT}/bin:${PATH}
+        
+        # Set prompt to indicate current env
+        export OLD_PS1=${PS1}
+        export PS1='\[\e[31m\][microkorg2] \[\e[0m\]\w $ '
+    fi
+}
+
+# __is_backlisted(var_name)
+__is_blacklisted () {
+    case ${1} in
+        PWD|OLDPWD|SHELL|STORAGE|USER|HOME|-*)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+__unset() {
+    __is_blacklisted "${1%%=*}" || unset -v "${1%%=*}"
+}
+ 
+
+__export() {
+    __is_blacklisted "${1%%=*}" || export "$@"
+}
+
+
+# __recover_env(backup_path)
+__recover_env () {
+    local path=${1}
+    
+    [ ! -r "${path}" ] && echo "Error: No such file (${path})" && return 1
+
+    [ -z "$(set +o | grep '\-o posix')" ] && posix_set=1 && set -o posix
+    
+    local unset_code="$(export -p | sed 's|export|__unset|;')"
+    local export_code="$(sed 's|export|__export|;' ${path})"
+
+    eval "${unset_code}${export_code}"
+        
+    [ ! -z $posix_set ] && set +o posix
+    
+    return 0
+}
+
+__microkorg2_reset_env () {
+    if [ ! -z ${__MICROKORG2_DEV_ENV} ] ; then
+        
+        # Recover session id
+        local uuid="${__MICROKORG2_DEV_ENV}"
+        
+        # Check for backed up environment
+        local env_backup_dir="${HOME}/.microkorg2.env_backup"
+        local env_backup_path="${env_backup_dir}/session_${uuid}"
+        if [ ! -r "${env_backup_path}" ]; then
+            echo "Warning: Could not find backup environment at ${env_backup_path}, attempting manual revert..."
+            set -x
+
+            unset APP_PREFIX
+            unset BUILD_TARGET_TRIPLE
+            unset TOOLCHAIN_ROOT
+            unset CROSS_COMPILE
+            
+            export PATH=${OLD_PATH}
+            unset OLD_PATH
+
+            unset __MICROKORG2_DEV_ENV
+            
+            # Set prompt to indicate current env
+            export PS1="${OLD_PS1}"
+            unset OLD_PS1
+            
+            set +x
+            return 0
+        fi
+
+        # Recover saved environment
+        __recover_env "${env_backup_path}"
+        if [ $? -eq 0 ]; then
+            rm -f "${env_backup_path}"            
+        fi
+    fi
+}
+
+reset_env () {
+    echo ">> Cleaning up microkorg2 development environment."
+    __microkorg2_reset_env
+    unset -f __is_blacklisted
+    unset -f __unset
+    unset -f __export
+    unset -f __recover_env
+    unset -f __microkorg2_reset_env
+    unset -f reset_env
+}
+
+# ---- Main ---------------------
+
+echo ">> Initializing microkorg2 development environment."
+__microkorg2_set_env
+unset -f __microkorg2_set_env
