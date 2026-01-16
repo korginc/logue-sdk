@@ -4,11 +4,17 @@
 
 このリポジトリには [prologue](https://www.korg.com/jp/products/synthesizers/prologue/), [minilogue xd](https://www.korg.com/jp/products/synthesizers/minilogue_xd/), [Nu:Tekt NTS-1 digital kit](https://www.korg.com/jp/products/dj/nts_1/), [Nu:Tekt NTS-1 digital kit mkII](https://www.korg.com/jp/products/synthesizers/nts_1_mk2), [microKORG2](https://www.korg.com/products/synthesizers/microkorg2) synthesizers, the [Nu:Tekt NTS-3 kaoss pad kit](https://www.korg.com/jp/products/dj/nts_3), and [drumlogue](https://www.korg.com/jp/products/drums/drumlogue/) の6製品で使用できる自作オシレーターやエフェクトのビルドに必要なファイルが全て揃っています.
 
+## ニュース
+
+[websim](websim/) に、NTS-1 mkii と NTS-3 向けの新しいWebベースのシミュレーターが追加されました. 
+Webブラウザ内でDSPコードの開発、テスト、デバッグができ、開発サイクルを大幅に高速化できます.
+使い方は [websim/README.md](websim/README.md) を参照してください.
+
 ## まずは使ってみよう
 
 既に公開されているオシレーターやエフェクトの情報は [Unit Index](https://korginc.github.io/logue-sdk/ja/unit-index/) にあります.
 具体的な入手方法については各デベロッパーのウェブサイトにてご確認下さい.
-[logue-SDK-filter](https://logue-sdk.vercel.app/) という、より検索しやすいユニットインデックスページもあります。
+[logue-SDK-filter](https://logue-sdk.vercel.app/) という、より検索しやすいユニットインデックスページもあります.
 
 ## プラットフォームと互換性に関して
 
