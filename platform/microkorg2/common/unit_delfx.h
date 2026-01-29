@@ -55,10 +55,7 @@ extern "C" {
 
   /** Exposed parameters with fixed/direct UI controls. */
   enum {
-    k_unit_delfx_fixed_param_time = 0,
-    k_unit_delfx_fixed_param_depth,
-    k_unit_delfx_fixed_param_mix,
-    k_num_unit_delfx_fixed_param_id
+    k_num_unit_delfx_fixed_param_id = 0
   };
 
 #define UNIT_DELFX_MAX_PARAM_COUNT (8)
