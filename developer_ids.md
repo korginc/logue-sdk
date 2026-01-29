@@ -41,3 +41,4 @@
  | 0x696b7556 ('Vuki') | [Greg Vuki](https://multimed.org/~greg/) |
  | 0x666d6f64 ('fmod') | [Frostmod Audio](https://github.com/frostmod) |
  | 0x6a504952 ('jPIR') | [Joerg Piringer](https://joerg.piringer.net/nts3) |
+ | 0x4D72474AU ('MrGJ') | [Glenn Jones](https://github.com/mrglennjones) |
