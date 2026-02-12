@@ -17,3 +17,9 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [noiser](https://joerg.piringer.net/index.php?href=software/noiser.xml) | jörg piringer | noise oscillator with various noise variants | nts-3 | paid |
 | [microlooper](https://joerg.piringer.net/index.php?href=software/microlooper.xml) | jörg piringer | audio looper | nts-3 | paid |
 | [talker](https://jpiringer.gumroad.com/l/talker) | jörg piringer | vintage computer voice | nts-3 | paid |
+| [Retroreverb](https://mrglennjones.gumroad.com/l/sgfee) | Glenn Jones | PS1 & SNES Reverbs | nts-3 | paid |
+| [ShapeSync](https://mrglennjones.gumroad.com/l/shapesync) | Glenn Jones | Rhythmic Modulation | nts-3 | paid |
+| [Menzler Machine](https://mrglennjones.gumroad.com/l/menzlermachine) | Glenn Jones | Rhythmic white noise generator | nts-3 | paid |
+| [Strymon Echo](https://mrglennjones.gumroad.com/l/drymonecho) | Glenn Jones | Tape Saturation & Doubletracker | nts-3 | free |
+| [The Full English](https://mrglennjones.gumroad.com/l/thefullenglish) | Glenn Jones | Experimental noise drone generator | nts-3 | free |
+| [Zammo's Stash](https://mrglennjones.gumroad.com/l/thefullenglish) | Glenn Jones | Experimental FX | nts-3 | free |
