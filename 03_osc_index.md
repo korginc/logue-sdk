@@ -11,6 +11,7 @@ nav_order: 2
 _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp or submit a pull request modifying the table below_
 
 | Name | Developer | Description | Platforms | |
+| [NORM](https://beatnicster.booth.pm/items/6637409) | Beatnicster | phase distortion osc | nts-1 mkii| free |
 | [Alpha One](https://blog.boochow.com/logue/alpha1) | boochow instruments | Alpha-Juno DCO emulation | pro, xd, nts-1 | paid |
 | [Hoovic](https://blog.boochow.com/logue/hoovic) | boochow instruments | Hoover sound | pro, xd, nts-1, nts-1 mkii | paid |
 | [Lily](https://blog.boochow.com/logue/lily) | boochow instruments | oscillator unit based on Mutable Instruments Braids | nts-1 mkii | free |
