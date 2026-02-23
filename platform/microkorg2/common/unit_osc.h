@@ -54,7 +54,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-  
+
+  /** Exposed parameters with fixed/direct UI controls. */
+  enum {
+    k_num_unit_osc_fixed_param_id = 0
+  };
+
   #define OSC_MEMORY_SIZE_BYTES 0x2000
   #define OSC_MEMORY_SIZE (OSC_MEMORY_SIZE_BYTES >> 2) // assumes 32 bit data type
   #define UNIT_OSC_MAX_PARAM_COUNT (13)
