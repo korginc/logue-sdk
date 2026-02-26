@@ -67,3 +67,14 @@ tools/gcc/gcc-arm-none-eabi-*
 
 # Mac ds_store
 **/.DS_Store
+ripplerx_2_3.patch
+platform/drumlogue/resonator/config.mk
+
+#other projects used for exmaple only
+platform/drumlogue/resonator/**
+platform/drumlogue/loguePADS/**
+docker/run_interactive.sh.bak
+.sudo_as_admin_successful
+docker/docker-app/builder/get_microkorg2_toolchain.sh
+docker/docker-app/microkorg2/environment
+platform/ext/CMSIS

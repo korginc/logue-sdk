@@ -1,0 +1,24 @@
+CompileFlags:
+  Add:
+    - -xc++
+    - -std=gnu++14
+    - --target=arm-unknown-linux-gnueabihf
+    - -march=armv7-a
+    - -mtune=cortex-a7
+    - -marm
+    - -mfloat-abi=hard
+    - -mfpu=neon-vfpv4
+    - -Os
+    - -W
+    - -Wall
+    - -Wextra
+    - -Wno-ignored-qualifiers
+    - -fPIC
+    - -D__arm__
+    - -D__cortex_a7__
+    - -D__ARM_NEON__
+    - -D__ARM_ARCH_7A__
+    - -I.
+    - -I../common
+Index:
+  StandardLibrary: true

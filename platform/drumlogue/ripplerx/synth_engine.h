@@ -1,7 +1,13 @@
 #pragma once
+#include <atomic>
+#include <cstddef>
+#include <cstdint>
+
+#include <arm_neon.h>
 
 #include "unit.h"
 #include "dsp_core.h"
+#include "dsp_process.h"
 #include "../common/runtime.h" // Drumlogue OS functions
 
 /**

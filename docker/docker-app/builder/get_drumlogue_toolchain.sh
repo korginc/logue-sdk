@@ -30,6 +30,12 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+## FEDE DEBUG: this is actually APP_PREFIX="/d/app/drumlogue
+## but instead of getting the path global variable it's done
+## by this commant. Unluckily, on Windows11 and having the code in an
+## external disk as D:/, the dirname is wrong.
+## So I commented the call to this script in Dockerfile and done these
+## operations manually.
 SCRIPT_DIR="$(pwd)/$(dirname $0)"
 
 pushd ${SCRIPT_DIR} 2>&1 > /dev/null
@@ -42,7 +48,7 @@ assert_success() {
     exit 1
 }
 
-CUR_ARCH="$(uname -p)"
+CUR_ARCH="x86_64"
 
 if [ "${CUR_ARCH}" == "x86_64" ]; then
     ARCHIVE_URL="https://www.dropbox.com/s/3curhjx9yip29os/drumlogue-toolchain-amd64.tar.bz2"

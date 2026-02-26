@@ -63,7 +63,9 @@ COPY ./commands/* /app/commands/
 
 # drumlogue specific files
 COPY ./drumlogue/environment /app/drumlogue/
+COPY ./drumlogue/environment /app/drumlogue/
 COPY ./builder/get_drumlogue_toolchain.sh /app/drumlogue/
+
 RUN /bin/bash -c "/app/drumlogue/get_drumlogue_toolchain.sh && rm /app/drumlogue/get_drumlogue_toolchain.sh"
 
 # minilogue-xd specific files
@@ -81,10 +83,10 @@ COPY ./nts-3_kaoss/environment /app/nts-3_kaoss/
 # prologue specific files
 COPY ./prologue/environment /app/prologue/
 
-# microkorg2 specific files
-COPY ./microkorg2/environment /app/microkorg2/
-COPY ./builder/get_microkorg2_toolchain.sh /app/microkorg2/
-RUN /bin/bash -c "/app/microkorg2/get_microkorg2_toolchain.sh && rm /app/microkorg2/get_microkorg2_toolchain.sh"
+# microkorg2 specific files (SKIPPED)
+# COPY ./microkorg2/environment /app/microkorg2/
+# COPY ./builder/get_microkorg2_toolchain.sh /app/microkorg2/
+# RUN /bin/bash -c "/app/microkorg2/get_microkorg2_toolchain.sh && rm /app/microkorg2/get_microkorg2_toolchain.sh"
 
 # Patch /etc/bash.bashrc to get rid of sudo warnings
 COPY ./builder/bash.bashrc.patch /root/
