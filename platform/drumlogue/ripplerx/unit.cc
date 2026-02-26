@@ -24,16 +24,14 @@ __unit_callback int8_t unit_init(const unit_runtime_desc_t * desc) {
 
     s_runtime_desc = *desc;
 
-    // If you add an Init() function to RipplerXWaveguide later (e.g., to zero out delay lines),
-    // call it here: s_synth.Init();
-
-    return k_unit_err_none;
+    // Hand over initialization to our synth engine
+    return s_synth.Init(desc);
 }
 
-__unit_callback void unit_teardown() { }
-__unit_callback void unit_reset()    { }
-__unit_callback void unit_resume()   { }
-__unit_callback void unit_suspend()  { }
+__unit_callback void unit_teardown() { s_synth.Teardown(); }
+__unit_callback void unit_reset()    { s_synth.Reset(); }
+__unit_callback void unit_resume()   { s_synth.Resume(); }
+__unit_callback void unit_suspend()  { s_synth.Suspend(); }
 
 // ==============================================================================
 // 3. The Real-Time Audio Thread

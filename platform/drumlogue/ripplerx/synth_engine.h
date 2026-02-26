@@ -29,7 +29,55 @@ inline float apply_skew(float normalized_val, float skew) {
 class alignas(16) RipplerXWaveguide {
 public:
     SynthState state;
+// ==============================================================================
+    // 0. Lifecycle & Initialization
+    // ==============================================================================
 
+    inline int8_t Init(const unit_runtime_desc_t * desc) {
+        // 1. Hardware Sanity Checks
+        // The Drumlogue is strictly 48kHz, stereo.
+        // If Korg ever releases a 96kHz device, this prevents your delay math from breaking.
+        if (desc->samplerate != 48000) return k_unit_err_samplerate;
+        if (desc->output_channels != 2) return k_unit_err_geometry;
+
+        // 2. Clear all memory explicitly at boot
+        Reset();
+
+        return k_unit_err_none;
+    }
+
+    inline void Teardown() {
+        // We use static memory, so there are no raw pointers to free() or delete.
+        // If we were using dynamic memory, we would release it here.
+    }
+
+    inline void Reset() {
+        // Called when the user changes programs or the engine needs a hard flush.
+        // This prevents loud "pops" from old delay line data playing unexpectedly.
+        for (int i = 0; i < NUM_VOICES; ++i) {
+            state.voices[i].is_active = false;
+            state.voices[i].is_releasing = false;
+            state.voices[i].resA.write_ptr = 0;
+            state.voices[i].resB.write_ptr = 0;
+            state.voices[i].resA.z1 = 0.0f;
+            state.voices[i].resB.z1 = 0.0f;
+
+            // Fast-zero the delay buffers
+            for(int j = 0; j < DELAY_BUFFER_SIZE; ++j) {
+                state.voices[i].resA.buffer[j] = 0.0f;
+                state.voices[i].resB.buffer[j] = 0.0f;
+            }
+        }
+        clearSampleState();
+    }
+
+    inline void Resume() {
+        // Called when the audio thread wakes up
+    }
+
+    inline void Suspend() {
+        // Called when the audio thread goes to sleep
+    }
     // ==============================================================================
     // 1. Parameter Binding (UI Thread)
     // ==============================================================================
