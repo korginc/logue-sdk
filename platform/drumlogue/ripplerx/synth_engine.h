@@ -141,6 +141,19 @@ public:
                 break;
             }
 
+            // --- FILTER TRANSLATION ---
+            case 19: { // c_parameterFilterCutoff (Scaled A/B in header.c)
+                // Let's assume the UI passes a value from 10 to 19990 Hz.
+#ifdef ENABLE_PHASE_6_FILTERS
+                // We map this directly to our SVF
+                float cutoff = (float)value;
+                float resonance = 1.5f; // Hardcoded for now, can map to another UI knob later
+
+                state.master_filter.set_coeffs(cutoff, resonance, 48000.0f);
+#endif
+                break;
+            }
+            
             default:
                 break;
         }
@@ -199,6 +212,12 @@ public:
         v.exciter.current_frame = 0;
         v.resA.write_ptr = 0;
         v.resB.write_ptr = 0;
+
+#ifdef ENABLE_PHASE_5_EXCITERS
+        // Trigger the envelopes when a note hits
+        v.exciter.noise_env.trigger();
+        v.exciter.master_env.trigger();
+#endif
     }
 
     inline void GateOn(uint8_t velocity) {

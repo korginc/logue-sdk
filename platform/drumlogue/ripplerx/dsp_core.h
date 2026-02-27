@@ -2,6 +2,26 @@
 #include <cstdint>
 #include <cstddef>
 
+
+// =================================================================
+// UNCOMMENT THIS LINE TO ACTIVATE PHASE 5 (NOISE & ENVELOPES)
+// #define ENABLE_PHASE_5_EXCITERS 1
+// =================================================================
+
+#ifdef ENABLE_PHASE_5_EXCITERS
+#include "noise.h"
+#include "envelope.h"
+#endif
+
+// =================================================================
+// UNCOMMENT THIS LINE TO ACTIVATE PHASE 6 (MASTER FILTER)
+// #define ENABLE_PHASE_6_FILTERS 1
+// =================================================================
+
+#ifdef ENABLE_PHASE_6_FILTERS
+#include "filter.h"
+#endif
+
 /** Because we are optimizing for bare-metal, notice there are no virtual functions,
  * no dynamic memory (new/malloc), and no deep class hierarchies.
  * Just pure data that the CPU cache can read sequentially. */
@@ -22,6 +42,12 @@ struct ExciterState {
     size_t sample_frames = 0;
     size_t current_frame = 0;
     uint8_t channels = 1;
+
+#ifdef ENABLE_PHASE_5_EXCITERS
+    FastNoise noise_gen;
+    FastEnvelope noise_env;
+    FastEnvelope master_env; // Optional: To choke the whole voice on GateOff
+#endif
 
     // Noise Burst Data
     float noise_decay_coeff = 0.0f;
@@ -72,4 +98,8 @@ struct SynthState {
     // Master FX
     float mix_ab = 0.5f;
     float master_gain = 1.0f;
+
+#ifdef ENABLE_PHASE_6_FILTERS
+    FastSVF master_filter;
+#endif
 };

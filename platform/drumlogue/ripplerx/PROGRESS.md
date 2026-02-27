@@ -14,19 +14,28 @@
 - [x] Implement linear interpolation for accurate pitch tuning.
 - [x] Write the master block processing loop (Summation & Exciter routing).
 
-## Phase 4: The Hardware "Hello World" [NEXT]
-- [ ] Compile the minimal viable engine (Oscillator + VCA).
+## Phase 3: The Audio Processing Loop [COMPLETED]
+## Phase 4: The Hardware "Hello World" [READY FOR TEST]
+- [x] `unit.cc` wrapper implemented with complete OS lifecycle compliance (`Init`, `Reset`, etc.).
+- [ ] Compile the minimal viable engine.
 - [ ] Deploy to Drumlogue and verify CPU load and stability.
-- [ ] Ensure sequencer and pitch wheel behave correctly.
 
-## Phase 5: Envelopes & Exciters [PENDING]
-- [ ] `envelope.h`: Implement a fast, branchless ADSR/AR struct.
-- [ ] `noise.h`: Add a white/pink noise generator for breath, bow, and snare wire exciters.
+## Phase 5: Envelopes & Exciters [READY FOR TEST]
+- [x] `envelope.h`: Implement a fast, branchless AR/ADSR struct.
+- [x] `noise.h`: Add a fast PRNG (Xorshift32) noise generator.
+- [x] **Incremental Integration:** Modules added to `dsp_core.h` and `dsp_process.h` behind `#ifdef ENABLE_PHASE_5_EXCITERS` for safe debugging.
 
-## Phase 6: Filters & Master FX [PENDING]
-- [ ] `filter.h`: Implement a 2-pole State Variable Filter (SVF) for the noise exciter and global output.
-- [ ] Tie `header.c` Cutoff and Resonance parameters to the SVF.
+## Phase 6: Filters & Master FX [IN PROGRESS]
+- [x] `filter.h`: Implement a 2-pole Chamberlin State Variable Filter (SVF).
+- [x] Tie `header.c` Cutoff and Resonance to the Master SVF.
+- [x] Integrate SVF incrementally into the audio loop.
 
 ## Phase 7: Waveguide Models & Tables [PENDING]
 - [ ] `constants.h` & `tables.h`: Define fast-math lookup tables and tuning constants.
 - [ ] `models.h`: Define the structural differences between "String", "Tube", and "Membrane" (e.g., swapping loop filters or adding secondary delay lines).
+
+## Phase 8: Preset Design & Acoustic Tuning [PENDING]
+- [ ] Reverse-engineer waveguide parameters for original 28 presets.
+- [ ] Derive exact physics coefficients for new instruments: Timpani, Djambé, Taiko Drum, Marching Snare, Tam Tam, Koto.
+
+

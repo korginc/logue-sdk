@@ -58,12 +58,15 @@ inline float process_exciter(ExciterState& ex) {
         ex.current_frame++;
     }
 
+#ifdef ENABLE_PHASE_5_EXCITERS
     // Add optional Noise Burst here (e.g. for snare wires or breath noise)
-    // if (ex.current_noise_env > 0.001f) {
-    //     float white_noise = ((float)rand() / (float)RAND_MAX * 2.0f) - 1.0f;
-    //     out += white_noise * ex.current_noise_env;
-    //     ex.current_noise_env *= ex.noise_decay_coeff; // Exponential decay
-    // }
+    // 2. Synthesized Noise Burst (Activated incrementally)
+    float noise_env_val = ex.noise_env.process();
+    if (noise_env_val > 0.001f) {
+        float raw_noise = ex.noise_gen.process();
+        out += raw_noise * noise_env_val;
+    }
+#endif
 
     return out;
 }
@@ -108,15 +111,23 @@ inline void processBlock(float* __restrict main_out, size_t frames) {
         }
     }
 
-    // 5. The Hardware Safety Net (Brickwall Limiter)
-    for (size_t i = 0; i < frames * 2; ++i) {
-        float x = main_out[i];
+    // 4. Master Effects
+    for (size_t i = 0; i < frames; ++i) {
+        float mix_l = main_out[i * 2];
+        float mix_r = main_out[i * 2 + 1];
 
-        // Fast Soft-Clipper: Smoothly rounds off extreme peaks (Tube-like saturation)
-        // Equation: x / (1.0 + abs(x))
-        float clipped = x / (1.0f + fabsf(x));
+#ifdef ENABLE_PHASE_6_FILTERS
+        // Apply the SVF to the summed output.
+        // (Note: For true stereo, you'd need two SVFs. For now, we process L and copy to R)
+        mix_l = state.master_filter.process(mix_l);
+        mix_r = mix_l;
+#endif
 
-        // Hard-clamp to absolute Drumlogue DAC limits just in case
-        main_out[i] = fmaxf(-0.99f, fminf(0.99f, clipped));
+        // 5. The Hardware Safety Net (Brickwall Limiter)
+        float clipped_l = mix_l / (1.0f + fabsf(mix_l));
+        float clipped_r = mix_r / (1.0f + fabsf(mix_r));
+
+        main_out[i * 2]     = fmaxf(-0.99f, fminf(0.99f, clipped_l));
+        main_out[i * 2 + 1] = fmaxf(-0.99f, fminf(0.99f, clipped_r));
     }
 }
