@@ -4,7 +4,7 @@
  */
 
 #include "unit.h"
-#include "synth_engine.h" // This should #include "dsp_core.h" and "dsp_process.h" internally
+#include "synth_engine.h" // This should #include "dsp_core.h"
 
 // ==============================================================================
 // 1. Global Synth Instance

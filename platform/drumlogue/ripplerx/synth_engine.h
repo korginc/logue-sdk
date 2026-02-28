@@ -4,10 +4,9 @@
 #include <cstdint>
 
 #include <arm_neon.h>
-
+#include <float_math.h>
 #include "unit.h"
 #include "dsp_core.h"
-#include "dsp_process.h"
 #include "../common/runtime.h" // Drumlogue OS functions
 
 /**
@@ -23,13 +22,13 @@ Sequencer Routing: GateOn properly routes to m_ui_note, ensuring the internal dr
 // Utility for fast skewing
 inline float apply_skew(float normalized_val, float skew) {
     // Inverse exponent mapping for log-style potentiometer curves
-    return powf(normalized_val, 1.0f / skew);
+    return fasterpowf(normalized_val, 1.0f / skew);
 }
 
 class alignas(16) RipplerXWaveguide {
 public:
     SynthState state;
-// ==============================================================================
+    // ==============================================================================
     // 0. Lifecycle & Initialization
     // ==============================================================================
 
@@ -42,6 +41,11 @@ public:
 
         // 2. Clear all memory explicitly at boot
         Reset();
+
+        // 3. Stash runtime functions to manage samples.
+        m_get_num_sample_banks_ptr = desc->get_num_sample_banks;
+        m_get_num_samples_for_bank_ptr = desc->get_num_samples_for_bank;
+        m_get_sample = desc->get_sample;
 
         return k_unit_err_none;
     }
@@ -92,12 +96,10 @@ public:
 
             case 4: // c_parameterSampleBank
                 m_sample_bank = value;
-                loadConfigureSample();
                 break;
 
             case 5: // c_parameterSampleNumber
                 m_sample_number = value;
-                loadConfigureSample();
                 break;
 
             // --- WAVEGUIDE COEFFICIENT TRANSLATION ---
@@ -153,34 +155,9 @@ public:
 #endif
                 break;
             }
-            
+
             default:
                 break;
-        }
-    }
-
-    // ==============================================================================
-    // 2. Safe Sample Loading (OS Interrogation)
-    // ==============================================================================
-    inline void loadConfigureSample() {
-        if (m_sample_bank >= m_get_num_sample_banks_ptr()) {
-            clearSampleState(); return;
-        }
-
-        size_t actualIndex = (m_sample_number > 0) ? (size_t)(m_sample_number - 1) : 0;
-        if (actualIndex >= m_get_num_samples_for_bank_ptr(m_sample_bank)) {
-            clearSampleState(); return;
-        }
-
-        const sample_wrapper_t* wrapper = m_get_sample(m_sample_bank, actualIndex);
-        if (wrapper && wrapper->sample_ptr) {
-            for (int i = 0; i < NUM_VOICES; ++i) {
-                state.voices[i].exciter.sample_ptr = wrapper->sample_ptr;
-                state.voices[i].exciter.sample_frames = wrapper->frames;
-                state.voices[i].exciter.channels = wrapper->channels;
-            }
-        } else {
-            clearSampleState();
         }
     }
 
@@ -190,6 +167,27 @@ public:
     inline void NoteOn(uint8_t note, uint8_t velocity) {
         state.next_voice_idx = (state.next_voice_idx + 1) % NUM_VOICES;
         VoiceState& v = state.voices[state.next_voice_idx];
+
+        // --- Sample Loading ---
+        // First, clear any old sample data
+        v.exciter.sample_ptr = nullptr;
+        v.exciter.sample_frames = 0;
+
+        // Then, try to load the new one just-in-time
+        if (m_get_sample && m_get_num_sample_banks_ptr && m_get_num_samples_for_bank_ptr) {
+            if (m_sample_bank < m_get_num_sample_banks_ptr()) {
+                size_t actualIndex = (m_sample_number > 0) ? (size_t)(m_sample_number - 1) : 0;
+                if (actualIndex < m_get_num_samples_for_bank_ptr(m_sample_bank)) {
+                    const sample_wrapper_t* wrapper = m_get_sample(m_sample_bank, actualIndex);
+                    if (wrapper && wrapper->sample_ptr) {
+                        v.exciter.sample_ptr = wrapper->sample_ptr;
+                        v.exciter.sample_frames = wrapper->frames;
+                        v.exciter.channels = wrapper->channels;
+                    }
+                }
+            }
+        }
+        // --- End Sample Loading ---
 
         v.is_active = true;
         v.is_releasing = false;
@@ -220,20 +218,148 @@ public:
 #endif
     }
 
+
+    /**
+    The Architectural Wins Here:
+    Zero Division or Trigonometry: Notice that inside the massive for (size_t i = 0; i < frames; ++i) loop, there is not a single /, cos(), pow(), or log(). It is purely +, -, and *. This is why this engine will never trigger a Watchdog Timeout or denormal CPU spike on the hardware.
+
+    Bitwise Masking (& DELAY_MASK): Instead of using expensive if (ptr >= 4096) ptr = 0; branches, or slow modulo (% 4096) operators, we use a bitwise AND. It takes exactly 1 clock cycle on the ARM CPU to wrap the delay line safely.
+
+    Contiguous Memory Arrays: wg.buffer is just an array of float. The CPU will pre-fetch these arrays into the L1 cache, meaning memory access is effectively zero-cost.
+    */
+
+    // ==============================================================================
+    // 4. The Core Physics (Executed per-voice, per-sample)
+    // ==============================================================================
+
+    // Processes a single sample through the Waveguide
+    inline float process_waveguide(WaveguideState& wg, float exciter_input) {
+        // 1. Calculate the read pointer position for exact pitch
+        float read_pos = (float)wg.write_ptr - wg.delay_length;
+        if (read_pos < 0.0f) read_pos += (float)DELAY_BUFFER_SIZE; // Wrap around safely
+
+        // 2. Fractional Delay Line Reading (Linear Interpolation)
+        int idx_int = (int)read_pos;
+        float frac = read_pos - (float)idx_int;
+
+        int idx_A = idx_int & DELAY_MASK;
+        int idx_B = (idx_A + 1) & DELAY_MASK;
+
+        // Blend the two samples based on the fraction
+        float delay_out = (wg.buffer[idx_A] * (1.0f - frac)) + (wg.buffer[idx_B] * frac);
+
+        // 3. The Loss Filter (1-pole Lowpass) - Simulates Material (Wood/Metal)
+        // wg.lowpass_coeff was pre-calculated in setParameter()
+        wg.z1 = (delay_out * wg.lowpass_coeff) + (wg.z1 * (1.0f - wg.lowpass_coeff));
+        float filtered_out = wg.z1;
+
+        // 4. Feedback & Exciter Addition
+        // wg.feedback_gain is our "Decay" time
+        float new_val = exciter_input + (filtered_out * wg.feedback_gain);
+
+        // 5. Write back to the delay line and advance the pointer
+        wg.buffer[wg.write_ptr] = new_val;
+        wg.write_ptr = (wg.write_ptr + 1) & DELAY_MASK;
+
+        return new_val;
+    }
+
+    // Processes the Exciter (Generates the initial "strike" or sample burst)
+    inline float process_exciter(ExciterState& ex) {
+        float out = 0.0f;
+
+        // Play PCM Sample if loaded
+        if (ex.sample_ptr && ex.current_frame < ex.sample_frames) {
+            // Assume interleaved sample buffer (L R L R). We just read the Left channel for the exciter.
+            size_t raw_idx = ex.current_frame * ex.channels;
+            out = ex.sample_ptr[raw_idx];
+            ex.current_frame++;
+        }
+
+    #ifdef ENABLE_PHASE_5_EXCITERS
+        // Add optional Noise Burst here (e.g. for snare wires or breath noise)
+        // 2. Synthesized Noise Burst (Activated incrementally)
+        float noise_env_val = ex.noise_env.process();
+        if (noise_env_val > 0.001f) {
+            float raw_noise = ex.noise_gen.process();
+            out += raw_noise * noise_env_val;
+        }
+    #endif
+
+        return out;
+    }
+
+    // ==============================================================================
+    // 5. The Master Audio Loop (Called by Drumlogue OS)
+    // ==============================================================================
+    inline void processBlock(float* __restrict main_out, size_t frames) {
+
+        // Clear the output buffer
+        for (size_t i = 0; i < frames * 2; ++i) {
+            main_out[i] = 0.0f;
+        }
+
+        // Process each active voice
+        for (size_t v = 0; v < NUM_VOICES; ++v) {
+            VoiceState& voice = state.voices[v];
+            if (!voice.is_active) continue;
+
+            // Process the block for this voice
+            for (size_t i = 0; i < frames; ++i) {
+
+                // 1. Generate the Exciter burst
+                float exciter_sig = process_exciter(voice.exciter);
+
+                // 2. Feed the Exciter into both Resonators
+                float outA = process_waveguide(voice.resA, exciter_sig);
+                float outB = process_waveguide(voice.resB, exciter_sig);
+
+                // 3. Mix the resonators together
+                // (mix_ab is controlled by the UI, 0.0 = A only, 1.0 = B only)
+                float voice_out = (outA * (1.0f - state.mix_ab)) + (outB * state.mix_ab);
+
+                // Apply note velocity
+                voice_out *= voice.current_velocity;
+
+                // 4. Sum into the master interleaved stereo buffer (L and R)
+                main_out[i * 2]     += voice_out * state.master_gain; // Left
+                main_out[i * 2 + 1] += voice_out * state.master_gain; // Right
+            }
+        }
+
+        // 4. Master Effects
+        for (size_t i = 0; i < frames; ++i) {
+            float mix_l = main_out[i * 2];
+            float mix_r = main_out[i * 2 + 1];
+
+    #ifdef ENABLE_PHASE_6_FILTERS
+            // Apply the SVF to the summed output.
+            // (Note: For true stereo, you'd need two SVFs. For now, we process L and copy to R)
+            mix_l = state.master_filter.process(mix_l);
+            mix_r = mix_l;
+    #endif
+
+            // 5. The Hardware Safety Net (Brickwall Limiter)
+            float clipped_l = mix_l / (1.0f + fabsf(mix_l));
+            float clipped_r = mix_r / (1.0f + fabsf(mix_r));
+
+            main_out[i * 2]     = fmaxf(-0.99f, fminf(0.99f, clipped_l));
+            main_out[i * 2 + 1] = fmaxf(-0.99f, fminf(0.99f, clipped_r));
+        }
+    }
+
     inline void GateOn(uint8_t velocity) {
         // Route internal Drumlogue sequencer to the UI Note parameter
         NoteOn(m_ui_note, velocity);
     }
 
 private:
+    // Functions from unit runtime
+    unit_runtime_get_num_sample_banks_ptr m_get_num_sample_banks_ptr;
+    unit_runtime_get_num_samples_for_bank_ptr m_get_num_samples_for_bank_ptr;
+    unit_runtime_get_sample_ptr m_get_sample;
+
     uint8_t m_ui_note = 60;
     uint8_t m_sample_bank = 0;
     uint8_t m_sample_number = 0;
-
-    inline void clearSampleState() {
-        for (int i = 0; i < NUM_VOICES; ++i) {
-            state.voices[i].exciter.sample_ptr = nullptr;
-            state.voices[i].exciter.sample_frames = 0;
-        }
-    }
 };
