@@ -72,7 +72,6 @@ public:
                 state.voices[i].resB.buffer[j] = 0.0f;
             }
         }
-        clearSampleState();
     }
 
     inline void Resume() {
@@ -94,11 +93,11 @@ public:
                 m_ui_note = (uint8_t)fmaxf(1.0f, fminf(126.0f, value));
                 break;
 
-            case 4: // c_parameterSampleBank
+            case 2: // c_parameterSampleBank
                 m_sample_bank = value;
                 break;
 
-            case 5: // c_parameterSampleNumber
+            case 3: // c_parameterSampleNumber
                 m_sample_number = value;
                 break;
 
@@ -159,6 +158,42 @@ public:
             default:
                 break;
         }
+    }
+
+    inline int32_t getParameterValue(uint8_t index) const {
+        switch (index) {
+            case 1: // Note
+                return m_ui_note;
+            case 2: // Bank
+                return m_sample_bank;
+            case 3: // Sample
+                return m_sample_number;
+            default:
+                return 0;
+        }
+    }
+
+    inline const char * getParameterStrValue(uint8_t index, int32_t value) const {
+        static const char* const bank_names[] = {
+            "None",
+            "CH",
+            "OH",
+            "RS",
+            "CP",
+            "MISC",
+            "USER",
+            "EXP"
+        };
+
+        switch (index) {
+        case 2: // Bank
+            if (value >= 0 && value < 7)
+                return bank_names[value];
+            break;
+        default:
+            break;
+        }
+        return nullptr;
     }
 
     // ==============================================================================

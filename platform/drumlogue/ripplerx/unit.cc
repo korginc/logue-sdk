@@ -51,13 +51,11 @@ __unit_callback void unit_set_param_value(uint8_t id, int32_t value) {
 }
 
 __unit_callback int32_t unit_get_param_value(uint8_t id) {
-    // TODO: Return your UI tracking variables (m_ui_note, a_b_decay, etc.)
-    // based on the requested 'id' so the screen updates correctly on preset load.
-    return 0;
+    return s_synth.getParameterValue(id);
 }
 
 __unit_callback const char * unit_get_param_str_value(uint8_t id, int32_t value) {
-    return nullptr; // Drumlogue defaults to rendering the raw number if nullptr
+    return s_synth.getParameterStrValue(id, value);
 }
 
 __unit_callback const uint8_t * unit_get_param_bmp_value(uint8_t id, int32_t value) {

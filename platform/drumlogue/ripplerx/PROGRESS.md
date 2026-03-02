@@ -22,6 +22,7 @@ The initial implementation of sample loading was found to be unreliable, leading
 - **[FIXED]** Replaced the fragile, state-based sample loading mechanism with a "just-in-time" model. The `NoteOn` function now directly fetches sample data from the OS when a note is triggered.
 - **[REMOVED]** Deleted the `loadConfigureSample` and `clearSampleState` functions, which were triggered by the UI, in favor of the more robust `NoteOn`-based loading.
 - **[COMPLETED]** Added defensive checks to the `Init` and `NoteOn` functions to ensure all OS-provided sample API pointers are valid before use, preventing potential crashes.
+- **[FIXED]** Corrected a parameter index mismatch between `header.c` and `synth_engine.h` that prevented sample bank and number changes from being recognized by the engine, causing sample loading to fail.
 
 ## Phase 5: Sound Generation & UI Integration [IN PROGRESS]
 
@@ -32,8 +33,8 @@ The initial implementation of sample loading was found to be unreliable, leading
     - **[ ] Implement Mixer:** Add a parameter to select or mix between Sample, Noise, and Mallet exciters.
 
 - **[ ] Full UI Integration:**
-    - **[ ] Implement `unit_get_param_value`:** In `unit.cc`, fully implement this function to report the current state of all parameters back to the UI.
-    - **[ ] Implement `unit_get_param_str_value`:** In `unit.cc`, implement this to display the correct names for string-based parameters like the current sample, bank, and exciter type.
+    - **[COMPLETED]** Implement `unit_get_param_value`: In `unit.cc`, fully implement this function to report the current state of all parameters back to the UI.
+    - **[COMPLETED]** Implement `unit_get_param_str_value`: In `unit.cc`, implement this to display the correct names for string-based parameters like the current sample, bank, and exciter type.
     - **[ ] Test & Verify:** Thoroughly test that all UI controls map correctly to the engine and that the screen accurately reflects the state of the synth.
 
 ## Phase 6: Filters & Master FX [IN PROGRESS]
