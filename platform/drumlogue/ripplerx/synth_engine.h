@@ -9,6 +9,9 @@
 #include "dsp_core.h"
 #include "../common/runtime.h" // Drumlogue OS functions
 
+#define ENABLE_PHASE_5_EXCITERS
+// #define ENABLE_PHASE_6_FILTERS
+
 /**
  * The Architectural Wins Here:
 Pre-Calculated Math: Notice the apply_skew and division happens purely in setParameter. The DSP struct (WaveguideState) now holds a pure float like 0.993f. In Phase 3, the Audio Thread will just do a single multiplication (buffer[i] * feedback_gain).
@@ -175,7 +178,6 @@ public:
 
     inline const char * getParameterStrValue(uint8_t index, int32_t value) const {
         static const char* const bank_names[] = {
-            "None",
             "CH",
             "OH",
             "RS",

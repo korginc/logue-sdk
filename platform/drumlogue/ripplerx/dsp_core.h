@@ -5,7 +5,7 @@
 
 // =================================================================
 // UNCOMMENT THIS LINE TO ACTIVATE PHASE 5 (NOISE & ENVELOPES)
-// #define ENABLE_PHASE_5_EXCITERS 1
+#define ENABLE_PHASE_5_EXCITERS 1
 // =================================================================
 
 #ifdef ENABLE_PHASE_5_EXCITERS

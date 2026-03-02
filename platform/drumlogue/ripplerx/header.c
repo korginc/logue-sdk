@@ -16,24 +16,15 @@ const __unit_header unit_header_t unit_header = {
     .target = UNIT_TARGET_PLATFORM | k_unit_module_synth,  // target platform and module for this unit
     .api = UNIT_API_VERSION,                               // logue sdk API version against which unit was built
     .dev_id = 0x46654465U,                                 // 'FeDe' - https://github.com/fedemone/logue-sdk
-    .unit_id = 0x5265736fU,                                // TODO - Id for this unit, should be unique within the scope of a given dev_id
+    .unit_id = 0x5265736fU,                                // Id for this unit, should be unique within the scope of a given dev_id
     .version = 0x00010000U,                                // This unit's version: major.minor.patch (major<<16 minor<<8 patch).
     .name = "RipplerX",                                    // Name for this unit, will be displayed on device
-// #ifdef DEBUGN
-    .num_presets = 29,                                     // Number of internal presets this unit has.
-// #else
-    // .num_presets = 28,                                     // Number of internal presets this unit has.
-// #endif
+    .num_presets = 28,                                     // Number of internal presets this unit has.
     .num_params = 24,                                      // Number of parameters for this unit, max 24
     .params = {
         // Format: min, max, center, default, type, fractional digits, frac. type (fixed/decimal), <reserved>, name
 
         // See common/runtime.h for type enum and unit_param_t structure
-
-        //FOR PORTING. On page one must be synth type and load from xml the parameters accordingly
-        //             on other pages, all the "PARAMETERS" (see PluginPorcessor.cpp)
-        //             see also unit_load_preset
-        // NOTE Names are truncated to 6 characters
 
         // Page 1: Program and sample selection
         // Program, will set different values for parameters
