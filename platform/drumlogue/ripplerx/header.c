@@ -27,8 +27,8 @@ const __unit_header unit_header_t unit_header = {
         // See common/runtime.h for type enum and unit_param_t structure
 
         // Page 1: Program and sample selection
-        // Program, will set different values for parameters
-        {0, 28, 0, 13, k_unit_param_type_strings, 0, 0, 0, {"Prgram"}},  // Program::Initial
+        // TO BE DECIDED
+        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},  // not need to use for preset, as there's an API for that
         // Resonator note for Gate mode - MIDI Note 24 (C1)
         {24, 126, 1, 60, k_unit_param_type_midi_note, 0, 0, 0, {"Note"}},
         // Res Gain - NOTE: removed for the moment
@@ -42,7 +42,7 @@ const __unit_header unit_header_t unit_header = {
         // Mallet resonance
         {0, 1000, 500, 8, k_unit_param_type_none, 1, 1, 0, {"MlltRes"}},
         // Mallet stiffness
-        {100, 5000, 250, 250, k_unit_param_type_none, 10, 0, 0, {"MlltStif"}},
+        {100, 5000, 250, 250, k_unit_param_type_none, 0, 0, 0, {"MlltStif"}},
         // Velocity Mallet Resonance
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"VlMllRes"}},
         // Velocity Mallet Stiffness

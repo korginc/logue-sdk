@@ -70,7 +70,7 @@ __unit_callback void unit_note_on(uint8_t note, uint8_t velocity) {
 }
 
 __unit_callback void unit_note_off(uint8_t note) {
-    // s_synth.NoteOff(note); // Uncomment when Envelope Release is implemented
+    s_synth.NoteOff(note);
 }
 
 __unit_callback void unit_gate_on(uint8_t velocity) {
@@ -78,11 +78,11 @@ __unit_callback void unit_gate_on(uint8_t velocity) {
 }
 
 __unit_callback void unit_gate_off() {
-    // s_synth.GateOff(); // Uncomment when Envelope Release is implemented
+    s_synth.GateOff();
 }
 
 __unit_callback void unit_all_note_off() {
-    // Zero out the delay lines or fast-release all active voices here
+    s_synth.AllNoteOff();
 }
 
 __unit_callback void unit_pitch_bend(uint16_t bend) {
@@ -91,3 +91,15 @@ __unit_callback void unit_pitch_bend(uint16_t bend) {
 
 __unit_callback void unit_channel_pressure(uint8_t pressure) { }
 __unit_callback void unit_aftertouch(uint8_t note, uint8_t aftertouch) { }
+
+__unit_callback void unit_load_preset(uint8_t idx) {
+  return s_synth_instance.LoadPreset(idx);
+}
+
+__unit_callback uint8_t unit_get_preset_index() {
+  return s_synth_instance.getPresetIndex();
+}
+
+__unit_callback const char * unit_get_preset_name(uint8_t idx) {
+  return Synth::getPresetName(idx);
+}

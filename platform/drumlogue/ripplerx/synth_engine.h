@@ -84,19 +84,79 @@ public:
     inline void Suspend() {
         // Called when the audio thread goes to sleep
     }
+
+    inline void ChannelPressure(uint8_t pressure) { (void)pressure; }
+
+    inline void Aftertouch(uint8_t note, uint8_t aftertouch) {
+        (void)note;
+        (void)aftertouch;
+    }
+
+
     // ==============================================================================
-    // 1. Parameter Binding (UI Thread)
+    // 1. UI State & Preset Management
+    // ==============================================================================
+
+    // Tracks the raw UI integer for all 25 possible parameter slots (0 to 24)
+    int32_t m_params[25] = {0};
+    uint8_t m_preset_idx = 0;
+
+    // Called by unit_get_param_value so the OS knows what to draw on the screen
+    inline int32_t getParameterValue(uint8_t index) const {
+        return m_params[index];
+    }
+
+    inline uint8_t getPresetIndex() const {
+        return m_preset_idx;
+    }
+
+    // Called by unit_set_param_value(0, value) to load a new patch
+    inline void LoadPreset(uint8_t idx) {
+        m_preset_idx = idx;
+
+        // TODO (Phase 8): When you export your 28 legacy presets, you will
+        // paste the 2D array here and loop through it.
+        // Example:
+        // for (int param_id = 1; param_id <= 24; ++param_id) {
+        //     if (param_id == 2) continue; // Skip Gain
+        //     setParameter(param_id, legacy_preset_data[idx][param_id]);
+        // }
+    }
+
+    static inline const char * getPresetName(uint8_t idx) {
+        // Dummy names until we port your legacy preset list in Phase 8
+        static const char* const preset_names[] = {
+            "Init", "Marimba", "Vibraphone", "Woodblock", "Timpani",
+            "Snare", "Tom", "Cymbal", "Bell", "Gong", // ... add up to 28
+            "Preset11", "Preset12", "Preset13", "Preset14", "Preset15",
+            "Preset16", "Preset17", "Preset18", "Preset19", "Preset20",
+            "Preset21", "Preset22", "Preset23", "Preset24", "Preset25",
+            "Preset26", "Preset27", "Preset28"
+        };
+        if (idx < 28) return preset_names[idx];
+        return "Unknown";
+    }
+
+
+    // ==============================================================================
+    // 2. Parameter Binding (UI Thread)
     // ==============================================================================
     inline void setParameter(uint8_t index, int32_t value) {
-        // We calculate coefficients HERE so the audio thread does zero heavy math.
+        // 1. Save the raw value so the OLED screen can read it back later
+        m_params[index] = value;
 
-        switch(index) {
-            case 0: // c_parameterResonatorNote (or similar pitch offset)
+        // 2. Translate UI integer to DSP Physics
+	switch(index) {
+	        // Page 1
+            case 0:
+                // TODO
+                break;
+            case 1: // Note
                 // Store UI note for the internal sequencer Gate triggers
                 m_ui_note = (uint8_t)fmaxf(1.0f, fminf(126.0f, value));
                 break;
 
-            case 2: // c_parameterSampleBank
+            case 2: // Bank
                 m_sample_bank = value;
                 break;
 
@@ -104,30 +164,44 @@ public:
                 m_sample_number = value;
                 break;
 
-            // --- WAVEGUIDE COEFFICIENT TRANSLATION ---
+            // Page 2 - TODO
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+            // Page 3 - TODO
+            case 8:
+	        // fallthrough
+                break;
+            case 9: { // Model (0..17, where 0..8 is ResA and 9..17 is ResB)
+                // We will fully implement this in Phase 7.
+                // For now, track it so the screen remembers it.
+                m_model_a = value % 9;
+                break;
+            case 10:
+                // fallthrough
+                break;
 
-            case 12: { // c_parameterResonatorDecayFeedback (e.g. 0 to 1000)
-                // Map 0-1000 to a feedback multiplier: 0.0 to 0.999
-                // A value of 1.0 would cause infinite feedback (explosion)
-                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
-                float skewed = apply_skew(norm, 0.3f);
+            case 11: { // Dkay (Decay Time = Feedback Loop)
+                // UI Range is 0 to 2000.
+                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
 
-                float max_feedback = 0.999f;
-                float g = skewed * max_feedback;
+                // TODO apply skew?
 
-                // Apply to all voices to allow live knob sweeps
+                // Cap at 0.995 to prevent dangerous infinite volume build-up
+                float g = norm * 0.995f;
+
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     state.voices[i].resA.feedback_gain = g;
                     state.voices[i].resB.feedback_gain = g;
                 }
                 break;
             }
-
-            case 13: { // c_parameterResonatorDecayDamping (Material/Tone)
-                // Map UI 0-1000 to a 1-pole Lowpass coefficient: 0.01 to 1.0
-                // 1.0 = No damping (bright metallic), 0.01 = Heavy damping (dull wood)
-                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
-                float coeff = 0.01f + (norm * 0.99f);
+            // Page 4
+            case 12: { // Mterl (Material = Loop Lowpass Filter)
+                // UI Range is -10 to 30 -> mapped to 0.0 to 1.0
+                float norm = (fmaxf(-10.0f, fminf(30.0f, (float)value)) + 10.0f) / 40.0f;
+                float coeff = 0.01f + (norm * 0.99f); // 0.01 (dull/wood) to 1.0 (bright/metal)
 
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     state.voices[i].resA.lowpass_coeff = coeff;
@@ -136,17 +210,41 @@ public:
                 break;
             }
 
-            case 14: { // c_parameterResonatorDispersion (Inharmonicity)
-                // Map to allpass coefficient (-1.0 to 1.0)
-                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
+            case 14:
+            {
+                //TODO
+                break;
+            }
+	    case 14: { // Rel (Release Envelope Time)
+                // Range 0 to 20. Map to an exponential release rate.
+                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 20.0f));
+                float rel_rate = 0.0001f + ((1.0f - norm) * 0.01f); // Higher knob = slower rate
                 for (int i = 0; i < NUM_VOICES; ++i) {
-                    // Update internal dispersion variables here
+#ifdef ENABLE_PHASE_5_EXCITERS
+                    state.voices[i].exciter.noise_env.release_rate = rel_rate;
+                    state.voices[i].exciter.master_env.release_rate = rel_rate;
+#endif
                 }
                 break;
             }
 
+            case 15: { // c_parameterResonatorDispersion (Inharmonicity)
+                // Map to allpass coefficient (-1.0 to 1.0)
+                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
+                for (int i = 0; i < NUM_VOICES; ++i) {
+#ifdef ENABLE_PHASE_5_EXCITERS
+                    state.voices[i].exciter.noise_env.release_rate = rel_rate;
+                    state.voices[i].exciter.master_env.release_rate = rel_rate;
+#endif
+                }
+                break;
+            }
+            // Page 5
+            case 16:
+                // TODO
+                break;
             // --- FILTER TRANSLATION ---
-            case 19: { // c_parameterFilterCutoff (Scaled A/B in header.c)
+            case 17: { // c_parameterFilterCutoff (Scaled A/B in header.c)
                 // Let's assume the UI passes a value from 10 to 19990 Hz.
 #ifdef ENABLE_PHASE_6_FILTERS
                 // We map this directly to our SVF
@@ -158,23 +256,44 @@ public:
                 break;
             }
 
+            case 18:
+            case 19:
+                // fallthrough
+                // TODO
+                break;
+            // Page 6
+            case 20: { // NzMix (Noise Burst Volume)
+                // UI Range is 0 to 1000
+#ifdef ENABLE_PHASE_5_EXCITERS
+                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
+                for (int i = 0; i < NUM_VOICES; ++i) {
+                    state.voices[i].exciter.noise_decay_coeff = norm; // We'll use this as Volume
+                }
+#endif
+                break;
+            }
+
+            case 21: { // NzRes (Using this as Noise Envelope Attack/Decay for now)
+                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
+                for (int i = 0; i < NUM_VOICES; ++i) {
+                    // Lower value = sharp percussive click. Higher = soft breath attack.
+                    state.voices[i].exciter.noise_env.attack_rate = 0.9f - (norm * 0.8f);
+                    state.voices[i].exciter.noise_env.decay_rate = 0.05f - (norm * 0.04f);
+                }
+                break;
+            }
+            case 22:
+            case 23:
+                // fallthrough
+                // TODO
+                break;
             default:
+                // Catch all other unassigned parameters (Tone, HitPos, Inharm, TubeRadius)
+                // They are saved in m_params[] automatically at the top of the function.
                 break;
         }
     }
 
-    inline int32_t getParameterValue(uint8_t index) const {
-        switch (index) {
-            case 1: // Note
-                return m_ui_note;
-            case 2: // Bank
-                return m_sample_bank;
-            case 3: // Sample
-                return m_sample_number;
-            default:
-                return 0;
-        }
-    }
 
     inline const char * getParameterStrValue(uint8_t index, int32_t value) const {
         static const char* const bank_names[] = {
@@ -199,7 +318,7 @@ public:
     }
 
     // ==============================================================================
-    // 3. Sequencer and MIDI Routing
+    // 4. Sequencer and MIDI Routing
     // ==============================================================================
     inline void NoteOn(uint8_t note, uint8_t velocity) {
         state.next_voice_idx = (state.next_voice_idx + 1) % NUM_VOICES;
@@ -251,11 +370,45 @@ public:
 #ifdef ENABLE_PHASE_5_EXCITERS
         // Trigger the envelopes when a note hits
         v.exciter.noise_env.trigger();
+        // Configure master envelope as a Gate (Instant attack, infinite sustain)
+        v.exciter.master_env.attack_rate = 0.99f;
+        v.exciter.master_env.decay_rate = 0.0f;
+        v.exciter.master_env.sustain_level = 1.0f;
         v.exciter.master_env.trigger();
 #endif
     }
 
+inline void NoteOff(uint8_t note) {
+        for (int i = 0; i < NUM_VOICES; ++i) {
+            VoiceState& v = state.voices[i];
 
+            // Find the voice playing this note that hasn't already been released
+            if (v.is_active && !v.is_releasing && v.current_note == note) {
+                v.is_releasing = true;
+
+#ifdef ENABLE_PHASE_5_EXCITERS
+                v.exciter.noise_env.release();
+                v.exciter.master_env.release();
+#endif
+            }
+        }
+    }
+
+    inline void GateOff() {
+        // The internal Drumlogue sequencer releases the UI note
+        NoteOff(m_ui_note);
+    }
+
+    inline void AllNoteOff() {
+        // Panic button: aggressively release everything
+        for (int i = 0; i < NUM_VOICES; ++i) {
+            state.voices[i].is_releasing = true;
+#ifdef ENABLE_PHASE_5_EXCITERS
+            state.voices[i].exciter.noise_env.release();
+            state.voices[i].exciter.master_env.release();
+#endif
+        }
+    }
     /**
     The Architectural Wins Here:
     Zero Division or Trigonometry: Notice that inside the massive for (size_t i = 0; i < frames; ++i) loop, there is not a single /, cos(), pow(), or log(). It is purely +, -, and *. This is why this engine will never trigger a Watchdog Timeout or denormal CPU spike on the hardware.
@@ -266,7 +419,7 @@ public:
     */
 
     // ==============================================================================
-    // 4. The Core Physics (Executed per-voice, per-sample)
+    // 5. The Core Physics (Executed per-voice, per-sample)
     // ==============================================================================
 
     // Processes a single sample through the Waveguide
@@ -319,7 +472,8 @@ public:
         float noise_env_val = ex.noise_env.process();
         if (noise_env_val > 0.001f) {
             float raw_noise = ex.noise_gen.process();
-            out += raw_noise * noise_env_val;
+            // Multiply by noise_decay_coeff so the UI NzMix knob actually changes the volume
+            out += raw_noise * noise_env_val * ex.noise_decay_coeff;
         }
     #endif
 
@@ -327,7 +481,7 @@ public:
     }
 
     // ==============================================================================
-    // 5. The Master Audio Loop (Called by Drumlogue OS)
+    // 6. The Master Audio Loop (Called by Drumlogue OS)
     // ==============================================================================
     inline void processBlock(float* __restrict main_out, size_t frames) {
 
@@ -357,6 +511,18 @@ public:
 
                 // Apply note velocity
                 voice_out *= voice.current_velocity;
+
+#ifdef ENABLE_PHASE_5_EXCITERS
+                // --- THE MASTER VCA ---
+                // Process the envelope and apply it to the audio
+                float master_amp = voice.exciter.master_env.process();
+                voice_out *= master_amp;
+
+                // CPU Optimization: If release phase is completely finished, turn voice off
+                if (voice.is_releasing && voice.exciter.master_env.state == ENV_IDLE) {
+                    voice.is_active = false;
+                }
+#endif
 
                 // 4. Sum into the master interleaved stereo buffer (L and R)
                 main_out[i * 2]     += voice_out * state.master_gain; // Left
