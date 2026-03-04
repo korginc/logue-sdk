@@ -41,4 +41,4 @@
 - [x] **State Reporting:** Implemented `getParameterValue(uint8_t id)` to track UI state across menu pages.
 - [x] **Parameter Linkage:** Mapped all core `header.c` knobs inside `setParameter`. (Mallet and Models pending Phase 7/8).
 - [x] **Release Phase Logic:** Implemented `NoteOff`, `GateOff`, and `AllNoteOff` callbacks. Applied Master Envelope as a VCA in the audio loop to properly choke ringing delay lines.
-- [ ] **The "Free Parameter" Decision:** Decide what to map to the open slot at Index 2 (Gain). (Options: Master Resonance, A/B Mix, or Limiter Drive).
+- [x] **The "Free Parameter" Decision:** Decide what to map to the open slot at Index 2 (Gain). (Options: Master Resonance, A/B Mix, or Limiter Drive). Resonance mapped instead of noiser filter Q and empty parameter is gain with limiter drive
