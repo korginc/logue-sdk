@@ -22,6 +22,17 @@
 #include "filter.h"
 #endif
 
+// =================================================================
+// UNCOMMENT THIS LINE TO ACTIVATE PHASE 7 (MODELS & TABLES)
+// #define ENABLE_PHASE_7_MODELS 1
+// =================================================================
+
+#ifdef ENABLE_PHASE_7_MODELS
+#include "tables.h"
+#endif
+
+
+
 /** Because we are optimizing for bare-metal, notice there are no virtual functions,
  * no dynamic memory (new/malloc), and no deep class hierarchies.
  * Just pure data that the CPU cache can read sequentially. */
@@ -71,6 +82,11 @@ struct WaveguideState {
 
     // Filter State Memory
     float z1 = 0.0f;               // 1-pole lowpass history
+
+#ifdef ENABLE_PHASE_7_MODELS
+    // Physics Topology Multiplier (+1.0f for String, -1.0f for Tube)
+    float phase_mult = 1.0f;
+#endif
 };
 
 /**
@@ -98,6 +114,7 @@ struct SynthState {
     // Master FX
     float mix_ab = 0.5f;
     float master_gain = 1.0f;
+    float master_drive = 1.0f;
 
 #ifdef ENABLE_PHASE_6_FILTERS
     FastSVF master_filter;

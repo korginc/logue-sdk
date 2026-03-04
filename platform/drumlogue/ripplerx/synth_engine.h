@@ -28,6 +28,10 @@ inline float apply_skew(float normalized_val, float skew) {
     return fasterpowf(normalized_val, 1.0f / skew);
 }
 
+#ifdef ENABLE_PHASE_7_MODELS
+FastTables g_tables;
+#endif
+
 class alignas(16) RipplerXWaveguide {
 public:
     SynthState state;
@@ -41,6 +45,10 @@ public:
         // If Korg ever releases a 96kHz device, this prevents your delay math from breaking.
         if (desc->samplerate != 48000) return k_unit_err_samplerate;
         if (desc->output_channels != 2) return k_unit_err_geometry;
+
+#ifdef ENABLE_PHASE_7_MODELS
+        g_tables.generate(48000.0f); // Pre-calculate all tuning math
+#endif
 
         // 2. Clear all memory explicitly at boot
         Reset();
@@ -141,68 +149,63 @@ public:
     // ==============================================================================
     // 2. Parameter Binding (UI Thread)
     // ==============================================================================
+    // ==============================================================================
+    // 2. Parameter Binding (UI Thread)
+    // ==============================================================================
     inline void setParameter(uint8_t index, int32_t value) {
         // 1. Save the raw value so the OLED screen can read it back later
         m_params[index] = value;
 
         // 2. Translate UI integer to DSP Physics
-	switch(index) {
-	        // Page 1
-            case 0:
-                // TODO
-                break;
-            case 1: // Note
-                // Store UI note for the internal sequencer Gate triggers
+        switch(index) {
+            case 0: // Note
                 m_ui_note = (uint8_t)fmaxf(1.0f, fminf(126.0f, value));
+                break;
+
+            case 1: // Gain (Overdrive/Distortion)
+                // UI range is 0 to 1000.
+                // We map this to a drive multiplier (1.0x to 10.0x)
+                state.master_drive = 1.0f + (fmaxf(0.0f, (float)value / 100.0f));
                 break;
 
             case 2: // Bank
                 m_sample_bank = value;
                 break;
 
-            case 3: // c_parameterSampleNumber
+            case 3: // Sample
                 m_sample_number = value;
                 break;
 
-            // Page 2 - TODO
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-            // Page 3 - TODO
-            case 8:
-	        // fallthrough
-                break;
-            case 9: { // Model (0..17, where 0..8 is ResA and 9..17 is ResB)
-                // We will fully implement this in Phase 7.
-                // For now, track it so the screen remembers it.
+            case 8: { // Model (0..17)
                 m_model_a = value % 9;
+                // TODO model b
+#ifdef ENABLE_PHASE_7_MODELS
+                for (int i = 0; i < NUM_VOICES; ++i) {
+                    if (m_model_a == 7 || m_model_a == 8) {
+                        state.voices[i].resA.phase_mult = -1.0f;
+                        state.voices[i].resB.phase_mult = -1.0f;
+                    } else {
+                        state.voices[i].resA.phase_mult = 1.0f;
+                        state.voices[i].resB.phase_mult = 1.0f;
+                    }
+                }
+#endif
                 break;
-            case 10:
-                // fallthrough
-                break;
+            } // <-- ADDED MISSING BRACE HERE
 
-            case 11: { // Dkay (Decay Time = Feedback Loop)
-                // UI Range is 0 to 2000.
+            case 10: { // Dkay (Decay Time = Feedback Loop)
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
-
-                // TODO apply skew?
-
-                // Cap at 0.995 to prevent dangerous infinite volume build-up
                 float g = norm * 0.995f;
-
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     state.voices[i].resA.feedback_gain = g;
                     state.voices[i].resB.feedback_gain = g;
                 }
                 break;
             }
-            // Page 4
-            case 12: { // Mterl (Material = Loop Lowpass Filter)
-                // UI Range is -10 to 30 -> mapped to 0.0 to 1.0
-                float norm = (fmaxf(-10.0f, fminf(30.0f, (float)value)) + 10.0f) / 40.0f;
-                float coeff = 0.01f + (norm * 0.99f); // 0.01 (dull/wood) to 1.0 (bright/metal)
 
+            case 11: { // Mterl (Material = Loop Lowpass Filter)
+                float norm = (fmaxf(-10.0f, fminf(30.0f, (float)value)) + 10.0f) / 40.0f;
+                float coeff = 0.01f + (norm * 0.99f);
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     state.voices[i].resA.lowpass_coeff = coeff;
                     state.voices[i].resB.lowpass_coeff = coeff;
@@ -210,15 +213,9 @@ public:
                 break;
             }
 
-            case 14:
-            {
-                //TODO
-                break;
-            }
-	    case 14: { // Rel (Release Envelope Time)
-                // Range 0 to 20. Map to an exponential release rate.
+            case 14: { // Rel (Release Envelope Time)
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 20.0f));
-                float rel_rate = 0.0001f + ((1.0f - norm) * 0.01f); // Higher knob = slower rate
+                float rel_rate = 0.0001f + ((1.0f - norm) * 0.01f);
                 for (int i = 0; i < NUM_VOICES; ++i) {
 #ifdef ENABLE_PHASE_5_EXCITERS
                     state.voices[i].exciter.noise_env.release_rate = rel_rate;
@@ -228,68 +225,46 @@ public:
                 break;
             }
 
-            case 15: { // c_parameterResonatorDispersion (Inharmonicity)
-                // Map to allpass coefficient (-1.0 to 1.0)
-                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
-                for (int i = 0; i < NUM_VOICES; ++i) {
-#ifdef ENABLE_PHASE_5_EXCITERS
-                    state.voices[i].exciter.noise_env.release_rate = rel_rate;
-                    state.voices[i].exciter.master_env.release_rate = rel_rate;
-#endif
-                }
-                break;
-            }
-            // Page 5
-            case 16:
-                // TODO
-                break;
-            // --- FILTER TRANSLATION ---
-            case 17: { // c_parameterFilterCutoff (Scaled A/B in header.c)
-                // Let's assume the UI passes a value from 10 to 19990 Hz.
+            case 16: { // LowCut (Master SVF Cutoff)
 #ifdef ENABLE_PHASE_6_FILTERS
-                // We map this directly to our SVF
-                float cutoff = (float)value;
-                float resonance = 1.5f; // Hardcoded for now, can map to another UI knob later
-
-                state.master_filter.set_coeffs(cutoff, resonance, 48000.0f);
+                m_master_cutoff = (float)value;
+                // Fetch the resonance from index 23 (Resnc)
+                float res_val = fmaxf(1.0f, (float)m_params[23] / 700.0f);
+                state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
 #endif
                 break;
             }
 
-            case 18:
-            case 19:
-                // fallthrough
-                // TODO
-                break;
-            // Page 6
-            case 20: { // NzMix (Noise Burst Volume)
-                // UI Range is 0 to 1000
+            case 19: { // NzMix (Noise Burst Volume)
 #ifdef ENABLE_PHASE_5_EXCITERS
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
                 for (int i = 0; i < NUM_VOICES; ++i) {
-                    state.voices[i].exciter.noise_decay_coeff = norm; // We'll use this as Volume
+                    state.voices[i].exciter.noise_decay_coeff = norm;
                 }
 #endif
                 break;
             }
 
-            case 21: { // NzRes (Using this as Noise Envelope Attack/Decay for now)
+            case 20: { // NzRes (Noise Envelope Attack/Decay)
+#ifdef ENABLE_PHASE_5_EXCITERS
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
                 for (int i = 0; i < NUM_VOICES; ++i) {
-                    // Lower value = sharp percussive click. Higher = soft breath attack.
                     state.voices[i].exciter.noise_env.attack_rate = 0.9f - (norm * 0.8f);
                     state.voices[i].exciter.noise_env.decay_rate = 0.05f - (norm * 0.04f);
                 }
+#endif
                 break;
             }
-            case 22:
-            case 23:
-                // fallthrough
-                // TODO
+
+            case 23: { // Resnc (Master Resonance)
+#ifdef ENABLE_PHASE_6_FILTERS
+                float res_val = fmaxf(1.0f, (float)value / 700.0f);
+                state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
+#endif
                 break;
+            }
+
             default:
-                // Catch all other unassigned parameters (Tone, HitPos, Inharm, TubeRadius)
-                // They are saved in m_params[] automatically at the top of the function.
                 break;
         }
     }
@@ -351,16 +326,33 @@ public:
         v.current_velocity = (float)velocity / 127.0f;
 
         // --- THE PHYSICS OF PITCH ---
+#ifdef ENABLE_PHASE_7_MODELS
+        // 1. O(1) Array Lookup for absolute baseline pitch
+        float base_delay = g_tables.note_to_delay_length[note & 127];
+
+        // 2. Structural Routing based on Model
+        if (m_model_a == 3 || m_model_a == 5) {
+            // Membrane / Drumhead Logic:
+            // A drum skin vibrates in chaotic 2D modes. We fake this by forcing
+            // Resonator B to track an irrational offset (e.g., 0.68) of Resonator A.
+            v.resA.delay_length = base_delay;
+            v.resB.delay_length = base_delay * 0.68f;
+        } else {
+            // Standard matched resonators (Strings, Tubes, Bars)
+            v.resA.delay_length = base_delay;
+            v.resB.delay_length = base_delay;
+        }
+#else
+        // Legacy fallback calculation
         // 1. Convert MIDI Note to Frequency (Hz)
         float freq = 440.0f * fasterpowf(2.0f, ((float)note - 69.0f) / 12.0f);
-
         // 2. Convert Frequency to Delay Line Length (Samples)
         // Drumlogue sample rate is strictly 48000.0f
         float delay_len = 48000.0f / freq;
-
         // 3. Assign to resonators (Apply fine-tuning offsets here later)
         v.resA.delay_length = delay_len;
         v.resB.delay_length = delay_len;
+#endif
 
         // Reset phase
         v.exciter.current_frame = 0;
@@ -445,7 +437,12 @@ inline void NoteOff(uint8_t note) {
 
         // 4. Feedback & Exciter Addition
         // wg.feedback_gain is our "Decay" time
+        // --- PHASE 7: The Topology Multiplier ---
+#ifdef ENABLE_PHASE_7_MODELS
+        float new_val = exciter_input + (filtered_out * wg.feedback_gain * wg.phase_mult);
+#else
         float new_val = exciter_input + (filtered_out * wg.feedback_gain);
+#endif
 
         // 5. Write back to the delay line and advance the pointer
         wg.buffer[wg.write_ptr] = new_val;
@@ -530,22 +527,29 @@ inline void NoteOff(uint8_t note) {
             }
         }
 
-        // 4. Master Effects
+        // 4. Master Effects & Overdrive
         for (size_t i = 0; i < frames; ++i) {
             float mix_l = main_out[i * 2];
             float mix_r = main_out[i * 2 + 1];
 
-    #ifdef ENABLE_PHASE_6_FILTERS
-            // Apply the SVF to the summed output.
-            // (Note: For true stereo, you'd need two SVFs. For now, we process L and copy to R)
+#ifdef ENABLE_PHASE_6_FILTERS
             mix_l = state.master_filter.process(mix_l);
             mix_r = mix_l;
-    #endif
+#endif
 
-            // 5. The Hardware Safety Net (Brickwall Limiter)
+            // --- THE NEW DRUM OVERDRIVE ---
+            // 1. Multiply by the UI Gain parameter (e.g., 1.0x to 10.0x)
+            mix_l *= state.master_drive;
+            mix_r *= state.master_drive;
+
+            // 2. Soft-Clipping (Distortion Curve)
+            // Equation: x / (1.0 + abs(x)) curves the peaks mathematically
             float clipped_l = mix_l / (1.0f + fabsf(mix_l));
             float clipped_r = mix_r / (1.0f + fabsf(mix_r));
 
+            // TODO - new distortion
+
+            // 5. The Hardware Safety Net (Brickwall Limiter)
             main_out[i * 2]     = fmaxf(-0.99f, fminf(0.99f, clipped_l));
             main_out[i * 2 + 1] = fmaxf(-0.99f, fminf(0.99f, clipped_r));
         }
@@ -557,6 +561,8 @@ inline void NoteOff(uint8_t note) {
     }
 
 private:
+    float m_master_cutoff = 10000.0f; // Default open filter
+
     // Functions from unit runtime
     unit_runtime_get_num_sample_banks_ptr m_get_num_sample_banks_ptr;
     unit_runtime_get_num_samples_for_bank_ptr m_get_num_samples_for_bank_ptr;

@@ -25,14 +25,13 @@ const __unit_header unit_header_t unit_header = {
         // Format: min, max, center, default, type, fractional digits, frac. type (fixed/decimal), <reserved>, name
 
         // See common/runtime.h for type enum and unit_param_t structure
+        // no need to use for preset, as there's an API LoadPreset()
 
         // Page 1: Program and sample selection
-        // TO BE DECIDED
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},  // not need to use for preset, as there's an API for that
         // Resonator note for Gate mode - MIDI Note 24 (C1)
         {24, 126, 1, 60, k_unit_param_type_midi_note, 0, 0, 0, {"Note"}},
-        // Res Gain - NOTE: removed for the moment
-        // {-240, 240, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Gain"}},
+        // Overall Gain - push to distortion boundary
+        {0, 1000, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Gain"}},
         // Sample bank
         {0, 6, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"Bank"}},
         // Sample number
@@ -97,7 +96,7 @@ const __unit_header unit_header_t unit_header = {
         {0, 2, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"NzFltr"}},
         // Noise Filter Freq
         {20, 20000, 12000, 20, k_unit_param_type_hertz, 0, 0, 0, {"NzFltFrq"}},
-        // Noise Filter Q
-        {707, 4000, 0, 707, k_unit_param_type_none, 3, 1, 0, {"NzFltQ"}}
+        // Master Resonance - was Noise Filter Q
+        {707, 4000, 0, 707, k_unit_param_type_none, 3, 1, 0, {"Resnc"}}
         }   // end of .params
     };

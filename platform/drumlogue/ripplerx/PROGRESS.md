@@ -21,14 +21,16 @@
 - [x] `envelope.h` and `noise.h` implemented and tested on hardware.
 - [x] Noise mix and PCM sample triggering confirmed working.
 
-## Phase 6: Filters & Master FX [IN PROGRESS]
+## Phase 6: Filters & Master FX [COMPLETED]
 - [x] `filter.h`: Implement a 2-pole Chamberlin State Variable Filter (SVF).
-- [ ] Tie `header.c` LowCut and Resonance parameters to the Master SVF.
-- [ ] Integrate SVF incrementally into the audio loop.
+- [x] Tie `header.c` LowCut and Resonance parameters to the Master SVF.
+- [x] Integrate SVF incrementally into the audio loop.
 
-## Phase 7: Waveguide Models & Tables [PENDING]
-- [ ] `constants.h` & `tables.h`: Define fast-math lookup tables and tuning constants.
-- [ ] `models.h`: Define the structural differences between "String", "Tube", and "Membrane" (e.g., swapping loop filters or adding secondary delay lines).
+## Phase 7: Waveguide Models & Tables [COMPLETED]
+- [x] `tables.h`: Defined fast-math lookup tables for MIDI-to-Delay-Length conversion.
+- [x] Implemented branchless Tube physics (Inverting Feedback via `phase_mult`).
+- [x] Implemented Membrane physics (Inharmonic irrational detuning of Resonator B).
+- [x] Linked UI `Model` parameter to physical topologies.
 
 ## Phase 8: Preset Design & Acoustic Tuning [PENDING]
 - [ ] Reverse-engineer waveguide parameters for legacy 28 presets.
