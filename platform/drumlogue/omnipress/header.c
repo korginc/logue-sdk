@@ -10,75 +10,75 @@
 
 // ---- Unit header definition  --------------------------------------------------------------------
 
-const __unit_header unit_header_t unit_header = {
-    .header_size = sizeof(unit_header_t),                     // leave as is, size of this header
-    .target = UNIT_TARGET_PLATFORM | k_unit_module_masterfx,  // target platform and module for this unit
-    .api = UNIT_API_VERSION,                                  // logue sdk API version against which unit was built
-    .dev_id = 0x0U,                                           // developer id (replace with your unique ID if distributing)
-    .unit_id = 0x01U,                                         // Id for this unit, should be unique within the scope of a given dev_id
-    .version = 0x00010000U,                                   // This unit's version: major.minor.patch (v1.0.0)
-    .name = "OmniPress",                                      // Name for this unit, will be displayed on device (max 13 chars)
-    .num_presets = 0,                                         // Number of internal presets this unit has
-    .num_params = 24,                                         // Number of parameters for this unit, max 24
-    .params = {
-        // Format: min, max, center, default, type, fractional, frac. type, <reserved>, name
-        // frac_mode: 0: fixed point, 1: decimal
+// String tables for parameter display
+static const char* comp_mode_strings[3] = {
+    "Standard",
+    "Distressor",
+    "Multiband"
+};
 
+static const char* band_select_strings[4] = {
+    "Low",
+    "Mid",
+    "High",
+    "All"
+};
+
+const __unit_header unit_header_t unit_header = {
+    .header_size = sizeof(unit_header_t),
+    .target = UNIT_TARGET_PLATFORM | k_unit_module_masterfx,
+    .api = UNIT_API_VERSION,
+    .dev_id = 0x7D0U,
+    .unit_id = 0x03U,
+    .version = 0x00020000U,      // v2.0.0 with multiband
+    .name = "OmniPress",
+    .num_presets = 0,
+    .num_params = 12,  // Now using 12 parameters
+
+    .params = {
         // --- Page 1: Core Dynamics ---
-        
-        // PARAM 1: Threshold (-60.0 dB to 0.0 dB)
-        // Uses 1 decimal place. Init: -20.0 dB.
-        {-600, 0, -600, -200, k_unit_param_type_db, 1, 1, 0, {"THRESH"}},
-        
-        // PARAM 2: Ratio (1.0 to 20.0)
-        // Uses 1 decimal place. Init: 4.0. 
-        {10, 200, 10, 40, k_unit_param_type_none, 1, 1, 0, {"RATIO"}},
-        
-        // PARAM 3: Attack (0.1 ms to 100.0 ms)
-        // Uses 1 decimal place. Init: 15.0 ms.
-        {1, 1000, 1, 150, k_unit_param_type_msec, 1, 1, 0, {"ATTACK"}},
-        
-        // PARAM 4: Release (10 ms to 2000 ms)
-        // Integer ms. Init: 200 ms.
-        {10, 2000, 10, 200, k_unit_param_type_msec, 0, 0, 0, {"RELEASE"}},
+        { -600, 0, -600, -200, k_unit_param_type_db, 1, 1, 0, {"THRESH"} },
+        { 10, 200, 10, 40, k_unit_param_type_none, 1, 1, 0, {"RATIO"} },
+        { 1, 1000, 1, 150, k_unit_param_type_msec, 1, 1, 0, {"ATTACK"} },
+        { 10, 2000, 10, 200, k_unit_param_type_msec, 0, 0, 0, {"RELEASE"} },
 
         // --- Page 2: Character & Output ---
-        
-        // PARAM 5: Make-Up Gain (0.0 dB to 24.0 dB)
-        // Uses 1 decimal place. Init: 0.0 dB.
-        {0, 240, 0, 0, k_unit_param_type_db, 1, 1, 0, {"MAKEUP"}},
-        
-        // PARAM 6: Drive / Wavefolder amount (0% to 100%)
-        // Integer %. Init: 0%.
-        {0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"DRIVE"}},
-        
-        // PARAM 7: Mix Dry/Wet (-100 to +100)
-        // -100 = D (Dry), 0 = BAL, +100 = W (Wet). Init: 100 (100% Wet).
-        {-100, 100, 0, 100, k_unit_param_type_drywet, 0, 0, 0, {"MIX"}},
-        
-        // PARAM 8: Sidechain High-Pass Filter (20 Hz to 500 Hz)
-        // Integer Hz. Init: 20 Hz.
-        {20, 500, 20, 20, k_unit_param_type_hertz, 0, 0, 0, {"SC HPF"}},
+        { 0, 240, 0, 0, k_unit_param_type_db, 1, 1, 0, {"MAKEUP"} },
+        { 0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"DRIVE"} },
+        { -100, 100, 0, 100, k_unit_param_type_drywet, 0, 0, 0, {"MIX"} },
+        { 20, 500, 20, 20, k_unit_param_type_hertz, 0, 0, 0, {"SC HPF"} },
 
-        // --- Page 3 to 6: Unused (Blanked out to clean up UI) ---
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
+        // --- Page 3: Mode Selection ---
+        { 0, 2, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"COMP MODE"} },  // Param 8
+        { 0, 3, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"BAND SEL"} },   // Param 9
+        { -600, 0, -600, -200, k_unit_param_type_db, 1, 1, 0, {"L THRESH"} },  // Param 10
+        { 10, 200, 10, 40, k_unit_param_type_none, 1, 1, 0, {"L RATIO"} },     // Param 11
 
+        // --- Page 4: Multiband Parameters ---
+        { 0, 3, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"DSTR MODE"} }  // None, 2nd harmonics, 3rd, both
         {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
         {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
         {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
-
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
-
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
-        {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}}
+        // ... (continues to 24)
     }
 };
+
+const char* unit_get_param_str_value(uint8_t index, int32_t value) {
+    static char buf[16];
+
+    switch (index) {
+        case 8: // COMP MODE
+            if (value >= 0 && value <= 2)
+                return comp_mode_strings[value];
+            break;
+        case 9: // BAND SEL
+            if (value >= 0 && value <= 3)
+                return band_select_strings[value];
+            break;
+        case 10: // L THRESH - could format with "dB"
+        case 11: // L RATIO - could format with ":1"
+            snprintf(buf, sizeof(buf), "%d", value);
+            return buf;
+    }
+    return nullptr;
+}
