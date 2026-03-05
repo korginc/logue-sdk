@@ -49,3 +49,5 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Eternal](https://www.sinevibes.com/korgeternal/) | Sinevibes | Barber-pole flanger | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [Stator](https://www.sinevibes.com/korgstator/) | Sinevibes | Tape wobble simulator | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [autopan](https://github.com/tmlbl/autopan) | Tim Lebel | Basic autopan effect | pro, xd, nts-1 | free |
+| [Drymon Echo](https://mrglennjones.gumroad.com/l/drymonecho) | Glenn Jones | Tape Saturation & Doubletracker | nts-3 | free |
+| [ShapeSync](https://mrglennjones.gumroad.com/l/shapesync) | Glenn Jones | Rhythmic Modulation | nts-3 | paid |
