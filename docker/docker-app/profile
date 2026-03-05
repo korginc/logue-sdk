@@ -1,6 +1,8 @@
 
+#PATH=/app/commands:${PATH}
 PATH=/app/commands:${PATH}
-
+#FEDE DEBUG
+#source /app/env
 source /app/env
 
 alias ls='ls --color=auto'

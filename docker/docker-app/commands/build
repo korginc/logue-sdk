@@ -37,6 +37,7 @@
 #
 
 if [ "$(type -t env)" != "function" ]; then
+    # source /app/env
     source /app/env
 fi
 
