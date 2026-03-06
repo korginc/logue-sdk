@@ -382,6 +382,9 @@ public:
         };
         static const char* const partial_names[] = {"4", "8", "16", "32", "64"};
 
+        // ADDED: The missing Noise Filter strings!
+        static const char* const nz_filter_names[] = {"LP", "BP", "HP"};
+
         switch (index) {
             case k_paramProgram:
                 return getPresetName((uint8_t)value);
@@ -395,8 +398,14 @@ public:
             case k_paramPartls:
                 if (value >= 0 && value < 5) return partial_names[value];
                 break;
+            // ADDED: The missing Noise Filter logic!
+            case k_paramNzFltr:
+                if (value >= 0 && value < 3) return nz_filter_names[value];
+                break;
         }
-        return nullptr;
+
+        // THE LOGUE SDK GOLDEN RULE: Never return nullptr to the OS!
+        return "---";
     }
 
     // ==============================================================================

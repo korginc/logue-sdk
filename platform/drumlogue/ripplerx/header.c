@@ -35,7 +35,7 @@ const __unit_header unit_header_t unit_header = {
 
         // Page 3: Resonator A-I
         {0, 17, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Model"}},
-        {0, 9, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Partls"}},
+        {0, 4, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Partls"}},
         {0, 2000, 250, 250, k_unit_param_type_none, 1, 1, 0, {"Dkay"}},
         {-10, 30, 0, 0, k_unit_param_type_none, 1, 1, 0, {"Mterl"}},
 
