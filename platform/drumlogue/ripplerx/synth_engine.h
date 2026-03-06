@@ -30,6 +30,37 @@ FastTables g_tables;
 
 class alignas(16) RipplerXWaveguide {
 public:
+    // ==============================================================================
+    // PARAMETER INDEX ENUM (Strictly matches header.c)
+    // ==============================================================================
+    enum ParamIndex {
+        k_paramProgram = 0,
+        k_paramNote,        // 1
+        k_paramBank,        // 2
+        k_paramSample,      // 3
+        k_paramMlltRes,     // 4
+        k_paramMlltStif,    // 5
+        k_paramVlMllRes,    // 6
+        k_paramVlMllStf,    // 7
+        k_paramModel,       // 8
+        k_paramPartls,      // 9
+        k_paramDkay,        // 10
+        k_paramMterl,       // 11
+        k_paramTone,        // 12
+        k_paramHitPos,      // 13
+        k_paramRel,         // 14
+        k_paramInharm,      // 15
+        k_paramLowCut,      // 16
+        k_paramTubRad,      // 17
+        k_paramGain,        // 18
+        k_paramNzMix,       // 19
+        k_paramNzRes,       // 20
+        k_paramNzFltr,      // 21
+        k_paramNzFltFrq,    // 22
+        k_paramResnc        // 23
+    };
+
+    SynthState state;
     SynthState state;
     // ==============================================================================
     // 0. Lifecycle & Initialization
@@ -118,11 +149,10 @@ public:
     inline void LoadPreset(uint8_t idx) {
         m_preset_idx = idx;
 
-        // Columns Map (Updated for Gain at 18):
+        // Columns Map:
         // 0:Prgram | 1:Note | 2:Bank | 3:Sample | 4:MlltRes | 5:MlltStif | 6:VlMllR | 7:VlMllS
         // 8:Model  | 9:Prtls| 10:Dkay| 11:Mterl | 12:Tone   | 13:HitPos  | 14:Rel   | 15:Inharm
         // 16:LCut  | 17:TRad| 18:Gain| 19:NzMix | 20:NzRes  | 21:NzFltr  | 22:NzFrq | 23:Resnc
-
         static const int32_t presets[28][24] = {
             // 0: Init (Basic Plucked String)
             {0, 60, 0, 1, 500, 2500, 0, 0, 0, 3, 250, 10,  0, 26, 10, 3000, 10, 5, 0,   0,   300, 0, 12000, 707},
@@ -133,53 +163,56 @@ public:
             // 3: Ac Snare (Model 5, Medium Decay, High Noise Mix for snares)
             {3, 38, 0, 1, 400, 3000, 0, 0, 5, 3, 150, 15,  0, 20, 8,  5000, 150,5, 50,  800, 500, 2, 8000,  707},
             // 4: Tubular Bell (Model 8 Tube, Extreme Inharm, Bright Material)
-            {4, 72, 0, 1, 900, 5000, 0, 0, 8, 3, 1500,30,  0, 10, 20, 19000,200,5, 0,   0,   300, 0, 12000, 707},
-            // 5: Timpani (Model 3 Membrane, Soft Mallet, Dark Material)
-            {5, 40, 30, 0, 1, 300, 500,  0, 0, 3, 3, 600, -5,  0, 30, 15, 200,  10, 5, 0, 0,   300, 0, 5000,  707},
-            // 6: Djambe (Model 5 Drumhead, Resonant, Edge HitPos)
-            {6, 48, 50, 0, 1, 600, 2000, 0, 0, 5, 3, 300, 5,   0, 10, 12, 500,  50, 5, 0, 50,  200, 0, 6000,  707},
-            // 7: Taiko (Model 5 Drumhead, Heavy Overdrive, Massive Decay)
-            {7, 36, 200,0, 1, 200, 800,  0, 0, 5, 3, 700, -10, 0, 50, 18, 100,  10, 5, 0, 0,   300, 0, 4000,  707},
-            // 8: March Snare (Model 5, Very Short Decay, Max Noise Mix)
-            {8, 65, 80, 0, 1, 700, 4500, 0, 0, 5, 3, 80,  20,  0, 50, 3,  2000, 250,5, 0, 950, 150, 2, 10000, 707},
-            // 9: Tam Tam (Model 4 Plate, Extreme Inharm, Longest Decay)
-            {9, 35, 60, 0, 1, 100, 1500, 0, 0, 4, 3, 1800,25,  0, 25, 20, 18000,10, 5, 0, 100, 800, 0, 8000,  707},
-            // 10: Koto (Model 0 String, Pure Harmonic (Inharm=1), Sharp Pluck)
-            {10, 72, 0,  0, 1, 600, 4500, 0, 0, 0, 3, 800, 10,  0, 80, 12, 1,    10, 5, 0, 0,   300, 0, 10000, 707},
-            // 11: Vibraphone (Model 1 Beam, Harmonic, Long Decay)
-            {11, 72, 0,  0, 1, 500, 3000, 0, 0, 1, 3, 1200,15,  0, 50, 18, 50,   10, 5, 0, 0,   300, 0, 10000, 707},
-            // 12: Woodblock (Model 2 Squared, Very Short Decay, Dull Material)
-            {12, 76, 0,  0, 1, 800, 3500, 0, 0, 2, 3, 50,  -8,  0, 50, 2,  800,  10, 5, 0, 0,   300, 0, 5000,  707},
-            // 13: Acoustic Tom (Model 5, Pitch 45, Medium Decay)
-            {13, 45, 40, 0, 1, 400, 2000, 0, 0, 5, 3, 400, -2,  0, 50, 10, 300,  10, 5, 0, 20,  300, 0, 8000,  707},
-            // 14: Cymbal (Model 4 Plate, Massive Inharm, Bright, High Noise)
-            {14, 60, 20, 0, 1, 800, 5000, 0, 0, 4, 3, 1400,30,  0, 10, 18, 19500,400,5, 0, 600, 700, 2, 14000, 707},
-            // 15: Gong (Model 4 Plate, Low Pitch, Massive Inharm)
-            {15, 36, 40, 0, 1, 200, 2000, 0, 0, 4, 3, 1900,20,  0, 50, 20, 19000,10, 5, 0, 100, 800, 0, 6000,  707},
-            // 16: Kalimba (Model 1 Beam, Pure, Metallic, Short Decay)
-            {16, 72, 10, 0, 1, 700, 4000, 0, 0, 1, 3, 200, 25,  0, 80, 5,  10,   10, 5, 0, 0,   300, 0, 10000, 707},
-            // 17: Steel Pan (Model 4 Plate, Medium Inharm, Bright)
-            {17, 60, 20, 0, 1, 600, 3500, 0, 0, 4, 3, 600, 20,  0, 30, 12, 8000, 100,5, 0, 0,   300, 0, 10000, 707},
-            // 18: Claves (Model 2 Squared, Stiff Mallet, Instant Decay)
-            {18, 79, 0,  0, 1, 900, 4800, 0, 0, 2, 3, 30,  5,   0, 50, 1,  200,  10, 5, 0, 0,   300, 0, 8000,  707},
-            // 19: Cowbell (Model 4 Plate, Very High Inharm, Short Decay)
-            {19, 67, 30, 0, 1, 800, 4500, 0, 0, 4, 3, 150, 25,  0, 20, 4,  17000,200,5, 0, 0,   300, 0, 10000, 707},
-            // 20: Triangle (Model 1 Beam, High Pitch, Extreme Inharm)
-            {20, 84, 0,  0, 1, 900, 5000, 0, 0, 1, 3, 1000,30,  0, 10, 15, 19900,800,5, 0, 0,   300, 0, 15000, 707},
-            // 21: Kick Drum (Model 5, Punchy, Fast Envelope)
-            {21, 36, 100,0, 1, 300, 1500, 0, 0, 5, 3, 200, -5,  0, 50, 6,  200,  10, 5, 0, 50,  200, 0, 3000,  707},
-            // 22: Clap (Model 5, 100% Noise Mix, Multiple bounces simulated by fast delay)
-            {22, 60, 50, 0, 1, 500, 3000, 0, 0, 5, 3, 50,  10,  0, 50, 3,  5000, 400,5, 0, 1000,100, 2, 10000, 707},
-            // 23: Shaker (Model 5, 100% Noise Mix, High Pass Filtered)
-            {23, 72, 20, 0, 1, 100, 4000, 0, 0, 5, 3, 20,  15,  0, 50, 2,  1000, 800,5, 0, 1000,300, 2, 12000, 707},
-            // 24: Flute (Model 7 Open Tube, Breath Noise Exciter)
-            {24, 72, 0,  0, 1, 100, 500,  0, 0, 7, 3, 900, -5,  0, 10, 12, 10,   10, 5, 0, 400, 800, 0, 6000,  707},
-            // 25: Clarinet (Model 8 Closed Tube, Breath Noise Exciter)
-            {25, 60, 0,  0, 1, 100, 500,  0, 0, 8, 3, 900, -5,  0, 10, 12, 10,   10, 5, 0, 400, 800, 0, 6000,  707},
-            // 26: Pluck Bass (Model 0 String, Dark Material, Low Pitch)
-            {26, 36, 60, 0, 1, 600, 2500, 0, 0, 0, 3, 600, -8,  0, 20, 10, 5,    10, 5, 0, 0,   300, 0, 5000,  707},
-            // 27: Glass Bowl (Model 4 Plate, Pure but shimmering)
-            {27, 76, 0,  0, 1, 700, 3500, 0, 0, 4, 3, 1600,25,  0, 80, 18, 12000,100,5, 0, 0,   300, 0, 12000, 707}
+            {4, 72, 0, 1, 900, 5000, 0, 0, 8, 3, 1500,30,  0, 10, 20, 19000,200,5, 0,   0,   300, 0, 12000, 707}
+            // ... The following are misplaced. First param, index 0, is now program, index 18 is Gain
+            // and there's an exceeding element
+            // Commented out for compiling purposes. Will be filled in Phase 10
+            // // 5: Timpani (Model 3 Membrane, Soft Mallet, Dark Material)
+            // {5, 40, 30, 0, 1, 300, 500,  0, 0, 3, 3, 600, -5,  0, 30, 15, 200,  10, 5, 0, 0,   300, 0, 5000,  707},
+            // // 6: Djambe (Model 5 Drumhead, Resonant, Edge HitPos)
+            // {6, 48, 50, 0, 1, 600, 2000, 0, 0, 5, 3, 300, 5,   0, 10, 12, 500,  50, 5, 0, 50,  200, 0, 6000,  707},
+            // // 7: Taiko (Model 5 Drumhead, Heavy Overdrive, Massive Decay)
+            // {7, 36, 200,0, 1, 200, 800,  0, 0, 5, 3, 700, -10, 0, 50, 18, 100,  10, 5, 0, 0,   300, 0, 4000,  707},
+            // // 8: March Snare (Model 5, Very Short Decay, Max Noise Mix)
+            // {8, 65, 80, 0, 1, 700, 4500, 0, 0, 5, 3, 80,  20,  0, 50, 3,  2000, 250,5, 0, 950, 150, 2, 10000, 707},
+            // // 9: Tam Tam (Model 4 Plate, Extreme Inharm, Longest Decay)
+            // {9, 35, 60, 0, 1, 100, 1500, 0, 0, 4, 3, 1800,25,  0, 25, 20, 18000,10, 5, 0, 100, 800, 0, 8000,  707},
+            // // 10: Koto (Model 0 String, Pure Harmonic (Inharm=1), Sharp Pluck)
+            // {10, 72, 0,  0, 1, 600, 4500, 0, 0, 0, 3, 800, 10,  0, 80, 12, 1,    10, 5, 0, 0,   300, 0, 10000, 707},
+            // // 11: Vibraphone (Model 1 Beam, Harmonic, Long Decay)
+            // {11, 72, 0,  0, 1, 500, 3000, 0, 0, 1, 3, 1200,15,  0, 50, 18, 50,   10, 5, 0, 0,   300, 0, 10000, 707},
+            // // 12: Woodblock (Model 2 Squared, Very Short Decay, Dull Material)
+            // {12, 76, 0,  0, 1, 800, 3500, 0, 0, 2, 3, 50,  -8,  0, 50, 2,  800,  10, 5, 0, 0,   300, 0, 5000,  707},
+            // // 13: Acoustic Tom (Model 5, Pitch 45, Medium Decay)
+            // {13, 45, 40, 0, 1, 400, 2000, 0, 0, 5, 3, 400, -2,  0, 50, 10, 300,  10, 5, 0, 20,  300, 0, 8000,  707},
+            // // 14: Cymbal (Model 4 Plate, Massive Inharm, Bright, High Noise)
+            // {14, 60, 20, 0, 1, 800, 5000, 0, 0, 4, 3, 1400,30,  0, 10, 18, 19500,400,5, 0, 600, 700, 2, 14000, 707},
+            // // 15: Gong (Model 4 Plate, Low Pitch, Massive Inharm)
+            // {15, 36, 40, 0, 1, 200, 2000, 0, 0, 4, 3, 1900,20,  0, 50, 20, 19000,10, 5, 0, 100, 800, 0, 6000,  707},
+            // // 16: Kalimba (Model 1 Beam, Pure, Metallic, Short Decay)
+            // {16, 72, 10, 0, 1, 700, 4000, 0, 0, 1, 3, 200, 25,  0, 80, 5,  10,   10, 5, 0, 0,   300, 0, 10000, 707},
+            // // 17: Steel Pan (Model 4 Plate, Medium Inharm, Bright)
+            // {17, 60, 20, 0, 1, 600, 3500, 0, 0, 4, 3, 600, 20,  0, 30, 12, 8000, 100,5, 0, 0,   300, 0, 10000, 707},
+            // // 18: Claves (Model 2 Squared, Stiff Mallet, Instant Decay)
+            // {18, 79, 0,  0, 1, 900, 4800, 0, 0, 2, 3, 30,  5,   0, 50, 1,  200,  10, 5, 0, 0,   300, 0, 8000,  707},
+            // // 19: Cowbell (Model 4 Plate, Very High Inharm, Short Decay)
+            // {19, 67, 30, 0, 1, 800, 4500, 0, 0, 4, 3, 150, 25,  0, 20, 4,  17000,200,5, 0, 0,   300, 0, 10000, 707},
+            // // 20: Triangle (Model 1 Beam, High Pitch, Extreme Inharm)
+            // {20, 84, 0,  0, 1, 900, 5000, 0, 0, 1, 3, 1000,30,  0, 10, 15, 19900,800,5, 0, 0,   300, 0, 15000, 707},
+            // // 21: Kick Drum (Model 5, Punchy, Fast Envelope)
+            // {21, 36, 100,0, 1, 300, 1500, 0, 0, 5, 3, 200, -5,  0, 50, 6,  200,  10, 5, 0, 50,  200, 0, 3000,  707},
+            // // 22: Clap (Model 5, 100% Noise Mix, Multiple bounces simulated by fast delay)
+            // {22, 60, 50, 0, 1, 500, 3000, 0, 0, 5, 3, 50,  10,  0, 50, 3,  5000, 400,5, 0, 1000,100, 2, 10000, 707},
+            // // 23: Shaker (Model 5, 100% Noise Mix, High Pass Filtered)
+            // {23, 72, 20, 0, 1, 100, 4000, 0, 0, 5, 3, 20,  15,  0, 50, 2,  1000, 800,5, 0, 1000,300, 2, 12000, 707},
+            // // 24: Flute (Model 7 Open Tube, Breath Noise Exciter)
+            // {24, 72, 0,  0, 1, 100, 500,  0, 0, 7, 3, 900, -5,  0, 10, 12, 10,   10, 5, 0, 400, 800, 0, 6000,  707},
+            // // 25: Clarinet (Model 8 Closed Tube, Breath Noise Exciter)
+            // {25, 60, 0,  0, 1, 100, 500,  0, 0, 8, 3, 900, -5,  0, 10, 12, 10,   10, 5, 0, 400, 800, 0, 6000,  707},
+            // // 26: Pluck Bass (Model 0 String, Dark Material, Low Pitch)
+            // {26, 36, 60, 0, 1, 600, 2500, 0, 0, 0, 3, 600, -8,  0, 20, 10, 5,    10, 5, 0, 0,   300, 0, 5000,  707},
+            // // 27: Glass Bowl (Model 4 Plate, Pure but shimmering)
+            // {27, 76, 0,  0, 1, 700, 3500, 0, 0, 4, 3, 1600,25,  0, 80, 18, 12000,100,5, 0, 0,   300, 0, 12000, 707}
         };
 
         if (idx >= 28) return;
@@ -211,25 +244,24 @@ public:
         m_params[index] = value;
 
         switch(index) {
-            case 0: // Program
+            case k_paramProgram:
                 LoadPreset((uint8_t)value);
                 break;
 
-            case 1: // Note
+            case k_paramNote:
                 m_ui_note = (uint8_t)fmaxf(1.0f, fminf(126.0f, value));
                 break;
 
-            case 2: // Bank
+            case k_paramBank:
                 m_sample_bank = value;
                 break;
 
-            case 3: // Sample
+            case k_paramSample:
                 m_sample_number = value;
                 break;
 
-            case 8: { // Model (0..17)
+            case k_paramModel: {
                 m_model_a = value % 9;
-                // TODO: Parse value / 9 for Model B
 #ifdef ENABLE_PHASE_7_MODELS
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     if (m_model_a == 7 || m_model_a == 8) {
@@ -244,7 +276,12 @@ public:
                 break;
             }
 
-            case 10: { // Dkay (Decay Time = Feedback Loop)
+            case k_paramPartls: {
+                m_active_partials = value;
+                break;
+            }
+
+            case k_paramDkay: {
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
                 float g = norm * 0.995f;
                 for (int i = 0; i < NUM_VOICES; ++i) {
@@ -254,7 +291,7 @@ public:
                 break;
             }
 
-            case 11: { // Mterl (Material = Loop Lowpass Filter)
+            case k_paramMterl: {
                 float norm = (fmaxf(-10.0f, fminf(30.0f, (float)value)) + 10.0f) / 40.0f;
                 float coeff = 0.01f + (norm * 0.99f);
                 for (int i = 0; i < NUM_VOICES; ++i) {
@@ -264,16 +301,13 @@ public:
                 break;
             }
 
-            // 0.0 = hitting exactly on the edge (All Res A)
-            // 0.5 = hitting in the dead center (Equal Mix)
-            case 13: { // HitPos (Mapped to A/B Mix Balance)
+            case k_paramHitPos: {
                 state.mix_ab = fmaxf(0.0f, fminf(1.0f, (float)value / 100.0f));
                 break;
             }
 
-            case 14: { // Rel (Release Envelope Time)
+            case k_paramRel: {
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 20.0f));
-                // Steeper baseline release to make choking obvious
                 float rel_rate = 0.001f + ((1.0f - norm) * 0.05f);
                 for (int i = 0; i < NUM_VOICES; ++i) {
 #ifdef ENABLE_PHASE_5_EXCITERS
@@ -284,9 +318,7 @@ public:
                 break;
             }
 
-            // UI Range is 1 to 19999.
-            // We map this to the allpass coefficient (-0.99f to +0.99f)
-            case 15: { // Inharm (Dispersion)
+            case k_paramInharm: {
                 float norm = (float)value / 20000.0f;
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     state.voices[i].resA.ap_coeff = norm;
@@ -295,24 +327,22 @@ public:
                 break;
             }
 
-            case 16: { // LowCut (Master SVF Cutoff)
+            case k_paramLowCut: {
 #ifdef ENABLE_PHASE_6_FILTERS
                 m_master_cutoff = (float)value;
-                float res_val = fmaxf(1.0f, (float)m_params[23] / 700.0f);
+                float res_val = fmaxf(1.0f, (float)m_params[k_paramResnc] / 700.0f);
                 state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
 #endif
                 break;
             }
 
-            case 18: { // Gain (Overdrive/Distortion)
-                // Overwrites CoarsPtch slot. Range is likely -480 to 1442 or 0 to 1000.
-                // We map this aggressively for heavy drum distortion.
-                float norm = fmaxf(0.0f, (float)(value + 480) / 1922.0f);
-                state.master_drive = 1.0f + (norm * 20.0f); // Up to 21x Drive
+            case k_paramGain: {
+                float norm = fmaxf(0.0f, (float)value / 1000.0f);
+                state.master_drive = 1.0f + (norm * 20.0f);
                 break;
             }
 
-            case 19: { // NzMix (Noise Burst Volume)
+            case k_paramNzMix: {
 #ifdef ENABLE_PHASE_5_EXCITERS
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
                 for (int i = 0; i < NUM_VOICES; ++i) {
@@ -322,7 +352,7 @@ public:
                 break;
             }
 
-            case 20: { // NzRes (Noise Envelope Attack/Decay)
+            case k_paramNzRes: {
 #ifdef ENABLE_PHASE_5_EXCITERS
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
                 for (int i = 0; i < NUM_VOICES; ++i) {
@@ -333,16 +363,17 @@ public:
                 break;
             }
 
-            case 23: { // Resnc (Master Resonance)
+            case k_paramResnc: {
 #ifdef ENABLE_PHASE_6_FILTERS
                 float res_val = fmaxf(1.0f, (float)value / 700.0f);
                 state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
 #endif
                 break;
             }
+            default:
+                break;
         }
     }
-
 
     inline const char * getParameterStrValue(uint8_t index, int32_t value) const {
         static const char* const bank_names[] = { "CH", "OH", "RS", "CP", "MISC", "USER", "EXP" };
@@ -353,16 +384,16 @@ public:
         static const char* const partial_names[] = {"4", "8", "16", "32", "64"};
 
         switch (index) {
-            case 0: // Program
+            case k_paramProgram:
                 return getPresetName((uint8_t)value);
-            case 2: // Bank
+            case k_paramBank:
                 if (value >= 0 && value < 7) return bank_names[value];
                 break;
-            case 8: // Model (Handles both ResA 0-8 and ResB 9-17)
+            case k_paramModel:
                 if (value >= 0 && value < 9) return model_names[value];
                 if (value >= 9 && value < 18) return model_names[value - 9];
                 break;
-            case 9: // Partials
+            case k_paramPartls:
                 if (value >= 0 && value < 5) return partial_names[value];
                 break;
         }
