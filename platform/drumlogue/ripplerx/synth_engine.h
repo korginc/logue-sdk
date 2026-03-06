@@ -267,6 +267,8 @@ public:
                 break;
             }
 
+            // 0.0 = hitting exactly on the edge (All Res A)
+            // 0.5 = hitting in the dead center (Equal Mix)
             case 13: { // HitPos (Mapped to A/B Mix Balance)
                 state.mix_ab = fmaxf(0.0f, fminf(1.0f, (float)value / 100.0f));
                 break;
@@ -285,6 +287,8 @@ public:
                 break;
             }
 
+            // UI Range is 1 to 19999.
+            // We map this to the allpass coefficient (-0.99f to +0.99f)
             case 15: { // Inharm (Dispersion)
                 float norm = (float)value / 20000.0f;
                 for (int i = 0; i < NUM_VOICES; ++i) {
@@ -548,7 +552,29 @@ inline void NoteOff(uint8_t note) {
         // CRITICAL FIX: Always advance time, even if no sample is loaded!
         ex.current_frame++;
 
-        // ... [Rest of the exciter function remains unchanged] ...
+        #ifdef ENABLE_PHASE_5_EXCITERS
+        // Add optional Noise Burst here (e.g. for snare wires or breath noise)
+        // 2. Synthesized Noise Burst (Activated incrementally)
+        float noise_env_val = ex.noise_env.process();
+        if (noise_env_val > 0.001f) {
+            float raw_noise = ex.noise_gen.process();
+            // Multiply by noise_decay_coeff so the UI NzMix knob actually changes the volume
+            out += raw_noise * noise_env_val * ex.noise_decay_coeff;
+        }
+#endif
+
+        // 3. The Modal Mallet Strike
+        // We only trigger the mallet on the very first frame of the note
+        float mallet_impulse = (ex.current_frame == 0) ? 1.0f : 0.0f;
+
+        // (Note: You'll need to add `float mallet_lp = 0.0f;` and `float mallet_stiffness = 0.5f;` to ExciterState)
+        ex.mallet_lp = (mallet_impulse * ex.mallet_stiffness) + (ex.mallet_lp * (1.0f - ex.mallet_stiffness));
+
+        // Add the mallet thump to the total exciter output
+        out += ex.mallet_lp * 2.0f; // Multiplied for volume compensation
+
+        return out;
+    }
 
     // ==============================================================================
     // 6. The Master Audio Loop (Called by Drumlogue OS)
