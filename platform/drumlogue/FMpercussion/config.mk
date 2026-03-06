@@ -23,20 +23,17 @@ CXXSRC = unit.cc
 # Include Paths
 #
 
-UINCDIR  = . 
+UINCDIR  = .
 
 ##############################################################################
 # Compiler Flags
 #
 
-# Enable NEON optimizations
-UCFLAGS = -mfpu=neon -mfloat-abi=softfp -O3 -ftree-vectorize
-
 ##############################################################################
 # Library Paths
 #
 
-ULIBDIR = 
+ULIBDIR =
 
 ##############################################################################
 # Libraries
@@ -49,4 +46,4 @@ ULIBS += -lc
 # Macros
 #
 
-UDEFS = -DARM_NEON_OPTIMIZATION
+UDEFS =

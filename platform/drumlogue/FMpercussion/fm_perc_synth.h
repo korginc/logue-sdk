@@ -1,18 +1,21 @@
-/**
- *  @file fm_perc_synth.h
- *  @brief Complete FM Percussion Synthesizer
- *
- *  Integrates all components:
- *  - 4 FM engines (Kick, Snare, Metal, Perc)
- *  - Enhanced LFO system with bipolar modulation
- *  - Envelope ROM
- *  - Parameter smoothing
- *  - Preset system
- */
-
 #pragma once
 
+/**
+ * @file fm_perc_synth.h
+ * @brief Complete FM Percussion Synthesizer
+ *
+ * Integrates all components:
+ * - 4 FM engines (Kick, Snare, Metal, Perc)
+ * - Enhanced LFO system with bipolar modulation
+ * - Envelope ROM
+ * - Parameter smoothing
+ * - Preset system
+ *
+ * FIXED: Optimized NEON horizontal sum using vpadd
+ */
+
 #include <arm_neon.h>
+#include "constants.h"
 #include "kick_engine.h"
 #include "snare_engine.h"
 #include "metal_engine.h"
@@ -33,28 +36,28 @@ typedef struct {
     snare_engine_t snare;
     metal_engine_t metal;
     perc_engine_t perc;
-    
+
     // LFO System
     lfo_enhanced_t lfo;
     lfo_smoother_t lfo_smooth;
-    
+
     // Envelope
     neon_envelope_t envelope;
     uint8_t current_env_shape;
-    
+
     // Probability PRNG
     neon_prng_t prng;
-    
+
     // MIDI handler
     midi_handler_t midi;
-    
+
     // Current parameters (cached)
     uint8_t params[24];
-    
+
     // Voice activity
     uint32x4_t active_voices;
     uint32x4_t voice_triggered;  // Which voices triggered this note
-    
+
     // Output gain
     float master_gain;
 } fm_perc_synth_t;
@@ -67,22 +70,53 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
     snare_engine_init(&synth->snare);
     metal_engine_init(&synth->metal);
     perc_engine_init(&synth->perc);
-    
+
     lfo_enhanced_init(&synth->lfo);
     lfo_smoother_init(&synth->lfo_smooth);
-    
+
     neon_envelope_init(&synth->envelope);
     neon_prng_init(&synth->prng, 0x12345678);
     midi_handler_init(&synth->midi);
-    
+
     synth->active_voices = vdupq_n_u32(0);
     synth->voice_triggered = vdupq_n_u32(0);
     synth->master_gain = 0.25f;
     synth->current_env_shape = 40;
-    
+
     // Load default preset
     load_fm_preset(0, synth->params);
     fm_perc_synth_update_params(synth);
+}
+
+/**
+ * Fast NEON horizontal sum of 4 floats
+ * Returns sum of all 4 lanes
+ */
+fast_inline float neon_horizontal_sum(float32x4_t v) {
+    // Step 1: Pairwise add low and high halves
+    float32x2_t sum_low = vpadd_f32(vget_low_f32(v), vget_high_f32(v));
+
+    // Step 2: Pairwise add again to get final sum
+    float32x2_t sum_total = vpadd_f32(sum_low, sum_low);
+
+    // Step 3: Extract result
+    return vget_lane_f32(sum_total, 0);
+}
+
+/**
+ * Alternative method using vaddvq_f32 for ARMv8/AArch64
+ * For ARMv7 (drumlogue), use the vpadd method above
+ */
+fast_inline float neon_horizontal_sum_alt(float32x4_t v) {
+    #if defined(__aarch64__)
+    // ARMv8/AArch64 has dedicated instruction
+    return vaddvq_f32(v);
+    #else
+    // ARMv7 fallback
+    float32x2_t sum_low = vpadd_f32(vget_low_f32(v), vget_high_f32(v));
+    float32x2_t sum_total = vpadd_f32(sum_low, sum_low);
+    return vget_lane_f32(sum_total, 0);
+    #endif
 }
 
 /**
@@ -90,44 +124,60 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
  */
 fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
     uint8_t* p = synth->params;
-    
-    // Update engines with their parameters
-    float32x4_t kick_params = {
-        p[4] / 100.0f,  // Kick sweep
-        p[5] / 100.0f,  // Kick decay
-        0, 0
-    };
-    kick_engine_update(&synth->kick, 
-                      vdupq_n_f32(p[4] / 100.0f),
-                      vdupq_n_f32(p[5] / 100.0f));
-    
+
+    // =================================================================
+    // Update FM engines with their parameters
+    // =================================================================
+
+    // Kick engine: param1 = sweep depth (0-1), param2 = decay shape (0-1)
+    kick_engine_update(&synth->kick,
+                       vdupq_n_f32(p[4] / 100.0f),   // Kick sweep
+                       vdupq_n_f32(p[5] / 100.0f));  // Kick decay
+
+    // Snare engine: param1 = noise mix (0-1), param2 = body resonance (0-1)
     snare_engine_update(&synth->snare,
-                       vdupq_n_f32(p[6] / 100.0f),
-                       vdupq_n_f32(p[7] / 100.0f));
-    
+                        vdupq_n_f32(p[6] / 100.0f),  // Snare noise mix
+                        vdupq_n_f32(p[7] / 100.0f)); // Snare body resonance
+
+    // Metal engine: param1 = inharmonicity (0-1), param2 = brightness (0-1)
     metal_engine_update(&synth->metal,
-                       vdupq_n_f32(p[8] / 100.0f),
-                       vdupq_n_f32(p[9] / 100.0f));
-    
+                        vdupq_n_f32(p[8] / 100.0f),  // Metal inharmonicity
+                        vdupq_n_f32(p[9] / 100.0f)); // Metal brightness
+
+    // Perc engine: param1 = ratio center (0-1), param2 = variation (0-1)
     perc_engine_update(&synth->perc,
-                      vdupq_n_f32(p[10] / 100.0f),
-                      vdupq_n_f32(p[11] / 100.0f));
-    
-    // Update LFO with smoothing
+                       vdupq_n_f32(p[10] / 100.0f),  // Perc ratio center
+                       vdupq_n_f32(p[11] / 100.0f)); // Perc variation
+
+    // =================================================================
+    // Update LFO with smoothing (for all voices)
+    // =================================================================
     uint32x4_t all_voices = vdupq_n_u32(0xFFFFFFFF);
-    
+
+    // LFO parameters from params array:
+    // p[12] = LFO1 shape combo (0-8)
+    // p[13] = LFO1 rate (0-100)
+    // p[14] = LFO1 target (0-5)
+    // p[15] = LFO1 depth (0-100) - stored as 0-200 for bipolar
+    // p[16] = LFO2 shape combo (0-8)
+    // p[17] = LFO2 rate (0-100)
+    // p[18] = LFO2 target (0-5)
+    // p[19] = LFO2 depth (0-100) - stored as 0-200 for bipolar
+
     // Convert depth from stored 0-200 to -100..100
     int8_t depth1 = (int8_t)(p[15] - 100);
     int8_t depth2 = (int8_t)(p[19] - 100);
-    
+
     lfo_smoother_set_rate(&synth->lfo_smooth, 0, p[13] / 100.0f, all_voices);
     lfo_smoother_set_rate(&synth->lfo_smooth, 1, p[17] / 100.0f, all_voices);
     lfo_smoother_set_depth(&synth->lfo_smooth, 0, depth1 / 100.0f, all_voices);
     lfo_smoother_set_depth(&synth->lfo_smooth, 1, depth2 / 100.0f, all_voices);
     lfo_smoother_set_target(&synth->lfo_smooth, 0, p[14], all_voices);
     lfo_smoother_set_target(&synth->lfo_smooth, 1, p[18], all_voices);
-    
+
+    // =================================================================
     // Update envelope shape
+    // =================================================================
     synth->current_env_shape = p[20];
 }
 
@@ -138,33 +188,41 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
                                        uint8_t note,
                                        uint8_t velocity) {
     uint32_t probs[4] = {
-        synth->params[0],  // Kick prob
-        synth->params[1],  // Snare prob
-        synth->params[2],  // Metal prob
-        synth->params[3]   // Perc prob
+        synth->params[0],  // Kick prob (0-100)
+        synth->params[1],  // Snare prob (0-100)
+        synth->params[2],  // Metal prob (0-100)
+        synth->params[3]   // Perc prob (0-100)
     };
-    
+
     trigger_event_t triggers[4];
     uint32_t num_triggers = midi_note_on(&synth->midi, &synth->prng,
                                          note, velocity, probs, triggers);
-    
+
     // Build voice mask from triggers
     uint32_t mask = 0;
     for (uint32_t i = 0; i < num_triggers; i++) {
         mask |= 1 << triggers[i].voice;
-        
+
         // Set note for specific engine
         float32x4_t midi_note = vdupq_n_f32(triggers[i].note);
         uint32x4_t voice_mask = vdupq_n_u32(1 << triggers[i].voice);
-        
+
         switch (triggers[i].voice) {
-            case 0: kick_engine_set_note(&synth->kick, voice_mask, midi_note); break;
-            case 1: snare_engine_set_note(&synth->snare, voice_mask, midi_note); break;
-            case 2: metal_engine_set_note(&synth->metal, voice_mask, midi_note); break;
-            case 3: perc_engine_set_note(&synth->perc, voice_mask, midi_note); break;
+            case 0: // Kick
+                kick_engine_set_note(&synth->kick, voice_mask, midi_note);
+                break;
+            case 1: // Snare
+                snare_engine_set_note(&synth->snare, voice_mask, midi_note);
+                break;
+            case 2: // Metal
+                metal_engine_set_note(&synth->metal, voice_mask, midi_note);
+                break;
+            case 3: // Perc
+                perc_engine_set_note(&synth->perc, voice_mask, midi_note);
+                break;
         }
     }
-    
+
     // Trigger envelope for active voices
     if (mask) {
         synth->voice_triggered = vdupq_n_u32(mask);
@@ -180,7 +238,7 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
 fast_inline void fm_perc_synth_note_off(fm_perc_synth_t* synth, uint8_t note) {
     uint8_t releasing[4];
     uint32_t num_releasing = midi_note_off(&synth->midi, note, releasing);
-    
+
     // For now, envelope release is triggered when any voice releases
     // In a more sophisticated version, we'd track per-voice release
     if (num_releasing > 0) {
@@ -191,39 +249,51 @@ fast_inline void fm_perc_synth_note_off(fm_perc_synth_t* synth, uint8_t note) {
 
 /**
  * Process one audio sample
+ * @return Mono mix of all active voices
  */
 fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
+    // =================================================================
     // Process parameter smoothing
+    // =================================================================
     lfo_smoother_process(&synth->lfo_smooth);
-    
+
+    // =================================================================
     // Update LFO with smoothed values
+    // =================================================================
     lfo_enhanced_update(&synth->lfo,
-                       synth->params[12],  // shape combo
-                       vgetq_lane_u32(synth->lfo_smooth.current_target1, 0),
-                       vgetq_lane_u32(synth->lfo_smooth.current_target2, 0),
-                       vgetq_lane_f32(synth->lfo_smooth.current_depth1, 0) * 100.0f,
-                       vgetq_lane_f32(synth->lfo_smooth.current_depth2, 0) * 100.0f,
-                       vgetq_lane_f32(synth->lfo_smooth.current_rate1, 0) * 100.0f,
-                       vgetq_lane_f32(synth->lfo_smooth.current_rate2, 0) * 100.0f);
-    
+                        synth->params[12],  // shape combo
+                        vgetq_lane_u32(synth->lfo_smooth.current_target1, 0),
+                        vgetq_lane_u32(synth->lfo_smooth.current_target2, 0),
+                        vgetq_lane_f32(synth->lfo_smooth.current_depth1, 0) * 100.0f,
+                        vgetq_lane_f32(synth->lfo_smooth.current_depth2, 0) * 100.0f,
+                        vgetq_lane_f32(synth->lfo_smooth.current_rate1, 0) * 100.0f,
+                        vgetq_lane_f32(synth->lfo_smooth.current_rate2, 0) * 100.0f);
+
+    // =================================================================
     // Process envelope
+    // =================================================================
     neon_envelope_process(&synth->envelope);
-    
+    float32x4_t env = synth->envelope.level;
+
+    // =================================================================
     // Process LFOs
+    // =================================================================
     float32x4_t lfo1, lfo2;
     lfo_enhanced_process(&synth->lfo, &lfo1, &lfo2);
-    
+
+    // =================================================================
     // Apply LFO modulations to envelope
-    float32x4_t env = synth->envelope.level;
-    
+    // =================================================================
     if (synth->lfo.target1 == LFO_TARGET_ENV) {
         env = lfo_apply_modulation(env, lfo1, synth->lfo.depth1, 0.0f, 1.0f);
     }
     if (synth->lfo.target2 == LFO_TARGET_ENV) {
         env = lfo_apply_modulation(env, lfo2, synth->lfo.depth2, 0.0f, 1.0f);
     }
-    
-    // Process each engine
+
+    // =================================================================
+    // Process each engine (they output on their respective voice)
+    // =================================================================
     float32x4_t kick_out = kick_engine_process(&synth->kick, env,
                                                synth->voice_triggered);
     float32x4_t snare_out = snare_engine_process(&synth->snare, env,
@@ -232,17 +302,33 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
                                                   synth->voice_triggered);
     float32x4_t perc_out = perc_engine_process(&synth->perc, env,
                                                 synth->voice_triggered);
-    
-    // Mix and apply gain
+
+    // =================================================================
+    // Mix all voices
+    // =================================================================
     float32x4_t mixed = vaddq_f32(kick_out, snare_out);
     mixed = vaddq_f32(mixed, metal_out);
     mixed = vaddq_f32(mixed, perc_out);
-    
-    // Sum to mono (for now) and apply master gain
-    float sum = vgetq_lane_f32(mixed, 0) +
-                vgetq_lane_f32(mixed, 1) +
-                vgetq_lane_f32(mixed, 2) +
-                vgetq_lane_f32(mixed, 3);
-    
+
+    // =================================================================
+    // FIXED: Efficient horizontal sum using NEON vpadd
+    // =================================================================
+    float sum = neon_horizontal_sum(mixed);
+
+    // Apply master gain
     return sum * synth->master_gain;
+}
+
+/**
+ * Get current envelope level for a specific voice
+ */
+fast_inline float fm_perc_synth_get_env(const fm_perc_synth_t* synth, uint32_t voice) {
+    return vgetq_lane_f32(synth->envelope.level, voice);
+}
+
+/**
+ * Check if any voices are active
+ */
+fast_inline uint32_t fm_perc_synth_active(const fm_perc_synth_t* synth) {
+    return neon_envelope_active(&synth->envelope);
 }

@@ -29,9 +29,9 @@ static const char* voice_mask_strings[15] = {
 
 const __unit_header unit_header_t unit_header = {
     .header_size = sizeof(unit_header_t),
-    .target = UNIT_TARGET_PLATFORM | k_unit_module_delfx,
+    .target = UNIT_TARGET_PLATFORM | k_unit_module_synth,
     .api = UNIT_API_VERSION,
-    .dev_id = 0x7D0U,           // Same developer ID as spatializer
+    .dev_id = 0x46654465U,       // 'FeDe' - https://github.com/fedemone/logue-sdk
     .unit_id = 0x02U,            // Second unit
     .version = 0x00010000U,      // v1.0.0
     .name = "FMPerc",
@@ -77,7 +77,7 @@ const __unit_header unit_header_t unit_header = {
         // Param 4-3: LFO1 Voice Mask (0-14, string display)
         {0, 14, 0, 14, k_unit_param_type_strings, 0, 0, 0, {"L1Dest"}},
         // Param 4-4: LFO1 Modulation Depth (0-100%)
-        {0, 100, 0, 50, k_unit_param_type_percent, 0, 0, 0, {"L1Depth"}},
+        {-100, 100, 0, 50, k_unit_param_type_percent, 0, 0, 0, {"L1Depth"}},
 
         // ---------- Page 5: LFO2 Configuration ----------
         // Param 5-1: LFO2 Shape (0-8, string display)
@@ -87,7 +87,7 @@ const __unit_header unit_header_t unit_header = {
         // Param 5-3: LFO2 Voice Mask (0-14, string display)
         {0, 14, 0, 14, k_unit_param_type_strings, 0, 0, 0, {"L2Dest"}},
         // Param 5-4: LFO2 Modulation Depth (0-100%)
-        {0, 100, 0, 50, k_unit_param_type_percent, 0, 0, 0, {"L2Depth"}},
+        {-100, 100, 0, 50, k_unit_param_type_percent, 0, 0, 0, {"L2Depth"}},
 
         // ---------- Page 6: Global Envelope + Future ----------
         // Param 6-1: Envelope Shape (0-127, selects from ROM)
@@ -113,5 +113,5 @@ const char* unit_get_param_str_value(uint8_t index, int32_t value) {
             if (value >= 0 && value <= 14) return voice_mask_strings[value];
             break;
     }
-    return nullptr;
+    return NULL;    // C compatible
 }

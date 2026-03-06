@@ -1,72 +1,88 @@
-/*
- *  File: unit.cc
- *
- *  @brief drumlogue SDK unit interface
- *
- *  2022 (c) Korg All rights reserved.
- *
+/**
+ * @file unit.cc
+ * @brief drumlogue SDK unit interface for Labirinto Reverb
  */
 
+#include <cstddef>
+#include <cstdint>
 #include "unit.h"    // Note: Include common definitions for all units
-#include "NeonAdvancedLabirinto.h"  // Note: Include custom reverb code
+#include "NeonAdvancedLabirinto.h"
 
-static NeonAdvancedLabirinto s_reverb_instance;            // Note: In this case, actual instance of custom reverb object.
-static unit_runtime_desc_t s_runtime_desc;  // Note: used to cache runtime descriptor obtained via init callback
+static NeonAdvancedLabirinto* s_reverb = nullptr;
+static unit_runtime_desc_t s_runtime_desc;
+static bool s_initialized = false;
 
-// ---- Callback entry points from drumlogue runtime ----------------------------------------------
+__unit_callback int8_t unit_init(const unit_runtime_desc_t* desc) {
+    if (!desc) return k_unit_err_undef;
+    if (desc->target != unit_header.target) return k_unit_err_target;
+    if (!UNIT_API_IS_COMPAT(desc->api)) return k_unit_err_api_version;
 
-__unit_callback int8_t unit_init(const unit_runtime_desc_t * desc) {
-  if (!desc)
-    return k_unit_err_undef;
+    s_runtime_desc = *desc;
 
-  // Note: make sure the unit is being loaded to the correct platform/module target
-  if (desc->target != unit_header.target)
-    return k_unit_err_target;
+    // Create reverb instance
+    s_reverb = new NeonAdvancedLabirinto();
+    if (!s_reverb) {
+        return k_unit_err_memory;
+    }
 
-  // Note: check API compatibility with the one this unit was built against
-  if (!UNIT_API_IS_COMPAT(desc->api))
-    return k_unit_err_api_version;
+    // Initialize with memory allocation
+    if (!s_reverb->init()) {
+        delete s_reverb;
+        s_reverb = nullptr;
+        return k_unit_err_memory;
+    }
 
-  // Note: (optional) caching runtime descriptor for future reference
-  s_runtime_desc = *desc;
-
-  return s_reverb_instance.Init(desc);
+    s_initialized = true;
+    return k_unit_err_none;
 }
 
 __unit_callback void unit_teardown() {
-  s_reverb_instance.Teardown();
+    if (s_reverb) {
+        delete s_reverb;
+        s_reverb = nullptr;
+    }
+    s_initialized = false;
 }
 
+
 __unit_callback void unit_reset() {
-  s_reverb_instance.Reset();
+  s_reverb.Reset();
 }
 
 __unit_callback void unit_resume() {
-  s_reverb_instance.Resume();
+  s_reverb.Resume();
 }
 
 __unit_callback void unit_suspend() {
-  s_reverb_instance.Suspend();
+  s_reverb.Suspend();
 }
 
-__unit_callback void unit_render(const float * in, float * out, uint32_t frames) {
-  s_reverb_instance.Process(in, out, frames);
+__unit_callback void unit_render(const float* in, float* out, uint32_t frames) {
+    if (!s_initialized || !s_reverb) {
+        // Bypass: copy input to output
+        memcpy(out, in, frames * 2 * sizeof(float));
+        return;
+    }
+
+    // Input format: [L, R] interleaved
+    // Output format: [L, R] interleaved
+    s_reverb->process(in, in + 1, out, out + 1, frames);
 }
 
 __unit_callback void unit_set_param_value(uint8_t id, int32_t value) {
-  s_reverb_instance.setParameter(id, value);
+  s_reverb.setParameter(id, value);
 }
 
 __unit_callback int32_t unit_get_param_value(uint8_t id) {
-  return s_reverb_instance.getParameterValue(id);
+  return s_reverb.getParameterValue(id);
 }
 
 __unit_callback const char * unit_get_param_str_value(uint8_t id, int32_t value) {
-  return s_reverb_instance.getParameterStrValue(id, value);
+  return s_reverb.getParameterStrValue(id, value);
 }
 
 __unit_callback const uint8_t * unit_get_param_bmp_value(uint8_t id, int32_t value) {
-  return s_reverb_instance.getParameterBmpValue(id, value);
+  return s_reverb.getParameterBmpValue(id, value);
 }
 
 __unit_callback void unit_set_tempo(uint32_t tempo) {
@@ -75,11 +91,11 @@ __unit_callback void unit_set_tempo(uint32_t tempo) {
 }
 
 __unit_callback void unit_load_preset(uint8_t idx) {
-  s_reverb_instance.LoadPreset(idx);
+  s_reverb.LoadPreset(idx);
 }
 
 __unit_callback uint8_t unit_get_preset_index() {
-  return s_reverb_instance.getPresetIndex();
+  return s_reverb.getPresetIndex();
 }
 
 __unit_callback const char * unit_get_preset_name(uint8_t idx) {

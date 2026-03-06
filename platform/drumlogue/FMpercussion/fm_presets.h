@@ -19,39 +19,39 @@
 
 typedef struct {
     char name[12];
-    
+
     // Page 1: Probabilities
     uint8_t prob_kick;
     uint8_t prob_snare;
     uint8_t prob_metal;
     uint8_t prob_perc;
-    
+
     // Page 2: Kick + Snare
     uint8_t kick_sweep;
     uint8_t kick_decay;
     uint8_t snare_noise;
     uint8_t snare_body;
-    
+
     // Page 3: Metal + Perc
     uint8_t metal_inharm;
     uint8_t metal_bright;
     uint8_t perc_ratio;
     uint8_t perc_var;
-    
+
     // Page 4: LFO1
-    uint8_t lfo1_shape;     // 0-8
-    uint8_t lfo1_rate;      // 0-100
-    uint8_t lfo1_target;    // 0-5
-    int8_t  lfo1_depth;     // -100 to 100
-    
+    uint8_t lfo1_shape;    // 0-8
+    uint8_t lfo1_rate;     // 0-100
+    uint8_t lfo1_target;   // 0-5
+    int8_t  lfo1_depth;    // -100 to 100
+
     // Page 5: LFO2
-    uint8_t lfo2_shape;     // 0-8
-    uint8_t lfo2_rate;      // 0-100
-    uint8_t lfo2_target;    // 0-5
-    int8_t  lfo2_depth;     // -100 to 100
-    
+    uint8_t lfo2_shape;    // 0-8
+    uint8_t lfo2_rate;     // 0-100
+    uint8_t lfo2_target;   // 0-5
+    int8_t  lfo2_depth;    // -100 to 100
+
     // Page 6: Envelope
-    uint8_t env_shape;      // 0-127
+    uint8_t env_shape;     // 0-127
 } fm_preset_t;
 
 // Factory presets
@@ -145,3 +145,48 @@ static const fm_preset_t FM_PRESETS[8] = {
         .env_shape = 25
     }
 };
+
+/**
+ * Load preset into parameter array
+ */
+fast_inline void load_fm_preset(uint8_t preset_idx, uint8_t* params) {
+    if (preset_idx >= 8) return;
+
+    const fm_preset_t* p = &FM_PRESETS[preset_idx];
+
+    // Page 1
+    params[0] = p->prob_kick;
+    params[1] = p->prob_snare;
+    params[2] = p->prob_metal;
+    params[3] = p->prob_perc;
+
+    // Page 2
+    params[4] = p->kick_sweep;
+    params[5] = p->kick_decay;
+    params[6] = p->snare_noise;
+    params[7] = p->snare_body;
+
+    // Page 3
+    params[8] = p->metal_inharm;
+    params[9] = p->metal_bright;
+    params[10] = p->perc_ratio;
+    params[11] = p->perc_var;
+
+    // Page 4 (LFO1)
+    params[12] = p->lfo1_shape;
+    params[13] = p->lfo1_rate;
+    params[14] = p->lfo1_target;
+    params[15] = (uint8_t)(p->lfo1_depth + 100);  // Convert -100..100 to 0..200
+
+    // Page 5 (LFO2)
+    params[16] = p->lfo2_shape;
+    params[17] = p->lfo2_rate;
+    params[18] = p->lfo2_target;
+    params[19] = (uint8_t)(p->lfo2_depth + 100);
+
+    // Page 6
+    params[20] = p->env_shape;
+    params[21] = 0;
+    params[22] = 0;
+    params[23] = 0;
+}

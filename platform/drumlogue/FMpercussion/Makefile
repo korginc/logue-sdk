@@ -112,7 +112,7 @@ else
   endif
 
   USE_VECTORIZATION := yes
-endif 
+endif
 
 ifneq ($(NO_INLINE),)
   USE_COPT += -fno-inline

@@ -1,15 +1,26 @@
-/**
- *  @file envelope_rom.h
- *  @brief 128 predefined ADR envelopes for percussion
- *
- *  Single parameter selects from 128 carefully tuned curves
- *  Attack: 0-50ms, Decay: 20-500ms, Release: 10-500ms
- */
-
 #pragma once
+
+/**
+ * @file envelope_rom.h
+ * @brief 128 predefined ADR envelopes for percussion
+ *
+ * Fixed version with proper parallel processing for all 4 voices
+ * Attack → Decay → Release (ADR) - no sustain
+ */
 
 #include <arm_neon.h>
 #include <stdint.h>
+#include "constants.h"
+
+// Envelope stages
+#define ENV_STAGE_ATTACK  0
+#define ENV_STAGE_DECAY   1
+#define ENV_STAGE_RELEASE 2
+#define ENV_STATE_OFF     3
+
+// Envelope curve types
+#define ENV_CURVE_LINEAR    0
+#define ENV_CURVE_EXPONENTIAL 1
 
 typedef struct {
     uint8_t attack_ms;    // 0-50ms
@@ -18,7 +29,7 @@ typedef struct {
     uint8_t curve_type;   // 0=linear, 1=exponential
 } env_curve_t;
 
-// 128 predefined envelope curves
+// 128 predefined envelope curves (as previously defined)
 static const env_curve_t ENV_ROM[128] = {
     // Range 0-15: Tight & Dry (fast attack, short decay)
     {0, 20, 10, 1},   // 0: Fastest click
@@ -166,9 +177,37 @@ static const env_curve_t ENV_ROM[128] = {
 };
 
 /**
- * Get envelope parameters for a given shape index
+ * NEON-optimized envelope generator for 4 parallel voices
  */
-fast_inline void get_envelope(uint8_t shape_idx, 
+typedef struct {
+    float32x4_t level;           // Current envelope level (0-1) for 4 voices
+    uint32x4_t stage;            // 0=attack, 1=decay, 2=release, 3=off
+    uint32x4_t samples_left;     // Samples remaining in current stage
+    float32x4_t increment;       // Per-sample increment for current stage
+    float32x4_t attack_samples;  // Attack length in samples (pre-calculated)
+    float32x4_t decay_samples;   // Decay length in samples
+    float32x4_t release_samples; // Release length in samples
+    uint32x4_t curve_type;       // 0=linear, 1=exponential
+} neon_envelope_t;
+
+/**
+ * Initialize envelope generator
+ */
+fast_inline void neon_envelope_init(neon_envelope_t* env) {
+    env->level = vdupq_n_f32(0.0f);
+    env->stage = vdupq_n_u32(ENV_STATE_OFF);
+    env->samples_left = vdupq_n_u32(0);
+    env->increment = vdupq_n_f32(0.0f);
+    env->attack_samples = vdupq_n_f32(0.0f);
+    env->decay_samples = vdupq_n_f32(0.0f);
+    env->release_samples = vdupq_n_f32(0.0f);
+    env->curve_type = vdupq_n_u32(ENV_CURVE_LINEAR);
+}
+
+/**
+ * Get envelope parameters from ROM
+ */
+fast_inline void get_envelope(uint8_t shape_idx,
                               uint8_t* attack_ms,
                               uint8_t* decay_ms,
                               uint8_t* release_ms,
@@ -181,113 +220,267 @@ fast_inline void get_envelope(uint8_t shape_idx,
 }
 
 /**
- * NEON-optimized envelope generator for 4 voices
- */
-typedef struct {
-    float32x4_t level;        // Current envelope level (0-1)
-    uint32x4_t stage;         // 0=attack, 1=decay, 2=release, 3=off
-    uint32x4_t samples_left;  // Samples remaining in current stage
-    float32x4_t increment;    // Per-sample increment for linear stages
-} neon_envelope_t;
-
-/**
- * Initialize envelope generator
- */
-fast_inline void neon_envelope_init(neon_envelope_t* env) {
-    env->level = vdupq_n_f32(0.0f);
-    env->stage = vdupq_n_u32(3);  // Off
-    env->samples_left = vdupq_n_u32(0);
-    env->increment = vdupq_n_f32(0.0f);
-}
-
-/**
  * Trigger envelope for selected voices
+ * @param env Envelope state
+ * @param voice_mask Which voices to trigger (1 bit per voice)
+ * @param shape_idx Envelope shape index (0-127)
  */
 fast_inline void neon_envelope_trigger(neon_envelope_t* env,
                                        uint32x4_t voice_mask,
                                        uint8_t shape_idx) {
-    uint8_t a, d, r, curve;
-    get_envelope(shape_idx, &a, &d, &r, &curve);
-    
+    uint8_t a_ms, d_ms, r_ms, curve;
+    get_envelope(shape_idx, &a_ms, &d_ms, &r_ms, &curve);
+
     // Convert ms to samples at 48kHz
-    uint32_t attack_samples = a * 48;
-    uint32_t decay_samples = d * 48;
-    uint32_t release_samples = r * 48;
-    
-    // Set up attack stage for triggered voices
-    uint32x4_t attack_stage = vdupq_n_u32(0);
-    uint32x4_t attack_samples_vec = vdupq_n_u32(attack_samples);
-    
-    // Calculate attack increment (linear: 1.0 / samples)
-    float attack_inc = 1.0f / (attack_samples ? attack_samples : 1);
-    float32x4_t attack_inc_vec = vdupq_n_f32(attack_inc);
-    
-    // Apply to masked voices only
-    env->stage = vbslq_u32(voice_mask, attack_stage, env->stage);
-    env->samples_left = vbslq_u32(voice_mask, attack_samples_vec, env->samples_left);
-    env->increment = vbslq_f32(vreinterpretq_f32_u32(voice_mask), 
-                                attack_inc_vec, env->increment);
-    env->level = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
-                           vdupq_n_f32(0.0f), env->level);
+    float attack_samps = a_ms * 48.0f;
+    float decay_samps = d_ms * 48.0f;
+    float release_samps = r_ms * 48.0f;
+
+    // Ensure non-zero to avoid division by zero
+    if (attack_samps < 1.0f) attack_samps = 1.0f;
+    if (decay_samps < 1.0f) decay_samps = 1.0f;
+    if (release_samps < 1.0f) release_samps = 1.0f;
+
+    // Store pre-calculated stage lengths
+    env->attack_samples = vbslq_f32(voice_mask,
+                                    vdupq_n_f32(attack_samps),
+                                    env->attack_samples);
+    env->decay_samples = vbslq_f32(voice_mask,
+                                   vdupq_n_f32(decay_samps),
+                                   env->decay_samples);
+    env->release_samples = vbslq_f32(voice_mask,
+                                     vdupq_n_f32(release_samps),
+                                     env->release_samples);
+
+    // Set curve type
+    env->curve_type = vbslq_u32(voice_mask,
+                                vdupq_n_u32(curve),
+                                env->curve_type);
+
+    // Set stage to attack
+    env->stage = vbslq_u32(voice_mask,
+                           vdupq_n_u32(ENV_STAGE_ATTACK),
+                           env->stage);
+
+    // Set samples left for attack stage
+    env->samples_left = vbslq_u32(voice_mask,
+                                  vcvtq_u32_f32(vdupq_n_f32(attack_samps)),
+                                  env->samples_left);
+
+    // Set increment for attack (linear: positive slope to reach 1.0)
+    // For exponential, we'll handle differently in process function
+    env->increment = vbslq_f32(voice_mask,
+                               vdupq_n_f32(1.0f / attack_samps),
+                               env->increment);
+
+    // Reset level to 0 for triggered voices
+    env->level = vbslq_f32(voice_mask,
+                           vdupq_n_f32(0.0f),
+                           env->level);
 }
 
 /**
- * Process one sample of envelope for all 4 voices
+ * Process one sample for all 4 voices in parallel
+ * Must be called exactly once per sample
  */
 fast_inline void neon_envelope_process(neon_envelope_t* env) {
-    // Update level based on current stage
+    // -----------------------------------------------------------------
+    // 1. Update level based on current stage and curve type
+    // -----------------------------------------------------------------
+    // For linear stages: level += increment
+    // For exponential stages: we need different handling
+
+    // First, handle linear stages (most common)
     env->level = vaddq_f32(env->level, env->increment);
-    
-    // Decrement sample counters
+
+    // For exponential attack, we'd need a different approach
+    // But for simplicity, we'll use linear for now and add exp option later
+
+    // -----------------------------------------------------------------
+    // 2. Decrement sample counters for all voices
+    // -----------------------------------------------------------------
     env->samples_left = vsubq_u32(env->samples_left, vdupq_n_u32(1));
-    
-    // Check for stage completion
+
+    // -----------------------------------------------------------------
+    // 3. Check which voices have completed their current stage
+    // -----------------------------------------------------------------
     uint32x4_t stage_done = vceqq_u32(env->samples_left, vdupq_n_u32(0));
-    
-    // Handle stage transitions
-    uint32x4_t attack_stage = vceqq_u32(env->stage, vdupq_n_u32(0));
-    uint32x4_t decay_stage = vceqq_u32(env->stage, vdupq_n_u32(1));
-    uint32x4_t release_stage = vceqq_u32(env->stage, vdupq_n_u32(2));
-    
-    // Attack -> Decay transition
+
+    // -----------------------------------------------------------------
+    // 4. Handle stage transitions for ALL voices that are done
+    // -----------------------------------------------------------------
+    // Instead of checking only first voice with vget_lane, we process all lanes
+    // using vector operations
+
+    // Get current stage masks
+    uint32x4_t attack_stage = vceqq_u32(env->stage, vdupq_n_u32(ENV_STAGE_ATTACK));
+    uint32x4_t decay_stage = vceqq_u32(env->stage, vdupq_n_u32(ENV_STAGE_DECAY));
+    uint32x4_t release_stage = vceqq_u32(env->stage, vdupq_n_u32(ENV_STAGE_RELEASE));
+
+    // -----------------------------------------------------------------
+    // 4a. Attack -> Decay transition (for voices that finished attack)
+    // -----------------------------------------------------------------
     uint32x4_t attack_done = vandq_u32(stage_done, attack_stage);
-    if (vget_lane_u32(vreinterpret_u32_u8(vmovn_u32(attack_done)), 0)) {
-        // Move to decay stage
-        env->stage = vbslq_u32(attack_done, vdupq_n_u32(1), env->stage);
-        
-        // Set up decay (exponential)
-        // For now, linear decay - will add exponential later
-        float decay_samples = 100 * 48;  // Placeholder
-        env->samples_left = vbslq_u32(attack_done,
-                                      vdupq_n_u32((uint32_t)decay_samples),
-                                      env->samples_left);
-        env->increment = vbslq_f32(vreinterpretq_f32_u32(attack_done),
-                                   vdupq_n_f32(-1.0f / decay_samples),
-                                   env->increment);
-    }
-    
-    // Clamp level to [0,1]
-    env->level = vmaxq_f32(vdupq_n_f32(0.0f), 
+
+    // Update stage to decay for voices that finished attack
+    env->stage = vbslq_u32(attack_done,
+                           vdupq_n_u32(ENV_STAGE_DECAY),
+                           env->stage);
+
+    // Set samples left for decay stage
+    env->samples_left = vbslq_u32(attack_done,
+                                  vcvtq_u32_f32(env->decay_samples),
+                                  env->samples_left);
+
+    // Set increment for decay (negative slope to reach 0)
+    // For linear decay: increment = -1.0 / decay_samples
+    env->increment = vbslq_f32(vreinterpretq_f32_u32(attack_done),
+                               vnegq_f32(vrecpeq_f32(env->decay_samples)),
+                               env->increment);
+
+    // -----------------------------------------------------------------
+    // 4b. Decay -> Release transition (for voices that finished decay)
+    // -----------------------------------------------------------------
+    uint32x4_t decay_done = vandq_u32(stage_done, decay_stage);
+
+    // Update stage to release for voices that finished decay
+    env->stage = vbslq_u32(decay_done,
+                           vdupq_n_u32(ENV_STAGE_RELEASE),
+                           env->stage);
+
+    // Set samples left for release stage
+    env->samples_left = vbslq_u32(decay_done,
+                                  vcvtq_u32_f32(env->release_samples),
+                                  env->samples_left);
+
+    // Set increment for release (continues negative slope to reach 0)
+    env->increment = vbslq_f32(vreinterpretq_f32_u32(decay_done),
+                               vnegq_f32(vrecpeq_f32(env->release_samples)),
+                               env->increment);
+
+    // -----------------------------------------------------------------
+    // 4c. Release -> Off transition (for voices that finished release)
+    // -----------------------------------------------------------------
+    uint32x4_t release_done = vandq_u32(stage_done, release_stage);
+
+    // Update stage to off for voices that finished release
+    env->stage = vbslq_u32(release_done,
+                           vdupq_n_u32(ENV_STATE_OFF),
+                           env->stage);
+
+    // Set level to 0 for voices that turned off
+    env->level = vbslq_f32(vreinterpretq_f32_u32(release_done),
+                           vdupq_n_f32(0.0f),
+                           env->level);
+
+    // Zero out increment for off voices
+    env->increment = vbslq_f32(vreinterpretq_f32_u32(release_done),
+                               vdupq_n_f32(0.0f),
+                               env->increment);
+
+    // -----------------------------------------------------------------
+    // 5. Clamp level to [0, 1] for all voices
+    // -----------------------------------------------------------------
+    env->level = vmaxq_f32(vdupq_n_f32(0.0f),
                            vminq_f32(vdupq_n_f32(1.0f), env->level));
+}
+
+/**
+ * Check if any voices are still active
+ * @return Non-zero if at least one voice is active
+ */
+fast_inline uint32_t neon_envelope_active(neon_envelope_t* env) {
+    uint32x4_t not_off = vcgtq_u32(vdupq_n_u32(ENV_STATE_OFF), env->stage);
+    return vgetq_lane_u32(not_off, 0) |
+           vgetq_lane_u32(not_off, 1) |
+           vgetq_lane_u32(not_off, 2) |
+           vgetq_lane_u32(not_off, 3);
+}
+
+/**
+ * Get current envelope level for a specific voice
+ */
+fast_inline float neon_envelope_get_voice(const neon_envelope_t* env, uint32_t voice_idx) {
+    return vgetq_lane_f32(env->level, voice_idx);
 }
 
 // ========== UNIT TEST ==========
 #ifdef TEST_ENVELOPE
 
-void test_envelope_rom() {
-    // Test a few envelope shapes
-    uint8_t a, d, r, c;
-    
-    get_envelope(0, &a, &d, &r, &c);
-    assert(a == 0 && d == 20 && r == 10);
-    
-    get_envelope(48, &a, &d, &r, &c);
-    assert(a == 20 && d == 500 && r == 250);
-    
-    get_envelope(127, &a, &d, &r, &c);
-    assert(a == 50 && d == 500 && r == 500);
-    
-    printf("Envelope ROM test PASSED\n");
+#include <stdio.h>
+#include <assert.h>
+
+void test_envelope_transitions() {
+    neon_envelope_t env;
+    neon_envelope_init(&env);
+
+    // Trigger voice 0 only
+    uint32x4_t mask = {1, 0, 0, 0};
+    neon_envelope_trigger(&env, mask, 20);  // Use shape 20
+
+    float last_level = 0.0f;
+    int attack_samples = 0;
+    int decay_samples = 0;
+    int release_samples = 0;
+
+    // Track through all stages
+    while (neon_envelope_active(&env)) {
+        neon_envelope_process(&env);
+        float level = neon_envelope_get_voice(&env, 0);
+        uint32_t stage = vgetq_lane_u32(env.stage, 0);
+
+        switch (stage) {
+            case ENV_STAGE_ATTACK:
+                assert(level >= last_level);  // Should increase
+                attack_samples++;
+                break;
+            case ENV_STAGE_DECAY:
+                assert(level <= last_level);  // Should decrease
+                decay_samples++;
+                break;
+            case ENV_STAGE_RELEASE:
+                assert(level <= last_level);  // Should decrease
+                release_samples++;
+                break;
+        }
+
+        last_level = level;
+    }
+
+    printf("Attack samples: %d\n", attack_samples);
+    printf("Decay samples: %d\n", decay_samples);
+    printf("Release samples: %d\n", release_samples);
+    printf("All stages completed: PASSED\n");
 }
 
-#endif
+void test_parallel_processing() {
+    neon_envelope_t env;
+    neon_envelope_init(&env);
+
+    // Trigger all 4 voices with different shapes
+    uint32x4_t mask = {1, 1, 1, 1};
+    neon_envelope_trigger(&env, mask, 0);   // All shape 0
+
+    // Process 10 samples
+    for (int i = 0; i < 10; i++) {
+        neon_envelope_process(&env);
+
+        // All voices should have same level (same shape)
+        float l0 = neon_envelope_get_voice(&env, 0);
+        float l1 = neon_envelope_get_voice(&env, 1);
+        float l2 = neon_envelope_get_voice(&env, 2);
+        float l3 = neon_envelope_get_voice(&env, 3);
+
+        assert(l0 == l1 && l1 == l2 && l2 == l3);
+    }
+
+    printf("Parallel processing test: PASSED\n");
+}
+
+int main() {
+    test_envelope_transitions();
+    test_parallel_processing();
+    return 0;
+}
+
+#endif // TEST_ENVELOPE
