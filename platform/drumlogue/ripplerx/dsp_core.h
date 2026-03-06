@@ -79,6 +79,9 @@ struct WaveguideState {
     // Fast-math loop coefficients (Calculated from UI parameters)
     float feedback_gain = 0.0f;    // Determines Decay Time
     float lowpass_coeff = 1.0f;    // Determines Material/Tone
+    float ap_coeff = 0.0f; // Allpass coefficient (-0.99 to 0.99)
+    float ap_x1 = 0.0f;    // Allpass delayed input
+    float ap_y1 = 0.0f;    // Allpass delayed output
 
     // Filter State Memory
     float z1 = 0.0f;               // 1-pole lowpass history

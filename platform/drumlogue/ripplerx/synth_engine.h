@@ -9,17 +9,16 @@
 #include "dsp_core.h"
 #include "../common/runtime.h" // Drumlogue OS functions
 
-#define ENABLE_PHASE_5_EXCITERS
-// #define ENABLE_PHASE_6_FILTERS
+#define ENABLE_PHASE_5_EXCITERS 1
+#define ENABLE_PHASE_6_FILTERS 0
+#define ENABLE_PHASE_7_MODELS 0
 
 /**
  * The Architectural Wins Here:
-Pre-Calculated Math: Notice the apply_skew and division happens purely in setParameter. The DSP struct (WaveguideState) now holds a pure float like 0.993f. In Phase 3, the Audio Thread will just do a single multiplication (buffer[i] * feedback_gain).
-
-Crash-Proof Samples: The sample loader has the exact pointer checks we discussed, but it pushes the metadata to all 4 voices instantly.
-
-Sequencer Routing: GateOn properly routes to m_ui_note, ensuring the internal drum machine plays the pitch defined on the screen.
-
+ * Pre-Calculated Math: Notice the apply_skew and division happens purely in setParameter. The DSP struct (WaveguideState) now holds a pure float like 0.993f. In Phase 3, the Audio Thread will just do a single multiplication (buffer[i] * feedback_gain).
+ * Crash-Proof Samples: The sample loader has the exact pointer checks we discussed, but it pushes the metadata to all 4 voices instantly.
+ * Sequencer Routing: GateOn properly routes to m_ui_note, ensuring the internal drum machine plays the pitch defined on the screen.
+ *
 */
 
 // Utility for fast skewing
@@ -122,24 +121,87 @@ public:
     inline void LoadPreset(uint8_t idx) {
         m_preset_idx = idx;
 
-        // TODO (Phase 8): When you export your 28 legacy presets, you will
-        // paste the 2D array here and loop through it.
-        // Example:
-        // for (int param_id = 1; param_id <= 24; ++param_id) {
-        //     if (param_id == 2) continue; // Skip Gain
-        //     setParameter(param_id, legacy_preset_data[idx][param_id]);
-        // }
+        // Columns Map:
+        // 0:Note | 1:Gain | 2:Bank | 3:Sample | 4:MlltRes | 5:MlltStif | 6:VlMllR | 7:VlMllS
+        // 8:Model| 9:Prtls| 10:Dkay| 11:Mterl | 12:Tone   | 13:HitPos  | 14:Rel   | 15:Inharm
+        // 16:LCut| 17:TRad| 18:CPtch| 19:NzMix| 20:NzRes  | 21:NzFltr  | 22:NzFrq | 23:Resnc
+
+        static const int32_t presets[28][24] = {
+            // 0: Init (Basic Plucked String)
+            {60, 0,  0, 1, 500, 2500, 0, 0, 0, 3, 250, 10,  0, 26, 10, 3000, 10, 5, 0, 0,   300, 0, 12000, 707},
+            // 1: Marimba (Model 6, Stiff Mallet, Short Decay, Low Inharm)
+            {60, 20, 0, 1, 800, 4000, 0, 0, 6, 3, 150, -5,  0, 50, 5,  1500, 10, 5, 0, 0,   300, 0, 12000, 707},
+            // 2: 808 Sub (Model 5, Overdriven Gain, Long Decay, Dark Material)
+            {36, 150,0, 1, 100, 500,  0, 0, 5, 3, 800, -10, 0, 50, 15, 100,  10, 5, 0, 0,   300, 0, 1000,  707},
+            // 3: Ac Snare (Model 5, Medium Decay, High Noise Mix for snares)
+            {38, 50, 0, 1, 400, 3000, 0, 0, 5, 3, 150, 15,  0, 20, 8,  5000, 150,5, 0, 800, 500, 2, 8000,  707},
+            // 4: Tubular Bell (Model 8 Tube, Extreme Inharm, Bright Material)
+            {72, 0,  0, 1, 900, 5000, 0, 0, 8, 3, 1500,30,  0, 10, 20, 19000,200,5, 0, 0,   300, 0, 12000, 707},
+            // 5: Timpani (Model 3 Membrane, Soft Mallet, Dark Material)
+            {40, 30, 0, 1, 300, 500,  0, 0, 3, 3, 600, -5,  0, 30, 15, 200,  10, 5, 0, 0,   300, 0, 5000,  707},
+            // 6: Djambe (Model 5 Drumhead, Resonant, Edge HitPos)
+            {48, 50, 0, 1, 600, 2000, 0, 0, 5, 3, 300, 5,   0, 10, 12, 500,  50, 5, 0, 50,  200, 0, 6000,  707},
+            // 7: Taiko (Model 5 Drumhead, Heavy Overdrive, Massive Decay)
+            {36, 200,0, 1, 200, 800,  0, 0, 5, 3, 700, -10, 0, 50, 18, 100,  10, 5, 0, 0,   300, 0, 4000,  707},
+            // 8: March Snare (Model 5, Very Short Decay, Max Noise Mix)
+            {65, 80, 0, 1, 700, 4500, 0, 0, 5, 3, 80,  20,  0, 50, 3,  2000, 250,5, 0, 950, 150, 2, 10000, 707},
+            // 9: Tam Tam (Model 4 Plate, Extreme Inharm, Longest Decay)
+            {35, 60, 0, 1, 100, 1500, 0, 0, 4, 3, 1800,25,  0, 25, 20, 18000,10, 5, 0, 100, 800, 0, 8000,  707},
+            // 10: Koto (Model 0 String, Pure Harmonic (Inharm=1), Sharp Pluck)
+            {72, 0,  0, 1, 600, 4500, 0, 0, 0, 3, 800, 10,  0, 80, 12, 1,    10, 5, 0, 0,   300, 0, 10000, 707},
+            // 11: Vibraphone (Model 1 Beam, Harmonic, Long Decay)
+            {72, 0,  0, 1, 500, 3000, 0, 0, 1, 3, 1200,15,  0, 50, 18, 50,   10, 5, 0, 0,   300, 0, 10000, 707},
+            // 12: Woodblock (Model 2 Squared, Very Short Decay, Dull Material)
+            {76, 0,  0, 1, 800, 3500, 0, 0, 2, 3, 50,  -8,  0, 50, 2,  800,  10, 5, 0, 0,   300, 0, 5000,  707},
+            // 13: Acoustic Tom (Model 5, Pitch 45, Medium Decay)
+            {45, 40, 0, 1, 400, 2000, 0, 0, 5, 3, 400, -2,  0, 50, 10, 300,  10, 5, 0, 20,  300, 0, 8000,  707},
+            // 14: Cymbal (Model 4 Plate, Massive Inharm, Bright, High Noise)
+            {60, 20, 0, 1, 800, 5000, 0, 0, 4, 3, 1400,30,  0, 10, 18, 19500,400,5, 0, 600, 700, 2, 14000, 707},
+            // 15: Gong (Model 4 Plate, Low Pitch, Massive Inharm)
+            {36, 40, 0, 1, 200, 2000, 0, 0, 4, 3, 1900,20,  0, 50, 20, 19000,10, 5, 0, 100, 800, 0, 6000,  707},
+            // 16: Kalimba (Model 1 Beam, Pure, Metallic, Short Decay)
+            {72, 10, 0, 1, 700, 4000, 0, 0, 1, 3, 200, 25,  0, 80, 5,  10,   10, 5, 0, 0,   300, 0, 10000, 707},
+            // 17: Steel Pan (Model 4 Plate, Medium Inharm, Bright)
+            {60, 20, 0, 1, 600, 3500, 0, 0, 4, 3, 600, 20,  0, 30, 12, 8000, 100,5, 0, 0,   300, 0, 10000, 707},
+            // 18: Claves (Model 2 Squared, Stiff Mallet, Instant Decay)
+            {79, 0,  0, 1, 900, 4800, 0, 0, 2, 3, 30,  5,   0, 50, 1,  200,  10, 5, 0, 0,   300, 0, 8000,  707},
+            // 19: Cowbell (Model 4 Plate, Very High Inharm, Short Decay)
+            {67, 30, 0, 1, 800, 4500, 0, 0, 4, 3, 150, 25,  0, 20, 4,  17000,200,5, 0, 0,   300, 0, 10000, 707},
+            // 20: Triangle (Model 1 Beam, High Pitch, Extreme Inharm)
+            {84, 0,  0, 1, 900, 5000, 0, 0, 1, 3, 1000,30,  0, 10, 15, 19900,800,5, 0, 0,   300, 0, 15000, 707},
+            // 21: Kick Drum (Model 5, Punchy, Fast Envelope)
+            {36, 100,0, 1, 300, 1500, 0, 0, 5, 3, 200, -5,  0, 50, 6,  200,  10, 5, 0, 50,  200, 0, 3000,  707},
+            // 22: Clap (Model 5, 100% Noise Mix, Multiple bounces simulated by fast delay)
+            {60, 50, 0, 1, 500, 3000, 0, 0, 5, 3, 50,  10,  0, 50, 3,  5000, 400,5, 0, 1000,100, 2, 10000, 707},
+            // 23: Shaker (Model 5, 100% Noise Mix, High Pass Filtered)
+            {72, 20, 0, 1, 100, 4000, 0, 0, 5, 3, 20,  15,  0, 50, 2,  1000, 800,5, 0, 1000,300, 2, 12000, 707},
+            // 24: Flute (Model 7 Open Tube, Breath Noise Exciter)
+            {72, 0,  0, 1, 100, 500,  0, 0, 7, 3, 900, -5,  0, 10, 12, 10,   10, 5, 0, 400, 800, 0, 6000,  707},
+            // 25: Clarinet (Model 8 Closed Tube, Breath Noise Exciter)
+            {60, 0,  0, 1, 100, 500,  0, 0, 8, 3, 900, -5,  0, 10, 12, 10,   10, 5, 0, 400, 800, 0, 6000,  707},
+            // 26: Pluck Bass (Model 0 String, Dark Material, Low Pitch)
+            {36, 60, 0, 1, 600, 2500, 0, 0, 0, 3, 600, -8,  0, 20, 10, 5,    10, 5, 0, 0,   300, 0, 5000,  707},
+            // 27: Glass Bowl (Model 4 Plate, Pure but shimmering)
+            {76, 0,  0, 1, 700, 3500, 0, 0, 4, 3, 1600,25,  0, 80, 18, 12000,100,5, 0, 0,   300, 0, 12000, 707}
+        };
+
+        if (idx >= 28) return;
+
+        // Fire the parameter translation logic to instantly rebuild the acoustic space
+        for (uint8_t param_id = 0; param_id < 24; ++param_id) {
+            setParameter(param_id, presets[idx][param_id]);
+        }
     }
 
     static inline const char * getPresetName(uint8_t idx) {
-        // Dummy names until we port your legacy preset list in Phase 8
         static const char* const preset_names[] = {
-            "Init", "Marimba", "Vibraphone", "Woodblock", "Timpani",
-            "Snare", "Tom", "Cymbal", "Bell", "Gong", // ... add up to 28
-            "Preset11", "Preset12", "Preset13", "Preset14", "Preset15",
-            "Preset16", "Preset17", "Preset18", "Preset19", "Preset20",
-            "Preset21", "Preset22", "Preset23", "Preset24", "Preset25",
-            "Preset26", "Preset27", "Preset28"
+            "Init",         "Marimba",      "808 Sub",      "Ac Snare",
+            "TubularBell",  "Timpani",      "Djambe",       "Taiko",
+            "March Snare",  "Tam Tam",      "Koto",         "Vibraphone",
+            "Woodblock",    "AcousticTom",  "Cymbal",       "Gong",
+            "Kalimba",      "Steel Pan",    "Claves",       "Cowbell",
+            "Triangle",     "Kick Drum",    "Clap",         "Shaker",
+            "Flute",        "Clarinet",     "Pluck Bass",   "Glass Bowl"
         };
         if (idx < 28) return preset_names[idx];
         return "Unknown";
@@ -213,6 +275,15 @@ public:
                 break;
             }
 
+            case 13: { // HitPos (Comb Filter / Mixture)
+                // Range is usually 0 to 100.
+                // We map this to the A/B mix balance!
+                // 0.0 = hitting exactly on the edge (All Res A)
+                // 0.5 = hitting in the dead center (Equal Mix)
+                state.mix_ab = fmaxf(0.0f, fminf(1.0f, (float)value / 100.0f));
+                break;
+            }
+
             case 14: { // Rel (Release Envelope Time)
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 20.0f));
                 float rel_rate = 0.0001f + ((1.0f - norm) * 0.01f);
@@ -221,6 +292,17 @@ public:
                     state.voices[i].exciter.noise_env.release_rate = rel_rate;
                     state.voices[i].exciter.master_env.release_rate = rel_rate;
 #endif
+                }
+                break;
+            }
+
+            case 15: { // Inharm (Dispersion)
+                // UI Range is 1 to 19999.
+                // We map this to the allpass coefficient (-0.99f to +0.99f)
+                float norm = (float)value / 20000.0f;
+                for (int i = 0; i < NUM_VOICES; ++i) {
+                    state.voices[i].resA.ap_coeff = norm;
+                    state.voices[i].resB.ap_coeff = norm;
                 }
                 break;
             }
@@ -435,13 +517,21 @@ inline void NoteOff(uint8_t note) {
         wg.z1 = (delay_out * wg.lowpass_coeff) + (wg.z1 * (1.0f - wg.lowpass_coeff));
         float filtered_out = wg.z1;
 
+
+        // --- NEW: Dispersion (Allpass Filter) ---
+        // This slightly delays high frequencies, stretching the harmonics out of tune
+        // to create metallic, stiff, or bell-like tones.
+        float ap_out = (wg.ap_coeff * filtered_out) + wg.ap_x1 - (wg.ap_coeff * wg.ap_y1);
+        wg.ap_x1 = filtered_out;
+        wg.ap_y1 = ap_out;
+
         // 4. Feedback & Exciter Addition
         // wg.feedback_gain is our "Decay" time
-        // --- PHASE 7: The Topology Multiplier ---
+        // --- PHASE 7: The Topology Multiplier (Use ap_out instead of filtered_out) ---
 #ifdef ENABLE_PHASE_7_MODELS
-        float new_val = exciter_input + (filtered_out * wg.feedback_gain * wg.phase_mult);
+        float new_val = exciter_input + (ap_out * wg.feedback_gain * wg.phase_mult);
 #else
-        float new_val = exciter_input + (filtered_out * wg.feedback_gain);
+        float new_val = exciter_input + (ap_out * wg.feedback_gain);
 #endif
 
         // 5. Write back to the delay line and advance the pointer
@@ -463,7 +553,7 @@ inline void NoteOff(uint8_t note) {
             ex.current_frame++;
         }
 
-    #ifdef ENABLE_PHASE_5_EXCITERS
+#ifdef ENABLE_PHASE_5_EXCITERS
         // Add optional Noise Burst here (e.g. for snare wires or breath noise)
         // 2. Synthesized Noise Burst (Activated incrementally)
         float noise_env_val = ex.noise_env.process();
@@ -472,7 +562,17 @@ inline void NoteOff(uint8_t note) {
             // Multiply by noise_decay_coeff so the UI NzMix knob actually changes the volume
             out += raw_noise * noise_env_val * ex.noise_decay_coeff;
         }
-    #endif
+#endif
+
+        // 3. The Modal Mallet Strike
+        // We only trigger the mallet on the very first frame of the note
+        float mallet_impulse = (ex.current_frame == 0) ? 1.0f : 0.0f;
+
+        // (Note: You'll need to add `float mallet_lp = 0.0f;` and `float mallet_stiffness = 0.5f;` to ExciterState)
+        ex.mallet_lp = (mallet_impulse * ex.mallet_stiffness) + (ex.mallet_lp * (1.0f - ex.mallet_stiffness));
+
+        // Add the mallet thump to the total exciter output
+        out += ex.mallet_lp * 2.0f; // Multiplied for volume compensation
 
         return out;
     }
