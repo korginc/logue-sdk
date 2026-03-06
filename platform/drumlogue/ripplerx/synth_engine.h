@@ -137,6 +137,8 @@ public:
 
     // Called by unit_get_param_value so the OS knows what to draw on the screen
     inline int32_t getParameterValue(uint8_t index) const {
+        // CRITICAL UI FIX: Prevent OS out-of-bounds reads
+        if (index >= 24) return 0;
         return m_params[index];
     }
 
@@ -240,6 +242,8 @@ public:
     // 2. Parameter Binding (UI Thread)
     // ==============================================================================
     inline void setParameter(uint8_t index, int32_t value) {
+        // CRITICAL UI FIX: Prevent OS out-of-bounds writes
+        if (index >= 24) return;
         m_params[index] = value;
 
         switch(index) {
@@ -381,30 +385,22 @@ public:
             "Drumhd", "Marimb", "OpnTub", "ClsTub"
         };
         static const char* const partial_names[] = {"4", "8", "16", "32", "64"};
-
-        // ADDED: The missing Noise Filter strings!
         static const char* const nz_filter_names[] = {"LP", "BP", "HP"};
 
-        switch (index) {
-            case k_paramProgram:
-                return getPresetName((uint8_t)value);
-            case k_paramBank:
-                if (value >= 0 && value < 7) return bank_names[value];
-                break;
-            case k_paramModel:
-                if (value >= 0 && value < 9) return model_names[value];
-                if (value >= 9 && value < 18) return model_names[value - 9];
-                break;
-            case k_paramPartls:
-                if (value >= 0 && value < 5) return partial_names[value];
-                break;
-            // ADDED: The missing Noise Filter logic!
-            case k_paramNzFltr:
-                if (value >= 0 && value < 3) return nz_filter_names[value];
-                break;
+        if (index == k_paramProgram) {
+            return getPresetName((uint8_t)value);
+        } else if (index == k_paramBank) {
+            if (value >= 0 && value < 7) return bank_names[value];
+        } else if (index == k_paramModel) {
+            if (value >= 0 && value < 9) return model_names[value];
+            if (value >= 9 && value < 18) return model_names[value - 9];
+        } else if (index == k_paramPartls) {
+            if (value >= 0 && value < 5) return partial_names[value];
+        } else if (index == k_paramNzFltr) {
+            if (value >= 0 && value < 3) return nz_filter_names[value];
         }
 
-        // THE LOGUE SDK GOLDEN RULE: Never return nullptr to the OS!
+        // Unconditional failsafe to prevent OS screen crashes
         return "---";
     }
 
@@ -534,11 +530,17 @@ inline void NoteOff(uint8_t note) {
     inline float process_waveguide(WaveguideState& wg, float exciter_input) {
         // 1. Calculate the read pointer position for exact pitch
         float read_pos = (float)wg.write_ptr - wg.delay_length;
-        if (read_pos < 0.0f) read_pos += (float)DELAY_BUFFER_SIZE; // Wrap around safely
+        float read_idx = (float)wg.write_ptr - wg.delay_length;
 
-        // 2. Fractional Delay Line Reading (Linear Interpolation)
-        int idx_int = (int)read_pos;
-        float frac = read_pos - (float)idx_int;
+        // CRITICAL DSP FIX: Handle massive sub-bass wrap-arounds
+        while (read_idx < 0.0f) {
+            read_idx += (float)DELAY_BUFFER_SIZE;
+        }
+
+        // Explicitly mask BOTH indices to guarantee we never read out-of-bounds memory
+        uint32_t idx_A = ((uint32_t)read_idx) & DELAY_MASK;
+        uint32_t idx_B = (idx_A + 1) & DELAY_MASK;
+        float frac = read_idx - (float)((uint32_t)read_idx);
 
         int idx_A = idx_int & DELAY_MASK;
         int idx_B = (idx_A + 1) & DELAY_MASK;
