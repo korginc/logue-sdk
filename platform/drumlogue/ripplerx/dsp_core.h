@@ -15,7 +15,7 @@
 
 // =================================================================
 // UNCOMMENT THIS LINE TO ACTIVATE PHASE 6 (MASTER FILTER)
-// #define ENABLE_PHASE_6_FILTERS 1
+#define ENABLE_PHASE_6_FILTERS 1
 // =================================================================
 
 #ifdef ENABLE_PHASE_6_FILTERS
@@ -24,7 +24,7 @@
 
 // =================================================================
 // UNCOMMENT THIS LINE TO ACTIVATE PHASE 7 (MODELS & TABLES)
-// #define ENABLE_PHASE_7_MODELS 1
+#define ENABLE_PHASE_7_MODELS 1
 // =================================================================
 
 #ifdef ENABLE_PHASE_7_MODELS
@@ -63,6 +63,9 @@ struct ExciterState {
     // Noise Burst Data
     float noise_decay_coeff = 0.0f;
     float current_noise_env = 0.0f;
+
+    float mallet_lp = 0.0f;
+    float mallet_stiffness = 0.5f;
 };
 
 /**

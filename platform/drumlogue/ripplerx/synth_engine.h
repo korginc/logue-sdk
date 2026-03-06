@@ -9,9 +9,6 @@
 #include "dsp_core.h"
 #include "../common/runtime.h" // Drumlogue OS functions
 
-#define ENABLE_PHASE_5_EXCITERS 1
-#define ENABLE_PHASE_6_FILTERS 0
-#define ENABLE_PHASE_7_MODELS 0
 
 /**
  * The Architectural Wins Here:
@@ -136,7 +133,7 @@ public:
             // 3: Ac Snare (Model 5, Medium Decay, High Noise Mix for snares)
             {3, 38, 0, 1, 400, 3000, 0, 0, 5, 3, 150, 15,  0, 20, 8,  5000, 150,5, 50,  800, 500, 2, 8000,  707},
             // 4: Tubular Bell (Model 8 Tube, Extreme Inharm, Bright Material)
-            {4, 72, 0, 1, 900, 5000, 0, 0, 8, 3, 1500,30,  0, 10, 20, 19000,200,5, 0,   0,   300, 0, 12000, 707}
+            {4, 72, 0, 1, 900, 5000, 0, 0, 8, 3, 1500,30,  0, 10, 20, 19000,200,5, 0,   0,   300, 0, 12000, 707},
             // 5: Timpani (Model 3 Membrane, Soft Mallet, Dark Material)
             {5, 40, 30, 0, 1, 300, 500,  0, 0, 3, 3, 600, -5,  0, 30, 15, 200,  10, 5, 0, 0,   300, 0, 5000,  707},
             // 6: Djambe (Model 5 Drumhead, Resonant, Edge HitPos)
@@ -567,7 +564,6 @@ inline void NoteOff(uint8_t note) {
         // We only trigger the mallet on the very first frame of the note
         float mallet_impulse = (ex.current_frame == 0) ? 1.0f : 0.0f;
 
-        // (Note: You'll need to add `float mallet_lp = 0.0f;` and `float mallet_stiffness = 0.5f;` to ExciterState)
         ex.mallet_lp = (mallet_impulse * ex.mallet_stiffness) + (ex.mallet_lp * (1.0f - ex.mallet_stiffness));
 
         // Add the mallet thump to the total exciter output
