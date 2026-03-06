@@ -571,4 +571,5 @@ private:
     uint8_t m_ui_note = 60;
     uint8_t m_sample_bank = 0;
     uint8_t m_sample_number = 0;
+    uint8_t m_model_a = 0;
 };

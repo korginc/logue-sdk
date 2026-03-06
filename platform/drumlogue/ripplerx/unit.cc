@@ -93,13 +93,13 @@ __unit_callback void unit_channel_pressure(uint8_t pressure) { }
 __unit_callback void unit_aftertouch(uint8_t note, uint8_t aftertouch) { }
 
 __unit_callback void unit_load_preset(uint8_t idx) {
-  return s_synth_instance.LoadPreset(idx);
+  s_synth.LoadPreset(idx);
 }
 
 __unit_callback uint8_t unit_get_preset_index() {
-  return s_synth_instance.getPresetIndex();
+  return s_synth.getPresetIndex();
 }
 
 __unit_callback const char * unit_get_preset_name(uint8_t idx) {
-  return Synth::getPresetName(idx);
+  return RipplerXWaveguide::getPresetName(idx);
 }
