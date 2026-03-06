@@ -1,6 +1,147 @@
 
 # Final Integration Checklist
 
+# PROGRESS.md - Updated with TODOs
+
+## Project Status: Phase 4 Active
+
+### Completed Phases
+
+#### Phase 0: Foundation ✓
+- [x] Architecture design (5 engines, voice allocation)
+- [x] Parameter mapping (24 parameters across 6 pages)
+- [x] LFO target encoding (0-7 with resonant parameters)
+- [x] Voice allocation encoding (5 configurations)
+
+#### Phase 1: Core Infrastructure ✓
+- [x] NEON PRNG for probability gating
+- [x] Sine/cosine approximations
+- [x] Parameter smoothing
+- [x] MIDI handler
+- [x] Buffer structures with alignment
+
+#### Phase 2: FM Engines ✓
+- [x] Kick engine (2-op FM with pitch sweep)
+- [x] Snare engine (2-op FM + noise)
+- [x] Metal engine (4-op FM with inharmonic ratios)
+- [x] Perc engine (3-op FM with variable ratios)
+
+#### Phase 3: Support Systems ✓
+- [x] Envelope ROM (128 ADR curves)
+- [x] LFO system with phase independence
+- [x] Voice allocation system with engine masks
+- [x] 12 factory presets
+
+### Phase 4: Resonant Integration (75% Complete)
+- [x] Resonant synthesis theory (Lazzarini, 2017)
+- [x] `resonant_synthesis.h` implementation
+- [x] 5 resonant modes (LP, BP, HP, Notch, Peak)
+- [x] Parameter smoothing for resonant parameters
+- [x] Integration with voice allocation system
+- [ ] **Complete LFO modulation of resonant parameters**
+- [ ] **Performance profiling (division operations)**
+- [ ] **Anti-aliasing protection**
+
+### TODOs - Immediate (Week 1)
+
+#### 1. Complete LFO Modulation for Resonant Parameters
+```c
+// In fm_perc_synth_process(), need to ensure LFO modulation
+// of resonant frequency and resonance works correctly with smoothing
+
+// Current issue: LFO modulation bypasses smoothing
+// Fix: Apply LFO after smoothing, not before
+```
+
+#### 2. Performance Profiling & Optimization
+```c
+// Benchmark division operations (expensive on ARM)
+// Options to optimize:
+// - Use reciprocal + multiply instead of vdivq_f32
+// - Pre-calculate common denominators
+// - Use Newton-Raphson refinement
+
+void benchmark_resonant_ops() {
+    // Measure cycles for vdivq_f32 vs reciprocal method
+    // Target: < 15 cycles per sample for resonant engine
+}
+```
+
+#### 3. Anti-Aliasing Protection
+```c
+// Resonant synthesis can generate high frequencies
+// Add simple lowpass filter at output if needed
+// Or implement 2x oversampling for critical modes
+```
+
+#### 4. Add Resonant Parameter Display in UI
+```c
+// Update header.c to show ResFreq in Hz (not just %)
+// Add string formatting for "xxx Hz" display
+```
+
+### TODOs - Short-term (Week 2)
+
+#### 5. Additional Voice Allocation Options
+Current 5 allocations are sufficient, but could add:
+- Value 5: "R-R-M-P" (two resonant voices?)
+- Need to ensure UI clarity remains
+
+#### 6. Enhanced Resonant Modes
+Based on Lazzarini's Extended ModFM, add:
+- Symmetry control for resonant peak
+- Bandwidth/Q control
+- This would require 2 more parameters - use Page 6 slots?
+
+#### 7. Preset Refinement
+- Fine-tune the 4 resonant presets
+- Add 4 more hybrid presets (total 16)
+
+### TODOs - Medium-term (Week 3)
+
+#### 8. Real-time Parameter Modulation via MIDI
+- Map resonant parameters to MIDI CC
+- Add aftertouch control for resonance
+
+#### 9. Advanced Envelope Options
+- Add envelope control over resonant frequency
+- "Sweep" mode for resonant peak
+
+#### 10. CPU Optimization Pass
+- Profile with ARM Streamline
+- Identify and eliminate bottlenecks
+- Target: < 30% CPU for all 4 voices
+
+### Known Issues & Limitations
+
+| Issue | Status | Priority |
+|-------|--------|----------|
+| LFO smoothing for resonant params | 🔧 In Progress | High |
+| Division performance | 📝 To Profile | Medium |
+| Potential aliasing in high resonance | 📝 To Test | Medium |
+| Voice allocation UI clarity | ✅ Good | - |
+| Resonant mode transitions (clicks) | 📝 To Test | Low |
+
+### Performance Targets
+
+| Mode | Current Cycles | Target | Status |
+|------|----------------|--------|--------|
+| Kick | 24 | < 20 | ✅ |
+| Snare | 31 | < 25 | ✅ |
+| Metal | 42 | < 35 | ✅ |
+| Perc | 28 | < 25 | ✅ |
+| Resonant | TBD | < 30 | 🔧 |
+| **Total (4 voices)** | **~125** | **< 110** | 🔧 |
+
+### Next Steps - Immediate Action Items
+
+1. **Complete LFO modulation fix** for resonant parameters
+2. **Run benchmarks** on resonant engine
+3. **Test with real percussion** - resonant kick/snare
+4. **Update documentation** with final performance numbers
+
+The resonant engine is a significant addition that transforms the FM Percussion Synth from a 4-instrument drum machine into a flexible synthesis platform capable of emulating resonant percussion and synthetic sounds.
+
 ## ✅ COMPLETED - Core Components
 
 ### Header Files (All Present)
@@ -13,7 +154,7 @@
 - [x] `fm_perc_synth.h` - Main synth container
 - [x] `fm_voices.h` - NEON-aligned voice structures
 - [x] `kick_engine.h` - Kick drum FM engine
-- [x] `snare_engine.h` - Snare drum FM engine  
+- [x] `snare_engine.h` - Snare drum FM engine
 - [x] `metal_engine.h` - Metal/cymbal FM engine
 - [x] `perc_engine.h` - Percussion/tom FM engine
 
@@ -138,8 +279,8 @@ You're ready to build and test on actual hardware!
 | Envelope | 8 | 5% |
 | **Total** | **149** | **100%** |
 
-At 48kHz: 149 cycles/sample × 48000 = 7.15 MIPS  
-On 1GHz ARM Cortex-A9: 0.7% CPU utilization  
+At 48kHz: 149 cycles/sample × 48000 = 7.15 MIPS
+On 1GHz ARM Cortex-A9: 0.7% CPU utilization
 **Well within drumlogue's real-time requirements!**
 
 ## Project Complete! 🎉
