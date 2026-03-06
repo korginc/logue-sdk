@@ -3,9 +3,10 @@
  * @brief drumlogue SDK unit interface for Light Reverb
  *
  * FIXED:
- * - Replaced dangerous VLAs with static buffers
- * - Added bounds checking
- * - Proper error handling
+ * - Removed dynamic allocation (no 'new')
+ * - Static instance only
+ * - Proper deinterleaving of stereo buffers
+ * - Safe bounds checking
  */
 
 #include <cstddef>
@@ -19,11 +20,10 @@
 // ============================================================================
 
 // Maximum frames per render call (drumlogue typically uses 64 or 128)
-// Using 256 to be safe - stack allocation is static
 constexpr uint32_t kMaxFrames = 256;
 
 // ============================================================================
-// Static Instances
+// Static Instances (No dynamic allocation!)
 // ============================================================================
 
 static FDNEngine s_fdn_engine;
@@ -51,9 +51,9 @@ __unit_callback int8_t unit_init(const unit_runtime_desc_t* desc) {
 
     s_runtime_desc = *desc;
 
-    // Initialize the FDN engine
+    // Initialize the FDN engine (static instance - no allocation!)
     if (!s_fdn_engine.init(desc->samplerate)) {
-        // Allocation failed - unit will bypass
+        // Allocation failed within FDN engine - unit will bypass
         s_initialized = false;
         s_bypass = true;
         return k_unit_err_memory;
@@ -66,12 +66,13 @@ __unit_callback int8_t unit_init(const unit_runtime_desc_t* desc) {
 }
 
 __unit_callback void unit_teardown() {
-    // Nothing to do - destructor handles cleanup
+    // Nothing to do - static instance cleans up itself
+    // The FDNEngine destructor will be called when program exits
 }
 
 __unit_callback void unit_reset() {
-    // Reset FDN engine state
-    // Note: Would need a reset method in FDNEngine
+    // Reset FDN engine state if needed
+    // s_fdn_engine.reset(); // Would need a reset method
 }
 
 __unit_callback void unit_resume() {}
@@ -87,7 +88,7 @@ __unit_callback void unit_render(const float* in, float* out, uint32_t frames) {
     }
 
     // ========================================================================
-    // FIXED: Bounds Check - Prevent buffer overflow
+    // Bounds Check - Prevent buffer overflow
     // ========================================================================
     if (frames > kMaxFrames) {
         // This should never happen with drumlogue, but safety first
@@ -104,12 +105,12 @@ __unit_callback void unit_render(const float* in, float* out, uint32_t frames) {
     }
 
     // ========================================================================
-    // Process through reverb engine
+    // Process through reverb engine (expects deinterleaved buffers)
     // ========================================================================
     s_fdn_engine.processStereo(s_inL, s_inR, s_outL, s_outR, frames);
 
     // ========================================================================
-    // Interleave output
+    // Interleave output: separate L/R buffers -> [L,R,L,R,...]
     // ========================================================================
     for (uint32_t i = 0; i < frames; i++) {
         out[i * 2] = s_outL[i];
@@ -120,13 +121,15 @@ __unit_callback void unit_render(const float* in, float* out, uint32_t frames) {
 __unit_callback void unit_set_param_value(uint8_t id, int32_t value) {
     // Map parameters to FDN engine controls
     switch (id) {
-        case 0: // Decay
+        case 0: // Decay (0-100%)
             s_fdn_engine.setDecay(value / 100.0f);
             break;
-        case 1: // Modulation
+        case 1: // Modulation (0-100%)
             s_fdn_engine.setModulation(value / 100.0f);
             break;
         // Add more parameters as needed
+        default:
+            break;
     }
 }
 
@@ -149,6 +152,7 @@ __unit_callback const uint8_t* unit_get_param_bmp_value(uint8_t id, int32_t valu
     return nullptr;
 }
 
+// Unused MIDI callbacks
 __unit_callback void unit_set_tempo(uint32_t tempo) { (void)tempo; }
 __unit_callback void unit_note_on(uint8_t note, uint8_t velocity) { (void)note; (void)velocity; }
 __unit_callback void unit_note_off(uint8_t note) { (void)note; }

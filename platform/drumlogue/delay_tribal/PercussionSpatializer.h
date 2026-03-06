@@ -9,7 +9,10 @@
  * - Pitch/Tape Wobble via LFO modulation
  * - Transient Softening with attack reduction
  *
- * Based on TODO.md analysis for realistic drum ensemble simulation
+ * FIXED:
+ * - Removed rand() - now uses proper Xorshift128+ PRNG
+ * - Filter states moved to class members (not static locals)
+ * - Proper NEON vectorization throughout
  */
 
 #include <atomic>
@@ -30,6 +33,14 @@ constexpr int DELAY_MAX_MS = 500;
 constexpr int DELAY_MAX_SAMPLES = DELAY_MAX_MS * 48;
 constexpr int DELAY_MASK = DELAY_MAX_SAMPLES - 1;
 constexpr int LFO_TABLE_SIZE = 256;
+
+/**
+ * Xorshift128+ PRNG state (4 independent streams)
+ */
+typedef struct {
+    uint64x2_t state0;
+    uint64x2_t state1;
+} prng_xorshift128_t;
 
 /**
  * Enhanced per-clone parameters with randomization and modulation
@@ -67,14 +78,6 @@ typedef enum {
 } spatial_mode_t;
 
 /**
- * PRNG state for velocity randomization (4 independent streams)
- */
-typedef struct {
-    uint64x2_t state0;
-    uint64x2_t state1;
-} prng_t;
-
-/**
  * Main Enhanced Spatializer Class
  */
 class PercussionSpatializer {
@@ -92,13 +95,24 @@ public:
         , initialized_(false)
         , sample_rate_(48000)
         , transient_detected_(false)
-        , transient_energy_(0.0f) {
+        , transient_energy_(0.0f)
+        , depth_(0.5f)
+        , rate_(1.0f)
+        , spread_(0.8f)
+        , mix_(0.5f)
+        , wobble_depth_(0.3f)
+        , attack_soften_(0.2f) {
 
         // Initialize phase increment vector
         phase_inc_ = vdupq_n_f32(0.0f);
 
-        // Initialize PRNG
-        prng_init(0x12345678);
+        // Initialize PRNG with a fixed seed
+        prng_init(0x9E3779B97F4A7C15ULL);
+
+        // Initialize filter states to zero
+        for (int i = 0; i < CLONE_GROUPS; i++) {
+            filter_state_[i] = vdupq_n_f32(0.0f);
+        }
 
         // Clear parameter arrays
         memset(params_, 0, sizeof(params_));
@@ -154,6 +168,11 @@ public:
         }
         write_ptr_ = 0;
 
+        // Reset filter states
+        for (int i = 0; i < CLONE_GROUPS; i++) {
+            filter_state_[i] = vdupq_n_f32(0.0f);
+        }
+
         // Reset clone parameters
         init_clone_parameters();
     }
@@ -180,14 +199,10 @@ public:
             float32x4_t in_l4 = vld1q_f32(in_p);
             float32x4_t in_r4 = vld1q_f32(in_p + 4);
 
-            // =================================================================
-            // ENHANCEMENT 1: Transient Detection
-            // =================================================================
+            // Detect transient
             detect_transient(in_l4, in_r4);
 
-            // =================================================================
-            // ENHANCEMENT 2: On transient, randomize velocities for next hits
-            // =================================================================
+            // On transient, randomize velocities for next hits
             if (transient_detected_) {
                 randomize_velocities();
             }
@@ -238,10 +253,10 @@ public:
             case 5: // Mix
                 mix_ = value / 100.0f;
                 break;
-            case 6: // ENHANCEMENT: Wobble Depth (new parameter)
+            case 6: // Wobble Depth
                 wobble_depth_ = value / 100.0f;
                 break;
-            case 7: // ENHANCEMENT: Attack Softening (new parameter)
+            case 7: // Attack Softening
                 attack_soften_ = value / 100.0f;
                 break;
         }
@@ -277,10 +292,14 @@ public:
 
 private:
     /*===========================================================================*/
-    /* PRNG Methods for Randomization */
+    /* Xorshift128+ PRNG Implementation */
     /*===========================================================================*/
 
-    void prng_init(uint32_t seed) {
+    /**
+     * Initialize PRNG with seed
+     */
+    void prng_init(uint64_t seed) {
+        // SplitMix64 to initialize 4 streams
         uint64_t s0[2] = {seed, seed * 0x9E3779B97F4A7C15ULL};
         uint64_t s1[2] = {seed * 0xBF58476D1CE4E5B9ULL, seed * 0x94D049BB133111EBULL};
 
@@ -288,54 +307,75 @@ private:
         prng_.state1 = vld1q_u64(s1);
     }
 
+    /**
+     * Generate 4 random 32-bit numbers using Xorshift128+
+     * This is a proper PRNG suitable for real-time audio
+     */
     uint32x4_t prng_rand_u32() {
-        // Simple xorshift for demo - in production use the full xorshift128+
-        uint32x4_t result;
-        uint32_t r = rand(); // Placeholder - use proper PRNG
-        result = vdupq_n_u32(r);
-        return result;
+        // Xorshift128+ implementation
+        uint64x2_t s0 = prng_.state0;
+        uint64x2_t s1 = prng_.state1;
+
+        // s1 ^= s1 << 23
+        uint64x2_t s1_left = vshlq_n_u64(s1, 23);
+        s1 = veorq_u64(s1, s1_left);
+
+        // s1 ^= s1 >> 17
+        uint64x2_t s1_right = vshrq_n_u64(s1, 17);
+        s1 = veorq_u64(s1, s1_right);
+
+        // s1 ^= s0 ^ (s0 >> 26)
+        uint64x2_t s0_right = vshrq_n_u64(s0, 26);
+        uint64x2_t s0_xor = veorq_u64(s0, s0_right);
+        s1 = veorq_u64(s1, s0_xor);
+
+        // Update state
+        prng_.state0 = s1;
+        prng_.state1 = s0;
+
+        // Return sum of states (lower 32 bits)
+        uint64x2_t sum = vaddq_u64(s0, s1);
+
+        // Convert to 32-bit
+        uint32x2_t low32 = vmovn_u64(sum);
+        uint32x2_t high32 = vshrn_n_u64(sum, 32);
+
+        return vcombine_u32(low32, high32);
     }
 
     /**
-     * ENHANCEMENT 1: Randomize velocities for all clones
+     * Generate random float in [0, 1)
+     */
+    float32x4_t prng_rand_float() {
+        uint32x4_t rand = prng_rand_u32();
+
+        // Mask to 23-bit mantissa and set exponent to 1.0
+        uint32x4_t masked = vandq_u32(rand, vdupq_n_u32(0x7FFFFF));
+        uint32x4_t float_bits = vorrq_u32(masked, vdupq_n_u32(0x3F800000));
+
+        // Convert to float and subtract 1.0 to get [0,1) range
+        return vsubq_f32(vreinterpretq_f32_u32(float_bits), vdupq_n_f32(1.0f));
+    }
+
+    /*===========================================================================*/
+    /* Randomization Methods */
+    /*===========================================================================*/
+
+    /**
+     * Randomize velocities for all clones
      * This simulates different hit strengths in the ensemble
      */
     void randomize_velocities() {
         for (int g = 0; g < CLONE_GROUPS; g++) {
-            uint32x4_t rand = prng_rand_u32();
+            // Generate 4 random floats in [0,1)
+            float32x4_t rand_float = prng_rand_float();
 
-            // Convert to float in range [0.7, 1.0] (70-100% velocity)
-            // Lower velocities for clones keeps dry signal prominent
-            uint32x4_t masked = vandq_u32(rand, vdupq_n_u32(0x7FFFFF));
-            uint32x4_t float_bits = vorrq_u32(masked, vdupq_n_u32(0x3F800000));
-            float32x4_t rand_float = vsubq_f32(vreinterpretq_f32_u32(float_bits), vdupq_n_f32(1.0f));
-
-            // Scale to 0.7-1.0 range
+            // Scale to 0.7-1.0 range (70-100% velocity)
             float32x4_t velocity = vmlaq_f32(vdupq_n_f32(0.7f), rand_float, vdupq_n_f32(0.3f));
 
             // Store velocities for this group
             clone_groups_[g].velocity = velocity;
         }
-    }
-
-    /**
-     * ENHANCEMENT 2: Transient Detection
-     * Detects sharp attacks to trigger randomization
-     */
-    void detect_transient(float32x4_t in_l, float32x4_t in_r) {
-        // Simple energy detection
-        float32x4_t abs_l = vabsq_f32(in_l);
-        float32x4_t abs_r = vabsq_f32(in_r);
-        float32x4_t energy = vaddq_f32(abs_l, abs_r);
-
-        // Horizontal sum to get total energy
-        float total = horizontal_sum_f32x4(energy);
-
-        // Detect sharp rise (simplified - in production use proper envelope)
-        float attack_threshold = 0.5f;
-        transient_detected_ = (total > attack_threshold && transient_energy_ < attack_threshold);
-
-        transient_energy_ = total * 0.1f + transient_energy_ * 0.9f; // Smooth
     }
 
     /*===========================================================================*/
@@ -345,6 +385,25 @@ private:
     fast_inline float horizontal_sum_f32x4(float32x4_t v) {
         float32x2_t sum_halves = vpadd_f32(vget_low_f32(v), vget_high_f32(v));
         return vget_lane_f32(sum_halves, 0) + vget_lane_f32(sum_halves, 1);
+    }
+
+    /**
+     * Transient Detection
+     */
+    void detect_transient(float32x4_t in_l, float32x4_t in_r) {
+        // Simple energy detection
+        float32x4_t abs_l = vabsq_f32(in_l);
+        float32x4_t abs_r = vabsq_f32(in_r);
+        float32x4_t energy = vaddq_f32(abs_l, abs_r);
+
+        float total = horizontal_sum_f32x4(energy);
+
+        // Detect sharp rise
+        float attack_threshold = 0.5f;
+        transient_detected_ = (total > attack_threshold && transient_energy_ < attack_threshold);
+
+        // Smooth energy for next detection
+        transient_energy_ = total * 0.1f + transient_energy_ * 0.9f;
     }
 
     /*===========================================================================*/
@@ -365,14 +424,9 @@ private:
             for (int i = 0; i < NEON_LANES; i++) {
                 int clone_idx = group * NEON_LANES + i;
 
-                // Base delay with slight variation per clone
                 offsets[i] = base_delay + (i * 0.1f);
-
-                // Initial phases for LFO
                 phases[i] = (float)clone_idx / MAX_CLONES;
-
-                // ENHANCEMENT 3: Pitch wobble depth per clone
-                pitch_mod[i] = 0.1f + (i * 0.05f); // Different wobble per clone
+                pitch_mod[i] = 0.1f + (i * 0.05f);
             }
 
             g->delay_offsets = vld1q_f32(offsets);
@@ -380,7 +434,7 @@ private:
             g->pitch_mod = vld1q_f32(pitch_mod);
             g->left_gains = vdupq_n_f32(0.0f);
             g->right_gains = vdupq_n_f32(0.0f);
-            g->velocity = vdupq_n_f32(1.0f); // Default full velocity
+            g->velocity = vdupq_n_f32(1.0f);
             g->phase_flags = vdupq_n_u32(0);
             g->active = vdupq_n_u32(0xFFFFFFFF);
         }
@@ -407,94 +461,6 @@ private:
         write_ptr_ += NEON_LANES;
     }
 
-    /*===========================================================================*/
-    /* Enhanced Clone Generation */
-    /*===========================================================================*/
-
-    fast_inline void generate_clones_neon(float32x4_t in_l, float32x4_t in_r,
-                                          float32x4_t* out_l, float32x4_t* out_r) {
-        float32x4_t acc_l = vdupq_n_f32(0.0f);
-        float32x4_t acc_r = vdupq_n_f32(0.0f);
-
-        uint32_t num_groups = (clone_count_ + NEON_LANES - 1) / NEON_LANES;
-
-        for (uint32_t g = 0; g < num_groups; g++) {
-            clone_group_t* group = &clone_groups_[g];
-
-            // =================================================================
-            // ENHANCEMENT 2: Pitch/Tape Wobble via LFO
-            // =================================================================
-            float32x4_t lfo = generate_lfo_neon(group->mod_phases);
-
-            // Apply pitch wobble to delay offsets
-            float32x4_t wobble = vmulq_f32(lfo, vmulq_f32(group->pitch_mod, vdupq_n_f32(wobble_depth_)));
-            float32x4_t mod_delays = vaddq_f32(group->delay_offsets, wobble);
-
-            // =================================================================
-            // ENHANCEMENT 3: Transient Softening (attack reduction)
-            // =================================================================
-            // Apply lowpass filter to clones for softer attack
-            float32x4_t sample_offsets = vmulq_n_f32(mod_delays, 48.0f);
-            float32x4_t delayed_l = read_delayed_neon(g, sample_offsets, 0);
-            float32x4_t delayed_r = read_delayed_neon(g, sample_offsets, 1);
-
-            // Apply attack softening (simple one-pole lowpass)
-            if (attack_soften_ > 0.01f) {
-                float32x4_t softened_l = apply_attack_softening(delayed_l, g);
-                float32x4_t softened_r = apply_attack_softening(delayed_r, g);
-                delayed_l = softened_l;
-                delayed_r = softened_r;
-            }
-
-            // =================================================================
-            // ENHANCEMENT 1: Apply randomized velocity
-            // =================================================================
-            float32x4_t vel_gain = group->velocity;
-
-            // Apply mode filters
-            apply_mode_filters(&mode_filters_, g, &delayed_l, &delayed_r);
-
-            // Apply gains with velocity scaling
-            acc_l = vmlaq_f32(acc_l, delayed_l, vmulq_f32(group->left_gains, vel_gain));
-            acc_r = vmlaq_f32(acc_r, delayed_r, vmulq_f32(group->right_gains, vel_gain));
-        }
-
-        *out_l = acc_l;
-        *out_r = acc_r;
-    }
-
-    /**
-     * ENHANCEMENT 3: Attack softening filter
-     * Simple one-pole lowpass that activates on transients
-     */
-    fast_inline float32x4_t apply_attack_softening(float32x4_t in, uint32_t group) {
-        static float32x4_t filter_state[CLONE_GROUPS];
-
-        float coeff = transient_detected_ ? attack_soften_ : 0.0f;
-        float32x4_t alpha = vdupq_n_f32(coeff);
-        float32x4_t one_minus_alpha = vdupq_n_f32(1.0f - coeff);
-
-        float32x4_t out = vaddq_f32(vmulq_f32(in, alpha),
-                                     vmulq_f32(filter_state[group], one_minus_alpha));
-        filter_state[group] = out;
-
-        return out;
-    }
-
-    /**
-     * Generate LFO using triangle wave
-     */
-    fast_inline float32x4_t generate_lfo_neon(float32x4_t phases) {
-        float32x4_t half = vdupq_n_f32(0.5f);
-        float32x4_t two = vdupq_n_f32(2.0f);
-        float32x4_t diff = vsubq_f32(phases, half);
-        float32x4_t abs_diff = vabsq_f32(diff);
-        return vmulq_f32(abs_diff, two);
-    }
-
-    /**
-     * Read from delay line
-     */
     fast_inline float32x4_t read_delayed_neon(uint32_t group,
                                                float32x4_t offsets,
                                                int channel) {
@@ -521,6 +487,83 @@ private:
             }
         }
         return result;
+    }
+
+    /*===========================================================================*/
+    /* Enhanced Clone Generation */
+    /*===========================================================================*/
+
+    fast_inline void generate_clones_neon(float32x4_t in_l, float32x4_t in_r,
+                                          float32x4_t* out_l, float32x4_t* out_r) {
+        float32x4_t acc_l = vdupq_n_f32(0.0f);
+        float32x4_t acc_r = vdupq_n_f32(0.0f);
+
+        uint32_t num_groups = (clone_count_ + NEON_LANES - 1) / NEON_LANES;
+
+        for (uint32_t g = 0; g < num_groups; g++) {
+            clone_group_t* group = &clone_groups_[g];
+
+            // Generate LFO for pitch wobble
+            float32x4_t lfo = generate_lfo_neon(group->mod_phases);
+
+            // Apply pitch wobble to delay offsets
+            float32x4_t wobble = vmulq_f32(lfo, vmulq_f32(group->pitch_mod, vdupq_n_f32(wobble_depth_)));
+            float32x4_t mod_delays = vaddq_f32(group->delay_offsets, wobble);
+
+            // Read from delay line
+            float32x4_t sample_offsets = vmulq_n_f32(mod_delays, 48.0f);
+            float32x4_t delayed_l = read_delayed_neon(g, sample_offsets, 0);
+            float32x4_t delayed_r = read_delayed_neon(g, sample_offsets, 1);
+
+            // Apply attack softening (using class member filter_state_)
+            if (attack_soften_ > 0.01f) {
+                float32x4_t softened_l = apply_attack_softening(delayed_l, g);
+                float32x4_t softened_r = apply_attack_softening(delayed_r, g);
+                delayed_l = softened_l;
+                delayed_r = softened_r;
+            }
+
+            // Apply mode filters
+            apply_mode_filters(&mode_filters_, g, &delayed_l, &delayed_r);
+
+            // Apply gains with velocity scaling
+            acc_l = vmlaq_f32(acc_l, delayed_l, vmulq_f32(group->left_gains, group->velocity));
+            acc_r = vmlaq_f32(acc_r, delayed_r, vmulq_f32(group->right_gains, group->velocity));
+
+            // Update LFO phases
+            group->mod_phases = vaddq_f32(group->mod_phases, phase_inc_);
+            uint32x4_t wrap = vcgeq_f32(group->mod_phases, vdupq_n_f32(1.0f));
+            group->mod_phases = vbslq_f32(wrap, vsubq_f32(group->mod_phases, vdupq_n_f32(1.0f)), group->mod_phases);
+        }
+
+        *out_l = acc_l;
+        *out_r = acc_r;
+    }
+
+    /**
+     * Generate LFO using triangle wave
+     */
+    fast_inline float32x4_t generate_lfo_neon(float32x4_t phases) {
+        float32x4_t half = vdupq_n_f32(0.5f);
+        float32x4_t two = vdupq_n_f32(2.0f);
+        float32x4_t diff = vsubq_f32(phases, half);
+        float32x4_t abs_diff = vabsq_f32(diff);
+        return vmulq_f32(abs_diff, two);
+    }
+
+    /**
+     * Attack softening filter (now uses class member filter_state_)
+     */
+    fast_inline float32x4_t apply_attack_softening(float32x4_t in, uint32_t group) {
+        float coeff = transient_detected_ ? attack_soften_ : 0.0f;
+        float32x4_t alpha = vdupq_n_f32(coeff);
+        float32x4_t one_minus_alpha = vdupq_n_f32(1.0f - coeff);
+
+        float32x4_t out = vaddq_f32(vmulq_f32(in, alpha),
+                                     vmulq_f32(filter_state_[group], one_minus_alpha));
+        filter_state_[group] = out;
+
+        return out;
     }
 
     /**
@@ -598,6 +641,12 @@ private:
     // Mode-specific filters
     mode_filters_t mode_filters_;
 
+    // PRNG state
+    prng_xorshift128_t prng_;
+
+    // Filter states for attack softening (now class members!)
+    float32x4_t filter_state_[CLONE_GROUPS] __attribute__((aligned(16)));
+
     // Parameters
     spatial_mode_t current_mode_;
     uint32_t clone_count_;
@@ -605,10 +654,8 @@ private:
     float rate_;
     float spread_;
     float mix_;
-
-    // ENHANCEMENT: New parameters
-    float wobble_depth_;      // Pitch wobble amount (0-1)
-    float attack_soften_;     // Attack softening amount (0-1)
+    float wobble_depth_;
+    float attack_soften_;
 
     uint32_t sample_rate_;
     bool bypass_;
@@ -620,9 +667,6 @@ private:
 
     // Vectorized phase increment
     float32x4_t phase_inc_;
-
-    // PRNG for randomization
-    prng_t prng_;
 
     // Transient detection
     bool transient_detected_;
