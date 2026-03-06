@@ -624,12 +624,16 @@ inline void NoteOff(uint8_t note) {
                 // 1. Generate the Exciter burst
                 float exciter_sig = process_exciter(voice.exciter);
 
-                // 2. Feed the Exciter into both Resonators
+                // 2. Feed the Exciter into Resonator A (Always active)
                 float outA = process_waveguide(voice.resA, exciter_sig);
-                float outB = process_waveguide(voice.resB, exciter_sig);
+                float outB = 0.0f;
 
-                // 3. Mix the resonators together
-                // (mix_ab is controlled by the UI, 0.0 = A only, 1.0 = B only)
+                // 3. Active Partial Counting: Only process ResB if complexity is high enough
+                if (m_active_partials >= 2) {
+                    outB = process_waveguide(voice.resB, exciter_sig);
+                }
+
+                // 4. Mix the resonators together
                 float voice_out = (outA * (1.0f - state.mix_ab)) + (outB * state.mix_ab);
 
                 // Apply note velocity
@@ -698,4 +702,6 @@ private:
     uint8_t m_sample_bank = 0;
     uint8_t m_sample_number = 0;
     uint8_t m_model_a = 0;
+
+    uint8_t m_active_partials = 4; // Default to maximum complexity
 };
