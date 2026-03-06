@@ -126,10 +126,3 @@ constexpr int RELEASE_MAX = 2000;
 // Utility Functions (compile-time)
 // ============================================================================
 
-/**
- * Compile-time calculation of 2^(n/12) for any n
- * Can be used to generate interval ratios at compile time
- */
-constexpr float interval_ratio(int semitones) {
-    return powf(2.0f, semitones / 12.0f);
-}
