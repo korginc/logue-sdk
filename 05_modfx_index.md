@@ -51,3 +51,5 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [autopan](https://github.com/tmlbl/autopan) | Tim Lebel | Basic autopan effect | pro, xd, nts-1 | free |
 | [Drymon Echo](https://mrglennjones.gumroad.com/l/drymonecho) | Glenn Jones | Tape Saturation & Doubletracker | nts-3 | free |
 | [ShapeSync](https://mrglennjones.gumroad.com/l/shapesync) | Glenn Jones | Rhythmic Modulation | nts-3 | paid |
+| [Menzler Machine](https://mrglennjones.gumroad.com/l/menzlermachine) | Glenn Jones | Rhythmic white noise generator | nts-3 | paid |
+| [KaoZZy Drive](https://mrglennjones.gumroad.com/l/KaoZZyDrive) | Glenn Jones | Guitar amp distortion | nts-3 | paid |
