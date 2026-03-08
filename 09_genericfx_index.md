@@ -22,4 +22,12 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Menzler Machine](https://mrglennjones.gumroad.com/l/menzlermachine) | Glenn Jones | Rhythmic white noise generator | nts-3 | paid |
 | [Drymon Echo](https://mrglennjones.gumroad.com/l/drymonecho) | Glenn Jones | Tape Saturation & Doubletracker | nts-3 | free |
 | [The Full English](https://mrglennjones.gumroad.com/l/thefullenglish) | Glenn Jones | Experimental noise drone generator | nts-3 | free |
-| [Zammo's Stash](https://mrglennjones.gumroad.com/l/thefullenglish) | Glenn Jones | Experimental FX | nts-3 | free |
+| [Zammo's Stash](https://mrglennjones.gumroad.com/l/zammosstash) | Glenn Jones | Experimental FX | nts-3 | free |
+| [VULPECULA](https://mrglennjones.gumroad.com/l/vulpecula) | Glenn Jones | Dual delay effect | nts-3 | free |
+| [JIMI Kaoss](https://mrglennjones.gumroad.com/l/jimikaoss) | Glenn Jones | Electric guitar synthesizer | nts-3 | free |
+| [MEUH](https://mrglennjones.gumroad.com/l/meuh) | Glenn Jones | Cowbell synthesizer | nts-3 | free |
+| [KaossKhord](https://mrglennjones.gumroad.com/l/KaossKhord) | Glenn Jones | Diatonic FM chord synthesizer | nts-3 | paid |
+| [DIZI笛子](https://mrglennjones.gumroad.com/l/dizi) | Glenn Jones | Chinese bamboo flute synthesizer | nts-3 | paid |
+| [KaoZZy Drive](https://mrglennjones.gumroad.com/l/KaoZZyDrive) | Glenn Jones | Guitar amp distortion | nts-3 | paid |
+| [Warehouse Drum Kit](https://mrglennjones.gumroad.com/l/wdk01) | Glenn Jones | Full drum kit | nts-3 | paid |
+| [U-SPLICE](https://mrglennjones.gumroad.com/l/usplice) | Glenn Jones | Instant punch-in tape loop | nts-3 | paid |
