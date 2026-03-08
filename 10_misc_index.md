@@ -16,5 +16,8 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Wave Creator](http://hammondeggsmusic.ca/logueplugins/wavecreator.html) | Hammond Eggs Music | Generate oscillator from multiple samples | pro, xd, nts-1 | donation |
 | [wavDesk](https://gumroad.com/l/wavDesk) | Roll-Log Sounds | Generate oscillator from multiple wavetables | pro, xd, nts-1 | donation |
 | [wavShelf](https://gumroad.com/l/wavShelf) | Roll-Log Sounds | Generate oscillator from multiple samples | pro, xd, nts-1 | donation |
-
+| [The Full English](https://mrglennjones.gumroad.com/l/thefullenglish) | Glenn Jones | Experimental noise drone generator | nts-3 | free |
+| [Zammo's Stash](https://mrglennjones.gumroad.com/l/zammosstash) | Glenn Jones | Experimental FX | nts-3 | free |
+| [Warehouse Drum Kit](https://mrglennjones.gumroad.com/l/wdk01) | Glenn Jones | Full drum kit | nts-3 | paid |
+| [U-SPLICE](https://mrglennjones.gumroad.com/l/usplice) | Glenn Jones | Instant punch-in tape loop | nts-3 | paid |
 
