@@ -2,18 +2,10 @@
 
 /**
  * @file resonant_synthesis.h
- * @brief Resonant synthesis engine based on summation formulae
+ * @brief Resonant synthesis engine with morph control
  *
- * Implements the resonant synthesis technique from Lazzarini (2017) Section 4.10.3
- * Combines single-sided (low-pass) and double-sided (band-pass) summation formulae
- * to model resonant filter behavior.
- *
- * Features:
- * - 5 resonant modes: Low-pass, Band-pass, High-pass, Notch, Peak
- * - Resonance control (0-99%)
- * - Center frequency control (50-8000 Hz)
- * - Mix control between single/double-sided responses
- * - NEON-optimized for ARMv7
+ * Based on Lazzarini (2017) Section 4.10.3
+ * Now with 5 resonant modes and morph parameter for expressive control
  */
 
 #include <arm_neon.h>
@@ -47,14 +39,18 @@ typedef struct {
     // Parameters
     float32x4_t resonance;     // 'a' parameter from paper (0-0.99)
     float32x4_t mix;           // Blend between single/double-sided (0-1)
+    float32x4_t gain;          // Output gain (for peak mode)
     resonant_mode_t mode;      // Current resonant mode
 
+    // Morph control (0-1)
+    float32x4_t morph;         // Single-knob control affecting multiple parameters
+
     // Parameter smoothing
-    float32x4_t target_resonance;
     float32x4_t target_fc;
+    float32x4_t target_resonance;
     uint32x4_t ramp_counter;
 
-    // For performance optimization (cached values)
+    // Constants
     float32x4_t one;
     float32x4_t two;
     float32x4_t epsilon;
@@ -72,10 +68,12 @@ fast_inline void resonant_synth_init(resonant_synth_t* rs) {
 
     rs->resonance = vdupq_n_f32(0.5f);
     rs->mix = vdupq_n_f32(0.5f);
+    rs->gain = vdupq_n_f32(1.0f);
     rs->mode = RESONANT_MODE_BANDPASS;
+    rs->morph = vdupq_n_f32(0.5f);
 
-    rs->target_resonance = vdupq_n_f32(0.5f);
     rs->target_fc = vdupq_n_f32(1000.0f);
+    rs->target_resonance = vdupq_n_f32(0.5f);
     rs->ramp_counter = vdupq_n_u32(0);
 
     rs->one = vdupq_n_f32(1.0f);
@@ -108,7 +106,7 @@ fast_inline void resonant_synth_set_f0(resonant_synth_t* rs,
 }
 
 /**
- * Set center frequency (resonance peak)
+ * Set center frequency with smoothing
  */
 fast_inline void resonant_synth_set_center(resonant_synth_t* rs,
                                            uint32x4_t voice_mask,
@@ -124,7 +122,6 @@ fast_inline void resonant_synth_set_center(resonant_synth_t* rs,
 
 /**
  * Set resonance amount with smoothing
- * @param resonance_percent 0-100%
  */
 fast_inline void resonant_synth_set_resonance(resonant_synth_t* rs,
                                               uint32x4_t voice_mask,
@@ -141,27 +138,71 @@ fast_inline void resonant_synth_set_resonance(resonant_synth_t* rs,
 }
 
 /**
- * Set mix between single/double-sided
- * @param mix_percent 0-100% (0 = pure single-sided, 100 = pure double-sided)
- */
-fast_inline void resonant_synth_set_mix(resonant_synth_t* rs,
-                                        uint32x4_t voice_mask,
-                                        float mix_percent) {
-    float m = mix_percent / 100.0f;
-    rs->mix = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
-                         vdupq_n_f32(m),
-                         rs->mix);
-}
-
-/**
  * Set resonant mode
  */
 fast_inline void resonant_synth_set_mode(resonant_synth_t* rs,
                                          uint32x4_t voice_mask,
                                          resonant_mode_t mode) {
-    // Mode is per-voice, but we'll handle it in process function
-    // This is a simplification - in production, store per-voice mode
     rs->mode = mode;
+}
+
+/**
+ * Apply morph parameter - controls multiple dimensions based on mode
+ * @param morph 0-1
+ */
+fast_inline void resonant_synth_apply_morph(resonant_synth_t* rs,
+                                            uint32x4_t voice_mask,
+                                            float morph) {
+    rs->morph = vdupq_n_f32(morph);
+
+    float fc, res, gain;
+
+    switch (rs->mode) {
+        case RESONANT_MODE_LOWPASS:
+            // LowPass: morph controls cutoff frequency
+            fc = 50.0f + morph * 7950.0f;  // 50-8000 Hz
+            res = 0.5f;                     // Fixed resonance
+            gain = 1.0f;
+            break;
+
+        case RESONANT_MODE_BANDPASS:
+            // BandPass: morph controls Q/resonance
+            fc = 1000.0f;                    // Fixed center
+            res = 0.1f + morph * 0.8f;        // 0.1-0.9
+            gain = 1.0f;
+            break;
+
+        case RESONANT_MODE_HIGHPASS:
+            // HighPass: morph controls cutoff (inverse)
+            fc = 8000.0f - morph * 7950.0f;  // 8000-50 Hz
+            res = 0.3f;                       // Fixed resonance
+            gain = 1.0f;
+            break;
+
+        case RESONANT_MODE_NOTCH:
+            // Notch: morph controls notch width
+            fc = 1000.0f;                    // Fixed center
+            res = 0.2f + morph * 0.7f;        // 0.2-0.9
+            gain = 1.0f;
+            break;
+
+        case RESONANT_MODE_PEAK:
+            // Peak: morph controls both frequency and gain
+            fc = 200.0f + morph * 3800.0f;   // 200-4000 Hz
+            res = 0.3f + morph * 0.6f;        // 0.3-0.9
+            gain = 1.0f + morph * 3.0f;       // 1-4x
+            break;
+
+        default:
+            fc = 1000.0f;
+            res = 0.5f;
+            gain = 1.0f;
+    }
+
+    // Apply parameters
+    resonant_synth_set_center(rs, voice_mask, vdupq_n_f32(fc));
+    resonant_synth_set_resonance(rs, voice_mask, res * 100.0f);
+    rs->gain = vdupq_n_f32(gain);
 }
 
 /**
@@ -275,7 +316,7 @@ fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
             // Combined scaling
             scale = vaddq_f32(vmulq_f32(vrsqrteq_f32(vsubq_f32(rs->one, a_sq)),
                                          vsubq_f32(rs->one, rs->mix)),
-                              vmulq_f32(vdupq_n_f32(1.0f), rs->mix));
+                              vmulq_f32(rs->one, rs->mix));
             break;
 
         case RESONANT_MODE_HIGHPASS:
@@ -293,7 +334,7 @@ fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
         case RESONANT_MODE_PEAK:
             // Peak: band_pass boosted by resonance
             output = vmulq_f32(band_pass, vaddq_f32(rs->one, a));
-            scale = vrsqrteq_f32(vsubq_f32(rs->one, a_sq));
+            scale = vmulq_f32(vrsqrteq_f32(vsubq_f32(rs->one, a_sq)), rs->gain);
             break;
 
         default:
@@ -307,4 +348,18 @@ fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
                        output, vdupq_n_f32(0.0f));
 
     return output;
+}
+
+/**
+ * Get current center frequency (for LFO modulation)
+ */
+fast_inline float32x4_t resonant_synth_get_center(const resonant_synth_t* rs) {
+    return rs->fc;
+}
+
+/**
+ * Get current resonance value (0-1 scale)
+ */
+fast_inline float32x4_t resonant_synth_get_resonance(const resonant_synth_t* rs) {
+    return rs->resonance;
 }

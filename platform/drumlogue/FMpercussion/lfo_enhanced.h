@@ -3,21 +3,14 @@
 /**
  * @file lfo_enhanced.h
  * @brief Enhanced LFO system with 8 targets (including resonant)
+ *
+ * Note: LFO target constants are now in constants.h
+ * Targets 0-5: Standard, 6-7: Resonant parameters
  */
 
 #include <arm_neon.h>
 #include <stdint.h>
-#include "constants.h"
-
-// LFO targets (0-7)
-#define LFO_TARGET_NONE        0
-#define LFO_TARGET_PITCH       1
-#define LFO_TARGET_INDEX       2
-#define LFO_TARGET_ENV         3
-#define LFO_TARGET_LFO2_PHASE  4
-#define LFO_TARGET_LFO1_PHASE  5
-#define LFO_TARGET_RES_FREQ    6
-#define LFO_TARGET_RESONANCE   7
+#include "constants.h"  // Contains LFO_TARGET_* constants
 
 // Phase offset to prevent cancellation (90° = 0.25 cycle)
 #define LFO_PHASE_OFFSET 0.25f
@@ -30,8 +23,8 @@ typedef struct {
     float32x4_t phase2;
 
     uint32_t shape_combo;
-    uint32_t target1;          // 0-7
-    uint32_t target2;          // 0-7
+    uint32_t target1;          // 0-7 (from constants.h)
+    uint32_t target2;          // 0-7 (from constants.h)
     float32x4_t depth1;
     float32x4_t depth2;
     float32x4_t rate1;

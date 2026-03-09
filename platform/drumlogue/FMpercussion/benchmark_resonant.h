@@ -1,7 +1,7 @@
 /**
  * @file benchmark_resonant.h
  * @brief Performance benchmark for resonant synthesis
- * 
+ *
  * Measures CPU cycles for division operations
  */
 
@@ -18,13 +18,13 @@ static inline uint32_t read_cycle_counter(void) {
 
 void benchmark_resonant_operations() {
     const int ITERATIONS = 10000;
-    
+
     float32x4_t a = vdupq_n_f32(0.5f);
     float32x4_t b = vdupq_n_f32(1.5f);
     float32x4_t c = vdupq_n_f32(2.0f);
     float32x4_t d = vdupq_n_f32(3.0f);
     float32x4_t result;
-    
+
     // Benchmark 1: Standard division (slow)
     uint32_t start = read_cycle_counter();
     for (int i = 0; i < ITERATIONS; i++) {
@@ -33,7 +33,7 @@ void benchmark_resonant_operations() {
     uint32_t end = read_cycle_counter();
     uint32_t div_cycles = (end - start) / ITERATIONS;
     printf("vdivq_f32: %d cycles\n", div_cycles);
-    
+
     // Benchmark 2: Division using reciprocal + multiply (faster)
     start = read_cycle_counter();
     for (int i = 0; i < ITERATIONS; i++) {
@@ -44,7 +44,7 @@ void benchmark_resonant_operations() {
     end = read_cycle_counter();
     uint32_t recip_cycles = (end - start) / ITERATIONS;
     printf("reciprocal method: %d cycles\n", recip_cycles);
-    
+
     // Benchmark 3: Approximate division (for denom protection)
     start = read_cycle_counter();
     for (int i = 0; i < ITERATIONS; i++) {
@@ -57,7 +57,7 @@ void benchmark_resonant_operations() {
     end = read_cycle_counter();
     uint32_t protected_cycles = (end - start) / ITERATIONS;
     printf("protected division: %d cycles\n", protected_cycles);
-    
+
     // Expected results:
     // - vdivq_f32: ~20-30 cycles
     // - reciprocal method: ~8-12 cycles

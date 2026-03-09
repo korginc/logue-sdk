@@ -2,12 +2,14 @@
 
 /**
  * @file fm_perc_synth.h
- * @brief Complete FM Percussion Synthesizer with Voice Allocation
+ * @brief FM Percussion Synth - 4 voices, 5 instruments, one instance per instrument
  *
  * Features:
- * - 5 engine types (Kick, Snare, Metal, Perc, Resonant)
- * - Voice allocation: one instrument per voice, one resonant instrument
- * - Updated LFO targets (0-7) including resonant parameters
+ * - 5 instruments: Kick, Snare, Metal, Perc, Resonant
+ * - 4 voices, each with unique instrument (no duplicates)
+ * - 12 valid allocations encoded in VoiceAlloc param
+ * - Per-voice probability triggering
+ * - Resonant morph parameter for expressive control
  */
 
 #include <arm_neon.h>
@@ -25,45 +27,42 @@
 #include "fm_presets.h"
 
 // Engine modes
-#define ENGINE_MODE_KICK     0
-#define ENGINE_MODE_SNARE    1
-#define ENGINE_MODE_METAL    2
-#define ENGINE_MODE_PERC     3
-#define ENGINE_MODE_RESONANT 4
-#define ENGINE_MODE_COUNT    5
+#define ENGINE_KICK     0
+#define ENGINE_SNARE    1
+#define ENGINE_METAL    2
+#define ENGINE_PERC     3
+#define ENGINE_RESONANT 4
+#define ENGINE_COUNT    5
 
-// LFO targets (updated)
-#define LFO_TARGET_NONE        0
-#define LFO_TARGET_PITCH       1
-#define LFO_TARGET_INDEX       2
-#define LFO_TARGET_ENV         3
-#define LFO_TARGET_LFO2_PHASE  4
-#define LFO_TARGET_LFO1_PHASE  5
-#define LFO_TARGET_RES_FREQ    6  // NEW: Resonant center frequency
-#define LFO_TARGET_RESONANCE   7  // NEW: Resonance amount
-
-// Voice allocation presets (which instrument gets resonant treatment)
-// Format: [kick, snare, metal, perc, resonant_voice]
-static const uint8_t VOICE_ALLOC[5][5] = {
-    {ENGINE_MODE_KICK, ENGINE_MODE_SNARE, ENGINE_MODE_METAL, ENGINE_MODE_PERC, 0xFF},        // 0: All standard (no resonant)
-    {ENGINE_MODE_KICK, ENGINE_MODE_SNARE, ENGINE_MODE_METAL, ENGINE_MODE_RESONANT, 3},       // 1: Perc -> Resonant
-    {ENGINE_MODE_KICK, ENGINE_MODE_SNARE, ENGINE_MODE_RESONANT, ENGINE_MODE_PERC, 2},        // 2: Metal -> Resonant
-    {ENGINE_MODE_KICK, ENGINE_MODE_RESONANT, ENGINE_MODE_METAL, ENGINE_MODE_PERC, 1},        // 3: Snare -> Resonant
-    {ENGINE_MODE_RESONANT, ENGINE_MODE_SNARE, ENGINE_MODE_METAL, ENGINE_MODE_PERC, 0}        // 4: Kick -> Resonant
+// Voice allocation table - 12 combinations (no duplicates)
+// Format: [voice0, voice1, voice2, voice3] engine assignments
+static const uint8_t VOICE_ALLOC_TABLE[12][4] = {
+    {ENGINE_KICK, ENGINE_SNARE, ENGINE_METAL, ENGINE_PERC},     // 0: K-S-M-P (no resonant)
+    {ENGINE_KICK, ENGINE_SNARE, ENGINE_METAL, ENGINE_RESONANT}, // 1: K-S-M-R
+    {ENGINE_KICK, ENGINE_SNARE, ENGINE_RESONANT, ENGINE_PERC},  // 2: K-S-R-P
+    {ENGINE_KICK, ENGINE_RESONANT, ENGINE_METAL, ENGINE_PERC},  // 3: K-R-M-P
+    {ENGINE_RESONANT, ENGINE_SNARE, ENGINE_METAL, ENGINE_PERC}, // 4: R-S-M-P
+    {ENGINE_KICK, ENGINE_SNARE, ENGINE_RESONANT, ENGINE_METAL}, // 5: K-S-R-M
+    {ENGINE_KICK, ENGINE_RESONANT, ENGINE_SNARE, ENGINE_PERC},  // 6: K-R-S-P
+    {ENGINE_RESONANT, ENGINE_KICK, ENGINE_METAL, ENGINE_PERC},  // 7: R-K-M-P
+    {ENGINE_RESONANT, ENGINE_SNARE, ENGINE_KICK, ENGINE_PERC},  // 8: R-S-K-P
+    {ENGINE_METAL, ENGINE_RESONANT, ENGINE_KICK, ENGINE_PERC},  // 9: M-R-K-P
+    {ENGINE_PERC, ENGINE_RESONANT, ENGINE_KICK, ENGINE_METAL},  // 10: P-R-K-M
+    {ENGINE_METAL, ENGINE_PERC, ENGINE_RESONANT, ENGINE_KICK}   // 11: M-P-R-K
 };
 
 /**
  * Complete synthesizer state
  */
 typedef struct {
-    // FM Engines
+    // FM Engines (5 total)
     kick_engine_t kick;
     snare_engine_t snare;
     metal_engine_t metal;
     perc_engine_t perc;
     resonant_synth_t resonant;
 
-    // LFO System (updated for 8 targets)
+    // LFO System
     lfo_enhanced_t lfo;
     lfo_smoother_t lfo_smooth;
 
@@ -71,7 +70,7 @@ typedef struct {
     neon_envelope_t envelope;
     uint8_t current_env_shape;
 
-    // Probability PRNG
+    // Probability PRNG (4 independent streams)
     neon_prng_t prng;
 
     // MIDI handler
@@ -82,35 +81,38 @@ typedef struct {
 
     // Voice allocation
     uint8_t voice_engine[4];        // Engine type for each voice (0-4)
-    uint8_t resonant_voice;         // Which voice is resonant (0-3 or 0xFF if none)
+    uint8_t allocation_idx;          // Current allocation (0-11)
 
     // Masks for efficient NEON processing
-    uint32x4_t engine_mask[ENGINE_MODE_COUNT];
+    uint32x4_t engine_mask[ENGINE_COUNT];
 
-    // Voice activity
-    uint32x4_t active_voices;
+    // Voice activity and probabilities
+    uint32x4_t voice_active;
     uint32x4_t voice_triggered;
+    uint32_t voice_probs[4];         // Per-voice probabilities (0-100)
+
+    // Resonant morph parameter
+    float resonant_morph;             // 0-1
 
     // Output gain
     float master_gain;
 } fm_perc_synth_t;
 
 /**
- * Update voice allocation based on param 21
+ * Update voice allocation from param 21 (0-11)
  */
-fast_inline void update_voice_allocation(fm_perc_synth_t* synth) {
-    uint8_t alloc_idx = synth->params[21] % 5;
+fast_inline void update_voice_allocation(fm_perc_synth_t* synth, uint8_t alloc_idx) {
+    if (alloc_idx >= 12) alloc_idx = 0;
 
-    // Set voice engines from allocation table
+    synth->allocation_idx = alloc_idx;
+
+    // Copy allocation to voice_engine array
     for (int v = 0; v < 4; v++) {
-        synth->voice_engine[v] = VOICE_ALLOC[alloc_idx][v];
+        synth->voice_engine[v] = VOICE_ALLOC_TABLE[alloc_idx][v];
     }
 
-    // Store which voice is resonant (or 0xFF if none)
-    synth->resonant_voice = VOICE_ALLOC[alloc_idx][4];
-
     // Build masks for each engine type
-    for (int e = 0; e < ENGINE_MODE_COUNT; e++) {
+    for (int e = 0; e < ENGINE_COUNT; e++) {
         uint32_t mask = 0;
         for (int v = 0; v < 4; v++) {
             if (synth->voice_engine[v] == e) {
@@ -125,29 +127,39 @@ fast_inline void update_voice_allocation(fm_perc_synth_t* synth) {
  * Initialize synthesizer
  */
 fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
+    // Initialize all engines
     kick_engine_init(&synth->kick);
     snare_engine_init(&synth->snare);
     metal_engine_init(&synth->metal);
     perc_engine_init(&synth->perc);
     resonant_synth_init(&synth->resonant);
 
+    // Initialize LFO and envelope
     lfo_enhanced_init(&synth->lfo);
     lfo_smoother_init(&synth->lfo_smooth);
     neon_envelope_init(&synth->envelope);
 
+    // Initialize PRNG and MIDI
     neon_prng_init(&synth->prng, 0x12345678);
     midi_handler_init(&synth->midi);
 
-    synth->active_voices = vdupq_n_u32(0);
+    // Initialize parameters
+    synth->voice_active = vdupq_n_u32(0);
     synth->voice_triggered = vdupq_n_u32(0);
     synth->master_gain = 0.25f;
     synth->current_env_shape = 40;
+    synth->resonant_morph = 0.5f;
+
+    // Default probabilities (all 100%)
+    for (int i = 0; i < 4; i++) {
+        synth->voice_probs[i] = 100;
+    }
 
     // Load default preset
     load_fm_preset(0, synth->params);
 
     // Update voice allocation from params
-    update_voice_allocation(synth);
+    update_voice_allocation(synth, synth->params[21]);
     fm_perc_synth_update_params(synth);
 }
 
@@ -157,59 +169,62 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
 fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
     uint8_t* p = synth->params;
 
-    // Check if voice allocation changed
+    // =================================================================
+    // Update voice probabilities (Page 1, params 0-3)
+    // =================================================================
+    synth->voice_probs[0] = p[0];
+    synth->voice_probs[1] = p[1];
+    synth->voice_probs[2] = p[2];
+    synth->voice_probs[3] = p[3];
+
+    // =================================================================
+    // Check if voice allocation changed (param 21)
+    // =================================================================
     static uint8_t last_alloc = 0xFF;
     if (p[21] != last_alloc) {
-        update_voice_allocation(synth);
+        update_voice_allocation(synth, p[21]);
         last_alloc = p[21];
     }
 
     // =================================================================
-    // Update all engines (they'll be used based on allocation)
+    // Update resonant morph (param 23)
     // =================================================================
+    synth->resonant_morph = p[23] / 100.0f;
 
-    // Kick engine
+    // Apply morph to resonant parameters
+    // Morph controls multiple parameters: mode, frequency, resonance
+    apply_resonant_morph(&synth->resonant, synth->resonant_morph, p[22]);
+
+    // =================================================================
+    // Update FM engines (always update all - they'll be used based on allocation)
+    // =================================================================
     kick_engine_update(&synth->kick,
                        vdupq_n_f32(p[4] / 100.0f),
                        vdupq_n_f32(p[5] / 100.0f));
 
-    // Snare engine
     snare_engine_update(&synth->snare,
                         vdupq_n_f32(p[6] / 100.0f),
                         vdupq_n_f32(p[7] / 100.0f));
 
-    // Metal engine
     metal_engine_update(&synth->metal,
                         vdupq_n_f32(p[8] / 100.0f),
                         vdupq_n_f32(p[9] / 100.0f));
 
-    // Perc engine
     perc_engine_update(&synth->perc,
                        vdupq_n_f32(p[10] / 100.0f),
                        vdupq_n_f32(p[11] / 100.0f));
 
     // =================================================================
-    // Update resonant engine (using params 22-23)
+    // Update resonant base parameters (mode from param 22)
     // =================================================================
-    uint32x4_t all_voices = vdupq_n_u32(0xFFFFFFFF);
-
-    // Resonant mode (param 22)
-    resonant_synth_set_mode(&synth->resonant, all_voices,
+    resonant_synth_set_mode(&synth->resonant,
+                           vdupq_n_u32(0xFFFFFFFF),
                            (resonant_mode_t)(p[22] % 5));
 
-    // Resonance amount (use param 2 as default - can be changed)
-    resonant_synth_set_resonance(&synth->resonant, all_voices, p[2]);  // Depth param
-
-    // Center frequency (param 23 maps 0-100 to 50-8000 Hz)
-    float fc = 50.0f + (p[23] / 100.0f) * 7950.0f;
-    resonant_synth_set_center(&synth->resonant, all_voices, vdupq_n_f32(fc));
-
-    // Mix (fixed at 0.5 for now)
-    resonant_synth_set_mix(&synth->resonant, all_voices, 50.0f);
-
     // =================================================================
-    // Update LFO with new target ranges (0-7)
+    // Update LFO (params 12-19)
     // =================================================================
+    uint32x4_t all_voices = vdupq_n_u32(0xFFFFFFFF);
     int8_t depth1 = (int8_t)(p[15] - 100);
     int8_t depth2 = (int8_t)(p[19] - 100);
 
@@ -217,86 +232,139 @@ fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
     lfo_smoother_set_rate(&synth->lfo_smooth, 1, p[17] / 100.0f, all_voices);
     lfo_smoother_set_depth(&synth->lfo_smooth, 0, depth1 / 100.0f, all_voices);
     lfo_smoother_set_depth(&synth->lfo_smooth, 1, depth2 / 100.0f, all_voices);
-    lfo_smoother_set_target(&synth->lfo_smooth, 0, p[14], all_voices);  // 0-7
-    lfo_smoother_set_target(&synth->lfo_smooth, 1, p[18], all_voices);  // 0-7
+    lfo_smoother_set_target(&synth->lfo_smooth, 0, p[14], all_voices);
+    lfo_smoother_set_target(&synth->lfo_smooth, 1, p[18], all_voices);
 
     // =================================================================
-    // Update envelope shape
+    // Update envelope shape (param 20)
     // =================================================================
     synth->current_env_shape = p[20];
 }
 
 /**
- * MIDI Note On handler with voice allocation
+ * Apply resonant morph parameter - controls multiple dimensions
  */
-fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
-                                       uint8_t note,
-                                       uint8_t velocity) {
-    uint32_t probs[4] = {
-        synth->params[0],  // Kick prob
-        synth->params[1],  // Snare prob
-        synth->params[2],  // Metal prob
-        synth->params[3]   // Perc prob
-    };
+fast_inline void apply_resonant_morph(resonant_synth_t* res, float morph, uint8_t mode) {
+    uint32x4_t all_voices = vdupq_n_u32(0xFFFFFFFF);
 
-    trigger_event_t triggers[4];
-    uint32_t num_triggers = midi_note_on(&synth->midi, &synth->prng,
-                                         note, velocity, probs, triggers);
+    // Morph zones with different behaviors based on mode
+    switch (mode) {
+        case 0: // LowPass - morph controls cutoff frequency
+            {
+                float fc = 50.0f + morph * 7950.0f;  // 50-8000 Hz
+                resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
+                resonant_synth_set_resonance(res, all_voices, 50.0f); // Fixed resonance
+            }
+            break;
 
-    // Build voice mask from triggers
-    uint32_t mask = 0;
+        case 1: // BandPass - morph controls Q/resonance
+            {
+                float fc = 1000.0f;  // Fixed center
+                float resonance = 10.0f + morph * 80.0f;  // 10-90%
+                resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
+                resonant_synth_set_resonance(res, all_voices, resonance);
+            }
+            break;
 
-    for (uint32_t i = 0; i < num_triggers; i++) {
-        uint8_t voice = triggers[i].voice;
-        mask |= 1 << voice;
+        case 2: // HighPass - morph controls cutoff with inverse curve
+            {
+                float fc = 8000.0f - morph * 7950.0f;  // 8000-50 Hz (inverse)
+                resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
+                resonant_synth_set_resonance(res, all_voices, 30.0f);
+            }
+            break;
 
-        // Get engine type for this voice
-        uint8_t engine = synth->voice_engine[voice];
+        case 3: // Notch - morph controls notch width
+            {
+                float fc = 1000.0f;
+                float width = 0.1f + morph * 2.0f;  // Width multiplier
+                // Width affects Q internally
+                resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
+                resonant_synth_set_resonance(res, all_voices, 20.0f + morph * 60.0f);
+            }
+            break;
 
-        // Set note for the appropriate engine
-        float32x4_t midi_note = vdupq_n_f32(triggers[i].note);
-        uint32x4_t voice_mask = vdupq_n_u32(1 << voice);
-
-        switch (engine) {
-            case ENGINE_MODE_KICK:
-                kick_engine_set_note(&synth->kick, voice_mask, midi_note);
-                break;
-            case ENGINE_MODE_SNARE:
-                snare_engine_set_note(&synth->snare, voice_mask, midi_note);
-                break;
-            case ENGINE_MODE_METAL:
-                metal_engine_set_note(&synth->metal, voice_mask, midi_note);
-                break;
-            case ENGINE_MODE_PERC:
-                perc_engine_set_note(&synth->perc, voice_mask, midi_note);
-                break;
-            case ENGINE_MODE_RESONANT:
-                resonant_synth_set_f0(&synth->resonant, voice_mask, midi_note);
-                break;
-        }
-    }
-
-    // Trigger envelope for active voices
-    if (mask) {
-        synth->voice_triggered = vdupq_n_u32(mask);
-        neon_envelope_trigger(&synth->envelope,
-                             vdupq_n_u32(mask),
-                             synth->current_env_shape);
+        case 4: // Peak - morph controls both frequency and gain
+            {
+                float fc = 200.0f + morph * 3800.0f;  // 200-4000 Hz
+                float gain = 1.0f + morph * 3.0f;     // 1-4x gain
+                resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
+                resonant_synth_set_resonance(res, all_voices, 30.0f + morph * 60.0f);
+                // Gain applied in process function
+            }
+            break;
     }
 }
 
 /**
- * Process one audio sample (optimized for engine masks)
+ * MIDI Note On handler with per-voice probability
+ */
+fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
+                                       uint8_t note,
+                                       uint8_t velocity) {
+    // Generate probability gate for all 4 voices at once
+    uint32x4_t gate = probability_gate_neon(&synth->prng,
+                                            synth->voice_probs[0],
+                                            synth->voice_probs[1],
+                                            synth->voice_probs[2],
+                                            synth->voice_probs[3]);
+
+    // Extract which voices triggered
+    uint32_t gate_bits = 0;
+    gate_bits |= (vgetq_lane_u32(gate, 0) ? 1 : 0) << 0;
+    gate_bits |= (vgetq_lane_u32(gate, 1) ? 1 : 0) << 1;
+    gate_bits |= (vgetq_lane_u32(gate, 2) ? 1 : 0) << 2;
+    gate_bits |= (vgetq_lane_u32(gate, 3) ? 1 : 0) << 3;
+
+    if (gate_bits == 0) return;  // No voices triggered
+
+    // Build voice mask from gate results
+    uint32_t mask = gate_bits;
+
+    // Set note for each triggered voice based on its engine assignment
+    float32x4_t midi_note = vdupq_n_f32(note);
+
+    for (int v = 0; v < 4; v++) {
+        if (gate_bits & (1 << v)) {
+            uint32x4_t voice_mask = vdupq_n_u32(1 << v);
+            uint8_t engine = synth->voice_engine[v];
+
+            switch (engine) {
+                case ENGINE_KICK:
+                    kick_engine_set_note(&synth->kick, voice_mask, midi_note);
+                    break;
+                case ENGINE_SNARE:
+                    snare_engine_set_note(&synth->snare, voice_mask, midi_note);
+                    break;
+                case ENGINE_METAL:
+                    metal_engine_set_note(&synth->metal, voice_mask, midi_note);
+                    break;
+                case ENGINE_PERC:
+                    perc_engine_set_note(&synth->perc, voice_mask, midi_note);
+                    break;
+                case ENGINE_RESONANT:
+                    resonant_synth_set_f0(&synth->resonant, voice_mask, midi_note);
+                    break;
+            }
+        }
+    }
+
+    // Trigger envelope for active voices
+    synth->voice_triggered = vdupq_n_u32(mask);
+    neon_envelope_trigger(&synth->envelope,
+                         vdupq_n_u32(mask),
+                         synth->current_env_shape);
+}
+
+/**
+ * Process one audio sample with full LFO modulation support
  */
 fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     // =================================================================
-    // Process parameter smoothing
+    // Process parameter smoothing and LFO
     // =================================================================
     lfo_smoother_process(&synth->lfo_smooth);
 
-    // =================================================================
-    // Update LFO with smoothed values
-    // =================================================================
     lfo_enhanced_update(&synth->lfo,
                         synth->params[12],
                         vgetq_lane_u32(synth->lfo_smooth.current_target1, 0),
@@ -318,55 +386,84 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     float32x4_t lfo1, lfo2;
     lfo_enhanced_process(&synth->lfo, &lfo1, &lfo2);
 
+    // Apply LFO modulations to envelope
+    if (synth->lfo.target1 == LFO_TARGET_ENV || synth->lfo.target2 == LFO_TARGET_ENV) {
+        float32x4_t mod = (synth->lfo.target1 == LFO_TARGET_ENV) ? lfo1 : lfo2;
+        float32x4_t depth = (synth->lfo.target1 == LFO_TARGET_ENV) ? synth->lfo.depth1 : synth->lfo.depth2;
+        env = lfo_apply_modulation(env, mod, depth, 0.0f, 1.0f);
+    }
+
     // =================================================================
-    // Apply LFO modulations (including new resonant targets)
+    // NEW: Apply LFO modulation to resonant frequency (target 6)
     // =================================================================
-    if (synth->lfo.target1 == LFO_TARGET_ENV) {
-        env = lfo_apply_modulation(env, lfo1, synth->lfo.depth1, 0.0f, 1.0f);
+    if (synth->lfo.target1 == LFO_TARGET_RES_FREQ ||
+        synth->lfo.target2 == LFO_TARGET_RES_FREQ) {
+
+        // Determine which LFO is modulating resonant frequency
+        float32x4_t mod_freq = (synth->lfo.target1 == LFO_TARGET_RES_FREQ) ? lfo1 : lfo2;
+        float32x4_t depth_freq = (synth->lfo.target1 == LFO_TARGET_RES_FREQ) ?
+                                   synth->lfo.depth1 : synth->lfo.depth2;
+
+        // Get current center frequency (same for all voices in this implementation)
+        float current_fc = vgetq_lane_f32(synth->resonant.fc, 0);
+
+        // Apply bipolar modulation to frequency
+        float32x4_t modulated_fc = lfo_apply_modulation(
+            vdupq_n_f32(current_fc),
+            mod_freq,
+            depth_freq,
+            RES_FC_MIN,
+            RES_FC_MAX
+        );
+
+        // Update resonant engine with modulated frequency
+        resonant_synth_set_center(&synth->resonant,
+                                  vdupq_n_u32(0xFFFFFFFF),
+                                  modulated_fc);
     }
-    if (synth->lfo.target2 == LFO_TARGET_ENV) {
-        env = lfo_apply_modulation(env, lfo2, synth->lfo.depth2, 0.0f, 1.0f);
-    }
 
-    // Apply resonant parameter modulations
-    if (synth->lfo.target1 == LFO_TARGET_RES_FREQ || synth->lfo.target2 == LFO_TARGET_RES_FREQ) {
-        float32x4_t mod = (synth->lfo.target1 == LFO_TARGET_RES_FREQ) ? lfo1 : lfo2;
-        float32x4_t depth = (synth->lfo.target1 == LFO_TARGET_RES_FREQ) ? synth->lfo.depth1 : synth->lfo.depth2;
+    // =================================================================
+    // NEW: Apply LFO modulation to resonance amount (target 7)
+    // =================================================================
+    if (synth->lfo.target1 == LFO_TARGET_RESONANCE ||
+        synth->lfo.target2 == LFO_TARGET_RESONANCE) {
 
-        // Get current center frequency
-        float fc = vgetq_lane_f32(synth->resonant.target_fc, 0);
-        float32x4_t fc_mod = lfo_apply_modulation(vdupq_n_f32(fc), mod, depth,
-                                                   RESONANT_CENTER_FREQ_MIN,
-                                                   RESONANT_CENTER_FREQ_MAX);
-        resonant_synth_set_center(&synth->resonant, vdupq_n_u32(0xFFFFFFFF), fc_mod);
-    }
+        // Determine which LFO is modulating resonance
+        float32x4_t mod_res = (synth->lfo.target1 == LFO_TARGET_RESONANCE) ? lfo1 : lfo2;
+        float32x4_t depth_res = (synth->lfo.target1 == LFO_TARGET_RESONANCE) ?
+                                 synth->lfo.depth1 : synth->lfo.depth2;
 
-    if (synth->lfo.target1 == LFO_TARGET_RESONANCE || synth->lfo.target2 == LFO_TARGET_RESONANCE) {
-        float32x4_t mod = (synth->lfo.target1 == LFO_TARGET_RESONANCE) ? lfo1 : lfo2;
-        float32x4_t depth = (synth->lfo.target1 == LFO_TARGET_RESONANCE) ? synth->lfo.depth1 : synth->lfo.depth2;
+        // Get current resonance (0-1 scale)
+        float current_res = vgetq_lane_f32(synth->resonant.resonance, 0);
 
-        // Get current resonance
-        float res = vgetq_lane_f32(synth->resonant.target_resonance, 0);
-        float32x4_t res_mod = lfo_apply_modulation(vdupq_n_f32(res), mod, depth,
-                                                    RESONANT_RESONANCE_MIN,
-                                                    RESONANT_RESONANCE_MAX);
-        resonant_synth_set_resonance(&synth->resonant, vdupq_n_u32(0xFFFFFFFF),
-                                     res_mod * 100.0f);  // Convert to percent
+        // Apply bipolar modulation to resonance (convert to percent for setter)
+        float32x4_t modulated_res = lfo_apply_modulation(
+            vdupq_n_f32(current_res * 100.0f),
+            mod_res,
+            depth_res,
+            RES_RESONANCE_MIN * 100.0f,
+            RES_RESONANCE_MAX * 100.0f
+        );
+
+        // Update resonant engine with modulated resonance
+        resonant_synth_set_resonance(&synth->resonant,
+                                     vdupq_n_u32(0xFFFFFFFF),
+                                     vgetq_lane_f32(modulated_res, 0));
     }
 
     // =================================================================
     // Process each engine with its voice mask
     // =================================================================
     float32x4_t kick_out = kick_engine_process(&synth->kick, env,
-                                               synth->engine_mask[ENGINE_MODE_KICK]);
+                                               synth->engine_mask[ENGINE_KICK]);
     float32x4_t snare_out = snare_engine_process(&synth->snare, env,
-                                                  synth->engine_mask[ENGINE_MODE_SNARE]);
+                                                  synth->engine_mask[ENGINE_SNARE]);
     float32x4_t metal_out = metal_engine_process(&synth->metal, env,
-                                                  synth->engine_mask[ENGINE_MODE_METAL]);
+                                                  synth->engine_mask[ENGINE_METAL]);
     float32x4_t perc_out = perc_engine_process(&synth->perc, env,
-                                                synth->engine_mask[ENGINE_MODE_PERC]);
+                                                synth->engine_mask[ENGINE_PERC]);
     float32x4_t resonant_out = resonant_synth_process(&synth->resonant,
-                                                       synth->engine_mask[ENGINE_MODE_RESONANT]);
+                                                       synth->engine_mask[ENGINE_RESONANT]);
 
     // =================================================================
     // Mix all engines
@@ -380,19 +477,4 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     float sum = neon_horizontal_sum(mixed);
 
     return sum * synth->master_gain;
-}
-
-/**
- * Get engine type for a specific voice
- */
-fast_inline uint8_t fm_perc_synth_get_voice_engine(const fm_perc_synth_t* synth, uint8_t voice) {
-    if (voice < 4) return synth->voice_engine[voice];
-    return ENGINE_MODE_KICK;
-}
-
-/**
- * Check if a voice is using resonant engine
- */
-fast_inline bool fm_perc_synth_is_resonant_voice(const fm_perc_synth_t* synth, uint8_t voice) {
-    return (voice < 4) && (synth->voice_engine[voice] == ENGINE_MODE_RESONANT);
 }

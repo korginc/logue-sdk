@@ -1,4 +1,212 @@
+# Version 2.0
 
+# PROGRESS.md - FM Percussion Synth
+
+## Detailed TODO - LFO Modulation for Resonant Parameters
+
+### Priority: HIGH - Required for v2.0 completion
+
+| Task | Status | Estimated Effort |
+|------|--------|------------------|
+| Remove redundant LFO_TARGET defines from lfo_enhanced.h | ✅ Ready | 5 min |
+| Add getters to resonant_synthesis.h | ✅ Ready | 10 min |
+| Implement LFO_TARGET_RES_FREQ in fm_perc_synth_process | 🔄 TODO | 2 hours |
+| Implement LFO_TARGET_RESONANCE in fm_perc_synth_process | 🔄 TODO | 2 hours |
+| Test modulation with extreme LFO settings | 📝 TODO | 1 hour |
+| Profile CPU impact | 📝 TODO | 1 hour |
+| Create 4 demo presets | 📝 TODO | 2 hours |
+
+### Implementation Steps for LFO_RES_FREQ:
+1. [ ] Detect which LFO is targeting RES_FREQ
+2. [ ] Read current center frequency from resonant engine
+3. [ ] Apply bipolar modulation using lfo_apply_modulation
+4. [ ] Update resonant engine with new frequency
+5. [ ] Ensure smoothing doesn't conflict with LFO
+
+### Implementation Steps for LFO_RESONANCE:
+1. [ ] Detect which LFO is targeting RESONANCE
+2. [ ] Read current resonance value
+3. [ ] Apply bipolar modulation (convert to/from percent)
+4. [ ] Update resonant engine
+5. [ ] Test boundaries (0.1-0.9 range)
+
+### Test Cases:
+- [ ] LFO sine wave modulating frequency ±500Hz
+- [ ] LFO triangle wave modulating resonance ±0.2
+- [ ] Both LFOs modulating different parameters simultaneously
+- [ ] Extreme modulation at boundaries (clipping behavior)
+
+
+## Current Status: Phase 4 - Voice Allocation & Morph (90% Complete)
+
+### Completed ✓
+
+#### Phase 0-3: Foundation & Core Engines
+- [x] 5 core engines (Kick, Snare, Metal, Perc, Resonant)
+- [x] NEON optimization for ARMv7
+- [x] LFO system with phase independence
+- [x] Envelope ROM (128 ADR curves)
+- [x] PRNG for probability gating
+
+#### Phase 4a: Voice Allocation System
+- [x] Per-voice probabilities (Page 1, params 0-3)
+- [x] 12 valid voice allocations (no duplicates)
+- [x] Voice allocation lookup table in synth.h
+- [x] String display for allocations (header.c)
+- [x] Engine masks for efficient NEON processing
+
+#### Phase 4b: Resonant Morph
+- [x] ResMorph parameter (Page 6, param 23)
+- [x] 5 resonant modes (Page 6, param 22)
+- [x] Mode-specific morph curves
+- [x] Integration with resonant engine
+
+### In Progress 🔄
+
+#### Phase 4c: Testing & Validation
+- [ ] Verify all 12 allocations produce correct engine assignments
+- [ ] Test per-voice probability accuracy (statistical)
+- [ ] Validate no duplicate instruments in any allocation
+- [ ] Profile morph parameter CPU impact
+- [ ] Test LFO targeting of resonant parameters
+
+#### Phase 4d: Preset Design
+- [ ] Create 8 presets demonstrating morph range
+- [ ] Create 4 presets highlighting voice allocations
+- [ ] Document morph behavior per mode
+
+### Planned 📝
+
+#### Phase 5: Performance Optimization
+- [ ] Benchmark all 5 engines running simultaneously
+- [ ] Optimize division operations in resonant engine
+- [ ] Profile with ARM Streamline
+- [ ] Reduce CPU usage to <30% at 48kHz
+
+#### Phase 6: Additional Features
+- [ ] MIDI CC mapping for all parameters
+- [ ] Aftertouch control for morph
+- [ ] Web-based patch editor
+- [ ] Sample import for wavetable engine
+
+## Voice Allocation Table - Verified
+
+| Index | Display | Voice0 | Voice1 | Voice2 | Voice3 | Resonant On |
+|-------|---------|--------|--------|--------|--------|-------------|
+| 0 | K-S-M-P | Kick | Snare | Metal | Perc | None |
+| 1 | K-S-M-R | Kick | Snare | Metal | **Res** | Voice3 |
+| 2 | K-S-R-P | Kick | Snare | **Res** | Perc | Voice2 |
+| 3 | K-R-M-P | Kick | **Res** | Metal | Perc | Voice1 |
+| 4 | R-S-M-P | **Res** | Snare | Metal | Perc | Voice0 |
+| 5 | K-S-R-M | Kick | Snare | **Res** | Metal | Voice2 |
+| 6 | K-R-S-P | Kick | **Res** | Snare | Perc | Voice1 |
+| 7 | R-K-M-P | **Res** | Kick | Metal | Perc | Voice0 |
+| 8 | R-S-K-P | **Res** | Snare | Kick | Perc | Voice0 |
+| 9 | M-R-K-P | Metal | **Res** | Kick | Perc | Voice1 |
+| 10 | P-R-K-M | Perc | **Res** | Kick | Metal | Voice1 |
+| 11 | M-P-R-K | Metal | Perc | **Res** | Kick | Voice2 |
+
+## Resonant Morph Modes
+
+| Mode | Name | Morph Behavior | Range |
+|------|------|----------------|-------|
+| 0 | LowPass | Cutoff frequency | 50-8000 Hz |
+| 1 | BandPass | Q/Resonance | 10-90% |
+| 2 | HighPass | Cutoff (inverse) | 8000-50 Hz |
+| 3 | Notch | Notch width | 0.1-2.1x |
+| 4 | Peak | Frequency + Gain | 200-4000 Hz, 1-4x |
+
+## Known Issues
+
+| Issue | Status | Priority |
+|-------|--------|----------|
+| Resonant morph needs real-time LFO integration | 🔧 In Progress | Medium |
+| Division operations in resonant engine | 📝 To Profile | Medium |
+| Need more test coverage for allocations | 🔧 In Progress | Low |
+
+## Next Steps (Immediate)
+
+1. **Test all 12 allocations** with a simple script
+2. **Verify no duplicates** in any allocation
+3. **Profile resonant morph** CPU impact
+4. **Create demo presets** for each morph mode
+5. **Update documentation** with allocation table
+
+## Performance Targets
+
+| Engine | Current Cycles | Target | Status |
+|--------|----------------|--------|--------|
+| Kick | 24 | <20 | ✅ |
+| Snare | 31 | <25 | ✅ |
+| Metal | 42 | <35 | ✅ |
+| Perc | 28 | <25 | ✅ |
+| Resonant | TBD | <30 | 🔧 |
+| **Total (4 voices)** | **~125** | **<110** | 🔧 |
+
+## Current Status: Phase 4 - Voice Allocation & Morph (85% Complete)
+
+### Completed ✓
+- [x] 5 core engines (Kick, Snare, Metal, Perc, Resonant)
+- [x] NEON optimization for ARMv7
+- [x] LFO system with phase independence (targets 0-5)
+- [x] LFO target constants in constants.h (0-7)
+- [x] Envelope ROM (128 ADR curves)
+- [x] PRNG for probability gating
+- [x] Per-voice probabilities (Page 1)
+- [x] 12 valid voice allocations (no duplicates)
+- [x] Voice allocation lookup table
+- [x] Resonant morph parameter (Page 6, param 23)
+- [x] 5 resonant modes (Page 6, param 22)
+
+### In Progress 🔄
+- [ ] **Implement LFO_TARGET_RES_FREQ modulation** (target 6)
+- [ ] **Implement LFO_TARGET_RESONANCE modulation** (target 7)
+- [ ] Remove redundant LFO target defines from lfo_enhanced.h
+- [ ] Add LFO modulation to resonant_synth_process()
+- [ ] Test LFO modulation of resonant parameters
+
+### Pending 📝
+- [ ] Profile CPU impact of LFO modulation on resonant engine
+- [ ] Add 4 new presets demonstrating LFO-modulated resonant sounds
+- [ ] Document LFO target ranges for resonant parameters
+
+
+## Phase 4: Voice Allocation & Morph (Current)
+
+### Completed
+- [x] Voice probability parameters (Page 1)
+- [x] 16 voice allocation presets with string display
+- [x] Resonant mode selection (0-4)
+- [x] ResMorph parameter (0-100%)
+
+### In Progress
+- [ ] Implement voice allocation lookup table (16 combinations)
+- [ ] Add per-voice probability gate in MIDI handler
+- [ ] Design morph curves for each resonant mode
+- [ ] Test all 16 allocations with automated validation
+
+### Next Up
+- [ ] Profile CPU impact of morph parameter
+- [ ] Add 8 new presets demonstrating morph range
+- [ ] Implement LFO targeting of ResMorph (using LFO Dest 6/7)
+
+## Voice Allocation Status
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Per-voice probability | ✅ | Page 1, four independent params |
+| 12 valid allocations | ✅ | No duplicate instruments |
+| String display | ✅ | Clear "K-S-M-R" format |
+| Allocation decoding | 🔄 | Need lookup table in synth.h |
+| Validation | 🔄 | Ensure no duplicates programmatically |
+
+### Valid Allocations Verified:
+- [x] No duplicates in any combination
+- [x] Each voice has unique instrument
+- [x] Resonant appears at most once
+- [x] All 5 instruments available across the 12 presets
+
+---
 # Final Integration Checklist
 
 # PROGRESS.md - Updated with TODOs

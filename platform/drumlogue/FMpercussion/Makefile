@@ -433,3 +433,52 @@ CLEAN_RULE_HOOK:
 # Include the dependency files, should be the last of the makefile
 #
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
+
+# ============================================================================
+# Test and Benchmark Targets
+# ============================================================================
+
+.PHONY: test test-alloc test-prob test-morph test-engines test-integration \
+        bench bench-division bench-engines bench-memory bench-allocation
+
+# Run all tests
+test:
+	@./run_unit_tests.sh all
+
+# Individual tests
+test-alloc:
+	@./run_unit_tests.sh alloc
+
+test-prob:
+	@./run_unit_tests.sh prob
+
+test-morph:
+	@./run_unit_tests.sh morph
+
+test-engines:
+	@./run_unit_tests.sh engines
+
+test-integration:
+	@./run_unit_tests.sh integration
+
+# Run all benchmarks
+bench:
+	@./run_benchmarks.sh all
+
+# Individual benchmarks
+bench-division:
+	@./run_benchmarks.sh division
+
+bench-engines:
+	@./run_benchmarks.sh engines
+
+bench-memory:
+	@./run_benchmarks.sh memory
+
+bench-allocation:
+	@./run_benchmarks.sh allocation
+
+# Clean test artifacts
+clean-tests:
+	rm -rf build/test_*
+	rm -rf build/bench_*

@@ -16,9 +16,9 @@ A **4-voice FM percussion synthesizer** for KORG drumlogue with **5 synthesis en
 ## Parameter Page Layout (v2.0)
 
 ```
-Page 1: Trigger Probability (per voice)
+Page 1: Voice Probabilities (NEW)
 ┌─────────────┬─────────────┬─────────────┬─────────────┐
-│  ProbKick   │  ProbSnare  │  ProbMetal  │  ProbPerc   │
+│  Voice1Prob │  Voice2Prob │  Voice3Prob │  Voice4Prob │
 │   (0-100%)  │   (0-100%)  │   (0-100%)  │   (0-100%)  │
 └─────────────┴─────────────┴─────────────┴─────────────┘
 
@@ -34,22 +34,22 @@ Page 3: Metal + Perc Parameters
 │   (0-100%)  │   (0-100%)  │   (0-100%)  │   (0-100%)  │
 └─────────────┴─────────────┴─────────────┴─────────────┘
 
-Page 4: LFO1 Configuration
+Page 4: LFO1
 ┌─────────────┬─────────────┬─────────────┬─────────────┐
 │  L1Shape    │  L1Rate     │  L1Dest     │  L1Depth    │
 │   (0-8)     │   (0-100%)  │   (0-7)     │  (-100-100) │
 └─────────────┴─────────────┴─────────────┴─────────────┘
 
-Page 5: LFO2 Configuration
+Page 5: LFO2
 ┌─────────────┬─────────────┬─────────────┬─────────────┐
 │  L2Shape    │  L2Rate     │  L2Dest     │  L2Depth    │
 │   (0-8)     │   (0-100%)  │   (0-7)     │  (-100-100) │
 └─────────────┴─────────────┴─────────────┴─────────────┘
 
-Page 6: Envelope + Voice Allocation + Resonant
+Page 6: Envelope + Voice + Resonant
 ┌─────────────┬─────────────┬─────────────┬─────────────┐
-│  EnvShape   │  VoiceAlloc │  ResMode    │  ResFreq    │
-│   (0-127)   │   (0-4)     │   (0-4)     │   (0-100%)  │
+│  EnvShape   │  VoiceAlloc │  ResMode    │  ResMorph   │
+│   (0-127)   │   (0-11)    │   (0-4)     │   (0-100%)  │
 └─────────────┴─────────────┴─────────────┴─────────────┘
 ```
 
@@ -233,3 +233,41 @@ your_project/
 | Stack Usage | ~1 KB |
 
 **Total**: Well within drumlogue's limits (< 64 KB)
+
+--
+
+# Testing
+## The test suite now covers:
+1. Voice Allocation - No duplicates, resonant appears at most once
+2. Probability - Statistical accuracy of PRNG
+3. Morph Parameter - Correct range mapping per mode
+4. Engine Ranges - Parameter validation
+5. Integration - Full system coordination
+
+## The benchmark suite measures:
+1. Division Operations - Comparing direct vs reciprocal methods
+2. Engine Performance - Cycle estimates vs targets
+3. Memory Usage - ROM/RAM estimates
+4. Allocation Overhead - Confirming negligible per-sample cost
+
+### Run all tests
+./run_unit_tests.sh all
+
+### Run specific test
+./run_unit_tests.sh alloc      # Voice allocation tests only
+./run_unit_tests.sh prob       # Probability tests only
+./run_unit_tests.sh morph      # Morph parameter tests only
+
+### Run all benchmarks
+./run_benchmarks.sh all
+
+### Run specific benchmark
+./run_benchmarks.sh division   # Division operation benchmarks
+./run_benchmarks.sh engines    # Engine performance estimates
+./run_benchmarks.sh memory     # Memory usage estimates
+
+### Using make targets
+make test           # Run all tests
+make bench          # Run all benchmarks
+make test-alloc     # Run allocation tests only
+make bench-division # Run division benchmarks only
