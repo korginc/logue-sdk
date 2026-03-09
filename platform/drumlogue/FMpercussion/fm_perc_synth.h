@@ -386,7 +386,9 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     float32x4_t lfo1, lfo2;
     lfo_enhanced_process(&synth->lfo, &lfo1, &lfo2);
 
-    // Apply LFO modulations to envelope
+    // =================================================================
+    // Apply LFO modulations to envelope (target 3)
+    // =================================================================
     if (synth->lfo.target1 == LFO_TARGET_ENV || synth->lfo.target2 == LFO_TARGET_ENV) {
         float32x4_t mod = (synth->lfo.target1 == LFO_TARGET_ENV) ? lfo1 : lfo2;
         float32x4_t depth = (synth->lfo.target1 == LFO_TARGET_ENV) ? synth->lfo.depth1 : synth->lfo.depth2;
@@ -400,26 +402,34 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
         synth->lfo.target2 == LFO_TARGET_RES_FREQ) {
 
         // Determine which LFO is modulating resonant frequency
-        float32x4_t mod_freq = (synth->lfo.target1 == LFO_TARGET_RES_FREQ) ? lfo1 : lfo2;
-        float32x4_t depth_freq = (synth->lfo.target1 == LFO_TARGET_RES_FREQ) ?
-                                   synth->lfo.depth1 : synth->lfo.depth2;
+        float32x4_t mod_freq;
+        float32x4_t depth_freq;
+        uint32x4_t voice_mask;
 
-        // Get current center frequency (same for all voices in this implementation)
-        float current_fc = vgetq_lane_f32(synth->resonant.fc, 0);
+        if (synth->lfo.target1 == LFO_TARGET_RES_FREQ) {
+            mod_freq = lfo1;
+            depth_freq = synth->lfo.depth1;
+            voice_mask = synth->engine_mask[ENGINE_RESONANT];
+        } else {
+            mod_freq = lfo2;
+            depth_freq = synth->lfo.depth2;
+            voice_mask = synth->engine_mask[ENGINE_RESONANT];
+        }
+
+        // Get current center frequency from resonant engine
+        float32x4_t current_fc = resonant_synth_get_center(&synth->resonant);
 
         // Apply bipolar modulation to frequency
-        float32x4_t modulated_fc = lfo_apply_modulation(
-            vdupq_n_f32(current_fc),
-            mod_freq,
-            depth_freq,
-            RES_FC_MIN,
-            RES_FC_MAX
-        );
+        // Convert LFO (0-1) to bipolar (-1 to 1) and scale by depth
+        float32x4_t lfo_bipolar = vsubq_f32(vmulq_f32(mod_freq, vdupq_n_f32(2.0f)),
+                                            vdupq_n_f32(1.0f));
+        float32x4_t freq_mod = vmulq_f32(lfo_bipolar, depth_freq);
 
-        // Update resonant engine with modulated frequency
-        resonant_synth_set_center(&synth->resonant,
-                                  vdupq_n_u32(0xFFFFFFFF),
-                                  modulated_fc);
+        // Scale modulation to reasonable range (max ±500Hz)
+        freq_mod = vmulq_f32(freq_mod, vdupq_n_f32(500.0f));
+
+        // Apply to resonant engine
+        resonant_synth_apply_lfo_freq(&synth->resonant, voice_mask, freq_mod);
     }
 
     // =================================================================
@@ -429,26 +439,33 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
         synth->lfo.target2 == LFO_TARGET_RESONANCE) {
 
         // Determine which LFO is modulating resonance
-        float32x4_t mod_res = (synth->lfo.target1 == LFO_TARGET_RESONANCE) ? lfo1 : lfo2;
-        float32x4_t depth_res = (synth->lfo.target1 == LFO_TARGET_RESONANCE) ?
-                                 synth->lfo.depth1 : synth->lfo.depth2;
+        float32x4_t mod_res;
+        float32x4_t depth_res;
+        uint32x4_t voice_mask;
 
-        // Get current resonance (0-1 scale)
-        float current_res = vgetq_lane_f32(synth->resonant.resonance, 0);
+        if (synth->lfo.target1 == LFO_TARGET_RESONANCE) {
+            mod_res = lfo1;
+            depth_res = synth->lfo.depth1;
+            voice_mask = synth->engine_mask[ENGINE_RESONANT];
+        } else {
+            mod_res = lfo2;
+            depth_res = synth->lfo.depth2;
+            voice_mask = synth->engine_mask[ENGINE_RESONANT];
+        }
 
-        // Apply bipolar modulation to resonance (convert to percent for setter)
-        float32x4_t modulated_res = lfo_apply_modulation(
-            vdupq_n_f32(current_res * 100.0f),
-            mod_res,
-            depth_res,
-            RES_RESONANCE_MIN * 100.0f,
-            RES_RESONANCE_MAX * 100.0f
-        );
+        // Get current resonance from resonant engine
+        float32x4_t current_res = resonant_synth_get_resonance(&synth->resonant);
 
-        // Update resonant engine with modulated resonance
-        resonant_synth_set_resonance(&synth->resonant,
-                                     vdupq_n_u32(0xFFFFFFFF),
-                                     vgetq_lane_f32(modulated_res, 0));
+        // Apply bipolar modulation to resonance
+        float32x4_t lfo_bipolar = vsubq_f32(vmulq_f32(mod_res, vdupq_n_f32(2.0f)),
+                                            vdupq_n_f32(1.0f));
+        float32x4_t res_mod = vmulq_f32(lfo_bipolar, depth_res);
+
+        // Scale modulation to reasonable range (max ±0.3)
+        res_mod = vmulq_f32(res_mod, vdupq_n_f32(0.3f));
+
+        // Apply to resonant engine
+        resonant_synth_apply_lfo_resonance(&synth->resonant, voice_mask, res_mod);
     }
 
     // =================================================================

@@ -2,10 +2,10 @@
 
 /**
  * @file resonant_synthesis.h
- * @brief Resonant synthesis engine with morph control
+ * @brief Resonant synthesis engine with LFO modulation support
  *
  * Based on Lazzarini (2017) Section 4.10.3
- * Now with 5 resonant modes and morph parameter for expressive control
+ * Now with full LFO modulation of center frequency and resonance
  */
 
 #include <arm_neon.h>
@@ -13,9 +13,7 @@
 #include "constants.h"
 #include "sine_neon.h"
 
-/**
- * Resonant mode types
- */
+// Resonant mode types
 typedef enum {
     RESONANT_MODE_LOWPASS = 0,   // Single-sided (low-pass character)
     RESONANT_MODE_BANDPASS = 1,  // Double-sided (band-pass character)
@@ -50,6 +48,10 @@ typedef struct {
     float32x4_t target_resonance;
     uint32x4_t ramp_counter;
 
+    // LFO modulation targets (updated per sample)
+    float32x4_t mod_fc;        // LFO modulation applied to center frequency
+    float32x4_t mod_resonance; // LFO modulation applied to resonance
+
     // Constants
     float32x4_t one;
     float32x4_t two;
@@ -75,6 +77,9 @@ fast_inline void resonant_synth_init(resonant_synth_t* rs) {
     rs->target_fc = vdupq_n_f32(1000.0f);
     rs->target_resonance = vdupq_n_f32(0.5f);
     rs->ramp_counter = vdupq_n_u32(0);
+
+    rs->mod_fc = vdupq_n_f32(0.0f);
+    rs->mod_resonance = vdupq_n_f32(0.0f);
 
     rs->one = vdupq_n_f32(1.0f);
     rs->two = vdupq_n_f32(2.0f);
@@ -135,6 +140,44 @@ fast_inline void resonant_synth_set_resonance(resonant_synth_t* rs,
     rs->ramp_counter = vbslq_u32(voice_mask,
                                   vdupq_n_u32(48),
                                   rs->ramp_counter);
+}
+
+/**
+ * Get current center frequency (for LFO modulation)
+ */
+fast_inline float32x4_t resonant_synth_get_center(const resonant_synth_t* rs) {
+    return rs->fc;
+}
+
+/**
+ * Get current resonance value (0-1 scale)
+ */
+fast_inline float32x4_t resonant_synth_get_resonance(const resonant_synth_t* rs) {
+    return rs->resonance;
+}
+
+/**
+ * Apply LFO modulation to center frequency
+ * This is called per sample from fm_perc_synth_process
+ */
+fast_inline void resonant_synth_apply_lfo_freq(resonant_synth_t* rs,
+                                               uint32x4_t voice_mask,
+                                               float32x4_t lfo_mod) {
+    // Store modulation for use in process function
+    rs->mod_fc = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
+                            lfo_mod, rs->mod_fc);
+}
+
+/**
+ * Apply LFO modulation to resonance
+ * This is called per sample from fm_perc_synth_process
+ */
+fast_inline void resonant_synth_apply_lfo_resonance(resonant_synth_t* rs,
+                                                    uint32x4_t voice_mask,
+                                                    float32x4_t lfo_mod) {
+    // Store modulation for use in process function
+    rs->mod_resonance = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
+                                   lfo_mod, rs->mod_resonance);
 }
 
 /**
@@ -199,15 +242,14 @@ fast_inline void resonant_synth_apply_morph(resonant_synth_t* rs,
             gain = 1.0f;
     }
 
-    // Apply parameters
+    // Apply parameters (these will be smoothed)
     resonant_synth_set_center(rs, voice_mask, vdupq_n_f32(fc));
     resonant_synth_set_resonance(rs, voice_mask, res * 100.0f);
     rs->gain = vdupq_n_f32(gain);
 }
 
 /**
- * Process one sample of resonant synthesis
- * @return Output sample for all 4 voices
+ * Process one sample of resonant synthesis with LFO modulation
  */
 fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
                                                uint32x4_t voice_mask) {
@@ -247,12 +289,27 @@ fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
                         rs->fc);
 
     // =================================================================
-    // 2. Update phases
+    // 2. Apply LFO modulation to smoothed parameters
+    // =================================================================
+    // Modulate center frequency with LFO (bipolar)
+    float32x4_t modulated_fc = vaddq_f32(rs->fc, rs->mod_fc);
+
+    // Clamp to valid range
+    modulated_fc = vmaxq_f32(modulated_fc, vdupq_n_f32(RES_FC_MIN));
+    modulated_fc = vminq_f32(modulated_fc, vdupq_n_f32(RES_FC_MAX));
+
+    // Modulate resonance with LFO (bipolar) and clamp to 0-0.99
+    float32x4_t modulated_res = vaddq_f32(rs->resonance, rs->mod_resonance);
+    modulated_res = vmaxq_f32(modulated_res, vdupq_n_f32(0.0f));
+    modulated_res = vminq_f32(modulated_res, vdupq_n_f32(0.99f));
+
+    // =================================================================
+    // 3. Update phases using modulated parameters
     // =================================================================
     float32x4_t two_pi_over_sr = vdupq_n_f32(2.0f * M_PI * INV_SAMPLE_RATE);
 
     float32x4_t f0_inc = vmulq_f32(rs->f0, two_pi_over_sr);
-    float32x4_t fc_inc = vmulq_f32(rs->fc, two_pi_over_sr);
+    float32x4_t fc_inc = vmulq_f32(modulated_fc, two_pi_over_sr);
 
     rs->phase_f0 = vaddq_f32(rs->phase_f0, f0_inc);
     rs->phase_fc = vaddq_f32(rs->phase_fc, fc_inc);
@@ -270,16 +327,15 @@ fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
                               rs->phase_fc);
 
     // =================================================================
-    // 3. Generate carrier and modulator signals
+    // 4. Generate carrier and modulator signals using modulated parameters
     // =================================================================
     float32x4_t sin_f0 = neon_sin(rs->phase_f0);
     float32x4_t cos_fc = neon_cos(rs->phase_fc);
 
     // =================================================================
-    // 4. Apply summation formulae
+    // 5. Apply summation formulae with modulated resonance
     // =================================================================
-    // Denominator: 1 - 2a cos(θ) + a²
-    float32x4_t a = rs->resonance;
+    float32x4_t a = modulated_res;
     float32x4_t a_sq = vmulq_f32(a, a);
     float32x4_t two_a = vmulq_f32(rs->two, a);
 
@@ -289,50 +345,43 @@ fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
     // Protect against division by zero
     denom = vmaxq_f32(denom, rs->epsilon);
 
-    // Single-sided (low-pass) component: s(t) = sin(ωt) / (1 - 2a cos(θ) + a²)
+    // Single-sided (low-pass) component
     float32x4_t low_pass = vdivq_f32(sin_f0, denom);
 
-    // Double-sided (band-pass) component: s(t) = (1 - a²) sin(ωt) / (1 - 2a cos(θ) + a²)
+    // Double-sided (band-pass) component
     float32x4_t band_pass = vdivq_f32(vmulq_f32(vsubq_f32(rs->one, a_sq), sin_f0), denom);
 
     // =================================================================
-    // 5. Apply mode-specific transformations
+    // 6. Apply mode-specific transformations
     // =================================================================
     float32x4_t output;
     float32x4_t scale = vdupq_n_f32(1.0f);
 
     switch (rs->mode) {
         case RESONANT_MODE_LOWPASS:
-            // Pure single-sided (low-pass character)
             output = low_pass;
-            // Scale from Lazzarini eq. 4.8: sqrt(1 - a²)
             scale = vrsqrteq_f32(vsubq_f32(rs->one, a_sq));
             break;
 
         case RESONANT_MODE_BANDPASS:
-            // Mixed response (original resonant synthesis)
             output = vaddq_f32(vmulq_f32(low_pass, vsubq_f32(rs->one, rs->mix)),
                                vmulq_f32(band_pass, rs->mix));
-            // Combined scaling
             scale = vaddq_f32(vmulq_f32(vrsqrteq_f32(vsubq_f32(rs->one, a_sq)),
                                          vsubq_f32(rs->one, rs->mix)),
                               vmulq_f32(rs->one, rs->mix));
             break;
 
         case RESONANT_MODE_HIGHPASS:
-            // High-pass derived from low-pass: 1 - low_pass
             output = vsubq_f32(rs->one, low_pass);
             scale = rs->one;
             break;
 
         case RESONANT_MODE_NOTCH:
-            // Notch: 1 - band_pass
             output = vsubq_f32(rs->one, band_pass);
             scale = rs->one;
             break;
 
         case RESONANT_MODE_PEAK:
-            // Peak: band_pass boosted by resonance
             output = vmulq_f32(band_pass, vaddq_f32(rs->one, a));
             scale = vmulq_f32(vrsqrteq_f32(vsubq_f32(rs->one, a_sq)), rs->gain);
             break;
@@ -348,18 +397,4 @@ fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
                        output, vdupq_n_f32(0.0f));
 
     return output;
-}
-
-/**
- * Get current center frequency (for LFO modulation)
- */
-fast_inline float32x4_t resonant_synth_get_center(const resonant_synth_t* rs) {
-    return rs->fc;
-}
-
-/**
- * Get current resonance value (0-1 scale)
- */
-fast_inline float32x4_t resonant_synth_get_resonance(const resonant_synth_t* rs) {
-    return rs->resonance;
 }
