@@ -2,6 +2,7 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 
 #include <arm_neon.h>
 #include <float_math.h>
@@ -164,56 +165,53 @@ public:
             // 3: Ac Snare (Model 5, Medium Decay, High Noise Mix for snares)
             {3, 38, 0, 1, 400, 3000, 0, 0, 5, 3, 150, 15,  0, 20, 8,  5000, 150,5, 50,  800, 500, 2, 8000,  707},
             // 4: Tubular Bell (Model 8 Tube, Extreme Inharm, Bright Material)
-            {4, 72, 0, 1, 900, 5000, 0, 0, 8, 3, 1500,30,  0, 10, 20, 19000,200,5, 0,   0,   300, 0, 12000, 707}
-            // ... The following are misplaced. First param, index 0, is now program, index 18 is Gain
-            // and there's an exceeding element
-            // Commented out for compiling purposes. Will be filled in Phase 10
-            // // 5: Timpani (Model 3 Membrane, Soft Mallet, Dark Material)
-            // {5, 40, 30, 0, 1, 300, 500,  0, 0, 3, 3, 600, -5,  0, 30, 15, 200,  10, 5, 0, 0,   300, 0, 5000,  707},
-            // // 6: Djambe (Model 5 Drumhead, Resonant, Edge HitPos)
-            // {6, 48, 50, 0, 1, 600, 2000, 0, 0, 5, 3, 300, 5,   0, 10, 12, 500,  50, 5, 0, 50,  200, 0, 6000,  707},
-            // // 7: Taiko (Model 5 Drumhead, Heavy Overdrive, Massive Decay)
-            // {7, 36, 200,0, 1, 200, 800,  0, 0, 5, 3, 700, -10, 0, 50, 18, 100,  10, 5, 0, 0,   300, 0, 4000,  707},
-            // // 8: March Snare (Model 5, Very Short Decay, Max Noise Mix)
-            // {8, 65, 80, 0, 1, 700, 4500, 0, 0, 5, 3, 80,  20,  0, 50, 3,  2000, 250,5, 0, 950, 150, 2, 10000, 707},
-            // // 9: Tam Tam (Model 4 Plate, Extreme Inharm, Longest Decay)
-            // {9, 35, 60, 0, 1, 100, 1500, 0, 0, 4, 3, 1800,25,  0, 25, 20, 18000,10, 5, 0, 100, 800, 0, 8000,  707},
-            // // 10: Koto (Model 0 String, Pure Harmonic (Inharm=1), Sharp Pluck)
-            // {10, 72, 0,  0, 1, 600, 4500, 0, 0, 0, 3, 800, 10,  0, 80, 12, 1,    10, 5, 0, 0,   300, 0, 10000, 707},
-            // // 11: Vibraphone (Model 1 Beam, Harmonic, Long Decay)
-            // {11, 72, 0,  0, 1, 500, 3000, 0, 0, 1, 3, 1200,15,  0, 50, 18, 50,   10, 5, 0, 0,   300, 0, 10000, 707},
-            // // 12: Woodblock (Model 2 Squared, Very Short Decay, Dull Material)
-            // {12, 76, 0,  0, 1, 800, 3500, 0, 0, 2, 3, 50,  -8,  0, 50, 2,  800,  10, 5, 0, 0,   300, 0, 5000,  707},
-            // // 13: Acoustic Tom (Model 5, Pitch 45, Medium Decay)
-            // {13, 45, 40, 0, 1, 400, 2000, 0, 0, 5, 3, 400, -2,  0, 50, 10, 300,  10, 5, 0, 20,  300, 0, 8000,  707},
-            // // 14: Cymbal (Model 4 Plate, Massive Inharm, Bright, High Noise)
-            // {14, 60, 20, 0, 1, 800, 5000, 0, 0, 4, 3, 1400,30,  0, 10, 18, 19500,400,5, 0, 600, 700, 2, 14000, 707},
-            // // 15: Gong (Model 4 Plate, Low Pitch, Massive Inharm)
-            // {15, 36, 40, 0, 1, 200, 2000, 0, 0, 4, 3, 1900,20,  0, 50, 20, 19000,10, 5, 0, 100, 800, 0, 6000,  707},
-            // // 16: Kalimba (Model 1 Beam, Pure, Metallic, Short Decay)
-            // {16, 72, 10, 0, 1, 700, 4000, 0, 0, 1, 3, 200, 25,  0, 80, 5,  10,   10, 5, 0, 0,   300, 0, 10000, 707},
-            // // 17: Steel Pan (Model 4 Plate, Medium Inharm, Bright)
-            // {17, 60, 20, 0, 1, 600, 3500, 0, 0, 4, 3, 600, 20,  0, 30, 12, 8000, 100,5, 0, 0,   300, 0, 10000, 707},
-            // // 18: Claves (Model 2 Squared, Stiff Mallet, Instant Decay)
-            // {18, 79, 0,  0, 1, 900, 4800, 0, 0, 2, 3, 30,  5,   0, 50, 1,  200,  10, 5, 0, 0,   300, 0, 8000,  707},
-            // // 19: Cowbell (Model 4 Plate, Very High Inharm, Short Decay)
-            // {19, 67, 30, 0, 1, 800, 4500, 0, 0, 4, 3, 150, 25,  0, 20, 4,  17000,200,5, 0, 0,   300, 0, 10000, 707},
-            // // 20: Triangle (Model 1 Beam, High Pitch, Extreme Inharm)
-            // {20, 84, 0,  0, 1, 900, 5000, 0, 0, 1, 3, 1000,30,  0, 10, 15, 19900,800,5, 0, 0,   300, 0, 15000, 707},
-            // // 21: Kick Drum (Model 5, Punchy, Fast Envelope)
-            // {21, 36, 100,0, 1, 300, 1500, 0, 0, 5, 3, 200, -5,  0, 50, 6,  200,  10, 5, 0, 50,  200, 0, 3000,  707},
-            // // 22: Clap (Model 5, 100% Noise Mix, Multiple bounces simulated by fast delay)
-            // {22, 60, 50, 0, 1, 500, 3000, 0, 0, 5, 3, 50,  10,  0, 50, 3,  5000, 400,5, 0, 1000,100, 2, 10000, 707},
-            // // 23: Shaker (Model 5, 100% Noise Mix, High Pass Filtered)
-            // {23, 72, 20, 0, 1, 100, 4000, 0, 0, 5, 3, 20,  15,  0, 50, 2,  1000, 800,5, 0, 1000,300, 2, 12000, 707},
-            // // 24: Flute (Model 7 Open Tube, Breath Noise Exciter)
-            // {24, 72, 0,  0, 1, 100, 500,  0, 0, 7, 3, 900, -5,  0, 10, 12, 10,   10, 5, 0, 400, 800, 0, 6000,  707},
-            // // 25: Clarinet (Model 8 Closed Tube, Breath Noise Exciter)
-            // {25, 60, 0,  0, 1, 100, 500,  0, 0, 8, 3, 900, -5,  0, 10, 12, 10,   10, 5, 0, 400, 800, 0, 6000,  707},
-            // // 26: Pluck Bass (Model 0 String, Dark Material, Low Pitch)
-            // {26, 36, 60, 0, 1, 600, 2500, 0, 0, 0, 3, 600, -8,  0, 20, 10, 5,    10, 5, 0, 0,   300, 0, 5000,  707},
-            // // 27: Glass Bowl (Model 4 Plate, Pure but shimmering)
-            // {27, 76, 0,  0, 1, 700, 3500, 0, 0, 4, 3, 1600,25,  0, 80, 18, 12000,100,5, 0, 0,   300, 0, 12000, 707}
+            {4, 72, 0, 1, 900, 5000, 0, 0, 8, 3, 1500,30,  0, 10, 20, 19000,200,5, 0,   0,   300, 0, 12000, 707},
+            // 5: Timpani (Model 3 Membrane, Soft Mallet, Dark Material)
+            {5, 40, 30, 0, 1, 300, 500,  0, 0, 3, 3, 600, -5,  0, 30, 15, 200,  10, 5, 0, 0,   300, 0, 5000},
+            // 6: Djambe (Model 5 Drumhead, Resonant, Edge HitPos)
+            {6, 48, 50, 0, 1, 600, 2000, 0, 0, 5, 3, 300, 5,   0, 10, 12, 500,  50, 5, 0, 50,  200, 0, 6000},
+            // 7: Taiko (Model 5 Drumhead, Heavy Overdrive, Massive Decay)
+            {7, 36, 200,0, 1, 200, 800,  0, 0, 5, 3, 700, -10, 0, 50, 18, 100,  10, 5, 0, 0,   300, 0, 4000},
+            // 8: March Snare (Model 5, Very Short Decay, Max Noise Mix)
+            {8, 65, 80, 0, 1, 700, 4500, 0, 0, 5, 3, 80,  20,  0, 50, 3,  2000, 250,5, 0, 950, 150, 2, 10000},
+            // 9: Tam Tam (Model 4 Plate, Extreme Inharm, Longest Decay)
+            {9, 35, 60, 0, 1, 100, 1500, 0, 0, 4, 3, 1800,25,  0, 25, 20, 18000,10, 5, 0, 100, 800, 0, 8000},
+            // 10: Koto (Model 0 String, Pure Harmonic (Inharm=1), Sharp Pluck)
+            {10, 72, 0,  0, 1, 600, 4500, 0, 0, 0, 3, 800, 10,  0, 80, 12, 1,    10, 5, 0, 0,   300, 0, 10000},
+            // 11: Vibraphone (Model 1 Beam, Harmonic, Long Decay)
+            {11, 72, 0,  0, 1, 500, 3000, 0, 0, 1, 3, 1200,15,  0, 50, 18, 50,   10, 5, 0, 0,   300, 0, 10000},
+            // 12: Woodblock (Model 2 Squared, Very Short Decay, Dull Material)
+            {12, 76, 0,  0, 1, 800, 3500, 0, 0, 2, 3, 50,  -8,  0, 50, 2,  800,  10, 5, 0, 0,   300, 0, 5000},
+            // 13: Acoustic Tom (Model 5, Pitch 45, Medium Decay)
+            {13, 45, 40, 0, 1, 400, 2000, 0, 0, 5, 3, 400, -2,  0, 50, 10, 300,  10, 5, 0, 20,  300, 0, 8000},
+            // 14: Cymbal (Model 4 Plate, Massive Inharm, Bright, High Noise)
+            {14, 60, 20, 0, 1, 800, 5000, 0, 0, 4, 3, 1400,30,  0, 10, 18, 19500,400,5, 0, 600, 700, 2, 14000},
+            // 15: Gong (Model 4 Plate, Low Pitch, Massive Inharm)
+            {15, 36, 40, 0, 1, 200, 2000, 0, 0, 4, 3, 1900,20,  0, 50, 20, 19000,10, 5, 0, 100, 800, 0, 6000},
+            // 16: Kalimba (Model 1 Beam, Pure, Metallic, Short Decay)
+            {16, 72, 10, 0, 1, 700, 4000, 0, 0, 1, 3, 200, 25,  0, 80, 5,  10,   10, 5, 0, 0,   300, 0, 10000},
+            // 17: Steel Pan (Model 4 Plate, Medium Inharm, Bright)
+            {17, 60, 20, 0, 1, 600, 3500, 0, 0, 4, 3, 600, 20,  0, 30, 12, 8000, 100,5, 0, 0,   300, 0, 10000},
+            // 18: Claves (Model 2 Squared, Stiff Mallet, Instant Decay)
+            {18, 79, 0,  0, 1, 900, 4800, 0, 0, 2, 3, 30,  5,   0, 50, 1,  200,  10, 5, 0, 0,   300, 0, 8000},
+            // 19: Cowbell (Model 4 Plate, Very High Inharm, Short Decay)
+            {19, 67, 30, 0, 1, 800, 4500, 0, 0, 4, 3, 150, 25,  0, 20, 4,  17000,200,5, 0, 0,   300, 0, 10000},
+            // 20: Triangle (Model 1 Beam, High Pitch, Extreme Inharm)
+            {20, 84, 0,  0, 1, 900, 5000, 0, 0, 1, 3, 1000,30,  0, 10, 15, 19900,800,5, 0, 0,   300, 0, 15000},
+            // 21: Kick Drum (Model 5, Punchy, Fast Envelope)
+            {21, 36, 100,0, 1, 300, 1500, 0, 0, 5, 3, 200, -5,  0, 50, 6,  200,  10, 5, 0, 50,  200, 0, 3000},
+            // 22: Clap (Model 5, 100% Noise Mix, Multiple bounces simulated by fast delay)
+            {22, 60, 50, 0, 1, 500, 3000, 0, 0, 5, 3, 50,  10,  0, 50, 3,  5000, 400,5, 0, 1000,100, 2, 10000},
+            // 23: Shaker (Model 5, 100% Noise Mix, High Pass Filtered)
+            {23, 72, 20, 0, 1, 100, 4000, 0, 0, 5, 3, 20,  15,  0, 50, 2,  1000, 800,5, 0, 1000,300, 2, 12000},
+            // 24: Flute (Model 7 Open Tube, Breath Noise Exciter)
+            {24, 72, 0,  0, 1, 100, 500,  0, 0, 7, 3, 900, -5,  0, 10, 12, 10,   10, 5, 0, 400, 800, 0, 6000},
+            // 25: Clarinet (Model 8 Closed Tube, Breath Noise Exciter)
+            {25, 60, 0,  0, 1, 100, 500,  0, 0, 8, 3, 900, -5,  0, 10, 12, 10,   10, 5, 0, 400, 800, 0, 6000},
+            // 26: Pluck Bass (Model 0 String, Dark Material, Low Pitch)
+            {26, 36, 60, 0, 1, 600, 2500, 0, 0, 0, 3, 600, -8,  0, 20, 10, 5,    10, 5, 0, 0,   300, 0, 5000},
+            // 27: Glass Bowl (Model 4 Plate, Pure but shimmering)
+            {27, 76, 0,  0, 1, 700, 3500, 0, 0, 4, 3, 1600,25,  0, 80, 18, 12000,100,5, 0, 0,   300, 0, 12000}
         };
 
         if (idx >= 28) return;
@@ -541,9 +539,6 @@ inline void NoteOff(uint8_t note) {
         uint32_t idx_A = ((uint32_t)read_idx) & DELAY_MASK;
         uint32_t idx_B = (idx_A + 1) & DELAY_MASK;
         float frac = read_idx - (float)((uint32_t)read_idx);
-
-        int idx_A = idx_int & DELAY_MASK;
-        int idx_B = (idx_A + 1) & DELAY_MASK;
 
         // Blend the two samples based on the fraction
         float delay_out = (wg.buffer[idx_A] * (1.0f - frac)) + (wg.buffer[idx_B] * frac);
