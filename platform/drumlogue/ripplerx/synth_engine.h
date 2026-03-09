@@ -117,7 +117,8 @@ public:
     }
 
     inline void Suspend() {
-        // Called when the audio thread goes to sleep
+        AllNoteOff();
+        Reset();
     }
 
     inline void ChannelPressure(uint8_t pressure) { (void)pressure; }
@@ -257,7 +258,8 @@ public:
 
             case k_paramDkay: {
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
-                float g = norm * 0.995f;
+                // Waveguide Physics: 0.85 = instant dead thud. 0.999 = rings for 5 seconds.
+                float g = 0.85f + (norm * 0.149f);
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     state.voices[i].resA.feedback_gain = g;
                     state.voices[i].resB.feedback_gain = g;
@@ -282,7 +284,8 @@ public:
 
             case k_paramRel: {
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 20.0f));
-                float rel_rate = 0.001f + ((1.0f - norm) * 0.05f);
+                // Much slower release fade to prevent clicking when GateOff is received
+                float rel_rate = 0.00005f + ((1.0f - norm) * 0.01f);
                 for (int i = 0; i < NUM_VOICES; ++i) {
 #ifdef ENABLE_PHASE_5_EXCITERS
                     state.voices[i].exciter.noise_env.release_rate = rel_rate;
@@ -304,21 +307,17 @@ public:
             case k_paramLowCut: {
 #ifdef ENABLE_PHASE_6_FILTERS
                 m_master_cutoff = (float)value;
-                float res_val = fmaxf(1.0f, (float)m_params[k_paramResnc] / 700.0f);
+                // Fetch the integer resonance (e.g. 707) and divide to get 0.707f
+                float res_val = fmaxf(0.707f, (float)m_params[k_paramResnc] / 1000.0f);
                 state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
 #endif
                 break;
             }
 
-            case k_paramGain: {
-                float norm = fmaxf(0.0f, (float)value / 1000.0f);
-                state.master_drive = 1.0f + (norm * 20.0f);
-                break;
-            }
-
             case k_paramNzMix: {
+                // Updated for the new 0-100 header.c range
 #ifdef ENABLE_PHASE_5_EXCITERS
-                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
+                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 100.0f));
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     state.voices[i].exciter.noise_decay_coeff = norm;
                 }
@@ -328,22 +327,33 @@ public:
 
             case k_paramNzRes: {
 #ifdef ENABLE_PHASE_5_EXCITERS
+                // Leaving this at the old 0-1000 scale
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     state.voices[i].exciter.noise_env.attack_rate = 0.9f - (norm * 0.8f);
-                    state.voices[i].exciter.noise_env.decay_rate = 0.05f - (norm * 0.04f);
+                    // Slower decay so the noise actually injects energy into the tube
+                    state.voices[i].exciter.noise_env.decay_rate = 0.0001f + ((1.0f - norm) * 0.005f);
                 }
 #endif
                 break;
             }
 
+           case k_paramGain: {
+                // Updated for the new 0-100 header.c range
+                float norm = fmaxf(0.0f, (float)value / 100.0f);
+                state.master_drive = 1.0f + (norm * 20.0f); // 1.0x to 21.0x Drive
+                break;
+            }
+
             case k_paramResnc: {
 #ifdef ENABLE_PHASE_6_FILTERS
-                float res_val = fmaxf(1.0f, (float)value / 700.0f);
+                // UI passes 707 to 4000. Divide by 1000 to get a Q factor of 0.707 to 4.0
+                float res_val = fmaxf(0.707f, (float)value / 1000.0f);
                 state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
 #endif
                 break;
             }
+
             default:
                 break;
         }
@@ -549,34 +559,28 @@ inline void NoteOff(uint8_t note) {
     inline float process_exciter(ExciterState& ex) {
         float out = 0.0f;
 
-        // Play PCM Sample if loaded
         if (ex.sample_ptr && ex.current_frame < ex.sample_frames) {
             size_t raw_idx = ex.current_frame * ex.channels;
             out = ex.sample_ptr[raw_idx];
         }
 
-        // CRITICAL FIX: Always advance time, even if no sample is loaded!
-        ex.current_frame++;
-
-        #ifdef ENABLE_PHASE_5_EXCITERS
-        // Add optional Noise Burst here (e.g. for snare wires or breath noise)
-        // 2. Synthesized Noise Burst (Activated incrementally)
+#ifdef ENABLE_PHASE_5_EXCITERS
         float noise_env_val = ex.noise_env.process();
         if (noise_env_val > 0.001f) {
             float raw_noise = ex.noise_gen.process();
-            // Multiply by noise_decay_coeff so the UI NzMix knob actually changes the volume
             out += raw_noise * noise_env_val * ex.noise_decay_coeff;
         }
 #endif
 
         // 3. The Modal Mallet Strike
-        // We only trigger the mallet on the very first frame of the note
         float mallet_impulse = (ex.current_frame == 0) ? 1.0f : 0.0f;
-
         ex.mallet_lp = (mallet_impulse * ex.mallet_stiffness) + (ex.mallet_lp * (1.0f - ex.mallet_stiffness));
 
-        // Add the mallet thump to the total exciter output
-        out += ex.mallet_lp * 2.0f; // Multiplied for volume compensation
+        // Boost mallet energy significantly so it rings the delay line
+        out += ex.mallet_lp * 5.0f;
+
+        // CRITICAL FIX: Increment time AT THE VERY END so Frame 0 triggers correctly
+        ex.current_frame++;
 
         return out;
     }
