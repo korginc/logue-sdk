@@ -13,11 +13,11 @@ struct FastSVF {
     float hp = 0.0f;
 
     // Fast-math coefficients (Calculated in UI thread)
-    float f = 0.0f; // Cutoff coefficient
-    float q = 0.0f; // Resonance coefficient
+    float f = 0.0f;
+    float q = 0.0f;
 
-    // Mode: 0 = Lowpass, 1 = Bandpass, 2 = Highpass
-    int mode = 0;
+    // CRITICAL FIX: Mode 2 = Highpass. This prevents the 10Hz parameter from muting the synth!
+    int mode = 2;
 
     // Called by the UI Thread (setParameter) to keep the Audio Thread fast
     inline void set_coeffs(float cutoff_hz, float resonance, float srate) {

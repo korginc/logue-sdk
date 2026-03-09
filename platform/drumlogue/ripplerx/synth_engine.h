@@ -258,7 +258,7 @@ public:
 
             case k_paramDkay: {
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
-                // Waveguide Physics: 0.85 = instant dead thud. 0.999 = rings for 5 seconds.
+                // 0.85 = instant dead thud. 0.999 = rings for 5 seconds.
                 float g = 0.85f + (norm * 0.149f);
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     state.voices[i].resA.feedback_gain = g;
@@ -304,10 +304,18 @@ public:
                 break;
             }
 
+            case k_paramMlltStif: {
+                // UI Range is 100 to 5000. Map to 0.01 to 1.0
+                float norm = fmaxf(0.01f, fminf(1.0f, (float)value / 5000.0f));
+                for (int i = 0; i < NUM_VOICES; ++i) {
+                    state.voices[i].exciter.mallet_stiffness = norm;
+                }
+                break;
+            }
+
             case k_paramLowCut: {
 #ifdef ENABLE_PHASE_6_FILTERS
                 m_master_cutoff = (float)value;
-                // Fetch the integer resonance (e.g. 707) and divide to get 0.707f
                 float res_val = fmaxf(0.707f, (float)m_params[k_paramResnc] / 1000.0f);
                 state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
 #endif
@@ -391,6 +399,10 @@ public:
     inline void NoteOn(uint8_t note, uint8_t velocity) {
         state.next_voice_idx = (state.next_voice_idx + 1) % NUM_VOICES;
         VoiceState& v = state.voices[state.next_voice_idx];
+
+        // CRITICAL FIX 2: Ensure the voice actually turns on!
+        v.is_active = true;
+        v.is_releasing = false;
 
         // --- Sample Loading ---
         // First, clear any old sample data
@@ -576,10 +588,10 @@ inline void NoteOff(uint8_t note) {
         float mallet_impulse = (ex.current_frame == 0) ? 1.0f : 0.0f;
         ex.mallet_lp = (mallet_impulse * ex.mallet_stiffness) + (ex.mallet_lp * (1.0f - ex.mallet_stiffness));
 
-        // Boost mallet energy significantly so it rings the delay line
-        out += ex.mallet_lp * 5.0f;
+        // Massive energy multiplier to physically ring the tube
+        out += ex.mallet_lp * 15.0f;
 
-        // CRITICAL FIX: Increment time AT THE VERY END so Frame 0 triggers correctly
+        // CRITICAL FIX: Increment time AT THE VERY END so Frame 0 actually triggers
         ex.current_frame++;
 
         return out;
@@ -590,14 +602,16 @@ inline void NoteOff(uint8_t note) {
     // ==============================================================================
     inline void processBlock(float* __restrict main_out, size_t frames) {
 
-        // Clear the output buffer
+        // CRITICAL FIX 1: Clear the hardware buffer!
+        // If we don't do this, the += accumulation can cause NaN silence.
         for (size_t i = 0; i < frames * 2; ++i) {
             main_out[i] = 0.0f;
         }
 
-        // Process each active voice
-        for (size_t v = 0; v < NUM_VOICES; ++v) {
-            VoiceState& voice = state.voices[v];
+        // Sum active voices into the master buffer
+        for (int voice_idx = 0; voice_idx < NUM_VOICES; ++voice_idx) {
+            VoiceState& voice = state.voices[voice_idx];
+
             if (!voice.is_active) continue;
 
             // Process the block for this voice
