@@ -36,7 +36,7 @@ const __unit_header unit_header_t unit_header = {
         // Page 3: Resonator A-I
         {0, 17, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Model"}},
         {0, 4, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Partls"}},
-        {0, 2000, 250, 250, k_unit_param_type_none, 1, 1, 0, {"Dkay"}},
+        {0, 2000, 250, 250, k_unit_param_type_none, 0, 0, 0, {"Dkay"}}, // Removed fractional
         {-10, 30, 0, 0, k_unit_param_type_none, 1, 1, 0, {"Mterl"}},
 
         // Page 4: Resonator A-II
@@ -48,13 +48,14 @@ const __unit_header unit_header_t unit_header = {
         // Page 5: Resonator A-III
         {10, 19990, 5005, 10, k_unit_param_type_hertz, 0, 0, 0, {"LowCut"}},
         {0, 20, 0, 5, k_unit_param_type_none, 1, 0, 0, {"TubRad"}},
-        {0, 1000, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Gain"}},  // <--- OVERDRIVE
-        {0, 1000, 300, 0, k_unit_param_type_percent, 1, 1, 0, {"NzMix"}},
+        // Range 0-100, no fraction
+        {0, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Gain"}},  // <--- Overdrive
+        {0, 100, 50, 0, k_unit_param_type_percent, 0, 0, 0, {"NzMix"}},
 
         // Page 6: Noise II
         {0, 1000, 300, 0, k_unit_param_type_percent, 1, 1, 0, {"NzRes"}},
         {0, 2, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"NzFltr"}},
         {20, 20000, 12000, 20, k_unit_param_type_hertz, 0, 0, 0, {"NzFltFrq"}},
-        {707, 4000, 0, 707, k_unit_param_type_none, 3, 1, 0, {"Resnc"}}
+        {707, 4000, 0, 707, k_unit_param_type_none, 0, 0, 0, {"Resnc"}}
     }
 };
