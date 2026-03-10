@@ -37,18 +37,25 @@ public:
         : sampleRate(48000.0f)
         , writePos(0)
         , decay(0.5f)
-        , modulation(0.2f)
+        , modulation(0.05f)
+        , glow(0.3f)
+        , colorCoeff(0.5f)
+        , brightness(0.5f)
+        , sizeScale(1.0f)
+        , colorLpfL(0.0f)
+        , colorLpfR(0.0f)
         , initialized(false)
         , fdnMem(nullptr) {
 
-        // Initialize delay times (in seconds)
-        float baseDelays[FDN_CHANNELS] = {
+        // Initialize base delay times (prime-based, in seconds)
+        static const float kBaseDelays[FDN_CHANNELS] = {
             0.0421f, 0.0713f, 0.0987f, 0.1249f,
             0.1571f, 0.1835f, 0.2127f, 0.2413f
         };
 
         for (int i = 0; i < FDN_CHANNELS; i++) {
-            delayTimes[i] = baseDelays[i];
+            baseDelayTimes[i] = kBaseDelays[i];
+            delayTimes[i] = kBaseDelays[i];
         }
 
         // Initialize modulation phases
@@ -111,6 +118,39 @@ public:
     void setDelayTime(int channel, float timeSeconds) {
         if (channel >= 0 && channel < FDN_CHANNELS) {
             delayTimes[channel] = std::max(0.01f, std::min(2.0f, timeSeconds));
+        }
+    }
+
+    /** Wet/dry mix  0.0 = fully dry, 1.0 = fully wet (GLOW parameter) */
+    void setGlow(float g) {
+        glow = std::max(0.0f, std::min(1.0f, g));
+    }
+
+    /**
+     * Tone color: LPF coefficient (COLR parameter).
+     * 0.0 = open/bright, 1.0 = very dark/filtered.
+     */
+    void setColor(float c) {
+        colorCoeff = std::max(0.0f, std::min(0.95f, c));
+    }
+
+    /**
+     * Brightness: high-frequency blend (BRIG parameter).
+     * 0.0 = no HF content, 1.0 = full HF (bypasses LPF).
+     */
+    void setBrightness(float b) {
+        brightness = std::max(0.0f, std::min(1.0f, b));
+    }
+
+    /**
+     * Room size: scales all delay times (SIZE parameter).
+     * 0.0 = tiny room, 1.0 = normal, 2.0 = large hall.
+     */
+    void setSize(float s) {
+        sizeScale = std::max(0.1f, std::min(2.0f, s));
+        for (int i = 0; i < FDN_CHANNELS; i++) {
+            delayTimes[i] = std::min(baseDelayTimes[i] * sizeScale,
+                                     (float)(FDN_BUFFER_SIZE - 1) / sampleRate);
         }
     }
 
@@ -332,12 +372,20 @@ public:
             leftOut *= 0.25f;
             rightOut *= 0.25f;
 
-            // Mix with dry signal (50% wet)
+            // Apply tone: LPF (color) blended with dry-wet mix
+            // LPF: y = colorCoeff*y_prev + (1-colorCoeff)*x
+            colorLpfL = colorCoeff * colorLpfL + (1.0f - colorCoeff) * leftOut;
+            colorLpfR = colorCoeff * colorLpfR + (1.0f - colorCoeff) * rightOut;
+
+            // Brightness: blend between lpf output and unfiltered
+            float wetL = colorLpfL + brightness * (leftOut  - colorLpfL);
+            float wetR = colorLpfR + brightness * (rightOut - colorLpfR);
+
             float inLVal = vgetq_lane_f32(inL4, s);
             float inRVal = vgetq_lane_f32(inR4, s);
 
-            outL[s] = inLVal * 0.5f + leftOut * 0.5f;
-            outR[s] = inRVal * 0.5f + rightOut * 0.5f;
+            outL[s] = inLVal * (1.0f - glow) + wetL * glow;
+            outR[s] = inRVal * (1.0f - glow) + wetR * glow;
         }
     }
 
@@ -389,8 +437,14 @@ public:
             leftOut *= 0.25f;
             rightOut *= 0.25f;
 
-            outL[i] = inL[i] * 0.5f + leftOut * 0.5f;
-            outR[i] = inR[i] * 0.5f + rightOut * 0.5f;
+            // Apply tone (color LPF + brightness blend)
+            colorLpfL = colorCoeff * colorLpfL + (1.0f - colorCoeff) * leftOut;
+            colorLpfR = colorCoeff * colorLpfR + (1.0f - colorCoeff) * rightOut;
+            float wetL = colorLpfL + brightness * (leftOut  - colorLpfL);
+            float wetR = colorLpfR + brightness * (rightOut - colorLpfR);
+
+            outL[i] = inL[i] * (1.0f - glow) + wetL * glow;
+            outR[i] = inR[i] * (1.0f - glow) + wetR * glow;
         }
     }
 
@@ -423,10 +477,17 @@ private:
     int writePos;
     float decay;
     float modulation;
+    float glow;          // wet/dry mix  0..1
+    float colorCoeff;    // tone LPF coefficient  0..0.95
+    float brightness;    // HF blend  0..1
+    float sizeScale;     // room size scale  0.1..2.0
+    float colorLpfL;     // LPF state for left channel output
+    float colorLpfR;     // LPF state for right channel output
 
     bool initialized;
     float* fdnMem;  // [FDN_CHANNELS][BUFFER_SIZE]
 
+    float baseDelayTimes[FDN_CHANNELS]; // unscaled delay times
     float delayTimes[FDN_CHANNELS];
     float modPhases[FDN_CHANNELS];
     float fdnState[FDN_CHANNELS];

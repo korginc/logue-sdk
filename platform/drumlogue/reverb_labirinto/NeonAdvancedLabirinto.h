@@ -47,6 +47,11 @@ public:
         , diffusion(0.3f)
         , modDepth(0.1f)
         , modRate(0.5f)
+        , mix(0.3f)
+        , width(1.0f)
+        , dampingCoeff(0.5f)
+        , lowDecayMult(1.0f)
+        , highDecayMult(0.5f)
         , initialized(false)
         , fdnMem(nullptr) {
 
@@ -120,6 +125,47 @@ public:
         modRate = std::max(0.1f, std::min(10.0f, r));
     }
 
+    /** Wet/dry mix  0.0 = fully dry, 1.0 = fully wet */
+    void setMix(float m) {
+        mix = std::max(0.0f, std::min(1.0f, m));
+    }
+
+    /** Stereo width  0.0 = mono, 1.0 = normal, 2.0 = hyper-stereo */
+    void setWidth(float w) {
+        width = std::max(0.0f, std::min(2.0f, w));
+    }
+
+    /**
+     * Damping: crossover frequency in Hz (200..10000).
+     * Converts to a one-pole LPF coefficient used in applyDiffusion4.
+     */
+    void setDamping(float freqHz) {
+        freqHz = std::max(200.0f, std::min(10000.0f, freqHz));
+        // omega = 2π * fc / fs;  coeff ≈ 1 - omega  (first-order approx)
+        float omega = 2.0f * (float)M_PI * freqHz / sampleRate;
+        dampingCoeff = std::max(0.0f, std::min(0.99f, 1.0f - omega));
+    }
+
+    /**
+     * Low-frequency RT60 multiplier (1..100 → 0.01..1.0 s scale).
+     * Increases effective decay for low-end warmth.
+     */
+    void setLowDecay(float value) {
+        // value 1-100; map to a per-channel decay multiplier 0.9..1.5
+        lowDecayMult = 0.9f + (value / 100.0f) * 0.6f;
+    }
+
+    /**
+     * High-frequency RT60 multiplier (1..100 → 0.01..1.0 s scale).
+     * Controls how quickly the high end decays.
+     */
+    void setHighDecay(float value) {
+        // value 1-100; higher value = brighter (less high-freq damping)
+        highDecayMult = 0.1f + (value / 100.0f) * 0.9f;
+        // Recompute diffusion blend so DAMP/HIGH work together
+        diffusion = std::max(0.0f, std::min(1.0f, diffusion));
+    }
+
     /*===========================================================================*/
     /* Core Processing - NEON Vectorized */
     /*===========================================================================*/
@@ -155,10 +201,12 @@ public:
                 // SCALAR PATH: Process remaining 1-3 samples
                 // =================================================================
                 for (int i = 0; i < blockSize; i++) {
-                    float input = (inL[samplesProcessed + i] + inR[samplesProcessed + i]) * 0.5f;
-                    float output = processScalar(input);
-                    outL[samplesProcessed + i] = output;
-                    outR[samplesProcessed + i] = output;
+                    float dryL = inL[samplesProcessed + i];
+                    float dryR = inR[samplesProcessed + i];
+                    float mono = (dryL + dryR) * 0.5f;
+                    float wet  = processScalar(mono);
+                    outL[samplesProcessed + i] = dryL * (1.0f - mix) + wet * mix;
+                    outR[samplesProcessed + i] = dryR * (1.0f - mix) + wet * mix;
                 }
             }
 
@@ -247,14 +295,20 @@ private:
         leftMix = vmulq_f32(leftMix, vdupq_n_f32(0.25f));
         rightMix = vmulq_f32(rightMix, vdupq_n_f32(0.25f));
 
-        // Mix with dry signal (50% wet for now)
-        float32x4_t dryGain = vdupq_n_f32(0.5f);
-        float32x4_t wetGain = vdupq_n_f32(0.5f);
+        // Apply stereo width:  mid = (L+R)*0.5, side = (L-R)*0.5
+        // outL_wet = mid + side*width,  outR_wet = mid - side*width
+        float32x4_t wetMid  = vmulq_f32(vaddq_f32(leftMix, rightMix), vdupq_n_f32(0.5f));
+        float32x4_t wetSide = vmulq_f32(vsubq_f32(leftMix, rightMix), vdupq_n_f32(0.5f));
+        float32x4_t width4  = vdupq_n_f32(width);
+        float32x4_t wetL    = vaddq_f32(wetMid, vmulq_f32(wetSide, width4));
+        float32x4_t wetR    = vsubq_f32(wetMid, vmulq_f32(wetSide, width4));
 
-        float32x4_t outL4 = vaddq_f32(vmulq_f32(inL4, dryGain),
-                                       vmulq_f32(leftMix, wetGain));
-        float32x4_t outR4 = vaddq_f32(vmulq_f32(inR4, dryGain),
-                                       vmulq_f32(rightMix, wetGain));
+        // Wet/dry blend
+        float32x4_t wetGain = vdupq_n_f32(mix);
+        float32x4_t dryGain = vdupq_n_f32(1.0f - mix);
+
+        float32x4_t outL4 = vaddq_f32(vmulq_f32(inL4, dryGain), vmulq_f32(wetL, wetGain));
+        float32x4_t outR4 = vaddq_f32(vmulq_f32(inR4, dryGain), vmulq_f32(wetR, wetGain));
 
         // Store results
         vst1q_f32(outL, outL4);
@@ -454,11 +508,11 @@ private:
         }
         writePos = (writePos + 1) & BUFFER_MASK;
 
-        float output = 0.0f;
-        for (int i = 0; i < 4; i++) output += mixed[i];
-        for (int i = 4; i < FDN_CHANNELS; i++) output += mixed[i];
+        float wet = 0.0f;
+        for (int i = 0; i < FDN_CHANNELS; i++) wet += mixed[i];
+        wet *= 0.125f;
 
-        return output * 0.125f;
+        return input * (1.0f - mix) + wet * mix;
     }
 
     /*===========================================================================*/
@@ -491,6 +545,11 @@ private:
     float diffusion;
     float modDepth;
     float modRate;
+    float mix;           // wet/dry blend  0..1
+    float width;         // stereo width   0..2
+    float dampingCoeff;  // one-pole LPF coeff for damping
+    float lowDecayMult;  // low-freq decay multiplier
+    float highDecayMult; // high-freq decay multiplier (controls diffusion brightness)
 
     bool initialized;
     float* fdnMem;  // [FDN_CHANNELS][BUFFER_SIZE]

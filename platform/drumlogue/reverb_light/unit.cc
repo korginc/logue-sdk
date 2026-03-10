@@ -32,6 +32,17 @@ static bool s_initialized = false;
 static bool s_bypass = true;
 
 // ============================================================================
+// Parameter State (mirrors header.c defaults)
+// ============================================================================
+// ID 0: DARK  0..100 %  default 20
+// ID 1: BRIG  0..100 %  default 50
+// ID 2: GLOW  0..100 %  default 30
+// ID 3: COLR  0..100 %  default 10
+// ID 4: SPRK  0..100 %  default 5
+// ID 5: SIZE  0..100 %  default 50
+static int32_t s_params[6] = { 20, 50, 30, 10, 5, 50 };
+
+// ============================================================================
 // Static Buffers (Safe - allocated in BSS, not on stack)
 // ============================================================================
 
@@ -61,6 +72,11 @@ __unit_callback int8_t unit_init(const unit_runtime_desc_t* desc) {
 
     s_initialized = true;
     s_bypass = false;
+
+    // Apply default parameter values
+    for (uint8_t i = 0; i < 6; i++) {
+        unit_set_param_value(i, s_params[i]);
+    }
 
     return k_unit_err_none;
 }
@@ -119,25 +135,38 @@ __unit_callback void unit_render(const float* in, float* out, uint32_t frames) {
 }
 
 __unit_callback void unit_set_param_value(uint8_t id, int32_t value) {
-    // Map parameters to FDN engine controls
+    if (id >= 6) return;
+    s_params[id] = value;
+
+    const float norm = value / 100.0f;  // 0..100 → 0.0..1.0
+
     switch (id) {
-        case 0: // Decay (0-100%)
-            s_fdn_engine.setDecay(value / 100.0f);
+        case 0: // DARK  decay/warmth  0-100% → decay 0.0..0.99
+            s_fdn_engine.setDecay(norm * 0.99f);
             break;
-        case 1: // Modulation (0-100%)
-            s_fdn_engine.setModulation(value / 100.0f);
+        case 1: // BRIG  brightness  0-100% → 0.0..1.0
+            s_fdn_engine.setBrightness(norm);
             break;
-        // Add more parameters as needed
+        case 2: // GLOW  wet/dry mix  0-100% → 0.0..1.0
+            s_fdn_engine.setGlow(norm);
+            break;
+        case 3: // COLR  tone color (LPF)  0-100% → coeff 0.0..0.95
+            s_fdn_engine.setColor(norm * 0.95f);
+            break;
+        case 4: // SPRK  sparkle / modulation depth  0-100% → 0.0..1.0
+            s_fdn_engine.setModulation(norm);
+            break;
+        case 5: // SIZE  room size  0-100% → scale 0.1..2.0
+            s_fdn_engine.setSize(0.1f + norm * 1.9f);
+            break;
         default:
             break;
     }
 }
 
 __unit_callback int32_t unit_get_param_value(uint8_t id) {
-    // Return current parameter values
-    // This would need to be implemented based on your parameter scheme
-    (void)id;
-    return 0;
+    if (id >= 6) return 0;
+    return s_params[id];
 }
 
 __unit_callback const char* unit_get_param_str_value(uint8_t id, int32_t value) {
