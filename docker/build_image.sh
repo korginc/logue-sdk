@@ -91,6 +91,8 @@ res=$?
 if [ $res -ne 0 ]; then
     echo "Error: Failed to build docker image (${res})"
     exit $res
+else
+	echo "Success: build docker image done"
 fi
 
 # Cleanup build stage images, leaving only the flattened final image

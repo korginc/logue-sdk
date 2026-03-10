@@ -63,7 +63,9 @@ COPY ./commands/* /app/commands/
 
 # drumlogue specific files
 COPY ./drumlogue/environment /app/drumlogue/
+COPY ./drumlogue/environment /app/drumlogue/
 COPY ./builder/get_drumlogue_toolchain.sh /app/drumlogue/
+
 RUN /bin/bash -c "/app/drumlogue/get_drumlogue_toolchain.sh && rm /app/drumlogue/get_drumlogue_toolchain.sh"
 
 # minilogue-xd specific files
