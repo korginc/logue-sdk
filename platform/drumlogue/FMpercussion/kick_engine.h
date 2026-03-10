@@ -87,6 +87,11 @@ fast_inline void kick_engine_set_note(kick_engine_t* kick,
     kick->carrier_freq_base = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
                                         base_freq,
                                         kick->carrier_freq_base);
+
+    // Reset phases for triggered voices so every hit has a consistent attack click
+    float32x4_t zero = vdupq_n_f32(0.0f);
+    kick->carrier_phase   = vbslq_f32(vreinterpretq_f32_u32(voice_mask), zero, kick->carrier_phase);
+    kick->modulator_phase = vbslq_f32(vreinterpretq_f32_u32(voice_mask), zero, kick->modulator_phase);
 }
 
 /**
@@ -96,12 +101,15 @@ fast_inline void kick_engine_set_note(kick_engine_t* kick,
 fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
                                             float32x4_t envelope,
                                             uint32x4_t active_mask) {
-    // Calculate instantaneous carrier frequency with pitch sweep
-    // Sweep: frequency drops by up to 3 octaves as envelope decays
-    // sweep_factor = 1.0 - sweep_depth * envelope
+    // Calculate instantaneous carrier frequency with pitch sweep.
+    // At note-on (envelope=1): freq = base * (1 + sweep_depth * KICK_SWEEP_OCTAVES)
+    // At tail    (envelope=0): freq = base  (sweeps DOWN as envelope decays)
     float32x4_t one = vdupq_n_f32(1.0f);
-    float32x4_t sweep_factor = vmlsq_f32(one, kick->sweep_depth, envelope);
-    
+    float32x4_t sweep_scale = vdupq_n_f32(KICK_SWEEP_OCTAVES);
+    float32x4_t sweep_factor = vmlaq_f32(one,
+                                          vmulq_f32(kick->sweep_depth, sweep_scale),
+                                          envelope);
+
     // Apply sweep to carrier frequency
     float32x4_t carrier_freq = vmulq_f32(kick->carrier_freq_base, sweep_factor);
     

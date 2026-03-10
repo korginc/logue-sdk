@@ -110,6 +110,11 @@ fast_inline void snare_engine_set_note(snare_engine_t* snare,
     snare->carrier_freq_base = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
                                          base_freq,
                                          snare->carrier_freq_base);
+
+    // Reset phases on trigger for consistent attack transient
+    float32x4_t zero = vdupq_n_f32(0.0f);
+    snare->carrier_phase   = vbslq_f32(vreinterpretq_f32_u32(voice_mask), zero, snare->carrier_phase);
+    snare->modulator_phase = vbslq_f32(vreinterpretq_f32_u32(voice_mask), zero, snare->modulator_phase);
 }
 
 /**
@@ -126,11 +131,13 @@ fast_inline float32x4_t snare_generate_noise(snare_engine_t* snare) {
                                    vdupq_n_f32(1.0f));
     white = vsubq_f32(vmulq_f32(white, vdupq_n_f32(2.0f)), vdupq_n_f32(1.0f));
     
-    // Apply bandpass filtering (simplified)
-    float32x4_t hpf_out = one_pole_lpf(&snare->noise_hpf, white, 
-                                       SNARE_NOISE_HPF_CUTOFF);
-    float32x4_t bpf_out = one_pole_lpf(&snare->noise_lpf, hpf_out,
-                                       SNARE_NOISE_LPF_CUTOFF);
+    // Bandpass: HPF (subtract LPF output from input) then LPF
+    // one_pole_lpf() is a low-pass; the HPF is its complement: input - LP_output
+    float32x4_t lpf_stage = one_pole_lpf(&snare->noise_hpf, white,
+                                         SNARE_NOISE_HPF_CUTOFF);
+    float32x4_t hpf_out   = vsubq_f32(white, lpf_stage);   // HPF = input - LPF
+    float32x4_t bpf_out   = one_pole_lpf(&snare->noise_lpf, hpf_out,
+                                         SNARE_NOISE_LPF_CUTOFF);
     
     return bpf_out;
 }

@@ -94,6 +94,9 @@ typedef struct {
     // Resonant morph parameter
     float resonant_morph;             // 0-1
 
+    // Per-voice velocity (set on note-on, persists until next trigger)
+    float32x4_t voice_velocity;       // 0-1 per lane
+
     // Output gain
     float master_gain;
 } fm_perc_synth_t;
@@ -146,6 +149,7 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
     // Initialize parameters
     synth->voice_active = vdupq_n_u32(0);
     synth->voice_triggered = vdupq_n_u32(0);
+    synth->voice_velocity = vdupq_n_f32(1.0f);
     synth->master_gain = 0.25f;
     synth->current_env_shape = 40;
     synth->resonant_morph = 0.5f;
@@ -318,6 +322,14 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
 
     if (gate_bits == 0) return;  // No voices triggered
 
+    // Store per-voice velocity (0-1) for triggered voices
+    float vel_scale = velocity / 127.0f;
+    for (int v = 0; v < 4; v++) {
+        if (gate_bits & (1 << v)) {
+            synth->voice_velocity = vsetq_lane_f32(vel_scale, synth->voice_velocity, v);
+        }
+    }
+
     // Build voice mask from gate results
     uint32_t mask = gate_bits;
 
@@ -483,12 +495,15 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
                                                        synth->engine_mask[ENGINE_RESONANT]);
 
     // =================================================================
-    // Mix all engines
+    // Mix all engines, then apply per-voice velocity scaling
     // =================================================================
     float32x4_t mixed = vaddq_f32(kick_out, snare_out);
     mixed = vaddq_f32(mixed, metal_out);
     mixed = vaddq_f32(mixed, perc_out);
     mixed = vaddq_f32(mixed, resonant_out);
+
+    // Scale each voice lane by its stored velocity before summing
+    mixed = vmulq_f32(mixed, synth->voice_velocity);
 
     // Efficient horizontal sum
     float sum = neon_horizontal_sum(mixed);
