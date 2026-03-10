@@ -194,7 +194,7 @@ public:
     }
 
     static inline const char* getPresetName(uint8_t idx) {
-        if (idx < 8) {
+        if (idx < 12) {
             return FM_PRESETS[idx].name;
         }
         return nullptr;
@@ -206,7 +206,7 @@ private:
     /*===========================================================================*/
 
     inline void load_preset(uint8_t idx) {
-        if (idx >= 8) return;
+        if (idx >= 12) return;
         
         const fm_preset_t* p = &FM_PRESETS[idx];
         

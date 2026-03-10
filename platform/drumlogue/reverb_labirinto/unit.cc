@@ -32,6 +32,19 @@ static bool s_initialized = false;
 static bool s_bypass = true;
 
 // ============================================================================
+// Parameter State (mirrors header.c defaults)
+// ============================================================================
+// ID 0: MIX  0..1000 (x0.1%)   default 300
+// ID 1: TIME 1..100             default 20
+// ID 2: LOW  1..100             default 20
+// ID 3: HIGH 1..100             default 10
+// ID 4: DAMP 200..10000 Hz      default 2500
+// ID 5: WIDE 0..200 %           default 100
+// ID 6: COMP 0..1000 (x0.1%)   default 1000
+// ID 7: PILL 0..3               default 3
+static int32_t s_params[8] = { 300, 20, 20, 10, 2500, 100, 1000, 3 };
+
+// ============================================================================
 // Static Buffers (Safe - allocated in BSS, not on stack)
 // ============================================================================
 
@@ -70,6 +83,11 @@ __unit_callback int8_t unit_init(const unit_runtime_desc_t* desc) {
 
     s_initialized = true;
     s_bypass = false;
+
+    // Apply default parameter values
+    for (uint8_t i = 0; i < 8; i++) {
+        unit_set_param_value(i, s_params[i]);
+    }
 
     return k_unit_err_none;
 }
@@ -132,21 +150,34 @@ __unit_callback void unit_render(const float* in, float* out, uint32_t frames) {
 }
 
 __unit_callback void unit_set_param_value(uint8_t id, int32_t value) {
+    if (id >= 8) return;
+    s_params[id] = value;
     if (!s_reverb) return;
 
-    // Map parameters to reverb controls
     switch (id) {
-        case 0: // Decay (0-100%)
-            s_reverb->setDecay(value / 100.0f);
+        case 0: // MIX  0..1000 → 0.0..1.0
+            s_reverb->setMix(value / 1000.0f);
             break;
-        case 1: // Diffusion (0-100%)
-            s_reverb->setDiffusion(value / 100.0f);
+        case 1: // TIME  1..100 → decay 0.01..0.99  (linear scale of RT60 x0.1s)
+            s_reverb->setDecay(0.01f + (value - 1) / 99.0f * 0.98f);
             break;
-        case 2: // Modulation Depth (0-100%)
-            s_reverb->setModDepth(value / 100.0f);
+        case 2: // LOW  1..100 → low-freq decay multiplier
+            s_reverb->setLowDecay((float)value);
             break;
-        case 3: // Modulation Rate (0-100% scaled to 0.1-10 Hz)
-            s_reverb->setModRate(0.1f + (value / 100.0f) * 9.9f);
+        case 3: // HIGH  1..100 → high-freq decay multiplier
+            s_reverb->setHighDecay((float)value);
+            break;
+        case 4: // DAMP  200..10000 Hz
+            s_reverb->setDamping((float)value);
+            break;
+        case 5: // WIDE  0..200 → stereo width 0.0..2.0
+            s_reverb->setWidth(value / 100.0f);
+            break;
+        case 6: // COMP  0..1000 → diffusion 0.0..1.0
+            s_reverb->setDiffusion(value / 1000.0f);
+            break;
+        case 7: // PILL  0..3  (pillar count index, stored for info)
+            // FDN channel count is fixed at compile time; store only
             break;
         default:
             break;
@@ -154,10 +185,8 @@ __unit_callback void unit_set_param_value(uint8_t id, int32_t value) {
 }
 
 __unit_callback int32_t unit_get_param_value(uint8_t id) {
-    // Return current parameter values
-    // This would need to be implemented based on your parameter scheme
-    (void)id;
-    return 0;
+    if (id >= 8) return 0;
+    return s_params[id];
 }
 
 __unit_callback const char* unit_get_param_str_value(uint8_t id, int32_t value) {
