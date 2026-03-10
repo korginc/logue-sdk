@@ -204,9 +204,10 @@ public:
                     float dryL = inL[samplesProcessed + i];
                     float dryR = inR[samplesProcessed + i];
                     float mono = (dryL + dryR) * 0.5f;
-                    float wet  = processScalar(mono);
-                    outL[samplesProcessed + i] = dryL * (1.0f - mix) + wet * mix;
-                    outR[samplesProcessed + i] = dryR * (1.0f - mix) + wet * mix;
+                    float wetL, wetR;
+                    processScalar(mono, wetL, wetR);
+                    outL[samplesProcessed + i] = dryL * (1.0f - mix) + wetL * mix;
+                    outR[samplesProcessed + i] = dryR * (1.0f - mix) + wetR * mix;
                 }
             }
 
@@ -483,8 +484,9 @@ private:
     /* Scalar Fallback for Remainder Samples */
     /*===========================================================================*/
 
-    float processScalar(float input) {
-        // Simple scalar FDN processing for remaining samples
+    // Scalar fallback: populates wetL/wetR with stereo wet signal (no mix applied).
+    // Mirrors the NEON path: channels 0-3 → L, channels 4-7 → R, then mid/side width.
+    void processScalar(float input, float& wetL, float& wetR) {
         float delayOut[FDN_CHANNELS];
 
         for (int ch = 0; ch < FDN_CHANNELS; ch++) {
@@ -519,11 +521,18 @@ private:
         }
         writePos = (writePos + 1) & BUFFER_MASK;
 
-        float wet = 0.0f;
-        for (int i = 0; i < FDN_CHANNELS; i++) wet += mixed[i];
-        wet *= 0.125f;
+        // Stereo mix-down: channels 0-3 → L, channels 4-7 → R (mirrors NEON path)
+        float leftRaw = 0.0f, rightRaw = 0.0f;
+        for (int i = 0; i < 4; i++)           leftRaw  += mixed[i];
+        for (int i = 4; i < FDN_CHANNELS; i++) rightRaw += mixed[i];
+        leftRaw  *= 0.25f;
+        rightRaw *= 0.25f;
 
-        return input * (1.0f - mix) + wet * mix;
+        // Apply stereo width via mid/side (mirrors NEON path)
+        float mid  = (leftRaw + rightRaw) * 0.5f;
+        float side = (leftRaw - rightRaw) * 0.5f;
+        wetL = mid + side * width;
+        wetR = mid - side * width;
     }
 
     /*===========================================================================*/
