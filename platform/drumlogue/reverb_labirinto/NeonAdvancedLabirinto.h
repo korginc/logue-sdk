@@ -162,8 +162,6 @@ public:
     void setHighDecay(float value) {
         // value 1-100; higher value = brighter (less high-freq damping)
         highDecayMult = 0.1f + (value / 100.0f) * 0.9f;
-        // Recompute diffusion blend so DAMP/HIGH work together
-        diffusion = std::max(0.0f, std::min(1.0f, diffusion));
     }
 
     /*===========================================================================*/
