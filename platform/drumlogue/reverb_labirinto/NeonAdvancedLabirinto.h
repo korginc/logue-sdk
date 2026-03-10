@@ -251,24 +251,28 @@ private:
         applyHadamard4(delayOut, mixed);
 
         // =================================================================
-        // Apply decay and feedback
+        // Apply frequency-dependent decay:
+        // Channels 0-3 have shorter delays (brighter content) → decay * highDecayMult
+        // Channels 4-7 have longer delays (warmer content)    → decay * lowDecayMult
         // =================================================================
-        float32x4_t decay4 = vdupq_n_f32(decay);
+        float32x4_t decayHi  = vdupq_n_f32(std::min(0.99f, decay * highDecayMult));
+        float32x4_t decayLo  = vdupq_n_f32(std::min(0.99f, decay * lowDecayMult));
         float32x4_t feedback = vdupq_n_f32(1.0f - decay);
 
-        for (int i = 0; i < FDN_CHANNELS; i++) {
-            mixed[i] = vmulq_f32(mixed[i], decay4);
+        for (int i = 0; i < 4; i++) {
+            mixed[i] = vmulq_f32(mixed[i], decayHi);
+        }
+        for (int i = 4; i < FDN_CHANNELS; i++) {
+            mixed[i] = vmulq_f32(mixed[i], decayLo);
         }
 
         // Add input to first channel (with feedback control)
         mixed[0] = vaddq_f32(mixed[0], vmulq_f32(inMono, feedback));
 
         // =================================================================
-        // Apply diffusion filters (optional)
+        // Apply DAMP (dampingCoeff) + COMP (diffusion) filters
         // =================================================================
-        if (diffusion > 0.01f) {
-            applyDiffusion4(mixed);
-        }
+        applyDiffusion4(mixed);
 
         // =================================================================
         // Write back to delay lines
@@ -416,22 +420,25 @@ private:
     }
 
     /**
-     * NEON-optimized diffusion filters
-     * Simple one-pole lowpass on each channel
+     * NEON one-pole LPF per channel.
+     * DAMP sets the pole (dampingCoeff: larger = lower cutoff = darker).
+     * COMP (diffusion) scales the pole amount: 0 = bypass, 1 = full DAMP.
+     * y[n] = (1 - diffusion*dampingCoeff) * x[n]
+     *      +      diffusion*dampingCoeff  * y[n-1]
      */
     void applyDiffusion4(float32x4_t* signals) {
-        float32x4_t alpha = vdupq_n_f32(diffusion * 0.5f);
-        float32x4_t oneMinusAlpha = vsubq_f32(vdupq_n_f32(1.0f), alpha);
+        // pole = amount of previous-sample blending
+        float pole = diffusion * dampingCoeff;
+        float32x4_t pole4       = vdupq_n_f32(pole);
+        float32x4_t oneMinusPole = vdupq_n_f32(1.0f - pole);
 
         for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-            // y[n] = α * x[n] + (1-α) * y[n-1]
             float32x4_t filtered = vaddq_f32(
-                vmulq_f32(signals[ch], alpha),
-                vmulq_f32(lpfState[ch], oneMinusAlpha)
+                vmulq_f32(signals[ch], oneMinusPole),
+                vmulq_f32(lpfState[ch], pole4)
             );
-
             lpfState[ch] = filtered;
-            signals[ch] = filtered;
+            signals[ch]  = filtered;
         }
     }
 
@@ -492,13 +499,17 @@ private:
             delayOut[ch] = fdnMem[ch * BUFFER_SIZE + idx];
         }
 
+        // Frequency-dependent decay (mirrors NEON path):
+        // channels 0-3 (shorter delays) → decay * highDecayMult
+        // channels 4-7 (longer delays)  → decay * lowDecayMult
         float mixed[FDN_CHANNELS];
         for (int i = 0; i < FDN_CHANNELS; i++) {
-            mixed[i] = 0.0f;
+            float sum = 0.0f;
             for (int j = 0; j < FDN_CHANNELS; j++) {
-                mixed[i] += hadamard[i][j] * delayOut[j];
+                sum += hadamard[i][j] * delayOut[j];
             }
-            mixed[i] *= decay;
+            float dm = (i < 4) ? (decay * highDecayMult) : (decay * lowDecayMult);
+            mixed[i] = sum * std::min(0.99f, dm);
         }
 
         mixed[0] += input * (1.0f - decay);

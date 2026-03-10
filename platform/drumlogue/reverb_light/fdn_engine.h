@@ -426,7 +426,7 @@ public:
         // =================================================================
         for (int i = samplesProcessed; i < numSamples; i++) {
             float monoIn = (inL[i] + inR[i]) * 0.5f;
-            float monoOut = processScalar(monoIn);
+            processScalar(monoIn);  // populates fdnState for stereo spread
 
             // Simple stereo spread (channels 0-3 to left, 4-7 to right)
             float leftOut = 0.0f, rightOut = 0.0f;
