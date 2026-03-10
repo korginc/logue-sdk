@@ -22,6 +22,7 @@
 #include <cstring>
 #include <cmath>
 #include <malloc.h>
+#include <float_math.h>
 
 // Maximum delay line length (2 seconds at 48kHz)
 #define MAX_DELAY_SECONDS 2.0f
@@ -143,7 +144,9 @@ public:
         freqHz = std::max(200.0f, std::min(10000.0f, freqHz));
         // omega = 2π * fc / fs;  coeff ≈ 1 - omega  (first-order approx)
         float omega = 2.0f * (float)M_PI * freqHz / sampleRate;
-        dampingCoeff = std::max(0.0f, std::min(0.99f, 1.0f - omega));
+        // accurate and musically conventional mapping from frequency to filter coefficient
+        // than first-order approximation
+        dampingCoeff =e_expff(-omega);
     }
 
     /**
