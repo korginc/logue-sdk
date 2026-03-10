@@ -40,9 +40,9 @@ static const char* voice_alloc_strings[12] = {
 
 const __unit_header unit_header_t unit_header = {
     .header_size = sizeof(unit_header_t),
-    .target = UNIT_TARGET_PLATFORM | k_unit_module_delfx,
+    .target = UNIT_TARGET_PLATFORM | k_unit_module_synth,
     .api = UNIT_API_VERSION,
-    .dev_id = 0x7D0U,
+    .dev_id = 0x46654465U,   // 'FeDe' - https://github.com/fedemone/logue-sdk
     .unit_id = 0x02U,
     .version = 0x00020000U,
     .name = "FMPerc",
