@@ -67,7 +67,26 @@ and never used it. Dead code — harmless but misleading.
 
 ---
 
-## Phase 11: Unused Parameters (currently do nothing — future work)
+## Phase 11: Independent Resonator B Control [COMPLETED]
+
+Three parameters now cover double their original range, with the first half
+controlling both resonators symmetrically and the second half independently
+overriding Resonator B. All 28 preset values fall within the A zone, so
+backward compatibility is fully preserved.
+
+| Parameter | A zone (both) | B zone (resB only) | Coefficient |
+|---|---|---|---|
+| Dkay (10) | 0 – 2000 | 2001 – 4000 | `feedback_gain` = 0.85 + norm×0.149 |
+| Mterl (11) | −10 – 30 | 31 – 70 | `lowpass_coeff` = 0.01 + norm×0.99 |
+| Inharm (15) | 0 – 19999 | 20000 – 39998 | `ap_coeff` = norm |
+
+Workflow: Set a sound using A-zone values (both resonators matched), then push
+past the zone boundary to give Resonator B its own independent character —
+longer decay, brighter material, or more inharmonic dispersion than Resonator A.
+
+---
+
+## Phase 12: Unused Parameters (currently do nothing — future work)
 
 * **`Tone` (Index 12):** Unmapped. Could become a tilt-EQ shelf inside the
   feedback loop, or a master high-shelf for brightness control.
@@ -87,7 +106,7 @@ and never used it. Dead code — harmless but misleading.
 
 ---
 
-## Phase 12: Missing Features & Improvements (TODO)
+## Phase 13: Missing Features & Improvements (TODO)
 
 * **Dynamic Energy Squelch (CPU):** Track per-voice output RMS. When the
   waveguide decays below −80 dB, set `is_active = false` immediately rather
@@ -159,3 +178,9 @@ and never used it. Dead code — harmless but misleading.
 - [x] Fix `Reset()` not restoring `mix_ab = 0.5f`.
 - [x] Remove dead `read_pos` variable from `process_waveguide()`.
 - [x] Document mono-filter intentional L-copy pattern with TODO for true stereo.
+
+## Phase 11: Independent Resonator B Control [COMPLETED]
+- [x] Dkay: range extended 0–2000 → 0–4000; second half sets resB.feedback_gain independently.
+- [x] Mterl: range extended −10..30 → −10..70; second half sets resB.lowpass_coeff independently.
+- [x] Inharm: range extended 0–19999 → 0–39998; second half sets resB.ap_coeff independently.
+- [x] All 28 preset values verified to fall within A zone — backward compatible.

@@ -268,22 +268,42 @@ public:
             }
 
             case k_paramDkay: {
-                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
-                // 0.85 = instant dead thud. 0.999 = rings for 5 seconds.
-                float g = 0.85f + (norm * 0.149f);
-                for (int i = 0; i < NUM_VOICES; ++i) {
-                    state.voices[i].resA.feedback_gain = g;
-                    state.voices[i].resB.feedback_gain = g;
+                // [0..2000]: symmetric — set both resA and resB to the same decay.
+                // [2001..4000]: resB override — resA stays frozen at its last A-zone value.
+                // 0.85 = instant dead thud. 0.999 = rings for ~5 seconds.
+                if (value <= 2000) {
+                    float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
+                    float g = 0.85f + (norm * 0.149f);
+                    for (int i = 0; i < NUM_VOICES; ++i) {
+                        state.voices[i].resA.feedback_gain = g;
+                        state.voices[i].resB.feedback_gain = g;
+                    }
+                } else {
+                    float norm = fmaxf(0.0f, fminf(1.0f, (float)(value - 2000) / 2000.0f));
+                    float g = 0.85f + (norm * 0.149f);
+                    for (int i = 0; i < NUM_VOICES; ++i) {
+                        state.voices[i].resB.feedback_gain = g;
+                    }
                 }
                 break;
             }
 
             case k_paramMterl: {
-                float norm = (fmaxf(-10.0f, fminf(30.0f, (float)value)) + 10.0f) / 40.0f;
-                float coeff = 0.01f + (norm * 0.99f);
-                for (int i = 0; i < NUM_VOICES; ++i) {
-                    state.voices[i].resA.lowpass_coeff = coeff;
-                    state.voices[i].resB.lowpass_coeff = coeff;
+                // [−10..30]: symmetric — set both resA and resB to the same material.
+                // [31..70]: resB override — resA stays frozen at its last A-zone value.
+                if (value <= 30) {
+                    float norm = (fmaxf(-10.0f, fminf(30.0f, (float)value)) + 10.0f) / 40.0f;
+                    float coeff = 0.01f + (norm * 0.99f);
+                    for (int i = 0; i < NUM_VOICES; ++i) {
+                        state.voices[i].resA.lowpass_coeff = coeff;
+                        state.voices[i].resB.lowpass_coeff = coeff;
+                    }
+                } else {
+                    float norm = fmaxf(0.0f, fminf(1.0f, (float)(value - 30) / 40.0f));
+                    float coeff = 0.01f + (norm * 0.99f);
+                    for (int i = 0; i < NUM_VOICES; ++i) {
+                        state.voices[i].resB.lowpass_coeff = coeff;
+                    }
                 }
                 break;
             }
@@ -307,10 +327,19 @@ public:
             }
 
             case k_paramInharm: {
-                float norm = (float)value / 20000.0f;
-                for (int i = 0; i < NUM_VOICES; ++i) {
-                    state.voices[i].resA.ap_coeff = norm;
-                    state.voices[i].resB.ap_coeff = norm;
+                // [0..19999]: symmetric — set both resA and resB to the same dispersion.
+                // [20000..39998]: resB override — resA stays frozen at its last A-zone value.
+                if (value <= 19999) {
+                    float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 20000.0f));
+                    for (int i = 0; i < NUM_VOICES; ++i) {
+                        state.voices[i].resA.ap_coeff = norm;
+                        state.voices[i].resB.ap_coeff = norm;
+                    }
+                } else {
+                    float norm = fmaxf(0.0f, fminf(1.0f, (float)(value - 20000) / 20000.0f));
+                    for (int i = 0; i < NUM_VOICES; ++i) {
+                        state.voices[i].resB.ap_coeff = norm;
+                    }
                 }
                 break;
             }

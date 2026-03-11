@@ -36,14 +36,17 @@ const __unit_header unit_header_t unit_header = {
         // Page 3: Resonator A-I
         {0, 17, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Model"}},
         {0, 4, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Partls"}},
-        {0, 2000, 250, 250, k_unit_param_type_none, 0, 0, 0, {"Dkay"}}, // Removed fractional
-        {-10, 30, 0, 0, k_unit_param_type_none, 1, 1, 0, {"Mterl"}},
+        // [0..2000]=both resA+B; [2001..4000]=resB override only
+        {0, 4000, 250, 250, k_unit_param_type_none, 0, 0, 0, {"Dkay"}},
+        // [−10..30]=both resA+B; [31..70]=resB override only
+        {-10, 70, 0, 0, k_unit_param_type_none, 1, 1, 0, {"Mterl"}},
 
         // Page 4: Resonator A-II
         {-10, 30, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Tone"}},
         {2, 98, 0, 26, k_unit_param_type_none, 2, 0, 0, {"HitPos"}},
         {0, 20, 0, 10, k_unit_param_type_none, 1, 0, 0, {"Rel"}},
-        {1, 19999, 3000, 1, k_unit_param_type_none, 4, 1, 0, {"Inharm"}},
+        // [0..19999]=both resA+B; [20000..39998]=resB override only
+        {0, 39998, 3000, 1, k_unit_param_type_none, 4, 1, 0, {"Inharm"}},
 
         // Page 5: Resonator A-III
         {10, 19990, 5005, 10, k_unit_param_type_hertz, 0, 0, 0, {"LowCut"}},
