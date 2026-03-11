@@ -153,6 +153,16 @@ public:
         // Initialize PRNG with a fixed seed
         prng_init(0x9E3779B97F4A7C15ULL);
 
+        // Pre-calculate sin/cos tables
+        if (!tables_initialized) {
+            for (int i = 0; i < 360; i++) {
+                float angle = i * 2.0f * M_PI / 360.0f;
+                sin_table[i] = sinf(angle);
+                cos_table[i] = cosf(angle);
+            }
+            tables_initialized = true;
+        }
+
         // Clear filter states
         memset(filter_state_, 0, sizeof(filter_state_));
         // Clear parameter arrays
@@ -174,6 +184,12 @@ public:
 
         sample_rate_ = desc->samplerate;
 
+        if (delay_line_ != nullptr)
+        {
+            free(delay_line_);
+            delay_line_ = nullptr;
+        }
+
         // OPTIMIZED: Use posix_memalign for better alignment
         if (posix_memalign((void**)&delay_line_, CACHE_LINE_SIZE,
                            DELAY_MAX_SAMPLES * sizeof(interleaved_frame_t)) != 0) {
@@ -184,15 +200,6 @@ public:
 
         initialized_ = true;
         bypass_ = false;
-
-        if (!tables_initialized) {
-            for (int i = 0; i < 360; i++) {
-                float angle = i * 2.0f * M_PI / 360.0f;
-                sin_table[i] = sinf(angle);
-                cos_table[i] = cosf(angle);
-            }
-            tables_initialized = true;
-        }
 
         Reset();
         return k_unit_err_none;

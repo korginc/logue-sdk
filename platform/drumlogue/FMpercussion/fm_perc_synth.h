@@ -324,11 +324,9 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
 
     // Store per-voice velocity (0-1) for triggered voices
     float vel_scale = velocity / 127.0f;
-    for (int v = 0; v < 4; v++) {
-        if (gate_bits & (1 << v)) {
-            synth->voice_velocity = vsetq_lane_f32(vel_scale, synth->voice_velocity, v);
-        }
-    }
+    float32x4_t new_velocities = vdupq_n_f32(vel_scale);
+    // Use the 'gate' mask from line 310 to conditionally update lanes.
+    synth->voice_velocity = vbslq_f32(gate, new_velocities, synth->voice_velocity);
 
     // Build voice mask from gate results
     uint32_t mask = gate_bits;
