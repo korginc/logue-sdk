@@ -12,7 +12,9 @@ struct FastTables {
             float freq = 440.0f * fasterpowf(2.0f, ((float)i - 69.0f) / 12.0f);
 
             // Protect against divide-by-zero or sub-sonic frequencies
-            if (freq < 10.0f) freq = 10.0f;
+            // [UT2: DELAY BOUNDS FIX] - Prevent buffer overflow wrap-around
+            // 48000 / 12Hz = 4000 samples (safely inside our 4096 buffer)
+            if (freq < 12.0f) freq = 12.0f;
 
             note_to_delay_length[i] = srate / freq;
         }

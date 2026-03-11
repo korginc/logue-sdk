@@ -105,9 +105,34 @@ public:
     // Called when the user changes programs or the engine needs a hard flush.
     // This prevents loud "pops" from old delay line data playing unexpectedly.
     inline void Reset() {
-        memset(&state, 0, sizeof(SynthState));
+        // [UT1: MEMSET FIX] - Never memset C++ structs with default initializers!
+        // memset(&state, 0, sizeof(SynthState)); <-- DELETED
+
+        for (int i = 0; i < NUM_VOICES; ++i) {
+            state.voices[i].is_active = false;
+            state.voices[i].exciter.current_frame = 0;
+            state.voices[i].resA.write_ptr = 0;
+            state.voices[i].resB.write_ptr = 0;
+
+            // Explicitly clear delay buffers to prevent NaN garbage
+            for(int j = 0; j < DELAY_BUFFER_SIZE; ++j) {
+                state.voices[i].resA.buffer[j] = 0.0f;
+                state.voices[i].resB.buffer[j] = 0.0f;
+            }
+
+            // Re-apply safe defaults
+            state.voices[i].resA.lowpass_coeff = 1.0f;
+            state.voices[i].resB.lowpass_coeff = 1.0f;
+        }
+
         state.master_gain = 1.0f;
         state.master_drive = 1.0f;
+
+#ifdef ENABLE_PHASE_6_FILTERS
+        // [UT1: MEMSET FIX] - Force the filter back to safe Highpass mode
+        state.master_filter.mode = 2;
+        state.master_filter.set_coeffs(10.0f, 0.707f, 48000.0f);
+#endif
     }
 
     inline void Resume() {
@@ -441,6 +466,8 @@ public:
         // Legacy fallback calculation
         // 1. Convert MIDI Note to Frequency (Hz)
         float freq = 440.0f * fasterpowf(2.0f, ((float)note - 69.0f) / 12.0f);
+        // [UT2: DELAY BOUNDS FIX]
+        if (freq < 12.0f) freq = 12.0f;
         // 2. Convert Frequency to Delay Line Length (Samples)
         // Drumlogue sample rate is strictly 48000.0f
         float delay_len = 48000.0f / freq;
@@ -448,7 +475,6 @@ public:
         v.resA.delay_length = delay_len;
         v.resB.delay_length = delay_len;
 #endif
-
         // Reset phase
         v.exciter.current_frame = 0;
         v.resA.ap_x1 = 0.0f;
