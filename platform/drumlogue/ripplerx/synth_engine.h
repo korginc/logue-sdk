@@ -29,7 +29,7 @@ extern float ut_voice_out;
 
 // Utility for fast skewing
 inline float apply_skew(float normalized_val, float skew) {
-    If (skew == 1.0f) return normalized_val;
+    if (skew == 1.0f) return normalized_val;
     // Inverse exponent mapping for log-style potentiometer curves
     return fasterpowf(normalized_val, 1.0f / skew);
 }

@@ -4,13 +4,24 @@
 #include <vector>
 
 // 1. Mock the Drumlogue OS structures
-#define UNIT_API_VERSION 0
-#define UNIT_TARGET_PLATFORM 0
-#define k_unit_module_synth 0
-typedef struct { int samplerate; int output_channels; void* get_num_sample_banks; void* get_num_samples_for_bank; void* get_sample; } unit_runtime_desc_t;
-typedef void* unit_runtime_get_num_sample_banks_ptr;
-typedef void* unit_runtime_get_num_samples_for_bank_ptr;
-typedef void* unit_runtime_get_sample_ptr;
+#include "../common/runtime.h"
+
+// Mock implementations of runtime functions
+uint8_t mock_get_num_sample_banks() {
+    return 1;
+}
+
+uint8_t mock_get_num_samples_for_bank(uint8_t bank) {
+    (void)bank;
+    return 1;
+}
+
+const sample_wrapper_t* mock_get_sample(uint8_t bank, uint8_t index) {
+    (void)bank;
+    (void)index;
+    // Return a null pointer or a mock sample_wrapper_t if needed
+    return nullptr;
+}
 
 // 2. Define UT flags BEFORE including engine
 #define UNIT_TEST_DEBUG
@@ -34,7 +45,17 @@ int main() {
     }
 
     RipplerXWaveguide synth;
-    unit_runtime_desc_t desc = { 48000, 2, nullptr, nullptr, nullptr };
+    unit_runtime_desc_t desc = {
+        .target = k_unit_target_drumlogue_synth,
+        .api = UNIT_API_VERSION,
+        .samplerate = 48000,
+        .frames_per_buffer = 1,
+        .input_channels = 0,
+        .output_channels = 2,
+        .get_num_sample_banks = mock_get_num_sample_banks,
+        .get_num_samples_for_bank = mock_get_num_samples_for_bank,
+        .get_sample = mock_get_sample
+    };
     synth.Init(&desc);
 
     synth.setParameter(RipplerXWaveguide::k_paramDkay, 1500);
