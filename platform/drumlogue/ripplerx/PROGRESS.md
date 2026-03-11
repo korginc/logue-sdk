@@ -1,39 +1,114 @@
 # Project Status Tracker
-# Project Status Tracker
 
 ## Phase 1 to 9: [COMPLETED]
 - Core DSP, sample loading, structural physical modeling, and OS lifecycles finished.
 
-## Phase 10: Final Feature Polish & Restoration (TODO) [IN PROGRESS]
-- [x] Fix `current_frame` bug causing DC-offset freeze on empty samples.
-- [x] Remap Gain to `CoarsPtch` slot for 20x heavy clipping overdrive.
-- [x] Expose `Model` and `Partials` to the OLED via `getParameterStrValue`.
-- [ ] Parse `Model B` logic from the Model parameter (`value / 9`).
-- [ ] Connect `Tube Radius` to adjust the waveguide's lowpass filter or dispersion.
-- [ ] Restore the original 28 VST preset names and exact coefficients.
+---
 
+## Phase 10: Bug-Fix Session — Root Cause of Hardware Silence [COMPLETED]
 
-## Phase 11. Unused Parameters (Currently doing nothing)
+A full code audit was performed after confirming zero audio output on hardware.
+Four confirmed bugs were found and fixed.
 
-Looking at your `header.c` and `synth_engine.h`, the following parameters are parsed but not actually affecting the audio thread yet:
+### BUG 1 — CRITICAL (Primary cause of silence): Init() leaves all DSP params at zero
 
-* **`Tone` (Index 12):** Currently unmapped. *Improvement:* We can map this to a simple tilt-EQ inside the feedback loop, or a Master High-Shelf filter, allowing users to make the drum sound "darker" or "brighter" independently of the material.
-* **`Partls` (Index 9):** In the old VST, this counted sine waves. In a Waveguide, partials don't exist in the same way. *Improvement:* We can repurpose this as "Complexity" or "Coupling"—controlling how aggressively Resonator B interferes with Resonator A.
-* **`VlMllRes` & `VlMllStf` (Indices 6 & 7):** These are velocity modifiers. *Improvement:* A real drum sounds sharper when hit harder. We need to multiply the `MlltStif` and `MlltRes` by the incoming MIDI velocity so the drum responds dynamically to sequencer accents.
-* **`NzFltr` & `NzFltFrq` (Indices 21 & 22):** You have a master SVF, but the noise exciter needs its own dedicated filter so you can simulate the low "thump" of a kick drum beater or the high "hiss" of snare wires.
+**Root cause:** `Init()` calls `Reset()` which does `memset(&state, 0, ...)`.
+This zeroes every field of `SynthState`, including inside all four `VoiceState` structs:
+
+| Field zeroed | Effect |
+|---|---|
+| `mallet_stiffness = 0.0f` | Mallet exciter outputs exactly 0.0 — zero energy enters the waveguide |
+| `feedback_gain = 0.0f` | No signal circulates in the delay loop — resonator is dead |
+| `lowpass_coeff = 0.0f` | The 1-pole loss filter holds its state at 0 permanently — silences feedback |
+
+With all three zeroed, the mallet produces no impulse, and even if any energy leaked
+in, the feedback loop would be dead. The result is complete silence, every note.
+
+**Fix:** Call `LoadPreset(0)` at the end of `Init()`, after the sample-function
+pointers are stored. This runs `setParameter` for every slot, setting
+`mallet_stiffness = 0.5f`, `feedback_gain ≈ 0.87f`, `lowpass_coeff ≈ 0.5f`, etc.
+
+### BUG 2 — Chamberlin SVF tuning formula uses wrong divisor
+
+**Root cause:** `filter.h` `set_coeffs()` computes:
+```cpp
+f = 2.0f * fastercosfullf(0.25f - (safe_cutoff / srate));
+```
+`fastercosfullf` maps input [0, 1] to a full 360° cycle, so:
+`cos(2π(0.25 − x)) = sin(2πx)` — this gives `f = 2·sin(2π·cutoff/srate)`.
+
+The correct Chamberlin formula is `f = 2·sin(π·cutoff/srate)`, requiring:
+```cpp
+f = 2.0f * fastercosfullf(0.25f - (safe_cutoff / (2.0f * srate)));
+```
+With the old formula the filter operated at double the intended cutoff frequency.
+At 10 kHz the computed `f` was 1.93 instead of the correct 1.22. While the SVF
+remains stable in practice (the 0.45·srate clamp keeps `f < 2`), frequency
+scaling was wrong for the entire LowCut parameter range.
+
+**Fix:** Changed divisor from `srate` to `2.0f * srate` in `set_coeffs()`.
+
+### BUG 3 — Reset() does not restore mix_ab default
+
+**Root cause:** `Reset()` restores `master_gain = 1.0f` and `master_drive = 1.0f`
+after the memset, but not `mix_ab`. The `SynthState` struct declares `mix_ab = 0.5f`
+as its default, but memset overwrites that to 0. With `mix_ab = 0`, the voice
+output formula `outA*(1−mix_ab) + outB*mix_ab` becomes `outA*1 + outB*0`, so
+Resonator B is completely dropped from the mix regardless of the HitPos parameter.
+
+**Fix:** Added `state.mix_ab = 0.5f` restoration inside `Reset()`.
+
+### BUG 4 — Stale `read_pos` variable in process_waveguide()
+
+**Root cause:** `process_waveguide()` computed `read_pos` (same formula as `read_idx`)
+and never used it. Dead code — harmless but misleading.
+
+**Fix:** Removed the unused variable.
 
 ---
 
-## Phase 12. Missing Features & Improvements
+## Phase 11: Unused Parameters (currently do nothing — future work)
 
-To make this engine truly robust and CPU-efficient, we should add these features to our Phase 10 roadmap:
+* **`Tone` (Index 12):** Unmapped. Could become a tilt-EQ shelf inside the
+  feedback loop, or a master high-shelf for brightness control.
+* **`Partls` (Index 9):** Currently only gates ResB on/off (threshold = 2).
+  Better usage: repurpose as A/B coupling depth — how much ResB's output
+  feeds back into ResA's exciter input.
+* **`VlMllRes` & `VlMllStf` (Indices 6 & 7):** Unmapped velocity modifiers.
+  Real drums sound sharper at higher velocity. Map these to scale
+  `mallet_stiffness` and the noise envelope rate by `current_velocity`.
+* **`NzFltr` & `NzFltFrq` (Indices 21 & 22):** Master SVF exists but noise
+  has no dedicated filter. Add a second `FastSVF` inside `ExciterState`
+  that shapes the noise before it enters the delay line.
+* **`MlltRes` (Index 4):** Parsed but not forwarded to the exciter.
+  Map to an additional `mallet_lp` pole to vary the strike brightness.
+* **`TubRad` (Index 17):** Unmapped. Could scale `lowpass_coeff` (wider tube
+  = less high-frequency loss) or `ap_coeff` (tube geometry affects dispersion).
 
-* **Dynamic Energy Squelch (CPU Optimization):** To save extra CPU cycles dynamically during playback, we shouldn't just rely on the release envelope to turn voices off. We should implement an auto-sleep function. By calculating the RMS energy of the waveguide, we can instantly set `is_active = false` the millisecond the physical vibration drops below the audible noise floor (e.g., `-80dB`).
-* **Dedicated Noise SVF:** Instantiating a second `FastSVF` inside `ExciterState` that strictly filters the white noise *before* it hits the delay line.
-* **Model B Parsing:** Your UI passes a single 0-17 integer for "Model." We are currently only extracting Model A (`value % 9`). We need to extract Model B (`value / 9`) and apply its specific topology to `resB`.
-* **Pitch Bend:** The Korg SDK provides `unit_pitch_bend`. We need to wire this into the `NoteOn` delay length calculation so the drum pitch can be warped in real-time.
+---
 
------------------------------------------------------------
+## Phase 12: Missing Features & Improvements (TODO)
+
+* **Dynamic Energy Squelch (CPU):** Track per-voice output RMS. When the
+  waveguide decays below −80 dB, set `is_active = false` immediately rather
+  than waiting for the release envelope. Prevents zombie voices consuming CPU
+  for the full envelope release time after the signal is inaudible.
+* **Dedicated Noise SVF:** Instantiate a second `FastSVF` inside `ExciterState`
+  to filter white noise before it enters the delay line. Wire `NzFltr` and
+  `NzFltFrq` parameters to its coefficients.
+* **Model B Parsing:** The Model UI parameter passes 0–17. Currently only
+  Model A is extracted (`value % 9`). Extract Model B (`value / 9`) and apply
+  its topology to `resB` independently.
+* **Pitch Bend:** Wire `unit_pitch_bend()` into `NoteOn` delay-length math.
+  A ±semitone bend would require multiplying `delay_length` by `2^(bend/12)`.
+* **True Stereo Master Filter:** `master_filter` is a single mono `FastSVF`.
+  Add a second instance to `SynthState` for the right channel so future stereo
+  effects (chorus, panning) pass through a properly independent filter.
+* **Voice 0 skipped on first note:** `NoteOn` increments `next_voice_idx`
+  before assigning, so the first ever note goes to voice 1. Minor; reorder to
+  assign before incrementing or just note it as a cosmetic issue.
+
+---
 
 ## Phase 1: Core DSP Structures [COMPLETED]
 - [x] Define flat, cache-friendly C++ structures (`Waveguide`, `Exciter`, `Voice`).
@@ -71,9 +146,16 @@ To make this engine truly robust and CPU-efficient, we should add these features
 - [ ] Reverse-engineer waveguide parameters for legacy 28 presets.
 - [ ] Derive coefficients for new instruments: Timpani, Djambé, Taiko, Marching Snare, Tam Tam, Koto.
 
-## Phase 9: UI Polish & Missing SDK Hooks [IN PROGRESS]
-- [x] **Preset Management:** Implemented `LoadPreset(uint8_t idx)`, `getPresetIndex()`, and `getPresetName(uint8_t idx)` to properly display patch names on the Drumlogue OLED.
-- [x] **State Reporting:** Implemented `getParameterValue(uint8_t id)` to track UI state across menu pages.
-- [x] **Parameter Linkage:** Mapped all core `header.c` knobs inside `setParameter`. (Mallet and Models pending Phase 7/8).
-- [x] **Release Phase Logic:** Implemented `NoteOff`, `GateOff`, and `AllNoteOff` callbacks. Applied Master Envelope as a VCA in the audio loop to properly choke ringing delay lines.
-- [x] **The "Free Parameter" Decision:** Decide what to map to the open slot at Index 2 (Gain). (Options: Master Resonance, A/B Mix, or Limiter Drive). Resonance mapped instead of noiser filter Q and empty parameter is gain with limiter drive
+## Phase 9: UI Polish & Missing SDK Hooks [COMPLETED]
+- [x] Preset Management: `LoadPreset()`, `getPresetIndex()`, `getPresetName()`.
+- [x] State Reporting: `getParameterValue()` for OLED display sync.
+- [x] Parameter Linkage: all core `header.c` knobs wired in `setParameter`.
+- [x] Release Phase Logic: `NoteOff`, `GateOff`, `AllNoteOff`, master envelope VCA.
+- [x] Free Parameter Decision: Gain slot → overdrive drive multiplier (1×–21×).
+
+## Phase 10: Bug-Fix Session [COMPLETED]
+- [x] Fix Init/Reset silence: `LoadPreset(0)` called at end of `Init()`.
+- [x] Fix Chamberlin SVF formula: divisor corrected to `2*srate`.
+- [x] Fix `Reset()` not restoring `mix_ab = 0.5f`.
+- [x] Remove dead `read_pos` variable from `process_waveguide()`.
+- [x] Document mono-filter intentional L-copy pattern with TODO for true stereo.

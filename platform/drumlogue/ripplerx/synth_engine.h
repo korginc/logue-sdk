@@ -94,6 +94,11 @@ public:
         m_get_num_samples_for_bank_ptr = desc->get_num_samples_for_bank;
         m_get_sample = desc->get_sample;
 
+        // 4. Load default preset so DSP parameters are not all-zero after Reset().
+        // Without this, mallet_stiffness=0 (no exciter energy), feedback_gain=0
+        // (no resonance), and lowpass_coeff=0 (feedback path silenced) — all silence.
+        LoadPreset(0);
+
         return k_unit_err_none;
     }
 
@@ -106,8 +111,10 @@ public:
     // This prevents loud "pops" from old delay line data playing unexpectedly.
     inline void Reset() {
         memset(&state, 0, sizeof(SynthState));
+        // Restore non-zero SynthState defaults that memset zeroed.
         state.master_gain = 1.0f;
         state.master_drive = 1.0f;
+        state.mix_ab = 0.5f; // Equal A/B mix (memset zeroed this to 0)
     }
 
     inline void Resume() {
@@ -507,7 +514,6 @@ inline void NoteOff(uint8_t note) {
     // Processes a single sample through the Waveguide
     inline float process_waveguide(WaveguideState& wg, float exciter_input) {
         // 1. Calculate the read pointer position for exact pitch
-        float read_pos = (float)wg.write_ptr - wg.delay_length;
         float read_idx = (float)wg.write_ptr - wg.delay_length;
 
         // CRITICAL DSP FIX: Handle massive sub-bass wrap-arounds
@@ -655,6 +661,10 @@ inline void NoteOff(uint8_t note) {
             float mix_r = main_out[i * 2 + 1];
 
 #ifdef ENABLE_PHASE_6_FILTERS
+            // master_filter is a single mono SVF instance. Calling process() once
+            // advances its internal state by one sample. Since all voices sum to
+            // identical L/R signals (mono), process L only and copy to R.
+            // TODO: add a second FastSVF instance for true stereo filtering.
             mix_l = state.master_filter.process(mix_l);
             mix_r = mix_l;
 #endif
