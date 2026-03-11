@@ -426,15 +426,19 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
             voice_mask = synth->engine_mask[ENGINE_RESONANT];
         }
 
-        // Get current center frequency from resonant engine
-        // Apply bipolar modulation to frequency
+        // Get current center frequency from resonant engine.
+        // Scaling freq_mod proportionally to current_fc keeps LFO depth
+        // musically consistent regardless of where the morph parameter sits:
+        // depth=1 always sweeps ±50% of the morph-set center frequency.
+        float32x4_t current_fc = resonant_synth_get_center(&synth->resonant);
+
         // Convert LFO (0-1) to bipolar (-1 to 1) and scale by depth
         float32x4_t lfo_bipolar = vsubq_f32(vmulq_f32(mod_freq, vdupq_n_f32(2.0f)),
                                             vdupq_n_f32(1.0f));
-        float32x4_t freq_mod = vmulq_f32(lfo_bipolar, depth_freq);
-
-        // Scale modulation to reasonable range (max ±500Hz)
-        freq_mod = vmulq_f32(freq_mod, vdupq_n_f32(500.0f));
+        // freq_mod = bipolar * depth * (current_fc * 0.5)
+        // → depth=1 swings ±50% of fc; depth=0.1 swings ±5%
+        float32x4_t half_fc = vmulq_f32(current_fc, vdupq_n_f32(0.5f));
+        float32x4_t freq_mod = vmulq_f32(vmulq_f32(lfo_bipolar, depth_freq), half_fc);
 
         // Apply to resonant engine
         resonant_synth_apply_lfo_freq(&synth->resonant, voice_mask, freq_mod);
@@ -461,13 +465,20 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
             voice_mask = synth->engine_mask[ENGINE_RESONANT];
         }
 
-        // Apply bipolar modulation to resonance
+        // Get current resonance from resonant engine.
+        // Scaling by the symmetric available headroom makes depth=1 sweep
+        // the full range in both directions without hard-clipping:
+        // swing = min(current_res, 0.99 - current_res)  →  always balanced.
+        float32x4_t current_res = resonant_synth_get_resonance(&synth->resonant);
+
         float32x4_t lfo_bipolar = vsubq_f32(vmulq_f32(mod_res, vdupq_n_f32(2.0f)),
                                             vdupq_n_f32(1.0f));
-        float32x4_t res_mod = vmulq_f32(lfo_bipolar, depth_res);
-
-        // Scale modulation to reasonable range (max ±0.3)
-        res_mod = vmulq_f32(res_mod, vdupq_n_f32(0.3f));
+        // Symmetric available swing: whichever limit (0 or 0.99) is closer
+        float32x4_t headroom = vsubq_f32(vdupq_n_f32(0.99f), current_res);
+        float32x4_t swing    = vminq_f32(current_res, headroom);
+        // res_mod = bipolar * depth * swing → depth=1 sweeps symmetrically to the nearest limit
+        float32x4_t bipolar_depth = vmulq_f32(lfo_bipolar, depth_res);
+        float32x4_t res_mod = vmulq_f32(bipolar_depth, swing);
 
         // Apply to resonant engine
         resonant_synth_apply_lfo_resonance(&synth->resonant, voice_mask, res_mod);
