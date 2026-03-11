@@ -429,8 +429,6 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
         }
 
         // Get current center frequency from resonant engine
-        float32x4_t current_fc = resonant_synth_get_center(&synth->resonant);
-
         // Apply bipolar modulation to frequency
         // Convert LFO (0-1) to bipolar (-1 to 1) and scale by depth
         float32x4_t lfo_bipolar = vsubq_f32(vmulq_f32(mod_freq, vdupq_n_f32(2.0f)),
@@ -464,9 +462,6 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
             depth_res = synth->lfo.depth2;
             voice_mask = synth->engine_mask[ENGINE_RESONANT];
         }
-
-        // Get current resonance from resonant engine
-        float32x4_t current_res = resonant_synth_get_resonance(&synth->resonant);
 
         // Apply bipolar modulation to resonance
         float32x4_t lfo_bipolar = vsubq_f32(vmulq_f32(mod_res, vdupq_n_f32(2.0f)),
