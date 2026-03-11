@@ -308,7 +308,8 @@ public:
             float32x4_t row6 = vld1q_f32(hadamard[6]);
             float32x4_t row7 = vld1q_f32(hadamard[7]);
 
-            // Matrix multiplication (result = H * input)
+            // Compute output channels 0-3: load first half of each Hadamard row
+            // total_lo[k] = sum_i(H[i][k] * in[i]) = out[k]  for k=0..3
             float32x4_t res0 = vmulq_f32(row0, vec0);
             float32x4_t res1 = vmulq_f32(row1, vec1);
             float32x4_t res2 = vmulq_f32(row2, vec2);
@@ -318,29 +319,47 @@ public:
             float32x4_t res6 = vmulq_f32(row6, vec6);
             float32x4_t res7 = vmulq_f32(row7, vec7);
 
-            // Sum all results
             float32x4_t sum01 = vaddq_f32(res0, res1);
             float32x4_t sum23 = vaddq_f32(res2, res3);
             float32x4_t sum45 = vaddq_f32(res4, res5);
             float32x4_t sum67 = vaddq_f32(res6, res7);
-
             float32x4_t sum0123 = vaddq_f32(sum01, sum23);
             float32x4_t sum4567 = vaddq_f32(sum45, sum67);
-            float32x4_t total = vaddq_f32(sum0123, sum4567);
+            float32x4_t total_lo = vaddq_f32(sum0123, sum4567);
 
-            // Apply decay and store
+            // Compute output channels 4-7: load second half (elements [4..7]) of each row
+            // total_hi[k] = sum_i(H[i][k+4] * in[i]) = out[k+4]  for k=0..3
+            float32x4_t row0h = vld1q_f32(&hadamard[0][4]);
+            float32x4_t row1h = vld1q_f32(&hadamard[1][4]);
+            float32x4_t row2h = vld1q_f32(&hadamard[2][4]);
+            float32x4_t row3h = vld1q_f32(&hadamard[3][4]);
+            float32x4_t row4h = vld1q_f32(&hadamard[4][4]);
+            float32x4_t row5h = vld1q_f32(&hadamard[5][4]);
+            float32x4_t row6h = vld1q_f32(&hadamard[6][4]);
+            float32x4_t row7h = vld1q_f32(&hadamard[7][4]);
+
+            float32x4_t total_hi = vaddq_f32(
+                vaddq_f32(vaddq_f32(vmulq_f32(row0h, vec0), vmulq_f32(row1h, vec1)),
+                          vaddq_f32(vmulq_f32(row2h, vec2), vmulq_f32(row3h, vec3))),
+                vaddq_f32(vaddq_f32(vmulq_f32(row4h, vec4), vmulq_f32(row5h, vec5)),
+                          vaddq_f32(vmulq_f32(row6h, vec6), vmulq_f32(row7h, vec7))));
+
             float32x4_t decay4 = vdupq_n_f32(decay);
-            total = vmulq_f32(total, decay4);
+            total_lo = vmulq_f32(total_lo, decay4);
+            total_hi = vmulq_f32(total_hi, decay4);
 
-            // Add input to first channel (for this sample)
+            // Store channels 0-3 (inject input into channel 0 only)
             float inSample = vgetq_lane_f32(inMono, s);
-            float* mixedPtr = &mixed[0][s];
-            *mixedPtr = vgetq_lane_f32(total, 0) + inSample * (1.0f - decay);
+            mixed[0][s] = vgetq_lane_f32(total_lo, 0) + inSample * (1.0f - decay);
+            mixed[1][s] = vgetq_lane_f32(total_lo, 1);
+            mixed[2][s] = vgetq_lane_f32(total_lo, 2);
+            mixed[3][s] = vgetq_lane_f32(total_lo, 3);
 
-            // Store other channels
-            for (int ch = 1; ch < FDN_CHANNELS; ch++) {
-                mixed[ch][s] = vgetq_lane_f32(total, ch % 4);
-            }
+            // Store channels 4-7 using correctly computed second-half transform
+            mixed[4][s] = vgetq_lane_f32(total_hi, 0);
+            mixed[5][s] = vgetq_lane_f32(total_hi, 1);
+            mixed[6][s] = vgetq_lane_f32(total_hi, 2);
+            mixed[7][s] = vgetq_lane_f32(total_hi, 3);
         }
 
         // =================================================================

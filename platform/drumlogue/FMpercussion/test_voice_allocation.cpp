@@ -145,7 +145,7 @@ void test_probability_range() {
     printf("\n=== Test 4: Probability Range (0-100) ===\n");
     
     // Simulate 1000 random notes with different probability settings
-    int test_probs[4][5] = {
+    int test_probs[5][4] = {
         {0, 0, 0, 0},      // All 0%
         {100, 100, 100, 100}, // All 100%
         {30, 50, 70, 90},  // Mixed
