@@ -2,17 +2,9 @@
 #include <iomanip>
 #include <cmath>
 #include <vector>
-
-// 1. Mock the Drumlogue OS structures so your header compiles on PC
-#define UNIT_API_VERSION 0
-#define UNIT_TARGET_PLATFORM 0
-#define k_unit_module_synth 0
-typedef struct { int samplerate; int output_channels; void* get_num_sample_banks; void* get_num_samples_for_bank; void* get_sample; } unit_runtime_desc_t;
-typedef void* unit_runtime_get_num_sample_banks_ptr;
-typedef void* unit_runtime_get_num_samples_for_bank_ptr;
-typedef void* unit_runtime_get_sample_ptr;
-
-// 2. Include your actual synth engine!
+// to test this:
+// /mnt/d/Fede/drumlogue/arm-unknown-linux-gnueabihf/bin/arm-unknown-linux-gnueabihf-g++ -static -std=c++17 -O3 -I.. -I. -I../../common -I../common -DRUNTIME_COMMON_H_ test_dsp.cpp -o run_test && qemu-arm ./run_test | tee run_test_result.log
+// Include your actual synth engine!
 #include "synth_engine.h"
 
 int main() {
@@ -27,7 +19,9 @@ int main() {
 
     // 4. Instantiate the Synth
     RipplerXWaveguide synth;
-    unit_runtime_desc_t desc = { 48000, 2, nullptr, nullptr, nullptr };
+    unit_runtime_desc_t desc = {0}; // zero-initialize
+    desc.samplerate = 48000;
+    desc.output_channels = 2;
     synth.Init(&desc);
 
     // 5. Set up a basic preset (Init Patch)

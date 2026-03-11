@@ -6,9 +6,9 @@
 
 #include <arm_neon.h>
 #include <float_math.h>
+#include "../common/runtime.h" // Drumlogue OS functions
 #include "unit.h"
 #include "dsp_core.h"
-#include "../common/runtime.h" // Drumlogue OS functions
 
 
 /**
