@@ -22,7 +22,7 @@ print_header() {
 }
 
 # Compile and run benchmark
-g++ -O3 -mfpu=neon -mfloat-abi=softfp -o "$BUILD_DIR/bench_delay" benchmark_delay.cpp PercussionSpatializer.h
+g++ -O3 -mfpu=neon -mfloat-abi=softfp -o "$BUILD_DIR/bench_delay" benchmark_delay.cpp
 
 if [ $? -eq 0 ]; then
     print_header "Running Delay Benchmarks"
