@@ -437,8 +437,8 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
                                             vdupq_n_f32(1.0f));
         // freq_mod = bipolar * depth * (current_fc * 0.5)
         // → depth=1 swings ±50% of fc; depth=0.1 swings ±5%
-        float32x4_t freq_mod = vmulq_f32(vmulq_f32(lfo_bipolar, depth_freq),
-                                          vmulq_f32(current_fc, vdupq_n_f32(0.5f)));
+        float32x4_t half_fc = vmulq_f32(current_fc, vdupq_n_f32(0.5f));
+        float32x4_t freq_mod = vmulq_f32(vmulq_f32(lfo_bipolar, depth_freq), half_fc);
 
         // Apply to resonant engine
         resonant_synth_apply_lfo_freq(&synth->resonant, voice_mask, freq_mod);
@@ -476,9 +476,9 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
         // Symmetric available swing: whichever limit (0 or 0.99) is closer
         float32x4_t headroom = vsubq_f32(vdupq_n_f32(0.99f), current_res);
         float32x4_t swing    = vminq_f32(current_res, headroom);
-        // res_mod = bipolar * depth * swing * 2 → depth=1 reaches both limits
-        float32x4_t res_mod = vmulq_f32(vmulq_f32(lfo_bipolar, depth_res),
-                                         vmulq_f32(swing, vdupq_n_f32(2.0f)));
+        // res_mod = bipolar * depth * swing → depth=1 sweeps symmetrically to the nearest limit
+        float32x4_t bipolar_depth = vmulq_f32(lfo_bipolar, depth_res);
+        float32x4_t res_mod = vmulq_f32(bipolar_depth, swing);
 
         // Apply to resonant engine
         resonant_synth_apply_lfo_resonance(&synth->resonant, voice_mask, res_mod);
