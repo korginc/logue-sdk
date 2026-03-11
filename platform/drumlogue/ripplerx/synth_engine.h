@@ -10,6 +10,14 @@
 #include "unit.h"
 #include "dsp_core.h"
 
+// ==============================================================================
+// UNIT TEST DEBUG HOOKS
+// ==============================================================================
+#ifdef UNIT_TEST_DEBUG
+extern float ut_exciter_out;
+extern float ut_delay_read;
+extern float ut_voice_out;
+#endif
 
 /**
  * The Architectural Wins Here:
@@ -21,6 +29,7 @@
 
 // Utility for fast skewing
 inline float apply_skew(float normalized_val, float skew) {
+    If (skew == 1.0f) return normalized_val;
     // Inverse exponent mapping for log-style potentiometer curves
     return fasterpowf(normalized_val, 1.0f / skew);
 }
@@ -93,23 +102,12 @@ public:
         // If we were using dynamic memory, we would release it here.
     }
 
+    // Called when the user changes programs or the engine needs a hard flush.
+    // This prevents loud "pops" from old delay line data playing unexpectedly.
     inline void Reset() {
-        // Called when the user changes programs or the engine needs a hard flush.
-        // This prevents loud "pops" from old delay line data playing unexpectedly.
-        for (int i = 0; i < NUM_VOICES; ++i) {
-            state.voices[i].is_active = false;
-            state.voices[i].is_releasing = false;
-            state.voices[i].resA.write_ptr = 0;
-            state.voices[i].resB.write_ptr = 0;
-            state.voices[i].resA.z1 = 0.0f;
-            state.voices[i].resB.z1 = 0.0f;
-
-            // Fast-zero the delay buffers
-            for(int j = 0; j < DELAY_BUFFER_SIZE; ++j) {
-                state.voices[i].resA.buffer[j] = 0.0f;
-                state.voices[i].resB.buffer[j] = 0.0f;
-            }
-        }
+        memset(&state, 0, sizeof(SynthState));
+        state.master_gain = 1.0f;
+        state.master_drive = 1.0f;
     }
 
     inline void Resume() {
@@ -234,7 +232,13 @@ public:
             case k_paramSample:
                 m_sample_number = value;
                 break;
-
+            case k_paramMlltStif: {
+                float norm = fmaxf(0.01f, fminf(1.0f, (float)value / 5000.0f));
+                for (int i = 0; i < NUM_VOICES; ++i) {
+                    state.voices[i].exciter.mallet_stiffness = norm;
+                }
+                break;
+            }
             case k_paramModel: {
                 m_model_a = value % 9;
 #ifdef ENABLE_PHASE_7_MODELS
@@ -303,16 +307,6 @@ public:
                 }
                 break;
             }
-
-            case k_paramMlltStif: {
-                // UI Range is 100 to 5000. Map to 0.01 to 1.0
-                float norm = fmaxf(0.01f, fminf(1.0f, (float)value / 5000.0f));
-                for (int i = 0; i < NUM_VOICES; ++i) {
-                    state.voices[i].exciter.mallet_stiffness = norm;
-                }
-                break;
-            }
-
             case k_paramLowCut: {
 #ifdef ENABLE_PHASE_6_FILTERS
                 m_master_cutoff = (float)value;
@@ -321,7 +315,11 @@ public:
 #endif
                 break;
             }
-
+            case k_paramGain: {
+                float norm = fmaxf(0.0f, (float)value / 100.0f);
+                state.master_drive = 1.0f + (norm * 20.0f);
+                break;
+            }
             case k_paramNzMix: {
                 // Updated for the new 0-100 header.c range
 #ifdef ENABLE_PHASE_5_EXCITERS
@@ -345,14 +343,6 @@ public:
 #endif
                 break;
             }
-
-           case k_paramGain: {
-                // Updated for the new 0-100 header.c range
-                float norm = fmaxf(0.0f, (float)value / 100.0f);
-                state.master_drive = 1.0f + (norm * 20.0f); // 1.0x to 21.0x Drive
-                break;
-            }
-
             case k_paramResnc: {
 #ifdef ENABLE_PHASE_6_FILTERS
                 // UI passes 707 to 4000. Divide by 1000 to get a Q factor of 0.707 to 4.0
@@ -461,8 +451,10 @@ public:
 
         // Reset phase
         v.exciter.current_frame = 0;
-        v.resA.write_ptr = 0;
-        v.resB.write_ptr = 0;
+        v.resA.ap_x1 = 0.0f;
+        v.resA.ap_y1 = 0.0f;
+        v.resB.ap_x1 = 0.0f;
+        v.resB.ap_y1 = 0.0f;
 
 #ifdef ENABLE_PHASE_5_EXCITERS
         // Trigger the envelopes when a note hits
@@ -506,14 +498,7 @@ inline void NoteOff(uint8_t note) {
 #endif
         }
     }
-    /**
-    The Architectural Wins Here:
-    Zero Division or Trigonometry: Notice that inside the massive for (size_t i = 0; i < frames; ++i) loop, there is not a single /, cos(), pow(), or log(). It is purely +, -, and *. This is why this engine will never trigger a Watchdog Timeout or denormal CPU spike on the hardware.
 
-    Bitwise Masking (& DELAY_MASK): Instead of using expensive if (ptr >= 4096) ptr = 0; branches, or slow modulo (% 4096) operators, we use a bitwise AND. It takes exactly 1 clock cycle on the ARM CPU to wrap the delay line safely.
-
-    Contiguous Memory Arrays: wg.buffer is just an array of float. The CPU will pre-fetch these arrays into the L1 cache, meaning memory access is effectively zero-cost.
-    */
 
     // ==============================================================================
     // 5. The Core Physics (Executed per-voice, per-sample)
@@ -564,7 +549,7 @@ inline void NoteOff(uint8_t note) {
         wg.buffer[wg.write_ptr] = new_val;
         wg.write_ptr = (wg.write_ptr + 1) & DELAY_MASK;
 
-        return new_val;
+        return delay_out;
     }
 
     // Processes the Exciter (Generates the initial "strike" or sample burst)
@@ -650,6 +635,17 @@ inline void NoteOff(uint8_t note) {
                 // 4. Sum into the master interleaved stereo buffer (L and R)
                 main_out[i * 2]     += voice_out * state.master_gain; // Left
                 main_out[i * 2 + 1] += voice_out * state.master_gain; // Right
+
+// ==============================================================================
+// [UT1/UT2/UT3] TRACK ACTIVE SIGNAL FOR UNIT TEST
+// ==============================================================================
+#ifdef UNIT_TEST_DEBUG
+                if (voice_idx == state.next_voice_idx) {
+                    ut_exciter_out = exciter_sig;
+                    ut_delay_read = outA;
+                    ut_voice_out = voice_out;
+                }
+#endif
             }
         }
 
