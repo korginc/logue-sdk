@@ -2,6 +2,7 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 
 #include <arm_neon.h>
@@ -193,38 +194,41 @@ public:
         // 0:Prgram | 1:Note | 2:Bank | 3:Sample | 4:MlltRes | 5:MlltStif | 6:VlMllR | 7:VlMllS
         // 8:Prtls  | 9:Model| 10:Dkay| 11:Mterl | 12:Tone   | 13:HitPos  | 14:Rel   | 15:Inharm
         // 16:LCut  | 17:TRad| 18:Gain| 19:NzMix | 20:NzRes  | 21:NzFltr  | 22:NzFrq | 23:Resnc
-        // TODO it would be better to have an enum for both row and columns using the existing comments
-        // using a dummy value as last value for marker, to have better maintenability (no magic numbers)
-        // TODO: are those parameters enough for physical modelling?
+        // Column order matches the ParamIndex enum above.
+        // Current parameters cover all core physical-modelling dimensions (exciter, resonator,
+        // noise, master FX). Phase 12/13 in PROGRESS.md track future additions (TubRad, Tone, etc.).
+        // Columns 15 (Inharm) and 16 (LowCut) store 1/10th of the effective value.
+        // setParameter multiplies them back by 10 so the encoder travels 10× fewer steps.
         static const int32_t presets[28][24] = {
-            { 0, 60, 0, 1, 500, 2500, 0, 0, 3, 0,  250,  10, 0, 26, 10,  3000,  10, 5,   0,    0, 300, 0, 12000, 707}, // 0: Init
-            { 1, 60, 0, 1, 800, 4000, 0, 0, 3, 6,  150,  -5, 0, 50,  5,  1500,  10, 5,  20,    0, 300, 0, 12000, 707}, // 1: Marimba
-            { 2, 36, 0, 1, 100,  500, 0, 0, 3, 5,  800, -10, 0, 50, 15,   100,  10, 5, 150,    0, 300, 0,  1000, 707}, // 2: 808 Sub
-            { 3, 38, 0, 1, 400, 3000, 0, 0, 3, 5,  150,  15, 0, 20,  8,  5000, 150, 5,  50,  800, 500, 2,  8000, 707}, // 3: Ac Snare
-            { 4, 72, 0, 1, 900, 5000, 0, 0, 3, 8, 1500,  30, 0, 10, 20, 19000, 200, 5,   0,    0, 300, 0, 12000, 707}, // 4: Tubular Bell
-            { 5, 40, 0, 1, 300,  500, 0, 0, 3, 3,  600,  -5, 0, 30, 15,   200,  10, 5,  30,    0, 300, 0,  5000, 707}, // 5: Timpani
-            { 6, 48, 0, 1, 600, 2000, 0, 0, 3, 5,  300,   5, 0, 10, 12,   500,  50, 5,  50,   50, 200, 0,  6000, 707}, // 6: Djambe
-            { 7, 36, 0, 1, 200,  800, 0, 0, 3, 5,  700, -10, 0, 50, 18,   100,  10, 5, 200,    0, 300, 0,  4000, 707}, // 7: Taiko
-            { 8, 65, 0, 1, 700, 4500, 0, 0, 3, 5,   80,  20, 0, 50,  3,  2000, 250, 5,  80,  950, 150, 2, 10000, 707}, // 8: March Snare
-            { 9, 35, 0, 1, 100, 1500, 0, 0, 3, 4, 1800,  25, 0, 25, 20, 18000,  10, 5,  60,  100, 800, 0,  8000, 707}, // 9: Tam Tam
-            {10, 72, 0, 1, 600, 4500, 0, 0, 3, 0,  800,  10, 0, 80, 12,     1,  10, 5,   0,    0, 300, 0, 10000, 707}, // 10: Koto
-            {11, 72, 0, 1, 500, 3000, 0, 0, 3, 1, 1200,  15, 0, 50, 18,    50,  10, 5,   0,    0, 300, 0, 10000, 707}, // 11: Vibraphone
-            {12, 76, 0, 1, 800, 3500, 0, 0, 3, 2,   50,  -8, 0, 50,  2,   800,  10, 5,   0,    0, 300, 0,  5000, 707}, // 12: Woodblock
-            {13, 45, 0, 1, 400, 2000, 0, 0, 3, 5,  400,  -2, 0, 50, 10,   300,  10, 5,  40,   20, 300, 0,  8000, 707}, // 13: Acoustic Tom
-            {14, 60, 0, 1, 800, 5000, 0, 0, 3, 4, 1400,  30, 0, 10, 18, 19500, 400, 5,  20,  600, 700, 2, 14000, 707}, // 14: Cymbal
-            {15, 36, 0, 1, 200, 2000, 0, 0, 3, 4, 1900,  20, 0, 50, 20, 19000,  10, 5,  40,  100, 800, 0,  6000, 707}, // 15: Gong
-            {16, 72, 0, 1, 700, 4000, 0, 0, 3, 1,  200,  25, 0, 80,  5,    10,  10, 5,  10,    0, 300, 0, 10000, 707}, // 16: Kalimba
-            {17, 60, 0, 1, 600, 3500, 0, 0, 3, 4,  600,  20, 0, 30, 12,  8000, 100, 5,  20,    0, 300, 0, 10000, 707}, // 17: Steel Pan
-            {18, 79, 0, 1, 900, 4800, 0, 0, 3, 2,   30,   5, 0, 50,  1,   200,  10, 5,   0,    0, 300, 0,  8000, 707}, // 18: Claves
-            {19, 67, 0, 1, 800, 4500, 0, 0, 3, 4,  150,  25, 0, 20,  4, 17000, 200, 5,  30,    0, 300, 0, 10000, 707}, // 19: Cowbell
-            {20, 84, 0, 1, 900, 5000, 0, 0, 3, 1, 1000,  30, 0, 10, 15, 19900, 800, 5,   0,    0, 300, 0, 15000, 707}, // 20: Triangle
-            {21, 36, 0, 1, 300, 1500, 0, 0, 3, 5,  200,  -5, 0, 50,  6,   200,  10, 5, 100,   50, 200, 0,  3000, 707}, // 21: Kick Drum
-            {22, 60, 0, 1, 500, 3000, 0, 0, 3, 5,   50,  10, 0, 50,  3,  5000, 400, 5,  50, 1000, 100, 2, 10000, 707}, // 22: Clap
-            {23, 72, 0, 1, 100, 4000, 0, 0, 3, 5,   20,  15, 0, 50,  2,  1000, 800, 5,  20, 1000, 300, 2, 12000, 707}, // 23: Shaker
-            {24, 72, 0, 1, 100,  500, 0, 0, 3, 7,  900,  -5, 0, 10, 12,    10,  10, 5,   0,  400, 800, 0,  6000, 707}, // 24: Flute
-            {25, 60, 0, 1, 100,  500, 0, 0, 3, 8,  900,  -5, 0, 10, 12,    10,  10, 5,   0,  400, 800, 0,  6000, 707}, // 25: Clarinet
-            {26, 36, 0, 1, 600, 2500, 0, 0, 3, 0,  600,  -8, 0, 20, 10,     5,  10, 5,  60,    0, 300, 0,  5000, 707}, // 26: Pluck Bass
-            {27, 76, 0, 1, 700, 3500, 0, 0, 3, 4, 1600,  25, 0, 80, 18, 12000, 100, 5,   0,    0, 300, 0, 12000, 707}  // 27: Glass Bowl
+            //  Prg  Nte  Bnk  Smp  MlRs MlSt VlRs VlSt Ptls Mdl  Dky  Mtr  Ton  Hit  Rel  InHm LwCt TbRd Gain NzMx NzRs NzFl NzFq Rsnc
+            { 0, 60, 0, 1, 500, 2500, 0, 0, 3, 0,  250,  10, 0, 26, 10,   300,   1, 5,   0,    0, 300, 0, 12000, 707}, // 0: Init
+            { 1, 60, 0, 1, 800, 4000, 0, 0, 3, 6,  150,  -5, 0, 50,  5,   150,   1, 5,  20,    0, 300, 0, 12000, 707}, // 1: Marimba
+            { 2, 36, 0, 1, 100,  500, 0, 0, 3, 5,  800, -10, 0, 50, 15,    10,   1, 5, 150,    0, 300, 0,  1000, 707}, // 2: 808 Sub
+            { 3, 38, 0, 1, 400, 3000, 0, 0, 3, 5,  150,  15, 0, 20,  8,   500,  15, 5,  50,  800, 500, 2,  8000, 707}, // 3: Ac Snare
+            { 4, 72, 0, 1, 900, 5000, 0, 0, 3, 8, 1500,  30, 0, 10, 20,  1900,  20, 5,   0,    0, 300, 0, 12000, 707}, // 4: Tubular Bell
+            { 5, 40, 0, 1, 300,  500, 0, 0, 3, 3,  600,  -5, 0, 30, 15,    20,   1, 5,  30,    0, 300, 0,  5000, 707}, // 5: Timpani
+            { 6, 48, 0, 1, 600, 2000, 0, 0, 3, 5,  300,   5, 0, 10, 12,    50,   5, 5,  50,   50, 200, 0,  6000, 707}, // 6: Djambe
+            { 7, 36, 0, 1, 200,  800, 0, 0, 3, 5,  700, -10, 0, 50, 18,    10,   1, 5, 200,    0, 300, 0,  4000, 707}, // 7: Taiko
+            { 8, 65, 0, 1, 700, 4500, 0, 0, 3, 5,   80,  20, 0, 50,  3,   200,  25, 5,  80,  950, 150, 2, 10000, 707}, // 8: March Snare
+            { 9, 35, 0, 1, 100, 1500, 0, 0, 3, 4, 1800,  25, 0, 25, 20,  1800,   1, 5,  60,  100, 800, 0,  8000, 707}, // 9: Tam Tam
+            {10, 72, 0, 1, 600, 4500, 0, 0, 3, 0,  800,  10, 0, 80, 12,     0,   1, 5,   0,    0, 300, 0, 10000, 707}, // 10: Koto
+            {11, 72, 0, 1, 500, 3000, 0, 0, 3, 1, 1200,  15, 0, 50, 18,     5,   1, 5,   0,    0, 300, 0, 10000, 707}, // 11: Vibraphone
+            {12, 76, 0, 1, 800, 3500, 0, 0, 3, 2,   50,  -8, 0, 50,  2,    80,   1, 5,   0,    0, 300, 0,  5000, 707}, // 12: Woodblock
+            {13, 45, 0, 1, 400, 2000, 0, 0, 3, 5,  400,  -2, 0, 50, 10,    30,   1, 5,  40,   20, 300, 0,  8000, 707}, // 13: Acoustic Tom
+            {14, 60, 0, 1, 800, 5000, 0, 0, 3, 4, 1400,  30, 0, 10, 18,  1950,  40, 5,  20,  600, 700, 2, 14000, 707}, // 14: Cymbal
+            {15, 36, 0, 1, 200, 2000, 0, 0, 3, 4, 1900,  20, 0, 50, 20,  1900,   1, 5,  40,  100, 800, 0,  6000, 707}, // 15: Gong
+            {16, 72, 0, 1, 700, 4000, 0, 0, 3, 1,  200,  25, 0, 80,  5,     1,   1, 5,  10,    0, 300, 0, 10000, 707}, // 16: Kalimba
+            {17, 60, 0, 1, 600, 3500, 0, 0, 3, 4,  600,  20, 0, 30, 12,   800,  10, 5,  20,    0, 300, 0, 10000, 707}, // 17: Steel Pan
+            {18, 79, 0, 1, 900, 4800, 0, 0, 3, 2,   30,   5, 0, 50,  1,    20,   1, 5,   0,    0, 300, 0,  8000, 707}, // 18: Claves
+            {19, 67, 0, 1, 800, 4500, 0, 0, 3, 4,  150,  25, 0, 20,  4,  1700,  20, 5,  30,    0, 300, 0, 10000, 707}, // 19: Cowbell
+            {20, 84, 0, 1, 900, 5000, 0, 0, 3, 1, 1000,  30, 0, 10, 15,  1990,  80, 5,   0,    0, 300, 0, 15000, 707}, // 20: Triangle
+            {21, 36, 0, 1, 300, 1500, 0, 0, 3, 5,  200,  -5, 0, 50,  6,    20,   1, 5, 100,   50, 200, 0,  3000, 707}, // 21: Kick Drum
+            {22, 60, 0, 1, 500, 3000, 0, 0, 3, 5,   50,  10, 0, 50,  3,   500,  40, 5,  50, 1000, 100, 2, 10000, 707}, // 22: Clap
+            {23, 72, 0, 1, 100, 4000, 0, 0, 3, 5,   20,  15, 0, 50,  2,   100,  80, 5,  20, 1000, 300, 2, 12000, 707}, // 23: Shaker
+            {24, 72, 0, 1, 100,  500, 0, 0, 3, 7,  900,  -5, 0, 10, 12,     1,   1, 5,   0,  400, 800, 0,  6000, 707}, // 24: Flute
+            {25, 60, 0, 1, 100,  500, 0, 0, 3, 8,  900,  -5, 0, 10, 12,     1,   1, 5,   0,  400, 800, 0,  6000, 707}, // 25: Clarinet
+            {26, 36, 0, 1, 600, 2500, 0, 0, 3, 0,  600,  -8, 0, 20, 10,     0,   1, 5,  60,    0, 300, 0,  5000, 707}, // 26: Pluck Bass
+            {27, 76, 0, 1, 700, 3500, 0, 0, 3, 4, 1600,  25, 0, 80, 18,  1200,  10, 5,   0,    0, 300, 0, 12000, 707}  // 27: Glass Bowl
         };
 
         if (idx >= 28) return;
@@ -311,12 +315,18 @@ public:
 
             // resonator A/B parameters
             case k_paramPartls: {
-                if (value < 5)
-                    // TODO is this the real values or it should be mapped into values we read in partial_names?
-                    // TODO should we have partials for resonator A and other for resonator B?
+                if (value < 5) {
+                    // Store the index (0-4), not the display label count (4/8/16/32/64).
+                    // Digital waveguides don't have discrete partial counts; the label is
+                    // cosmetic. The only DSP effect is the ResB gate in processBlock:
+                    //   index < 2  → ResB disabled (single resonator, lower CPU)
+                    //   index >= 2 → ResB enabled  (dual resonator, richer harmonic content)
+                    // Partials is intentionally global (not per-resonator) because it
+                    // controls CPU budget, not per-resonator timbre.
                     m_active_partials = value;
-                else
-                    m_is_resonator_a = value == 5 ;
+                } else {
+                    m_is_resonator_a = (value == 5);
+                }
                 break;
             }
 
@@ -390,8 +400,9 @@ public:
             }
 
             case k_paramInharm: {
-                if (value <= 19999) {
-                    float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 20000.0f));
+                if (value <= 1999) {
+                    // Stored 0–1999; effective range 0–19990 (×10). Divide by 2000 to normalise.
+                    float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
                     for (int i = 0; i < NUM_VOICES; ++i) {
                         if (m_is_resonator_a)
                             state.voices[i].resA.ap_coeff = norm;
@@ -403,7 +414,8 @@ public:
             }
             case k_paramLowCut: {
 #ifdef ENABLE_PHASE_6_FILTERS
-                m_master_cutoff = (float)value;
+                // Stored 1–1999; effective range 10–19990 Hz (×10 scaling).
+                m_master_cutoff = (float)value * 10.0f;
                 // Divide by 1000: UI stores 707–4000, filter needs 0.707–4.0
                 float res_val = fmaxf(0.707f, (float)m_params[k_paramResnc] / 1000.0f);
                 state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
@@ -488,6 +500,17 @@ public:
                 return m_is_resonator_a ? partial_names_a[value] : partial_names_b[value];
         } else if (index == k_paramNzFltr) {
             if (value >= 0 && value < 3) return nz_filter_names[value];
+        } else if (index == k_paramLowCut) {
+            // value is 1–1999; effective Hz is value×10 (10–19990 Hz).
+            static char lc_buf[10];
+            int32_t hz = value * 10;
+            if (hz >= 1000) {
+                // Show as kHz with one decimal place: 1000→"1.0kHz", 15000→"15.0kHz"
+                snprintf(lc_buf, sizeof(lc_buf), "%d.%dkHz", hz / 1000, (hz % 1000) / 100);
+            } else {
+                snprintf(lc_buf, sizeof(lc_buf), "%dHz", hz);
+            }
+            return lc_buf;
         }
 
         // Unconditional failsafe to prevent OS screen crashes
@@ -748,9 +771,9 @@ inline void NoteOff(uint8_t note) {
                 float outA = process_waveguide(voice.resA, exciter_sig);
                 float outB = 0.0f;
 
-                // 3. Active Partial Counting: Only process ResB if complexity is high enough
+                // Enable ResB only for "16+ partials" (index >= 2).
+                // Values 0 (4 ptls) and 1 (8 ptls) run single-resonator to save CPU.
                 if (m_active_partials >= 2) {
-                    // TODO value of m_active_partials actually used?
                     outB = process_waveguide(voice.resB, exciter_sig);
                 }
 
@@ -812,8 +835,6 @@ inline void NoteOff(uint8_t note) {
             // Equation: x / (1.0 + abs(x)) curves the peaks mathematically
             float clipped_l = mix_l / (1.0f + fabsf(mix_l));
             float clipped_r = mix_r / (1.0f + fabsf(mix_r));
-
-            // TODO - new distortion
 
             // 5. The Hardware Safety Net (Brickwall Limiter)
             main_out[i * 2]     = fmaxf(-0.99f, fminf(0.99f, clipped_l));

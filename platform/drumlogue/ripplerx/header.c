@@ -47,11 +47,14 @@ const __unit_header unit_header_t unit_header = {
         {-10, 30, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Tone"}},
         {2, 98, 0, 26, k_unit_param_type_none, 2, 0, 0, {"HitPos"}},
         {0, 20, 0, 10, k_unit_param_type_none, 1, 0, 0, {"Rel"}},
-        // [0..19999] - TODO to make change faster remove a digit and multiply by 10 in the code
-        {0, 19999, 3000, 1, k_unit_param_type_none, 0, 0, 0, {"Inharm"}},
+        // [0..1999] — stored value is multiplied by 10 in code (effective range 0–19990).
+        // Using 10× coarser steps makes the encoder 10× faster to dial.
+        {0, 1999, 300, 1, k_unit_param_type_none, 0, 0, 0, {"Inharm"}},
 
-        // Page 5: Resonator III - TODO to make change faster remove a digit and multiply by 10 in the code
-        {10, 19990, 5005, 10, k_unit_param_type_hertz, 0, 0, 0, {"LowCut"}},
+        // Page 5: Resonator III
+        // [1..1999] — stored value is multiplied by 10 in code (effective 10–19990 Hz).
+        // type_strings so getParameterStrValue can display the real Hz/kHz value.
+        {1, 1999, 500, 1, k_unit_param_type_strings, 0, 0, 0, {"LowCut"}},
         {0, 20, 0, 5, k_unit_param_type_none, 1, 0, 0, {"TubRad"}},
         // Range 0-100, no fraction
         {0, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Gain"}},  // <--- Overdrive
@@ -60,7 +63,8 @@ const __unit_header unit_header_t unit_header = {
         // Page 6: Noise II
         {0, 1000, 300, 0, k_unit_param_type_percent, 1, 1, 0, {"NzRes"}},
         {0, 2, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"NzFltr"}},
-        // TODO to make change faster remove a digit and multiply by 10 in the code
+        // Range change deferred: requires dedicated Noise SVF (Phase 13).
+        // When implemented: change to 2-2000 (type_strings), multiply by 10 in setParameter.
         {20, 20000, 12000, 20, k_unit_param_type_hertz, 0, 0, 0, {"NzFltFrq"}},
         {707, 4000, 0, 707, k_unit_param_type_none, 0, 0, 0, {"Resnc"}}
     }
