@@ -790,14 +790,12 @@ inline void NoteOff(uint8_t note) {
                 // Apply note velocity
                 voice_out *= voice.current_velocity;
 
+// [UT4: GATE-OFF CHOKE FIX] - Remove the ADSR VCA so physical tail rings naturally!
 #ifdef ENABLE_PHASE_5_EXCITERS
-                // --- THE MASTER VCA ---
-                // Process the envelope and apply it to the audio
-                float master_amp = voice.exciter.master_env.process();
-                voice_out *= master_amp;
+                // WE DELETED THIS CHOKE: voice_out *= voice.exciter.master_env.process();
 
-                // CPU Optimization: If release phase is completely finished, turn voice off
-                if (voice.is_releasing && voice.exciter.master_env.state == ENV_IDLE) {
+                // NEW: Energy Squelch. Mark voice inactive ONLY when it has actually faded to silence.
+                if (voice.is_releasing && fabsf(voice_out) < 0.0001f) {
                     voice.is_active = false;
                 }
 #endif
@@ -850,8 +848,13 @@ inline void NoteOff(uint8_t note) {
     }
 
     inline void GateOn(uint8_t velocity) {
-        // Route internal Drumlogue sequencer to the UI Note parameter
-        NoteOn(m_ui_note, velocity);
+        // [UT4: ZERO VELOCITY FIX]
+        if (velocity == 0) {
+            GateOff();
+        } else {
+            // Route internal Drumlogue sequencer to the UI Note parameter
+            NoteOn(m_ui_note, velocity);
+        }
     }
 
 private:
