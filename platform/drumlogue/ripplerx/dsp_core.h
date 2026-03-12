@@ -65,7 +65,9 @@ struct ExciterState {
     float current_noise_env = 0.0f;
 
     float mallet_lp = 0.0f;
+    float mallet_lp2 = 0.0f;       // Second LP pole state (MlltRes)
     float mallet_stiffness = 0.5f;
+    float mallet_res_coeff = 0.5f; // Second LP pole coefficient (MlltRes)
 };
 
 /**

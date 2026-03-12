@@ -25,8 +25,9 @@ struct FastSVF {
         float safe_cutoff = fminf(cutoff_hz, srate * 0.45f);
 
         // Chamberlin tuning formula: f = 2 * sin(pi * cutoff / srate)
-        // We use our float_math.h fast approximation for speed
-        f = 2.0f * fastercosfullf(0.25f - (safe_cutoff / srate)); // cos(0.25 - x) == sin(x*pi) approx
+        // fastercosfullf maps [0,1] -> full cycle, so cos(0.25 - x) = sin(2*pi*x).
+        // To get sin(pi * cutoff/srate) we must pass cutoff/(2*srate) as x.
+        f = 2.0f * fastercosfullf(0.25f - (safe_cutoff / (2.0f * srate)));
 
         // Resonance (Q). Lower value = higher resonance peak.
         // Clamp resonance between 1.0 (no peak) and 10.0 (self-oscillation boundary)

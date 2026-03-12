@@ -2,6 +2,7 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 
 #include <arm_neon.h>
@@ -52,8 +53,8 @@ public:
         k_paramMlltStif,    // 5
         k_paramVlMllRes,    // 6
         k_paramVlMllStf,    // 7
-        k_paramModel,       // 8
-        k_paramPartls,      // 9
+        k_paramPartls,      // 8
+        k_paramModel,       // 9
         k_paramDkay,        // 10
         k_paramMterl,       // 11
         k_paramTone,        // 12
@@ -94,6 +95,11 @@ public:
         m_get_num_samples_for_bank_ptr = desc->get_num_samples_for_bank;
         m_get_sample = desc->get_sample;
 
+        // 4. Load default preset so DSP parameters are not all-zero after Reset().
+        // Without this, mallet_stiffness=0 (no exciter energy), feedback_gain=0
+        // (no resonance), and lowpass_coeff=0 (feedback path silenced) — all silence.
+        LoadPreset(0);
+
         return k_unit_err_none;
     }
 
@@ -107,7 +113,6 @@ public:
     inline void Reset() {
         // [UT1: MEMSET FIX] - Never memset C++ structs with default initializers!
         // memset(&state, 0, sizeof(SynthState)); <-- DELETED
-
         for (int i = 0; i < NUM_VOICES; ++i) {
             state.voices[i].is_active = false;
             state.voices[i].exciter.current_frame = 0;
@@ -127,6 +132,11 @@ public:
 
         state.master_gain = 1.0f;
         state.master_drive = 1.0f;
+        state.mix_ab = 0.5f; // Equal A/B mix
+
+        // Always return to ResA edit context so LoadPreset (called next in Init)
+        // applies preset data symmetrically to both resonators.
+        m_is_resonator_a = true;
 
 #ifdef ENABLE_PHASE_6_FILTERS
         // [UT1: MEMSET FIX] - Force the filter back to safe Highpass mode
@@ -160,10 +170,15 @@ public:
     int32_t m_params[25] = {0};
     uint8_t m_preset_idx = 0;
 
-    // Called by unit_get_param_value so the OS knows what to draw on the screen
+    // Called by unit_get_param_value so the OS knows what to draw on the screen.
+    // For Model, return the value for the currently-selected resonator so the OLED
+    // stays in sync with what the user is editing via the A/B Partls selector.
     inline int32_t getParameterValue(uint8_t index) const {
         // CRITICAL UI FIX: Prevent OS out-of-bounds reads
         if (index >= 24) return 0;
+        if (index == k_paramModel) {
+            return m_is_resonator_a ? (int32_t)m_model_a : (int32_t)m_model_b;
+        }
         return m_params[index];
     }
 
@@ -175,59 +190,86 @@ public:
     inline void LoadPreset(uint8_t idx) {
         m_preset_idx = idx;
 
-        // Columns Map:
+        // Columns Map: NOTE keep the justification so it's easier to read!!
         // 0:Prgram | 1:Note | 2:Bank | 3:Sample | 4:MlltRes | 5:MlltStif | 6:VlMllR | 7:VlMllS
-        // 8:Model  | 9:Prtls| 10:Dkay| 11:Mterl | 12:Tone   | 13:HitPos  | 14:Rel   | 15:Inharm
+        // 8:Prtls  | 9:Model| 10:Dkay| 11:Mterl | 12:Tone   | 13:HitPos  | 14:Rel   | 15:Inharm
         // 16:LCut  | 17:TRad| 18:Gain| 19:NzMix | 20:NzRes  | 21:NzFltr  | 22:NzFrq | 23:Resnc
+        // Column order matches the ParamIndex enum above.
+        // Current parameters cover all core physical-modelling dimensions (exciter, resonator,
+        // noise, master FX). Phase 12/13 in PROGRESS.md track future additions (TubRad, Tone, etc.).
+        // Columns 15 (Inharm) and 16 (LowCut) store 1/10th of the effective value.
+        // setParameter multiplies them back by 10 so the encoder travels 10× fewer steps.
         static const int32_t presets[28][24] = {
-            {0, 60, 0, 1, 500, 2500, 0, 0, 0, 3, 250, 10, 0, 26, 10, 3000, 10, 5, 0, 0, 300, 0, 12000, 707}, // 0: Init
-            {1, 60, 0, 1, 800, 4000, 0, 0, 6, 3, 150, -5, 0, 50, 5, 1500, 10, 5, 20, 0, 300, 0, 12000, 707}, // 1: Marimba
-            {2, 36, 0, 1, 100, 500, 0, 0, 5, 3, 800, -10, 0, 50, 15, 100, 10, 5, 150, 0, 300, 0, 1000, 707}, // 2: 808 Sub
-            {3, 38, 0, 1, 400, 3000, 0, 0, 5, 3, 150, 15, 0, 20, 8, 5000, 150, 5, 50, 800, 500, 2, 8000, 707}, // 3: Ac Snare
-            {4, 72, 0, 1, 900, 5000, 0, 0, 8, 3, 1500, 30, 0, 10, 20, 19000, 200, 5, 0, 0, 300, 0, 12000, 707}, // 4: Tubular Bell
-            {5, 40, 0, 1, 300, 500, 0, 0, 3, 3, 600, -5, 0, 30, 15, 200, 10, 5, 30, 0, 300, 0, 5000, 707}, // 5: Timpani
-            {6, 48, 0, 1, 600, 2000, 0, 0, 5, 3, 300, 5, 0, 10, 12, 500, 50, 5, 50, 50, 200, 0, 6000, 707}, // 6: Djambe
-            {7, 36, 0, 1, 200, 800, 0, 0, 5, 3, 700, -10, 0, 50, 18, 100, 10, 5, 200, 0, 300, 0, 4000, 707}, // 7: Taiko
-            {8, 65, 0, 1, 700, 4500, 0, 0, 5, 3, 80, 20, 0, 50, 3, 2000, 250, 5, 80, 950, 150, 2, 10000, 707}, // 8: March Snare
-            {9, 35, 0, 1, 100, 1500, 0, 0, 4, 3, 1800, 25, 0, 25, 20, 18000, 10, 5, 60, 100, 800, 0, 8000, 707}, // 9: Tam Tam
-            {10, 72, 0, 1, 600, 4500, 0, 0, 0, 3, 800, 10, 0, 80, 12, 1, 10, 5, 0, 0, 300, 0, 10000, 707}, // 10: Koto
-            {11, 72, 0, 1, 500, 3000, 0, 0, 1, 3, 1200, 15, 0, 50, 18, 50, 10, 5, 0, 0, 300, 0, 10000, 707}, // 11: Vibraphone
-            {12, 76, 0, 1, 800, 3500, 0, 0, 2, 3, 50, -8, 0, 50, 2, 800, 10, 5, 0, 0, 300, 0, 5000, 707}, // 12: Woodblock
-            {13, 45, 0, 1, 400, 2000, 0, 0, 5, 3, 400, -2, 0, 50, 10, 300, 10, 5, 40, 20, 300, 0, 8000, 707}, // 13: Acoustic Tom
-            {14, 60, 0, 1, 800, 5000, 0, 0, 4, 3, 1400, 30, 0, 10, 18, 19500, 400, 5, 20, 600, 700, 2, 14000, 707}, // 14: Cymbal
-            {15, 36, 0, 1, 200, 2000, 0, 0, 4, 3, 1900, 20, 0, 50, 20, 19000, 10, 5, 40, 100, 800, 0, 6000, 707}, // 15: Gong
-            {16, 72, 0, 1, 700, 4000, 0, 0, 1, 3, 200, 25, 0, 80, 5, 10, 10, 5, 10, 0, 300, 0, 10000, 707}, // 16: Kalimba
-            {17, 60, 0, 1, 600, 3500, 0, 0, 4, 3, 600, 20, 0, 30, 12, 8000, 100, 5, 20, 0, 300, 0, 10000, 707}, // 17: Steel Pan
-            {18, 79, 0, 1, 900, 4800, 0, 0, 2, 3, 30, 5, 0, 50, 1, 200, 10, 5, 0, 0, 300, 0, 8000, 707}, // 18: Claves
-            {19, 67, 0, 1, 800, 4500, 0, 0, 4, 3, 150, 25, 0, 20, 4, 17000, 200, 5, 30, 0, 300, 0, 10000, 707}, // 19: Cowbell
-            {20, 84, 0, 1, 900, 5000, 0, 0, 1, 3, 1000, 30, 0, 10, 15, 19900, 800, 5, 0, 0, 300, 0, 15000, 707}, // 20: Triangle
-            {21, 36, 0, 1, 300, 1500, 0, 0, 5, 3, 200, -5, 0, 50, 6, 200, 10, 5, 100, 50, 200, 0, 3000, 707}, // 21: Kick Drum
-            {22, 60, 0, 1, 500, 3000, 0, 0, 5, 3, 50, 10, 0, 50, 3, 5000, 400, 5, 50, 1000, 100, 2, 10000, 707}, // 22: Clap
-            {23, 72, 0, 1, 100, 4000, 0, 0, 5, 3, 20, 15, 0, 50, 2, 1000, 800, 5, 20, 1000, 300, 2, 12000, 707}, // 23: Shaker
-            {24, 72, 0, 1, 100, 500, 0, 0, 7, 3, 900, -5, 0, 10, 12, 10, 10, 5, 0, 400, 800, 0, 6000, 707}, // 24: Flute
-            {25, 60, 0, 1, 100, 500, 0, 0, 8, 3, 900, -5, 0, 10, 12, 10, 10, 5, 0, 400, 800, 0, 6000, 707}, // 25: Clarinet
-            {26, 36, 0, 1, 600, 2500, 0, 0, 0, 3, 600, -8, 0, 20, 10, 5, 10, 5, 60, 0, 300, 0, 5000, 707}, // 26: Pluck Bass
-            {27, 76, 0, 1, 700, 3500, 0, 0, 4, 3, 1600, 25, 0, 80, 18, 12000, 100, 5, 0, 0, 300, 0, 12000, 707} // 27: Glass Bowl
+            //  Prg  Nte  Bnk  Smp  MlRs MlSt VlRs VlSt Ptls Mdl  Dky  Mtr  Ton  Hit  Rel  InHm LwCt TbRd Gain NzMx NzRs NzFl NzFq Rsnc
+            { 0, 60, 0, 1, 500, 2500, 0, 0, 3, 0,  250,  10, 0, 26, 10,   300,   1, 5,   0,    0, 300, 0, 12000, 707}, // 0: Init
+            { 1, 60, 0, 1, 800, 4000, 0, 0, 3, 6,  150,  -5, 0, 50,  5,   150,   1, 5,  20,    0, 300, 0, 12000, 707}, // 1: Marimba
+            { 2, 36, 0, 1, 100,  500, 0, 0, 3, 5,  800, -10, 0, 50, 15,    10,   1, 5, 150,    0, 300, 0,  1000, 707}, // 2: 808 Sub
+            { 3, 38, 0, 1, 400, 3000, 0, 0, 3, 5,  150,  15, 0, 20,  8,   500,  15, 5,  50,  800, 500, 2,  8000, 707}, // 3: Ac Snare
+            { 4, 72, 0, 1, 900, 5000, 0, 0, 3, 8, 1500,  30, 0, 10, 20,  1900,  20, 5,   0,    0, 300, 0, 12000, 707}, // 4: Tubular Bell
+            { 5, 40, 0, 1, 300,  500, 0, 0, 3, 3,  600,  -5, 0, 30, 15,    20,   1, 5,  30,    0, 300, 0,  5000, 707}, // 5: Timpani
+            { 6, 48, 0, 1, 600, 2000, 0, 0, 3, 5,  300,   5, 0, 10, 12,    50,   5, 5,  50,   50, 200, 0,  6000, 707}, // 6: Djambe
+            { 7, 36, 0, 1, 200,  800, 0, 0, 3, 5,  700, -10, 0, 50, 18,    10,   1, 5, 200,    0, 300, 0,  4000, 707}, // 7: Taiko
+            { 8, 65, 0, 1, 700, 4500, 0, 0, 3, 5,   80,  20, 0, 50,  3,   200,  25, 5,  80,  950, 150, 2, 10000, 707}, // 8: March Snare
+            { 9, 35, 0, 1, 100, 1500, 0, 0, 3, 4, 1800,  25, 0, 25, 20,  1800,   1, 5,  60,  100, 800, 0,  8000, 707}, // 9: Tam Tam
+            {10, 72, 0, 1, 600, 4500, 0, 0, 3, 0,  800,  10, 0, 80, 12,     0,   1, 5,   0,    0, 300, 0, 10000, 707}, // 10: Koto
+            {11, 72, 0, 1, 500, 3000, 0, 0, 3, 1, 1200,  15, 0, 50, 18,     5,   1, 5,   0,    0, 300, 0, 10000, 707}, // 11: Vibraphone
+            {12, 76, 0, 1, 800, 3500, 0, 0, 3, 2,   50,  -8, 0, 50,  2,    80,   1, 5,   0,    0, 300, 0,  5000, 707}, // 12: Woodblock
+            {13, 45, 0, 1, 400, 2000, 0, 0, 3, 5,  400,  -2, 0, 50, 10,    30,   1, 5,  40,   20, 300, 0,  8000, 707}, // 13: Acoustic Tom
+            {14, 60, 0, 1, 800, 5000, 0, 0, 3, 4, 1400,  30, 0, 10, 18,  1950,  40, 5,  20,  600, 700, 2, 14000, 707}, // 14: Cymbal
+            {15, 36, 0, 1, 200, 2000, 0, 0, 3, 4, 1900,  20, 0, 50, 20,  1900,   1, 5,  40,  100, 800, 0,  6000, 707}, // 15: Gong
+            {16, 72, 0, 1, 700, 4000, 0, 0, 3, 1,  200,  25, 0, 80,  5,     1,   1, 5,  10,    0, 300, 0, 10000, 707}, // 16: Kalimba
+            {17, 60, 0, 1, 600, 3500, 0, 0, 3, 4,  600,  20, 0, 30, 12,   800,  10, 5,  20,    0, 300, 0, 10000, 707}, // 17: Steel Pan
+            {18, 79, 0, 1, 900, 4800, 0, 0, 3, 2,   30,   5, 0, 50,  1,    20,   1, 5,   0,    0, 300, 0,  8000, 707}, // 18: Claves
+            {19, 67, 0, 1, 800, 4500, 0, 0, 3, 4,  150,  25, 0, 20,  4,  1700,  20, 5,  30,    0, 300, 0, 10000, 707}, // 19: Cowbell
+            {20, 84, 0, 1, 900, 5000, 0, 0, 3, 1, 1000,  30, 0, 10, 15,  1990,  80, 5,   0,    0, 300, 0, 15000, 707}, // 20: Triangle
+            {21, 36, 0, 1, 300, 1500, 0, 0, 3, 5,  200,  -5, 0, 50,  6,    20,   1, 5, 100,   50, 200, 0,  3000, 707}, // 21: Kick Drum
+            {22, 60, 0, 1, 500, 3000, 0, 0, 3, 5,   50,  10, 0, 50,  3,   500,  40, 5,  50, 1000, 100, 2, 10000, 707}, // 22: Clap
+            {23, 72, 0, 1, 100, 4000, 0, 0, 3, 5,   20,  15, 0, 50,  2,   100,  80, 5,  20, 1000, 300, 2, 12000, 707}, // 23: Shaker
+            {24, 72, 0, 1, 100,  500, 0, 0, 3, 7,  900,  -5, 0, 10, 12,     1,   1, 5,   0,  400, 800, 0,  6000, 707}, // 24: Flute
+            {25, 60, 0, 1, 100,  500, 0, 0, 3, 8,  900,  -5, 0, 10, 12,     1,   1, 5,   0,  400, 800, 0,  6000, 707}, // 25: Clarinet
+            {26, 36, 0, 1, 600, 2500, 0, 0, 3, 0,  600,  -8, 0, 20, 10,     0,   1, 5,  60,    0, 300, 0,  5000, 707}, // 26: Pluck Bass
+            {27, 76, 0, 1, 700, 3500, 0, 0, 3, 4, 1600,  25, 0, 80, 18,  1200,  10, 5,   0,    0, 300, 0, 12000, 707}  // 27: Glass Bowl
         };
 
         if (idx >= 28) return;
+
+        // Preset loading always targets ResA so that Dkay/Mterl/Inharm set resA first.
+        // Save and restore the user's resonator-edit context around the load.
+        bool saved_is_a = m_is_resonator_a;
+        m_is_resonator_a = true;
 
         // Apply parameters, SKIPPING INDEX 0 to prevent infinite recursion stack overflow!
         for (uint8_t param_id = 0; param_id < 24; ++param_id) {
             if (param_id == k_paramProgram) continue;
             setParameter(param_id, presets[idx][param_id]);
         }
+
+        // Mirror the three per-resonator physical params to ResB so both resonators
+        // start identically on every preset load (user can diverge them afterwards).
+        m_is_resonator_a = false;
+        setParameter(k_paramModel,  presets[idx][k_paramModel]);
+        setParameter(k_paramDkay,   presets[idx][k_paramDkay]);
+        setParameter(k_paramMterl,  presets[idx][k_paramMterl]);
+        setParameter(k_paramInharm, presets[idx][k_paramInharm]);
+        // NOTE: If ResA and ResB have the exact same decay and material, how do we get that chaotic,
+        // realistic 2D drum sound? It happens in NoteOn function, driven entirely by the Model parameter,
+        // where resonator B is given an irrational tuning ratio of 0.68 to simulate the metallic,
+        // clashing overtones of the drum skin (the edge mode),.
+        // Resonator A acts as the fundamental "thump" of the drum (the center mode).
+
+        // Restore user's resonator-edit context.
+        m_is_resonator_a = saved_is_a;
     }
 
     static inline const char * getPresetName(uint8_t idx) {
         static const char* const preset_names[] = {
-            "Init",         "Marimba",      "808 Sub",      "Ac Snare",
-            "TubularBell",  "Timpani",      "Djambe",       "Taiko",
-            "March Snare",  "Tam Tam",      "Koto",         "Vibraphone",
-            "Woodblock",    "AcousticTom",  "Cymbal",       "Gong",
-            "Kalimba",      "Steel Pan",    "Claves",       "Cowbell",
-            "Triangle",     "Kick Drum",    "Clap",         "Shaker",
-            "Flute",        "Clarinet",     "Pluck Bass",   "Glass Bowl"
+            "Init",    "Marmba", "808Sub", "AcSnre",
+            "TblrBel", "Timpni", "Djambe", "Taiko",
+            "MrchSnr", "TamTam", "Koto",   "Vibrph",
+            "Wodblk",  "Ac Tom", "Cymbal", "Gong",
+            "Kalimba", "StelPan","Claves", "Cowbel",
+            "Trngle",  "Kick",    "Clap",  "Shaker",
+            "Flute",   "Clrint", "PlkBss", "GlsBwl"
         };
         if (idx < 28) return preset_names[idx];
         return "Unknown";
@@ -264,15 +306,51 @@ public:
                 }
                 break;
             }
+
+            case k_paramMlltRes: {
+                // UI range 0–1000 (displays with 1 decimal via frac_type=1).
+                // Maps to a second 1-pole LP coefficient stacked after mallet_stiffness LP.
+                // Low value → darker/softer mallet body. High value → brighter/sharper.
+                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
+                float coeff = 0.01f + (norm * 0.99f);
+                for (int i = 0; i < NUM_VOICES; ++i) {
+                    state.voices[i].exciter.mallet_res_coeff = coeff;
+                }
+                break;
+            }
+
+            // resonator A/B parameters
+            case k_paramPartls: {
+                if (value < 5) {
+                    // Map the UI index (0-4) to the actual partial count (4/8/16/32/64).
+                    // m_active_partials stores the count so comparisons are self-documenting.
+                    // DSP effect: counts < 16 disable ResB (single resonator, lower CPU);
+                    // counts >= 16 enable ResB (dual resonator, richer harmonic content).
+                    // Partials is intentionally global (not per-resonator) because it
+                    // controls CPU budget, not per-resonator timbre.
+                    static const uint8_t partial_counts[] = {4, 8, 16, 32, 64};
+                    m_active_partials = partial_counts[value];
+                } else {
+                    m_is_resonator_a = (value == 5);
+                }
+                break;
+            }
+
             case k_paramModel: {
-                m_model_a = value % 9;
+                if (m_is_resonator_a)
+                    m_model_a = value;
+                else
+                    m_model_b = value;
 #ifdef ENABLE_PHASE_7_MODELS
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     if (m_model_a == 7 || m_model_a == 8) {
                         state.voices[i].resA.phase_mult = -1.0f;
-                        state.voices[i].resB.phase_mult = -1.0f;
                     } else {
                         state.voices[i].resA.phase_mult = 1.0f;
+                    }
+                    if (m_model_b == 7 || m_model_b == 8) {
+                        state.voices[i].resB.phase_mult = -1.0f;
+                    } else {
                         state.voices[i].resB.phase_mult = 1.0f;
                     }
                 }
@@ -280,32 +358,37 @@ public:
                 break;
             }
 
-            case k_paramPartls: {
-                m_active_partials = value;
-                break;
-            }
-
             case k_paramDkay: {
-                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
-                // 0.85 = instant dead thud. 0.999 = rings for 5 seconds.
-                float g = 0.85f + (norm * 0.149f);
-                for (int i = 0; i < NUM_VOICES; ++i) {
-                    state.voices[i].resA.feedback_gain = g;
-                    state.voices[i].resB.feedback_gain = g;
+                // 0.85 = instant dead thud. 0.999 = rings for ~5 seconds.
+                if (value <= 2000) {
+                    float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
+                    float g = 0.85f + (norm * 0.149f);
+                    for (int i = 0; i < NUM_VOICES; ++i) {
+                        if (m_is_resonator_a)
+                            state.voices[i].resA.feedback_gain = g;
+                        else
+                            state.voices[i].resB.feedback_gain = g;
+                    }
                 }
                 break;
             }
 
             case k_paramMterl: {
-                float norm = (fmaxf(-10.0f, fminf(30.0f, (float)value)) + 10.0f) / 40.0f;
-                float coeff = 0.01f + (norm * 0.99f);
-                for (int i = 0; i < NUM_VOICES; ++i) {
-                    state.voices[i].resA.lowpass_coeff = coeff;
-                    state.voices[i].resB.lowpass_coeff = coeff;
+                if (value <= 30) {
+                    float norm = (fmaxf(-10.0f, fminf(30.0f, (float)value)) + 10.0f) / 40.0f;
+                    float coeff = 0.01f + (norm * 0.99f);
+                    for (int i = 0; i < NUM_VOICES; ++i) {
+                        if (m_is_resonator_a)
+                            state.voices[i].resA.lowpass_coeff = coeff;
+                        else
+                            state.voices[i].resB.lowpass_coeff = coeff;
+                    }
                 }
                 break;
             }
-
+            // HitPos parameter acts as the physical mixer between these two modes.
+            // If HitPos is 0, you only hear ResA (hitting dead center).
+            // If HitPos is 100, you hear mostly ResB (hitting the rim).
             case k_paramHitPos: {
                 state.mix_ab = fmaxf(0.0f, fminf(1.0f, (float)value / 100.0f));
                 break;
@@ -325,16 +408,23 @@ public:
             }
 
             case k_paramInharm: {
-                float norm = (float)value / 20000.0f;
-                for (int i = 0; i < NUM_VOICES; ++i) {
-                    state.voices[i].resA.ap_coeff = norm;
-                    state.voices[i].resB.ap_coeff = norm;
+                if (value <= 1999) {
+                    // Stored 0–1999; effective range 0–19990 (×10). Divide by 2000 to normalise.
+                    float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
+                    for (int i = 0; i < NUM_VOICES; ++i) {
+                        if (m_is_resonator_a)
+                            state.voices[i].resA.ap_coeff = norm;
+                        else
+                            state.voices[i].resB.ap_coeff = norm;
+                    }
                 }
                 break;
             }
             case k_paramLowCut: {
 #ifdef ENABLE_PHASE_6_FILTERS
-                m_master_cutoff = (float)value;
+                // Stored 1–1999; effective range 10–19990 Hz (×10 scaling).
+                m_master_cutoff = (float)value * 10.0f;
+                // Divide by 1000: UI stores 707–4000, filter needs 0.707–4.0
                 float res_val = fmaxf(0.707f, (float)m_params[k_paramResnc] / 1000.0f);
                 state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
 #endif
@@ -345,6 +435,8 @@ public:
                 state.master_drive = 1.0f + (norm * 20.0f);
                 break;
             }
+
+            // resonator parameters
             case k_paramNzMix: {
                 // Updated for the new 0-100 header.c range
 #ifdef ENABLE_PHASE_5_EXCITERS
@@ -382,26 +474,51 @@ public:
         }
     }
 
+    // Show A or B label depending on the resonator selected via the Partls selector.
+    // IMPORTANT: always index into arrays with the function's `value` argument —
+    // never with stored state — so scrolling through values shows the correct label.
     inline const char * getParameterStrValue(uint8_t index, int32_t value) const {
         static const char* const bank_names[] = { "CH", "OH", "RS", "CP", "MISC", "USER", "EXP" };
-        static const char* const model_names[] = {
-            "String", "Beam", "Square", "Membrn", "Plate",
-            "Drumhd", "Marimb", "OpnTub", "ClsTub"
+        static const char* const model_names_a[] = {
+            "A:Strng", "A:Beam",  "A:Sqre", "A:Mbrn", "A:Plate",
+            "A:Drmhd", "A:Mrmb",  "A:OpTb", "A:ClTb"
         };
-        static const char* const partial_names[] = {"4", "8", "16", "32", "64"};
+        static const char* const model_names_b[] = {
+            "B:Strng", "B:Beam",  "B:Sqre", "B:Mbrn", "B:Plate",
+            "B:Drmhd", "B:Mrmb",  "B:OpTb", "B:ClTb"
+        };
+        // Values 0-4: partial count labels (shown with A/B indicator).
+        // Values 5, 6: resonator-select mode labels.
+        static const char* const partial_names_a[] = {"4:A", "8:A", "16:A", "32:A", "64:A"};
+        static const char* const partial_names_b[] = {"4:B", "8:B", "16:B", "32:B", "64:B"};
         static const char* const nz_filter_names[] = {"LP", "BP", "HP"};
 
         if (index == k_paramProgram) {
+            // value IS the preset index being browsed — use it directly.
             return getPresetName((uint8_t)value);
         } else if (index == k_paramBank) {
             if (value >= 0 && value < 7) return bank_names[value];
         } else if (index == k_paramModel) {
-            if (value >= 0 && value < 9) return model_names[value];
-            if (value >= 9 && value < 18) return model_names[value - 9];
+            if (value >= 0 && value < 9)
+                return m_is_resonator_a ? model_names_a[value] : model_names_b[value];
         } else if (index == k_paramPartls) {
-            if (value >= 0 && value < 5) return partial_names[value];
+            if (value == 5) return "-> ResA";
+            if (value == 6) return "-> ResB";
+            if (value >= 0 && value < 5)
+                return m_is_resonator_a ? partial_names_a[value] : partial_names_b[value];
         } else if (index == k_paramNzFltr) {
             if (value >= 0 && value < 3) return nz_filter_names[value];
+        } else if (index == k_paramLowCut) {
+            // value is 1–1999; effective Hz is value×10 (10–19990 Hz).
+            static char lc_buf[10];
+            int32_t hz = value * 10;
+            if (hz >= 1000) {
+                // Show as kHz with one decimal place: 1000→"1.0kHz", 15000→"15.0kHz"
+                snprintf(lc_buf, sizeof(lc_buf), "%d.%dkHz", hz / 1000, (hz % 1000) / 100);
+            } else {
+                snprintf(lc_buf, sizeof(lc_buf), "%dHz", hz);
+            }
+            return lc_buf;
         }
 
         // Unconditional failsafe to prevent OS screen crashes
@@ -445,21 +562,43 @@ public:
         v.current_note = note;
         v.current_velocity = (float)velocity / 127.0f;
 
+        // --- VELOCITY MODULATION ---
+        // VlMllStf: harder hit → stiffer (brighter) mallet.
+        // Override the global mallet_stiffness on this specific voice only,
+        // so soft hits are round and hard hits are sharp without changing other voices.
+        {
+            float base_stiff = fmaxf(0.01f, fminf(1.0f, (float)m_params[k_paramMlltStif] / 5000.0f));
+            float stif_mod   = (float)m_params[k_paramVlMllStf] / 100.0f; // -1.0 to +1.0
+            v.exciter.mallet_stiffness = fmaxf(0.01f, fminf(1.0f,
+                base_stiff + stif_mod * v.current_velocity));
+        }
+
+        // VlMllRes: harder hit → faster noise attack (sharper transient).
+        // Override the noise_env attack_rate on this voice so it responds to accents.
+        {
+            float base_nz     = fmaxf(0.0f, fminf(1.0f, (float)m_params[k_paramNzRes] / 1000.0f));
+            float base_attack = 0.9f - (base_nz * 0.8f);
+            float res_mod     = (float)m_params[k_paramVlMllRes] / 100.0f; // -1.0 to +1.0
+            v.exciter.noise_env.attack_rate = fmaxf(0.01f, fminf(0.99f,
+                base_attack + res_mod * v.current_velocity * 0.5f));
+        }
+
         // --- THE PHYSICS OF PITCH ---
 #ifdef ENABLE_PHASE_7_MODELS
         // 1. O(1) Array Lookup for absolute baseline pitch
         float base_delay = g_tables.note_to_delay_length[note & 127];
 
-        // 2. Structural Routing based on Model
-        if (m_model_a == 3 || m_model_a == 5) {
+        // 2. Structural Routing: each resonator uses its own model for inharmonic offset.
+        // ResA: Membrane/Drumhead models use standard pitch (resA is always the root).
+        v.resA.delay_length = base_delay;
+        // ResB: its own model (m_model_b) determines whether it tracks an irrational offset.
+        if (m_model_b == 3 || m_model_b == 5) {
             // Membrane / Drumhead Logic:
-            // A drum skin vibrates in chaotic 2D modes. We fake this by forcing
-            // Resonator B to track an irrational offset (e.g., 0.68) of Resonator A.
-            v.resA.delay_length = base_delay;
+            // A drum skin vibrates in chaotic 2D modes. Fake this with an irrational
+            // pitch offset so resB adds inharmonic content on top of resA.
             v.resB.delay_length = base_delay * 0.68f;
         } else {
             // Standard matched resonators (Strings, Tubes, Bars)
-            v.resA.delay_length = base_delay;
             v.resB.delay_length = base_delay;
         }
 #else
@@ -477,6 +616,8 @@ public:
 #endif
         // Reset phase
         v.exciter.current_frame = 0;
+        v.exciter.mallet_lp  = 0.0f;
+        v.exciter.mallet_lp2 = 0.0f;
         v.resA.ap_x1 = 0.0f;
         v.resA.ap_y1 = 0.0f;
         v.resB.ap_x1 = 0.0f;
@@ -533,7 +674,6 @@ inline void NoteOff(uint8_t note) {
     // Processes a single sample through the Waveguide
     inline float process_waveguide(WaveguideState& wg, float exciter_input) {
         // 1. Calculate the read pointer position for exact pitch
-        float read_pos = (float)wg.write_ptr - wg.delay_length;
         float read_idx = (float)wg.write_ptr - wg.delay_length;
 
         // CRITICAL DSP FIX: Handle massive sub-bass wrap-arounds
@@ -596,11 +736,15 @@ inline void NoteOff(uint8_t note) {
 #endif
 
         // 3. The Modal Mallet Strike
+        // Two cascaded 1-pole LPs shape the strike spectrum:
+        //   LP1 (mallet_stiffness): controls attack sharpness — high = bright, low = round.
+        //   LP2 (mallet_res_coeff): controls mallet body — high = bright, low = dark (MlltRes).
         float mallet_impulse = (ex.current_frame == 0) ? 1.0f : 0.0f;
-        ex.mallet_lp = (mallet_impulse * ex.mallet_stiffness) + (ex.mallet_lp * (1.0f - ex.mallet_stiffness));
+        ex.mallet_lp  = (mallet_impulse * ex.mallet_stiffness) + (ex.mallet_lp  * (1.0f - ex.mallet_stiffness));
+        ex.mallet_lp2 = (ex.mallet_lp   * ex.mallet_res_coeff) + (ex.mallet_lp2 * (1.0f - ex.mallet_res_coeff));
 
         // Massive energy multiplier to physically ring the tube
-        out += ex.mallet_lp * 15.0f;
+        out += ex.mallet_lp2 * 15.0f;
 
         // CRITICAL FIX: Increment time AT THE VERY END so Frame 0 actually triggers
         ex.current_frame++;
@@ -635,8 +779,8 @@ inline void NoteOff(uint8_t note) {
                 float outA = process_waveguide(voice.resA, exciter_sig);
                 float outB = 0.0f;
 
-                // 3. Active Partial Counting: Only process ResB if complexity is high enough
-                if (m_active_partials >= 2) {
+                // Enable ResB for 16+ partials; 4 or 8 partials runs single-resonator to save CPU.
+                if (m_active_partials >= 16) {
                     outB = process_waveguide(voice.resB, exciter_sig);
                 }
 
@@ -681,6 +825,10 @@ inline void NoteOff(uint8_t note) {
             float mix_r = main_out[i * 2 + 1];
 
 #ifdef ENABLE_PHASE_6_FILTERS
+            // master_filter is a single mono SVF instance. Calling process() once
+            // advances its internal state by one sample. Since all voices sum to
+            // identical L/R signals (mono), process L only and copy to R.
+            // TODO: add a second FastSVF instance for true stereo filtering.
             mix_l = state.master_filter.process(mix_l);
             mix_r = mix_l;
 #endif
@@ -694,8 +842,6 @@ inline void NoteOff(uint8_t note) {
             // Equation: x / (1.0 + abs(x)) curves the peaks mathematically
             float clipped_l = mix_l / (1.0f + fabsf(mix_l));
             float clipped_r = mix_r / (1.0f + fabsf(mix_r));
-
-            // TODO - new distortion
 
             // 5. The Hardware Safety Net (Brickwall Limiter)
             main_out[i * 2]     = fmaxf(-0.99f, fminf(0.99f, clipped_l));
@@ -720,6 +866,8 @@ private:
     uint8_t m_sample_bank = 0;
     uint8_t m_sample_number = 0;
     uint8_t m_model_a = 0;
+    uint8_t m_model_b = 0;
+    bool    m_is_resonator_a = true; // default is res A
 
-    uint8_t m_active_partials = 4; // Default to maximum complexity
+    uint8_t m_active_partials = 32; // Default: 32 partials (Partls index 3, ResB active)
 };
