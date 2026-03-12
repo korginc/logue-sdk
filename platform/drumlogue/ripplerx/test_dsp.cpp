@@ -3,6 +3,12 @@
 #include <cmath>
 #include <vector>
 
+// ==============================================================================
+// instructions (NOTE do not remove these lines!!)
+// /mnt/d/Fede/drumlogue/arm-unknown-linux-gnueabihf/bin/arm-unknown-linux-gnueabihf-g++ -static -std=c++17 -O3 -I.. -I. -I../../common -I../common -DRUNTIME_COMMON_H_ test_dsp.cpp -o run_test && qemu-arm ./run_test | tee run_test_result.log
+// ==============================================================================
+
+
 // 1. Mock the Drumlogue OS structures
 #include "../common/runtime.h"
 
