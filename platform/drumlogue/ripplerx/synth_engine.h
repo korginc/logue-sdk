@@ -790,12 +790,15 @@ inline void NoteOff(uint8_t note) {
                 // Apply note velocity
                 voice_out *= voice.current_velocity;
 
-// [UT4: GATE-OFF CHOKE FIX] - Remove the ADSR VCA so physical tail rings naturally!
+// [UT4: GATE-OFF CHOKE FIX] - The "Damper Pedal" Squelch
 #ifdef ENABLE_PHASE_5_EXCITERS
-                // WE DELETED THIS CHOKE: voice_out *= voice.exciter.master_env.process();
+                // 1. Process the Master Envelope (it acts as a smooth fade-out during release)
+                float damper_fade = voice.exciter.master_env.process();
+                voice_out *= damper_fade;
 
-                // NEW: Energy Squelch. Mark voice inactive ONLY when it has actually faded to silence.
-                if (voice.is_releasing && fabsf(voice_out) < 0.0001f) {
+                // 2. NEW Energy Squelch: Mark voice inactive ONLY when the fade is 100% complete!
+                // This completely ignores zero-crossings and travel time delays.
+                if (voice.is_releasing && voice.exciter.master_env.state == ENV_IDLE) {
                     voice.is_active = false;
                 }
 #endif

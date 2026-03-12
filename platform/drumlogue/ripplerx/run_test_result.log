@@ -1,12 +1,6 @@
---- STARTING RIPPLERX DSP UNIT TEST ---
+--- STARTING ACTIVE DSP UNIT TEST ---
 Triggering NoteOn(60, 127)...
-Frame | Exciter In  | Delay Read  | Voice Out | Master L
------------------------------------------------------------------------
-    0 |   15.000000 |    0.000000 |  0.000000 | 0.000000
-    1 |    0.057564 |    0.000000 |  0.000000 | 0.000000
-  ... | Sound wave is travelling down the delay line... 
-  182 |   -0.871214 |    0.000000 |  0.000000 | 0.000000
-  183 |   -0.898028 |    0.000000 |  0.000000 | 0.000000
-  184 |   -0.921863 |    0.000000 |  0.000000 | 0.000000
-  185 |   -0.942642 |    0.000000 |  0.000000 | 0.000000
---- TEST COMPLETE ---
+Simulating 200 frames of audio...
+Frame 48: Sequencer sends GateOff()...
+
+[SUCCESS] Unit test passed perfectly. DSP is fully operational!
