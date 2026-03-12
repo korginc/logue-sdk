@@ -287,21 +287,35 @@
    xs.i &= 0x7fffffff;
    return xs.f;
  }
- 
- /** Floor function
+  
+ /** Floor function (only valid for integers representable by signed 32 bit int)
   */
  static inline __attribute__((optimize("Ofast"),always_inline))
- float si_floorf(float x)
- {
-   return (float)((uint32_t)x);
+ float si_floorf_c(float x)
+ { 
+    return (x < 0) ? (((int32_t)x == x) ? x : (float)((int32_t)x - 1)) : 
+                     (float)((int32_t)x);
  }
  
- /** Ceiling function
+ static inline __attribute__((optimize("Ofast"),always_inline))
+ float si_floorf(float x)
+ { 
+    return __builtin_floorf(x);
+ }
+
+ /** Ceiling function (only valid for integers representable by signed 32 bit int)
   */
  static inline __attribute__((optimize("Ofast"),always_inline))
- float si_ceilf(float x)
+ float si_ceilf_c(float x)
  {
-   return (float)((uint32_t)x + 1);
+    return (x >= 0) ? (((int)x == x) ? x : (float)((int32_t)x + 1)) :  
+                      (float)((int32_t)x);
+ }
+
+ static inline __attribute__((optimize("Ofast"),always_inline))
+ float si_ceilf(float x)
+ { 
+    return __builtin_ceilf(x);
  }
  
  /** Round to nearest integer.
