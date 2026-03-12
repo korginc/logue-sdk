@@ -106,7 +106,7 @@ fast_inline void resonant_synth_set_f0(resonant_synth_t* rs,
 
     float32x4_t base_freq = vmulq_f32(a4_freq, two_pow);
 
-    rs->f0 = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
+    rs->f0 = vbslq_f32(voice_mask,
                         base_freq, rs->f0);
 }
 
@@ -116,7 +116,7 @@ fast_inline void resonant_synth_set_f0(resonant_synth_t* rs,
 fast_inline void resonant_synth_set_center(resonant_synth_t* rs,
                                            uint32x4_t voice_mask,
                                            float32x4_t fc_hz) {
-    rs->target_fc = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
+    rs->target_fc = vbslq_f32(voice_mask,
                                fc_hz, rs->target_fc);
 
     // Start ramp for selected voices (1ms @48kHz = 48 samples)
@@ -133,7 +133,7 @@ fast_inline void resonant_synth_set_resonance(resonant_synth_t* rs,
                                               float resonance_percent) {
     // Map 0-100% to 0-0.99 (a must be < 1)
     float r = (resonance_percent / 100.0f) * 0.99f;
-    rs->target_resonance = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
+    rs->target_resonance = vbslq_f32(voice_mask,
                                       vdupq_n_f32(r),
                                       rs->target_resonance);
 
@@ -164,7 +164,7 @@ fast_inline void resonant_synth_apply_lfo_freq(resonant_synth_t* rs,
                                                uint32x4_t voice_mask,
                                                float32x4_t lfo_mod) {
     // Store modulation for use in process function
-    rs->mod_fc = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
+    rs->mod_fc = vbslq_f32(voice_mask,
                             lfo_mod, rs->mod_fc);
 }
 
@@ -176,7 +176,7 @@ fast_inline void resonant_synth_apply_lfo_resonance(resonant_synth_t* rs,
                                                     uint32x4_t voice_mask,
                                                     float32x4_t lfo_mod) {
     // Store modulation for use in process function
-    rs->mod_resonance = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
+    rs->mod_resonance = vbslq_f32(voice_mask,
                                    lfo_mod, rs->mod_resonance);
 }
 
@@ -262,7 +262,7 @@ fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
     float32x4_t res_step = vsubq_f32(rs->target_resonance, rs->resonance);
     res_step = vmulq_f32(res_step, vdupq_n_f32(1.0f/48.0f));
 
-    rs->resonance = vbslq_f32(vreinterpretq_f32_u32(ramping),
+    rs->resonance = vbslq_f32(ramping,
                                vaddq_f32(rs->resonance, res_step),
                                rs->resonance);
 
@@ -270,7 +270,7 @@ fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
     float32x4_t fc_step = vsubq_f32(rs->target_fc, rs->fc);
     fc_step = vmulq_f32(fc_step, vdupq_n_f32(1.0f/48.0f));
 
-    rs->fc = vbslq_f32(vreinterpretq_f32_u32(ramping),
+    rs->fc = vbslq_f32(ramping,
                         vaddq_f32(rs->fc, fc_step),
                         rs->fc);
 
@@ -281,10 +281,10 @@ fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
 
     // Snap to target when done
     uint32x4_t done = vceqq_u32(rs->ramp_counter, vdupq_n_u32(0));
-    rs->resonance = vbslq_f32(vreinterpretq_f32_u32(done),
+    rs->resonance = vbslq_f32(done,
                                rs->target_resonance,
                                rs->resonance);
-    rs->fc = vbslq_f32(vreinterpretq_f32_u32(done),
+    rs->fc = vbslq_f32(done,
                         rs->target_fc,
                         rs->fc);
 
@@ -393,7 +393,7 @@ fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
 
     // Apply scaling and voice mask
     output = vmulq_f32(output, scale);
-    output = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
+    output = vbslq_f32(voice_mask,
                        output, vdupq_n_f32(0.0f));
 
     return output;

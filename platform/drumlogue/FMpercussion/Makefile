@@ -40,6 +40,8 @@ VERBOSE_COMPILE := no
 #
 
 DINCDIR := $(COMMON_INC_PATH)
+DDEFS += -D__ARM_NEON__
+DINCDIR += $(realpath $(PROJECT_ROOT)/../common) $(realpath $(PROJECT_ROOT)/../common/dsp)
 
 CSRC += $(realpath $(COMMON_SRC_PATH)/_unit_base.c)
 
@@ -71,7 +73,6 @@ ifeq ($(USE_OPT),)
   USE_CXXOPT += -fstrict-aliasing
   USE_CXXOPT += -falign-functions=16
   USE_CXXOPT += -fno-math-errno
-  USE_CXXOPT += -fconcepts
   # USE_CXXOPT += -fpermissive
   # USE_CXXOPT += -fmessage-length=0
 endif

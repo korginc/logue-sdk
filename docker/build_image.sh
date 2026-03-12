@@ -85,8 +85,11 @@ for o in "$@"; do
     esac
 done
 
+USER_ID=$(stat -c '%u' ~)
+GROUP_ID=$(stat -c '%g' ~)
+
 # Build actual image
-docker build --build-arg build=${BUILD_ID} --build-arg version=${VERSION} -t ${IMAGE_NAME}:${VERSION} -t ${IMAGE_NAME}:latest "${APP_DIR}"
+docker build --build-arg userid=${USER_ID} --build-arg groupid=${GROUP_ID} --build-arg build=${BUILD_ID} --build-arg version=${VERSION} -t ${IMAGE_NAME}:${VERSION} -t ${IMAGE_NAME}:latest "${APP_DIR}"
 res=$?
 if [ $res -ne 0 ]; then
     echo "Error: Failed to build docker image (${res})"
