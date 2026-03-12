@@ -34,7 +34,7 @@ const __unit_header unit_header_t unit_header = {
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"VlMllStf"}},
 
         // Page 3: Resonator I
-        // 0-4 are the partials, value 5 means that next paarms dedicated to resonator are adressing resonator A and value 6 are for resonator B
+        // 0-4 are the partials, value 5 means that next params dedicated to resonator are addressing resonator A and value 6 are for resonator B
         {0, 6, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Partls"}},
         // [0..8] String , Beam ,  Square , Membrn , Plate , Drumhd , Marmb , OpnTub , ClsTub
         {0, 8, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Model"}},

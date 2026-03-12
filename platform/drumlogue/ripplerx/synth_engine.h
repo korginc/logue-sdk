@@ -247,9 +247,15 @@ public:
         // Mirror the three per-resonator physical params to ResB so both resonators
         // start identically on every preset load (user can diverge them afterwards).
         m_is_resonator_a = false;
+        setParameter(k_paramModel,  presets[idx][k_paramModel]);
         setParameter(k_paramDkay,   presets[idx][k_paramDkay]);
         setParameter(k_paramMterl,  presets[idx][k_paramMterl]);
         setParameter(k_paramInharm, presets[idx][k_paramInharm]);
+        // NOTE: If ResA and ResB have the exact same decay and material, how do we get that chaotic,
+        // realistic 2D drum sound? It happens in NoteOn function, driven entirely by the Model parameter,
+        // where resonator B is given an irrational tuning ratio of 0.68 to simulate the metallic,
+        // clashing overtones of the drum skin (the edge mode),.
+        // Resonator A acts as the fundamental "thump" of the drum (the center mode).
 
         // Restore user's resonator-edit context.
         m_is_resonator_a = saved_is_a;
@@ -380,7 +386,9 @@ public:
                 }
                 break;
             }
-
+            // HitPos parameter acts as the physical mixer between these two modes.
+            // If HitPos is 0, you only hear ResA (hitting dead center).
+            // If HitPos is 100, you hear mostly ResB (hitting the rim).
             case k_paramHitPos: {
                 state.mix_ab = fmaxf(0.0f, fminf(1.0f, (float)value / 100.0f));
                 break;
