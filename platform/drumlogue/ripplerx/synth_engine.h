@@ -316,14 +316,14 @@ public:
             // resonator A/B parameters
             case k_paramPartls: {
                 if (value < 5) {
-                    // Store the index (0-4), not the display label count (4/8/16/32/64).
-                    // Digital waveguides don't have discrete partial counts; the label is
-                    // cosmetic. The only DSP effect is the ResB gate in processBlock:
-                    //   index < 2  → ResB disabled (single resonator, lower CPU)
-                    //   index >= 2 → ResB enabled  (dual resonator, richer harmonic content)
+                    // Map the UI index (0-4) to the actual partial count (4/8/16/32/64).
+                    // m_active_partials stores the count so comparisons are self-documenting.
+                    // DSP effect: counts < 16 disable ResB (single resonator, lower CPU);
+                    // counts >= 16 enable ResB (dual resonator, richer harmonic content).
                     // Partials is intentionally global (not per-resonator) because it
                     // controls CPU budget, not per-resonator timbre.
-                    m_active_partials = value;
+                    static const uint8_t partial_counts[] = {4, 8, 16, 32, 64};
+                    m_active_partials = partial_counts[value];
                 } else {
                     m_is_resonator_a = (value == 5);
                 }
@@ -771,9 +771,8 @@ inline void NoteOff(uint8_t note) {
                 float outA = process_waveguide(voice.resA, exciter_sig);
                 float outB = 0.0f;
 
-                // Enable ResB only for "16+ partials" (index >= 2).
-                // Values 0 (4 ptls) and 1 (8 ptls) run single-resonator to save CPU.
-                if (m_active_partials >= 2) {
+                // Enable ResB for 16+ partials; 4 or 8 partials runs single-resonator to save CPU.
+                if (m_active_partials >= 16) {
                     outB = process_waveguide(voice.resB, exciter_sig);
                 }
 
@@ -862,5 +861,5 @@ private:
     uint8_t m_model_b = 0;
     bool    m_is_resonator_a = true; // default is res A
 
-    uint8_t m_active_partials = 4; // Default to maximum complexity
+    uint8_t m_active_partials = 32; // Default: 32 partials (Partls index 3, ResB active)
 };
