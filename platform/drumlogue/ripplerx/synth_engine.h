@@ -133,6 +133,10 @@ public:
         state.master_drive = 1.0f;
         state.mix_ab = 0.5f; // Equal A/B mix
 
+        // Always return to ResA edit context so LoadPreset (called next in Init)
+        // applies preset data symmetrically to both resonators.
+        m_is_resonator_a = true;
+
 #ifdef ENABLE_PHASE_6_FILTERS
         // [UT1: MEMSET FIX] - Force the filter back to safe Highpass mode
         state.master_filter.mode = 2;
@@ -165,17 +169,15 @@ public:
     int32_t m_params[25] = {0};
     uint8_t m_preset_idx = 0;
 
-    // Called by unit_get_param_value so the OS knows what to draw on the screen
-    // TODO: is it correct to show just the value stored in the local database?
-    // No A/B discrimination? Are partials to be mapped? Any other parameter mapping?
+    // Called by unit_get_param_value so the OS knows what to draw on the screen.
+    // For Model, return the value for the currently-selected resonator so the OLED
+    // stays in sync with what the user is editing via the A/B Partls selector.
     inline int32_t getParameterValue(uint8_t index) const {
         // CRITICAL UI FIX: Prevent OS out-of-bounds reads
         if (index >= 24) return 0;
         if (index == k_paramModel) {
-            if (m_is_resonator_a)
-                return m_model_a;
-            else
-                return m_model_b;
+            return m_is_resonator_a ? (int32_t)m_model_a : (int32_t)m_model_b;
+        }
         return m_params[index];
     }
 
@@ -227,11 +229,26 @@ public:
 
         if (idx >= 28) return;
 
+        // Preset loading always targets ResA so that Dkay/Mterl/Inharm set resA first.
+        // Save and restore the user's resonator-edit context around the load.
+        bool saved_is_a = m_is_resonator_a;
+        m_is_resonator_a = true;
+
         // Apply parameters, SKIPPING INDEX 0 to prevent infinite recursion stack overflow!
         for (uint8_t param_id = 0; param_id < 24; ++param_id) {
             if (param_id == k_paramProgram) continue;
             setParameter(param_id, presets[idx][param_id]);
         }
+
+        // Mirror the three per-resonator physical params to ResB so both resonators
+        // start identically on every preset load (user can diverge them afterwards).
+        m_is_resonator_a = false;
+        setParameter(k_paramDkay,   presets[idx][k_paramDkay]);
+        setParameter(k_paramMterl,  presets[idx][k_paramMterl]);
+        setParameter(k_paramInharm, presets[idx][k_paramInharm]);
+
+        // Restore user's resonator-edit context.
+        m_is_resonator_a = saved_is_a;
     }
 
     static inline const char * getPresetName(uint8_t idx) {
@@ -374,7 +391,8 @@ public:
             case k_paramLowCut: {
 #ifdef ENABLE_PHASE_6_FILTERS
                 m_master_cutoff = (float)value;
-                float res_val = fmaxf(0.707f, (float)m_params[k_paramResnc]);
+                // Divide by 1000: UI stores 707–4000, filter needs 0.707–4.0
+                float res_val = fmaxf(0.707f, (float)m_params[k_paramResnc] / 1000.0f);
                 state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
 #endif
                 break;
@@ -423,32 +441,40 @@ public:
         }
     }
 
-    // NOTE: show A or B depending on the choosen resonator via partials parameter
+    // Show A or B label depending on the resonator selected via the Partls selector.
+    // IMPORTANT: always index into arrays with the function's `value` argument —
+    // never with stored state — so scrolling through values shows the correct label.
     inline const char * getParameterStrValue(uint8_t index, int32_t value) const {
         static const char* const bank_names[] = { "CH", "OH", "RS", "CP", "MISC", "USER", "EXP" };
         static const char* const model_names_a[] = {
-            "A:String", "A:Beam",  "A:Square", "A:Membrn", "A:Plate",
-            "A:Drumhd", "A:Marmb", "A:OpnTub", "A:ClsTub"
-        }
-        static const char* const model_names_b[] = {
-            "B:String", "B:Beam",  "B:Square", "B:Membrn", "B:Plate",
-            "B:Drumhd", "B:Marmb", "B:OpnTub", "B:ClsTub"
+            "A:Strng", "A:Beam",  "A:Sqre", "A:Mbrn", "A:Plate",
+            "A:Drmhd", "A:Mrmb",  "A:OpTb", "A:ClTb"
         };
+        static const char* const model_names_b[] = {
+            "B:Strng", "B:Beam",  "B:Sqre", "B:Mbrn", "B:Plate",
+            "B:Drmhd", "B:Mrmb",  "B:OpTb", "B:ClTb"
+        };
+        // Values 0-4: partial count labels (shown with A/B indicator).
+        // Values 5, 6: resonator-select mode labels.
         static const char* const partial_names_a[] = {"4:A", "8:A", "16:A", "32:A", "64:A"};
         static const char* const partial_names_b[] = {"4:B", "8:B", "16:B", "32:B", "64:B"};
         static const char* const nz_filter_names[] = {"LP", "BP", "HP"};
 
         if (index == k_paramProgram) {
-            return getPresetName((uint8_t)m_params[k_paramProgram]);
+            // value IS the preset index being browsed — use it directly.
+            return getPresetName((uint8_t)value);
         } else if (index == k_paramBank) {
-            if (value >= 0 && value < 7) return bank_names[m_sample_bank];
+            if (value >= 0 && value < 7) return bank_names[value];
         } else if (index == k_paramModel) {
             if (value >= 0 && value < 9)
-                return m_is_resonator_a ? model_names_a[m_model_a] : model_names_a[m_model_b];
+                return m_is_resonator_a ? model_names_a[value] : model_names_b[value];
         } else if (index == k_paramPartls) {
-            if (value >= 0 && value < 5) return m_is_resonator_a ? partial_names_a[m_active_partials] : partial_names_b[m_active_partials];
+            if (value == 5) return "-> ResA";
+            if (value == 6) return "-> ResB";
+            if (value >= 0 && value < 5)
+                return m_is_resonator_a ? partial_names_a[value] : partial_names_b[value];
         } else if (index == k_paramNzFltr) {
-            if (value >= 0 && value < 3) return nz_filter_names[m_params[k_paramNzFltr]];
+            if (value >= 0 && value < 3) return nz_filter_names[value];
         }
 
         // Unconditional failsafe to prevent OS screen crashes
@@ -772,7 +798,7 @@ private:
     uint8_t m_sample_number = 0;
     uint8_t m_model_a = 0;
     uint8_t m_model_b = 0;
-    bool    m_is_resonator_a = True; // default is res A
+    bool    m_is_resonator_a = true; // default is res A
 
     uint8_t m_active_partials = 4; // Default to maximum complexity
 };

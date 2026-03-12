@@ -67,22 +67,45 @@ and never used it. Dead code — harmless but misleading.
 
 ---
 
-## Phase 11: Independent Resonator B Control [COMPLETED]
+## Phase 11: Independent Resonator B Control — Partls-selector strategy [COMPLETED]
 
-Three parameters now cover double their original range, with the first half
-controlling both resonators symmetrically and the second half independently
-overriding Resonator B. All 28 preset values fall within the A zone, so
-backward compatibility is fully preserved.
+The **Partls** parameter (index 8, range 0–6) now serves a dual role:
+- Values **0–4**: set the active partials count ("4", "8", "16", "32", "64")
+  and display with an A/B suffix so the user sees which resonator is targeted.
+- Value **5**: switch edit context to **Resonator A** for subsequent parameter changes.
+- Value **6**: switch edit context to **Resonator B** for subsequent parameter changes.
 
-| Parameter | A zone (both) | B zone (resB only) | Coefficient |
-|---|---|---|---|
-| Dkay (10) | 0 – 2000 | 2001 – 4000 | `feedback_gain` = 0.85 + norm×0.149 |
-| Mterl (11) | −10 – 30 | 31 – 70 | `lowpass_coeff` = 0.01 + norm×0.99 |
-| Inharm (15) | 0 – 19999 | 20000 – 39998 | `ap_coeff` = norm |
+**Dkay**, **Mterl**, and **Inharm** now route to `resA` or `resB` independently,
+determined by `m_is_resonator_a`. **Model** is also per-resonator (`m_model_a` /
+`m_model_b`), updating `phase_mult` for each independently.
 
-Workflow: Set a sound using A-zone values (both resonators matched), then push
-past the zone boundary to give Resonator B its own independent character —
-longer decay, brighter material, or more inharmonic dispersion than Resonator A.
+**Preset loading** always initialises both resonators symmetrically:
+`LoadPreset` forces ResA context for the main parameter loop, then explicitly
+mirrors Dkay/Mterl/Inharm to ResB, then restores the user's edit context.
+
+**Reset** resets `m_is_resonator_a = true` so a cold start or Suspend always
+leaves the engine in a clean, deterministic ResA-first state.
+
+### Phase 11 bug-fix review [COMPLETED]
+The following bugs were found and fixed after the initial Partls-selector commit:
+
+- **Compile error**: `True` → `true` (C++ boolean literal).
+- **Compile error**: Missing `}` closing the `if (index == k_paramModel)` block in
+  `getParameterValue`, leaving `return m_params[index]` unreachable.
+- **Compile error**: Missing `;` after `model_names_a[]` initialiser in
+  `getParameterStrValue`.
+- **Bug**: `getParameterStrValue` for Model used `model_names_a` for both
+  resonators — now uses `model_names_b` correctly for ResB.
+- **Bug**: `getParameterStrValue` for Partls values 5 and 6 fell through to "---"
+  — now shows "-> ResA" / "-> ResB".
+- **Bug**: `getParameterStrValue` for Partls used `m_active_partials` as the
+  array index instead of the function's `value` argument — fixed.
+- **Bug**: `getParameterStrValue` for Bank, NzFltr, and Program indexed into their
+  arrays with stored state variables instead of the `value` argument — fixed.
+  The function argument is always the value being *browsed*, not the stored state.
+- **Bug**: `k_paramLowCut` handler lost its `/ 1000.0f` divisor for the resonance
+  Q, passing 707–4000 to `set_coeffs` instead of 0.707–4.0. SVF was near-
+  unstable. Fixed.
 
 ---
 
@@ -179,8 +202,16 @@ longer decay, brighter material, or more inharmonic dispersion than Resonator A.
 - [x] Remove dead `read_pos` variable from `process_waveguide()`.
 - [x] Document mono-filter intentional L-copy pattern with TODO for true stereo.
 
-## Phase 11: Independent Resonator B Control [COMPLETED]
-- [x] Dkay: range extended 0–2000 → 0–4000; second half sets resB.feedback_gain independently.
-- [x] Mterl: range extended −10..30 → −10..70; second half sets resB.lowpass_coeff independently.
-- [x] Inharm: range extended 0–19999 → 0–39998; second half sets resB.ap_coeff independently.
-- [x] All 28 preset values verified to fall within A zone — backward compatible.
+## Phase 11: Independent Resonator B Control — Partls-selector [COMPLETED]
+- [x] Partls 0–4 = partial count; 5 = select ResA edit; 6 = select ResB edit.
+- [x] Dkay, Mterl, Inharm route to resA or resB based on m_is_resonator_a.
+- [x] Model is per-resonator (m_model_a / m_model_b), phase_mult updated independently.
+- [x] LoadPreset: forces ResA context, mirrors Dkay/Mterl/Inharm to ResB, restores context.
+- [x] Reset: resets m_is_resonator_a = true for deterministic cold start.
+- [x] Fix: True → true (compile error).
+- [x] Fix: Missing } in getParameterValue (compile error / unreachable return).
+- [x] Fix: Missing ; after model_names_a[] init (compile error).
+- [x] Fix: Model B showing model_names_a instead of model_names_b.
+- [x] Fix: Partls values 5/6 showing "---" — now "-> ResA" / "-> ResB".
+- [x] Fix: getParameterStrValue used state vars instead of value arg (Bank, NzFltr, Program, Partls).
+- [x] Fix: k_paramLowCut dropped /1000.0f for Q — SVF near-unstable. Restored.
