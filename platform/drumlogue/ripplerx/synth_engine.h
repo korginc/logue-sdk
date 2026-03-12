@@ -296,6 +296,19 @@ public:
                 }
                 break;
             }
+
+            case k_paramMlltRes: {
+                // UI range 0–1000 (displays with 1 decimal via frac_type=1).
+                // Maps to a second 1-pole LP coefficient stacked after mallet_stiffness LP.
+                // Low value → darker/softer mallet body. High value → brighter/sharper.
+                float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
+                float coeff = 0.01f + (norm * 0.99f);
+                for (int i = 0; i < NUM_VOICES; ++i) {
+                    state.voices[i].exciter.mallet_res_coeff = coeff;
+                }
+                break;
+            }
+
             // resonator A/B parameters
             case k_paramPartls: {
                 if (value < 5)
@@ -518,21 +531,43 @@ public:
         v.current_note = note;
         v.current_velocity = (float)velocity / 127.0f;
 
+        // --- VELOCITY MODULATION ---
+        // VlMllStf: harder hit → stiffer (brighter) mallet.
+        // Override the global mallet_stiffness on this specific voice only,
+        // so soft hits are round and hard hits are sharp without changing other voices.
+        {
+            float base_stiff = fmaxf(0.01f, fminf(1.0f, (float)m_params[k_paramMlltStif] / 5000.0f));
+            float stif_mod   = (float)m_params[k_paramVlMllStf] / 100.0f; // -1.0 to +1.0
+            v.exciter.mallet_stiffness = fmaxf(0.01f, fminf(1.0f,
+                base_stiff + stif_mod * v.current_velocity));
+        }
+
+        // VlMllRes: harder hit → faster noise attack (sharper transient).
+        // Override the noise_env attack_rate on this voice so it responds to accents.
+        {
+            float base_nz     = fmaxf(0.0f, fminf(1.0f, (float)m_params[k_paramNzRes] / 1000.0f));
+            float base_attack = 0.9f - (base_nz * 0.8f);
+            float res_mod     = (float)m_params[k_paramVlMllRes] / 100.0f; // -1.0 to +1.0
+            v.exciter.noise_env.attack_rate = fmaxf(0.01f, fminf(0.99f,
+                base_attack + res_mod * v.current_velocity * 0.5f));
+        }
+
         // --- THE PHYSICS OF PITCH ---
 #ifdef ENABLE_PHASE_7_MODELS
         // 1. O(1) Array Lookup for absolute baseline pitch
         float base_delay = g_tables.note_to_delay_length[note & 127];
 
-        // 2. Structural Routing based on Model
-        if (m_model_a == 3 || m_model_a == 5) {
+        // 2. Structural Routing: each resonator uses its own model for inharmonic offset.
+        // ResA: Membrane/Drumhead models use standard pitch (resA is always the root).
+        v.resA.delay_length = base_delay;
+        // ResB: its own model (m_model_b) determines whether it tracks an irrational offset.
+        if (m_model_b == 3 || m_model_b == 5) {
             // Membrane / Drumhead Logic:
-            // A drum skin vibrates in chaotic 2D modes. We fake this by forcing
-            // Resonator B to track an irrational offset (e.g., 0.68) of Resonator A.
-            v.resA.delay_length = base_delay;
+            // A drum skin vibrates in chaotic 2D modes. Fake this with an irrational
+            // pitch offset so resB adds inharmonic content on top of resA.
             v.resB.delay_length = base_delay * 0.68f;
         } else {
             // Standard matched resonators (Strings, Tubes, Bars)
-            v.resA.delay_length = base_delay;
             v.resB.delay_length = base_delay;
         }
 #else
@@ -550,6 +585,8 @@ public:
 #endif
         // Reset phase
         v.exciter.current_frame = 0;
+        v.exciter.mallet_lp  = 0.0f;
+        v.exciter.mallet_lp2 = 0.0f;
         v.resA.ap_x1 = 0.0f;
         v.resA.ap_y1 = 0.0f;
         v.resB.ap_x1 = 0.0f;
@@ -668,11 +705,15 @@ inline void NoteOff(uint8_t note) {
 #endif
 
         // 3. The Modal Mallet Strike
+        // Two cascaded 1-pole LPs shape the strike spectrum:
+        //   LP1 (mallet_stiffness): controls attack sharpness — high = bright, low = round.
+        //   LP2 (mallet_res_coeff): controls mallet body — high = bright, low = dark (MlltRes).
         float mallet_impulse = (ex.current_frame == 0) ? 1.0f : 0.0f;
-        ex.mallet_lp = (mallet_impulse * ex.mallet_stiffness) + (ex.mallet_lp * (1.0f - ex.mallet_stiffness));
+        ex.mallet_lp  = (mallet_impulse * ex.mallet_stiffness) + (ex.mallet_lp  * (1.0f - ex.mallet_stiffness));
+        ex.mallet_lp2 = (ex.mallet_lp   * ex.mallet_res_coeff) + (ex.mallet_lp2 * (1.0f - ex.mallet_res_coeff));
 
         // Massive energy multiplier to physically ring the tube
-        out += ex.mallet_lp * 15.0f;
+        out += ex.mallet_lp2 * 15.0f;
 
         // CRITICAL FIX: Increment time AT THE VERY END so Frame 0 actually triggers
         ex.current_frame++;

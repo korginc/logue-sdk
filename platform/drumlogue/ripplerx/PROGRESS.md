@@ -109,23 +109,37 @@ The following bugs were found and fixed after the initial Partls-selector commit
 
 ---
 
-## Phase 12: Unused Parameters (currently do nothing — future work)
+## Phase 12: Unused Parameters
+
+### Implemented [COMPLETED]
+
+* **`VlMllStf` (Index 7):** In `NoteOn`, overrides `mallet_stiffness` on the
+  triggered voice: `stiffness = base_stiff + (VlMllStf/100) * velocity`.
+  Harder hits produce a stiffer (brighter) mallet strike per-note without
+  affecting concurrently ringing voices.
+* **`VlMllRes` (Index 6):** In `NoteOn`, overrides `noise_env.attack_rate` on
+  the triggered voice: positive values shorten the attack at high velocity
+  so accent hits have a sharper transient.  Formula:
+  `attack = base_attack + (VlMllRes/100) * velocity * 0.5`.
+* **`MlltRes` (Index 4):** Wired as a second 1-pole LP cascaded after the
+  existing `mallet_stiffness` LP.  High value → mallet energy passes through
+  quickly (bright), low value → extra roll-off (dark/woody body).
+  Both poles' state variables (`mallet_lp` and `mallet_lp2`) are reset to 0
+  on each `NoteOn` to prevent clicks from polyphonic overlap.
+
+### Still Pending (future work)
 
 * **`Tone` (Index 12):** Unmapped. Could become a tilt-EQ shelf inside the
   feedback loop, or a master high-shelf for brightness control.
-* **`Partls` (Index 9):** Currently only gates ResB on/off (threshold = 2).
-  Better usage: repurpose as A/B coupling depth — how much ResB's output
-  feeds back into ResA's exciter input.
-* **`VlMllRes` & `VlMllStf` (Indices 6 & 7):** Unmapped velocity modifiers.
-  Real drums sound sharper at higher velocity. Map these to scale
-  `mallet_stiffness` and the noise envelope rate by `current_velocity`.
+* **`Partls` active-partials meaning (Index 8, values 0–4):** Currently only
+  gates ResB on/off (threshold >= 2). Better usage: repurpose as A/B coupling
+  depth — how much ResB's output feeds back into ResA's exciter input.
 * **`NzFltr` & `NzFltFrq` (Indices 21 & 22):** Master SVF exists but noise
   has no dedicated filter. Add a second `FastSVF` inside `ExciterState`
   that shapes the noise before it enters the delay line.
-* **`MlltRes` (Index 4):** Parsed but not forwarded to the exciter.
-  Map to an additional `mallet_lp` pole to vary the strike brightness.
 * **`TubRad` (Index 17):** Unmapped. Could scale `lowpass_coeff` (wider tube
-  = less high-frequency loss) or `ap_coeff` (tube geometry affects dispersion).
+  = less high-frequency loss). Needs a stored base-Mterl coefficient so both
+  Mterl and TubRad can combine without re-deriving each other.
 
 ---
 
@@ -138,9 +152,6 @@ The following bugs were found and fixed after the initial Partls-selector commit
 * **Dedicated Noise SVF:** Instantiate a second `FastSVF` inside `ExciterState`
   to filter white noise before it enters the delay line. Wire `NzFltr` and
   `NzFltFrq` parameters to its coefficients.
-* **Model B Parsing:** The Model UI parameter passes 0–17. Currently only
-  Model A is extracted (`value % 9`). Extract Model B (`value / 9`) and apply
-  its topology to `resB` independently.
 * **Pitch Bend:** Wire `unit_pitch_bend()` into `NoteOn` delay-length math.
   A ±semitone bend would require multiplying `delay_length` by `2^(bend/12)`.
 * **True Stereo Master Filter:** `master_filter` is a single mono `FastSVF`.
