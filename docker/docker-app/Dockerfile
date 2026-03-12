@@ -83,17 +83,20 @@ COPY ./nts-3_kaoss/environment /app/nts-3_kaoss/
 # prologue specific files
 COPY ./prologue/environment /app/prologue/
 
-# microkorg2 specific files
-COPY ./microkorg2/environment /app/microkorg2/
-COPY ./builder/get_microkorg2_toolchain.sh /app/microkorg2/
-RUN /bin/bash -c "/app/microkorg2/get_microkorg2_toolchain.sh && rm /app/microkorg2/get_microkorg2_toolchain.sh"
+# microkorg2 specific files (SKIPPED)
+# COPY ./microkorg2/environment /app/microkorg2/
+# COPY ./builder/get_microkorg2_toolchain.sh /app/microkorg2/
+# RUN /bin/bash -c "/app/microkorg2/get_microkorg2_toolchain.sh && rm /app/microkorg2/get_microkorg2_toolchain.sh"
 
 # Patch /etc/bash.bashrc to get rid of sudo warnings
 COPY ./builder/bash.bashrc.patch /root/
 RUN /bin/bash -c "patch -s /etc/bash.bashrc < /root/bash.bashrc.patch; rm /root/bash.bashrc.patch"
 
-RUN /bin/bash -c "addgroup --gid 60000 -q user && \
-adduser --shell /usr/bin/bash --no-create-home --home /workspace --uid 60000 --gid 60000 --disabled-password --disabled-login --gecos \"\" -q user && \
+ARG userid
+ARG groupid
+
+RUN /bin/bash -c "addgroup --gid ${groupid} -q user && \
+adduser --shell /usr/bin/bash --no-create-home --home /workspace --uid ${userid} --gid ${groupid} --disabled-password --disabled-login --gecos \"\" -q user && \
 usermod -p \"\" user && \
 usermod -aG sudo user;"
 

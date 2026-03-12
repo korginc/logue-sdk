@@ -23,6 +23,7 @@
 #include <cmath>
 #include <malloc.h>
 #include <float_math.h>
+#include <algorithm>
 
 // Maximum delay line length (2 seconds at 48kHz)
 #define MAX_DELAY_SECONDS 2.0f
@@ -111,29 +112,29 @@ public:
     /*===========================================================================*/
 
     void setDecay(float d) {
-        decay = std::max(0.0f, std::min(0.99f, d));
+        decay = fmaxf(0.0f, fminf(0.99f, d));
     }
 
     void setDiffusion(float d) {
-        diffusion = std::max(0.0f, std::min(1.0f, d));
+        diffusion = fmaxf(0.0f, fminf(1.0f, d));
     }
 
     void setModDepth(float d) {
-        modDepth = std::max(0.0f, std::min(1.0f, d));
+        modDepth = fmaxf(0.0f, fminf(1.0f, d));
     }
 
     void setModRate(float r) {
-        modRate = std::max(0.1f, std::min(10.0f, r));
+        modRate = fmaxf(0.1f, fminf(10.0f, r));
     }
 
     /** Wet/dry mix  0.0 = fully dry, 1.0 = fully wet */
     void setMix(float m) {
-        mix = std::max(0.0f, std::min(1.0f, m));
+        mix = fmaxf(0.0f, fminf(1.0f, m));
     }
 
     /** Stereo width  0.0 = mono, 1.0 = normal, 2.0 = hyper-stereo */
     void setWidth(float w) {
-        width = std::max(0.0f, std::min(2.0f, w));
+        width = fmaxf(0.0f, fminf(2.0f, w));
     }
 
     /**
@@ -141,12 +142,12 @@ public:
      * Converts to a one-pole LPF coefficient used in applyDiffusion4.
      */
     void setDamping(float freqHz) {
-        freqHz = std::max(200.0f, std::min(10000.0f, freqHz));
+        freqHz = fmaxf(200.0f, fminf(10000.0f, freqHz));
         // omega = 2π * fc / fs;  coeff ≈ 1 - omega  (first-order approx)
         float omega = 2.0f * (float)M_PI * freqHz / sampleRate;
         // accurate and musically conventional mapping from frequency to filter coefficient
         // than first-order approximation
-        dampingCoeff =e_expff(-omega);
+        dampingCoeff = e_expff(-omega);
     }
 
     /**
@@ -257,8 +258,8 @@ private:
         // Channels 0-3 have shorter delays (brighter content) → decay * highDecayMult
         // Channels 4-7 have longer delays (warmer content)    → decay * lowDecayMult
         // =================================================================
-        float32x4_t decayHi  = vdupq_n_f32(std::min(0.99f, decay * highDecayMult));
-        float32x4_t decayLo  = vdupq_n_f32(std::min(0.99f, decay * lowDecayMult));
+        float32x4_t decayHi  = vdupq_n_f32(fminf(0.99f, decay * highDecayMult));
+        float32x4_t decayLo  = vdupq_n_f32(fminf(0.99f, decay * lowDecayMult));
         float32x4_t feedback = vdupq_n_f32(1.0f - decay);
 
         for (int i = 0; i < 4; i++) {
@@ -382,43 +383,35 @@ private:
 
     /**
      * NEON-optimized Hadamard matrix multiplication
-     * Processes 4 samples at once using vector operations
+     * Uses Fast Hadamard Transform (FHT) structure for O(N log N) efficiency
+     * Replaces expensive matrix multiply and avoids lane access issues.
      */
     void applyHadamard4(const float32x4_t* in, float32x4_t* out) {
-        // Pre-load Hadamard rows as vectors
-        float32x4_t row0 = vld1q_f32(hadamard[0]);
-        float32x4_t row1 = vld1q_f32(hadamard[1]);
-        float32x4_t row2 = vld1q_f32(hadamard[2]);
-        float32x4_t row3 = vld1q_f32(hadamard[3]);
-        float32x4_t row4 = vld1q_f32(hadamard[4]);
-        float32x4_t row5 = vld1q_f32(hadamard[5]);
-        float32x4_t row6 = vld1q_f32(hadamard[6]);
-        float32x4_t row7 = vld1q_f32(hadamard[7]);
+        // Stage 1 (Stride 1)
+        float32x4_t s1[8];
+        s1[0] = vaddq_f32(in[0], in[1]); s1[1] = vsubq_f32(in[0], in[1]);
+        s1[2] = vaddq_f32(in[2], in[3]); s1[3] = vsubq_f32(in[2], in[3]);
+        s1[4] = vaddq_f32(in[4], in[5]); s1[5] = vsubq_f32(in[4], in[5]);
+        s1[6] = vaddq_f32(in[6], in[7]); s1[7] = vsubq_f32(in[6], in[7]);
 
-        // For each sample position (0-3)
-        for (int s = 0; s < 4; s++) {
-            // Extract sample s from each channel
-            float32x4_t vec = vdupq_n_f32(0.0f);
-            for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-                vec = vsetq_lane_f32(vgetq_lane_f32(in[ch], s), vec, ch);
-            }
+        // Stage 2 (Stride 2)
+        float32x4_t s2[8];
+        s2[0] = vaddq_f32(s1[0], s1[2]); s2[2] = vsubq_f32(s1[0], s1[2]);
+        s2[1] = vaddq_f32(s1[1], s1[3]); s2[3] = vsubq_f32(s1[1], s1[3]);
+        s2[4] = vaddq_f32(s1[4], s1[6]); s2[6] = vsubq_f32(s1[4], s1[6]);
+        s2[5] = vaddq_f32(s1[5], s1[7]); s2[7] = vsubq_f32(s1[5], s1[7]);
 
-            // Multiply by Hadamard matrix
-            float32x4_t result = vdupq_n_f32(0.0f);
-            result = vmlaq_f32(result, row0, vdupq_laneq_f32(vec, 0));
-            result = vmlaq_f32(result, row1, vdupq_laneq_f32(vec, 1));
-            result = vmlaq_f32(result, row2, vdupq_laneq_f32(vec, 2));
-            result = vmlaq_f32(result, row3, vdupq_laneq_f32(vec, 3));
-            result = vmlaq_f32(result, row4, vdupq_laneq_f32(vec, 4));
-            result = vmlaq_f32(result, row5, vdupq_laneq_f32(vec, 5));
-            result = vmlaq_f32(result, row6, vdupq_laneq_f32(vec, 6));
-            result = vmlaq_f32(result, row7, vdupq_laneq_f32(vec, 7));
+        // Stage 3 (Stride 4) + Scaling (1/sqrt(8) ≈ 0.35355)
+        float32x4_t norm = vdupq_n_f32(0.35355339f);
 
-            // Store back
-            for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-                out[ch] = vsetq_lane_f32(vgetq_lane_f32(result, ch), out[ch], s);
-            }
-        }
+        out[0] = vmulq_f32(vaddq_f32(s2[0], s2[4]), norm);
+        out[4] = vmulq_f32(vsubq_f32(s2[0], s2[4]), norm);
+        out[1] = vmulq_f32(vaddq_f32(s2[1], s2[5]), norm);
+        out[5] = vmulq_f32(vsubq_f32(s2[1], s2[5]), norm);
+        out[2] = vmulq_f32(vaddq_f32(s2[2], s2[6]), norm);
+        out[6] = vmulq_f32(vsubq_f32(s2[2], s2[6]), norm);
+        out[3] = vmulq_f32(vaddq_f32(s2[3], s2[7]), norm);
+        out[7] = vmulq_f32(vsubq_f32(s2[3], s2[7]), norm);
     }
 
     /**
@@ -512,7 +505,7 @@ private:
                 sum += hadamard[i][j] * delayOut[j];
             }
             float dm = (i < 4) ? (decay * highDecayMult) : (decay * lowDecayMult);
-            mixed[i] = sum * std::min(0.99f, dm);
+            mixed[i] = sum * fminf(0.99f, dm);
         }
 
         mixed[0] += input * (1.0f - decay);

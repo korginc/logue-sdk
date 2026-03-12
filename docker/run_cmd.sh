@@ -112,6 +112,25 @@ if [ ! -d "${PLATFORM_PATH}" ]; then
     exit 1
 fi
 
+
+# Normalize path for Docker Desktop on Windows
+PLATFORM_MOUNT="${PLATFORM_PATH}"
+UNAME_S=$(uname -s 2>/dev/null || echo "")
+
+if [[ "${OSTYPE}" == msys* || "${OSTYPE}" == cygwin* || "${UNAME_S}" =~ MINGW ]]; then
+    # Running in Git Bash/MSYS2 on Windows with Docker Desktop WSL2 backend
+    if [[ "${PLATFORM_PATH}" =~ ^/([a-z])/ ]]; then
+        # Convert /d/path to /mnt/d/path for Docker WSL2 backend
+        DRIVE_LETTER=$(echo "${PLATFORM_PATH:1:1}" | tr '[:lower:]' '[:lower:]')
+        REST_PATH="${PLATFORM_PATH:2}"
+        PLATFORM_MOUNT="/mnt/${DRIVE_LETTER}${REST_PATH}"
+    fi
+elif [[ "${PLATFORM_PATH}" =~ ^([A-Za-z]): ]]; then
+    # Running from PowerShell/CMD - convert D:\path to /mnt/d/path
+    DRIVE_LETTER=$(echo "${PLATFORM_PATH:0:1}" | tr '[:upper:]' '[:lower:]')
+    REST_PATH=$(echo "${PLATFORM_PATH:2}" | sed 's|\\|/|g')
+    PLATFORM_MOUNT="/mnt/${DRIVE_LETTER}${REST_PATH}"
+fi
 if [ ! -z "${OPT_LIST}" ]; then
     if [ ! -z "${CMD}" ]; then
         echo "[Warn] Arguments overriden by -l/--list option: ${CMD}" 1>&2
@@ -124,6 +143,6 @@ if [ -z "${CMD}" ]; then
     exit 2
 fi
 
-## FEDE DEBUG
-# docker run --rm -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}
-docker run --rm -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}
+# Mount platform directory at /workspace as expected by container build scripts
+export MSYS_NO_PATHCONV=1
+docker run --rm -v "${PLATFORM_MOUNT}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}

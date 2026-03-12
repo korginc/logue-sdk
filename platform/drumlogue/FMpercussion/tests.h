@@ -122,7 +122,7 @@ bool test_prng_uniformity(void) {
     uint32_t start_cycles = read_cycle_counter();
 
     for (int i = 0; i < 10000; i++) {
-        uint32x4_t rand = neon_prng_rand(&rng);
+        uint32x4_t rand = neon_prng_rand_u32(&rng);
         uint32_t vals[4];
         vst1q_u32(vals, rand);
 
@@ -167,7 +167,7 @@ bool test_prng_independence(void) {
     uint32_t streams[4][SAMPLES];
 
     for (int i = 0; i < SAMPLES; i++) {
-        uint32x4_t rand = neon_prng_rand(&rng);
+        uint32x4_t rand = neon_prng_rand_u32(&rng);
         vst1q_u32(streams[i % 4], rand);  // Store interleaved
     }
 

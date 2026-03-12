@@ -21,7 +21,6 @@
 #include <cstring>
 #include <arm_neon.h>
 #include "unit.h"
-#include "constants.h"
 #include "spatial_modes.h"
 #include "filters.h"
 

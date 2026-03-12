@@ -12,8 +12,6 @@
 #include <stdint.h>
 #include "constants.h"  // Contains LFO_TARGET_* constants
 
-// Phase offset to prevent cancellation (90° = 0.25 cycle)
-#define LFO_PHASE_OFFSET 0.25f
 
 /**
  * Enhanced LFO state
