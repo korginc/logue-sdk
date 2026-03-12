@@ -33,22 +33,24 @@ const __unit_header unit_header_t unit_header = {
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"VlMllRes"}},
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"VlMllStf"}},
 
-        // Page 3: Resonator A-I
-        {0, 17, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Model"}},
-        {0, 4, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Partls"}},
-        // [0..2000]=both resA+B; [2001..4000]=resB override only
-        {0, 4000, 250, 250, k_unit_param_type_none, 0, 0, 0, {"Dkay"}},
-        // [−10..30]=both resA+B; [31..70]=resB override only
-        {-10, 70, 0, 0, k_unit_param_type_none, 1, 1, 0, {"Mterl"}},
+        // Page 3: Resonator I
+        // 0-4 are the partials, value 5 means that next paarms dedicated to resonator are adressing resonator A and value 6 are for resonator B
+        {0, 6, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Partls"}},
+        // [0..8] String , Beam ,  Square , Membrn , Plate , Drumhd , Marmb , OpnTub , ClsTub
+        {0, 8, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Model"}},
+        // [0..2000]
+        {0, 2000, 250, 250, k_unit_param_type_none, 0, 0, 0, {"Dkay"}},
+        // [−10..30]
+        {-10, 30, 0, 0, k_unit_param_type_none, 1, 1, 0, {"Mterl"}},
 
-        // Page 4: Resonator A-II
+        // Page 4: Resonator II
         {-10, 30, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Tone"}},
         {2, 98, 0, 26, k_unit_param_type_none, 2, 0, 0, {"HitPos"}},
         {0, 20, 0, 10, k_unit_param_type_none, 1, 0, 0, {"Rel"}},
-        // [0..19999]=both resA+B; [20000..39998]=resB override only
-        {0, 39998, 3000, 1, k_unit_param_type_none, 4, 1, 0, {"Inharm"}},
+        // [0..19999] - TODO to make change faster remove a digit and multiply by 10 in the code
+        {0, 19999, 3000, 1, k_unit_param_type_none, 0, 0, 0, {"Inharm"}},
 
-        // Page 5: Resonator A-III
+        // Page 5: Resonator III - TODO to make change faster remove a digit and multiply by 10 in the code
         {10, 19990, 5005, 10, k_unit_param_type_hertz, 0, 0, 0, {"LowCut"}},
         {0, 20, 0, 5, k_unit_param_type_none, 1, 0, 0, {"TubRad"}},
         // Range 0-100, no fraction
@@ -58,6 +60,7 @@ const __unit_header unit_header_t unit_header = {
         // Page 6: Noise II
         {0, 1000, 300, 0, k_unit_param_type_percent, 1, 1, 0, {"NzRes"}},
         {0, 2, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"NzFltr"}},
+        // TODO to make change faster remove a digit and multiply by 10 in the code
         {20, 20000, 12000, 20, k_unit_param_type_hertz, 0, 0, 0, {"NzFltFrq"}},
         {707, 4000, 0, 707, k_unit_param_type_none, 0, 0, 0, {"Resnc"}}
     }

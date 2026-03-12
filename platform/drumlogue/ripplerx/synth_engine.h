@@ -52,8 +52,8 @@ public:
         k_paramMlltStif,    // 5
         k_paramVlMllRes,    // 6
         k_paramVlMllStf,    // 7
-        k_paramModel,       // 8
-        k_paramPartls,      // 9
+        k_paramPartls,      // 8
+        k_paramModel,       // 9
         k_paramDkay,        // 10
         k_paramMterl,       // 11
         k_paramTone,        // 12
@@ -166,9 +166,16 @@ public:
     uint8_t m_preset_idx = 0;
 
     // Called by unit_get_param_value so the OS knows what to draw on the screen
+    // TODO: is it correct to show just the value stored in the local database?
+    // No A/B discrimination? Are partials to be mapped? Any other parameter mapping?
     inline int32_t getParameterValue(uint8_t index) const {
         // CRITICAL UI FIX: Prevent OS out-of-bounds reads
         if (index >= 24) return 0;
+        if (index == k_paramModel) {
+            if (m_is_resonator_a)
+                return m_model_a;
+            else
+                return m_model_b;
         return m_params[index];
     }
 
@@ -180,39 +187,42 @@ public:
     inline void LoadPreset(uint8_t idx) {
         m_preset_idx = idx;
 
-        // Columns Map:
+        // Columns Map: NOTE keep the justification so it's easier to read!!
         // 0:Prgram | 1:Note | 2:Bank | 3:Sample | 4:MlltRes | 5:MlltStif | 6:VlMllR | 7:VlMllS
-        // 8:Model  | 9:Prtls| 10:Dkay| 11:Mterl | 12:Tone   | 13:HitPos  | 14:Rel   | 15:Inharm
+        // 8:Prtls  | 9:Model| 10:Dkay| 11:Mterl | 12:Tone   | 13:HitPos  | 14:Rel   | 15:Inharm
         // 16:LCut  | 17:TRad| 18:Gain| 19:NzMix | 20:NzRes  | 21:NzFltr  | 22:NzFrq | 23:Resnc
+        // TODO it would be better to have an enum for both row and columns using the existing comments
+        // using a dummy value as last value for marker, to have better maintenability (no magic numbers)
+        // TODO: are those parameters enough for physical modelling?
         static const int32_t presets[28][24] = {
-            {0, 60, 0, 1, 500, 2500, 0, 0, 0, 3, 250, 10, 0, 26, 10, 3000, 10, 5, 0, 0, 300, 0, 12000, 707}, // 0: Init
-            {1, 60, 0, 1, 800, 4000, 0, 0, 6, 3, 150, -5, 0, 50, 5, 1500, 10, 5, 20, 0, 300, 0, 12000, 707}, // 1: Marimba
-            {2, 36, 0, 1, 100, 500, 0, 0, 5, 3, 800, -10, 0, 50, 15, 100, 10, 5, 150, 0, 300, 0, 1000, 707}, // 2: 808 Sub
-            {3, 38, 0, 1, 400, 3000, 0, 0, 5, 3, 150, 15, 0, 20, 8, 5000, 150, 5, 50, 800, 500, 2, 8000, 707}, // 3: Ac Snare
-            {4, 72, 0, 1, 900, 5000, 0, 0, 8, 3, 1500, 30, 0, 10, 20, 19000, 200, 5, 0, 0, 300, 0, 12000, 707}, // 4: Tubular Bell
-            {5, 40, 0, 1, 300, 500, 0, 0, 3, 3, 600, -5, 0, 30, 15, 200, 10, 5, 30, 0, 300, 0, 5000, 707}, // 5: Timpani
-            {6, 48, 0, 1, 600, 2000, 0, 0, 5, 3, 300, 5, 0, 10, 12, 500, 50, 5, 50, 50, 200, 0, 6000, 707}, // 6: Djambe
-            {7, 36, 0, 1, 200, 800, 0, 0, 5, 3, 700, -10, 0, 50, 18, 100, 10, 5, 200, 0, 300, 0, 4000, 707}, // 7: Taiko
-            {8, 65, 0, 1, 700, 4500, 0, 0, 5, 3, 80, 20, 0, 50, 3, 2000, 250, 5, 80, 950, 150, 2, 10000, 707}, // 8: March Snare
-            {9, 35, 0, 1, 100, 1500, 0, 0, 4, 3, 1800, 25, 0, 25, 20, 18000, 10, 5, 60, 100, 800, 0, 8000, 707}, // 9: Tam Tam
-            {10, 72, 0, 1, 600, 4500, 0, 0, 0, 3, 800, 10, 0, 80, 12, 1, 10, 5, 0, 0, 300, 0, 10000, 707}, // 10: Koto
-            {11, 72, 0, 1, 500, 3000, 0, 0, 1, 3, 1200, 15, 0, 50, 18, 50, 10, 5, 0, 0, 300, 0, 10000, 707}, // 11: Vibraphone
-            {12, 76, 0, 1, 800, 3500, 0, 0, 2, 3, 50, -8, 0, 50, 2, 800, 10, 5, 0, 0, 300, 0, 5000, 707}, // 12: Woodblock
-            {13, 45, 0, 1, 400, 2000, 0, 0, 5, 3, 400, -2, 0, 50, 10, 300, 10, 5, 40, 20, 300, 0, 8000, 707}, // 13: Acoustic Tom
-            {14, 60, 0, 1, 800, 5000, 0, 0, 4, 3, 1400, 30, 0, 10, 18, 19500, 400, 5, 20, 600, 700, 2, 14000, 707}, // 14: Cymbal
-            {15, 36, 0, 1, 200, 2000, 0, 0, 4, 3, 1900, 20, 0, 50, 20, 19000, 10, 5, 40, 100, 800, 0, 6000, 707}, // 15: Gong
-            {16, 72, 0, 1, 700, 4000, 0, 0, 1, 3, 200, 25, 0, 80, 5, 10, 10, 5, 10, 0, 300, 0, 10000, 707}, // 16: Kalimba
-            {17, 60, 0, 1, 600, 3500, 0, 0, 4, 3, 600, 20, 0, 30, 12, 8000, 100, 5, 20, 0, 300, 0, 10000, 707}, // 17: Steel Pan
-            {18, 79, 0, 1, 900, 4800, 0, 0, 2, 3, 30, 5, 0, 50, 1, 200, 10, 5, 0, 0, 300, 0, 8000, 707}, // 18: Claves
-            {19, 67, 0, 1, 800, 4500, 0, 0, 4, 3, 150, 25, 0, 20, 4, 17000, 200, 5, 30, 0, 300, 0, 10000, 707}, // 19: Cowbell
-            {20, 84, 0, 1, 900, 5000, 0, 0, 1, 3, 1000, 30, 0, 10, 15, 19900, 800, 5, 0, 0, 300, 0, 15000, 707}, // 20: Triangle
-            {21, 36, 0, 1, 300, 1500, 0, 0, 5, 3, 200, -5, 0, 50, 6, 200, 10, 5, 100, 50, 200, 0, 3000, 707}, // 21: Kick Drum
-            {22, 60, 0, 1, 500, 3000, 0, 0, 5, 3, 50, 10, 0, 50, 3, 5000, 400, 5, 50, 1000, 100, 2, 10000, 707}, // 22: Clap
-            {23, 72, 0, 1, 100, 4000, 0, 0, 5, 3, 20, 15, 0, 50, 2, 1000, 800, 5, 20, 1000, 300, 2, 12000, 707}, // 23: Shaker
-            {24, 72, 0, 1, 100, 500, 0, 0, 7, 3, 900, -5, 0, 10, 12, 10, 10, 5, 0, 400, 800, 0, 6000, 707}, // 24: Flute
-            {25, 60, 0, 1, 100, 500, 0, 0, 8, 3, 900, -5, 0, 10, 12, 10, 10, 5, 0, 400, 800, 0, 6000, 707}, // 25: Clarinet
-            {26, 36, 0, 1, 600, 2500, 0, 0, 0, 3, 600, -8, 0, 20, 10, 5, 10, 5, 60, 0, 300, 0, 5000, 707}, // 26: Pluck Bass
-            {27, 76, 0, 1, 700, 3500, 0, 0, 4, 3, 1600, 25, 0, 80, 18, 12000, 100, 5, 0, 0, 300, 0, 12000, 707} // 27: Glass Bowl
+            { 0, 60, 0, 1, 500, 2500, 0, 0, 3, 0,  250,  10, 0, 26, 10,  3000,  10, 5,   0,    0, 300, 0, 12000, 707}, // 0: Init
+            { 1, 60, 0, 1, 800, 4000, 0, 0, 3, 6,  150,  -5, 0, 50,  5,  1500,  10, 5,  20,    0, 300, 0, 12000, 707}, // 1: Marimba
+            { 2, 36, 0, 1, 100,  500, 0, 0, 3, 5,  800, -10, 0, 50, 15,   100,  10, 5, 150,    0, 300, 0,  1000, 707}, // 2: 808 Sub
+            { 3, 38, 0, 1, 400, 3000, 0, 0, 3, 5,  150,  15, 0, 20,  8,  5000, 150, 5,  50,  800, 500, 2,  8000, 707}, // 3: Ac Snare
+            { 4, 72, 0, 1, 900, 5000, 0, 0, 3, 8, 1500,  30, 0, 10, 20, 19000, 200, 5,   0,    0, 300, 0, 12000, 707}, // 4: Tubular Bell
+            { 5, 40, 0, 1, 300,  500, 0, 0, 3, 3,  600,  -5, 0, 30, 15,   200,  10, 5,  30,    0, 300, 0,  5000, 707}, // 5: Timpani
+            { 6, 48, 0, 1, 600, 2000, 0, 0, 3, 5,  300,   5, 0, 10, 12,   500,  50, 5,  50,   50, 200, 0,  6000, 707}, // 6: Djambe
+            { 7, 36, 0, 1, 200,  800, 0, 0, 3, 5,  700, -10, 0, 50, 18,   100,  10, 5, 200,    0, 300, 0,  4000, 707}, // 7: Taiko
+            { 8, 65, 0, 1, 700, 4500, 0, 0, 3, 5,   80,  20, 0, 50,  3,  2000, 250, 5,  80,  950, 150, 2, 10000, 707}, // 8: March Snare
+            { 9, 35, 0, 1, 100, 1500, 0, 0, 3, 4, 1800,  25, 0, 25, 20, 18000,  10, 5,  60,  100, 800, 0,  8000, 707}, // 9: Tam Tam
+            {10, 72, 0, 1, 600, 4500, 0, 0, 3, 0,  800,  10, 0, 80, 12,     1,  10, 5,   0,    0, 300, 0, 10000, 707}, // 10: Koto
+            {11, 72, 0, 1, 500, 3000, 0, 0, 3, 1, 1200,  15, 0, 50, 18,    50,  10, 5,   0,    0, 300, 0, 10000, 707}, // 11: Vibraphone
+            {12, 76, 0, 1, 800, 3500, 0, 0, 3, 2,   50,  -8, 0, 50,  2,   800,  10, 5,   0,    0, 300, 0,  5000, 707}, // 12: Woodblock
+            {13, 45, 0, 1, 400, 2000, 0, 0, 3, 5,  400,  -2, 0, 50, 10,   300,  10, 5,  40,   20, 300, 0,  8000, 707}, // 13: Acoustic Tom
+            {14, 60, 0, 1, 800, 5000, 0, 0, 3, 4, 1400,  30, 0, 10, 18, 19500, 400, 5,  20,  600, 700, 2, 14000, 707}, // 14: Cymbal
+            {15, 36, 0, 1, 200, 2000, 0, 0, 3, 4, 1900,  20, 0, 50, 20, 19000,  10, 5,  40,  100, 800, 0,  6000, 707}, // 15: Gong
+            {16, 72, 0, 1, 700, 4000, 0, 0, 3, 1,  200,  25, 0, 80,  5,    10,  10, 5,  10,    0, 300, 0, 10000, 707}, // 16: Kalimba
+            {17, 60, 0, 1, 600, 3500, 0, 0, 3, 4,  600,  20, 0, 30, 12,  8000, 100, 5,  20,    0, 300, 0, 10000, 707}, // 17: Steel Pan
+            {18, 79, 0, 1, 900, 4800, 0, 0, 3, 2,   30,   5, 0, 50,  1,   200,  10, 5,   0,    0, 300, 0,  8000, 707}, // 18: Claves
+            {19, 67, 0, 1, 800, 4500, 0, 0, 3, 4,  150,  25, 0, 20,  4, 17000, 200, 5,  30,    0, 300, 0, 10000, 707}, // 19: Cowbell
+            {20, 84, 0, 1, 900, 5000, 0, 0, 3, 1, 1000,  30, 0, 10, 15, 19900, 800, 5,   0,    0, 300, 0, 15000, 707}, // 20: Triangle
+            {21, 36, 0, 1, 300, 1500, 0, 0, 3, 5,  200,  -5, 0, 50,  6,   200,  10, 5, 100,   50, 200, 0,  3000, 707}, // 21: Kick Drum
+            {22, 60, 0, 1, 500, 3000, 0, 0, 3, 5,   50,  10, 0, 50,  3,  5000, 400, 5,  50, 1000, 100, 2, 10000, 707}, // 22: Clap
+            {23, 72, 0, 1, 100, 4000, 0, 0, 3, 5,   20,  15, 0, 50,  2,  1000, 800, 5,  20, 1000, 300, 2, 12000, 707}, // 23: Shaker
+            {24, 72, 0, 1, 100,  500, 0, 0, 3, 7,  900,  -5, 0, 10, 12,    10,  10, 5,   0,  400, 800, 0,  6000, 707}, // 24: Flute
+            {25, 60, 0, 1, 100,  500, 0, 0, 3, 8,  900,  -5, 0, 10, 12,    10,  10, 5,   0,  400, 800, 0,  6000, 707}, // 25: Clarinet
+            {26, 36, 0, 1, 600, 2500, 0, 0, 3, 0,  600,  -8, 0, 20, 10,     5,  10, 5,  60,    0, 300, 0,  5000, 707}, // 26: Pluck Bass
+            {27, 76, 0, 1, 700, 3500, 0, 0, 3, 4, 1600,  25, 0, 80, 18, 12000, 100, 5,   0,    0, 300, 0, 12000, 707}  // 27: Glass Bowl
         };
 
         if (idx >= 28) return;
@@ -226,13 +236,13 @@ public:
 
     static inline const char * getPresetName(uint8_t idx) {
         static const char* const preset_names[] = {
-            "Init",         "Marimba",      "808 Sub",      "Ac Snare",
-            "TubularBell",  "Timpani",      "Djambe",       "Taiko",
-            "March Snare",  "Tam Tam",      "Koto",         "Vibraphone",
-            "Woodblock",    "AcousticTom",  "Cymbal",       "Gong",
-            "Kalimba",      "Steel Pan",    "Claves",       "Cowbell",
-            "Triangle",     "Kick Drum",    "Clap",         "Shaker",
-            "Flute",        "Clarinet",     "Pluck Bass",   "Glass Bowl"
+            "Init",    "Marmba", "808Sub", "AcSnre",
+            "TblrBel", "Timpni", "Djambe", "Taiko",
+            "MrchSnr", "TamTam", "Koto",   "Vibrph",
+            "Wodblk",  "Ac Tom", "Cymbal", "Gong",
+            "Kalimba", "StelPan","Claves", "Cowbel",
+            "Trngle",  "Kick",    "Clap",  "Shaker",
+            "Flute",   "Clrint", "PlkBss", "GlsBwl"
         };
         if (idx < 28) return preset_names[idx];
         return "Unknown";
@@ -269,15 +279,32 @@ public:
                 }
                 break;
             }
+            // resonator A/B parameters
+            case k_paramPartls: {
+                if (value < 5)
+                    // TODO is this the real values or it should be mapped into values we read in partial_names?
+                    // TODO should we have partials for resonator A and other for resonator B?
+                    m_active_partials = value;
+                else
+                    m_is_resonator_a = value == 5 ;
+                break;
+            }
+
             case k_paramModel: {
-                m_model_a = value % 9;
+                if (m_is_resonator_a)
+                    m_model_a = value;
+                else
+                    m_model_b = value;
 #ifdef ENABLE_PHASE_7_MODELS
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     if (m_model_a == 7 || m_model_a == 8) {
                         state.voices[i].resA.phase_mult = -1.0f;
-                        state.voices[i].resB.phase_mult = -1.0f;
                     } else {
                         state.voices[i].resA.phase_mult = 1.0f;
+                    }
+                    if (m_model_b == 7 || m_model_b == 8) {
+                        state.voices[i].resB.phase_mult = -1.0f;
+                    } else {
                         state.voices[i].resB.phase_mult = 1.0f;
                     }
                 }
@@ -285,47 +312,30 @@ public:
                 break;
             }
 
-            case k_paramPartls: {
-                m_active_partials = value;
-                break;
-            }
-
             case k_paramDkay: {
-                // [0..2000]: symmetric — set both resA and resB to the same decay.
-                // [2001..4000]: resB override — resA stays frozen at its last A-zone value.
                 // 0.85 = instant dead thud. 0.999 = rings for ~5 seconds.
                 if (value <= 2000) {
                     float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
                     float g = 0.85f + (norm * 0.149f);
                     for (int i = 0; i < NUM_VOICES; ++i) {
-                        state.voices[i].resA.feedback_gain = g;
-                        state.voices[i].resB.feedback_gain = g;
-                    }
-                } else {
-                    float norm = fmaxf(0.0f, fminf(1.0f, (float)(value - 2000) / 2000.0f));
-                    float g = 0.85f + (norm * 0.149f);
-                    for (int i = 0; i < NUM_VOICES; ++i) {
-                        state.voices[i].resB.feedback_gain = g;
+                        if (m_is_resonator_a)
+                            state.voices[i].resA.feedback_gain = g;
+                        else
+                            state.voices[i].resB.feedback_gain = g;
                     }
                 }
                 break;
             }
 
             case k_paramMterl: {
-                // [−10..30]: symmetric — set both resA and resB to the same material.
-                // [31..70]: resB override — resA stays frozen at its last A-zone value.
                 if (value <= 30) {
                     float norm = (fmaxf(-10.0f, fminf(30.0f, (float)value)) + 10.0f) / 40.0f;
                     float coeff = 0.01f + (norm * 0.99f);
                     for (int i = 0; i < NUM_VOICES; ++i) {
-                        state.voices[i].resA.lowpass_coeff = coeff;
-                        state.voices[i].resB.lowpass_coeff = coeff;
-                    }
-                } else {
-                    float norm = fmaxf(0.0f, fminf(1.0f, (float)(value - 30) / 40.0f));
-                    float coeff = 0.01f + (norm * 0.99f);
-                    for (int i = 0; i < NUM_VOICES; ++i) {
-                        state.voices[i].resB.lowpass_coeff = coeff;
+                        if (m_is_resonator_a)
+                            state.voices[i].resA.lowpass_coeff = coeff;
+                        else
+                            state.voices[i].resB.lowpass_coeff = coeff;
                     }
                 }
                 break;
@@ -350,18 +360,13 @@ public:
             }
 
             case k_paramInharm: {
-                // [0..19999]: symmetric — set both resA and resB to the same dispersion.
-                // [20000..39998]: resB override — resA stays frozen at its last A-zone value.
                 if (value <= 19999) {
                     float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 20000.0f));
                     for (int i = 0; i < NUM_VOICES; ++i) {
-                        state.voices[i].resA.ap_coeff = norm;
-                        state.voices[i].resB.ap_coeff = norm;
-                    }
-                } else {
-                    float norm = fmaxf(0.0f, fminf(1.0f, (float)(value - 20000) / 20000.0f));
-                    for (int i = 0; i < NUM_VOICES; ++i) {
-                        state.voices[i].resB.ap_coeff = norm;
+                        if (m_is_resonator_a)
+                            state.voices[i].resA.ap_coeff = norm;
+                        else
+                            state.voices[i].resB.ap_coeff = norm;
                     }
                 }
                 break;
@@ -369,7 +374,7 @@ public:
             case k_paramLowCut: {
 #ifdef ENABLE_PHASE_6_FILTERS
                 m_master_cutoff = (float)value;
-                float res_val = fmaxf(0.707f, (float)m_params[k_paramResnc] / 1000.0f);
+                float res_val = fmaxf(0.707f, (float)m_params[k_paramResnc]);
                 state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
 #endif
                 break;
@@ -379,6 +384,8 @@ public:
                 state.master_drive = 1.0f + (norm * 20.0f);
                 break;
             }
+
+            // resonator parameters
             case k_paramNzMix: {
                 // Updated for the new 0-100 header.c range
 #ifdef ENABLE_PHASE_5_EXCITERS
@@ -416,26 +423,32 @@ public:
         }
     }
 
+    // NOTE: show A or B depending on the choosen resonator via partials parameter
     inline const char * getParameterStrValue(uint8_t index, int32_t value) const {
         static const char* const bank_names[] = { "CH", "OH", "RS", "CP", "MISC", "USER", "EXP" };
-        static const char* const model_names[] = {
-            "String", "Beam", "Square", "Membrn", "Plate",
-            "Drumhd", "Marimb", "OpnTub", "ClsTub"
+        static const char* const model_names_a[] = {
+            "A:String", "A:Beam",  "A:Square", "A:Membrn", "A:Plate",
+            "A:Drumhd", "A:Marmb", "A:OpnTub", "A:ClsTub"
+        }
+        static const char* const model_names_b[] = {
+            "B:String", "B:Beam",  "B:Square", "B:Membrn", "B:Plate",
+            "B:Drumhd", "B:Marmb", "B:OpnTub", "B:ClsTub"
         };
-        static const char* const partial_names[] = {"4", "8", "16", "32", "64"};
+        static const char* const partial_names_a[] = {"4:A", "8:A", "16:A", "32:A", "64:A"};
+        static const char* const partial_names_b[] = {"4:B", "8:B", "16:B", "32:B", "64:B"};
         static const char* const nz_filter_names[] = {"LP", "BP", "HP"};
 
         if (index == k_paramProgram) {
-            return getPresetName((uint8_t)value);
+            return getPresetName((uint8_t)m_params[k_paramProgram]);
         } else if (index == k_paramBank) {
-            if (value >= 0 && value < 7) return bank_names[value];
+            if (value >= 0 && value < 7) return bank_names[m_sample_bank];
         } else if (index == k_paramModel) {
-            if (value >= 0 && value < 9) return model_names[value];
-            if (value >= 9 && value < 18) return model_names[value - 9];
+            if (value >= 0 && value < 9)
+                return m_is_resonator_a ? model_names_a[m_model_a] : model_names_a[m_model_b];
         } else if (index == k_paramPartls) {
-            if (value >= 0 && value < 5) return partial_names[value];
+            if (value >= 0 && value < 5) return m_is_resonator_a ? partial_names_a[m_active_partials] : partial_names_b[m_active_partials];
         } else if (index == k_paramNzFltr) {
-            if (value >= 0 && value < 3) return nz_filter_names[value];
+            if (value >= 0 && value < 3) return nz_filter_names[m_params[k_paramNzFltr]];
         }
 
         // Unconditional failsafe to prevent OS screen crashes
@@ -670,6 +683,7 @@ inline void NoteOff(uint8_t note) {
 
                 // 3. Active Partial Counting: Only process ResB if complexity is high enough
                 if (m_active_partials >= 2) {
+                    // TODO value of m_active_partials actually used?
                     outB = process_waveguide(voice.resB, exciter_sig);
                 }
 
@@ -757,6 +771,8 @@ private:
     uint8_t m_sample_bank = 0;
     uint8_t m_sample_number = 0;
     uint8_t m_model_a = 0;
+    uint8_t m_model_b = 0;
+    bool    m_is_resonator_a = True; // default is res A
 
     uint8_t m_active_partials = 4; // Default to maximum complexity
 };
