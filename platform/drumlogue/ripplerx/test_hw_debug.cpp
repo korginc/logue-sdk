@@ -67,7 +67,7 @@ static float run_blocks(RipplerXWaveguide& s, int total_frames, int block_size =
         std::memset(buf, 0, sizeof(buf));
         s.processBlock(buf, (size_t)frames);
         for (int i = 0; i < frames * 2; ++i) {
-            float a = std::fabsf(buf[i]);
+            float a = std::fabs(buf[i]);
             if (a > peak) peak = a;
         }
     }
@@ -136,7 +136,7 @@ static void test_param_audit() {
            "master_drive < 1 would attenuate signal below audibility");
 
     // master_gain should always be 1.0 (never changed by any parameter)
-    bool mg_ok = std::fabsf(st.master_gain - 1.0f) < 1e-6f;
+    bool mg_ok = std::fabs(st.master_gain - 1.0f) < 1e-6f;
     result("T0c master_gain == 1.0 (never changed by UI)", mg_ok,
            "master_gain changed unexpectedly");
 }
@@ -164,7 +164,7 @@ static void test_hw_boot_sequence() {
         s.processBlock(buf, 32);
         float blk_peak = 0.0f;
         for (int i = 0; i < 64; ++i) {
-            float a = std::fabsf(buf[i]);
+            float a = std::fabs(buf[i]);
             if (a > blk_peak) blk_peak = a;
             if (a > peak) peak = a;
         }
@@ -193,7 +193,7 @@ static void test_default_preset_no_override() {
     float peak = 0.0f;
     for (int i = 0; i < 400; ++i) {
         float v = single_frame(s);
-        float a = std::fabsf(v);
+        float a = std::fabs(v);
         if (a > peak) peak = a;
         if (i < 5 || (i >= 180 && i <= 195) || i >= 395) {
             std::cout << "  " << std::setw(5) << i << " | " << std::setprecision(8) << v << "\n";
@@ -231,7 +231,7 @@ static void test_denormal_decay() {
         std::memset(buf, 0, sizeof(buf));
         s.processBlock(buf, 32);
         for (int i = 0; i < 64; ++i) {
-            float a = std::fabsf(buf[i]);
+            float a = std::fabs(buf[i]);
             if (is_nan_or_inf(buf[i])) nan_or_inf_detected = true;
             if (a > 1e-9f) {
                 if (frame >= 2400) still_audible_at_50ms  = true;
@@ -346,7 +346,9 @@ static void test_all_presets_audible() {
         s.Init(&desc);
         s.LoadPreset((uint8_t)p);
         s.GateOn(127);
-        float peak = run_blocks(s, 500, 32);
+        // 1500 frames covers the worst-case round-trip for the lowest preset note
+        // (note 35 / B1 ≈ 870-sample delay with fasterpowf approximation on x86).
+        float peak = run_blocks(s, 1500, 32);
         if (peak < 1e-9f) {
             std::cout << "  [SILENT] preset " << p << " (" << RipplerXWaveguide::getPresetName(p) << ")"
                       << "  peak=" << peak << "\n";
@@ -446,7 +448,7 @@ static void test_delay_roundtrip() {
     for (int i = 0; i <= roundtrip; ++i) {
         float buf[2] = {};
         s.processBlock(buf, 1);
-        float a = std::fabsf(ut_delay_read);
+        float a = std::fabs(ut_delay_read);
         if (a > max_delay_read) max_delay_read = a;
     }
 
