@@ -301,20 +301,85 @@ Two additional bugs found and fixed after the initial Phase 13 commit:
 - Fix: added `float m_coupling_depth` (private member, updated only when
   Partls < 5) and changed processBlock to use `m_coupling_depth` directly.
 
-## Phase 13: Still Pending (future work)
+---
 
-* **Dynamic Energy Squelch (CPU):** Track per-voice output RMS. When the
-  waveguide decays below −80 dB, set `is_active = false` immediately rather
-  than waiting for the release envelope. Prevents zombie voices consuming CPU
-  for the full envelope release time after the signal is inaudible.
-* **Pitch Bend:** Wire `unit_pitch_bend()` into `NoteOn` delay-length math.
-  A ±semitone bend would require multiplying `delay_length` by `2^(bend/12)`.
+## Phase 15: Dynamic Squelch, Pitch Bend, Tone Cache & fasterpowf Fix [COMPLETED]
+
+### Dynamic Energy Squelch
+
+Per-voice 1-pole RMS follower (α = 0.01, τ ≈ 2 ms at 48 kHz) tracks `voice_out`
+**before** the master-envelope fade. When a releasing voice's RMS drops below
+`0.0001f` (≈ −80 dB) the voice is immediately set `is_active = false`, freeing
+the CPU slot without waiting for the full release envelope to expire.
+
+A 1000-sample guard (~20 ms) prevents the squelch from firing during the
+delay-line round-trip, where `voice_out` is genuinely zero even though the
+waveguide has energy in transit. Data fields added to `VoiceState`:
+- `float rms_env = 0.0f` — RMS envelope follower state
+- `float base_delay_A/B = 0.0f` — pre-bend root delay lengths (see Pitch Bend)
+
+### Pitch Bend (MIDI 0–16383, ±2 semitone range)
+
+`PitchBend(uint16_t bend)` maps centre=8192 → 0 semitones, full-up=16383 →
++2 st, full-down=0 → −2 st. The delay multiplier is `2^(−semitones/12)` (note
+negative: higher pitch = shorter delay).
+
+`base_delay_A/B` are stored at NoteOn time (before applying any held bend) so
+that `PitchBend()` can always re-derive from the root pitch without accumulating
+error across successive bend messages.
+
+**BUG: `fasterpowf(2.0f, 0.0f)` ≈ 0.9714, not 1.0**
+`fasterpow2f(p)` = `(uint32_t)(8388608 * (p + 126.94269504))` interpreted as
+float. The constant 126.94269504 is slightly below 127, so at p=0 the result
+decodes to ≈0.9714 instead of 1.0. Every centre-bend would silently detune the
+voice downward by ~50 cents. Fixed by using an exact special-case for bend=8192:
+```cpp
+if (bend == 8192) {
+    m_pitch_bend_mult = 1.0f;
+} else {
+    float semitones = ((float)bend - 8192.0f) * (2.0f / 8192.0f);
+    m_pitch_bend_mult = powf(2.0f, -semitones / 12.0f);
+}
+```
+`powf` is used in place of `fasterpowf` throughout PitchBend because this
+function is called from the MIDI thread (not the audio loop) and accuracy
+matters more than speed here.
+
+`unit.cc` stub wired: `unit_pitch_bend` now calls `s_synth.PitchBend(bend)`.
+
+Buffer-overflow guard: all delay_length assignments in NoteOn and PitchBend are
+clamped to `[2, DELAY_BUFFER_SIZE−2]` to prevent out-of-bounds reads on low
+notes bent downward (e.g. MIDI note 0 − 2 st → delay ≈ 6585 > 4096).
+
+### Tone Parameter — audio-thread race condition fix
+
+Reading `m_params[k_paramTone]` in `processBlock` on every sample was a data
+race with the UI thread calling `setParameter`. Fixed by adding `float tone`
+to `SynthState` (updated only in `setParameter`) and hoisting
+`const float tone_val = state.tone` once per block before the voice loop.
+
+### Unit tests T16–T18
+
+- **T16a**: low-`feedback_gain` voice is killed within a bounded frame count
+  after GateOff (energy squelch fires when RMS < −80 dB).
+- **T16b**: a sustaining voice (no GateOff) stays active for 200 frames.
+- **T17a/b**: PitchBend up/down proportionally shortens/lengthens delay_length.
+- **T17c**: PitchBend(8192) (centre) restores delay_length to within 0.1
+  samples of the pre-bend value (exact, because bend == 8192 → mult = 1.0f).
+- **T18a**: a note struck while bend is held at max-up inherits the shorter
+  delay immediately.
+- **T18b**: centre-bend after a bent NoteOn restores the root pitch delay
+  (base_delay_A stored correctly in NoteOn).
+
+All 45 tests pass.
+
+### Remaining future work
+
 * **True Stereo Master Filter:** `master_filter` is a single mono `FastSVF`.
   Add a second instance to `SynthState` for the right channel so future stereo
   effects (chorus, panning) pass through a properly independent filter.
 * **Voice 0 skipped on first note:** `NoteOn` increments `next_voice_idx`
-  before assigning, so the first ever note goes to voice 1. Minor; reorder to
-  assign before incrementing or just note it as a cosmetic issue.
+  before assigning, so the first ever note goes to voice 1. Minor cosmetic issue.
 
 ---
 

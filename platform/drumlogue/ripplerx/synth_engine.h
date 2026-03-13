@@ -144,9 +144,12 @@ public:
             state.voices[i].resA.lowpass_coeff = 1.0f;
             state.voices[i].resB.lowpass_coeff = 1.0f;
 
-            // Clear coupling and tone memory
+            // Clear coupling, tone and energy-squelch memory
             state.voices[i].resB_out_prev = 0.0f;
             state.voices[i].tone_lp = 0.0f;
+            state.voices[i].rms_env = 0.0f;
+            state.voices[i].base_delay_A = 0.0f;
+            state.voices[i].base_delay_B = 0.0f;
 
 #ifdef ENABLE_PHASE_6_FILTERS
             // Noise filter defaults to LP mode, fully open (12 kHz)
@@ -165,6 +168,7 @@ public:
         state.master_drive = 1.0f;
         state.mix_ab = 0.5f; // Equal A/B mix
         state.tone = 0.0f;   // Neutral tilt EQ (LoadPreset restores the preset value)
+        m_pitch_bend_mult = 1.0f; // Clear any held bend so the next note plays in tune.
 
         // Always return to ResA edit context so LoadPreset (called next in Init)
         // applies preset data symmetrically to both resonators.
@@ -677,6 +681,19 @@ public:
         v.resA.delay_length = delay_len;
         v.resB.delay_length = delay_len;
 #endif
+        // Store pre-bend lengths so PitchBend() can always re-derive from the root pitch.
+        // Then apply any bend that was already active when this note was struck.
+        v.base_delay_A = v.resA.delay_length;
+        v.base_delay_B = v.resB.delay_length;
+        v.resA.delay_length = fmaxf(2.0f, fminf((float)(DELAY_BUFFER_SIZE - 2),
+                                                  v.base_delay_A * m_pitch_bend_mult));
+        v.resB.delay_length = fmaxf(2.0f, fminf((float)(DELAY_BUFFER_SIZE - 2),
+                                                  v.base_delay_B * m_pitch_bend_mult));
+
+        // Reset the RMS squelch tracker so residual energy from the previous note
+        // on this voice slot doesn't prematurely kill the new note's attack.
+        v.rms_env = 0.0f;
+
         // Reset phase
         v.exciter.current_frame = 0;
         v.exciter.mallet_lp  = 0.0f;
@@ -740,6 +757,33 @@ inline void NoteOff(uint8_t note) {
         }
     }
 
+    inline void PitchBend(uint16_t bend) {
+        // MIDI pitch bend: 0–16383, centre = 8192.
+        // Map to ±2 semitones (standard default bend-sensitivity range).
+        // PitchBend is not in the audio hot loop, so we use powf() for accuracy.
+        // fasterpowf(2.0f, 0.0f) ≈ 0.9714 (not 1.0) due to fasterlog2f(2.0f)≈1.057
+        // approximation error cascading through fasterpow2f(0.0f), which would cause
+        // every centre-bend to quietly detune the voice downward by ~50 cents.
+        if (bend == 8192) {
+            m_pitch_bend_mult = 1.0f;
+        } else {
+            float semitones = ((float)bend - 8192.0f) * (2.0f / 8192.0f);
+            // A higher pitch requires a shorter delay line → negate the exponent.
+            m_pitch_bend_mult = powf(2.0f, -semitones / 12.0f);
+        }
+
+        // Apply immediately to every active voice.
+        // Clamping to [2, DELAY_BUFFER_SIZE-2] prevents buffer overrun on low notes
+        // bent upward (e.g. MIDI 0 at −2 st → delay ≈ 6585 samples > buffer).
+        for (int i = 0; i < NUM_VOICES; ++i) {
+            VoiceState& v = state.voices[i];
+            if (!v.is_active) continue;
+            v.resA.delay_length = fmaxf(2.0f, fminf((float)(DELAY_BUFFER_SIZE - 2),
+                                                      v.base_delay_A * m_pitch_bend_mult));
+            v.resB.delay_length = fmaxf(2.0f, fminf((float)(DELAY_BUFFER_SIZE - 2),
+                                                      v.base_delay_B * m_pitch_bend_mult));
+        }
+    }
 
     // ==============================================================================
     // 5. The Core Physics (Executed per-voice, per-sample)
@@ -903,20 +947,28 @@ inline void NoteOff(uint8_t note) {
                     voice_out += hp * boost_amt;
                 }
 
-// [UT4: GATE-OFF CHOKE FIX] - The "Damper Pedal" Squelch
+// [UT4: GATE-OFF CHOKE FIX] - The "Damper Pedal" Squelch + Dynamic Energy Squelch
 #ifdef ENABLE_PHASE_5_EXCITERS
-                // 1. Process the Master Envelope (smooth fade-out during release).
-                //    During gate-on, master_env holds at 1.0 (sustain_level=1.0, decay_rate=0) —
-                //    no audible effect on the physical tail.
-                //    On GateOff/NoteOff, it fades to 0 at the rate set by k_paramRel.
+                // 1. Track the acoustic energy of the waveguide model BEFORE applying
+                //    the master-envelope fade.  This distinguishes "the tube is silent"
+                //    from "the user released the gate".  α=0.01 → τ ≈ 2 ms at 48 kHz.
+                voice.rms_env = (fabsf(voice_out) * 0.01f) + (voice.rms_env * 0.99f);
+
+                // 2. Process the Master Envelope (smooth fade-out during release).
+                //    During gate-on it holds at 1.0 — no audible effect on the tail.
+                //    On GateOff/NoteOff it fades to 0 at the rate set by k_paramRel.
                 float damper_fade = voice.exciter.master_env.process();
                 voice_out *= damper_fade;
 
-                // 2. Kill the voice ONLY when the envelope is fully idle.
-                //    This is time-based, not amplitude-based, so the delay-line travel
-                //    window is never mistaken for "silence" and prematurely squelched.
-                if (voice.is_releasing && voice.exciter.master_env.state == ENV_IDLE) {
-                    voice.is_active = false;
+                // 3. Dynamic Energy Squelch: yield CPU as soon as the acoustic model is
+                //    inaudible (−80 dB ≈ 0.0001), without waiting for the full release
+                //    fade to run to ENV_IDLE.
+                //    Guard: current_frame > 1000 (~20 ms) prevents mis-fires during the
+                //    delay-line round-trip window where voice_out is legitimately 0.
+                if (voice.is_releasing && voice.exciter.current_frame > 1000) {
+                    if (voice.rms_env < 0.0001f || voice.exciter.master_env.state == ENV_IDLE) {
+                        voice.is_active = false;
+                    }
                 }
 #endif
 
@@ -996,4 +1048,5 @@ private:
     float   m_coupling_depth  = 0.75f; // Coupling depth [0.0–1.0] from Partls UI index 0–4.
     // Stored separately from m_params[k_paramPartls] so that Partls=5/6
     // (ResA/ResB editor-select modes) never corrupt the coupling amount.
+    float   m_pitch_bend_mult = 1.0f; // Delay-length multiplier from MIDI pitch bend (1.0 = centred).
 };

@@ -119,6 +119,15 @@ struct VoiceState {
     // Coupling and Tone memory
     float resB_out_prev = 0.0f; // ResB output from previous sample (bidirectional coupling)
     float tone_lp = 0.0f;       // 1-pole LP state for the Tone tilt EQ
+
+    // Pitch Bend: pre-bend delay lengths so PitchBend() can reapply the multiplier
+    // without accumulating error across successive bend messages.
+    float base_delay_A = 0.0f;
+    float base_delay_B = 0.0f;
+
+    // Dynamic Energy Squelch: 1-pole absolute-value envelope follower.
+    // Smoothing: α=0.01 → τ ≈ 100 samples ≈ 2 ms at 48 kHz.
+    float rms_env = 0.0f;
 };
 
 // Global Synth State (4 Voices limit for strict CPU budgeting)

@@ -86,7 +86,7 @@ __unit_callback void unit_all_note_off() {
 }
 
 __unit_callback void unit_pitch_bend(uint16_t bend) {
-    // s_synth.PitchBend(bend); // Uncomment when bend math is implemented
+    s_synth.PitchBend(bend);
 }
 
 __unit_callback void unit_channel_pressure(uint8_t pressure) { }
