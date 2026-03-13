@@ -29,9 +29,11 @@ struct FastSVF {
         // To get sin(pi * cutoff/srate) we must pass cutoff/(2*srate) as x.
         f = 2.0f * fastercosfullf(0.25f - (safe_cutoff / (2.0f * srate)));
 
-        // Resonance (Q). Lower value = higher resonance peak.
-        // Clamp resonance between 1.0 (no peak) and 10.0 (self-oscillation boundary)
-        float safe_res = fmaxf(1.0f, fminf(resonance, 10.0f));
+        // Resonance (Q factor). Lower value = higher resonance peak.
+        // Clamp to [0.5, 10.0]: 0.5 allows the UI minimum of 0.707 (Butterworth flat
+        // response) to pass through correctly. Old clamp of 1.0 silently prevented
+        // Butterworth Q and made the minimum labelled value have no effect.
+        float safe_res = fmaxf(0.5f, fminf(resonance, 10.0f));
         q = 1.0f / safe_res;
     }
 
