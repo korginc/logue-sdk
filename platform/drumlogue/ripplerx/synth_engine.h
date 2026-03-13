@@ -39,6 +39,23 @@ inline float apply_skew(float normalized_val, float skew) {
 FastTables g_tables;
 #endif
 
+// ==============================================================================
+// CONSTANTS
+// ==============================================================================
+static constexpr float default_sample_rate = 48000.0f;
+static constexpr uint16_t pitch_centre = 8192;
+static constexpr float kToneLpMix = 0.3f;
+static constexpr float kToneCutDivisor = 10.0f;
+static constexpr float kToneBoostDivisor = 15.0f;
+static constexpr float zeroThreshold = 0.0f;
+static constexpr alpha = 0.01f;
+static constexpr limiter = 0.99f;
+static constexpr int kSquelchGuardSamples = 1000; // ~20 ms
+static constexpr float kSquelchThreshold = 0.0001f; // -80 dB
+                
+// ==============================================================================
+// MAIN CLASS
+// ==============================================================================
 class alignas(16) RipplerXWaveguide {
 public:
     // ==============================================================================
@@ -68,7 +85,39 @@ public:
         k_paramNzRes,       // 20
         k_paramNzFltr,      // 21
         k_paramNzFltFrq,    // 22
-        k_paramResnc        // 23
+        k_paramResnc,       // 23
+        k_lastParamIndex    // marker
+    };
+    enum ProgramIndex {
+        k_Init              //0     
+        k_Marimba           //1     
+        k_808 Sub           //2     
+        k_Ac Snare          //3     
+        k_Tubular Bell      //4     
+        k_Timpani           //5     
+        k_Djambe            //6     
+        k_Taiko             //7     
+        k_March Snare       //8     
+        k_Tam Tam           //9     
+        k_Koto              //10    
+        k_Vibraphone        //11    
+        k_Woodblock         //12    
+        k_Acoustic Tom      //13    
+        k_Cymbal            //14    
+        k_Gong              //15    
+        k_Kalimba           //16    
+        k_Steel Pan         //17    
+        k_Claves            //18    
+        k_Cowbell           //19    
+        k_Triangle          //20    
+        k_Kick Drum         //21    
+        k_Clap              //22    
+        k_Shaker            //23    
+        k_Flute             //24    
+        k_Clarinet          //25    
+        k_Pluck Bass        //26    
+        k_Glass Bowl        //27    
+        k_ProgramIndex      //28    marker
     };
 
     SynthState state;
@@ -86,11 +135,11 @@ public:
         // 1. Hardware Sanity Checks
         // The Drumlogue is strictly 48kHz, stereo.
         // If Korg ever releases a 96kHz device, this prevents your delay math from breaking.
-        if (desc->samplerate != 48000) return k_unit_err_samplerate;
+        if (desc->samplerate != (uint32_t)default_sample_rate) return k_unit_err_samplerate;
         if (desc->output_channels != 2) return k_unit_err_geometry;
 
 #ifdef ENABLE_PHASE_7_MODELS
-        g_tables.generate(48000.0f); // Pre-calculate all tuning math
+        g_tables.generate(default_sample_rate); // Pre-calculate all tuning math
 #endif
 
         // 2. Clear all memory explicitly at boot
@@ -154,7 +203,7 @@ public:
 #ifdef ENABLE_PHASE_6_FILTERS
             // Noise filter defaults to LP mode, fully open (12 kHz)
             state.voices[i].exciter.noise_filter.mode = 0;
-            state.voices[i].exciter.noise_filter.set_coeffs(12000.0f, 0.707f, 48000.0f);
+            state.voices[i].exciter.noise_filter.set_coeffs(12000.0f, 0.707f, default_sample_rate);
             // Clear SVF delay states — set_coeffs() only updates f/q, not the
             // recursive lp/bp/hp accumulators.  Leaving them non-zero after a
             // patch change would cause a loud click on the next NoteOn.
@@ -177,7 +226,7 @@ public:
 #ifdef ENABLE_PHASE_6_FILTERS
         // [UT1: MEMSET FIX] - Force the filter back to safe Highpass mode
         state.master_filter.mode = 2;
-        state.master_filter.set_coeffs(10.0f, 0.707f, 48000.0f);
+        state.master_filter.set_coeffs(10.0f, 0.707f, default_sample_rate);
 #endif
     }
 
@@ -203,7 +252,7 @@ public:
     // ==============================================================================
 
     // Tracks the raw UI integer for all 24 parameter slots (indices 0–23)
-    int32_t m_params[24] = {0};
+    int32_t m_params[k_lastParamIndex] = {0};
     uint8_t m_preset_idx = 0;
 
     // Called by unit_get_param_value so the OS knows what to draw on the screen.
@@ -211,7 +260,7 @@ public:
     // stays in sync with what the user is editing via the A/B Partls selector.
     inline int32_t getParameterValue(uint8_t index) const {
         // CRITICAL UI FIX: Prevent OS out-of-bounds reads
-        if (index >= 24) return 0;
+        if (index >= k_lastParamIndex) return 0;
         if (index == k_paramModel) {
             return m_is_resonator_a ? (int32_t)m_model_a : (int32_t)m_model_b;
         }
@@ -235,7 +284,7 @@ public:
         // noise, master FX). Phase 12/13 in PROGRESS.md track future additions (TubRad, Tone, etc.).
         // Columns 15 (Inharm) and 16 (LowCut) store 1/10th of the effective value.
         // setParameter multiplies them back by 10 so the encoder travels 10× fewer steps.
-        static const int32_t presets[28][24] = {
+        static const int32_t presets[k_ProgramIndex][k_lastParamIndex] = {
             //  Prg  Nte  Bnk  Smp  MlRs MlSt VlRs VlSt Ptls Mdl  Dky  Mtr  Ton  Hit  Rel  InHm LwCt TbRd Gain NzMx NzRs NzFl NzFq Rsnc
             { 0, 60, 0, 1, 500, 2500, 0, 0, 3, 0,  250,  10, 0, 26, 10,   300,   1, 5,   0,    0, 300, 0, 12000, 707}, // 0: Init
             { 1, 60, 0, 1, 800, 4000, 0, 0, 3, 6,  150,  -5, 0, 50,  5,   150,   1, 5,  20,    0, 300, 0, 12000, 707}, // 1: Marimba
@@ -267,7 +316,7 @@ public:
             {27, 76, 0, 1, 700, 3500, 0, 0, 3, 4, 1600,  25, 0, 80, 18,  1200,  10, 5,   0,    0, 300, 0, 12000, 707}  // 27: Glass Bowl
         };
 
-        if (idx >= 28) return;
+        if (idx >= k_ProgramIndex) return;
 
         // Preset loading always targets ResA so that Dkay/Mterl/Inharm set resA first.
         // Save and restore the user's resonator-edit context around the load.
@@ -307,7 +356,7 @@ public:
             "Trngle",  "Kick",    "Clap",  "Shaker",
             "Flute",   "Clrint", "PlkBss", "GlsBwl"
         };
-        if (idx < 28) return preset_names[idx];
+        if (idx < k_ProgramIndex) return preset_names[idx];
         return "Unknown";
     }
 
@@ -475,7 +524,7 @@ public:
                 m_master_cutoff = (float)value * 10.0f;
                 // Divide by 1000: UI stores 707–4000, filter needs 0.707–4.0
                 float res_val = fmaxf(0.707f, (float)m_params[k_paramResnc] / 1000.0f);
-                state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
+                state.master_filter.set_coeffs(m_master_cutoff, res_val, default_sample_rate);
 #endif
                 break;
             }
@@ -513,7 +562,7 @@ public:
 #ifdef ENABLE_PHASE_6_FILTERS
                 // UI passes 707 to 4000. Divide by 1000 to get a Q factor of 0.707 to 4.0
                 float res_val = fmaxf(0.707f, (float)value / 1000.0f);
-                state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
+                state.master_filter.set_coeffs(m_master_cutoff, res_val, default_sample_rate);
 #endif
                 break;
             }
@@ -532,7 +581,7 @@ public:
 #ifdef ENABLE_PHASE_6_FILTERS
                 float freq = fmaxf(20.0f, fminf(20000.0f, (float)value));
                 for (int i = 0; i < NUM_VOICES; ++i) {
-                    state.voices[i].exciter.noise_filter.set_coeffs(freq, 0.707f, 48000.0f);
+                    state.voices[i].exciter.noise_filter.set_coeffs(freq, 0.707f, default_sample_rate);
                 }
 #endif
                 break;
@@ -676,7 +725,7 @@ public:
         if (freq < 12.0f) freq = 12.0f;
         // 2. Convert Frequency to Delay Line Length (Samples)
         // Drumlogue sample rate is strictly 48000.0f
-        float delay_len = 48000.0f / freq;
+        float delay_len = default_sample_rate / freq;
         // 3. Assign to resonators (Apply fine-tuning offsets here later)
         v.resA.delay_length = delay_len;
         v.resB.delay_length = delay_len;
@@ -761,10 +810,11 @@ inline void NoteOff(uint8_t note) {
         // fasterpowf(2.0f, 0.0f) ≈ 0.9714 (not 1.0) due to fasterlog2f(2.0f)≈1.057
         // approximation error cascading through fasterpow2f(0.0f), which would cause
         // every centre-bend to quietly detune the voice downward by ~50 cents.
-        if (bend == 8192) {
+        
+        if (bend == pitch_centre) {
             m_pitch_bend_mult = 1.0f;
         } else {
-            float semitones = ((float)bend - 8192.0f) * (2.0f / 8192.0f);
+            float semitones = (float)(bend - pitch_centre) * (2.0f / (float)pitch_centre);
             // A higher pitch requires a shorter delay line → negate the exponent.
             m_pitch_bend_mult = powf(2.0f, -semitones / 12.0f);
         }
@@ -925,11 +975,6 @@ inline void NoteOff(uint8_t note) {
                 // boosts the complementary HP component (bright).
                 // tone_val is hoisted above the voice loop (state.tone, set by setParameter).
                 // Define tuning constants for the tilt EQ
-                static constexpr float kToneLpMix = 0.3f;
-                static constexpr float kToneCutDivisor = 10.0f;
-                static constexpr float kToneBoostDivisor = 15.0f;
-                static constexpr float zeroThreshold = 0.0f;
-
                 voice.tone_lp = (voice_out * kToneLpMix) + (voice.tone_lp * (1.0f - kToneLpMix));
                 if (tone_val < zeroThreshold) {
                     // Negative Tone: interpolate towards lowpass (cuts highs)
@@ -947,8 +992,6 @@ inline void NoteOff(uint8_t note) {
                 // 1. Track the acoustic energy of the waveguide model BEFORE applying
                 //    the master-envelope fade.  This distinguishes "the tube is silent"
                 //    from "the user released the gate".  α=0.01 → τ ≈ 2 ms at 48 kHz.
-                static constexpr alpha = 0.01f;
-                static constexpr limiter = 0.99f;
                 voice.rms_env = (fabsf(voice_out) * alpha) + (voice.rms_env * limiter);
 
                 // 2. Process the Master Envelope (smooth fade-out during release).
@@ -962,8 +1005,6 @@ inline void NoteOff(uint8_t note) {
                 //    fade to run to ENV_IDLE.
                 //    Guard: current_frame > 1000 (~20 ms) prevents mis-fires during the
                 //    delay-line round-trip window where voice_out is legitimately 0.
-                static constexpr int kSquelchGuardSamples = 1000; // ~20 ms
-                static constexpr float kSquelchThreshold = 0.0001f; // -80 dB
                 if (voice.is_releasing && voice.exciter.current_frame > kSquelchGuardSamples) {
                     if (voice.rms_env < kSquelchThreshold || voice.exciter.master_env.state == ENV_IDLE) {
                         voice.is_active = false;
