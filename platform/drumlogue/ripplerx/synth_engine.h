@@ -280,7 +280,7 @@ public:
             setParameter(param_id, presets[idx][param_id]);
         }
 
-        // Mirror the three per-resonator physical params to ResB so both resonators
+        // Mirror the four per-resonator physical params to ResB so both resonators
         // start identically on every preset load (user can diverge them afterwards).
         m_is_resonator_a = false;
         setParameter(k_paramModel,  presets[idx][k_paramModel]);
@@ -290,7 +290,7 @@ public:
         // NOTE: If ResA and ResB have the exact same decay and material, how do we get that chaotic,
         // realistic 2D drum sound? It happens in NoteOn function, driven entirely by the Model parameter,
         // where resonator B is given an irrational tuning ratio of 0.68 to simulate the metallic,
-        // clashing overtones of the drum skin (the edge mode),.
+        // clashing overtones of the drum skin (the edge mode).
         // Resonator A acts as the fundamental "thump" of the drum (the center mode).
 
         // Restore user's resonator-edit context.
@@ -685,10 +685,7 @@ public:
         // Then apply any bend that was already active when this note was struck.
         v.base_delay_A = v.resA.delay_length;
         v.base_delay_B = v.resB.delay_length;
-        v.resA.delay_length = fmaxf(2.0f, fminf((float)(DELAY_BUFFER_SIZE - 2),
-                                                  v.base_delay_A * m_pitch_bend_mult));
-        v.resB.delay_length = fmaxf(2.0f, fminf((float)(DELAY_BUFFER_SIZE - 2),
-                                                  v.base_delay_B * m_pitch_bend_mult));
+        apply_pitch_bend_to_voice(v);
 
         // Reset the RMS squelch tracker so residual energy from the previous note
         // on this voice slot doesn't prematurely kill the new note's attack.
@@ -778,10 +775,7 @@ inline void NoteOff(uint8_t note) {
         for (int i = 0; i < NUM_VOICES; ++i) {
             VoiceState& v = state.voices[i];
             if (!v.is_active) continue;
-            v.resA.delay_length = fmaxf(2.0f, fminf((float)(DELAY_BUFFER_SIZE - 2),
-                                                      v.base_delay_A * m_pitch_bend_mult));
-            v.resB.delay_length = fmaxf(2.0f, fminf((float)(DELAY_BUFFER_SIZE - 2),
-                                                      v.base_delay_B * m_pitch_bend_mult));
+            apply_pitch_bend_to_voice(v);
         }
     }
 
@@ -934,13 +928,14 @@ inline void NoteOff(uint8_t note) {
                 static constexpr float kToneLpMix = 0.3f;
                 static constexpr float kToneCutDivisor = 10.0f;
                 static constexpr float kToneBoostDivisor = 15.0f;
+                static constexpr float zeroThreshold = 0.0f;
 
                 voice.tone_lp = (voice_out * kToneLpMix) + (voice.tone_lp * (1.0f - kToneLpMix));
-                if (tone_val < 0.0f) {
+                if (tone_val < zeroThreshold) {
                     // Negative Tone: interpolate towards lowpass (cuts highs)
                     float cut_amt = -tone_val / kToneCutDivisor;
                     voice_out = voice_out + (voice.tone_lp - voice_out) * cut_amt;
-                } else if (tone_val > 0.0f) {
+                } else if (tone_val > zeroThreshold) {
                     // Positive Tone: boost the highpass component (adds highs)
                     float hp = voice_out - voice.tone_lp;
                     float boost_amt = tone_val / kToneBoostDivisor; // up to 2.0× high-shelf boost at Tone=30
@@ -952,7 +947,9 @@ inline void NoteOff(uint8_t note) {
                 // 1. Track the acoustic energy of the waveguide model BEFORE applying
                 //    the master-envelope fade.  This distinguishes "the tube is silent"
                 //    from "the user released the gate".  α=0.01 → τ ≈ 2 ms at 48 kHz.
-                voice.rms_env = (fabsf(voice_out) * 0.01f) + (voice.rms_env * 0.99f);
+                static constexpr alpha = 0.01f;
+                static constexpr limiter = 0.99f;
+                voice.rms_env = (fabsf(voice_out) * alpha) + (voice.rms_env * limiter);
 
                 // 2. Process the Master Envelope (smooth fade-out during release).
                 //    During gate-on it holds at 1.0 — no audible effect on the tail.
@@ -965,8 +962,10 @@ inline void NoteOff(uint8_t note) {
                 //    fade to run to ENV_IDLE.
                 //    Guard: current_frame > 1000 (~20 ms) prevents mis-fires during the
                 //    delay-line round-trip window where voice_out is legitimately 0.
-                if (voice.is_releasing && voice.exciter.current_frame > 1000) {
-                    if (voice.rms_env < 0.0001f || voice.exciter.master_env.state == ENV_IDLE) {
+                static constexpr int kSquelchGuardSamples = 1000; // ~20 ms
+                static constexpr float kSquelchThreshold = 0.0001f; // -80 dB
+                if (voice.is_releasing && voice.exciter.current_frame > kSquelchGuardSamples) {
+                    if (voice.rms_env < kSquelchThreshold || voice.exciter.master_env.state == ENV_IDLE) {
                         voice.is_active = false;
                     }
                 }
@@ -998,7 +997,6 @@ inline void NoteOff(uint8_t note) {
             // master_filter is a single mono SVF instance. Calling process() once
             // advances its internal state by one sample. Since all voices sum to
             // identical L/R signals (mono), process L only and copy to R.
-            // TODO: add a second FastSVF instance for true stereo filtering.
             mix_l = state.master_filter.process(mix_l);
             mix_r = mix_l;
 #endif
@@ -1029,6 +1027,21 @@ inline void NoteOff(uint8_t note) {
         }
     }
 
+// ==============================================================================
+// PRIVATE METHODS
+// ==============================================================================
+private:
+    inline void apply_pitch_bend_to_voice(VoiceState& v) {
+        v.resA.delay_length = fmaxf(2.0f, fminf((float)(DELAY_BUFFER_SIZE - 2),
+                                                  v.base_delay_A * m_pitch_bend_mult));
+        v.resB.delay_length = fmaxf(2.0f, fminf((float)(DELAY_BUFFER_SIZE - 2),
+                                                  v.base_delay_B * m_pitch_bend_mult));
+    }
+
+
+// ==============================================================================
+// PRIVATE VARIABLES
+// ==============================================================================
 private:
     float m_master_cutoff = 10000.0f; // Default open filter
 
