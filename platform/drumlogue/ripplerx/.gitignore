@@ -1,0 +1,13 @@
+# Compiled test binaries
+test_dsp
+test_hw_debug
+
+# x86 host-build stubs (arm_neon.h stub for local test compilation)
+test_stubs/
+
+# Build artifacts
+*.o
+*.a
+*.elf
+*.map
+build/

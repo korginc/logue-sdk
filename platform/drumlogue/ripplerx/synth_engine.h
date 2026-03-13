@@ -125,6 +125,15 @@ public:
                 state.voices[i].resB.buffer[j] = 0.0f;
             }
 
+            // Clear filter state memory so a Reset() mid-play never causes a click
+            // on the next NoteOn (stale z1/ap states corrupt the first output samples).
+            state.voices[i].resA.z1    = 0.0f;
+            state.voices[i].resA.ap_x1 = 0.0f;
+            state.voices[i].resA.ap_y1 = 0.0f;
+            state.voices[i].resB.z1    = 0.0f;
+            state.voices[i].resB.ap_x1 = 0.0f;
+            state.voices[i].resB.ap_y1 = 0.0f;
+
             // Re-apply safe defaults
             state.voices[i].resA.lowpass_coeff = 1.0f;
             state.voices[i].resB.lowpass_coeff = 1.0f;
@@ -166,8 +175,8 @@ public:
     // 1. UI State & Preset Management
     // ==============================================================================
 
-    // Tracks the raw UI integer for all 25 possible parameter slots (0 to 24)
-    int32_t m_params[25] = {0};
+    // Tracks the raw UI integer for all 24 parameter slots (indices 0–23)
+    int32_t m_params[24] = {0};
     uint8_t m_preset_idx = 0;
 
     // Called by unit_get_param_value so the OS knows what to draw on the screen.
@@ -374,7 +383,7 @@ public:
             }
 
             case k_paramMterl: {
-                if (value <= 30) {
+                if (value >= -10 && value <= 30) {
                     float norm = (fmaxf(-10.0f, fminf(30.0f, (float)value)) + 10.0f) / 40.0f;
                     float coeff = 0.01f + (norm * 0.99f);
                     for (int i = 0; i < NUM_VOICES; ++i) {
@@ -557,8 +566,6 @@ public:
         }
         // --- End Sample Loading ---
 
-        v.is_active = true;
-        v.is_releasing = false;
         v.current_note = note;
         v.current_velocity = (float)velocity / 127.0f;
 
@@ -792,12 +799,16 @@ inline void NoteOff(uint8_t note) {
 
 // [UT4: GATE-OFF CHOKE FIX] - The "Damper Pedal" Squelch
 #ifdef ENABLE_PHASE_5_EXCITERS
-                // 1. Process the Master Envelope (it acts as a smooth fade-out during release)
+                // 1. Process the Master Envelope (smooth fade-out during release).
+                //    During gate-on, master_env holds at 1.0 (sustain_level=1.0, decay_rate=0) —
+                //    no audible effect on the physical tail.
+                //    On GateOff/NoteOff, it fades to 0 at the rate set by k_paramRel.
                 float damper_fade = voice.exciter.master_env.process();
                 voice_out *= damper_fade;
 
-                // 2. NEW Energy Squelch: Mark voice inactive ONLY when the fade is 100% complete!
-                // This completely ignores zero-crossings and travel time delays.
+                // 2. Kill the voice ONLY when the envelope is fully idle.
+                //    This is time-based, not amplitude-based, so the delay-line travel
+                //    window is never mistaken for "silence" and prematurely squelched.
                 if (voice.is_releasing && voice.exciter.master_env.state == ENV_IDLE) {
                     voice.is_active = false;
                 }

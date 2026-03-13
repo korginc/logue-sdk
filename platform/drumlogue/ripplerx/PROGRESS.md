@@ -143,6 +143,81 @@ The following bugs were found and fixed after the initial Partls-selector commit
 
 ---
 
+## Phase 14: Code-Audit Bug-Fix Session [COMPLETED]
+
+A second full audit was performed after the first round of UTs passed.
+Six issues were found and fixed.
+
+### FIX 1 — Critical: Squelch prematurely kills voice during delay-line transit
+
+**Root cause:** The old squelch checked `fabsf(voice_out) < 0.0001f` while
+`is_releasing` was set. For note 60 (C4) the delay-line round-trip takes ~183
+samples (~3.8 ms). Any GateOff within that window produced silence because
+`voice_out` was genuinely zero (the wave hadn't reflected yet) and the voice
+was killed before a single audible sample emerged.
+
+**Fix:** Replaced amplitude-threshold squelch with a **damper-pedal envelope**
+approach. `master_env` is configured in `NoteOn` with `sustain_level=1.0` and
+`decay_rate=0`, so it holds at **1.0×** during gate-on with no audible effect.
+On GateOff/NoteOff it fades to 0 at the `k_paramRel` rate. The voice is marked
+inactive only when `master_env.state == ENV_IDLE` — time-based, not
+amplitude-based.
+
+**Side-effect fix:** `k_paramRel` now audibly controls the physical-tail fade.
+Previously the Release knob had no effect because `master_env` output was
+commented out.
+
+### FIX 2 — High: `Reset()` did not clear filter states `z1`, `ap_x1`, `ap_y1`
+
+**Root cause:** `Reset()` zeroed `buffer[]` and `write_ptr` but left the 1-pole
+LP state (`z1`) and allpass states (`ap_x1`, `ap_y1`) intact. A `Reset()` called
+mid-play (OS pattern change) left non-zero filter memory, causing a click or DC
+transient at the start of the next note.
+
+**Fix:** Added explicit zeroing of all six filter-state fields inside the
+`Reset()` per-voice loop.
+
+### FIX 3 — Medium: FastSVF resonance lower-clamp mismatch
+
+**Root cause:** `set_coeffs` clamped `resonance` to a minimum of `1.0`. The UI
+`Resnc` bottom is `707` → `0.707` after `/1000`. The Butterworth flat-response
+Q (0.707) was silently raised to Q=1.0 and the bottom half of the Resnc knob
+travel had no effect.
+
+**Fix:** Changed the lower clamp from `1.0f` to `0.5f`. The UI minimum 0.707
+now passes through unchanged, giving a true Butterworth response at the
+minimum knob position.
+
+### FIX 4 — Low: Duplicate `is_active`/`is_releasing` assignment in `NoteOn`
+
+**Root cause:** `is_active = true; is_releasing = false;` appeared twice —
+once before and once after the sample-loading block that was inserted between
+two existing copies of the same assignment.
+
+**Fix:** Removed the redundant second copy.
+
+### FIX 5 — Low: `m_params[25]` over-allocated by one element
+
+**Root cause:** Declared with 25 slots despite only 24 parameters (0–23).
+Index 24 was never read or written.
+
+**Fix:** Corrected to `m_params[24]`.
+
+### FIX 6 — Low: `k_paramMterl` guard missing lower-bound check
+
+**Root cause:** `if (value <= 30)` accepted values below −10, though the inner
+`fmaxf` clamped them safely. The asymmetric guard was inconsistent with the
+`header.c` range.
+
+**Fix:** Changed to `if (value >= -10 && value <= 30)`.
+
+### Test fixes (test_hw_debug.cpp)
+
+- **T9 hardcoded voice index:** `voices[1].resA` → `voices[s.state.next_voice_idx].resA`.
+- **T9 missing from runner:** `test_delay_roundtrip()` added to `main()`.
+
+---
+
 ## Phase 13: Missing Features & Improvements (TODO)
 
 * **Dynamic Energy Squelch (CPU):** Track per-voice output RMS. When the
