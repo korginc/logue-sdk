@@ -1,6 +1,22 @@
---- STARTING ACTIVE DSP UNIT TEST ---
+--- STARTING ACTIVE DSP UNIT TEST 1 ---
 Triggering NoteOn(60, 127)...
 Simulating 200 frames of audio...
 Frame 48: Sequencer sends GateOff()...
 
-[SUCCESS] Unit test passed perfectly. DSP is fully operational!
+--- 1st DIAGNOSTIC COMPLETE ---
+--- STARTING DIAGNOSTIC DSP UNIT TEST 2 ---
+
+[X-RAY 1: PITCH & TUNING]
+Note 60 Delay Length: 189.77 (Should be ~183.47)
+Read Pointer Offset : -188.77
+
+[X-RAY 2: EXCITERS & UI BINDING]
+Mallet Stiffness  : 0.5
+Mallet Res Coeff  : 0.505 (If 0.0, UI matrix is broken!)
+Exciter Output    : 3.7875 (Should be ~15.0)
+
+[X-RAY 3: WAVEGUIDE MEMORY]
+Phase Multiplier  : 1 (Should be 1.0 or -1.0)
+Buffer[0] Memory  : 3.7875 (If 0.0, the waveguide multiplied the Mallet by zero!)
+
+--- 2nd DIAGNOSTIC COMPLETE ---
