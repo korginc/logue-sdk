@@ -25,9 +25,12 @@ struct FastSVF {
         float safe_cutoff = fminf(cutoff_hz, srate * 0.45f);
 
         // Chamberlin tuning formula: f = 2 * sin(pi * cutoff / srate)
-        // fastercosfullf maps [0,1] -> full cycle, so cos(0.25 - x) = sin(2*pi*x).
-        // To get sin(pi * cutoff/srate) we must pass cutoff/(2*srate) as x.
-        f = 2.0f * fastercosfullf(0.25f - (safe_cutoff / (2.0f * srate)));
+        // NOTE: fastercosfullf takes RADIANS (not a [0,1]-normalised fraction).
+        // The previous formula 2*fastercosfullf(0.25 - x) computed 2*cos(0.25_rad),
+        // which gives f ≈ 1.91–1.97 for all audio frequencies — always near-Nyquist
+        // and catastrophically unstable. Use sinf() directly: it is only called from
+        // the UI thread (setParameter), so the extra precision cost is negligible.
+        f = 2.0f * sinf(M_PI * safe_cutoff / srate);
 
         // Resonance (Q factor). Lower value = higher resonance peak.
         // Clamp to [0.5, 10.0]: 0.5 allows the UI minimum of 0.707 (Butterworth flat

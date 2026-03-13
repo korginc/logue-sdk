@@ -68,6 +68,10 @@ struct ExciterState {
     float mallet_lp2 = 0.0f;       // Second LP pole state (MlltRes)
     float mallet_stiffness = 0.5f;
     float mallet_res_coeff = 0.5f; // Second LP pole coefficient (MlltRes)
+
+#ifdef ENABLE_PHASE_6_FILTERS
+    FastSVF noise_filter; // Dedicated per-voice noise shaping SVF (NzFltr / NzFltFrq)
+#endif
 };
 
 /**
@@ -111,6 +115,10 @@ struct VoiceState {
     ExciterState exciter;
     WaveguideState resA;
     WaveguideState resB;
+
+    // Coupling and Tone memory
+    float resB_out_prev = 0.0f; // ResB output from previous sample (bidirectional coupling)
+    float tone_lp = 0.0f;       // 1-pole LP state for the Tone tilt EQ
 };
 
 // Global Synth State (4 Voices limit for strict CPU budgeting)
@@ -123,6 +131,7 @@ struct SynthState {
     float mix_ab = 0.5f;
     float master_gain = 1.0f;
     float master_drive = 1.0f;
+    float tone = 0.0f;        // Tilt EQ amount, cached from k_paramTone [-10, 30]
 
 #ifdef ENABLE_PHASE_6_FILTERS
     FastSVF master_filter;

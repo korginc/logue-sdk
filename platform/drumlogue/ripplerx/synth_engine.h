@@ -72,6 +72,12 @@ public:
     };
 
     SynthState state;
+
+#ifdef UNIT_TEST_DEBUG
+    // Expose private members for unit test introspection (test binary only).
+    float m_coupling_depth_ut() const { return m_coupling_depth; }
+#endif
+
     // ==============================================================================
     // 0. Lifecycle & Initialization
     // ==============================================================================
@@ -137,11 +143,28 @@ public:
             // Re-apply safe defaults
             state.voices[i].resA.lowpass_coeff = 1.0f;
             state.voices[i].resB.lowpass_coeff = 1.0f;
+
+            // Clear coupling and tone memory
+            state.voices[i].resB_out_prev = 0.0f;
+            state.voices[i].tone_lp = 0.0f;
+
+#ifdef ENABLE_PHASE_6_FILTERS
+            // Noise filter defaults to LP mode, fully open (12 kHz)
+            state.voices[i].exciter.noise_filter.mode = 0;
+            state.voices[i].exciter.noise_filter.set_coeffs(12000.0f, 0.707f, 48000.0f);
+            // Clear SVF delay states — set_coeffs() only updates f/q, not the
+            // recursive lp/bp/hp accumulators.  Leaving them non-zero after a
+            // patch change would cause a loud click on the next NoteOn.
+            state.voices[i].exciter.noise_filter.lp = 0.0f;
+            state.voices[i].exciter.noise_filter.bp = 0.0f;
+            state.voices[i].exciter.noise_filter.hp = 0.0f;
+#endif
         }
 
         state.master_gain = 1.0f;
         state.master_drive = 1.0f;
         state.mix_ab = 0.5f; // Equal A/B mix
+        state.tone = 0.0f;   // Neutral tilt EQ (LoadPreset restores the preset value)
 
         // Always return to ResA edit context so LoadPreset (called next in Init)
         // applies preset data symmetrically to both resonators.
@@ -339,6 +362,9 @@ public:
                     // controls CPU budget, not per-resonator timbre.
                     static const uint8_t partial_counts[] = {4, 8, 16, 32, 64};
                     m_active_partials = partial_counts[value];
+                    // Store coupling depth from UI index so Partls=5/6
+                    // (editor-select modes) never overwrite this.
+                    m_coupling_depth = (float)value / 4.0f;
                 } else {
                     m_is_resonator_a = (value == 5);
                 }
@@ -382,22 +408,32 @@ public:
                 break;
             }
 
-            case k_paramMterl: {
-                if (value >= -10 && value <= 30) {
-                    float norm = (fmaxf(-10.0f, fminf(30.0f, (float)value)) + 10.0f) / 40.0f;
-                    float coeff = 0.01f + (norm * 0.99f);
-                    for (int i = 0; i < NUM_VOICES; ++i) {
-                        if (m_is_resonator_a)
-                            state.voices[i].resA.lowpass_coeff = coeff;
-                        else
-                            state.voices[i].resB.lowpass_coeff = coeff;
-                    }
+            case k_paramMterl:
+            case k_paramTubRad: {
+                // Combine Material (-10 to 30) and Tube Radius (0 to 20).
+                // Either parameter changing recalculates the coefficient from both stored values.
+                float mterl_norm = (fmaxf(-10.0f, fminf(30.0f, (float)m_params[k_paramMterl])) + 10.0f) / 40.0f;
+                float tubrad_norm = fmaxf(0.0f, fminf(20.0f, (float)m_params[k_paramTubRad])) / 20.0f;
+                // Base material loss (0.01 = dull wood to 1.0 = lossless metal)
+                float coeff = 0.01f + (mterl_norm * 0.99f);
+                // Wider tube pulls the coefficient towards 1.0 (less high-frequency loss)
+                coeff = coeff + ((1.0f - coeff) * (tubrad_norm * 0.8f));
+                for (int i = 0; i < NUM_VOICES; ++i) {
+                    if (m_is_resonator_a)
+                        state.voices[i].resA.lowpass_coeff = coeff;
+                    else
+                        state.voices[i].resB.lowpass_coeff = coeff;
                 }
                 break;
             }
             // HitPos parameter acts as the physical mixer between these two modes.
             // If HitPos is 0, you only hear ResA (hitting dead center).
             // If HitPos is 100, you hear mostly ResB (hitting the rim).
+            case k_paramTone: {
+                state.tone = fmaxf(-10.0f, fminf(30.0f, (float)value));
+                break;
+            }
+
             case k_paramHitPos: {
                 state.mix_ab = fmaxf(0.0f, fminf(1.0f, (float)value / 100.0f));
                 break;
@@ -474,6 +510,26 @@ public:
                 // UI passes 707 to 4000. Divide by 1000 to get a Q factor of 0.707 to 4.0
                 float res_val = fmaxf(0.707f, (float)value / 1000.0f);
                 state.master_filter.set_coeffs(m_master_cutoff, res_val, 48000.0f);
+#endif
+                break;
+            }
+
+            case k_paramNzFltr: {
+#ifdef ENABLE_PHASE_6_FILTERS
+                int mode = (int)fmaxf(0.0f, fminf(2.0f, (float)value));
+                for (int i = 0; i < NUM_VOICES; ++i) {
+                    state.voices[i].exciter.noise_filter.mode = mode;
+                }
+#endif
+                break;
+            }
+
+            case k_paramNzFltFrq: {
+#ifdef ENABLE_PHASE_6_FILTERS
+                float freq = fmaxf(20.0f, fminf(20000.0f, (float)value));
+                for (int i = 0; i < NUM_VOICES; ++i) {
+                    state.voices[i].exciter.noise_filter.set_coeffs(freq, 0.707f, 48000.0f);
+                }
 #endif
                 break;
             }
@@ -629,6 +685,17 @@ public:
         v.resA.ap_y1 = 0.0f;
         v.resB.ap_x1 = 0.0f;
         v.resB.ap_y1 = 0.0f;
+        v.resB_out_prev = 0.0f;
+        v.tone_lp = 0.0f;
+
+#ifdef ENABLE_PHASE_6_FILTERS
+        // Clear noise SVF delay states so rapid re-triggering doesn't produce
+        // a click from residual filter memory.  set_coeffs() (called once from
+        // setParameter) only updates f/q and never zeroes lp/bp/hp.
+        v.exciter.noise_filter.lp = 0.0f;
+        v.exciter.noise_filter.bp = 0.0f;
+        v.exciter.noise_filter.hp = 0.0f;
+#endif
 
 #ifdef ENABLE_PHASE_5_EXCITERS
         // Trigger the envelopes when a note hits
@@ -738,6 +805,9 @@ inline void NoteOff(uint8_t note) {
         float noise_env_val = ex.noise_env.process();
         if (noise_env_val > 0.001f) {
             float raw_noise = ex.noise_gen.process();
+#ifdef ENABLE_PHASE_6_FILTERS
+            raw_noise = ex.noise_filter.process(raw_noise);
+#endif
             out += raw_noise * noise_env_val * ex.noise_decay_coeff;
         }
 #endif
@@ -770,6 +840,10 @@ inline void NoteOff(uint8_t note) {
             main_out[i] = 0.0f;
         }
 
+        // Cache tone once per block — avoids reading m_params[] on every sample
+        // and eliminates the theoretical UI/audio-thread race on that array access.
+        const float tone_val = state.tone;
+
         // Sum active voices into the master buffer
         for (int voice_idx = 0; voice_idx < NUM_VOICES; ++voice_idx) {
             VoiceState& voice = state.voices[voice_idx];
@@ -782,20 +856,52 @@ inline void NoteOff(uint8_t note) {
                 // 1. Generate the Exciter burst
                 float exciter_sig = process_exciter(voice.exciter);
 
-                // 2. Feed the Exciter into Resonator A (Always active)
-                float outA = process_waveguide(voice.resA, exciter_sig);
+                // 2. Mutual Coupling (Partls 0–4 → 0.0–1.0 coupling depth).
+                // Use m_coupling_depth, not m_params[k_paramPartls], because
+                // Partls=5/6 (editor-select modes) must not change the coupling.
+                float coupling_amt = m_coupling_depth;
+
+                // ResA gets exciter + scaled feedback from ResB's previous output
+                float inputA = exciter_sig + (voice.resB_out_prev * coupling_amt * 0.5f);
+                float outA = process_waveguide(voice.resA, inputA);
                 float outB = 0.0f;
 
                 // Enable ResB for 16+ partials; 4 or 8 partials runs single-resonator to save CPU.
                 if (m_active_partials >= 16) {
-                    outB = process_waveguide(voice.resB, exciter_sig);
+                    // ResB gets exciter + feed-forward from ResA
+                    float inputB = exciter_sig + (outA * coupling_amt * 0.5f);
+                    outB = process_waveguide(voice.resB, inputB);
+                    voice.resB_out_prev = outB;
+                } else {
+                    voice.resB_out_prev = 0.0f;
                 }
 
-                // 4. Mix the resonators together
+                // 3. Mix the resonators together
                 float voice_out = (outA * (1.0f - state.mix_ab)) + (outB * state.mix_ab);
 
                 // Apply note velocity
                 voice_out *= voice.current_velocity;
+
+                // 4. Voice Tilt EQ (Tone parameter: -10 to 30)
+                // Extracts a ~2.7 kHz LP component and either blends towards it (dark) or
+                // boosts the complementary HP component (bright).
+                // tone_val is hoisted above the voice loop (state.tone, set by setParameter).
+                // Define tuning constants for the tilt EQ
+                static constexpr float kToneLpMix = 0.3f;
+                static constexpr float kToneCutDivisor = 10.0f;
+                static constexpr float kToneBoostDivisor = 15.0f;
+
+                voice.tone_lp = (voice_out * kToneLpMix) + (voice.tone_lp * (1.0f - kToneLpMix));
+                if (tone_val < 0.0f) {
+                    // Negative Tone: interpolate towards lowpass (cuts highs)
+                    float cut_amt = -tone_val / kToneCutDivisor;
+                    voice_out = voice_out + (voice.tone_lp - voice_out) * cut_amt;
+                } else if (tone_val > 0.0f) {
+                    // Positive Tone: boost the highpass component (adds highs)
+                    float hp = voice_out - voice.tone_lp;
+                    float boost_amt = tone_val / kToneBoostDivisor; // up to 2.0× high-shelf boost at Tone=30
+                    voice_out += hp * boost_amt;
+                }
 
 // [UT4: GATE-OFF CHOKE FIX] - The "Damper Pedal" Squelch
 #ifdef ENABLE_PHASE_5_EXCITERS
@@ -887,4 +993,7 @@ private:
     bool    m_is_resonator_a = true; // default is res A
 
     uint8_t m_active_partials = 32; // Default: 32 partials (Partls index 3, ResB active)
+    float   m_coupling_depth  = 0.75f; // Coupling depth [0.0–1.0] from Partls UI index 0–4.
+    // Stored separately from m_params[k_paramPartls] so that Partls=5/6
+    // (ResA/ResB editor-select modes) never corrupt the coupling amount.
 };
