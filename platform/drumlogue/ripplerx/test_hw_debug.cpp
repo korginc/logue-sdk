@@ -110,8 +110,8 @@ static void test_param_audit() {
     // Access internal state through the public SynthState member
     const SynthState& st = s.state;
 
-    // Print the values a developer would want to see on a logic analyser
-    auto& v  = st.voices[1]; // voice 1 is allocated by the first NoteOn
+    // Print voice[0] DSP coefficients — LoadPreset applies setParameter to all voices
+    // symmetrically, so every voice holds the same values after Init. No NoteOn needed.
     std::cout << std::fixed << std::setprecision(6);
     std::cout << "  master_gain          = " << st.master_gain    << "\n";
     std::cout << "  master_drive         = " << st.master_drive   << "\n";
