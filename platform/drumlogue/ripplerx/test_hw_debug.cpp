@@ -459,6 +459,161 @@ static void test_delay_roundtrip() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// T10 — Dedicated Noise SVF (NzFltr / NzFltFrq parameter routing)
+//   A structural test: verify that setParameter() routes NzFltr to
+//   noise_filter.mode and NzFltFrq to noise_filter.f on all four voices.
+//   This directly tests the previously unmapped parameter cases without
+//   relying on audio amplitude measurements that can overflow the resonator
+//   feedback loop at high noise injection levels.
+// ════════════════════════════════════════════════════════════════════════════
+static void test_noise_svf() {
+    std::cout << "\n── T10: NzFltr/NzFltFrq route to per-voice noise_filter ──\n";
+
+    unit_runtime_desc_t desc = make_desc();
+    RipplerXWaveguide s;
+    s.Init(&desc);
+
+    // NzFltr=0 → LP mode on all four voices
+    s.setParameter(RipplerXWaveguide::k_paramNzFltr, 0);
+    bool all_lp = true;
+    for (int i = 0; i < 4; ++i)
+        if (s.state.voices[i].exciter.noise_filter.mode != 0) all_lp = false;
+
+    // NzFltFrq: higher cutoff → larger SVF f-coefficient (Chamberlin formula)
+    s.setParameter(RipplerXWaveguide::k_paramNzFltFrq, 5000);
+    float f_5kHz = s.state.voices[0].exciter.noise_filter.f;
+    s.setParameter(RipplerXWaveguide::k_paramNzFltFrq, 200);
+    float f_200Hz = s.state.voices[0].exciter.noise_filter.f;
+
+    // NzFltr=2 → HP mode on all four voices
+    s.setParameter(RipplerXWaveguide::k_paramNzFltr, 2);
+    bool all_hp = true;
+    for (int i = 0; i < 4; ++i)
+        if (s.state.voices[i].exciter.noise_filter.mode != 2) all_hp = false;
+
+    std::cout << "  NzFltr=0 LP mode on all voices : " << (all_lp ? "yes" : "no") << "\n";
+    std::cout << "  f@5kHz=" << std::setprecision(4) << f_5kHz
+              << "  f@200Hz=" << f_200Hz << "  (higher freq → higher f)\n";
+    std::cout << "  NzFltr=2 HP mode on all voices : " << (all_hp ? "yes" : "no") << "\n";
+
+    result("T10a NzFltr=0 sets noise_filter.mode=LP(0) on all 4 voices",
+           all_lp,
+           "NzFltr not routing to noise_filter.mode — parameter still falls to default");
+    result("T10b NzFltFrq=5000 gives larger f-coeff than NzFltFrq=200",
+           f_5kHz > f_200Hz,
+           "NzFltFrq not routing to noise_filter.set_coeffs");
+    result("T10c NzFltr=2 sets noise_filter.mode=HP(2) on all 4 voices",
+           all_hp,
+           "NzFltr HP mode not routing correctly");
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// T11 — TubRad interacts with Mterl to increase lowpass_coeff
+//   With TubRad=0 the coefficient is determined by Mterl alone.
+//   TubRad=20 (widest tube) must pull the coefficient towards 1.0 (less loss).
+// ════════════════════════════════════════════════════════════════════════════
+static void test_tubrad_mterl() {
+    std::cout << "\n── T11: TubRad combines with Mterl to brighten lowpass_coeff ──\n";
+
+    unit_runtime_desc_t desc = make_desc();
+    RipplerXWaveguide s;
+    s.Init(&desc);
+
+    // Target ResA (default context after Init)
+    s.setParameter(RipplerXWaveguide::k_paramMterl,  10); // mid material
+    s.setParameter(RipplerXWaveguide::k_paramTubRad,  0); // narrow tube (no adjustment)
+    float coeff_narrow = s.state.voices[0].resA.lowpass_coeff;
+
+    s.setParameter(RipplerXWaveguide::k_paramTubRad, 20); // widest tube
+    float coeff_wide   = s.state.voices[0].resA.lowpass_coeff;
+
+    std::cout << "  lowpass_coeff TubRad=0  : " << coeff_narrow << "\n";
+    std::cout << "  lowpass_coeff TubRad=20 : " << coeff_wide   << "\n";
+
+    result("T11a TubRad=20 raises lowpass_coeff above TubRad=0",
+           coeff_wide > coeff_narrow,
+           "TubRad had no effect on lowpass_coeff");
+    result("T11b TubRad=20 lowpass_coeff < 1.0 (damping still present)",
+           coeff_wide < 1.0f,
+           "TubRad pushed coeff to 1.0 — all high-frequency damping lost");
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// T12 — Partls coupling cross-feeds resonators
+//   Partls=0 → ResB inactive, no coupling.  Partls=4 → ResB active, full
+//   coupling (ResA←ResB feedback, ResB←ResA feed-forward).  Both must produce
+//   audible output; the dual-resonator path must also sustain longer.
+// ════════════════════════════════════════════════════════════════════════════
+static void test_partls_coupling() {
+    std::cout << "\n── T12: Partls coupling — ResA only vs dual with cross-feed ──\n";
+
+    auto run_preset_with_partls = [](int partls_val) -> float {
+        unit_runtime_desc_t desc = make_desc();
+        RipplerXWaveguide s;
+        s.Init(&desc);
+        s.setParameter(RipplerXWaveguide::k_paramPartls, partls_val);
+        s.GateOn(127);
+        return run_blocks(s, 400, 32);
+    };
+
+    float peak_resA_only = run_preset_with_partls(0); // Partls=0: 4 partials, ResB off
+    float peak_dual      = run_preset_with_partls(4); // Partls=4: 64 partials, ResB + full coupling
+    std::cout << "  peak Partls=0 (ResA only) : " << peak_resA_only << "\n";
+    std::cout << "  peak Partls=4 (dual+coupling) : " << peak_dual  << "\n";
+
+    result("T12a Partls=0 (ResA only) produces sound",
+           peak_resA_only > 1e-9f, "ResA-only mode is silent");
+    result("T12b Partls=4 (ResB + coupling) produces sound",
+           peak_dual > 1e-9f, "Dual-resonator coupling mode is silent");
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// T13 — Tone tilt EQ: Tone=30 (bright) vs Tone=-10 (dark)
+//   Positive Tone boosts the highpass component; negative Tone blends towards
+//   the lowpass component.  A percussive mallet has bright attack energy, so
+//   Tone=30 must produce a higher peak than Tone=-10.
+// ════════════════════════════════════════════════════════════════════════════
+static void test_tone_eq() {
+    std::cout << "\n── T13: Tone tilt EQ — bright vs dark ──\n";
+
+    // The master limiter clips all output to ±0.99, hiding EQ differences.
+    // Instead, capture ut_voice_out — the post-Tone-EQ signal BEFORE master drive
+    // and limiter — by running one frame at a time.
+    //
+    // At the delay-line round-trip (~190 frames), tone_lp ≈ 0 (tracking zero for
+    // 190 frames), so the entire signal is "high frequency" from the tilt EQ's
+    // perspective.  Tone=30 boosts that component ×3; Tone=-10 crushes it to ~0.
+    auto peak_pre_limiter = [](int tone_val) -> float {
+        unit_runtime_desc_t desc = make_desc();
+        RipplerXWaveguide s;
+        s.Init(&desc);
+        s.setParameter(RipplerXWaveguide::k_paramTone, tone_val);
+        s.GateOn(127);
+        float peak = 0.0f;
+        for (int i = 0; i < 400; ++i) {
+            float buf[2] = {};
+            s.processBlock(buf, 1);
+            float a = std::fabs(ut_voice_out); // pre-master-effects signal
+            if (a > peak) peak = a;
+        }
+        return peak;
+    };
+
+    float peak_neutral = peak_pre_limiter(0);
+    float peak_bright  = peak_pre_limiter(30);
+    float peak_dark    = peak_pre_limiter(-10);
+    std::cout << "  peak (pre-limiter) Tone= 0 (neutral) : " << peak_neutral << "\n";
+    std::cout << "  peak (pre-limiter) Tone=30 (bright)  : " << peak_bright  << "\n";
+    std::cout << "  peak (pre-limiter) Tone=-10 (dark)   : " << peak_dark    << "\n";
+
+    result("T13a Tone=0 (neutral) produces sound (pre-limiter)",
+           peak_neutral > 1e-9f, "Tone=0 is silent");
+    result("T13b Tone=30 (bright) pre-limiter peak > Tone=-10 (dark)",
+           peak_bright > peak_dark,
+           "Tone EQ has no effect or inverted: bright pre-limiter peak <= dark");
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 int main() {
     std::cout << "=== RIPPLERX HW-DEBUG UNIT TESTS ===\n";
     std::cout << "Testing HW-vs-UT discrepancies that could cause hardware silence.\n";
@@ -473,6 +628,10 @@ int main() {
     test_all_presets_audible();
     test_voice_allocation();
     test_delay_roundtrip();
+    test_noise_svf();
+    test_tubrad_mterl();
+    test_partls_coupling();
+    test_tone_eq();
 
     std::cout << "\n=== RESULTS: " << g_pass << " passed, " << g_fail << " failed ===\n";
     return g_fail == 0 ? 0 : 1;

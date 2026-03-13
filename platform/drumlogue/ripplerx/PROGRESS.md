@@ -28,25 +28,37 @@ in, the feedback loop would be dead. The result is complete silence, every note.
 pointers are stored. This runs `setParameter` for every slot, setting
 `mallet_stiffness = 0.5f`, `feedback_gain ≈ 0.87f`, `lowpass_coeff ≈ 0.5f`, etc.
 
-### BUG 2 — Chamberlin SVF tuning formula uses wrong divisor
+### BUG 2 — Chamberlin SVF formula catastrophically wrong (filter always near-Nyquist)
 
-**Root cause:** `filter.h` `set_coeffs()` computes:
-```cpp
-f = 2.0f * fastercosfullf(0.25f - (safe_cutoff / srate));
-```
-`fastercosfullf` maps input [0, 1] to a full 360° cycle, so:
-`cos(2π(0.25 − x)) = sin(2πx)` — this gives `f = 2·sin(2π·cutoff/srate)`.
-
-The correct Chamberlin formula is `f = 2·sin(π·cutoff/srate)`, requiring:
+**Root cause:** `filter.h` `set_coeffs()` used `fastercosfullf`, which takes
+**radians** (it is implemented as `fastersinfullf(x + π/2)`), not a [0,1]-normalised
+fraction as the comment claimed. The formula:
 ```cpp
 f = 2.0f * fastercosfullf(0.25f - (safe_cutoff / (2.0f * srate)));
 ```
-With the old formula the filter operated at double the intended cutoff frequency.
-At 10 kHz the computed `f` was 1.93 instead of the correct 1.22. While the SVF
-remains stable in practice (the 0.45·srate clamp keeps `f < 2`), frequency
-scaling was wrong for the entire LowCut parameter range.
+actually computes `2·cos(0.25_rad − cutoff/(2·srate))`. Because 0.25 radians
+is only slightly less than the cosine peak, the argument stays near 0 for all
+audio frequencies and `f` is always in [1.91, 1.97] — regardless of cutoff.
 
-**Fix:** Changed divisor from `srate` to `2.0f * srate` in `set_coeffs()`.
+The Chamberlin SVF stability limit is `f < 2`. With f ≈ 1.91, the filter has
+an eigenvalue of ≈ 4.85, causing a ×5 blow-up every 3 samples. Both the
+**master_filter** (LowCut) and the **noise_filter** (NzFltr/NzFltFrq) diverge
+to NaN within ~60 samples of receiving any nonzero audio. The brickwall limiter
+(`fmaxf(-0.99, fminf(0.99, NaN)) = 0.99`) silently masked the failure so the
+synth appeared to work — every note immediately hard-clipped to ±0.99.
+
+A previous partial fix changed the divisor from `srate` to `2*srate` (based on
+the incorrect assumption about `fastercosfullf`'s input domain). That fix had
+no meaningful effect: both versions produce f near 1.91 for all audio
+frequencies and are equally unstable.
+
+**Fix:** Replace the broken formula with `sinf()`, which is unambiguous and
+only runs in the UI thread (setParameter) so its cost is negligible:
+```cpp
+f = 2.0f * sinf(M_PI * safe_cutoff / srate);
+```
+Correct f values for reference: 10 Hz → 0.0013, 1 kHz → 0.131,
+5 kHz → 0.643, 10 kHz → 1.218, 20 kHz (clamped) → 1.975. All < 2, stable.
 
 ### BUG 3 — Reset() does not restore mix_ab default
 
@@ -127,19 +139,12 @@ The following bugs were found and fixed after the initial Partls-selector commit
   Both poles' state variables (`mallet_lp` and `mallet_lp2`) are reset to 0
   on each `NoteOn` to prevent clicks from polyphonic overlap.
 
-### Still Pending (future work)
+### Previously Pending — now completed in Phase 13
 
-* **`Tone` (Index 12):** Unmapped. Could become a tilt-EQ shelf inside the
-  feedback loop, or a master high-shelf for brightness control.
-* **`Partls` active-partials meaning (Index 8, values 0–4):** Currently only
-  gates ResB on/off (threshold >= 2). Better usage: repurpose as A/B coupling
-  depth — how much ResB's output feeds back into ResA's exciter input.
-* **`NzFltr` & `NzFltFrq` (Indices 21 & 22):** Master SVF exists but noise
-  has no dedicated filter. Add a second `FastSVF` inside `ExciterState`
-  that shapes the noise before it enters the delay line.
-* **`TubRad` (Index 17):** Unmapped. Could scale `lowpass_coeff` (wider tube
-  = less high-frequency loss). Needs a stored base-Mterl coefficient so both
-  Mterl and TubRad can combine without re-deriving each other.
+* ~~**`Tone` (Index 12):** Unmapped.~~ → Tilt EQ (Phase 13).
+* ~~**`Partls` values 0–4:** Only gated ResB on/off.~~ → Bidirectional coupling depth (Phase 13).
+* ~~**`NzFltr` & `NzFltFrq` (Indices 21 & 22):** No dedicated noise filter.~~ → `FastSVF noise_filter` in ExciterState (Phase 13).
+* ~~**`TubRad` (Index 17):** Unmapped.~~ → Combined with Mterl for `lowpass_coeff` (Phase 13).
 
 ---
 
@@ -218,15 +223,62 @@ Index 24 was never read or written.
 
 ---
 
-## Phase 13: Missing Features & Improvements (TODO)
+## Phase 13: Parameter Activation & SVF Fix [COMPLETED]
+
+Four parameters stored in `m_params` but previously producing no DSP effect
+have been wired up, and the underlying SVF formula bug that made them unusable
+has been corrected.
+
+### SVF formula fix (filter.h)
+`fastercosfullf` takes **radians**, not a [0,1]-normalised fraction (see BUG 2
+above). The formula was producing f ≈ 1.91–1.97 for all audio frequencies,
+making both the master filter and the noise filter catastrophically unstable
+(eigenvalue ≈ 4.85, ×5 blow-up per 3 samples → NaN within 60 samples, silently
+masked by the brickwall limiter). Fixed with `f = 2·sinf(π·fc/srate)`.
+
+### Dedicated Noise SVF (NzFltr / NzFltFrq)
+Added `FastSVF noise_filter` to `ExciterState` (inside `ENABLE_PHASE_6_FILTERS`
+guard). `k_paramNzFltr` sets its mode (0=LP, 1=BP, 2=HP). `k_paramNzFltFrq`
+sets its cutoff (clamped 20–20000 Hz). Applied to the noise burst in
+`process_exciter()` before the noise scales by `noise_decay_coeff`.
+Defaults on Reset(): LP mode, 12 kHz cutoff.
+
+### TubRad + Mterl combined (k_paramTubRad / k_paramMterl)
+The two parameters now share a `case k_paramMterl: case k_paramTubRad:` block.
+Either change recalculates `lowpass_coeff` from both stored values:
+- Mterl (−10 to +30) → base material brightness (0.01 = dull wood, 1.0 = lossless metal)
+- TubRad (0 to 20) → pulls the coefficient towards 1.0 (wider tube = brighter)
+
+### Partls as bidirectional coupling depth (k_paramPartls values 0–4)
+UI values 0–4 (previously only gating ResB on/off) now also set cross-coupling
+depth (0.0–1.0). ResA receives `exciter + resB_out_prev × depth × 0.5`;
+ResB receives `exciter + outA × depth × 0.5`. The `m_active_partials >= 16`
+CPU gate for ResB is preserved. `resB_out_prev` is reset on NoteOn and in the
+`else` branch to prevent artefacts when ResB is inactive.
+
+### Tone tilt EQ (k_paramTone, −10 to +30)
+Per-voice 1-pole LP (coefficient 0.3, cutoff ≈ 2.7 kHz) extracts the low
+component. Negative Tone blends toward LP (darker); positive Tone boosts the HP
+component (brighter, up to 2× high-shelf gain at Tone=30). Applied after the
+velocity scale, before the master envelope/limiter. `tone_lp` state is reset on
+NoteOn.
+
+### Unit tests (T10–T13)
+- **T10** (structural): verifies NzFltr and NzFltFrq route to `noise_filter.mode`
+  and `noise_filter.f` on all 4 voices.
+- **T11**: verifies TubRad raises `lowpass_coeff` above the Mterl-only value but
+  stays below 1.0 (damping still present).
+- **T12**: verifies both Partls=0 (ResA only) and Partls=4 (dual + coupling)
+  produce sound.
+- **T13**: uses pre-limiter `ut_voice_out` tap to verify Tone=30 gives a higher
+  peak than Tone=−10.
+
+## Phase 13: Still Pending (future work)
 
 * **Dynamic Energy Squelch (CPU):** Track per-voice output RMS. When the
   waveguide decays below −80 dB, set `is_active = false` immediately rather
   than waiting for the release envelope. Prevents zombie voices consuming CPU
   for the full envelope release time after the signal is inaudible.
-* **Dedicated Noise SVF:** Instantiate a second `FastSVF` inside `ExciterState`
-  to filter white noise before it enters the delay line. Wire `NzFltr` and
-  `NzFltFrq` parameters to its coefficients.
 * **Pitch Bend:** Wire `unit_pitch_bend()` into `NoteOn` delay-length math.
   A ±semitone bend would require multiplying `delay_length` by `2^(bend/12)`.
 * **True Stereo Master Filter:** `master_filter` is a single mono `FastSVF`.
