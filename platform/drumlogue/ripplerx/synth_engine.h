@@ -886,15 +886,20 @@ inline void NoteOff(uint8_t note) {
                 // Extracts a ~2.7 kHz LP component and either blends towards it (dark) or
                 // boosts the complementary HP component (bright).
                 // tone_val is hoisted above the voice loop (state.tone, set by setParameter).
-                voice.tone_lp = (voice_out * 0.3f) + (voice.tone_lp * 0.7f);
+                // Define tuning constants for the tilt EQ
+                static constexpr float kToneLpMix = 0.3f;
+                static constexpr float kToneCutDivisor = 10.0f;
+                static constexpr float kToneBoostDivisor = 15.0f;
+
+                voice.tone_lp = (voice_out * kToneLpMix) + (voice.tone_lp * (1.0f - kToneLpMix));
                 if (tone_val < 0.0f) {
                     // Negative Tone: interpolate towards lowpass (cuts highs)
-                    float cut_amt = -tone_val / 10.0f;
+                    float cut_amt = -tone_val / kToneCutDivisor;
                     voice_out = voice_out + (voice.tone_lp - voice_out) * cut_amt;
                 } else if (tone_val > 0.0f) {
                     // Positive Tone: boost the highpass component (adds highs)
                     float hp = voice_out - voice.tone_lp;
-                    float boost_amt = tone_val / 15.0f; // up to 2.0× high-shelf boost at Tone=30
+                    float boost_amt = tone_val / kToneBoostDivisor; // up to 2.0× high-shelf boost at Tone=30
                     voice_out += hp * boost_amt;
                 }
 
