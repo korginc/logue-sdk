@@ -421,9 +421,10 @@ static void test_delay_roundtrip() {
     s.NoteOn(60, 127);
 
     // Inspect the allocated voice's delay_length directly.
-    // NoteOn increments next_voice_idx before assigning, so the active voice is
-    // at index (initial 0 +1) = 1.
-    const WaveguideState& resA = s.state.voices[1].resA;
+    // NoteOn advances next_voice_idx before assigning, so the active voice is
+    // always at that index — no hardcoded assumptions about initial state.
+    uint8_t active_idx = s.state.next_voice_idx;
+    const WaveguideState& resA = s.state.voices[active_idx].resA;
     float dl = resA.delay_length;
     std::cout << "  resA.delay_length after NoteOn(60) = " << dl << " samples\n";
     std::cout << "  Expected for C4 @ 48kHz            ≈ 183.5 samples\n";
@@ -469,6 +470,7 @@ int main() {
     test_reset_then_gate_on();
     test_all_presets_audible();
     test_voice_allocation();
+    test_delay_roundtrip();
 
     std::cout << "\n=== RESULTS: " << g_pass << " passed, " << g_fail << " failed ===\n";
     return g_fail == 0 ? 0 : 1;

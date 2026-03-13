@@ -792,12 +792,16 @@ inline void NoteOff(uint8_t note) {
 
 // [UT4: GATE-OFF CHOKE FIX] - The "Damper Pedal" Squelch
 #ifdef ENABLE_PHASE_5_EXCITERS
-                // 1. Process the Master Envelope (it acts as a smooth fade-out during release)
+                // 1. Process the Master Envelope (smooth fade-out during release).
+                //    During gate-on, master_env holds at 1.0 (sustain_level=1.0, decay_rate=0) —
+                //    no audible effect on the physical tail.
+                //    On GateOff/NoteOff, it fades to 0 at the rate set by k_paramRel.
                 float damper_fade = voice.exciter.master_env.process();
                 voice_out *= damper_fade;
 
-                // 2. NEW Energy Squelch: Mark voice inactive ONLY when the fade is 100% complete!
-                // This completely ignores zero-crossings and travel time delays.
+                // 2. Kill the voice ONLY when the envelope is fully idle.
+                //    This is time-based, not amplitude-based, so the delay-line travel
+                //    window is never mistaken for "silence" and prematurely squelched.
                 if (voice.is_releasing && voice.exciter.master_env.state == ENV_IDLE) {
                     voice.is_active = false;
                 }
