@@ -263,15 +263,43 @@ component (brighter, up to 2× high-shelf gain at Tone=30). Applied after the
 velocity scale, before the master envelope/limiter. `tone_lp` state is reset on
 NoteOn.
 
-### Unit tests (T10–T13)
+### Unit tests (T10–T15)
 - **T10** (structural): verifies NzFltr and NzFltFrq route to `noise_filter.mode`
-  and `noise_filter.f` on all 4 voices.
+  and `noise_filter.f` on all 4 voices. Structural (not audio) because sustained
+  noise into the feedback resonator overflows float before a round-trip completes.
 - **T11**: verifies TubRad raises `lowpass_coeff` above the Mterl-only value but
   stays below 1.0 (damping still present).
 - **T12**: verifies both Partls=0 (ResA only) and Partls=4 (dual + coupling)
   produce sound.
 - **T13**: uses pre-limiter `ut_voice_out` tap to verify Tone=30 gives a higher
   peak than Tone=−10.
+- **T14**: verifies that `noise_filter.lp` and `.bp` are exactly 0.0 after both
+  `Reset()` and `NoteOn()` even after noise injection has driven those states to
+  NaN (confirmed by T14a: lp = −nan before the fix was applied).
+- **T15**: verifies that `Partls=5` (select ResA) and `Partls=6` (select ResB)
+  do not overwrite `m_coupling_depth`, which would silently enable full coupling
+  whenever the user entered editor mode.
+
+### Post-activation bug review (code review pass)
+Two additional bugs found and fixed after the initial Phase 13 commit:
+
+**BUG: noise_filter SVF state (lp/bp/hp) not cleared on Reset() or NoteOn()**
+- `FastSVF.set_coeffs()` only updates `f` and `q`; it never zeroes `lp`, `bp`,
+  or `hp`. Reset() called set_coeffs() and nothing else. NoteOn() didn't touch
+  the noise filter state at all.
+- Result: on the very first note the states start at 0 (in-class init), but
+  every subsequent note reuses stale (and eventually NaN) filter memory, causing
+  an audible click/pop on retrigger.
+- Fix: both Reset() and NoteOn() now explicitly zero `lp`, `bp`, and `hp` inside
+  the `ENABLE_PHASE_6_FILTERS` guard.
+
+**BUG: Partls=5/6 (editor-select mode) silently set coupling depth to 1.0**
+- The processBlock coupling formula read `m_params[k_paramPartls]` directly and
+  clamped it: `fmaxf(0, fminf(4, value)) / 4`. When the user set Partls=5 or 6
+  to enter the resonator-edit menu, `m_params` stored 5/6 and the clamp produced
+  4/4 = 1.0 — full coupling — regardless of what the user had previously set.
+- Fix: added `float m_coupling_depth` (private member, updated only when
+  Partls < 5) and changed processBlock to use `m_coupling_depth` directly.
 
 ## Phase 13: Still Pending (future work)
 

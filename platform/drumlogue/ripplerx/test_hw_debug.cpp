@@ -614,6 +614,101 @@ static void test_tone_eq() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// T14 — noise_filter SVF delay state zeroed on NoteOn() and Reset()
+//   If lp/bp/hp are not cleared on retrigger, the first noise sample after
+//   NoteOn sees stale filter memory, producing a click/pop.
+//   This test verifies those fields are exactly 0.0 immediately after both
+//   a Reset() and a NoteOn() — before any audio is processed.
+// ════════════════════════════════════════════════════════════════════════════
+static void test_noise_filter_state_clear() {
+    std::cout << "\n── T14: noise_filter SVF state cleared on Reset() and NoteOn() ──\n";
+
+    unit_runtime_desc_t desc = make_desc();
+    RipplerXWaveguide s;
+    s.Init(&desc);
+
+    // Run 200 frames with NzMix=100 to accumulate non-zero filter state
+    s.setParameter(RipplerXWaveguide::k_paramNzMix, 100);
+    s.NoteOn(60, 127);
+    for (int i = 0; i < 200; ++i) { float buf[2]{}; s.processBlock(buf, 1); }
+
+    // Snapshot: confirm states are nonzero after processing noise
+    // (voice 1 was allocated by the first NoteOn above — index from T8 shows index 1)
+    float lp_before = s.state.voices[1].exciter.noise_filter.lp;
+    float bp_before = s.state.voices[1].exciter.noise_filter.bp;
+
+    // Reset() must zero all noise_filter delay states
+    s.Reset();
+    float lp_after_reset = s.state.voices[0].exciter.noise_filter.lp;
+    float bp_after_reset = s.state.voices[0].exciter.noise_filter.bp;
+
+    // A fresh NoteOn() must also zero the states before the first sample
+    s.NoteOn(60, 100);
+    float lp_after_noteon = s.state.voices[1].exciter.noise_filter.lp;
+    float bp_after_noteon = s.state.voices[1].exciter.noise_filter.bp;
+
+    std::cout << "  noise_filter.lp before reset : " << lp_before  << "\n";
+    std::cout << "  noise_filter.bp before reset : " << bp_before  << "\n";
+    std::cout << "  noise_filter.lp after Reset() : " << lp_after_reset << "\n";
+    std::cout << "  noise_filter.lp after NoteOn(): " << lp_after_noteon << "\n";
+
+    result("T14a noise_filter.lp/bp non-zero after 200-frame noise injection",
+           lp_before != 0.0f || bp_before != 0.0f,
+           "NzMix=100 noise filter state never changed — filter may not be processing");
+    result("T14b Reset() zeroes noise_filter.lp",
+           lp_after_reset == 0.0f,
+           "Reset() left stale noise_filter.lp — would cause click on next NoteOn");
+    result("T14c Reset() zeroes noise_filter.bp",
+           bp_after_reset == 0.0f,
+           "Reset() left stale noise_filter.bp — would cause click on next NoteOn");
+    result("T14d NoteOn() zeroes noise_filter.lp",
+           lp_after_noteon == 0.0f,
+           "NoteOn() left stale noise_filter.lp — retrigger click on poly overlap");
+    result("T14e NoteOn() zeroes noise_filter.bp",
+           bp_after_noteon == 0.0f,
+           "NoteOn() left stale noise_filter.bp — retrigger click on poly overlap");
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// T15 — Partls=5/6 (editor-select mode) must not change coupling depth
+//   Values 5 and 6 select which resonator subsequent edits target.
+//   They must not reset or replace the coupling depth set by values 0–4.
+// ════════════════════════════════════════════════════════════════════════════
+static void test_partls_mode_select_coupling() {
+    std::cout << "\n── T15: Partls=5/6 editor-select leaves coupling depth unchanged ──\n";
+
+    unit_runtime_desc_t desc = make_desc();
+    RipplerXWaveguide s;
+    s.Init(&desc);
+
+    // Set coupling to mid-depth via Partls=2 (16 partials → 0.5 coupling)
+    s.setParameter(RipplerXWaveguide::k_paramPartls, 2);
+    float depth_before = s.m_coupling_depth_ut();
+
+    // Partls=5 selects ResA for editing — must not touch coupling
+    s.setParameter(RipplerXWaveguide::k_paramPartls, 5);
+    float depth_after_5 = s.m_coupling_depth_ut();
+
+    // Partls=6 selects ResB for editing — must not touch coupling
+    s.setParameter(RipplerXWaveguide::k_paramPartls, 6);
+    float depth_after_6 = s.m_coupling_depth_ut();
+
+    std::cout << "  coupling_depth after Partls=2  : " << depth_before  << "\n";
+    std::cout << "  coupling_depth after Partls=5  : " << depth_after_5 << "\n";
+    std::cout << "  coupling_depth after Partls=6  : " << depth_after_6 << "\n";
+
+    result("T15a Partls=2 sets coupling_depth=0.5",
+           depth_before == 0.5f,
+           "Partls=2 did not set m_coupling_depth to 0.5");
+    result("T15b Partls=5 (ResA select) does not change coupling_depth",
+           depth_after_5 == depth_before,
+           "Partls=5 overwrote coupling_depth — would enable full coupling unexpectedly");
+    result("T15c Partls=6 (ResB select) does not change coupling_depth",
+           depth_after_6 == depth_before,
+           "Partls=6 overwrote coupling_depth — would enable full coupling unexpectedly");
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 int main() {
     std::cout << "=== RIPPLERX HW-DEBUG UNIT TESTS ===\n";
     std::cout << "Testing HW-vs-UT discrepancies that could cause hardware silence.\n";
@@ -632,6 +727,8 @@ int main() {
     test_tubrad_mterl();
     test_partls_coupling();
     test_tone_eq();
+    test_noise_filter_state_clear();
+    test_partls_mode_select_coupling();
 
     std::cout << "\n=== RESULTS: " << g_pass << " passed, " << g_fail << " failed ===\n";
     return g_fail == 0 ? 0 : 1;

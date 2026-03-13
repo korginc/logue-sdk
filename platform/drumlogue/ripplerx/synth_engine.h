@@ -72,6 +72,12 @@ public:
     };
 
     SynthState state;
+
+#ifdef UNIT_TEST_DEBUG
+    // Expose private members for unit test introspection (test binary only).
+    float m_coupling_depth_ut() const { return m_coupling_depth; }
+#endif
+
     // ==============================================================================
     // 0. Lifecycle & Initialization
     // ==============================================================================
@@ -146,6 +152,12 @@ public:
             // Noise filter defaults to LP mode, fully open (12 kHz)
             state.voices[i].exciter.noise_filter.mode = 0;
             state.voices[i].exciter.noise_filter.set_coeffs(12000.0f, 0.707f, 48000.0f);
+            // Clear SVF delay states — set_coeffs() only updates f/q, not the
+            // recursive lp/bp/hp accumulators.  Leaving them non-zero after a
+            // patch change would cause a loud click on the next NoteOn.
+            state.voices[i].exciter.noise_filter.lp = 0.0f;
+            state.voices[i].exciter.noise_filter.bp = 0.0f;
+            state.voices[i].exciter.noise_filter.hp = 0.0f;
 #endif
         }
 
@@ -349,6 +361,9 @@ public:
                     // controls CPU budget, not per-resonator timbre.
                     static const uint8_t partial_counts[] = {4, 8, 16, 32, 64};
                     m_active_partials = partial_counts[value];
+                    // Store coupling depth from UI index so Partls=5/6
+                    // (editor-select modes) never overwrite this.
+                    m_coupling_depth = (float)value / 4.0f;
                 } else {
                     m_is_resonator_a = (value == 5);
                 }
@@ -667,6 +682,15 @@ public:
         v.resB_out_prev = 0.0f;
         v.tone_lp = 0.0f;
 
+#ifdef ENABLE_PHASE_6_FILTERS
+        // Clear noise SVF delay states so rapid re-triggering doesn't produce
+        // a click from residual filter memory.  set_coeffs() (called once from
+        // setParameter) only updates f/q and never zeroes lp/bp/hp.
+        v.exciter.noise_filter.lp = 0.0f;
+        v.exciter.noise_filter.bp = 0.0f;
+        v.exciter.noise_filter.hp = 0.0f;
+#endif
+
 #ifdef ENABLE_PHASE_5_EXCITERS
         // Trigger the envelopes when a note hits
         v.exciter.noise_env.trigger();
@@ -823,8 +847,9 @@ inline void NoteOff(uint8_t note) {
                 float exciter_sig = process_exciter(voice.exciter);
 
                 // 2. Mutual Coupling (Partls 0–4 → 0.0–1.0 coupling depth).
-                // Values 5/6 are resonator-select modes; clamp keeps them at 1.0 max.
-                float coupling_amt = fmaxf(0.0f, fminf(4.0f, (float)m_params[k_paramPartls])) / 4.0f;
+                // Use m_coupling_depth, not m_params[k_paramPartls], because
+                // Partls=5/6 (editor-select modes) must not change the coupling.
+                float coupling_amt = m_coupling_depth;
 
                 // ResA gets exciter + scaled feedback from ResB's previous output
                 float inputA = exciter_sig + (voice.resB_out_prev * coupling_amt * 0.5f);
@@ -953,4 +978,7 @@ private:
     bool    m_is_resonator_a = true; // default is res A
 
     uint8_t m_active_partials = 32; // Default: 32 partials (Partls index 3, ResB active)
+    float   m_coupling_depth  = 0.75f; // Coupling depth [0.0–1.0] from Partls UI index 0–4.
+    // Stored separately from m_params[k_paramPartls] so that Partls=5/6
+    // (ResA/ResB editor-select modes) never corrupt the coupling amount.
 };
