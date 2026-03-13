@@ -26,7 +26,7 @@ float ut_voice_out = 0.0f;
 #include "synth_engine.h"
 
 void run_active_test() {
-    std::cout << "--- STARTING ACTIVE DSP UNIT TEST ---\n";
+    std::cout << "--- STARTING ACTIVE DSP UNIT TEST 1 ---\n";
 
     RipplerXWaveguide synth;
     unit_runtime_desc_t desc = {0};
@@ -34,10 +34,7 @@ void run_active_test() {
     desc.output_channels = 2;
     synth.Init(&desc);
 
-    synth.LoadPreset(0);
-    synth.setParameter(RipplerXWaveguide::k_paramDkay, 1500);
-    synth.setParameter(RipplerXWaveguide::k_paramNzMix, 0);
-    synth.setParameter(RipplerXWaveguide::k_paramGain, 50);
+    synth.LoadPreset(10);
 
     std::cout << "Triggering NoteOn(60, 127)...\n";
     synth.NoteOn(60, 127);
@@ -94,10 +91,49 @@ void run_active_test() {
         exit(1);
     }
 
-    std::cout << "\n[SUCCESS] Unit test passed perfectly. DSP is fully operational!\n";
+    std::cout << "\n--- 1st DIAGNOSTIC COMPLETE ---\n";
+}
+
+void run_active_test2() {
+    std::cout << "--- STARTING DIAGNOSTIC DSP UNIT TEST 2 ---\n";
+
+    RipplerXWaveguide synth;
+    unit_runtime_desc_t desc = {0};
+    desc.samplerate = 48000;
+    desc.output_channels = 2;
+    synth.Init(&desc);
+
+    synth.LoadPreset(0);
+    synth.setParameter(RipplerXWaveguide::k_paramDkay, 1500);
+    synth.setParameter(RipplerXWaveguide::k_paramNzMix, 0);
+
+    synth.NoteOn(60, 127);
+    uint8_t active_idx = synth.state.next_voice_idx;
+    VoiceState& v = synth.state.voices[active_idx];
+
+    // DIAGNOSTIC X-RAY: Run exactly 1 frame of audio
+    float frame_buffer[2] = {0.0f};
+    synth.processBlock(frame_buffer, 1);
+
+    std::cout << "\n[X-RAY 1: PITCH & TUNING]\n";
+    std::cout << "Note 60 Delay Length: " << v.resA.delay_length << " (Should be ~183.47)\n";
+    std::cout << "Read Pointer Offset : " << (float)v.resA.write_ptr - v.resA.delay_length << "\n";
+
+    std::cout << "\n[X-RAY 2: EXCITERS & UI BINDING]\n";
+    std::cout << "Mallet Stiffness  : " << v.exciter.mallet_stiffness << "\n";
+    std::cout << "Mallet Res Coeff  : " << v.exciter.mallet_res_coeff << " (If 0.0, UI matrix is broken!)\n";
+    std::cout << "Exciter Output    : " << ut_exciter_out << " (Should be ~15.0)\n";
+
+    std::cout << "\n[X-RAY 3: WAVEGUIDE MEMORY]\n";
+    std::cout << "Phase Multiplier  : " << v.resA.phase_mult << " (Should be 1.0 or -1.0)\n";
+    std::cout << "Buffer[0] Memory  : " << v.resA.buffer[0] << " (If 0.0, the waveguide multiplied the Mallet by zero!)\n";
+
+    std::cout << "\n--- 2nd DIAGNOSTIC COMPLETE ---\n";
+    return 0;
 }
 
 int main() {
     run_active_test();
+    run_active_test2();
     return 0;
 }

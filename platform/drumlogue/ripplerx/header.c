@@ -28,8 +28,8 @@ const __unit_header unit_header_t unit_header = {
         {1, 128, 1, 1, k_unit_param_type_none, 0, 0, 0, {"Sample"}},
 
         // Page 2: Mallet
-        {0, 1000, 500, 8, k_unit_param_type_none, 1, 1, 0, {"MlltRes"}},
-        {100, 5000, 250, 250, k_unit_param_type_none, 0, 0, 0, {"MlltStif"}},
+        {0, 1000, 500, 500, k_unit_param_type_none, 1, 1, 0, {"MlltRes"}},
+        {100, 5000, 250, 2500, k_unit_param_type_none, 0, 0, 0, {"MlltStif"}},
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"VlMllRes"}},
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"VlMllStf"}},
 
@@ -41,7 +41,7 @@ const __unit_header unit_header_t unit_header = {
         // [0..2000]
         {0, 2000, 250, 250, k_unit_param_type_none, 0, 0, 0, {"Dkay"}},
         // [−10..30]
-        {-10, 30, 0, 0, k_unit_param_type_none, 1, 1, 0, {"Mterl"}},
+        {-10, 30, 0, 10, k_unit_param_type_none, 1, 1, 0, {"Mterl"}},
 
         // Page 4: Resonator II
         {-10, 30, 0, 0, k_unit_param_type_none, 1, 0, 0, {"Tone"}},
@@ -49,7 +49,7 @@ const __unit_header unit_header_t unit_header = {
         {0, 20, 0, 10, k_unit_param_type_none, 1, 0, 0, {"Rel"}},
         // [0..1999] — stored value is multiplied by 10 in code (effective range 0–19990).
         // Using 10× coarser steps makes the encoder 10× faster to dial.
-        {0, 1999, 300, 1, k_unit_param_type_none, 0, 0, 0, {"Inharm"}},
+        {0, 1999, 300, 300, k_unit_param_type_none, 0, 0, 0, {"Inharm"}},
 
         // Page 5: Resonator III
         // [1..1999] — stored value is multiplied by 10 in code (effective 10–19990 Hz).
