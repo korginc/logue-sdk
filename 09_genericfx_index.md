@@ -31,3 +31,4 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [KaoZZy Drive](https://mrglennjones.gumroad.com/l/KaoZZyDrive) | Glenn Jones | Guitar amp distortion | nts-3 | paid |
 | [Warehouse Drum Kit](https://mrglennjones.gumroad.com/l/wdk01) | Glenn Jones | Full drum kit | nts-3 | paid |
 | [U-SPLICE](https://mrglennjones.gumroad.com/l/usplice) | Glenn Jones | Instant punch-in tape loop | nts-3 | paid |
+| [DOMINATOR](https://mrglennjones.gumroad.com/l/dominator) | Glenn Jones | Gesture-Looped Hoover Synthesizer | nts-3 | paid |
