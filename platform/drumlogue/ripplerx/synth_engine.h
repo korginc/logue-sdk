@@ -164,6 +164,7 @@ public:
         state.master_gain = 1.0f;
         state.master_drive = 1.0f;
         state.mix_ab = 0.5f; // Equal A/B mix
+        state.tone = 0.0f;   // Neutral tilt EQ (LoadPreset restores the preset value)
 
         // Always return to ResA edit context so LoadPreset (called next in Init)
         // applies preset data symmetrically to both resonators.
@@ -428,6 +429,11 @@ public:
             // HitPos parameter acts as the physical mixer between these two modes.
             // If HitPos is 0, you only hear ResA (hitting dead center).
             // If HitPos is 100, you hear mostly ResB (hitting the rim).
+            case k_paramTone: {
+                state.tone = fmaxf(-10.0f, fminf(30.0f, (float)value));
+                break;
+            }
+
             case k_paramHitPos: {
                 state.mix_ab = fmaxf(0.0f, fminf(1.0f, (float)value / 100.0f));
                 break;
@@ -834,6 +840,10 @@ inline void NoteOff(uint8_t note) {
             main_out[i] = 0.0f;
         }
 
+        // Cache tone once per block — avoids reading m_params[] on every sample
+        // and eliminates the theoretical UI/audio-thread race on that array access.
+        const float tone_val = state.tone;
+
         // Sum active voices into the master buffer
         for (int voice_idx = 0; voice_idx < NUM_VOICES; ++voice_idx) {
             VoiceState& voice = state.voices[voice_idx];
@@ -875,7 +885,7 @@ inline void NoteOff(uint8_t note) {
                 // 4. Voice Tilt EQ (Tone parameter: -10 to 30)
                 // Extracts a ~2.7 kHz LP component and either blends towards it (dark) or
                 // boosts the complementary HP component (bright).
-                float tone_val = (float)m_params[k_paramTone];
+                // tone_val is hoisted above the voice loop (state.tone, set by setParameter).
                 voice.tone_lp = (voice_out * 0.3f) + (voice.tone_lp * 0.7f);
                 if (tone_val < 0.0f) {
                     // Negative Tone: interpolate towards lowpass (cuts highs)

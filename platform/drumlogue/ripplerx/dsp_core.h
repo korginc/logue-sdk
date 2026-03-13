@@ -131,6 +131,7 @@ struct SynthState {
     float mix_ab = 0.5f;
     float master_gain = 1.0f;
     float master_drive = 1.0f;
+    float tone = 0.0f;        // Tilt EQ amount, cached from k_paramTone [-10, 30]
 
 #ifdef ENABLE_PHASE_6_FILTERS
     FastSVF master_filter;
