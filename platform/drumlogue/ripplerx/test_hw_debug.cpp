@@ -817,14 +817,14 @@ static void test_pitch_bend_persists_to_new_note() {
     s.NoteOn(60, 127);
     float nominal = s.state.voices[1].resA.delay_length;
 
-    // Hold bend up, then strike the same pitch
+    // Hold bend up, then strike the same pitch — allocates voices[2]
     s.PitchBend(16383);
     s.NoteOn(60, 127);
-    float bent_at_noteon = s.state.voices[1].resA.delay_length; // next voice slot
+    float bent_at_noteon = s.state.voices[2].resA.delay_length; // voices[2]: second NoteOn
 
     // Return to centre — delay should snap back to root pitch
     s.PitchBend(8192);
-    float after_centre = s.state.voices[1].resA.delay_length;
+    float after_centre = s.state.voices[2].resA.delay_length;
 
     std::cout << "  nominal delay=" << nominal
               << "  delay while bent=" << bent_at_noteon
