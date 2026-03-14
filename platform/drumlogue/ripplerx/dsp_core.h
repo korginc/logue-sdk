@@ -117,6 +117,10 @@ struct VoiceState {
     WaveguideState resB;
 
     // Coupling and Tone memory
+    // Both _prev fields hold the previous-sample output for symmetric 1-sample-delayed
+    // bidirectional coupling.  Using the current ResA output to feed ResB in the same
+    // sample (zero delay) was physically asymmetric and created a slight formant artefact.
+    float resA_out_prev = 0.0f; // ResA output from previous sample (bidirectional coupling)
     float resB_out_prev = 0.0f; // ResB output from previous sample (bidirectional coupling)
     float tone_lp = 0.0f;       // 1-pole LP state for the Tone tilt EQ
 
@@ -125,9 +129,11 @@ struct VoiceState {
     float base_delay_A = 0.0f;
     float base_delay_B = 0.0f;
 
-    // Dynamic Energy Squelch: 1-pole absolute-value envelope follower.
+    // Dynamic Energy Squelch: 1-pole mean-absolute-value envelope follower.
+    // Named mag_env (magnitude) because it smooths |x|, not x² — that is MAV,
+    // not RMS.  For the −80 dB silence gate both are equivalent in practice.
     // Smoothing: α=0.01 → τ ≈ 100 samples ≈ 2 ms at 48 kHz.
-    float rms_env = 0.0f;
+    float mag_env = 0.0f;
 };
 
 // Global Synth State (4 Voices limit for strict CPU budgeting)

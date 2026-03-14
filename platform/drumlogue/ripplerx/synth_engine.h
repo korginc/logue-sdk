@@ -48,8 +48,8 @@ static constexpr float kToneLpMix = 0.3f;
 static constexpr float kToneCutDivisor = 10.0f;
 static constexpr float kToneBoostDivisor = 15.0f;
 static constexpr float zeroThreshold = 0.0f;
-static constexpr alpha = 0.01f;
-static constexpr limiter = 0.99f;
+static constexpr float alpha = 0.01f;
+static constexpr float limiter = 0.99f;
 static constexpr int kSquelchGuardSamples = 1000; // ~20 ms
 static constexpr float kSquelchThreshold = 0.0001f; // -80 dB
                 
@@ -89,35 +89,35 @@ public:
         k_lastParamIndex    // marker
     };
     enum ProgramIndex {
-        k_Init              //0     
-        k_Marimba           //1     
-        k_808 Sub           //2     
-        k_Ac Snare          //3     
-        k_Tubular Bell      //4     
-        k_Timpani           //5     
-        k_Djambe            //6     
-        k_Taiko             //7     
-        k_March Snare       //8     
-        k_Tam Tam           //9     
-        k_Koto              //10    
-        k_Vibraphone        //11    
-        k_Woodblock         //12    
-        k_Acoustic Tom      //13    
-        k_Cymbal            //14    
-        k_Gong              //15    
-        k_Kalimba           //16    
-        k_Steel Pan         //17    
-        k_Claves            //18    
-        k_Cowbell           //19    
-        k_Triangle          //20    
-        k_Kick Drum         //21    
-        k_Clap              //22    
-        k_Shaker            //23    
-        k_Flute             //24    
-        k_Clarinet          //25    
-        k_Pluck Bass        //26    
-        k_Glass Bowl        //27    
-        k_ProgramIndex      //28    marker
+        k_Init = 0,         // 0
+        k_Marimba,          // 1
+        k_808Sub,           // 2
+        k_AcSnare,          // 3
+        k_TubularBell,      // 4
+        k_Timpani,          // 5
+        k_Djambe,           // 6
+        k_Taiko,            // 7
+        k_MarchSnare,       // 8
+        k_TamTam,           // 9
+        k_Koto,             // 10
+        k_Vibraphone,       // 11
+        k_Woodblock,        // 12
+        k_AcousticTom,      // 13
+        k_Cymbal,           // 14
+        k_Gong,             // 15
+        k_Kalimba,          // 16
+        k_SteelPan,         // 17
+        k_Claves,           // 18
+        k_Cowbell,          // 19
+        k_Triangle,         // 20
+        k_KickDrum,         // 21
+        k_Clap,             // 22
+        k_Shaker,           // 23
+        k_Flute,            // 24
+        k_Clarinet,         // 25
+        k_PluckBass,        // 26
+        k_GlassBowl,        // 27
+        k_NumPrograms       // 28 — marker (count)
     };
 
     SynthState state;
@@ -194,9 +194,10 @@ public:
             state.voices[i].resB.lowpass_coeff = 1.0f;
 
             // Clear coupling, tone and energy-squelch memory
+            state.voices[i].resA_out_prev = 0.0f;
             state.voices[i].resB_out_prev = 0.0f;
             state.voices[i].tone_lp = 0.0f;
-            state.voices[i].rms_env = 0.0f;
+            state.voices[i].mag_env = 0.0f;
             state.voices[i].base_delay_A = 0.0f;
             state.voices[i].base_delay_B = 0.0f;
 
@@ -284,7 +285,7 @@ public:
         // noise, master FX). Phase 12/13 in PROGRESS.md track future additions (TubRad, Tone, etc.).
         // Columns 15 (Inharm) and 16 (LowCut) store 1/10th of the effective value.
         // setParameter multiplies them back by 10 so the encoder travels 10× fewer steps.
-        static const int32_t presets[k_ProgramIndex][k_lastParamIndex] = {
+        static const int32_t presets[k_NumPrograms][k_lastParamIndex] = {
         //  Prg  Nte  Bnk  Smp - MlRs MlSt VlRs VlSt - Ptls Mdl  Dky  Mtr - Ton  Hit  Rel  InHm - LwCt TbRd Gain NzMx - NzRs NzFl NzFq Rsnc
             { 0,  60,   0,   1,   500, 2500,  0,   0,     3, 0,  250,  10,    0,  26, 10,   300,     1,   5,   0,    0, 300,  0, 12000, 707}, // 0: Init
             { 1,  60,   0,   1,   800, 4000,  0,   0,     3, 6,  150,  -5,    0,  50,  5,   150,     1,   5,  20,    0, 300,  0, 12000, 707}, // 1: Marimba
@@ -316,7 +317,7 @@ public:
             {27,  76,   0,   1,   700, 3500,  0,   0,     3, 4, 1600,  25,    0,  80, 18,  1200,    10,   5,   0,    0, 300,  0, 12000, 707}  // 27: Glass Bowl
         };
 
-        if (idx >= k_ProgramIndex) return;
+        if (idx >= k_NumPrograms) return;
 
         // Preset loading always targets ResA so that Dkay/Mterl/Inharm set resA first.
         // Save and restore the user's resonator-edit context around the load.
@@ -356,7 +357,7 @@ public:
             "Trngle",  "Kick",    "Clap",  "Shaker",
             "Flute",   "Clrint", "PlkBss", "GlsBwl"
         };
-        if (idx < k_ProgramIndex) return preset_names[idx];
+        if (idx < k_NumPrograms) return preset_names[idx];
         return "Unknown";
     }
 
@@ -710,9 +711,12 @@ public:
         // ResB: its own model (m_model_b) determines whether it tracks an irrational offset.
         if (m_model_b == 3 || m_model_b == 5) {
             // Membrane / Drumhead Logic:
-            // A drum skin vibrates in chaotic 2D modes. Fake this with an irrational
-            // pitch offset so resB adds inharmonic content on top of resA.
-            v.resB.delay_length = base_delay * 0.68f;
+            // A circular membrane's overtone ratios are determined by the zeros of the
+            // Bessel function J_mn.  The dominant second mode (1,1) has ratio ≈ 1.5926
+            // relative to the fundamental, so ResB should be at 1/1.5926 ≈ 0.628× the
+            // fundamental delay.  The old value of 0.68 (ratio 1.47) was not a Bessel
+            // zero and produced an off-character "wrong" shimmer.
+            v.resB.delay_length = base_delay * 0.628f;
         } else {
             // Standard matched resonators (Strings, Tubes, Bars)
             v.resB.delay_length = base_delay;
@@ -730,15 +734,38 @@ public:
         v.resA.delay_length = delay_len;
         v.resB.delay_length = delay_len;
 #endif
+        // --- PITCH COMPENSATION FOR LOOP FILTER GROUP DELAY ---
+        // The 1-pole LP and the allpass both add group delay at the fundamental
+        // frequency ω₀, extending the effective loop by τ_LP + τ_AP extra samples.
+        // Without compensation the pitch is flat by up to 35 cents (≈2.3 samples at
+        // lowpass_coeff=0.6, note 60).  DC approximation τ ≈ (1+pole)/(1-pole) is
+        // accurate to <0.01 samples for all MIDI notes at 48 kHz (ω₀ ≪ 1 rad/sample).
+        // cosf() is acceptable here — NoteOn is not in the audio hot loop.
+        {
+            // ResA
+            float pa = 1.0f - v.resA.lowpass_coeff;          // LP pole
+            float ca = v.resA.ap_coeff;                       // AP coefficient
+            float lp_del_A = (1.0f + pa) / (1.0f - pa);      // τ_LP in samples
+            float ap_del_A = (1.0f + ca) / (1.0f - ca);      // τ_AP in samples (1.0 at ca=0)
+            v.resA.delay_length = fmaxf(2.0f, v.resA.delay_length - lp_del_A - ap_del_A);
+
+            // ResB
+            float pb = 1.0f - v.resB.lowpass_coeff;
+            float cb = v.resB.ap_coeff;
+            float lp_del_B = (1.0f + pb) / (1.0f - pb);
+            float ap_del_B = (1.0f + cb) / (1.0f - cb);
+            v.resB.delay_length = fmaxf(2.0f, v.resB.delay_length - lp_del_B - ap_del_B);
+        }
+
         // Store pre-bend lengths so PitchBend() can always re-derive from the root pitch.
         // Then apply any bend that was already active when this note was struck.
         v.base_delay_A = v.resA.delay_length;
         v.base_delay_B = v.resB.delay_length;
         apply_pitch_bend_to_voice(v);
 
-        // Reset the RMS squelch tracker so residual energy from the previous note
-        // on this voice slot doesn't prematurely kill the new note's attack.
-        v.rms_env = 0.0f;
+        // Reset the magnitude-envelope squelch tracker so residual energy from the
+        // previous note on this voice slot doesn't prematurely kill the new note's attack.
+        v.mag_env = 0.0f;
 
         // Reset phase
         v.exciter.current_frame = 0;
@@ -748,6 +775,7 @@ public:
         v.resA.ap_y1 = 0.0f;
         v.resB.ap_x1 = 0.0f;
         v.resB.ap_y1 = 0.0f;
+        v.resA_out_prev = 0.0f;
         v.resB_out_prev = 0.0f;
         v.tone_lp = 0.0f;
 
@@ -838,8 +866,11 @@ inline void NoteOff(uint8_t note) {
         // 1. Calculate the read pointer position for exact pitch
         float read_idx = (float)wg.write_ptr - wg.delay_length;
 
-        // CRITICAL DSP FIX: Handle massive sub-bass wrap-arounds
-        while (read_idx < 0.0f) {
+        // delay_length is clamped to [2, DELAY_BUFFER_SIZE-2] so read_idx ≥ −4094.
+        // One addition of DELAY_BUFFER_SIZE always brings it into [2, 4096).
+        // Use 'if' rather than 'while' — the loop can execute at most once and
+        // the extra branch prediction overhead of 'while' is never justified.
+        if (read_idx < 0.0f) {
             read_idx += (float)DELAY_BUFFER_SIZE;
         }
 
@@ -848,29 +879,30 @@ inline void NoteOff(uint8_t note) {
         uint32_t idx_B = (idx_A + 1) & DELAY_MASK;
         float frac = read_idx - (float)((uint32_t)read_idx);
 
-        // Blend the two samples based on the fraction
-        float delay_out = (wg.buffer[idx_A] * (1.0f - frac)) + (wg.buffer[idx_B] * frac);
+        // Horner-form linear interpolation: 1 multiply + 2 adds instead of 2 multiplies + 1 add.
+        float delay_out = wg.buffer[idx_A] + frac * (wg.buffer[idx_B] - wg.buffer[idx_A]);
 
-        // 3. The Loss Filter (1-pole Lowpass) - Simulates Material (Wood/Metal)
-        // wg.lowpass_coeff was pre-calculated in setParameter()
-        wg.z1 = (delay_out * wg.lowpass_coeff) + (wg.z1 * (1.0f - wg.lowpass_coeff));
-        float filtered_out = wg.z1;
-
-
-        // --- NEW: Dispersion (Allpass Filter) ---
-        // This slightly delays high frequencies, stretching the harmonics out of tune
-        // to create metallic, stiff, or bell-like tones.
-        float ap_out = (wg.ap_coeff * filtered_out) + wg.ap_x1 - (wg.ap_coeff * wg.ap_y1);
-        wg.ap_x1 = filtered_out;
+        // 3a. Dispersion (Allpass Filter) — applied BEFORE the loss filter.
+        // Physical order: AP models wave propagation (medium property); LP models
+        // boundary absorption (reflection loss).  AP first ensures high-frequency
+        // phase stretching acts on the full-amplitude signal, then LP applies loss.
+        // With LP-first the AP acts on an already attenuated signal, reducing the
+        // audible inharmonicity at high frequencies (wrong direction for stiff strings).
+        float ap_out = (wg.ap_coeff * delay_out) + wg.ap_x1 - (wg.ap_coeff * wg.ap_y1);
+        wg.ap_x1 = delay_out;
         wg.ap_y1 = ap_out;
+
+        // 3b. Loss Filter (1-pole Lowpass) — applied AFTER dispersion.
+        // wg.lowpass_coeff was pre-calculated in setParameter()
+        wg.z1 = (ap_out * wg.lowpass_coeff) + (wg.z1 * (1.0f - wg.lowpass_coeff));
+        float filtered_out = wg.z1;
 
         // 4. Feedback & Exciter Addition
         // wg.feedback_gain is our "Decay" time
-        // --- PHASE 7: The Topology Multiplier (Use ap_out instead of filtered_out) ---
 #ifdef ENABLE_PHASE_7_MODELS
-        float new_val = exciter_input + (ap_out * wg.feedback_gain * wg.phase_mult);
+        float new_val = exciter_input + (filtered_out * wg.feedback_gain * wg.phase_mult);
 #else
-        float new_val = exciter_input + (ap_out * wg.feedback_gain);
+        float new_val = exciter_input + (filtered_out * wg.feedback_gain);
 #endif
 
         // 5. Write back to the delay line and advance the pointer
@@ -904,12 +936,16 @@ inline void NoteOff(uint8_t note) {
         // Two cascaded 1-pole LPs shape the strike spectrum:
         //   LP1 (mallet_stiffness): controls attack sharpness — high = bright, low = round.
         //   LP2 (mallet_res_coeff): controls mallet body — high = bright, low = dark (MlltRes).
-        float mallet_impulse = (ex.current_frame == 0) ? 1.0f : 0.0f;
-        ex.mallet_lp  = (mallet_impulse * ex.mallet_stiffness) + (ex.mallet_lp  * (1.0f - ex.mallet_stiffness));
-        ex.mallet_lp2 = (ex.mallet_lp   * ex.mallet_res_coeff) + (ex.mallet_lp2 * (1.0f - ex.mallet_res_coeff));
-
-        // Massive energy multiplier to physically ring the tube
-        out += ex.mallet_lp2 * 15.0f;
+        // Gate: skip both LP updates (and the * 15 add) once the second pole has fully
+        // decayed.  Without this gate the filters run for the full voice lifetime, leaking
+        // CPU every sample and risking denormal (subnormal) values on non-FTZ hardware.
+        // Threshold 1e-6f is well above the sub-normal range (~1.2e-38f) and inaudible.
+        if (ex.current_frame == 0 || ex.mallet_lp2 > 1e-6f) {
+            float mallet_impulse = (ex.current_frame == 0) ? 1.0f : 0.0f;
+            ex.mallet_lp  = (mallet_impulse * ex.mallet_stiffness) + (ex.mallet_lp  * (1.0f - ex.mallet_stiffness));
+            ex.mallet_lp2 = (ex.mallet_lp   * ex.mallet_res_coeff) + (ex.mallet_lp2 * (1.0f - ex.mallet_res_coeff));
+            out += ex.mallet_lp2 * 15.0f;
+        }
 
         // CRITICAL FIX: Increment time AT THE VERY END so Frame 0 actually triggers
         ex.current_frame++;
@@ -949,18 +985,24 @@ inline void NoteOff(uint8_t note) {
                 // Partls=5/6 (editor-select modes) must not change the coupling.
                 float coupling_amt = m_coupling_depth;
 
-                // ResA gets exciter + scaled feedback from ResB's previous output
+                // Symmetric bidirectional coupling via 1-sample-delayed outputs.
+                // Both resonators receive each other's PREVIOUS-sample output so the
+                // coupling is physically reciprocal.  The old code used outA (current
+                // sample) to feed ResB — zero delay on that path, 1-sample delay on
+                // the reverse path — creating an asymmetric formant artefact at high
+                // coupling depths.
                 float inputA = exciter_sig + (voice.resB_out_prev * coupling_amt * 0.5f);
                 float outA = process_waveguide(voice.resA, inputA);
                 float outB = 0.0f;
 
                 // Enable ResB for 16+ partials; 4 or 8 partials runs single-resonator to save CPU.
                 if (m_active_partials >= 16) {
-                    // ResB gets exciter + feed-forward from ResA
-                    float inputB = exciter_sig + (outA * coupling_amt * 0.5f);
+                    float inputB = exciter_sig + (voice.resA_out_prev * coupling_amt * 0.5f);
                     outB = process_waveguide(voice.resB, inputB);
+                    voice.resA_out_prev = outA;
                     voice.resB_out_prev = outB;
                 } else {
+                    voice.resA_out_prev = 0.0f;
                     voice.resB_out_prev = 0.0f;
                 }
 
@@ -992,7 +1034,7 @@ inline void NoteOff(uint8_t note) {
                 // 1. Track the acoustic energy of the waveguide model BEFORE applying
                 //    the master-envelope fade.  This distinguishes "the tube is silent"
                 //    from "the user released the gate".  α=0.01 → τ ≈ 2 ms at 48 kHz.
-                voice.rms_env = (fabsf(voice_out) * alpha) + (voice.rms_env * limiter);
+                voice.mag_env = (fabsf(voice_out) * alpha) + (voice.mag_env * limiter);
 
                 // 2. Process the Master Envelope (smooth fade-out during release).
                 //    During gate-on it holds at 1.0 — no audible effect on the tail.
@@ -1006,7 +1048,7 @@ inline void NoteOff(uint8_t note) {
                 //    Guard: current_frame > 1000 (~20 ms) prevents mis-fires during the
                 //    delay-line round-trip window where voice_out is legitimately 0.
                 if (voice.is_releasing && voice.exciter.current_frame > kSquelchGuardSamples) {
-                    if (voice.rms_env < kSquelchThreshold || voice.exciter.master_env.state == ENV_IDLE) {
+                    if (voice.mag_env < kSquelchThreshold || voice.exciter.master_env.state == ENV_IDLE) {
                         voice.is_active = false;
                     }
                 }

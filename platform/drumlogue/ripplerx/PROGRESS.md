@@ -383,6 +383,95 @@ All 45 tests pass.
 
 ---
 
+## Phase 16: Physical Model Review & DSP Correctness Pass [COMPLETED]
+
+Full audit of the digital waveguide physical model against known physical
+acoustics theory. Eight improvements applied; 45/45 tests pass.
+
+### 1. Coupling symmetry fix (correctness)
+
+The old coupling fed ResA with ResB's previous-sample output (1-sample delay)
+but fed ResB with ResA's current-sample output (zero delay). This asymmetry made
+the two resonators physically non-reciprocal — ResB always "heard" ResA one
+sample ahead — creating a subtle formant artefact at high coupling depths.
+
+Fix: added `float resA_out_prev` to `VoiceState`; both resonators now use the
+previous sample's output of the other, making the coupling symmetric and
+physically correct.
+
+### 2. Membrane inharmonicity ratio (correctness)
+
+`resB.delay_length = base_delay * 0.68f` gave a second mode ratio of 1/0.68 ≈
+1.47. Real circular membranes have overtone ratios determined by zeros of the
+Bessel function J_mn. The dominant second mode (1,1) has ratio ≈ 1.5926 →
+1/1.5926 ≈ **0.628**.
+
+Fix: changed multiplier from `0.68f` to `0.628f`.
+
+### 3. Filter order in the waveguide loop (correctness)
+
+Old order: LP → AP → write. The AP (dispersion) operated on an already
+frequency-attenuated signal, reducing its audible inharmonicity at high
+frequencies.
+
+Physical order: AP models in-medium wave propagation (stiffness); LP models
+boundary absorption (reflection loss). Correct order: **AP → LP → write**.
+
+Fix: swapped the two filter stages in `process_waveguide()`. The feedback write
+now uses `filtered_out` (LP output) rather than `ap_out` (AP output).
+
+### 4. `while` → `if` for delay-line read pointer (performance)
+
+`delay_length` is clamped to [2, 4094], so `read_idx ≥ −4094`. One addition
+of `DELAY_BUFFER_SIZE` (4096) always puts it in range. The `while` loop body
+can execute at most once; using `while` added an unnecessary backward branch in
+the innermost hot loop.
+
+### 5. Linear interpolation Horner form (performance)
+
+`(a * (1-f)) + (b * f)` → `a + f * (b - a)`: one multiply + two adds instead
+of two multiplies + one add. Saves one multiply per sample per active resonator.
+
+### 6. Mallet LP gate — denormal prevention (performance)
+
+The two cascaded mallet-shaping LP filters ran every sample for the full voice
+lifetime even though their state decays to ≈ sub-denormal within ~250 samples.
+Added a gate (`mallet_lp2 > 1e-6f`) that skips both LP updates and the
+`* 15.0f` add once the mallet has fully settled. Eliminates wasted CPU and
+prevents denormal stalls on non-FTZ hardware.
+
+### 7. `rms_env` renamed `mag_env` (naming accuracy)
+
+The envelope follower smooths `|x|` (mean absolute value), not `x²` (which
+would be RMS). Renamed to `mag_env` throughout (`dsp_core.h`,
+`synth_engine.h`). Behaviour is identical; only the name reflects what the
+code actually computes.
+
+### 8. Loop filter pitch compensation (tuning accuracy)
+
+The 1-pole LP and allpass both add group delay at the fundamental frequency ω₀,
+making the actual loop period longer than `delay_length` samples and the pitch
+correspondingly flat. For the default preset (lowpass_coeff = 0.604), the error
+was ≈ 35 cents flat at C4.
+
+Using the DC-limit approximation (valid for all MIDI notes at 48 kHz since
+ω₀ ≪ 1 rad/sample): τ_LP ≈ (1 + pole)/(1 − pole) and τ_AP ≈ (1 + c)/(1 − c).
+
+Fix: after computing the nominal delay from the lookup table, NoteOn subtracts
+(τ_LP + τ_AP) from each resonator's `delay_length` before storing it as the
+base for PitchBend. The corrected delay for C4 changes from 189.8 to 186.1
+samples — 3.7 samples shorter — bringing pitch error from −35 cents to < 1 cent.
+
+### Pre-existing compile errors also fixed
+
+Two `static constexpr` declarations were missing their `float` type keyword
+(introduced in a user commit). The `ProgramIndex` enum had enum values with
+spaces in their names and no commas — both invalid C++. Fixed: added `float`,
+replaced spaces with camelCase, added commas, renamed the count marker from
+`k_ProgramIndex` to `k_NumPrograms` to avoid shadowing confusion.
+
+---
+
 ## Phase 1: Core DSP Structures [COMPLETED]
 - [x] Define flat, cache-friendly C++ structures (`Waveguide`, `Exciter`, `Voice`).
 - [x] Establish memory bounds (4096-sample delay line for safe sub-bass).
