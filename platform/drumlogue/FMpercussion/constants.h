@@ -134,22 +134,6 @@ constexpr int VOICE_ALLOC_COUNT = 12;        // 12 valid allocations
 constexpr int VOICE_ALLOC_MIN = 0;
 constexpr int VOICE_ALLOC_MAX = 11;
 
-// Voice allocation string display (matches header.c)
-static const char* VOICE_ALLOC_STRINGS[12] = {
-    "K-S-M-P",  // 0: Kick, Snare, Metal, Perc (no resonant)
-    "K-S-M-R",  // 1: Kick, Snare, Metal, Resonant
-    "K-S-R-P",  // 2: Kick, Snare, Resonant, Perc
-    "K-R-M-P",  // 3: Kick, Resonant, Metal, Perc
-    "R-S-M-P",  // 4: Resonant, Snare, Metal, Perc
-    "K-S-R-M",  // 5: Kick, Snare, Resonant, Metal
-    "K-R-S-P",  // 6: Kick, Resonant, Snare, Perc
-    "R-K-M-P",  // 7: Resonant, Kick, Metal, Perc
-    "R-S-K-P",  // 8: Resonant, Snare, Kick, Perc
-    "M-R-K-P",  // 9: Metal, Resonant, Kick, Perc
-    "P-R-K-M",  // 10: Perc, Resonant, Kick, Metal
-    "M-P-R-K"   // 11: Metal, Perc, Resonant, Kick
-};
-
 // ============================================================================
 // Engine Mode Constants
 // ============================================================================
@@ -252,24 +236,6 @@ constexpr int LFO_TABLE_MASK = LFO_TABLE_SIZE - 1;
 constexpr float FILTER_Q_BESSEL = 0.5f;            // Bessel response
 constexpr float FILTER_Q_BUTTERWORTH = 0.707f;     // Butterworth response
 constexpr float FILTER_Q_LINKWITZ_RILEY = 0.5f;    // Linkwitz-Riley (cascaded)
-
-// ============================================================================
-// String tables (for synth.h)
-// ============================================================================
-static const char* lfo_shape_strings[9] = {
-            "Tri+Tri", "Ramp+Ramp", "Chord+Chord",
-            "Tri+Ramp", "Tri+Chord", "Ramp+Tri",
-            "Ramp+Chord", "Chord+Tri", "Chord+Ramp"
-        };
-
-        static const char* lfo_target_strings[8] = {
-            "None", "Pitch", "ModIdx", "Env",
-            "LFO2Ph", "LFO1Ph", "ResFreq", "Resonance"
-        };
-
-        static const char* resonant_mode_strings[5] = {
-            "LowPass", "BandPass", "HighPass", "Notch", "Peak"
-        };
 
 // ============================================================================
 // Utility Functions (compile-time)

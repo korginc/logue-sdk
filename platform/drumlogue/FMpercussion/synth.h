@@ -18,6 +18,12 @@
 #include "fm_presets.h"
 #include "constants.h"
 
+// defined in header.c
+extern const char* const lfo_shape_strings[9];
+extern const char* const lfo_target_strings[8];
+extern const char* const resonant_mode_strings[5];
+extern const char* const voice_alloc_strings[12];
+
 class Synth {
 public:
     /*===========================================================================*/

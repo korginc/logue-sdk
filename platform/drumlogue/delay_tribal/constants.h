@@ -6,14 +6,15 @@
  * Single source of truth for all magic numbers.
  */
 
-// NEON constants
+// Constants for NEON vectorization
 constexpr int NEON_LANES = 4;
-constexpr int CACHE_LINE_SIZE = 64;
-
-// Effect configuration
 constexpr int MAX_CLONES = 16;
 constexpr int CLONE_GROUPS = MAX_CLONES / NEON_LANES;
-constexpr int MAX_CLONE_GROUPS = CLONE_GROUPS;
+constexpr int CROSSFADE_SAMPLES = 480;  // 10ms @ 48kHz
+
+// Optimization constants
+constexpr int CACHE_LINE_SIZE = 64;  // ARM Cortex-A9 cache line
+constexpr int PREFETCH_DISTANCE = 4;  // Prefetch 4 samples ahead
 
 // Delay line configuration (48kHz sample rate)
 constexpr int DELAY_MAX_MS = 500;

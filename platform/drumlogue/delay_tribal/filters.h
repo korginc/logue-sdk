@@ -1,18 +1,10 @@
+// filters.h - SINGLE SOURCE OF TRUTH for all filter operations
 #pragma once
-
-/**
- * @file filters.h
- * @brief Complete filter implementations for the delay_tribal effect.
- *
- * Contains mode-specific filter types used in PercussionSpatializer.
- * Implements:
- * - Tribal mode: Bandpass filter (80-800 Hz)
- * - Military mode: Highpass filter (1 kHz+)
- * - Angel mode: Dual-band processor (HPF + LPF)
- */
 
 #include <arm_neon.h>
 #include <math.h>
+#include "constants.h"
+#include "spatial_modes.h"
 
 // Filter constants
 #define FILTER_Q_BUTTERWORTH 0.707f
@@ -21,46 +13,46 @@
 
 /**
  * Biquad filter coefficients (Transposed Direct Form II)
- * Efficient and stable for real-time audio
  */
 typedef struct {
-    float32x4_t b0;      // Numerator coefficients for 4 parallel filters
-    float32x4_t b1;
-    float32x4_t b2;
-    float32x4_t a1;      // Denominator coefficients (a0 = 1.0 after normalization)
-    float32x4_t a2;
+    float32x4_t b0, b1, b2, a1, a2;
 } biquad_coeffs_t;
 
 /**
  * Biquad filter state (4 parallel channels)
  */
 typedef struct {
-    float32x4_t z1;      // Delay element z^-1 for 4 channels
-    float32x4_t z2;      // Delay element z^-2 for 4 channels
+    float32x4_t z1, z2;
 } biquad_state_t;
 
-// mode_filters_t is defined in PercussionSpatializer.h (uses neon_biquad_t)
+/**
+ * Complete biquad filter with coeffs and state
+ */
+typedef struct {
+    biquad_coeffs_t coeffs;
+    biquad_state_t state;
+} neon_biquad_t;
+
+/**
+ * Mode filter state with multiple biquads
+ */
+typedef struct {
+    spatial_mode_t mode;
+    neon_biquad_t filters[CLONE_GROUPS * 2];  // [group*2] = pre, [group*2+1] = post
+    float depth_param;
+    float last_depth_param;
+    uint32_t ramp_samples;
+} mode_filters_t;
 
 /*===========================================================================*/
 /* Biquad Filter Core Operations */
 /*===========================================================================*/
 
-/**
- * Initialize biquad state to zero
- */
 fast_inline void biquad_init_state(biquad_state_t* state) {
     state->z1 = vdupq_n_f32(0.0f);
     state->z2 = vdupq_n_f32(0.0f);
 }
 
-/**
- * Process 4 samples through 4 parallel biquad filters
- * Transposed Direct Form II - efficient and stable
- *
- * y[n] = b0*x[n] + z1[n]
- * z1[n+1] = b1*x[n] - a1*y[n] + z2[n]
- * z2[n+1] = b2*x[n] - a2*y[n]
- */
 fast_inline float32x4_t biquad_process(
     float32x4_t in,
     const biquad_coeffs_t* coeff,
@@ -81,14 +73,10 @@ fast_inline float32x4_t biquad_process(
 }
 
 /*===========================================================================*/
-/* Coefficient Calculation - Tribal Mode (Bandpass) */
+/* Coefficient Calculation Functions */
 /*===========================================================================*/
 
-/**
- * Calculate bandpass coefficients for Tribal mode
- * Center frequency: 80-800 Hz, Q = 2.0 (musical resonance)
- */
-fast_inline void calculate_tribal_coeffs(
+fast_inline void calculate_bandpass_coeffs(
     biquad_coeffs_t* coeff,
     float center_freq,
     float q_factor
@@ -98,7 +86,6 @@ fast_inline void calculate_tribal_coeffs(
     float sin_w0 = sinf(w0);
     float alpha = sin_w0 / (2.0f * q_factor);
 
-    // Bandpass coefficients (un-normalized)
     float b0 = alpha;
     float b1 = 0.0f;
     float b2 = -alpha;
@@ -106,31 +93,15 @@ fast_inline void calculate_tribal_coeffs(
     float a1 = -2.0f * cos_w0;
     float a2 = 1.0f - alpha;
 
-    // Normalize by a0
     float inv_a0 = 1.0f / a0;
-    float32x4_t b0_vec = vdupq_n_f32(b0 * inv_a0);
-    float32x4_t b1_vec = vdupq_n_f32(b1 * inv_a0);
-    float32x4_t b2_vec = vdupq_n_f32(b2 * inv_a0);
-    float32x4_t a1_vec = vdupq_n_f32(a1 * inv_a0);
-    float32x4_t a2_vec = vdupq_n_f32(a2 * inv_a0);
-
-    // Store coefficients (same for all 4 parallel filters)
-    coeff->b0 = b0_vec;
-    coeff->b1 = b1_vec;
-    coeff->b2 = b2_vec;
-    coeff->a1 = a1_vec;
-    coeff->a2 = a2_vec;
+    coeff->b0 = vdupq_n_f32(b0 * inv_a0);
+    coeff->b1 = vdupq_n_f32(b1 * inv_a0);
+    coeff->b2 = vdupq_n_f32(b2 * inv_a0);
+    coeff->a1 = vdupq_n_f32(a1 * inv_a0);
+    coeff->a2 = vdupq_n_f32(a2 * inv_a0);
 }
 
-/*===========================================================================*/
-/* Coefficient Calculation - Military Mode (Highpass) */
-/*===========================================================================*/
-
-/**
- * Calculate highpass coefficients for Military mode
- * Cutoff: 1 kHz+, Q = 0.707 (Butterworth response)
- */
-fast_inline void calculate_military_coeffs(
+fast_inline void calculate_highpass_coeffs(
     biquad_coeffs_t* coeff,
     float cutoff_freq,
     float q_factor
@@ -140,7 +111,6 @@ fast_inline void calculate_military_coeffs(
     float sin_w0 = sinf(w0);
     float alpha = sin_w0 / (2.0f * q_factor);
 
-    // Highpass coefficients
     float b0 = (1.0f + cos_w0) / 2.0f;
     float b1 = -(1.0f + cos_w0);
     float b2 = b0;
@@ -156,14 +126,6 @@ fast_inline void calculate_military_coeffs(
     coeff->a2 = vdupq_n_f32(a2 * inv_a0);
 }
 
-/*===========================================================================*/
-/* Coefficient Calculation - Angel Mode (Dual-band) */
-/*===========================================================================*/
-
-/**
- * Calculate lowpass coefficients for Angel mode
- * Used for the ethereal smoothing
- */
 fast_inline void calculate_lowpass_coeffs(
     biquad_coeffs_t* coeff,
     float cutoff_freq,
@@ -174,7 +136,6 @@ fast_inline void calculate_lowpass_coeffs(
     float sin_w0 = sinf(w0);
     float alpha = sin_w0 / (2.0f * q_factor);
 
-    // Lowpass coefficients
     float b0 = (1.0f - cos_w0) / 2.0f;
     float b1 = 1.0f - cos_w0;
     float b2 = b0;
@@ -191,142 +152,102 @@ fast_inline void calculate_lowpass_coeffs(
 }
 
 /*===========================================================================*/
-/* Mode Filter Initialization */
+/* Mode Filter Management */
 /*===========================================================================*/
 
-/**
- * Initialize Tribal mode filters
- * Bandpass: 80-800 Hz center, Q=2.0
- */
-fast_inline void init_tribal_filters(
+fast_inline void init_mode_filters(
     mode_filters_t* filters,
-    float center_freq,
-    float q_factor
+    spatial_mode_t mode,
+    float depth
 ) {
-    filters->mode = 0;
-    filters->center_freq = center_freq;
-    filters->q_factor = q_factor;
+    filters->mode = mode;
+    filters->depth_param = depth;
+    filters->last_depth_param = depth;
+    filters->ramp_samples = 0;
 
-    // Calculate coefficients
-    calculate_tribal_coeffs(&filters->pre_coeff, center_freq, q_factor);
+    for (int i = 0; i < CLONE_GROUPS * 2; i++) {
+        biquad_init_state(&filters->filters[i].state);
+    }
 
-    // Copy to post filter (same coefficients)
-    filters->post_coeff = filters->pre_coeff;
+    // Set initial coefficients
+    update_filter_params(filters, depth, 0);
+}
 
-    // Initialize states
-    for (int i = 0; i < MAX_CLONE_GROUPS; i++) {
-        biquad_init_state(&filters->pre_state[i]);
-        biquad_init_state(&filters->post_state[i]);
+fast_inline void update_filter_params(
+    mode_filters_t* filters,
+    float depth,
+    uint32_t ramp_time
+) {
+    filters->depth_param = depth;
+    filters->ramp_samples = ramp_time;
+
+    if (ramp_time == 0) {
+        biquad_coeffs_t coeffs;
+
+        switch (filters->mode) {
+            case MODE_TRIBAL: {
+                float freq = 80.0f + depth * (800.0f - 80.0f);
+                calculate_bandpass_coeffs(&coeffs, freq, 2.0f);
+                break;
+            }
+            case MODE_MILITARY: {
+                float freq = 1000.0f + depth * (8000.0f - 1000.0f);
+                calculate_highpass_coeffs(&coeffs, freq, 0.707f);
+                break;
+            }
+            case MODE_ANGEL:
+                // For Angel mode, we'll set in apply function
+                return;
+        }
+
+        // Apply to all clone groups
+        for (int g = 0; g < CLONE_GROUPS; g++) {
+            filters->filters[g * 2].coeffs = coeffs;
+            filters->filters[g * 2 + 1].coeffs = coeffs;
+        }
     }
 }
 
-/**
- * Initialize Military mode filters
- * Highpass: 1 kHz+ cutoff, Q=0.707 (Butterworth)
- */
-fast_inline void init_military_filters(
-    mode_filters_t* filters,
-    float cutoff_freq,
-    float q_factor
-) {
-    filters->mode = 1;
-    filters->center_freq = cutoff_freq;
-    filters->q_factor = q_factor;
-
-    calculate_military_coeffs(&filters->pre_coeff, cutoff_freq, q_factor);
-    filters->post_coeff = filters->pre_coeff;
-
-    for (int i = 0; i < MAX_CLONE_GROUPS; i++) {
-        biquad_init_state(&filters->pre_state[i]);
-        biquad_init_state(&filters->post_state[i]);
-    }
-}
-
-/**
- * Initialize Angel mode filters
- * Dual-band: HPF (500 Hz) + gentle LPF (4 kHz)
- */
-fast_inline void init_angel_filters(
-    mode_filters_t* filters,
-    float low_cut,
-    float high_cut,
-    float q_factor
-) {
-    filters->mode = 2;
-    filters->center_freq = (low_cut + high_cut) * 0.5f;
-    filters->q_factor = q_factor;
-
-    // Pre-filter: Highpass (remove rumble)
-    calculate_military_coeffs(&filters->pre_coeff, low_cut, 0.707f);
-
-    // Post-filter: Lowpass (smooth ethereal character)
-    calculate_lowpass_coeffs(&filters->post_coeff, high_cut, q_factor);
-
-    for (int i = 0; i < MAX_CLONE_GROUPS; i++) {
-        biquad_init_state(&filters->pre_state[i]);
-        biquad_init_state(&filters->post_state[i]);
-    }
-}
-
-/*===========================================================================*/
-/* Main Filter Application Function */
-/*===========================================================================*/
-
-/**
- * Apply mode-specific filters to a clone group
- * @param filters Filter state (per mode)
- * @param group_idx Which clone group (0-3)
- * @param samples_l Left channel samples (4 clones)
- * @param samples_r Right channel samples (4 clones)
- */
 fast_inline void apply_mode_filters(
     mode_filters_t* filters,
     uint32_t group_idx,
     float32x4_t* samples_l,
-    float32x4_t* samples_r
+    float32x4_t* samples_r,
+    float depth
 ) {
-    // Apply pre-filter
-    if (group_idx < MAX_CLONE_GROUPS) {
-        *samples_l = biquad_process(*samples_l,
-                                     &filters->pre_coeff,
-                                     &filters->pre_state[group_idx]);
-        *samples_r = biquad_process(*samples_r,
-                                     &filters->pre_coeff,
-                                     &filters->pre_state[group_idx]);
+    if (!filters) return;
 
-        // Apply post-filter
-        *samples_l = biquad_process(*samples_l,
-                                     &filters->post_coeff,
-                                     &filters->post_state[group_idx]);
-        *samples_r = biquad_process(*samples_r,
-                                     &filters->post_coeff,
-                                     &filters->post_state[group_idx]);
-    }
-}
-
-/**
- * Update filter coefficients when parameters change
- * (e.g., when Depth or Rate parameters affect filter response)
- */
-fast_inline void update_filter_params(
-    mode_filters_t* filters,
-    float new_freq,
-    float new_q
-) {
     switch (filters->mode) {
-        case 0: // Tribal
-            calculate_tribal_coeffs(&filters->pre_coeff, new_freq, new_q);
-            filters->post_coeff = filters->pre_coeff;
+        case MODE_TRIBAL:
+        case MODE_MILITARY: {
+            // Same filter for both channels
+            *samples_l = biquad_process(*samples_l,
+                &filters->filters[group_idx * 2].coeffs,
+                &filters->filters[group_idx * 2].state);
+            *samples_r = biquad_process(*samples_r,
+                &filters->filters[group_idx * 2 + 1].coeffs,
+                &filters->filters[group_idx * 2 + 1].state);
             break;
-        case 1: // Military
-            calculate_military_coeffs(&filters->pre_coeff, new_freq, new_q);
-            filters->post_coeff = filters->pre_coeff;
+        }
+
+        case MODE_ANGEL: {
+            // Angel: HPF + LPF in series
+            biquad_coeffs_t hpf_coeffs, lpf_coeffs;
+            calculate_highpass_coeffs(&hpf_coeffs, 500.0f, 1.0f);
+            calculate_lowpass_coeffs(&lpf_coeffs, 4000.0f + depth * 2000.0f, 1.0f);
+
+            // HPF
+            *samples_l = biquad_process(*samples_l,
+                &hpf_coeffs, &filters->filters[group_idx * 2].state);
+            *samples_r = biquad_process(*samples_r,
+                &hpf_coeffs, &filters->filters[group_idx * 2 + 1].state);
+
+            // LPF
+            *samples_l = biquad_process(*samples_l,
+                &lpf_coeffs, &filters->filters[group_idx * 2].state);
+            *samples_r = biquad_process(*samples_r,
+                &lpf_coeffs, &filters->filters[group_idx * 2 + 1].state);
             break;
-        case 2: // Angel
-            // For Angel, new_freq affects the high cut
-            calculate_lowpass_coeffs(&filters->post_coeff, new_freq, new_q);
-            break;
+        }
     }
-    filters->center_freq = new_freq;
-    filters->q_factor = new_q;
 }
