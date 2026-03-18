@@ -33,3 +33,4 @@ _Note: The reverb effect section can contain effects that perform other function
 | [Hollow](https://www.sinevibes.com/korghollow/) | Sinevibes | FDN based vast space reverb | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [Luminance](https://www.sinevibes.com/korgluminance/) | Sinevibes | FDN based shimmer reverb | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [RetroReverb](https://mrglennjones.gumroad.com/l/sgfee) | Glenn Jones | PS1 & SNES Reverb | nts-3 | paid |
+| [Slink](https://mrglennjones.gumroad.com/l/slink) | Glenn Jones | Spring Reverb | nts-3 | paid |
