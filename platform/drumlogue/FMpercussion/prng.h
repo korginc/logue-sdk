@@ -200,6 +200,13 @@ fast_inline uint32x4_t probability_gate_neon(neon_prng_t* rng,
     return vcltq_u32(rand, thresholds);
 }
 
+/**
+ * Alias for backward compatibility - use neon_prng_rand_u32
+ */
+fast_inline uint32x4_t neon_prng_rand(neon_prng_t* rng) {
+    return neon_prng_rand_u32(rng);
+}
+
 // ========== UNIT TEST ==========
 #ifdef TEST_PRNG
 
