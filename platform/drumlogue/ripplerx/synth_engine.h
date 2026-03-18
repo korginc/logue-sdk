@@ -52,7 +52,7 @@ static constexpr float alpha = 0.01f;
 static constexpr float limiter = 0.99f;
 static constexpr int kSquelchGuardSamples = 1000; // ~20 ms
 static constexpr float kSquelchThreshold = 0.0001f; // -80 dB
-                
+
 // ==============================================================================
 // MAIN CLASS
 // ==============================================================================
@@ -223,6 +223,7 @@ public:
         // Always return to ResA edit context so LoadPreset (called next in Init)
         // applies preset data symmetrically to both resonators.
         m_is_resonator_a = true;
+        m_is_resonator_b = true;
 
 #ifdef ENABLE_PHASE_6_FILTERS
         // [UT1: MEMSET FIX] - Force the filter back to safe Highpass mode
@@ -323,6 +324,7 @@ public:
         // Save and restore the user's resonator-edit context around the load.
         bool saved_is_a = m_is_resonator_a;
         m_is_resonator_a = true;
+        m_is_resonator_b = false;
 
         // Apply parameters, SKIPPING INDEX 0 to prevent infinite recursion stack overflow!
         for (uint8_t param_id = 0; param_id < 24; ++param_id) {
@@ -333,6 +335,7 @@ public:
         // Mirror the four per-resonator physical params to ResB so both resonators
         // start identically on every preset load (user can diverge them afterwards).
         m_is_resonator_a = false;
+        m_is_resonator_b = true;
         setParameter(k_paramModel,  presets[idx][k_paramModel]);
         setParameter(k_paramDkay,   presets[idx][k_paramDkay]);
         setParameter(k_paramMterl,  presets[idx][k_paramMterl]);
@@ -420,7 +423,9 @@ public:
                     // (editor-select modes) never overwrite this.
                     m_coupling_depth = (float)value / 4.0f;
                 } else {
-                    m_is_resonator_a = (value == 5);
+                    // resonators can be coupled or indipendent
+                    m_is_resonator_a = (value == 5) || (value == 6);
+                    m_is_resonator_b = (value == 5) || (value == 7);
                 }
                 break;
             }
@@ -428,7 +433,7 @@ public:
             case k_paramModel: {
                 if (m_is_resonator_a)
                     m_model_a = value;
-                else
+                if (m_is_resonator_b)
                     m_model_b = value;
 #ifdef ENABLE_PHASE_7_MODELS
                 for (int i = 0; i < NUM_VOICES; ++i) {
@@ -455,7 +460,7 @@ public:
                     for (int i = 0; i < NUM_VOICES; ++i) {
                         if (m_is_resonator_a)
                             state.voices[i].resA.feedback_gain = g;
-                        else
+                        if (m_is_resonator_b)
                             state.voices[i].resB.feedback_gain = g;
                     }
                 }
@@ -475,7 +480,7 @@ public:
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     if (m_is_resonator_a)
                         state.voices[i].resA.lowpass_coeff = coeff;
-                    else
+                    if (m_is_resonator_b)
                         state.voices[i].resB.lowpass_coeff = coeff;
                 }
                 break;
@@ -513,7 +518,7 @@ public:
                     for (int i = 0; i < NUM_VOICES; ++i) {
                         if (m_is_resonator_a)
                             state.voices[i].resA.ap_coeff = norm;
-                        else
+                        if (m_is_resonator_b)
                             state.voices[i].resB.ap_coeff = norm;
                     }
                 }
@@ -606,10 +611,15 @@ public:
             "B:Strng", "B:Beam",  "B:Sqre", "B:Mbrn", "B:Plate",
             "B:Drmhd", "B:Mrmb",  "B:OpTb", "B:ClTb"
         };
+        static const char* const model_names_ab[] = {
+            "AB:Strng", "AB:Beam",  "AB:Sqre", "AB:Mbrn", "AB:Plate",
+            "AB:Drmhd", "AB:Mrmb",  "AB:OpTb", "AB:ClTb"
+        };
         // Values 0-4: partial count labels (shown with A/B indicator).
         // Values 5, 6: resonator-select mode labels.
-        static const char* const partial_names_a[] = {"4:A", "8:A", "16:A", "32:A", "64:A"};
-        static const char* const partial_names_b[] = {"4:B", "8:B", "16:B", "32:B", "64:B"};
+        static const char* const partial_names_a[] = {"A:4", "A:8", "A:6", "A:2", "A:4"};
+        static const char* const partial_names_b[] = {"B:4", "B:8", "B:6", "B:2", "B:4"};
+        static const char* const partial_names_ab[] = {"AB:4", "AB:8", "AB:6", "AB:2", "AB:4"};
         static const char* const nz_filter_names[] = {"LP", "BP", "HP"};
 
         if (index == k_paramProgram) {
@@ -619,12 +629,15 @@ public:
             if (value >= 0 && value < 7) return bank_names[value];
         } else if (index == k_paramModel) {
             if (value >= 0 && value < 9)
-                return m_is_resonator_a ? model_names_a[value] : model_names_b[value];
+                return m_is_resonator_a && m_is_resonator_b ? model_names_ab[value] :
+                    m_is_resonator_a ? model_names_a[value] : model_names_b[value];
         } else if (index == k_paramPartls) {
-            if (value == 5) return "-> ResA";
-            if (value == 6) return "-> ResB";
+            if (value == 5) return "-> ResA+B";
+            if (value == 6) return "-> ResA";
+            if (value == 7) return "-> ResB";
             if (value >= 0 && value < 5)
-                return m_is_resonator_a ? partial_names_a[value] : partial_names_b[value];
+                return m_is_resonator_a && m_is_resonator_b ? partial_names_ab[value] :
+                    m_is_resonator_a ? partial_names_a[value] : partial_names_b[value];
         } else if (index == k_paramNzFltr) {
             if (value >= 0 && value < 3) return nz_filter_names[value];
         } else if (index == k_paramLowCut) {
@@ -838,7 +851,7 @@ inline void NoteOff(uint8_t note) {
         // fasterpowf(2.0f, 0.0f) ≈ 0.9714 (not 1.0) due to fasterlog2f(2.0f)≈1.057
         // approximation error cascading through fasterpow2f(0.0f), which would cause
         // every centre-bend to quietly detune the voice downward by ~50 cents.
-        
+
         if (bend == pitch_centre) {
             m_pitch_bend_mult = 1.0f;
         } else {
@@ -1139,6 +1152,7 @@ private:
     uint8_t m_model_a = 0;
     uint8_t m_model_b = 0;
     bool    m_is_resonator_a = true; // default is res A
+    bool    m_is_resonator_b = true; // "copy" of res A
 
     uint8_t m_active_partials = 32; // Default: 32 partials (Partls index 3, ResB active)
     float   m_coupling_depth  = 0.75f; // Coupling depth [0.0–1.0] from Partls UI index 0–4.
