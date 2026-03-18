@@ -134,12 +134,12 @@ fast_inline void smoother_process(param_smoother_t* sm,
         // =================================================================
         // 4. Snap finished parameters to target and zero their step
         // =================================================================
-        sm->current[page] = vbslq_f32(vreinterpretq_f32_u32(done),
+        sm->current[page] = vbslq_f32(done,
                                       sm->target[page],
                                       sm->current[page]);
 
         // Zero out step for finished parameters
-        sm->step[page] = vbslq_f32(vreinterpretq_f32_u32(done),
+        sm->step[page] = vbslq_f32(done,
                                    vdupq_n_f32(0.0f),
                                    sm->step[page]);
 

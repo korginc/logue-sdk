@@ -334,7 +334,7 @@ fast_inline void neon_envelope_process(neon_envelope_t* env) {
 
     // Set increment for decay (negative slope to reach 0)
     // For linear decay: increment = -1.0 / decay_samples
-    env->increment = vbslq_f32(vreinterpretq_f32_u32(attack_done),
+    env->increment = vbslq_f32(attack_done,
                                vnegq_f32(vrecpeq_f32(env->decay_samples)),
                                env->increment);
 
@@ -354,7 +354,7 @@ fast_inline void neon_envelope_process(neon_envelope_t* env) {
                                   env->samples_left);
 
     // Set increment for release (continues negative slope to reach 0)
-    env->increment = vbslq_f32(vreinterpretq_f32_u32(decay_done),
+    env->increment = vbslq_f32(decay_done,
                                vnegq_f32(vrecpeq_f32(env->release_samples)),
                                env->increment);
 
@@ -369,12 +369,12 @@ fast_inline void neon_envelope_process(neon_envelope_t* env) {
                            env->stage);
 
     // Set level to 0 for voices that turned off
-    env->level = vbslq_f32(vreinterpretq_f32_u32(release_done),
+    env->level = vbslq_f32(release_done,
                            vdupq_n_f32(0.0f),
                            env->level);
 
     // Zero out increment for off voices
-    env->increment = vbslq_f32(vreinterpretq_f32_u32(release_done),
+    env->increment = vbslq_f32(release_done,
                                vdupq_n_f32(0.0f),
                                env->increment);
 
