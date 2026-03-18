@@ -1,4 +1,3 @@
-// PercussionSpatializer.h - Completed Implementation
 #pragma once
 
 /**
@@ -22,216 +21,9 @@
 #include "spatial_modes.h"
 #include "filters.h"
 
-// Constants for NEON vectorization
-constexpr int NEON_LANES = 4;
-constexpr int MAX_CLONES = 16;
-constexpr int CLONE_GROUPS = MAX_CLONES / NEON_LANES;
-constexpr int DELAY_MAX_MS = 500;
-constexpr int DELAY_MAX_SAMPLES = DELAY_MAX_MS * 48;
-constexpr int DELAY_MASK = DELAY_MAX_SAMPLES - 1;
-constexpr int LFO_TABLE_SIZE = 256;
-constexpr int CROSSFADE_SAMPLES = 480;  // 10ms @ 48kHz
+// At the top of PercussionSpatializer.h, after includes:
+extern float lfo_table[LFO_TABLE_SIZE] __attribute__((aligned(16)));
 
-// Optimization constants
-constexpr int PREFETCH_DISTANCE = 4;  // Prefetch 4 samples ahead
-
-/**
- * OPTIMIZED: Pre-calculated LFO table for faster modulation
- */
-static float lfo_table[LFO_TABLE_SIZE] __attribute__((aligned(16)));
-
-/**
- * Initialize LFO table at startup
- */
-__attribute__((constructor))
-static void init_lfo_table() {
-    for (int i = 0; i < LFO_TABLE_SIZE; i++) {
-        float phase = (float)i / LFO_TABLE_SIZE;
-        // Triangle wave: 2 * |phase - 0.5|
-        lfo_table[i] = 2.0f * fabsf(phase - 0.5f);
-    }
-}
-
-// Pre-computed filter coefficient tables
-// Tribal and Military: 5 coefficients [b0,b1,b2,a1,a2]
-// Angel: 10 coefficients [HPF b0..a2, LPF b0..a2]
-static float tribal_coeffs_[100][5] __attribute__((aligned(16)));
-static float military_coeffs_[100][5] __attribute__((aligned(16)));
-static float angel_coeffs_[100][10] __attribute__((aligned(16)));
-static bool coeff_tables_initialized_ = false;
-
-/**
- * Initialize filter coefficient tables at startup
- */
-__attribute__((constructor))
-static void init_filter_tables() {
-    // Pre-compute Tribal bandpass coefficients (80-800 Hz, Q=2.0)
-    for (int i = 0; i < 100; i++) {
-        float freq = 80.0f + (i / 99.0f) * (800.0f - 80.0f);
-        float w0 = 2.0f * FILTER_PI * freq / 48000.0f;
-        float cos_w0 = cosf(w0);
-        float sin_w0 = sinf(w0);
-        float alpha = sin_w0 / (2.0f * 2.0f);  // Q=2.0
-
-        float b0 = alpha;
-        float b1 = 0.0f;
-        float b2 = -alpha;
-        float a0 = 1.0f + alpha;
-        float a1 = -2.0f * cos_w0;
-        float a2 = 1.0f - alpha;
-
-        float inv_a0 = 1.0f / a0;
-        tribal_coeffs_[i][0] = b0 * inv_a0;
-        tribal_coeffs_[i][1] = b1 * inv_a0;
-        tribal_coeffs_[i][2] = b2 * inv_a0;
-        tribal_coeffs_[i][3] = a1 * inv_a0;
-        tribal_coeffs_[i][4] = a2 * inv_a0;
-    }
-
-    // Pre-compute Military highpass coefficients (1k-8k Hz, Butterworth)
-    for (int i = 0; i < 100; i++) {
-        float freq = 1000.0f + (i / 99.0f) * (8000.0f - 1000.0f);
-        float w0 = 2.0f * FILTER_PI * freq / 48000.0f;
-        float cos_w0 = cosf(w0);
-        float sin_w0 = sinf(w0);
-        float alpha = sin_w0 / (2.0f * 0.707f);  // Q=0.707
-
-        float b0 = (1.0f + cos_w0) / 2.0f;
-        float b1 = -(1.0f + cos_w0);
-        float b2 = b0;
-        float a0 = 1.0f + alpha;
-        float a1 = -2.0f * cos_w0;
-        float a2 = 1.0f - alpha;
-
-        float inv_a0 = 1.0f / a0;
-        military_coeffs_[i][0] = b0 * inv_a0;
-        military_coeffs_[i][1] = b1 * inv_a0;
-        military_coeffs_[i][2] = b2 * inv_a0;
-        military_coeffs_[i][3] = a1 * inv_a0;
-        military_coeffs_[i][4] = a2 * inv_a0;
-    }
-
-    // Pre-compute Angel dual-band coefficients
-    for (int i = 0; i < 100; i++) {
-        // HPF at 500 Hz
-        float freq_hp = 500.0f;
-        float w0_hp = 2.0f * FILTER_PI * freq_hp / 48000.0f;
-        float cos_w0_hp = cosf(w0_hp);
-        float sin_w0_hp = sinf(w0_hp);
-        float alpha_hp = sin_w0_hp / (2.0f * 1.0f);  // Q=1.0
-
-        float b0_hp = (1.0f + cos_w0_hp) / 2.0f;
-        float b1_hp = -(1.0f + cos_w0_hp);
-        float b2_hp = b0_hp;
-        float a0_hp = 1.0f + alpha_hp;
-        float a1_hp = -2.0f * cos_w0_hp;
-        float a2_hp = 1.0f - alpha_hp;
-
-        float inv_a0_hp = 1.0f / a0_hp;
-
-        // LPF at 4 kHz
-        float freq_lp = 4000.0f;
-        float w0_lp = 2.0f * FILTER_PI * freq_lp / 48000.0f;
-        float cos_w0_lp = cosf(w0_lp);
-        float sin_w0_lp = sinf(w0_lp);
-        float alpha_lp = sin_w0_lp / (2.0f * 1.0f);  // Q=1.0
-
-        float b0_lp = (1.0f - cos_w0_lp) / 2.0f;
-        float b1_lp = 1.0f - cos_w0_lp;
-        float b2_lp = b0_lp;
-        float a0_lp = 1.0f + alpha_lp;
-        float a1_lp = -2.0f * cos_w0_lp;
-        float a2_lp = 1.0f - alpha_lp;
-
-        float inv_a0_lp = 1.0f / a0_lp;
-
-        // Store both filters in the coefficient array
-        // We'll use them in series for the Angel mode
-        angel_coeffs_[i][0] = b0_hp * inv_a0_hp;  // HPF b0
-        angel_coeffs_[i][1] = b1_hp * inv_a0_hp;  // HPF b1
-        angel_coeffs_[i][2] = b2_hp * inv_a0_hp;  // HPF b2
-        angel_coeffs_[i][3] = a1_hp * inv_a0_hp;  // HPF a1
-        angel_coeffs_[i][4] = a2_hp * inv_a0_hp;  // HPF a2
-        angel_coeffs_[i][5] = b0_lp * inv_a0_lp;  // LPF b0
-        angel_coeffs_[i][6] = b1_lp * inv_a0_lp;  // LPF b1
-        angel_coeffs_[i][7] = b2_lp * inv_a0_lp;  // LPF b2
-        angel_coeffs_[i][8] = a1_lp * inv_a0_lp;  // LPF a1
-        angel_coeffs_[i][9] = a2_lp * inv_a0_lp;  // LPF a2
-    }
-
-    coeff_tables_initialized_ = true;
-}
-
-/**
- * Enhanced filter state with NEON vectors
- */
-typedef struct {
-    float32x4_t b0, b1, b2, a1, a2;  // Coefficients
-    float32x4_t z1, z2;               // Filter states
-} neon_biquad_t;
-
-/**
- * Mode filter state with multiple biquads
- */
-typedef struct {
-    spatial_mode_t mode;
-    neon_biquad_t pre_filter[CLONE_GROUPS];   // Pre-filter for each clone group
-    neon_biquad_t post_filter[CLONE_GROUPS];  // Post-filter for each clone group
-    float depth_param;
-    float last_depth_param;
-    uint32_t ramp_samples;
-} mode_filters_t;
-
-/**
- * Fast filter update using pre-computed tables
- */
-static void update_filter_params_fast(mode_filters_t* filters, float depth_param, uint32_t ramp_time = 0) {
-    if (!filters) return;
-
-    filters->depth_param = depth_param;
-    filters->ramp_samples = ramp_time;
-
-    // If no ramping, update immediately
-    if (ramp_time == 0) {
-        int index = (int)(depth_param * 99.0f);
-        index = index < 0 ? 0 : (index > 99 ? 99 : index);
-
-        float32x4_t b0, b1, b2, a1, a2;
-
-        switch (filters->mode) {
-            case MODE_TRIBAL:
-                b0 = vdupq_n_f32(tribal_coeffs_[index][0]);
-                b1 = vdupq_n_f32(tribal_coeffs_[index][1]);
-                b2 = vdupq_n_f32(tribal_coeffs_[index][2]);
-                a1 = vdupq_n_f32(tribal_coeffs_[index][3]);
-                a2 = vdupq_n_f32(tribal_coeffs_[index][4]);
-                break;
-            case MODE_MILITARY:
-                b0 = vdupq_n_f32(military_coeffs_[index][0]);
-                b1 = vdupq_n_f32(military_coeffs_[index][1]);
-                b2 = vdupq_n_f32(military_coeffs_[index][2]);
-                a1 = vdupq_n_f32(military_coeffs_[index][3]);
-                a2 = vdupq_n_f32(military_coeffs_[index][4]);
-                break;
-            case MODE_ANGEL:
-                // For Angel mode, we'll set coefficients in apply_mode_filters
-                // since we need two biquads in series
-                return;
-            default:
-                return;
-        }
-
-        // Update all clone groups with the same coefficients
-        for (int g = 0; g < CLONE_GROUPS; g++) {
-            filters->pre_filter[g].b0 = b0;
-            filters->pre_filter[g].b1 = b1;
-            filters->pre_filter[g].b2 = b2;
-            filters->pre_filter[g].a1 = a1;
-            filters->pre_filter[g].a2 = a2;
-            filters->post_filter[g] = filters->pre_filter[g];
-        }
-    }
-}
 
 /**
  * Per-clone parameters with randomization and modulation
@@ -261,6 +53,15 @@ static_assert(sizeof(clone_group_t) % CACHE_LINE_SIZE == 0,
 typedef struct __attribute__((aligned(16))) {
     float samples[8];  // [L0, L1, L2, L3, R0, R1, R2, R3] at a SINGLE time position
 } interleaved_frame_t;
+
+/**
+ * Spatial mode enumeration
+ */
+typedef enum {
+    MODE_TRIBAL = 0,      // Circular panning
+    MODE_MILITARY = 1,    // Linear array
+    MODE_ANGEL = 2        // Stochastic positioning
+} spatial_mode_t;
 
 /**
  * PRNG state (Xorshift128+)
@@ -316,7 +117,6 @@ public:
 
         // Initialize filter states
         memset(&mode_filters_, 0, sizeof(mode_filters_));
-        mode_filters_.mode = MODE_TRIBAL;
 
         for (int i = 0; i < CLONE_GROUPS; i++) {
             filter_state_[i] = vdupq_n_f32(0.0f);
@@ -326,8 +126,8 @@ public:
             mode_filters_.post_filter[i].z2 = vdupq_n_f32(0.0f);
         }
 
-        // Initialize filter coefficients
-        update_filter_params_fast(&mode_filters_, depth_);
+        // Initialize filters
+        init_mode_filters(&mode_filters_, current_mode_, depth_);
 
         // Clear parameter arrays
         memset(params_, 0, sizeof(params_));
@@ -502,7 +302,7 @@ public:
                 break;
             case 2: // Depth
                 depth_ = value / 100.0f;
-                update_filter_params_fast(&mode_filters_, depth_, 48); // 1ms ramp
+                update_filter_params(&mode_filters_, depth_, 48); // 1ms ramp
                 break;
             case 3: // Rate (LFO speed for pitch wobble)
                 rate_ = 0.1f + (value / 100.0f) * 9.9f;
@@ -701,89 +501,13 @@ private:
     /* Mode Filter Application */
     /*===========================================================================*/
 
-    fast_inline void apply_biquad(neon_biquad_t* filter, float32x4_t* samples) {
-        // Direct Form II transposed
-        // y[n] = b0*x[n] + z1[n]
-        // z1[n+1] = b1*x[n] - a1*y[n] + z2[n]
-        // z2[n+1] = b2*x[n] - a2*y[n]
-
-        float32x4_t x = *samples;
-
-        // y = b0*x + z1
-        float32x4_t y = vmlaq_f32(filter->z1, filter->b0, x);
-
-        // Update states
-        // z1 = b1*x - a1*y + z2
-        filter->z1 = vmlaq_f32(filter->z2, filter->b1, x);
-        filter->z1 = vmlsq_f32(filter->z1, filter->a1, y);
-
-        // z2 = b2*x - a2*y
-        filter->z2 = vmlsq_f32(vmulq_f32(filter->b2, x), filter->a2, y);
-
-        *samples = y;
-    }
-
     fast_inline void apply_mode_filters(mode_filters_t* filters,
-                                        uint32_t group_idx,
-                                        float32x4_t* samples_l,
-                                        float32x4_t* samples_r,
-                                        float depth_param) {
-        if (!filters) return;
-
-        switch (filters->mode) {
-            case MODE_TRIBAL:
-                // Apply bandpass to L via pre_filter, R via post_filter (separate states)
-                apply_biquad(&filters->pre_filter[group_idx], samples_l);
-                apply_biquad(&filters->post_filter[group_idx], samples_r);
-                break;
-
-            case MODE_MILITARY:
-                // Apply highpass to L via pre_filter, R via post_filter (separate states)
-                apply_biquad(&filters->pre_filter[group_idx], samples_l);
-                apply_biquad(&filters->post_filter[group_idx], samples_r);
-                break;
-
-            case MODE_ANGEL: {
-                // Angel mode: HPF + LPF in series
-                // Use depth_param to select coefficients from pre-computed table
-                int index = (int)(depth_param * 99.0f);
-                index = index < 0 ? 0 : (index > 99 ? 99 : index);
-
-                // Create temporary biquads for HPF and LPF
-                neon_biquad_t hpf, lpf;
-
-                hpf.b0 = vdupq_n_f32(angel_coeffs_[index][0]);
-                hpf.b1 = vdupq_n_f32(angel_coeffs_[index][1]);
-                hpf.b2 = vdupq_n_f32(angel_coeffs_[index][2]);
-                hpf.a1 = vdupq_n_f32(angel_coeffs_[index][3]);
-                hpf.a2 = vdupq_n_f32(angel_coeffs_[index][4]);
-
-                lpf.b0 = vdupq_n_f32(angel_coeffs_[index][5]);
-                lpf.b1 = vdupq_n_f32(angel_coeffs_[index][6]);
-                lpf.b2 = vdupq_n_f32(angel_coeffs_[index][7]);
-                lpf.a1 = vdupq_n_f32(angel_coeffs_[index][8]);
-                lpf.a2 = vdupq_n_f32(angel_coeffs_[index][9]);
-
-                // Copy states from persistent filters
-                hpf.z1 = filters->pre_filter[group_idx].z1;
-                hpf.z2 = filters->pre_filter[group_idx].z2;
-                lpf.z1 = filters->post_filter[group_idx].z1;
-                lpf.z2 = filters->post_filter[group_idx].z2;
-
-                // Apply HPF then LPF
-                apply_biquad(&hpf, samples_l);
-                apply_biquad(&hpf, samples_r);
-                apply_biquad(&lpf, samples_l);
-                apply_biquad(&lpf, samples_r);
-
-                // Save states back
-                filters->pre_filter[group_idx].z1 = hpf.z1;
-                filters->pre_filter[group_idx].z2 = hpf.z2;
-                filters->post_filter[group_idx].z1 = lpf.z1;
-                filters->post_filter[group_idx].z2 = lpf.z2;
-                break;
-            }
-        }
+                                    uint32_t group_idx,
+                                    float32x4_t* samples_l,
+                                    float32x4_t* samples_r,
+                                    float depth_param) {
+        // Just forward to the filters.h implementation
+        ::apply_mode_filters(filters, group_idx, samples_l, samples_r, depth_param);
     }
 
     /*===========================================================================*/
@@ -953,17 +677,7 @@ private:
         crossfade_counter_ = CROSSFADE_SAMPLES;
         crossfade_active_ = true;
 
-        // Initialize new mode filters
-        mode_filters_.mode = new_mode;
-        update_filter_params_fast(&mode_filters_, depth_);
-
-        // Reset filter states for new mode
-        for (int g = 0; g < CLONE_GROUPS; g++) {
-            mode_filters_.pre_filter[g].z1 = vdupq_n_f32(0.0f);
-            mode_filters_.pre_filter[g].z2 = vdupq_n_f32(0.0f);
-            mode_filters_.post_filter[g].z1 = vdupq_n_f32(0.0f);
-            mode_filters_.post_filter[g].z2 = vdupq_n_f32(0.0f);
-        }
+        init_mode_filters(&mode_filters_, new_mode, depth_);
 
         current_mode_ = new_mode;
         update_panning(); // Update phase inversion for Angel mode
