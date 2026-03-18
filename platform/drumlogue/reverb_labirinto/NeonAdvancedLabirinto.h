@@ -9,12 +9,16 @@
  * - TRUE NEON vectorization (processes 4 samples at a time)
  * - Modulated delays for diffusion
  * - Stereo input/output
+ * - Frequency-dependent decay (low/high multipliers)
+ * - Stereo width control
+ * - Damping filter
  *
  * OPTIMIZED:
  * - Process 4 samples in parallel using float32x4_t
  * - Vectorized delay line access
  * - NEON-accelerated Hadamard mixing
  * - Added null pointer checks for all allocations
+ * - FIXED: Added clear() method for reset
  */
 
 #include <arm_neon.h>
@@ -92,7 +96,7 @@ public:
      * @return true if initialization successful, false if out of memory
      */
     bool init() {
-        // FIXED: Check allocation success
+        // Check allocation success
         fdnMem = (float*)memalign(16, BUFFER_SIZE * FDN_CHANNELS * sizeof(float));
         if (fdnMem == nullptr) {
             initialized = false;
@@ -100,10 +104,33 @@ public:
         }
 
         // Clear buffer
-        memset(fdnMem, 0, BUFFER_SIZE * FDN_CHANNELS * sizeof(float));
+        clear();
 
         initialized = true;
         return true;
+    }
+
+    /**
+     * FIXED: Clear all delay lines and filter states
+     * Called by unit_reset() to ensure clean state
+     */
+    void clear() {
+        if (fdnMem != nullptr) {
+            memset(fdnMem, 0, BUFFER_SIZE * FDN_CHANNELS * sizeof(float));
+        }
+
+        writePos = 0;
+
+        // Reset modulation phases
+        for (int i = 0; i < FDN_CHANNELS; i++) {
+            modPhases[i] = 0.0f;
+        }
+
+        // Reset filter states using NEON
+        float32x4_t zero = vdupq_n_f32(0.0f);
+        for (int i = 0; i < FDN_CHANNELS; i++) {
+            lpfState[i] = zero;
+        }
     }
 
     /*===========================================================================*/
@@ -144,8 +171,6 @@ public:
         freqHz = std::max(200.0f, std::min(10000.0f, freqHz));
         // omega = 2π * fc / fs;  coeff ≈ 1 - omega  (first-order approx)
         float omega = 2.0f * (float)M_PI * freqHz / sampleRate;
-        // accurate and musically conventional mapping from frequency to filter coefficient
-        // than first-order approximation
         dampingCoeff = e_expff(-omega);
     }
 
@@ -223,7 +248,6 @@ private:
 
     /**
      * Process 4 samples in parallel using NEON
-     * This is where the real optimization happens
      */
     void process4Samples(const float* inL, const float* inR,
                          float* outL, float* outR) {
@@ -240,8 +264,6 @@ private:
 
         // =================================================================
         // Read from all 8 delay lines for 4 samples
-        // This is the most intensive part - we need 8 * 4 = 32 reads
-        // Using NEON to do them in batches
         // =================================================================
         float32x4_t delayOut[FDN_CHANNELS];
         readDelayLines4(delayOut);
@@ -323,7 +345,6 @@ private:
 
     /**
      * NEON-optimized delay line reading for 4 samples
-     * Reads from all 8 channels in parallel where possible
      */
     void readDelayLines4(float32x4_t* out) {
         // Pre-calculate read positions for all channels
@@ -362,7 +383,6 @@ private:
             idx3 = vandq_u32(idx3, vdupq_n_u32(BUFFER_MASK));
 
             // Gather samples from delay lines
-            // Note: In production, you'd want to use vld4q_f32 for interleaved access
             for (int s = 0; s < 4; s++) {
                 uint32_t i0 = vgetq_lane_u32(idx0, s);
                 uint32_t i1 = vgetq_lane_u32(idx1, s);
@@ -382,10 +402,6 @@ private:
 
     /**
      * NEON-optimized Hadamard matrix multiplication.
-     * in[ch] and out[ch] each hold 4 consecutive time-domain samples for channel ch.
-     * out[i] = sum_j(hadamard[i][j] * in[j]) for all 4 samples simultaneously.
-     * Uses vmlaq_n_f32 to multiply each channel's 4-sample vector by its scalar
-     * Hadamard coefficient and accumulate, giving true NEON throughput.
      */
     void applyHadamard4(const float32x4_t* in, float32x4_t* out) {
         for (int i = 0; i < FDN_CHANNELS; i++) {
@@ -399,10 +415,6 @@ private:
 
     /**
      * NEON one-pole LPF per channel.
-     * DAMP sets the pole (dampingCoeff: larger = lower cutoff = darker).
-     * COMP (diffusion) scales the pole amount: 0 = bypass, 1 = full DAMP.
-     * y[n] = (1 - diffusion*dampingCoeff) * x[n]
-     *      +      diffusion*dampingCoeff  * y[n-1]
      */
     void applyDiffusion4(float32x4_t* signals) {
         // pole = amount of previous-sample blending
@@ -461,8 +473,6 @@ private:
     /* Scalar Fallback for Remainder Samples */
     /*===========================================================================*/
 
-    // Scalar fallback: populates wetL/wetR with stereo wet signal (no mix applied).
-    // Mirrors the NEON path: channels 0-3 → L, channels 4-7 → R, then mid/side width.
     void processScalar(float input, float& wetL, float& wetR) {
         float delayOut[FDN_CHANNELS];
 
@@ -478,9 +488,7 @@ private:
             delayOut[ch] = fdnMem[ch * BUFFER_SIZE + idx];
         }
 
-        // Frequency-dependent decay (mirrors NEON path):
-        // channels 0-3 (shorter delays) → decay * highDecayMult
-        // channels 4-7 (longer delays)  → decay * lowDecayMult
+        // Frequency-dependent decay
         float mixed[FDN_CHANNELS];
         for (int i = 0; i < FDN_CHANNELS; i++) {
             float sum = 0.0f;
@@ -498,14 +506,14 @@ private:
         }
         writePos = (writePos + 1) & BUFFER_MASK;
 
-        // Stereo mix-down: channels 0-3 → L, channels 4-7 → R (mirrors NEON path)
+        // Stereo mix-down
         float leftRaw = 0.0f, rightRaw = 0.0f;
         for (int i = 0; i < 4; i++)           leftRaw  += mixed[i];
         for (int i = 4; i < FDN_CHANNELS; i++) rightRaw += mixed[i];
         leftRaw  *= 0.25f;
         rightRaw *= 0.25f;
 
-        // Apply stereo width via mid/side (mirrors NEON path)
+        // Apply stereo width
         float mid  = (leftRaw + rightRaw) * 0.5f;
         float side = (leftRaw - rightRaw) * 0.5f;
         wetL = mid + side * width;
@@ -546,7 +554,7 @@ private:
     float width;         // stereo width   0..2
     float dampingCoeff;  // one-pole LPF coeff for damping
     float lowDecayMult;  // low-freq decay multiplier
-    float highDecayMult; // high-freq decay multiplier (controls diffusion brightness)
+    float highDecayMult; // high-freq decay multiplier
 
     bool initialized;
     float* fdnMem;  // [FDN_CHANNELS][BUFFER_SIZE]
