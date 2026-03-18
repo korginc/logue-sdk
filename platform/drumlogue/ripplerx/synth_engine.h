@@ -320,9 +320,11 @@ public:
 
         if (idx >= k_NumPrograms) return;
 
-        // Preset loading always targets ResA so that Dkay/Mterl/Inharm set resA first.
-        // Save and restore the user's resonator-edit context around the load.
+        // Preset loading always targets ResA first, then ResB, regardless of the
+        // current editor selection.  Save both flags and restore them afterwards so
+        // a preset load never changes which resonator(s) the user is editing.
         bool saved_is_a = m_is_resonator_a;
+        bool saved_is_b = m_is_resonator_b;
         m_is_resonator_a = true;
         m_is_resonator_b = false;
 
@@ -346,8 +348,9 @@ public:
         // clashing overtones of the drum skin (the edge mode).
         // Resonator A acts as the fundamental "thump" of the drum (the center mode).
 
-        // Restore user's resonator-edit context.
+        // Restore both flags so the user's edit context survives preset loads.
         m_is_resonator_a = saved_is_a;
+        m_is_resonator_b = saved_is_b;
     }
 
     static inline const char * getPresetName(uint8_t idx) {
@@ -617,9 +620,9 @@ public:
         };
         // Values 0-4: partial count labels (shown with A/B indicator).
         // Values 5, 6: resonator-select mode labels.
-        static const char* const partial_names_a[] = {"A:4", "A:8", "A:6", "A:2", "A:4"};
-        static const char* const partial_names_b[] = {"B:4", "B:8", "B:6", "B:2", "B:4"};
-        static const char* const partial_names_ab[] = {"AB:4", "AB:8", "AB:6", "AB:2", "AB:4"};
+        static const char* const partial_names_a[]  = {"A:4",  "A:8",  "A:16",  "A:32",  "A:64"};
+        static const char* const partial_names_b[]  = {"B:4",  "B:8",  "B:16",  "B:32",  "B:64"};
+        static const char* const partial_names_ab[] = {"AB:4", "AB:8", "AB:16", "AB:32", "AB:64"};
         static const char* const nz_filter_names[] = {"LP", "BP", "HP"};
 
         if (index == k_paramProgram) {
@@ -748,24 +751,34 @@ public:
         v.resB.delay_length = delay_len;
 #endif
         // --- PITCH COMPENSATION FOR LOOP FILTER GROUP DELAY ---
-        // The 1-pole LP and the allpass both add group delay at the fundamental
-        // frequency ω₀, extending the effective loop by τ_LP + τ_AP extra samples.
-        // Without compensation the pitch is flat by up to 35 cents (≈2.3 samples at
-        // lowpass_coeff=0.6, note 60).  DC approximation τ ≈ (1+pole)/(1-pole) is
-        // accurate to <0.01 samples for all MIDI notes at 48 kHz (ω₀ ≪ 1 rad/sample).
-        // cosf() is acceptable here — NoteOn is not in the audio hot loop.
+        // Both the 1-pole LP and the allpass extend the effective loop period by
+        // their group delay, making the pitch flat.  Subtract the combined group
+        // delay from the nominal delay line length so the loop oscillates at f₀.
+        //
+        // DC-limit approximations (valid for all MIDI notes at 48 kHz, ω₀ ≪ 1):
+        //   LP  H(z) = α/(1-pa·z⁻¹),  pole at pa=1-α  →  τ_LP = pa/(1-pa) = (1-α)/α
+        //   AP  H(z) = (c+z⁻¹)/(1+c·z⁻¹)              →  τ_AP = (1+c)/(1-c)
+        //
+        // Derivation (LP): phase φ = -arctan(pa·sinω/(1-pa·cosω))
+        //   τ = -dφ/dω = pa·(cosω-pa)/(1-2pa·cosω+pa²)
+        //   At DC: pa·(1-pa)/(1-pa)² = pa/(1-pa).
+        //   Sanity: pa=0 (α=1, passthrough) → τ=0; pa→1 (dark) → τ→∞.  Both ✓
+        //
+        // The AP formula (1+c)/(1-c) is the standard first-order allpass result; at
+        // c=0 (no dispersion) it reduces to 1 sample — the pure z⁻¹ delay built into
+        // the allpass recurrence.
         {
             // ResA
             float pa = 1.0f - v.resA.lowpass_coeff;          // LP pole
             float ca = v.resA.ap_coeff;                       // AP coefficient
-            float lp_del_A = (1.0f + pa) / (1.0f - pa);      // τ_LP in samples
-            float ap_del_A = (1.0f + ca) / (1.0f - ca);      // τ_AP in samples (1.0 at ca=0)
+            float lp_del_A = pa / (1.0f - pa);                // τ_LP: pa/(1-pa)
+            float ap_del_A = (1.0f + ca) / (1.0f - ca);      // τ_AP: (1+c)/(1-c) ≥ 1
             v.resA.delay_length = fmaxf(2.0f, v.resA.delay_length - lp_del_A - ap_del_A);
 
             // ResB
             float pb = 1.0f - v.resB.lowpass_coeff;
             float cb = v.resB.ap_coeff;
-            float lp_del_B = (1.0f + pb) / (1.0f - pb);
+            float lp_del_B = pb / (1.0f - pb);
             float ap_del_B = (1.0f + cb) / (1.0f - cb);
             v.resB.delay_length = fmaxf(2.0f, v.resB.delay_length - lp_del_B - ap_del_B);
         }

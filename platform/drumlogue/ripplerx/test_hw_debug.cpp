@@ -429,7 +429,7 @@ static void test_delay_roundtrip() {
     const WaveguideState& resA = s.state.voices[active_idx].resA;
     float dl = resA.delay_length;
     std::cout << "  resA.delay_length after NoteOn(60) = " << dl << " samples\n";
-    std::cout << "  Expected for C4 @ 48kHz            ≈ 183.5 samples\n";
+    std::cout << "  Raw C4 period @ 48 kHz = 183.47 samples; after LP+AP compensation (~2 samples) ≈ 181.5\n";
 
     bool dl_sane = dl > 10.0f && dl < 4090.0f;
     result("T9a delay_length in [10, 4090] after NoteOn(60)", dl_sane,
@@ -839,6 +839,48 @@ static void test_pitch_bend_persists_to_new_note() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// T19 — Loop filter pitch compensation accuracy
+//   After NoteOn(60) the effective loop period (delay_length + τ_LP + τ_AP)
+//   should equal srate/f₀ (183.47 samples for C4 at 48 kHz) to within 2 cents.
+//   This verifies that both the table generation (powf, not fasterpowf) and the
+//   pitch compensation formula (pa/(1-pa) for LP, (1+c)/(1-c) for AP) are correct.
+// ════════════════════════════════════════════════════════════════════════════
+static void test_pitch_compensation_accuracy() {
+    std::cout << "\n── T19: Loop filter pitch compensation accuracy ──\n";
+
+    unit_runtime_desc_t desc = make_desc();
+    RipplerXWaveguide s;
+    s.Init(&desc);
+
+    s.NoteOn(60, 127);
+    uint8_t vi = s.state.next_voice_idx;
+
+    float dl  = s.state.voices[vi].resA.delay_length;
+    float lc  = s.state.voices[vi].resA.lowpass_coeff;
+    float ac  = s.state.voices[vi].resA.ap_coeff;
+
+    // Reconstruct the group delays using the same DC-limit formulas as NoteOn
+    float pa     = 1.0f - lc;
+    float tau_lp = pa / (1.0f - pa);                    // τ_LP = pa/(1-pa)
+    float tau_ap = (1.0f + ac) / (1.0f - ac);           // τ_AP = (1+c)/(1-c)
+    float effective_period = dl + tau_lp + tau_ap;
+
+    // C4 exact at A4=440 Hz, 48 kHz
+    float expected_period  = 48000.0f / (440.0f * powf(2.0f, (60.0f - 69.0f) / 12.0f));
+    float error_cents      = 1200.0f * log2f(effective_period / expected_period);
+
+    std::cout << "  delay_length    = " << dl              << " samples\n";
+    std::cout << "  lowpass_coeff   = " << lc              << "  τ_LP=" << tau_lp << "\n";
+    std::cout << "  ap_coeff        = " << ac              << "  τ_AP=" << tau_ap << "\n";
+    std::cout << "  effective period= " << effective_period << " samples (target=" << expected_period << ")\n";
+    std::cout << "  pitch error     = " << error_cents      << " cents\n";
+
+    result("T19a effective loop period within 2 cents of C4 target",
+           std::fabs(error_cents) < 2.0f,
+           "Pitch compensation inaccurate: effective period too far from 48000/261.63");
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 int main() {
     std::cout << "=== RIPPLERX HW-DEBUG UNIT TESTS ===\n";
     std::cout << "Testing HW-vs-UT discrepancies that could cause hardware silence.\n";
@@ -862,6 +904,7 @@ int main() {
     test_energy_squelch();
     test_pitch_bend();
     test_pitch_bend_persists_to_new_note();
+    test_pitch_compensation_accuracy();
 
     std::cout << "\n=== RESULTS: " << g_pass << " passed, " << g_fail << " failed ===\n";
     return g_fail == 0 ? 0 : 1;

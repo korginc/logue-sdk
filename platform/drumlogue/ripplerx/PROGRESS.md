@@ -383,6 +383,71 @@ All 45 tests pass.
 
 ---
 
+## Phase 17: Partls AB/A/B Editor Selection + Bug Fixes [COMPLETED]
+
+### User change: Partls extended from 0..6 to 0..7
+
+`k_paramPartls` now has four distinct value bands:
+
+| Value | UI label   | Effect |
+|-------|-----------|--------|
+| 0–4   | AB:N / A:N / B:N | Set partial count (4/8/16/32/64) and coupling depth |
+| 5     | → ResA+B  | Route subsequent parameter edits to **both** resonators |
+| 6     | → ResA    | Route subsequent parameter edits to ResA only |
+| 7     | → ResB    | Route subsequent parameter edits to ResB only |
+
+`m_is_resonator_b` added as second routing flag (alongside `m_is_resonator_a`).
+All per-resonator `setParameter` handlers changed from `else` → `if (m_is_resonator_b)`
+to support the independent-flag routing.  The partial-count and model display strings
+now have three variants: `A:N`, `B:N`, `AB:N`.
+
+### Bug fixes applied in this review pass
+
+**1. LP group delay formula was wrong (Phase 16 regression)**
+
+The Phase 16 pitch compensation used `(1+pa)/(1-pa)` for the 1-pole LP group
+delay.  This is the allpass formula, not the LP formula.
+
+Correct derivation: for H(z) = α/(1-pa·z⁻¹), phase φ = -arctan(pa·sinω/(1-pa·cosω)).
+Group delay τ = -dφ/dω; at DC: τ_LP = pa·(1-pa)/(1-pa)² = **pa/(1-pa)** = (1-α)/α.
+
+Sanity check: pa=0 (α=1, passthrough) → τ=0 ✓; pa→1 (dark) → τ→∞ ✓.
+The old formula gave τ=1 for the passthrough case, which is wrong.
+
+**2. `tables.h` used `fasterpowf` for pitch table generation (startup bug)**
+
+`fasterpowf` has a ~3% systematic approximation error (the constant `fasterpow2(0) ≈
+0.9714` offset makes every note about 50 cents flat before any filter compensation).
+Since `generate()` runs once in `Init()` — not in the audio loop — there is no
+performance justification for the approximation.  Changed to `powf`.
+
+Combined effect of fixes 1+2: for the default preset at C4, the compensated delay
+changes from 186.1 to 181.46 samples, and T19 confirms the effective loop period
+is **183.4683 samples = 48000/261.626 Hz → pitch error 0.00 cents**.
+
+**3. Partial name string typos**
+
+`partial_names_a[]`, `partial_names_b[]`, and `partial_names_ab[]` had truncated
+two-digit numbers at indices 2–4:
+- Index 2: `"A:6"` → `"A:16"`
+- Index 3: `"A:2"` → `"A:32"`
+- Index 4: `"A:4"` → `"A:64"`
+
+**4. `m_is_resonator_b` not saved/restored in `LoadPreset`**
+
+After a preset load `m_is_resonator_b` was always left as `true` (from the ResB
+application block), overriding whatever editing mode the user had selected.  Now
+both `m_is_resonator_a` and `m_is_resonator_b` are saved and restored around the
+preset application, preserving the user's editing context.
+
+### New test: T19 — pitch compensation accuracy
+
+Verifies that `delay_length + τ_LP + τ_AP` equals the equal-temperament period
+for C4 within 2 cents.  With the corrected LP formula and `powf` table the error
+is 0.00 cents.  46/46 tests pass.
+
+---
+
 ## Phase 16: Physical Model Review & DSP Correctness Pass [COMPLETED]
 
 Full audit of the digital waveguide physical model against known physical

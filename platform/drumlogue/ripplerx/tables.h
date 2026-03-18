@@ -8,8 +8,12 @@ struct FastTables {
     // Called ONCE during Init()
     inline void generate(float srate) {
         for (int i = 0; i < 128; ++i) {
-            // Standard MIDI to Hz formula
-            float freq = 440.0f * fasterpowf(2.0f, ((float)i - 69.0f) / 12.0f);
+            // Standard MIDI to Hz formula.
+            // Use powf (not fasterpowf) — this is a startup-only initialisation,
+            // NOT in the audio hot loop.  fasterpowf has a ~3% systematic error
+            // (e.g. fasterpowf(2,0)≈0.97 instead of 1.0) that would make every
+            // note in the table ~50 cents flat before any filter compensation.
+            float freq = 440.0f * powf(2.0f, ((float)i - 69.0f) / 12.0f);
 
             // Protect against divide-by-zero or sub-sonic frequencies
             // [UT2: DELAY BOUNDS FIX] - Prevent buffer overflow wrap-around
