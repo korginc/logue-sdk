@@ -7,6 +7,7 @@
  * - Correct interleaving of output buffers
  * - Static buffers with bounds checking
  * - Safe bypass mode
+ * - FIXED: unit_reset() now calls clear() on reverb
  */
 
 #include <cstddef>
@@ -102,8 +103,10 @@ __unit_callback void unit_teardown() {
 }
 
 __unit_callback void unit_reset() {
-    // Reset reverb state if needed
-    // Note: Would need a reset method in NeonAdvancedLabirinto
+    // FIXED: Clear reverb state when host calls reset
+    if (s_reverb) {
+        s_reverb->clear();
+    }
 }
 
 __unit_callback void unit_resume() {}
@@ -128,7 +131,7 @@ __unit_callback void unit_render(const float* in, float* out, uint32_t frames) {
     }
 
     // ========================================================================
-    // FIXED: Deinterleave input: [L,R,L,R,...] -> separate L and R buffers
+    // Deinterleave input: [L,R,L,R,...] -> separate L and R buffers
     // ========================================================================
     for (uint32_t i = 0; i < frames; i++) {
         s_inL[i] = in[i * 2];
@@ -141,7 +144,7 @@ __unit_callback void unit_render(const float* in, float* out, uint32_t frames) {
     s_reverb->process(s_inL, s_inR, s_outL, s_outR, frames);
 
     // ========================================================================
-    // FIXED: Interleave output: separate L/R buffers -> [L,R,L,R,...]
+    // Interleave output: separate L/R buffers -> [L,R,L,R,...]
     // ========================================================================
     for (uint32_t i = 0; i < frames; i++) {
         out[i * 2] = s_outL[i];
@@ -158,7 +161,7 @@ __unit_callback void unit_set_param_value(uint8_t id, int32_t value) {
         case 0: // MIX  0..1000 → 0.0..1.0
             s_reverb->setMix(value / 1000.0f);
             break;
-        case 1: // TIME  1..100 → decay 0.01..0.99  (linear scale of RT60 x0.1s)
+        case 1: // TIME  1..100 → decay 0.01..0.99
             s_reverb->setDecay(0.01f + (value - 1) / 99.0f * 0.98f);
             break;
         case 2: // LOW  1..100 → low-freq decay multiplier

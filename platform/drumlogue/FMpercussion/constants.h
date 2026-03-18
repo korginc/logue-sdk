@@ -118,9 +118,14 @@ constexpr int LFO_TARGET_COUNT = 8;
 constexpr int LFO_SHAPE_TRIANGLE = 0;
 constexpr int LFO_SHAPE_RAMP = 1;
 constexpr int LFO_SHAPE_CHORD = 2;
+constexpr int LFO_SHAPE_COMBO_COUNT = 9;       // 3×3 = 9 combinations
 
 // Phase offset to prevent cancellation (90° = 0.25 cycle)
 constexpr float LFO_PHASE_OFFSET = 0.25f;
+
+// LFO rate range
+constexpr float LFO_RATE_MIN = 0.1f;           // 0.1 Hz
+constexpr float LFO_RATE_MAX = 10.0f;          // 10 Hz
 
 // ============================================================================
 // Voice Allocation Constants
@@ -154,32 +159,6 @@ constexpr int ENGINE_METAL = 2;
 constexpr int ENGINE_PERC = 3;
 constexpr int ENGINE_RESONANT = 4;
 constexpr int ENGINE_COUNT = 5;  // Total number of engines
-
-// ============================================================================
-// LFO Constants - Updated with resonant targets
-// ============================================================================
-constexpr int LFO_TARGET_NONE = 0;           // LFO disabled
-constexpr int LFO_TARGET_PITCH = 1;           // Modulate oscillator frequency
-constexpr int LFO_TARGET_INDEX = 2;           // Modulate FM amount
-constexpr int LFO_TARGET_ENV = 3;              // Modulate envelope shape/level
-constexpr int LFO_TARGET_LFO2_PHASE = 4;       // LFO1 modulates LFO2 phase
-constexpr int LFO_TARGET_LFO1_PHASE = 5;       // LFO2 modulates LFO1 phase
-constexpr int LFO_TARGET_RES_FREQ = 6;         // NEW: Modulate resonant center frequency
-constexpr int LFO_TARGET_RESONANCE = 7;        // NEW: Modulate resonance amount
-constexpr int LFO_TARGET_COUNT = 8;             // Total number of LFO targets
-
-// LFO shape constants
-constexpr int LFO_SHAPE_TRIANGLE = 0;
-constexpr int LFO_SHAPE_RAMP = 1;
-constexpr int LFO_SHAPE_CHORD = 2;
-constexpr int LFO_SHAPE_COMBO_COUNT = 9;       // 3×3 = 9 combinations
-
-// LFO phase offset to prevent cancellation (90° = 0.25 cycle)
-constexpr float LFO_PHASE_OFFSET = 0.25f;
-
-// LFO rate range
-constexpr float LFO_RATE_MIN = 0.1f;           // 0.1 Hz
-constexpr float LFO_RATE_MAX = 10.0f;          // 10 Hz
 
 // ============================================================================
 // Resonant Synthesis Constants
@@ -227,11 +206,6 @@ constexpr int ENV_STATE_OFF = 3;
 // Envelope curve types
 constexpr int ENV_CURVE_LINEAR = 0;
 constexpr int ENV_CURVE_EXPONENTIAL = 1;
-
-// ============================================================================
-// Parameter Smoothing Constants
-// ============================================================================
-constexpr int SMOOTH_FRAMES = 48;  // 1ms at 48kHz
 
 // ============================================================================
 // FM Engine Parameter Ranges
@@ -300,6 +274,30 @@ constexpr int LFO_TABLE_MASK = LFO_TABLE_SIZE - 1;
 constexpr float FILTER_Q_BESSEL = 0.5f;            // Bessel response
 constexpr float FILTER_Q_BUTTERWORTH = 0.707f;     // Butterworth response
 constexpr float FILTER_Q_LINKWITZ_RILEY = 0.5f;    // Linkwitz-Riley (cascaded)
+
+// ============================================================================
+// String tables (for synth.h)
+// ============================================================================
+static const char* lfo_shape_strings[9] = {
+            "Tri+Tri", "Ramp+Ramp", "Chord+Chord",
+            "Tri+Ramp", "Tri+Chord", "Ramp+Tri",
+            "Ramp+Chord", "Chord+Tri", "Chord+Ramp"
+        };
+
+        static const char* lfo_target_strings[8] = {
+            "None", "Pitch", "ModIdx", "Env",
+            "LFO2Ph", "LFO1Ph", "ResFreq", "Resonance"
+        };
+
+        static const char* voice_alloc_strings[12] = {
+            "K-S-M-P", "K-S-M-R", "K-S-R-P", "K-R-M-P",
+            "R-S-M-P", "K-S-R-M", "K-R-S-P", "R-K-M-P",
+            "R-S-K-P", "M-R-K-P", "P-R-K-M", "M-P-R-K"
+        };
+
+        static const char* resonant_mode_strings[5] = {
+            "LowPass", "BandPass", "HighPass", "Notch", "Peak"
+        };
 
 // ============================================================================
 // Utility Functions (compile-time)

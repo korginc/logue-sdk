@@ -32,7 +32,7 @@
 #include "multiband.h"
 
 // Parameter count must match header.c
-#define NUM_PARAMS 12
+#define NUM_PARAMS 13
 
 class MasterFX {
 public:
@@ -428,6 +428,12 @@ private:
             case 11: // L RATIO (multiband low ratio)
                 // Store for later use
                 break;
+
+            case 12: // DSTR MODE (0=None, 1=2nd harm, 2=3rd harm, 3=Both)
+                if (value >= 0 && value <= 3) {
+                    distressor_.dist_mode = value;
+                }
+                break;
         }
     }
 
@@ -474,6 +480,13 @@ private:
                 if (value >= 100) return "WET";
                 if (abs(value) < 10) return "BAL";
                 break;
+
+            case 12: // DSTR MODE
+                if (value >= 0 && value <= 3) {
+                    static const char* dstr_modes[] = {"None", "2nd", "3rd", "Both"};
+                    return dstr_modes[value];
+                }
+                break;
         }
         return nullptr;
     }
@@ -497,7 +510,6 @@ private:
     float samplerate_;
     bool has_sidechain_;
 
-    // FIXED: Array size matches NUM_PARAMS (12)
     int32_t raw_params_[NUM_PARAMS];
 
     // Floating-point parameters

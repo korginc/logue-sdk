@@ -9,12 +9,17 @@
  * - TRUE NEON vectorization (processes 4 samples at a time)
  * - Modulated delays for diffusion
  * - Stereo input/output
+ * - Frequency-dependent decay (low/high multipliers)
+ * - Stereo width control
+ * - Damping filter
  *
  * OPTIMIZED:
  * - Process 4 samples in parallel using float32x4_t
  * - Vectorized delay line access
  * - NEON-accelerated Hadamard mixing
  * - Added null pointer checks for all allocations
+ * - FIXED: Added clear() method for reset
+ * - FIXED: Proper phase management in updateModulation4() - preserves all 4 lanes
  */
 
 #include <arm_neon.h>
@@ -66,9 +71,11 @@ public:
             delayTimes[i] = baseDelays[i];
         }
 
-        // Initialize modulation phases
+        // Initialize modulation phases (store full vector per channel)
         for (int i = 0; i < FDN_CHANNELS; i++) {
-            modPhases[i] = 0.0f;
+            // Initialize all 4 lanes to the same starting phase
+            float32x4_t init_phase = { 0.0f, 0.0f, 0.0f, 0.0f };
+            modPhaseVec[i] = init_phase;
         }
 
         // Initialize filter states
@@ -92,7 +99,7 @@ public:
      * @return true if initialization successful, false if out of memory
      */
     bool init() {
-        // FIXED: Check allocation success
+        // Check allocation success
         fdnMem = (float*)memalign(16, BUFFER_SIZE * FDN_CHANNELS * sizeof(float));
         if (fdnMem == nullptr) {
             initialized = false;
@@ -100,10 +107,36 @@ public:
         }
 
         // Clear buffer
-        memset(fdnMem, 0, BUFFER_SIZE * FDN_CHANNELS * sizeof(float));
+        clear();
 
         initialized = true;
         return true;
+    }
+
+    /**
+     * Clear all delay lines and filter states
+     * Called by unit_reset() to ensure clean state
+     */
+    void clear() {
+        if (fdnMem != nullptr) {
+            memset(fdnMem, 0, BUFFER_SIZE * FDN_CHANNELS * sizeof(float));
+        }
+
+        writePos = 0;
+
+        // Reset modulation phases: lane k = k * incPerSample so sequential
+        // samples start at phase 0, inc, 2*inc, 3*inc
+        float incPerSample = modRate * 2.0f * M_PI / sampleRate;
+        float32x4_t init_phases = { 0.0f, incPerSample, 2.0f*incPerSample, 3.0f*incPerSample };
+        for (int i = 0; i < FDN_CHANNELS; i++) {
+            modPhaseVec[i] = init_phases;
+        }
+
+        // Reset filter states using NEON
+        float32x4_t zero = vdupq_n_f32(0.0f);
+        for (int i = 0; i < FDN_CHANNELS; i++) {
+            lpfState[i] = zero;
+        }
     }
 
     /*===========================================================================*/
@@ -144,9 +177,7 @@ public:
         freqHz = std::max(200.0f, std::min(10000.0f, freqHz));
         // omega = 2π * fc / fs;  coeff ≈ 1 - omega  (first-order approx)
         float omega = 2.0f * (float)M_PI * freqHz / sampleRate;
-        // accurate and musically conventional mapping from frequency to filter coefficient
-        // than first-order approximation
-        dampingCoeff =e_expff(-omega);
+        dampingCoeff = e_expff(-omega);
     }
 
     /**
@@ -223,7 +254,6 @@ private:
 
     /**
      * Process 4 samples in parallel using NEON
-     * This is where the real optimization happens
      */
     void process4Samples(const float* inL, const float* inR,
                          float* outL, float* outR) {
@@ -235,16 +265,14 @@ private:
         // Convert to mono for FDN input
         float32x4_t inMono = vmulq_f32(vaddq_f32(inL4, inR4), vdupq_n_f32(0.5f));
 
-        // Update modulation phases (vectorized)
-        updateModulation4();
-
         // =================================================================
-        // Read from all 8 delay lines for 4 samples
-        // This is the most intensive part - we need 8 * 4 = 32 reads
-        // Using NEON to do them in batches
+        // Read from all 8 delay lines for 4 samples using current phases
         // =================================================================
         float32x4_t delayOut[FDN_CHANNELS];
         readDelayLines4(delayOut);
+
+        // Advance modulation phases for the next block (after read so phases aren't clobbered)
+        updateModulation4();
 
         // =================================================================
         // Apply Hadamard mixing matrix (vectorized)
@@ -323,110 +351,82 @@ private:
 
     /**
      * NEON-optimized delay line reading for 4 samples
-     * Reads from all 8 channels in parallel where possible
      */
     void readDelayLines4(float32x4_t* out) {
-        // Pre-calculate read positions for all channels
-        float readPositions[FDN_CHANNELS][4];
+        // For each channel, we need the modulation value for each of the 4 samples
+        // We'll compute sin values for all 4 phases at once
 
         for (int ch = 0; ch < FDN_CHANNELS; ch++) {
+            // Get the 4 phases for this channel (one per sample)
+            float32x4_t phases = modPhaseVec[ch];
+
+            // Compute sin(2π * phase) for all 4 samples at once
+            // First scale to [0, 2π]
+            float32x4_t angles = vmulq_f32(phases, vdupq_n_f32(2.0f * M_PI));
+
+            // Compute sin using NEON approximation
+            float32x4_t sin_vals = fast_sin_neon(angles);
+
+            // Scale by modulation depth
+            float32x4_t mod = vmulq_f32(sin_vals, vdupq_n_f32(modDepth * 100.0f));
+
             float delaySamples = delayTimes[ch] * sampleRate;
-            float mod = sinf(modPhases[ch] * 2.0f * M_PI) * modDepth * 100.0f;
+            float baseDelay = delaySamples;
+
+            // Calculate read positions for all 4 samples
+            float32x4_t writePosVec = {
+                (float)writePos,
+                (float)(writePos + 1),
+                (float)(writePos + 2),
+                (float)(writePos + 3)
+            };
+
+            float32x4_t readPos = vsubq_f32(writePosVec,
+                                           vaddq_f32(vdupq_n_f32(baseDelay), mod));
+
+            // Wrap to [0, BUFFER_SIZE)
+            // This is tricky with floats - we'll convert to ints after wrapping
+            float readPosF[4];
+            vst1q_f32(readPosF, readPos);
 
             for (int s = 0; s < 4; s++) {
-                float pos = (float)(writePos + s) - (delaySamples + mod);
+                // Manual wrap for each sample (safer than vectorized wrap)
+                float pos = readPosF[s];
                 while (pos < 0) pos += BUFFER_SIZE;
                 while (pos >= BUFFER_SIZE) pos -= BUFFER_SIZE;
-                readPositions[ch][s] = pos;
-            }
-        }
 
-        // Read samples using NEON (process 4 channels at a time)
-        for (int chBase = 0; chBase < FDN_CHANNELS; chBase += 4) {
-            // Load 4 read positions for each of 4 channels (16 values total)
-            float32x4_t pos0 = vld1q_f32(readPositions[chBase]);
-            float32x4_t pos1 = vld1q_f32(readPositions[chBase + 1]);
-            float32x4_t pos2 = vld1q_f32(readPositions[chBase + 2]);
-            float32x4_t pos3 = vld1q_f32(readPositions[chBase + 3]);
+                int idx = (int)pos;
+                int idx_next = (idx + 1) & BUFFER_MASK;
+                float frac = pos - idx;
 
-            // Convert to integer indices for each channel
-            uint32x4_t idx0 = vcvtq_u32_f32(pos0);
-            uint32x4_t idx1 = vcvtq_u32_f32(pos1);
-            uint32x4_t idx2 = vcvtq_u32_f32(pos2);
-            uint32x4_t idx3 = vcvtq_u32_f32(pos3);
+                // Linear interpolation
+                float s1 = fdnMem[ch * BUFFER_SIZE + idx];
+                float s2 = fdnMem[ch * BUFFER_SIZE + idx_next];
+                float sample = s1 + frac * (s2 - s1);
 
-            // Ensure indices are within buffer bounds
-            idx0 = vandq_u32(idx0, vdupq_n_u32(BUFFER_MASK));
-            idx1 = vandq_u32(idx1, vdupq_n_u32(BUFFER_MASK));
-            idx2 = vandq_u32(idx2, vdupq_n_u32(BUFFER_MASK));
-            idx3 = vandq_u32(idx3, vdupq_n_u32(BUFFER_MASK));
-
-            // Gather samples from delay lines
-            // Note: In production, you'd want to use vld4q_f32 for interleaved access
-            for (int s = 0; s < 4; s++) {
-                uint32_t i0 = vgetq_lane_u32(idx0, s);
-                uint32_t i1 = vgetq_lane_u32(idx1, s);
-                uint32_t i2 = vgetq_lane_u32(idx2, s);
-                uint32_t i3 = vgetq_lane_u32(idx3, s);
-
-                float32x4_t samples = vdupq_n_f32(0.0f);
-                samples = vsetq_lane_f32(fdnMem[chBase * BUFFER_SIZE + i0], samples, 0);
-                samples = vsetq_lane_f32(fdnMem[(chBase + 1) * BUFFER_SIZE + i1], samples, 1);
-                samples = vsetq_lane_f32(fdnMem[(chBase + 2) * BUFFER_SIZE + i2], samples, 2);
-                samples = vsetq_lane_f32(fdnMem[(chBase + 3) * BUFFER_SIZE + i3], samples, 3);
-
-                out[chBase + s] = vsetq_lane_f32(vgetq_lane_f32(samples, s), out[chBase + s], s);
+                // Store in output vector
+                float32x4_t temp = out[ch];
+                temp = vsetq_lane_f32(sample, temp, s);
+                out[ch] = temp;
             }
         }
     }
 
     /**
-     * NEON-optimized Hadamard matrix multiplication
-     * Processes 4 samples at once using vector operations
+     * NEON-optimized Hadamard matrix multiplication.
      */
     void applyHadamard4(const float32x4_t* in, float32x4_t* out) {
-        // Pre-load Hadamard rows as vectors
-        float32x4_t row0 = vld1q_f32(hadamard[0]);
-        float32x4_t row1 = vld1q_f32(hadamard[1]);
-        float32x4_t row2 = vld1q_f32(hadamard[2]);
-        float32x4_t row3 = vld1q_f32(hadamard[3]);
-        float32x4_t row4 = vld1q_f32(hadamard[4]);
-        float32x4_t row5 = vld1q_f32(hadamard[5]);
-        float32x4_t row6 = vld1q_f32(hadamard[6]);
-        float32x4_t row7 = vld1q_f32(hadamard[7]);
-
-        // For each sample position (0-3)
-        for (int s = 0; s < 4; s++) {
-            // Extract sample s from each channel
-            float32x4_t vec = vdupq_n_f32(0.0f);
-            for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-                vec = vsetq_lane_f32(vgetq_lane_f32(in[ch], s), vec, ch);
+        for (int i = 0; i < FDN_CHANNELS; i++) {
+            float32x4_t acc = vdupq_n_f32(0.0f);
+            for (int j = 0; j < FDN_CHANNELS; j++) {
+                acc = vmlaq_n_f32(acc, in[j], hadamard[i][j]);
             }
-
-            // Multiply by Hadamard matrix
-            float32x4_t result = vdupq_n_f32(0.0f);
-            result = vmlaq_f32(result, row0, vdupq_laneq_f32(vec, 0));
-            result = vmlaq_f32(result, row1, vdupq_laneq_f32(vec, 1));
-            result = vmlaq_f32(result, row2, vdupq_laneq_f32(vec, 2));
-            result = vmlaq_f32(result, row3, vdupq_laneq_f32(vec, 3));
-            result = vmlaq_f32(result, row4, vdupq_laneq_f32(vec, 4));
-            result = vmlaq_f32(result, row5, vdupq_laneq_f32(vec, 5));
-            result = vmlaq_f32(result, row6, vdupq_laneq_f32(vec, 6));
-            result = vmlaq_f32(result, row7, vdupq_laneq_f32(vec, 7));
-
-            // Store back
-            for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-                out[ch] = vsetq_lane_f32(vgetq_lane_f32(result, ch), out[ch], s);
-            }
+            out[i] = acc;
         }
     }
 
     /**
      * NEON one-pole LPF per channel.
-     * DAMP sets the pole (dampingCoeff: larger = lower cutoff = darker).
-     * COMP (diffusion) scales the pole amount: 0 = bypass, 1 = full DAMP.
-     * y[n] = (1 - diffusion*dampingCoeff) * x[n]
-     *      +      diffusion*dampingCoeff  * y[n-1]
      */
     void applyDiffusion4(float32x4_t* signals) {
         // pole = amount of previous-sample blending
@@ -461,23 +461,32 @@ private:
     }
 
     /**
-     * Update modulation phases for 4 samples (vectorized)
+     * FIXED: Update modulation phases for 4 samples (vectorized)
+     * Now properly maintains phase for all 4 lanes
+     */
+    /**
+     * Advance modulation phases by one block (4 samples).
+     * modPhaseVec[ch] holds sequential per-sample phases [s0, s1, s2, s3].
+     * Called AFTER readDelayLines4 has consumed the current phases, so the
+     * phases stored here are ready for the NEXT block's read.
+     * Each lane advances by 4 × incPerSample to keep lanes in sequence.
      */
     void updateModulation4() {
-        float modInc = modRate * 2.0f * M_PI / sampleRate * 4.0f;
-        float32x4_t inc = vdupq_n_f32(modInc);
+        float incPerSample = modRate * 2.0f * M_PI / sampleRate;
+        float32x4_t block_advance = vdupq_n_f32(4.0f * incPerSample);
+        float32x4_t twoPi = vdupq_n_f32(2.0f * M_PI);
 
         for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-            float32x4_t phase = vdupq_n_f32(modPhases[ch]);
-            phase = vaddq_f32(phase, inc);
+            float32x4_t new_phases = vaddq_f32(modPhaseVec[ch], block_advance);
 
-            // Wrap to [0, 2π]
-            float32x4_t twoPi = vdupq_n_f32(2.0f * M_PI);
-            uint32x4_t wrap = vcgeq_f32(phase, twoPi);
-            phase = vbslq_f32(wrap, vsubq_f32(phase, twoPi), phase);
+            // Wrap to [0, 2π) using truncate-toward-zero floor
+            float32x4_t div = vmulq_f32(new_phases, vdupq_n_f32(1.0f / (2.0f * M_PI)));
+            float32x4_t floor_f = vcvtq_f32_s32(vcvtq_s32_f32(div));
+            new_phases = vsubq_f32(new_phases, vmulq_f32(floor_f, twoPi));
+            uint32x4_t neg = vcltq_f32(new_phases, vdupq_n_f32(0.0f));
+            new_phases = vbslq_f32(neg, vaddq_f32(new_phases, twoPi), new_phases);
 
-            // Store back (use first lane as new phase)
-            modPhases[ch] = vgetq_lane_f32(phase, 3);
+            modPhaseVec[ch] = new_phases;
         }
     }
 
@@ -485,26 +494,39 @@ private:
     /* Scalar Fallback for Remainder Samples */
     /*===========================================================================*/
 
-    // Scalar fallback: populates wetL/wetR with stereo wet signal (no mix applied).
-    // Mirrors the NEON path: channels 0-3 → L, channels 4-7 → R, then mid/side width.
     void processScalar(float input, float& wetL, float& wetR) {
         float delayOut[FDN_CHANNELS];
 
         for (int ch = 0; ch < FDN_CHANNELS; ch++) {
+            // For scalar path, we only need the current phase (lane 0)
+            float phase = vgetq_lane_f32(modPhaseVec[ch], 0);
+
             float delaySamples = delayTimes[ch] * sampleRate;
-            float mod = sinf(modPhases[ch] * 2.0f * M_PI) * modDepth * 100.0f;
+            float mod = sinf(phase * 2.0f * M_PI) * modDepth * 100.0f;
             float readPos = (float)writePos - (delaySamples + mod);
 
             while (readPos < 0) readPos += BUFFER_SIZE;
             while (readPos >= BUFFER_SIZE) readPos -= BUFFER_SIZE;
 
             int idx = (int)readPos;
-            delayOut[ch] = fdnMem[ch * BUFFER_SIZE + idx];
+            int idx_next = (idx + 1) & BUFFER_MASK;
+            float frac = readPos - idx;
+
+            float s1 = fdnMem[ch * BUFFER_SIZE + idx];
+            float s2 = fdnMem[ch * BUFFER_SIZE + idx_next];
+            delayOut[ch] = s1 + frac * (s2 - s1);
+
+            // Update scalar phase (only for lane 0)
+            float new_phase = phase + modRate * 2.0f * M_PI / sampleRate;
+            if (new_phase >= 2.0f * M_PI) new_phase -= 2.0f * M_PI;
+
+            // Update just lane 0, preserve other lanes
+            float32x4_t temp = modPhaseVec[ch];
+            temp = vsetq_lane_f32(new_phase, temp, 0);
+            modPhaseVec[ch] = temp;
         }
 
-        // Frequency-dependent decay (mirrors NEON path):
-        // channels 0-3 (shorter delays) → decay * highDecayMult
-        // channels 4-7 (longer delays)  → decay * lowDecayMult
+        // Frequency-dependent decay
         float mixed[FDN_CHANNELS];
         for (int i = 0; i < FDN_CHANNELS; i++) {
             float sum = 0.0f;
@@ -522,18 +544,34 @@ private:
         }
         writePos = (writePos + 1) & BUFFER_MASK;
 
-        // Stereo mix-down: channels 0-3 → L, channels 4-7 → R (mirrors NEON path)
+        // Stereo mix-down
         float leftRaw = 0.0f, rightRaw = 0.0f;
         for (int i = 0; i < 4; i++)           leftRaw  += mixed[i];
         for (int i = 4; i < FDN_CHANNELS; i++) rightRaw += mixed[i];
         leftRaw  *= 0.25f;
         rightRaw *= 0.25f;
 
-        // Apply stereo width via mid/side (mirrors NEON path)
+        // Apply stereo width
         float mid  = (leftRaw + rightRaw) * 0.5f;
         float side = (leftRaw - rightRaw) * 0.5f;
         wetL = mid + side * width;
         wetR = mid - side * width;
+    }
+
+    /*===========================================================================*/
+    /* Fast sine approximation (from float_math.h) */
+    /*===========================================================================*/
+
+    fast_inline float32x4_t fast_sin_neon(float32x4_t x) {
+        // Use the fast sine from float_math.h
+        // This is a placeholder - in real code, include float_math.h and use faster_sinf
+        float32x4_t result;
+        for (int i = 0; i < 4; i++) {
+            float val = vgetq_lane_f32(x, i);
+            val = faster_sinf(val);
+            result = vsetq_lane_f32(val, result, i);
+        }
+        return result;
     }
 
     /*===========================================================================*/
@@ -570,13 +608,14 @@ private:
     float width;         // stereo width   0..2
     float dampingCoeff;  // one-pole LPF coeff for damping
     float lowDecayMult;  // low-freq decay multiplier
-    float highDecayMult; // high-freq decay multiplier (controls diffusion brightness)
+    float highDecayMult; // high-freq decay multiplier
 
     bool initialized;
     float* fdnMem;  // [FDN_CHANNELS][BUFFER_SIZE]
 
     float delayTimes[FDN_CHANNELS];
-    float modPhases[FDN_CHANNELS];
+    // FIXED: Store full vector of 4 phases per channel (one per sample in block)
+    float32x4_t modPhaseVec[FDN_CHANNELS];
     float32x4_t lpfState[FDN_CHANNELS];
     float hadamard[FDN_CHANNELS][FDN_CHANNELS];
 };

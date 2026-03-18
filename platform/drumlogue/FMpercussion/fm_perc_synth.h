@@ -26,14 +26,6 @@
 #include "midi_handler.h"
 #include "fm_presets.h"
 
-// Engine modes
-#define ENGINE_KICK     0
-#define ENGINE_SNARE    1
-#define ENGINE_METAL    2
-#define ENGINE_PERC     3
-#define ENGINE_RESONANT 4
-#define ENGINE_COUNT    5
-
 // Voice allocation table - 12 combinations (no duplicates)
 // Format: [voice0, voice1, voice2, voice3] engine assignments
 static const uint8_t VOICE_ALLOC_TABLE[12][4] = {
@@ -81,7 +73,7 @@ typedef struct {
 
     // Voice allocation
     uint8_t voice_engine[4];        // Engine type for each voice (0-4)
-    uint8_t allocation_idx;          // Current allocation (0-11)
+    uint8_t allocation_idx;         // Current allocation (0-11)
 
     // Masks for efficient NEON processing
     uint32x4_t engine_mask[ENGINE_COUNT];
@@ -92,10 +84,10 @@ typedef struct {
     uint32_t voice_probs[4];         // Per-voice probabilities (0-100)
 
     // Resonant morph parameter
-    float resonant_morph;             // 0-1
+    float resonant_morph;            // 0-1
 
     // Per-voice velocity (set on note-on, persists until next trigger)
-    float32x4_t voice_velocity;       // 0-1 per lane
+    float32x4_t voice_velocity;      // 0-1 per lane
 
     // Output gain
     float master_gain;
@@ -114,15 +106,14 @@ fast_inline void update_voice_allocation(fm_perc_synth_t* synth, uint8_t alloc_i
         synth->voice_engine[v] = VOICE_ALLOC_TABLE[alloc_idx][v];
     }
 
-    // Build masks for each engine type
+    // Build per-lane NEON masks for each engine type.
+    // Each lane gets 0xFFFFFFFF if that voice uses this engine, 0 otherwise.
     for (int e = 0; e < ENGINE_COUNT; e++) {
-        uint32_t mask = 0;
+        uint32_t lanes[4];
         for (int v = 0; v < 4; v++) {
-            if (synth->voice_engine[v] == e) {
-                mask |= (1 << v);
-            }
+            lanes[v] = (synth->voice_engine[v] == e) ? 0xFFFFFFFFU : 0U;
         }
-        synth->engine_mask[e] = vdupq_n_u32(mask);
+        synth->engine_mask[e] = vld1q_u32(lanes);
     }
 }
 
@@ -336,7 +327,9 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
 
     for (int v = 0; v < 4; v++) {
         if (gate_bits & (1 << v)) {
-            uint32x4_t voice_mask = vdupq_n_u32(1 << v);
+            // Per-lane mask: 0xFFFFFFFF for the triggered voice lane, 0 for others
+            // comparing a vector containing the current voice index v with a constant vector of indices {0, 1, 2, 3} by means of compound literal
+            uint32x4_t voice_mask = vceqq_u32(vdupq_n_u32(v), vld1q_u32((const uint32_t[]){0, 1, 2, 3}));
             uint8_t engine = synth->voice_engine[v];
 
             switch (engine) {
