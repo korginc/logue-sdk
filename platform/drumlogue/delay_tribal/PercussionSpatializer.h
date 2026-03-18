@@ -22,7 +22,14 @@
 #include "spatial_modes.h"
 #include "filters.h"
 
-// Additional constant not in constants.h
+// Constants for NEON vectorization
+constexpr int NEON_LANES = 4;
+constexpr int MAX_CLONES = 16;
+constexpr int CLONE_GROUPS = MAX_CLONES / NEON_LANES;
+constexpr int DELAY_MAX_MS = 500;
+constexpr int DELAY_MAX_SAMPLES = DELAY_MAX_MS * 48;
+constexpr int DELAY_MASK = DELAY_MAX_SAMPLES - 1;
+constexpr int LFO_TABLE_SIZE = 256;
 constexpr int CROSSFADE_SAMPLES = 480;  // 10ms @ 48kHz
 
 // Optimization constants
