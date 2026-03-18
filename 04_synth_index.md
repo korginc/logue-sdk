@@ -30,3 +30,4 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [KaossKhord](https://mrglennjones.gumroad.com/l/KaossKhord) | Glenn Jones | Diatonic FM chord synthesizer | nts-3 | paid |
 | [DIZI笛子](https://mrglennjones.gumroad.com/l/dizi) | Glenn Jones | Chinese bamboo flute synthesizer | nts-3 | paid |
 | [MEUH](https://mrglennjones.gumroad.com/l/meuh) | Glenn Jones | Cowbell synthesizer | nts-3 | free |
+| [DOMINATOR](https://mrglennjones.gumroad.com/l/dominator) | Glenn Jones | Gesture-Looped Hoover Synthesizer | nts-3 | paid |
