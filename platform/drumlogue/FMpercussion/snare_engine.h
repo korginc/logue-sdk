@@ -115,8 +115,8 @@ fast_inline void snare_engine_set_note(snare_engine_t* snare,
 
     // Reset phases on trigger for consistent attack transient
     float32x4_t zero = vdupq_n_f32(0.0f);
-    snare->carrier_phase   = vbslq_f32(voice_mask, zero, snare->carrier_phase);
-    snare->modulator_phase = vbslq_f32(voice_mask, zero, snare->modulator_phase);
+    snare->carrier_phase   = vbslq_f32(voice_mask), zero, snare->carrier_phase;
+    snare->modulator_phase = vbslq_f32(voice_mask), zero, snare->modulator_phase;
 }
 
 /**
