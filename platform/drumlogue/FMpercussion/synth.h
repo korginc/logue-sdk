@@ -157,11 +157,19 @@ public:
             "Ramp+Chord", "Chord+Tri", "Chord+Ramp"
         };
 
-        static const char* voice_mask_strings[15] = {
-            "Kick", "Snare", "Metal", "Perc",
-            "K+S", "K+M", "K+P", "S+M",
-            "S+P", "M+P", "K+S+M", "K+S+P",
-            "K+M+P", "S+M+P", "All"
+        static const char* lfo_target_strings[8] = {
+            "None", "Pitch", "ModIdx", "Env",
+            "LFO2Ph", "LFO1Ph", "ResFreq", "Resonance"
+        };
+
+        static const char* voice_alloc_strings[12] = {
+            "K-S-M-P", "K-S-M-R", "K-S-R-P", "K-R-M-P",
+            "R-S-M-P", "K-S-R-M", "K-R-S-P", "R-K-M-P",
+            "R-S-K-P", "M-R-K-P", "P-R-K-M", "M-P-R-K"
+        };
+
+        static const char* resonant_mode_strings[5] = {
+            "LowPass", "BandPass", "HighPass", "Notch", "Peak"
         };
 
         switch (index) {
@@ -169,7 +177,13 @@ public:
                 if (value >= 0 && value <= 8) return lfo_shape_strings[value];
                 break;
             case 14: case 18:  // LFO1 Dest and LFO2 Dest
-                if (value >= 0 && value <= 14) return voice_mask_strings[value];
+                if (value >= 0 && value <= 7) return lfo_target_strings[value];
+                break;
+            case 21:  // Voice Alloc
+                if (value >= 0 && value <= 11) return voice_alloc_strings[value];
+                break;
+            case 22:  // Resonant Mode
+                if (value >= 0 && value <= 4) return resonant_mode_strings[value];
                 break;
         }
         return nullptr;

@@ -26,14 +26,6 @@
 #include "midi_handler.h"
 #include "fm_presets.h"
 
-// Engine modes
-#define ENGINE_KICK     0
-#define ENGINE_SNARE    1
-#define ENGINE_METAL    2
-#define ENGINE_PERC     3
-#define ENGINE_RESONANT 4
-#define ENGINE_COUNT    5
-
 // Voice allocation table - 12 combinations (no duplicates)
 // Format: [voice0, voice1, voice2, voice3] engine assignments
 static const uint8_t VOICE_ALLOC_TABLE[12][4] = {
@@ -114,15 +106,14 @@ fast_inline void update_voice_allocation(fm_perc_synth_t* synth, uint8_t alloc_i
         synth->voice_engine[v] = VOICE_ALLOC_TABLE[alloc_idx][v];
     }
 
-    // Build masks for each engine type
+    // Build per-lane NEON masks for each engine type.
+    // Each lane gets 0xFFFFFFFF if that voice uses this engine, 0 otherwise.
     for (int e = 0; e < ENGINE_COUNT; e++) {
-        uint32_t mask = 0;
+        uint32_t lanes[4];
         for (int v = 0; v < 4; v++) {
-            if (synth->voice_engine[v] == e) {
-                mask |= (1 << v);
-            }
+            lanes[v] = (synth->voice_engine[v] == e) ? 0xFFFFFFFFU : 0U;
         }
-        synth->engine_mask[e] = vdupq_n_u32(mask);
+        synth->engine_mask[e] = vld1q_u32(lanes);
     }
 }
 
@@ -336,7 +327,10 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
 
     for (int v = 0; v < 4; v++) {
         if (gate_bits & (1 << v)) {
-            uint32x4_t voice_mask = vdupq_n_u32(1 << v);
+            // Per-lane mask: 0xFFFFFFFF for the triggered voice lane, 0 for others
+            uint32_t vm[4] = {0U, 0U, 0U, 0U};
+            vm[v] = 0xFFFFFFFFU;
+            uint32x4_t voice_mask = vld1q_u32(vm);
             uint8_t engine = synth->voice_engine[v];
 
             switch (engine) {
