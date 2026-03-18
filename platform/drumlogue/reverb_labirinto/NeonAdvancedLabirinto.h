@@ -146,7 +146,7 @@ public:
         float omega = 2.0f * (float)M_PI * freqHz / sampleRate;
         // accurate and musically conventional mapping from frequency to filter coefficient
         // than first-order approximation
-        dampingCoeff =e_expff(-omega);
+        dampingCoeff = e_expff(-omega);
     }
 
     /**
@@ -381,43 +381,19 @@ private:
     }
 
     /**
-     * NEON-optimized Hadamard matrix multiplication
-     * Processes 4 samples at once using vector operations
+     * NEON-optimized Hadamard matrix multiplication.
+     * in[ch] and out[ch] each hold 4 consecutive time-domain samples for channel ch.
+     * out[i] = sum_j(hadamard[i][j] * in[j]) for all 4 samples simultaneously.
+     * Uses vmlaq_n_f32 to multiply each channel's 4-sample vector by its scalar
+     * Hadamard coefficient and accumulate, giving true NEON throughput.
      */
     void applyHadamard4(const float32x4_t* in, float32x4_t* out) {
-        // Pre-load Hadamard rows as vectors
-        float32x4_t row0 = vld1q_f32(hadamard[0]);
-        float32x4_t row1 = vld1q_f32(hadamard[1]);
-        float32x4_t row2 = vld1q_f32(hadamard[2]);
-        float32x4_t row3 = vld1q_f32(hadamard[3]);
-        float32x4_t row4 = vld1q_f32(hadamard[4]);
-        float32x4_t row5 = vld1q_f32(hadamard[5]);
-        float32x4_t row6 = vld1q_f32(hadamard[6]);
-        float32x4_t row7 = vld1q_f32(hadamard[7]);
-
-        // For each sample position (0-3)
-        for (int s = 0; s < 4; s++) {
-            // Extract sample s from each channel
-            float32x4_t vec = vdupq_n_f32(0.0f);
-            for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-                vec = vsetq_lane_f32(vgetq_lane_f32(in[ch], s), vec, ch);
+        for (int i = 0; i < FDN_CHANNELS; i++) {
+            float32x4_t acc = vdupq_n_f32(0.0f);
+            for (int j = 0; j < FDN_CHANNELS; j++) {
+                acc = vmlaq_n_f32(acc, in[j], hadamard[i][j]);
             }
-
-            // Multiply by Hadamard matrix
-            float32x4_t result = vdupq_n_f32(0.0f);
-            result = vmlaq_f32(result, row0, vdupq_laneq_f32(vec, 0));
-            result = vmlaq_f32(result, row1, vdupq_laneq_f32(vec, 1));
-            result = vmlaq_f32(result, row2, vdupq_laneq_f32(vec, 2));
-            result = vmlaq_f32(result, row3, vdupq_laneq_f32(vec, 3));
-            result = vmlaq_f32(result, row4, vdupq_laneq_f32(vec, 4));
-            result = vmlaq_f32(result, row5, vdupq_laneq_f32(vec, 5));
-            result = vmlaq_f32(result, row6, vdupq_laneq_f32(vec, 6));
-            result = vmlaq_f32(result, row7, vdupq_laneq_f32(vec, 7));
-
-            // Store back
-            for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-                out[ch] = vsetq_lane_f32(vgetq_lane_f32(result, ch), out[ch], s);
-            }
+            out[i] = acc;
         }
     }
 

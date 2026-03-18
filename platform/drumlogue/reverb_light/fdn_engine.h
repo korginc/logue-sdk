@@ -158,15 +158,7 @@ public:
     /* NEON Utilities */
     /*===========================================================================*/
 
-    /**
-     * Horizontal sum of float32x4_t (ARMv7 compatible)
-     */
-    fast_inline float horizontal_sum_f32x4(float32x4_t v) {
-        float32x2_t sum_halves = vpadd_f32(vget_low_f32(v), vget_high_f32(v));
-        return vget_lane_f32(sum_halves, 0) + vget_lane_f32(sum_halves, 1);
-    }
-
-    /*===========================================================================*/
+/*===========================================================================*/
     /* Core Processing - Scalar (Single Sample) */
     /*===========================================================================*/
 
