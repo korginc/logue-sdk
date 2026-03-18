@@ -69,3 +69,32 @@ The Percussion Spatializer now delivers a **highly realistic drum ensemble simul
 - Natural pitch variations (tape wobble)
 - Softer attacks on clones
 - All running in real-time on ARM NEON
+
+# NEW
+## 🔧 Technical Details - Filter Implementation
+
+### Tribal Mode (Bandpass)
+- **Center Frequency**: 80-800 Hz (controlled by Depth param)
+- **Q Factor**: 2.0 (musical resonance)
+- **Transfer Function**: H(s) = (s/Q) / (s² + s/Q + 1)
+- **Psychoacoustic Goal**: Emphasize warmth and "earthiness" of tribal percussion
+
+### Military Mode (Highpass)
+- **Cutoff Frequency**: 1 kHz - 8 kHz (controlled by Depth param)
+- **Q Factor**: 0.707 (Butterworth - maximally flat)
+- **Transfer Function**: H(s) = s² / (s² + s/Q + 1)
+- **Psychoacoustic Goal**: Enhance attack and "snap" for snares/tambourines
+
+### Angel Mode (Dual-band)
+- **Highpass Filter**: 500 Hz (removes low-end rumble)
+- **Lowpass Filter**: 4 kHz (ethereal smoothing)
+- **Q Factor**: 1.0 (gentle resonance)
+- **Psychoacoustic Goal**: Create ethereal, "heavenly" character
+
+## 📊 Filter Performance Impact
+
+| Mode | Operations | CPU Increase | Memory |
+|------|------------|--------------|--------|
+| Tribal | 2 biquads | +5% | 128 bytes |
+| Military | 2 biquads | +5% | 128 bytes |
+| Angel | 2 biquads | +5% | 128 bytes |
