@@ -79,7 +79,7 @@ typedef struct {
     uint32x4_t engine_mask[ENGINE_COUNT];
 
     // Voice activity and probabilities
-    uint32x4_t voice_active;
+    float32x4_t voice_active;
     uint32x4_t voice_triggered;
     uint32_t voice_probs[4];         // Per-voice probabilities (0-100)
 

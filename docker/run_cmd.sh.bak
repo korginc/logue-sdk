@@ -145,4 +145,4 @@ fi
 
 # Mount platform directory at /workspace as expected by container build scripts
 export MSYS_NO_PATHCONV=1
-docker run --rm -v "${PLATFORM_MOUNT}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}
+docker run --rm -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}

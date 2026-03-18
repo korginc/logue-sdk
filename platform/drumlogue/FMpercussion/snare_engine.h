@@ -15,6 +15,7 @@
 
 #include <arm_neon.h>
 #include "fm_voices.h"
+#include "sine_neon.h"
 #include "prng.h"
 #include "sine_neon.h"
 
@@ -108,14 +109,14 @@ fast_inline void snare_engine_set_note(snare_engine_t* snare,
 
     float32x4_t base_freq = vmulq_f32(a4_freq, two_pow);
 
-    snare->carrier_freq_base = vbslq_f32(vreinterpretq_f32_u32(voice_mask),
+    snare->carrier_freq_base = vbslq_f32(voice_mask,
                                          base_freq,
                                          snare->carrier_freq_base);
 
     // Reset phases on trigger for consistent attack transient
     float32x4_t zero = vdupq_n_f32(0.0f);
-    snare->carrier_phase   = vbslq_f32(vreinterpretq_f32_u32(voice_mask), zero, snare->carrier_phase);
-    snare->modulator_phase = vbslq_f32(vreinterpretq_f32_u32(voice_mask), zero, snare->modulator_phase);
+    snare->carrier_phase   = vbslq_f32(voice_mask, zero, snare->carrier_phase);
+    snare->modulator_phase = vbslq_f32(voice_mask, zero, snare->modulator_phase);
 }
 
 /**
@@ -123,12 +124,12 @@ fast_inline void snare_engine_set_note(snare_engine_t* snare,
  */
 fast_inline float32x4_t snare_generate_noise(snare_engine_t* snare) {
     // Generate 4 random values
-    uint32x4_t rand = neon_prng_rand_u32(&snare->noise_prng);  // FIXED
+    uint32x4_t rand = neon_prng_rand_u32(&snare->noise_prng);
 
     // Convert to float in [-1, 1]
     uint32x4_t masked = vandq_u32(rand, vdupq_n_u32(0x7FFFFF));
     uint32x4_t float_bits = vorrq_u32(masked, vdupq_n_u32(0x3F800000));
-    float32x4_t white = vsubq_f32(vreinterpretq_f32_u32(float_bits),
+    float32x4_t white = vsubq_f32(float_bits,
                                    vdupq_n_f32(1.0f));
     white = vsubq_f32(vmulq_f32(white, vdupq_n_f32(2.0f)), vdupq_n_f32(1.0f));
 
@@ -199,7 +200,7 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
 
     // Apply envelope and mask
     output = vmulq_f32(output, envelope);
-    output = vbslq_f32(vreinterpretq_f32_u32(active_mask),
+    output = vbslq_f32(active_mask,
                        output, vdupq_n_f32(0.0f));
 
     return output;

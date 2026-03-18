@@ -28,6 +28,7 @@
 #include <cmath>
 #include <malloc.h>
 #include <float_math.h>
+#include <algorithm>
 
 // Maximum delay line length (2 seconds at 48kHz)
 #define MAX_DELAY_SECONDS 2.0f
@@ -144,29 +145,29 @@ public:
     /*===========================================================================*/
 
     void setDecay(float d) {
-        decay = std::max(0.0f, std::min(0.99f, d));
+        decay = fmaxf(0.0f, fminf(0.99f, d));
     }
 
     void setDiffusion(float d) {
-        diffusion = std::max(0.0f, std::min(1.0f, d));
+        diffusion = fmaxf(0.0f, fminf(1.0f, d));
     }
 
     void setModDepth(float d) {
-        modDepth = std::max(0.0f, std::min(1.0f, d));
+        modDepth = fmaxf(0.0f, fminf(1.0f, d));
     }
 
     void setModRate(float r) {
-        modRate = std::max(0.1f, std::min(10.0f, r));
+        modRate = fmaxf(0.1f, fminf(10.0f, r));
     }
 
     /** Wet/dry mix  0.0 = fully dry, 1.0 = fully wet */
     void setMix(float m) {
-        mix = std::max(0.0f, std::min(1.0f, m));
+        mix = fmaxf(0.0f, fminf(1.0f, m));
     }
 
     /** Stereo width  0.0 = mono, 1.0 = normal, 2.0 = hyper-stereo */
     void setWidth(float w) {
-        width = std::max(0.0f, std::min(2.0f, w));
+        width = fmaxf(0.0f, fminf(2.0f, w));
     }
 
     /**
@@ -174,9 +175,11 @@ public:
      * Converts to a one-pole LPF coefficient used in applyDiffusion4.
      */
     void setDamping(float freqHz) {
-        freqHz = std::max(200.0f, std::min(10000.0f, freqHz));
+        freqHz = fmaxf(200.0f, fminf(10000.0f, freqHz));
         // omega = 2π * fc / fs;  coeff ≈ 1 - omega  (first-order approx)
         float omega = 2.0f * (float)M_PI * freqHz / sampleRate;
+        // accurate and musically conventional mapping from frequency to filter coefficient
+        // than first-order approximation
         dampingCoeff = e_expff(-omega);
     }
 
@@ -285,8 +288,8 @@ private:
         // Channels 0-3 have shorter delays (brighter content) → decay * highDecayMult
         // Channels 4-7 have longer delays (warmer content)    → decay * lowDecayMult
         // =================================================================
-        float32x4_t decayHi  = vdupq_n_f32(std::min(0.99f, decay * highDecayMult));
-        float32x4_t decayLo  = vdupq_n_f32(std::min(0.99f, decay * lowDecayMult));
+        float32x4_t decayHi  = vdupq_n_f32(fminf(0.99f, decay * highDecayMult));
+        float32x4_t decayLo  = vdupq_n_f32(fminf(0.99f, decay * lowDecayMult));
         float32x4_t feedback = vdupq_n_f32(1.0f - decay);
 
         for (int i = 0; i < 4; i++) {
@@ -534,7 +537,7 @@ private:
                 sum += hadamard[i][j] * delayOut[j];
             }
             float dm = (i < 4) ? (decay * highDecayMult) : (decay * lowDecayMult);
-            mixed[i] = sum * std::min(0.99f, dm);
+            mixed[i] = sum * fminf(0.99f, dm);
         }
 
         mixed[0] += input * (1.0f - decay);

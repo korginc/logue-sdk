@@ -54,6 +54,14 @@ if docker image inspect "${IMAGE_NAME_DEFAULT}:${IMAGE_VERSION}" >/dev/null 2>&1
 else
     IMAGE_NAME="${IMAGE_NAME_FALLBACK}"
 fi
+IMAGE_NAME_DEFAULT="xiashj/logue-sdk"
+IMAGE_NAME_FALLBACK="logue-sdk-dev-env"
+
+if docker image inspect "${IMAGE_NAME_DEFAULT}:${IMAGE_VERSION}" >/dev/null 2>&1; then
+    IMAGE_NAME="${IMAGE_NAME_DEFAULT}"
+else
+    IMAGE_NAME="${IMAGE_NAME_FALLBACK}"
+fi
 PLATFORM_PATH=$(realpath "${SCRIPT_DIR}/../platform")
 
 usage () {
@@ -104,25 +112,26 @@ if [ ! -d "${PLATFORM_PATH}" ]; then
 fi
 
 # Normalize path for Docker Desktop on Windows
-# Docker Desktop with WSL2 backend needs /mnt/e/ style paths
+# Docker Desktop with WSL2 backend needs /mnt/d/ style paths
 PLATFORM_MOUNT="${PLATFORM_PATH}"
 UNAME_S=$(uname -s 2>/dev/null || echo "")
 
 if [[ "${OSTYPE}" == msys* || "${OSTYPE}" == cygwin* || "${UNAME_S}" =~ MINGW ]]; then
     # Running in Git Bash/MSYS2 on Windows with Docker Desktop WSL2 backend
-    if [[ "${PLATFORM_PATH}" =~ ^/([a-z])/ ]]; then
-        # Convert /e/path to /mnt/e/path for Docker WSL2 backend
-        DRIVE_LETTER=$(echo "${PLATFORM_PATH:1:1}" | tr '[:lower:]' '[:lower:]')
-        REST_PATH="${PLATFORM_PATH:2}"
-        PLATFORM_MOUNT="/mnt/${DRIVE_LETTER}${REST_PATH}"
+    if [[ "${WORKSPACE_ROOT}" =~ ^/([a-z])/ ]]; then
+        # Convert /d/path to /mnt/d/path for Docker WSL2 backend
+        DRIVE_LETTER=$(echo "${WORKSPACE_ROOT:1:1}" | tr '[:lower:]' '[:lower:]')
+        REST_PATH="${WORKSPACE_ROOT:2}"
+        WORKSPACE_MOUNT="/mnt/${DRIVE_LETTER}${REST_PATH}"
     fi
-elif [[ "${PLATFORM_PATH}" =~ ^([A-Za-z]): ]]; then
-    # Running from PowerShell/CMD - convert E:\path to /mnt/e/path
-    DRIVE_LETTER=$(echo "${PLATFORM_PATH:0:1}" | tr '[:upper:]' '[:lower:]')
-    REST_PATH=$(echo "${PLATFORM_PATH:2}" | sed 's|\\|/|g')
-    PLATFORM_MOUNT="/mnt/${DRIVE_LETTER}${REST_PATH}"
+elif [[ "${WORKSPACE_ROOT}" =~ ^([A-Za-z]): ]]; then
+    # Running from PowerShell/CMD - convert D:\path to /mnt/d/path
+    DRIVE_LETTER=$(echo "${WORKSPACE_ROOT:0:1}" | tr '[:upper:]' '[:lower:]')
+    REST_PATH=$(echo "${WORKSPACE_ROOT:2}" | sed 's|\\|/|g')
+    WORKSPACE_MOUNT="/mnt/${DRIVE_LETTER}${REST_PATH}"
 fi
 
+echo "[Info] Workspace root: ${WORKSPACE_ROOT}"
 echo "[Info] Platform path: ${PLATFORM_PATH}"
 echo "[Info] Mount path: ${PLATFORM_MOUNT}"
 echo "[Info] Docker command:"
@@ -140,4 +149,3 @@ echo ""
 export MSYS_NO_PATHCONV=1
 
 docker run --rm -v "${PLATFORM_MOUNT}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/interactive_entry
-

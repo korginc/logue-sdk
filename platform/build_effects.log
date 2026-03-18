@@ -1,0 +1,580 @@
+>> Building 'drumlogue' projects
+>> Building /workspace/drumlogue/FMpercussion
+Compiling header.c
+Compiling unit.cc
+In file included from header.c:7:0:
+constants.h:10:19: fatal error: cstdint: No such file or directory
+ #include <cstdint>
+                   ^
+compilation terminated.
+make: *** [Makefile:330: build/obj/header.o] Error 1
+make: *** Waiting for unfinished jobs....
+In file included from kick_engine.h:16:0,
+                 from fm_perc_synth.h:17,
+                 from synth.h:17,
+                 from unit.cc:13:
+fm_voices.h: In function 'float32x4_t midi_to_freq_neon(uint32x4_t)':
+fm_voices.h:70:17: warning: unused variable 'semitone_offset' [-Wunused-variable]
+     float32x4_t semitone_offset = vsubq_f32(vcvtq_f32_u32(midi_notes), a4_midi);
+                 ^~~~~~~~~~~~~~~
+In file included from sine_neon.h:15:0,
+                 from kick_engine.h:17,
+                 from fm_perc_synth.h:17,
+                 from synth.h:17,
+                 from unit.cc:13:
+float_math.h: In function 'float Q_rsqrt(float)':
+float_math.h:1014:21: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+  i  = * ( long * ) &y;                       // evil floating point bit level hacking
+                     ^
+float_math.h:1016:22: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+  y  = * ( float * ) &i;
+                      ^
+In file included from fm_perc_synth.h:18:0,
+                 from synth.h:17,
+                 from unit.cc:13:
+snare_engine.h: In function 'float32x4_t snare_generate_noise(snare_engine_t*)':
+snare_engine.h:127:53: error: cannot convert 'uint32x4_t {aka __vector(4) unsigned int}' to 'float32x4_t {aka __vector(4) float}' for argument '1' to 'float32x4_t vsubq_f32(float32x4_t, float32x4_t)'
+                                    vdupq_n_f32(1.0f));
+                                                     ^
+In file included from fm_perc_synth.h:21:0,
+                 from synth.h:17,
+                 from unit.cc:13:
+resonant_synthesis.h: In function 'void resonant_synth_init(resonant_synth_t*)':
+resonant_synthesis.h:86:31: error: 'RESONANT_DENOM_EPSILON' was not declared in this scope
+     rs->epsilon = vdupq_n_f32(RESONANT_DENOM_EPSILON);
+                               ^~~~~~~~~~~~~~~~~~~~~~
+resonant_synthesis.h: In function 'void resonant_synth_set_mode(resonant_synth_t*, uint32x4_t, resonant_mode_t)':
+resonant_synthesis.h:187:53: warning: unused parameter 'voice_mask' [-Wunused-parameter]
+                                          uint32x4_t voice_mask,
+                                                     ^~~~~~~~~~
+resonant_synthesis.h: In function 'float32x4_t resonant_synth_process(resonant_synth_t*, uint32x4_t)':
+resonant_synthesis.h:349:51: error: 'vdivq_f32' was not declared in this scope
+     float32x4_t low_pass = vdivq_f32(sin_f0, denom);
+                                                   ^
+In file included from fm_perc_synth.h:23:0,
+                 from synth.h:17,
+                 from unit.cc:13:
+lfo_smoothing.h: In function 'void lfo_smoother_set_rate(lfo_smoother_t*, uint8_t, float, uint32x4_t)':
+lfo_smoothing.h:87:36: error: '$1' was not declared in this scope
+         sm->rate_step1 = vbslq_f32($1,
+                                    ^~
+lfo_smoothing.h:88:82: error: 'vdivq_f32' was not declared in this scope
+                                    vdivq_f32(diff, vdupq_n_f32(LFO_SMOOTH_FRAMES)),
+                                                                                  ^
+lfo_smoothing.h:101:82: error: 'vdivq_f32' was not declared in this scope
+                                    vdivq_f32(diff, vdupq_n_f32(LFO_SMOOTH_FRAMES)),
+                                                                                  ^
+lfo_smoothing.h: In function 'void lfo_smoother_set_depth(lfo_smoother_t*, uint8_t, float, uint32x4_t)':
+lfo_smoothing.h:125:83: error: 'vdivq_f32' was not declared in this scope
+                                     vdivq_f32(diff, vdupq_n_f32(LFO_SMOOTH_FRAMES)),
+                                                                                   ^
+lfo_smoothing.h:137:83: error: 'vdivq_f32' was not declared in this scope
+                                     vdivq_f32(diff, vdupq_n_f32(LFO_SMOOTH_FRAMES)),
+                                                                                   ^
+In file included from fm_perc_synth.h:27:0,
+                 from synth.h:17,
+                 from unit.cc:13:
+fm_presets.h: At global scope:
+fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
+ };
+ ^
+fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
+fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
+fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
+fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
+fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
+fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
+fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
+fm_presets.h:279:1: error: initializer-string for array of chars is too long [-fpermissive]
+fm_presets.h:279:1: error: initializer-string for array of chars is too long [-fpermissive]
+In file included from synth.h:17:0,
+                 from unit.cc:13:
+fm_perc_synth.h: In function 'void fm_perc_synth_init(fm_perc_synth_t*)':
+fm_perc_synth.h:147:40: error: cannot convert 'uint32x4_t {aka __vector(4) unsigned int}' to 'float32x4_t {aka __vector(4) float}' in assignment
+     synth->voice_active = vdupq_n_u32(0);
+                                        ^
+fm_perc_synth.h:159:36: error: 'load_fm_preset' was not declared in this scope
+     load_fm_preset(0, synth->params);
+                                    ^
+fm_perc_synth.h:163:38: error: 'fm_perc_synth_update_params' was not declared in this scope
+     fm_perc_synth_update_params(synth);
+                                      ^
+fm_perc_synth.h: In function 'void fm_perc_synth_update_params(fm_perc_synth_t*)':
+fm_perc_synth.h:196:72: error: 'apply_resonant_morph' was not declared in this scope
+     apply_resonant_morph(&synth->resonant, synth->resonant_morph, p[22]);
+                                                                        ^
+fm_perc_synth.h: In function 'void apply_resonant_morph(resonant_synth_t*, float, uint8_t)':
+fm_perc_synth.h:280:23: warning: unused variable 'width' [-Wunused-variable]
+                 float width = 0.1f + morph * 2.0f;  // Width multiplier
+                       ^~~~~
+fm_perc_synth.h:290:23: warning: unused variable 'gain' [-Wunused-variable]
+                 float gain = 1.0f + morph * 3.0f;     // 1-4x gain
+                       ^~~~
+fm_perc_synth.h: In function 'void fm_perc_synth_note_on(fm_perc_synth_t*, uint8_t, uint8_t)':
+fm_perc_synth.h:304:48: warning: unused parameter 'velocity' [-Wunused-parameter]
+                                        uint8_t velocity) {
+                                                ^~~~~~~~
+fm_perc_synth.h: In function 'float fm_perc_synth_process(fm_perc_synth_t*)':
+fm_perc_synth.h:420:21: warning: unused variable 'current_fc' [-Wunused-variable]
+         float32x4_t current_fc = resonant_synth_get_center(&synth->resonant);
+                     ^~~~~~~~~~
+fm_perc_synth.h:457:21: warning: unused variable 'current_res' [-Wunused-variable]
+         float32x4_t current_res = resonant_synth_get_resonance(&synth->resonant);
+                     ^~~~~~~~~~~
+fm_perc_synth.h:494:42: error: 'neon_horizontal_sum' was not declared in this scope
+     float sum = neon_horizontal_sum(mixed);
+                                          ^
+In file included from unit.cc:13:0:
+synth.h: In member function 'void Synth::NoteOff(uint8_t)':
+synth.h:95:45: error: 'fm_perc_synth_note_off' was not declared in this scope
+         fm_perc_synth_note_off(&synth_, note);
+                                             ^
+synth.h: In member function 'void Synth::AllNoteOff()':
+synth.h:115:46: error: 'fm_perc_synth_note_off' was not declared in this scope
+             fm_perc_synth_note_off(&synth_, i);
+                                              ^
+make: *** [Makefile:321: build/obj/unit.o] Error 1
+>> Installing /workspace/drumlogue/FMpercussion
+Compiling header.c
+In file included from header.c:7:0:
+constants.h:10:19: fatal error: cstdint: No such file or directory
+ #include <cstdint>
+                   ^
+compilation terminated.
+make: *** [Makefile:330: build/obj/header.o] Error 1
+>> Building /workspace/drumlogue/delay_tribal
+Compiling unit.cc
+In file included from unit.cc:7:0:
+PercussionSpatializer.h:24:27: fatal error: spatial_modes.h: No such file or directory
+ #include "spatial_modes.h"
+                           ^
+compilation terminated.
+make: *** [Makefile:320: build/obj/unit.o] Error 1
+>> Installing /workspace/drumlogue/delay_tribal
+Compiling unit.cc
+In file included from unit.cc:7:0:
+PercussionSpatializer.h:24:27: fatal error: spatial_modes.h: No such file or directory
+ #include "spatial_modes.h"
+                           ^
+compilation terminated.
+make: *** [Makefile:320: build/obj/unit.o] Error 1
+>> Building /workspace/drumlogue/dummy-delfx
+
+Linking build/dummy_delay.drmlgunit
+Stripping build/dummy_delay.drmlgunit
+Creating build/dummy_delay.hex
+Creating build/dummy_delay.bin
+Creating build/dummy_delay.dmp
+Creating build/dummy_delay.list
+
+
+Done
+
+   text	   data	    bss	    dec	    hex	filename
+   3593	    344	 192032	 195969	  2fd81	build/dummy_delay.drmlgunit
+chown: changing ownership of 'build/dummy_delay.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.list': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-delfx
+Deploying to /workspace/drumlogue/dummy-delfx//dummy_delay.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-masterfx
+
+Linking build/dummy_master.drmlgunit
+Stripping build/dummy_master.drmlgunit
+Creating build/dummy_master.hex
+Creating build/dummy_master.bin
+Creating build/dummy_master.dmp
+Creating build/dummy_master.list
+
+
+Done
+
+   text	   data	    bss	    dec	    hex	filename
+   3587	    344	     12	   3943	    f67	build/dummy_master.drmlgunit
+chown: changing ownership of 'build/dummy_master.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_master.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_master.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_master.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_master.list': Operation not permitted
+chown: changing ownership of 'build/dummy_master.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-masterfx
+Deploying to /workspace/drumlogue/dummy-masterfx//dummy_master.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-revfx
+
+Linking build/dummy_reverb.drmlgunit
+Stripping build/dummy_reverb.drmlgunit
+Creating build/dummy_reverb.hex
+Creating build/dummy_reverb.bin
+Creating build/dummy_reverb.dmp
+Creating build/dummy_reverb.list
+
+
+Done
+
+   text	   data	    bss	    dec	    hex	filename
+   3595	    344	 192032	 195971	  2fd83	build/dummy_reverb.drmlgunit
+chown: changing ownership of 'build/dummy_reverb.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.list': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-revfx
+Deploying to /workspace/drumlogue/dummy-revfx//dummy_reverb.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-synth
+
+arm-unknown-linux-gnueabihf-g++   build/obj/header.o build/obj/_unit_base.o build/obj/unit.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations   -shared -Wl,-Map=build/dummy_synth.map,--cref  -lm -lc -o build/dummy_synth.drmlgunit
+arm-unknown-linux-gnueabihf-strip build/dummy_synth.drmlgunit
+arm-unknown-linux-gnueabihf-objcopy -O ihex build/dummy_synth.drmlgunit build/dummy_synth.hex
+arm-unknown-linux-gnueabihf-objcopy -O binary build/dummy_synth.drmlgunit build/dummy_synth.bin
+arm-unknown-linux-gnueabihf-objdump -x --syms build/dummy_synth.drmlgunit > build/dummy_synth.dmp
+arm-unknown-linux-gnueabihf-objdump -S build/dummy_synth.drmlgunit > build/dummy_synth.list
+arm-unknown-linux-gnueabihf-size build/dummy_synth.drmlgunit
+   text	   data	    bss	    dec	    hex	filename
+   3267	    316	      8	   3591	    e07	build/dummy_synth.drmlgunit
+chown: changing ownership of 'build/dummy_synth.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.list': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-synth
+Deploying to /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/reverb_labirinto
+
+Linking build/neon_labirinto_reverb.drmlgunit
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:368:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:369:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:370:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:371:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_f32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:379:49,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+In function 'vsetq_lane_f32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:379:49,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5567:86: error: argument 3 must be a constant immediate
+   return (float32x4_t)__builtin_neon_vset_lanev4sf ((__builtin_neon_sf) __a, __b, __c);
+                                                                                      ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:368:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:369:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:370:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:371:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_f32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:379:49,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+In function 'vsetq_lane_f32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:379:49,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5567:86: error: argument 3 must be a constant immediate
+   return (float32x4_t)__builtin_neon_vset_lanev4sf ((__builtin_neon_sf) __a, __b, __c);
+                                                                                      ^
+In function 'vgetq_lane_f32',
+    inlined from 'writeDelayLines4' at NeonAdvancedLabirinto.h:449:73,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:283:32:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+lto-wrapper: fatal error: arm-unknown-linux-gnueabihf-g++ returned 1 exit status
+compilation terminated.
+/app/drumlogue/arm-unknown-linux-gnueabihf/bin/../lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/../../../../arm-unknown-linux-gnueabihf/bin/ld.bfd: error: lto-wrapper failed
+collect2: error: ld returned 1 exit status
+make: *** [Makefile:360: build/neon_labirinto_reverb.drmlgunit] Error 1
+>> Installing /workspace/drumlogue/reverb_labirinto
+
+Linking build/neon_labirinto_reverb.drmlgunit
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:368:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:369:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:370:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:371:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_f32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:379:49,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+In function 'vsetq_lane_f32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:379:49,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5567:86: error: argument 3 must be a constant immediate
+   return (float32x4_t)__builtin_neon_vset_lanev4sf ((__builtin_neon_sf) __a, __b, __c);
+                                                                                      ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:368:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:369:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:370:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_u32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:371:53,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5429:50: error: argument 2 must be a constant immediate
+   return (uint32_t)__builtin_neon_vget_laneuv4si ((int32x4_t) __a, __b);
+                                                  ^
+In function 'vgetq_lane_f32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:379:49,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+In function 'vsetq_lane_f32',
+    inlined from 'readDelayLines4' at NeonAdvancedLabirinto.h:379:49,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:248:34:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5567:86: error: argument 3 must be a constant immediate
+   return (float32x4_t)__builtin_neon_vset_lanev4sf ((__builtin_neon_sf) __a, __b, __c);
+                                                                                      ^
+In function 'vgetq_lane_f32',
+    inlined from 'writeDelayLines4' at NeonAdvancedLabirinto.h:449:73,
+    inlined from 'process4Samples' at NeonAdvancedLabirinto.h:283:32:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+lto-wrapper: fatal error: arm-unknown-linux-gnueabihf-g++ returned 1 exit status
+compilation terminated.
+/app/drumlogue/arm-unknown-linux-gnueabihf/bin/../lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/../../../../arm-unknown-linux-gnueabihf/bin/ld.bfd: error: lto-wrapper failed
+collect2: error: ld returned 1 exit status
+make: *** [Makefile:360: build/neon_labirinto_reverb.drmlgunit] Error 1
+>> Building /workspace/drumlogue/reverb_light
+
+Linking build/light_fdn_reverb.drmlgunit
+In function 'vgetq_lane_f32',
+    inlined from 'process4Samples.constprop' at fdn_engine.h:337:54:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+In function 'vgetq_lane_f32',
+    inlined from 'process4Samples.constprop' at fdn_engine.h:343:46:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+In function 'vgetq_lane_f32',
+    inlined from 'process4Samples.constprop' at fdn_engine.h:385:50:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+In function 'vgetq_lane_f32',
+    inlined from 'process4Samples.constprop' at fdn_engine.h:386:50:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+lto-wrapper: fatal error: arm-unknown-linux-gnueabihf-g++ returned 1 exit status
+compilation terminated.
+/app/drumlogue/arm-unknown-linux-gnueabihf/bin/../lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/../../../../arm-unknown-linux-gnueabihf/bin/ld.bfd: error: lto-wrapper failed
+collect2: error: ld returned 1 exit status
+make: *** [Makefile:360: build/light_fdn_reverb.drmlgunit] Error 1
+>> Installing /workspace/drumlogue/reverb_light
+
+Linking build/light_fdn_reverb.drmlgunit
+In function 'vgetq_lane_f32',
+    inlined from 'process4Samples.constprop' at fdn_engine.h:337:54:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+In function 'vgetq_lane_f32',
+    inlined from 'process4Samples.constprop' at fdn_engine.h:343:46:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+In function 'vgetq_lane_f32',
+    inlined from 'process4Samples.constprop' at fdn_engine.h:385:50:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+In function 'vgetq_lane_f32',
+    inlined from 'process4Samples.constprop' at fdn_engine.h:386:50:
+/app/drumlogue/arm-unknown-linux-gnueabihf/lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/include/arm_neon.h:5411:59: error: argument 2 must be a constant immediate
+   return (float32_t)__builtin_neon_vget_lanev4sf (__a, __b);
+                                                           ^
+lto-wrapper: fatal error: arm-unknown-linux-gnueabihf-g++ returned 1 exit status
+compilation terminated.
+/app/drumlogue/arm-unknown-linux-gnueabihf/bin/../lib/gcc/arm-unknown-linux-gnueabihf/6.5.0/../../../../arm-unknown-linux-gnueabihf/bin/ld.bfd: error: lto-wrapper failed
+collect2: error: ld returned 1 exit status
+make: *** [Makefile:360: build/light_fdn_reverb.drmlgunit] Error 1
+>> Building /workspace/drumlogue/ripplerx
+
+arm-unknown-linux-gnueabihf-g++   build/obj/header.o build/obj/_unit_base.o build/obj/unit.o build/obj/ripplerx.o build/obj/Envelope.o build/obj/Filter.o build/obj/Mallet.o build/obj/Resonator.o build/obj/Partial.o build/obj/Waveguide.o build/obj/Noise.o build/obj/Voice.o build/obj/Models.o build/obj/Sampler.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations   -shared -Wl,-Map=build/resonator.map,--cref  -lm -lc -o build/resonator.drmlgunit
+arm-unknown-linux-gnueabihf-strip build/resonator.drmlgunit
+arm-unknown-linux-gnueabihf-objcopy -O ihex build/resonator.drmlgunit build/resonator.hex
+arm-unknown-linux-gnueabihf-objcopy -O binary build/resonator.drmlgunit build/resonator.bin
+arm-unknown-linux-gnueabihf-objdump -x --syms build/resonator.drmlgunit > build/resonator.dmp
+arm-unknown-linux-gnueabihf-objdump -S build/resonator.drmlgunit > build/resonator.list
+arm-unknown-linux-gnueabihf-size build/resonator.drmlgunit
+   text	   data	    bss	    dec	    hex	filename
+  37846	    828	    864	  39538	   9a72	build/resonator.drmlgunit
+chown: changing ownership of 'build/lst/Envelope.lst': Operation not permitted
+chown: changing ownership of 'build/lst/Filter.lst': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/Mallet.lst': Operation not permitted
+chown: changing ownership of 'build/lst/Models.lst': Operation not permitted
+chown: changing ownership of 'build/lst/Noise.lst': Operation not permitted
+chown: changing ownership of 'build/lst/Partial.lst': Operation not permitted
+chown: changing ownership of 'build/lst/Resonator.lst': Operation not permitted
+chown: changing ownership of 'build/lst/ripplerx.lst': Operation not permitted
+chown: changing ownership of 'build/lst/Sampler.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/Voice.lst': Operation not permitted
+chown: changing ownership of 'build/lst/Waveguide.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/Envelope.o': Operation not permitted
+chown: changing ownership of 'build/obj/Filter.o': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/Mallet.o': Operation not permitted
+chown: changing ownership of 'build/obj/Models.o': Operation not permitted
+chown: changing ownership of 'build/obj/Noise.o': Operation not permitted
+chown: changing ownership of 'build/obj/Partial.o': Operation not permitted
+chown: changing ownership of 'build/obj/Resonator.o': Operation not permitted
+chown: changing ownership of 'build/obj/ripplerx.o': Operation not permitted
+chown: changing ownership of 'build/obj/Sampler.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/Voice.o': Operation not permitted
+chown: changing ownership of 'build/obj/Waveguide.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build/resonator.bin': Operation not permitted
+chown: changing ownership of 'build/resonator.dmp': Operation not permitted
+chown: changing ownership of 'build/resonator.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/resonator.hex': Operation not permitted
+chown: changing ownership of 'build/resonator.list': Operation not permitted
+chown: changing ownership of 'build/resonator.map': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/ripplerx
+Deploying to /workspace/drumlogue/ripplerx//resonator.drmlgunit
+
+Done
+
+>> Resetting environment

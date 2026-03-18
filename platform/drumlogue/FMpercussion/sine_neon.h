@@ -13,6 +13,7 @@
 #include <arm_neon.h>
 #include <stdint.h>
 #include "float_math.h"  // For M_* constants if needed
+#include "constants.h"
 
 // Constants for sine approximation
 static const float32x4_t ONE = vdupq_n_f32(1.0f);

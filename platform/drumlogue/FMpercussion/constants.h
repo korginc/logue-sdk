@@ -189,6 +189,20 @@ constexpr float RES_GAIN_DEFAULT = 1.0f;
 constexpr float RESONANT_DENOM_EPSILON = 0.0001f;
 
 
+// Phase offset to prevent cancellation (90° = 0.25 cycle)
+constexpr int LFO_PHASE_OFFSET = 0.25f;
+constexpr int LFO_SHAPE_TRIANGLE = 0;
+constexpr int LFO_SHAPE_RAMP = 1;
+constexpr int LFO_SHAPE_CHORD = 2;
+// LFO Depth range (bipolar)
+constexpr int LFO_DEPTH_MIN = -100;
+constexpr int LFO_DEPTH_MAX = 100;
+constexpr int LFO_DEPTH_DEFAULT = 50;  // +50% modulation
+
+// LFO Rate range (unipolar)
+constexpr int LFO_RATE_MIN = 0;
+constexpr int LFO_RATE_MAX = 100;
+constexpr int LFO_RATE_DEFAULT = 30;
 // ============================================================================
 // Envelope ROM Constants
 // ============================================================================
@@ -206,42 +220,6 @@ constexpr int ENV_STATE_OFF = 3;
 // Envelope curve types
 constexpr int ENV_CURVE_LINEAR = 0;
 constexpr int ENV_CURVE_EXPONENTIAL = 1;
-
-// ============================================================================
-// FM Engine Parameter Ranges
-// ============================================================================
-
-// Kick engine
-constexpr float KICK_SWEEP_MIN = 0.0f;
-constexpr float KICK_SWEEP_MAX = 1.0f;
-constexpr float KICK_SWEEP_DEFAULT = 0.5f;
-constexpr float KICK_DECAY_MIN = 0.0f;
-constexpr float KICK_DECAY_MAX = 1.0f;
-constexpr float KICK_DECAY_DEFAULT = 0.5f;
-
-// Snare engine
-constexpr float SNARE_NOISE_MIN = 0.0f;
-constexpr float SNARE_NOISE_MAX = 1.0f;
-constexpr float SNARE_NOISE_DEFAULT = 0.3f;
-constexpr float SNARE_BODY_MIN = 0.0f;
-constexpr float SNARE_BODY_MAX = 1.0f;
-constexpr float SNARE_BODY_DEFAULT = 0.5f;
-
-// Metal engine
-constexpr float METAL_INHARM_MIN = 0.0f;
-constexpr float METAL_INHARM_MAX = 1.0f;
-constexpr float METAL_INHARM_DEFAULT = 0.5f;
-constexpr float METAL_BRIGHT_MIN = 0.0f;
-constexpr float METAL_BRIGHT_MAX = 1.0f;
-constexpr float METAL_BRIGHT_DEFAULT = 0.7f;
-
-// Perc engine
-constexpr float PERC_RATIO_MIN = 1.0f;
-constexpr float PERC_RATIO_MAX = 4.0f;
-constexpr float PERC_RATIO_DEFAULT = 2.0f;
-constexpr float PERC_VAR_MIN = 0.0f;
-constexpr float PERC_VAR_MAX = 1.0f;
-constexpr float PERC_VAR_DEFAULT = 0.3f;
 
 // ============================================================================
 // PRNG (Pseudo-Random Number Generator) Constants
@@ -287,12 +265,6 @@ static const char* lfo_shape_strings[9] = {
         static const char* lfo_target_strings[8] = {
             "None", "Pitch", "ModIdx", "Env",
             "LFO2Ph", "LFO1Ph", "ResFreq", "Resonance"
-        };
-
-        static const char* voice_alloc_strings[12] = {
-            "K-S-M-P", "K-S-M-R", "K-S-R-P", "K-R-M-P",
-            "R-S-M-P", "K-S-R-M", "K-R-S-P", "R-K-M-P",
-            "R-S-K-P", "M-R-K-P", "P-R-K-M", "M-P-R-K"
         };
 
         static const char* resonant_mode_strings[5] = {

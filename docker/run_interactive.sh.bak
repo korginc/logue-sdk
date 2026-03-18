@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 #
-#    run_cmd.sh
+#    run_interactive.sh
 #
-#    Spin up a container instance of the logue SDK development
-#    environment docker image and run specified command
+#    Convenience script to spin up a container instance of the logue SDK development
+#    environment docker image and start an interactive shell
 #
 
 #
@@ -56,40 +56,27 @@ else
 fi
 PLATFORM_PATH=$(realpath "${SCRIPT_DIR}/../platform")
 
-OPT_LIST=""
-
 usage () {
     echo ""
-    echo "Usage: $0 [OPTIONS] <CMD> [CMD_OPTIONS] [CMD_ARGS]"
+    echo "Usage: $0 [OPTIONS] [[REPOSITORY]:VERSION]"
     echo ""
     echo " Spin up a container instance of the logue SDK development environment"
-    echo " and run the specified command, shutting down the container upon exit."
+    echo " and start an interactive shell."
     echo ""
     echo "Options:"
-    echo " -l, --list                 list logue SDK dev. environment specific commands"
-    echo "     --platform=PATH        specify path to platform directory (default: ${PLATFORM_PATH})"
-    echo "     --image=REPO[:VERSION] specify docker image name/version tags (default: ${IMAGE_NAME}:${IMAGE_VERSION})"
-    echo " -h, --help                 display this help"
+    echo "     --platform=PATH    specify path to platform directory (default: ${PLATFORM_PATH})"
+    echo " -h, --help            display this help"
+    echo ""
+    echo "Arguments:"
+    echo " [REPOSITORY]          specify docker image name tag (default: ${IMAGE_NAME})"
+    echo " [VERSION]             specify docker image version tag (default: ${IMAGE_VERSION})"
     echo ""
 }
 
 for o in "$@"; do
     case $o in
-        -l|--list)
-            OPT_LIST="yes"
-            shift
-            ;;
         --platform=*)
             PLATFORM_PATH=$(realpath "${o#*=}")
-            shift
-            ;;        
-        --image=*)
-            _o=${o#*=}
-            IMAGE_NAME="${_o%:*}"
-            v="${_o#*:}"
-            if [ "${v}" != "${IMAGE_NAME}" ] && [ ! -z "${v}" ]; then
-                IMAGE_VERSION=${v}
-            fi
             shift
             ;;
         -h|--help)
@@ -101,48 +88,56 @@ for o in "$@"; do
             shift
             ;;
         *)
-            break;
+            IMAGE_NAME="${o%:*}"
+            v="${o#*:}"
+            if [ "${v}" != "${IMAGE_NAME}" ] && [ ! -z "${v}" ]; then
+                IMAGE_VERSION=${v}
+            fi
+            break
+            ;;
     esac
 done
-
-CMD="$@" ## consider all remaining option/args as command
 
 if [ ! -d "${PLATFORM_PATH}" ]; then
     echo "[Err] Could not find platform directory at '${PLATFORM_PATH}'" 1>&2
     exit 1
 fi
 
-
 # Normalize path for Docker Desktop on Windows
+# Docker Desktop with WSL2 backend needs /mnt/e/ style paths
 PLATFORM_MOUNT="${PLATFORM_PATH}"
 UNAME_S=$(uname -s 2>/dev/null || echo "")
 
 if [[ "${OSTYPE}" == msys* || "${OSTYPE}" == cygwin* || "${UNAME_S}" =~ MINGW ]]; then
     # Running in Git Bash/MSYS2 on Windows with Docker Desktop WSL2 backend
     if [[ "${PLATFORM_PATH}" =~ ^/([a-z])/ ]]; then
-        # Convert /d/path to /mnt/d/path for Docker WSL2 backend
+        # Convert /e/path to /mnt/e/path for Docker WSL2 backend
         DRIVE_LETTER=$(echo "${PLATFORM_PATH:1:1}" | tr '[:lower:]' '[:lower:]')
         REST_PATH="${PLATFORM_PATH:2}"
         PLATFORM_MOUNT="/mnt/${DRIVE_LETTER}${REST_PATH}"
     fi
 elif [[ "${PLATFORM_PATH}" =~ ^([A-Za-z]): ]]; then
-    # Running from PowerShell/CMD - convert D:\path to /mnt/d/path
+    # Running from PowerShell/CMD - convert E:\path to /mnt/e/path
     DRIVE_LETTER=$(echo "${PLATFORM_PATH:0:1}" | tr '[:upper:]' '[:lower:]')
     REST_PATH=$(echo "${PLATFORM_PATH:2}" | sed 's|\\|/|g')
     PLATFORM_MOUNT="/mnt/${DRIVE_LETTER}${REST_PATH}"
 fi
-if [ ! -z "${OPT_LIST}" ]; then
-    if [ ! -z "${CMD}" ]; then
-        echo "[Warn] Arguments overriden by -l/--list option: ${CMD}" 1>&2
-    fi
-    CMD=list
-fi
 
-if [ -z "${CMD}" ]; then
-    echo "[Err] No command specified: '${CMD}'" 1>&2
-    exit 2
-fi
+echo "[Info] Platform path: ${PLATFORM_PATH}"
+echo "[Info] Mount path: ${PLATFORM_MOUNT}"
+echo "[Info] Docker command:"
+echo "[Info] docker run --rm -v \"${PLATFORM_MOUNT}:/workspace\" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/interactive_entry"
+echo "[Info] If the mount is empty in the container, ensure Docker Desktop has"
+echo "[Info] file sharing enabled for the drive in Settings > Resources > File Sharing"
+echo ""
+echo "[Info] If you encounter permission errors, run these commands once in the container:"
+echo "       sudo mkdir -p ~/.drumlogue.env_backup"
+echo "       sudo chown -R \$USER:\$USER ~/.drumlogue.env_backup"
+echo ""
 
-# Mount platform directory at /workspace as expected by container build scripts
+# Disable MSYS path conversion for Git Bash on Windows
+# This prevents /app/interactive_entry from being converted to C:/Program Files/Git/app/...
 export MSYS_NO_PATHCONV=1
-docker run --rm -v "${PLATFORM_MOUNT}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}
+
+docker run --rm -v "${PLATFORM_MOUNT}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/interactive_entry
+
