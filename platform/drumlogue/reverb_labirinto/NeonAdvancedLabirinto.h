@@ -124,9 +124,12 @@ public:
 
         writePos = 0;
 
-        // Reset modulation phases (all lanes to 0)
+        // Reset modulation phases: lane k = k * incPerSample so sequential
+        // samples start at phase 0, inc, 2*inc, 3*inc
+        float incPerSample = modRate * 2.0f * M_PI / sampleRate;
+        float32x4_t init_phases = { 0.0f, incPerSample, 2.0f*incPerSample, 3.0f*incPerSample };
         for (int i = 0; i < FDN_CHANNELS; i++) {
-            modPhaseVec[i] = vdupq_n_f32(0.0f);
+            modPhaseVec[i] = init_phases;
         }
 
         // Reset filter states using NEON
@@ -262,14 +265,14 @@ private:
         // Convert to mono for FDN input
         float32x4_t inMono = vmulq_f32(vaddq_f32(inL4, inR4), vdupq_n_f32(0.5f));
 
-        // Update modulation phases (vectorized) - NOW PRESERVES ALL LANES
-        updateModulation4();
-
         // =================================================================
-        // Read from all 8 delay lines for 4 samples
+        // Read from all 8 delay lines for 4 samples using current phases
         // =================================================================
         float32x4_t delayOut[FDN_CHANNELS];
         readDelayLines4(delayOut);
+
+        // Advance modulation phases for the next block (after read so phases aren't clobbered)
+        updateModulation4();
 
         // =================================================================
         // Apply Hadamard mixing matrix (vectorized)
@@ -461,36 +464,28 @@ private:
      * FIXED: Update modulation phases for 4 samples (vectorized)
      * Now properly maintains phase for all 4 lanes
      */
+    /**
+     * Advance modulation phases by one block (4 samples).
+     * modPhaseVec[ch] holds sequential per-sample phases [s0, s1, s2, s3].
+     * Called AFTER readDelayLines4 has consumed the current phases, so the
+     * phases stored here are ready for the NEXT block's read.
+     * Each lane advances by 4 × incPerSample to keep lanes in sequence.
+     */
     void updateModulation4() {
-        // Phase increment per sample
         float incPerSample = modRate * 2.0f * M_PI / sampleRate;
+        float32x4_t block_advance = vdupq_n_f32(4.0f * incPerSample);
+        float32x4_t twoPi = vdupq_n_f32(2.0f * M_PI);
 
-        // Create vector of increments for 4 samples: [0, inc, 2*inc, 3*inc]
-        float32x4_t base_inc = vdupq_n_f32(incPerSample);
-        float32x4_t offsets = { 0.0f, 1.0f, 2.0f, 3.0f };
-        float32x4_t inc_vec = vmulq_f32(base_inc, offsets);
-
-        // For each channel, add the increment vector to the phase vector
         for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-            // Add increments to all 4 phases at once
-            float32x4_t new_phases = vaddq_f32(modPhaseVec[ch], inc_vec);
+            float32x4_t new_phases = vaddq_f32(modPhaseVec[ch], block_advance);
 
-            // Wrap phases to [0, 2π) range
-            float32x4_t twoPi = vdupq_n_f32(2.0f * M_PI);
-
-            // Wrap using modulo approach: phase = phase - 2π * floor(phase / 2π)
+            // Wrap to [0, 2π) using truncate-toward-zero floor
             float32x4_t div = vmulq_f32(new_phases, vdupq_n_f32(1.0f / (2.0f * M_PI)));
-            int32x4_t floor_div = vcvtq_s32_f32(div);  // truncates toward zero
-            float32x4_t floor_div_f = vcvtq_f32_s32(floor_div);
-            float32x4_t adjustment = vmulq_f32(floor_div_f, twoPi);
+            float32x4_t floor_f = vcvtq_f32_s32(vcvtq_s32_f32(div));
+            new_phases = vsubq_f32(new_phases, vmulq_f32(floor_f, twoPi));
+            uint32x4_t neg = vcltq_f32(new_phases, vdupq_n_f32(0.0f));
+            new_phases = vbslq_f32(neg, vaddq_f32(new_phases, twoPi), new_phases);
 
-            new_phases = vsubq_f32(new_phases, adjustment);
-
-            // Handle negative phases (if any)
-            uint32x4_t negative = vcltq_f32(new_phases, vdupq_n_f32(0.0f));
-            new_phases = vbslq_f32(negative, vaddq_f32(new_phases, twoPi), new_phases);
-
-            // Store back - ALL 4 LANES ARE PRESERVED
             modPhaseVec[ch] = new_phases;
         }
     }

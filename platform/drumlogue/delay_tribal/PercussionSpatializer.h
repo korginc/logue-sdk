@@ -22,18 +22,10 @@
 #include "spatial_modes.h"
 #include "filters.h"
 
-// Constants for NEON vectorization
-constexpr int NEON_LANES = 4;
-constexpr int MAX_CLONES = 16;
-constexpr int CLONE_GROUPS = MAX_CLONES / NEON_LANES;
-constexpr int DELAY_MAX_MS = 500;
-constexpr int DELAY_MAX_SAMPLES = DELAY_MAX_MS * 48;
-constexpr int DELAY_MASK = DELAY_MAX_SAMPLES - 1;
-constexpr int LFO_TABLE_SIZE = 256;
+// Additional constant not in constants.h
 constexpr int CROSSFADE_SAMPLES = 480;  // 10ms @ 48kHz
 
 // Optimization constants
-constexpr int CACHE_LINE_SIZE = 64;  // ARM Cortex-A9 cache line
 constexpr int PREFETCH_DISTANCE = 4;  // Prefetch 4 samples ahead
 
 /**
@@ -54,9 +46,11 @@ static void init_lfo_table() {
 }
 
 // Pre-computed filter coefficient tables
+// Tribal and Military: 5 coefficients [b0,b1,b2,a1,a2]
+// Angel: 10 coefficients [HPF b0..a2, LPF b0..a2]
 static float tribal_coeffs_[100][5] __attribute__((aligned(16)));
 static float military_coeffs_[100][5] __attribute__((aligned(16)));
-static float angel_coeffs_[100][5] __attribute__((aligned(16)));
+static float angel_coeffs_[100][10] __attribute__((aligned(16)));
 static bool coeff_tables_initialized_ = false;
 
 /**
@@ -260,15 +254,6 @@ static_assert(sizeof(clone_group_t) % CACHE_LINE_SIZE == 0,
 typedef struct __attribute__((aligned(16))) {
     float samples[8];  // [L0, L1, L2, L3, R0, R1, R2, R3] at a SINGLE time position
 } interleaved_frame_t;
-
-/**
- * Spatial mode enumeration
- */
-typedef enum {
-    MODE_TRIBAL = 0,      // Circular panning
-    MODE_MILITARY = 1,    // Linear array
-    MODE_ANGEL = 2        // Stochastic positioning
-} spatial_mode_t;
 
 /**
  * PRNG state (Xorshift128+)
@@ -726,8 +711,7 @@ private:
         filter->z1 = vmlsq_f32(filter->z1, filter->a1, y);
 
         // z2 = b2*x - a2*y
-        filter->z2 = vmlsq_f32(vdupq_n_f32(0.0f), filter->b2, x);
-        filter->z2 = vmlsq_f32(filter->z2, filter->a2, y);
+        filter->z2 = vmlsq_f32(vmulq_f32(filter->b2, x), filter->a2, y);
 
         *samples = y;
     }
@@ -741,15 +725,15 @@ private:
 
         switch (filters->mode) {
             case MODE_TRIBAL:
-                // Apply same bandpass to both channels
+                // Apply bandpass to L via pre_filter, R via post_filter (separate states)
                 apply_biquad(&filters->pre_filter[group_idx], samples_l);
-                apply_biquad(&filters->pre_filter[group_idx], samples_r);
+                apply_biquad(&filters->post_filter[group_idx], samples_r);
                 break;
 
             case MODE_MILITARY:
-                // Apply highpass to both channels
+                // Apply highpass to L via pre_filter, R via post_filter (separate states)
                 apply_biquad(&filters->pre_filter[group_idx], samples_l);
-                apply_biquad(&filters->pre_filter[group_idx], samples_r);
+                apply_biquad(&filters->post_filter[group_idx], samples_r);
                 break;
 
             case MODE_ANGEL: {
@@ -927,10 +911,11 @@ private:
 
                     // Randomize phase inversion for Angel mode
                     if (current_mode_ == MODE_ANGEL) {
-                        uint32_t invert = (prng_rand_u32() & 1);
+                        uint32_t rand_bits[4];
+                        vst1q_u32(rand_bits, vandq_u32(prng_rand_u32(), vdupq_n_u32(1)));
                         uint32_t flags[4];
                         vst1q_u32(flags, g->phase_flags);
-                        flags[i] = invert;
+                        flags[i] = rand_bits[i] ? 0xFFFFFFFFU : 0U;
                         g->phase_flags = vld1q_u32(flags);
                     }
                 }

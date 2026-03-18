@@ -39,23 +39,7 @@ typedef struct {
     float32x4_t z2;      // Delay element z^-2 for 4 channels
 } biquad_state_t;
 
-/**
- * Complete filter set for one spatial mode
- */
-typedef struct {
-    // Pre-filter (applied before spatialization)
-    biquad_coeffs_t pre_coeff;
-    biquad_state_t pre_state[MAX_CLONE_GROUPS];
-
-    // Post-filter (applied after spatialization)
-    biquad_coeffs_t post_coeff;
-    biquad_state_t post_state[MAX_CLONE_GROUPS];
-
-    // Filter configuration
-    float center_freq;     // Center/cutoff frequency in Hz
-    float q_factor;        // Q/resonance factor
-    uint8_t mode;          // Current spatial mode (0=Tribal,1=Military,2=Angel)
-} mode_filters_t;
+// mode_filters_t is defined in PercussionSpatializer.h (uses neon_biquad_t)
 
 /*===========================================================================*/
 /* Biquad Filter Core Operations */
