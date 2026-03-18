@@ -73,7 +73,7 @@ typedef struct {
 
     // Voice allocation
     uint8_t voice_engine[4];        // Engine type for each voice (0-4)
-    uint8_t allocation_idx;          // Current allocation (0-11)
+    uint8_t allocation_idx;         // Current allocation (0-11)
 
     // Masks for efficient NEON processing
     uint32x4_t engine_mask[ENGINE_COUNT];
@@ -84,10 +84,10 @@ typedef struct {
     uint32_t voice_probs[4];         // Per-voice probabilities (0-100)
 
     // Resonant morph parameter
-    float resonant_morph;             // 0-1
+    float resonant_morph;            // 0-1
 
     // Per-voice velocity (set on note-on, persists until next trigger)
-    float32x4_t voice_velocity;       // 0-1 per lane
+    float32x4_t voice_velocity;      // 0-1 per lane
 
     // Output gain
     float master_gain;
@@ -328,9 +328,8 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
     for (int v = 0; v < 4; v++) {
         if (gate_bits & (1 << v)) {
             // Per-lane mask: 0xFFFFFFFF for the triggered voice lane, 0 for others
-            uint32_t vm[4] = {0U, 0U, 0U, 0U};
-            vm[v] = 0xFFFFFFFFU;
-            uint32x4_t voice_mask = vld1q_u32(vm);
+            // comparing a vector containing the current voice index v with a constant vector of indices {0, 1, 2, 3} by means of compound literal
+            uint32x4_t voice_mask = vceqq_u32(vdupq_n_u32(v), vld1q_u32((const uint32_t[]){0, 1, 2, 3}));
             uint8_t engine = synth->voice_engine[v];
 
             switch (engine) {

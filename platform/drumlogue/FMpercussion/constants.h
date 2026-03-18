@@ -276,6 +276,30 @@ constexpr float FILTER_Q_BUTTERWORTH = 0.707f;     // Butterworth response
 constexpr float FILTER_Q_LINKWITZ_RILEY = 0.5f;    // Linkwitz-Riley (cascaded)
 
 // ============================================================================
+// String tables (for synth.h)
+// ============================================================================
+static const char* lfo_shape_strings[9] = {
+            "Tri+Tri", "Ramp+Ramp", "Chord+Chord",
+            "Tri+Ramp", "Tri+Chord", "Ramp+Tri",
+            "Ramp+Chord", "Chord+Tri", "Chord+Ramp"
+        };
+
+        static const char* lfo_target_strings[8] = {
+            "None", "Pitch", "ModIdx", "Env",
+            "LFO2Ph", "LFO1Ph", "ResFreq", "Resonance"
+        };
+
+        static const char* voice_alloc_strings[12] = {
+            "K-S-M-P", "K-S-M-R", "K-S-R-P", "K-R-M-P",
+            "R-S-M-P", "K-S-R-M", "K-R-S-P", "R-K-M-P",
+            "R-S-K-P", "M-R-K-P", "P-R-K-M", "M-P-R-K"
+        };
+
+        static const char* resonant_mode_strings[5] = {
+            "LowPass", "BandPass", "HighPass", "Notch", "Peak"
+        };
+
+// ============================================================================
 // Utility Functions (compile-time)
 // ============================================================================
 
