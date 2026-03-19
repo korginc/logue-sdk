@@ -448,6 +448,69 @@ is 0.00 cents.  46/46 tests pass.
 
 ---
 
+## Phase 18: Hardware Silence — Same-tick GateOn+GateOff Fix [COMPLETED]
+
+Two bugs caused complete silence on hardware even after all Phase 10–17 fixes.
+Root-cause analysis confirmed by T20 (peak=0.837, added to the test suite).
+
+### BUG 1 — CRITICAL: master_env killed at value=0 on same-tick GateOff
+
+**Root cause:** The Drumlogue uses a one-shot drum trigger model: `gate_on` and
+`gate_off` both fire in the same scheduler tick, before any audio block is
+rendered. The sequence was:
+
+1. `NoteOn` → `trigger()` → `value=0, state=ENV_ATTACK`
+2. `GateOff` → `release()` → `state=ENV_RELEASE, value still 0`
+3. First `processBlock` → `process()` sees `ENV_RELEASE, value=0` → threshold
+   `value <= 0.001f` is immediately true → `state=ENV_IDLE`, returns 0.0f
+4. `voice_out *= 0.0f` → permanent silence on every note
+
+**Fix:** In `NoteOn`, call `v.exciter.master_env.process()` once immediately
+after `trigger()`. With `attack_rate=0.99`, one call advances `value: 0 → 1.0`
+and transitions `state: ENV_ATTACK → ENV_DECAY`. If `release()` fires before
+the first audio block, it finds `value=1.0` and the note fades out normally
+through `ENV_RELEASE`.
+
+**Code safety:** The pre-advance call has no unintended side effects. The
+`master_env` is freshly configured (attack/decay/sustain set, trigger called)
+immediately before, so there is no stale state to pick up. The `ENV_DECAY`
+state with `decay_rate=0.0f` and `sustain_level=1.0f` is a fixed point —
+`process()` returns 1.0f on every subsequent call until `release()` is
+called — so the one pre-advance sample is indistinguishable from the steady
+hold state. The feedback loop and pitch are unaffected.
+
+### BUG 2 — HIGH: process_waveguide returned delay_out instead of new_val
+
+**Root cause:** A previous commit changed `return new_val` to `return delay_out`
+in `process_waveguide()`. This caused 4 ms of silence before the first
+audible sound on every note (the delay-line round-trip at ~182 samples for
+note 60). With `return delay_out`, the output tap is placed at the read point
+of the delay line, so nothing is heard until the exciter signal has propagated
+all the way around the loop and been read back.
+
+**Fix:** Restored `return new_val`. The exciter signal (sample + mallet) passes
+through immediately on frame 0. Both PCM sample audio and mallet percussion
+benefit equally. The fundamental pitch is still determined by `delay_length`;
+changing the output tap from the read point to the write point does not affect
+the feedback loop or its stability.
+
+**Physical model invariant:** The delay line feedback path is:
+`read → AP → LP → (× feedback_gain × phase_mult) + exciter → write`.
+`new_val` is the value written into the buffer. Returning `new_val` is
+equivalent to placing the output tap at the write head — standard in many
+waveguide synthesis designs. The loop gain and stability are determined solely
+by `feedback_gain` and `lowpass_coeff`, which are unchanged.
+
+### New test: T20 — same-tick GateOn + GateOff
+
+Directly validates the hardware trigger model: `GateOn` is called immediately
+followed by `GateOff` with no audio frames in between. The test then renders
+300 frames and checks that peak output > 1e-4f.
+
+Result: peak = 0.837, PASS. **47/47 tests pass.**
+
+---
+
 ## Phase 16: Physical Model Review & DSP Correctness Pass [COMPLETED]
 
 Full audit of the digital waveguide physical model against known physical
