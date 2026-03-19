@@ -79,15 +79,17 @@ fast_inline float32x4_t sidechain_hpf_process(sidechain_hpf_t* f, float32x4_t in
     float32x4_t a1 = vdupq_n_f32(f->a1);
     float32x4_t a2 = vdupq_n_f32(f->a2);
 
-    // Direct Form I
-    float32x4_t out = vaddq_f32(vmlaq_f32(f->z1, in, b0), vmulq_f32(f->z2, b1));
+    // Transposed Direct Form II
+    // y[n] = b0 * x[n] + z1[n]
+    float32x4_t out = vmlaq_f32(f->z1, in, b0);
 
     // Update states for next sample
     // z1_new = b1 * x[n] - a1 * y[n] + z2_old
-    f->z2 = vaddq_f32(vmulq_f32(in, b2), vmlsq_f32(f->z1, out, a1));
+    f->z1 = vmlaq_f32(f->z2, in, b1);
+    f->z1 = vmlsq_f32(f->z1, out, a1);
 
     // z2_new = b2 * x[n] - a2 * y[n]
-    f->z1 = vaddq_f32(vmulq_f32(in, b1), vmlsq_f32(vdupq_n_f32(0.0f), out, a2));
+    f->z2 = vsubq_f32(vmulq_f32(in, b2), vmulq_f32(out, a2));
 
     return out;
 }

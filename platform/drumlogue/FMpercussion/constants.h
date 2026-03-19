@@ -99,6 +99,9 @@ constexpr uint8_t PARAM_VOICE_ALLOC = 21;    // Voice allocation (0-11)
 constexpr uint8_t PARAM_RES_MODE = 22;       // Resonant mode (0-4)
 constexpr uint8_t PARAM_RES_MORPH = 23;      // Resonant morph (0-100%)
 
+// marker for end of user editable parameters
+constexpr uint8_t PARAM_TOTAL = 24;          // For maintenace
+
 // ============================================================================
 // LFO Target Constants
 // ============================================================================
@@ -123,16 +126,12 @@ constexpr int LFO_SHAPE_COMBO_COUNT = 9;       // 3×3 = 9 combinations
 // Phase offset to prevent cancellation (90° = 0.25 cycle)
 constexpr float LFO_PHASE_OFFSET = 0.25f;
 
-// LFO rate range
-constexpr float LFO_RATE_MIN = 0.1f;           // 0.1 Hz
-constexpr float LFO_RATE_MAX = 10.0f;          // 10 Hz
-
 // ============================================================================
 // Voice Allocation Constants
 // ============================================================================
 constexpr int VOICE_ALLOC_COUNT = 12;        // 12 valid allocations
 constexpr int VOICE_ALLOC_MIN = 0;
-constexpr int VOICE_ALLOC_MAX = 11;
+constexpr int VOICE_ALLOC_MAX = 4;
 
 // ============================================================================
 // Engine Mode Constants
@@ -173,11 +172,6 @@ constexpr float RES_GAIN_DEFAULT = 1.0f;
 constexpr float RESONANT_DENOM_EPSILON = 0.0001f;
 
 
-// Phase offset to prevent cancellation (90° = 0.25 cycle)
-constexpr int LFO_PHASE_OFFSET = 0.25f;
-constexpr int LFO_SHAPE_TRIANGLE = 0;
-constexpr int LFO_SHAPE_RAMP = 1;
-constexpr int LFO_SHAPE_CHORD = 2;
 // LFO Depth range (bipolar)
 constexpr int LFO_DEPTH_MIN = -100;
 constexpr int LFO_DEPTH_MAX = 100;

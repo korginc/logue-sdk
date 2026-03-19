@@ -306,36 +306,57 @@ private:
     /* Vectorized Hadamard Transform */
     /*===========================================================================*/
 
-    void applyHadamard4(const float32x4_t* in, float32x4_t* out) {
-        // Optimized Hadamard for 8 channels
-        // Using the property: H = H4 ⊗ H2
+    void initHadamardMatrix() {
+        float norm = 1.0f / sqrtf(8.0f);
 
-        // First stage: process first 4 channels
-        float32x4_t sum04 = vaddq_f32(in[0], in[4]);
-        float32x4_t sum15 = vaddq_f32(in[1], in[5]);
-        float32x4_t sum26 = vaddq_f32(in[2], in[6]);
-        float32x4_t sum37 = vaddq_f32(in[3], in[7]);
-
-        float32x4_t diff04 = vsubq_f32(in[0], in[4]);
-        float32x4_t diff15 = vsubq_f32(in[1], in[5]);
-        float32x4_t diff26 = vsubq_f32(in[2], in[6]);
-        float32x4_t diff37 = vsubq_f32(in[3], in[7]);
-
-        // Second stage
-        out[0] = vaddq_f32(vaddq_f32(sum04, sum26), vaddq_f32(sum15, sum37));
-        out[1] = vaddq_f32(vsubq_f32(sum04, sum26), vsubq_f32(sum15, sum37));
-        out[2] = vsubq_f32(vaddq_f32(sum04, sum26), vaddq_f32(sum15, sum37));
-        out[3] = vsubq_f32(vsubq_f32(sum04, sum26), vsubq_f32(sum15, sum37));
-
-        out[4] = vaddq_f32(vaddq_f32(diff04, diff26), vaddq_f32(diff15, diff37));
-        out[5] = vaddq_f32(vsubq_f32(diff04, diff26), vsubq_f32(diff15, diff37));
-        out[6] = vsubq_f32(vaddq_f32(diff04, diff26), vaddq_f32(diff15, diff37));
-        out[7] = vsubq_f32(vsubq_f32(diff04, diff26), vsubq_f32(diff15, diff37));
-
-        // Normalize
-        float32x4_t norm = vdupq_n_f32(1.0f / 8.0f);
+        // Store in row-major for scalar access
         for (int i = 0; i < FDN_CHANNELS; i++) {
-            out[i] = vmulq_f32(out[i], norm);
+            for (int j = 0; j < FDN_CHANNELS; j++) {
+                int bits = i & j;
+                int parity = 0;
+                while (bits) {
+                    parity ^= (bits & 1);
+                    bits >>= 1;
+                }
+                hadamard[i][j] = parity ? -norm : norm;
+            }
+        }
+
+        // Pre-transpose into column-major NEON-friendly format
+        for (int j = 0; j < FDN_CHANNELS; j++) {
+            for (int i = 0; i < FDN_CHANNELS; i += 4) {
+                float32x4_t col = {
+                    hadamard[i][j],
+                    hadamard[i + 1][j],
+                    hadamard[i + 2][j],
+                    hadamard[i + 3][j]
+                };
+                hadamardCols[j][i/4] = col;
+            }
+        }
+    }
+
+    void applyHadamard4(const float32x4_t* in, float32x4_t* out) {
+        // Clear accumulators
+        for (int i = 0; i < FDN_CHANNELS; i++) {
+            out[i] = vdupq_n_f32(0.0f);
+        }
+
+        // For each input channel, add its contribution to all outputs
+        for (int j = 0; j < FDN_CHANNELS; j++) {
+            float32x4_t inVal = in[j];
+
+            // For each group of 4 output channels
+            for (int i = 0; i < FDN_CHANNELS; i += 4) {
+                float32x4_t coeffs = hadamardCols[j][i/4];
+
+                // out[i..i+3] += coeffs * inVal
+                float32x4_t contrib = vmulq_f32(coeffs, inVal);
+                out[i] = vaddq_f32(out[i], vdupq_lane_f32(vget_low_f32(contrib), 0));
+                out[i + 1] = vaddq_f32(out[i + 1], vdupq_lane_f32(vget_low_f32(contrib), 1));
+                out[i + 2] = vaddq_f32(out[i + 2], vdupq_lane_f32(vget_high_f32(contrib), 0));
+                out[i + 3] = vaddq_f32(out[i + 3], vdupq_lane_f32(vget_high_f32(contrib), 1));
+            }
         }
     }
 
@@ -523,6 +544,7 @@ private:
     bool initialized;
     interleaved_frame_t* delayLine __attribute__((aligned(64)));
 
+    float32x4_t hadamardCols[FDN_CHANNELS][FDN_CHANNELS/4];  // Column-major for NEON
     float delayTimes[FDN_CHANNELS];
     float32x4_t modPhaseVec[FDN_CHANNELS];
     float32x4_t lpfState[FDN_CHANNELS];

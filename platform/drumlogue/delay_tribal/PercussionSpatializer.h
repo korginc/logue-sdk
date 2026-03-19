@@ -630,10 +630,17 @@ private:
             clone_group_t* g = &clone_groups_[group];
             float left_vals[4], right_vals[4];
 
+            // Initialize all lanes to 0 (inactive)
+            for (int i = 0; i < NEON_LANES; i++) {
+                left_vals[i] = 0.0f;
+                right_vals[i] = 0.0f;
+            }
+
             for (int i = 0; i < NEON_LANES; i++) {
                 int clone_idx = group * NEON_LANES + i;
                 if (clone_idx < clone_count_) {
-                    float pos = (clone_count_ > 1) ? (float)clone_idx / (clone_count_ - 1) : 0.5f;
+                    float pos = (clone_count_ > 1) ?
+                                (float)clone_idx / (clone_count_ - 1) : 0.5f;
                     int angle_idx = (int)(pos * 359);
 
                     left_vals[i] = sin_table[angle_idx] * spread_;
@@ -650,8 +657,18 @@ private:
                     }
                 }
             }
+
+            // Load all 4 values at once - this is efficient and correct
             g->left_gains = vld1q_f32(left_vals);
             g->right_gains = vld1q_f32(right_vals);
+
+            // Also update active mask
+            uint32_t active_vals[4];
+            for (int i = 0; i < NEON_LANES; i++) {
+                int clone_idx = group * NEON_LANES + i;
+                active_vals[i] = (clone_idx < clone_count_) ? 0xFFFFFFFFU : 0U;
+            }
+            g->active = vld1q_u32(active_vals);
         }
     }
 

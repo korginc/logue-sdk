@@ -17,17 +17,20 @@
  * Enhanced LFO state
  */
 typedef struct {
-    float32x4_t phase1;
-    float32x4_t phase2;
+    // Primary LFOs
+    float32x4_t phase1;      // LFO1 phase for all 4 voices
+    float32x4_t phase2;      // LFO2 phase for all 4 voices (90° offset)
 
-    uint32_t shape_combo;
+    // Parameters
+    uint32_t shape_combo;     // 0-8 encoding both LFO shapes
     uint32_t target1;          // 0-7 (from constants.h)
     uint32_t target2;          // 0-7 (from constants.h)
-    float32x4_t depth1;
-    float32x4_t depth2;
-    float32x4_t rate1;
-    float32x4_t rate2;
+    float32x4_t depth1;       // Bipolar depth (-1.0 to 1.0)
+    float32x4_t depth2;       // Bipolar depth (-1.0 to 1.0)
+    float32x4_t rate1;        // Rate as phase increment
+    float32x4_t rate2;        // Rate as phase increment
 
+    // Circular reference detection
     uint8_t mod_matrix[2][2];
 } lfo_enhanced_t;
 
@@ -53,14 +56,22 @@ fast_inline void lfo_enhanced_init(lfo_enhanced_t* lfo) {
 }
 
 /**
- * Update LFO parameters
+ * Update LFO parameters with proper bipolar depth scaling
+ *
+ * @param shape_combo 0-8 encoding both LFO shapes
+ * @param target1 0-5 LFO1 target
+ * @param target2 0-5 LFO2 target
+ * @param depth1_value -100 to +100 (from UI) - maps to -1.0 to 1.0
+ * @param depth2_value -100 to +100 (from UI) - maps to -1.0 to 1.0
+ * @param rate1_percent 0-100 LFO1 rate
+ * @param rate2_percent 0-100 LFO2 rate
  */
 fast_inline void lfo_enhanced_update(lfo_enhanced_t* lfo,
                                      uint32_t shape_combo,
                                      uint32_t target1,
                                      uint32_t target2,
-                                     float depth1_percent,
-                                     float depth2_percent,
+                                     float depth1_value,  // -100 to +100
+                                     float depth2_value,  // -100 to +100
                                      float rate1_percent,
                                      float rate2_percent) {
 
@@ -74,6 +85,7 @@ fast_inline void lfo_enhanced_update(lfo_enhanced_t* lfo,
          new_target2 == LFO_TARGET_LFO1_PHASE) ||
         (new_target2 == LFO_TARGET_LFO1_PHASE &&
          new_target1 == LFO_TARGET_LFO2_PHASE)) {
+        // Circular reference detected!
         if (new_target1 == LFO_TARGET_LFO2_PHASE) new_target1 = LFO_TARGET_NONE;
         if (new_target2 == LFO_TARGET_LFO1_PHASE) new_target2 = LFO_TARGET_NONE;
     }
@@ -81,17 +93,33 @@ fast_inline void lfo_enhanced_update(lfo_enhanced_t* lfo,
     lfo->target1 = new_target1;
     lfo->target2 = new_target2;
 
+    // Update modulation matrix
     lfo->mod_matrix[0][1] = (new_target1 == LFO_TARGET_LFO2_PHASE) ? 1 : 0;
     lfo->mod_matrix[1][0] = (new_target2 == LFO_TARGET_LFO1_PHASE) ? 1 : 0;
 
-    // Map depth from -100..100 to -1.0..1.0
-    float depth1 = depth1_percent / 100.0f;
-    float depth2 = depth2_percent / 100.0f;
+    // =================================================================
+    // CORRECT BIPOLAR MAPPING: -100 to +100 → -1.0 to +1.0
+    // =================================================================
+    // Examples:
+    //   -100 → -1.0 (full negative modulation)
+    //   -50  → -0.5 (half negative)
+    //    0   →  0.0 (no modulation)
+    //   50   →  0.5 (half positive)
+    //  100   →  1.0 (full positive)
+    // =================================================================
+    float depth1 = depth1_value / 100.0f;
+    float depth2 = depth2_value / 100.0f;
+
+    // Clamp to ensure valid range (safety)
+    if (depth1 < -1.0f) depth1 = -1.0f;
+    if (depth1 > 1.0f) depth1 = 1.0f;
+    if (depth2 < -1.0f) depth2 = -1.0f;
+    if (depth2 > 1.0f) depth2 = 1.0f;
 
     lfo->depth1 = vdupq_n_f32(depth1);
     lfo->depth2 = vdupq_n_f32(depth2);
 
-    // Convert rate percentage to phase increment
+    // Convert rate percentage to phase increment (0.01 to 0.5 rad/sample)
     float rate1 = 0.01f + (rate1_percent / 100.0f) * 0.49f;
     float rate2 = 0.01f + (rate2_percent / 100.0f) * 0.49f;
 
