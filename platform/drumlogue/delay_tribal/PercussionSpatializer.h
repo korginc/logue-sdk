@@ -96,7 +96,8 @@ public:
         , wobble_depth_(0.3f)
         , attack_soften_(0.2f)
         , crossfade_counter_(0)
-        , crossfade_active_(false) {
+        , crossfade_active_(false)
+        , flags_(0) {
 
         // Initialize phase increment vector
         phase_inc_ = vdupq_n_f32(0.0f);
@@ -119,10 +120,6 @@ public:
 
         for (int i = 0; i < CLONE_GROUPS; i++) {
             filter_state_[i] = vdupq_n_f32(0.0f);
-            mode_filters_.pre_filter[i].z1 = vdupq_n_f32(0.0f);
-            mode_filters_.pre_filter[i].z2 = vdupq_n_f32(0.0f);
-            mode_filters_.post_filter[i].z1 = vdupq_n_f32(0.0f);
-            mode_filters_.post_filter[i].z2 = vdupq_n_f32(0.0f);
         }
 
         // Initialize filters
@@ -186,14 +183,11 @@ public:
         }
         write_ptr_ = 0;
 
-        // Reset filter states
+        // Reset filter states (init_mode_filters handles biquad state clearing)
         for (int i = 0; i < CLONE_GROUPS; i++) {
             filter_state_[i] = vdupq_n_f32(0.0f);
-            mode_filters_.pre_filter[i].z1 = vdupq_n_f32(0.0f);
-            mode_filters_.pre_filter[i].z2 = vdupq_n_f32(0.0f);
-            mode_filters_.post_filter[i].z1 = vdupq_n_f32(0.0f);
-            mode_filters_.post_filter[i].z2 = vdupq_n_f32(0.0f);
         }
+        init_mode_filters(&mode_filters_, current_mode_, depth_);
 
         // Reset clone parameters
         init_clone_parameters();
@@ -558,7 +552,8 @@ private:
             float32x4x4_t right_frames = vld4q_f32(&delay_line_[base_idx].samples[4]);
 
             // Extract the right time for each clone
-            float32x4_t delayed_l, delayed_r;
+            float32x4_t delayed_l = vdupq_n_f32(0.0f);
+            float32x4_t delayed_r = vdupq_n_f32(0.0f);
 
             for (int lane = 0; lane < NEON_LANES; lane++) {
                 int offset = (int)(pos_vals[lane] - base_idx);
