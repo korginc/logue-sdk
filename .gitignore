@@ -62,6 +62,13 @@ tools/gcc/gcc-arm-none-eabi-*
 *.dSYM/
 *.su
 
+# x86 test binaries (compiled locally, not for target)
+platform/drumlogue/FMpercussion/test_alloc
+platform/drumlogue/FMpercussion/test_lfo
+platform/drumlogue/delay_tribal/test_biquad
+platform/drumlogue/omnipress/test_compressor
+platform/drumlogue/reverb_labirinto/test_hadamard
+
 # VS Code config
 .vscode/
 
