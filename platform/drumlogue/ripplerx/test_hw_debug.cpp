@@ -881,6 +881,41 @@ static void test_pitch_compensation_accuracy() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// T20 — Same-tick GateOn + GateOff (Drumlogue one-shot drum trigger model)
+//
+//   On the Drumlogue the internal sequencer fires gate_on THEN gate_off in the
+//   same scheduler tick, before any audio block is rendered.  The master_env
+//   therefore starts at value=0 (just triggered) and is immediately released.
+//
+//   Before the fix: release() with value=0 → ENV_RELEASE → ENV_IDLE in one
+//   audio sample → damper_fade=0 → voice_out *= 0 → permanent silence.
+//
+//   After the fix: NoteOn calls process() once after trigger(), advancing
+//   value to 1.0 before GateOff can call release().  The first audio block
+//   then sees value=1.0 releasing normally and hears the strike.
+// ════════════════════════════════════════════════════════════════════════════
+static void test_same_tick_gate() {
+    std::cout << "\n── T20: Same-tick GateOn + GateOff (Drumlogue drum trigger model) ──\n";
+
+    unit_runtime_desc_t desc = make_desc();
+    RipplerXWaveguide s;
+    s.Init(&desc);
+
+    // Replicate the hardware sequence: both events fire before any audio block
+    s.GateOn(127);    // → NoteOn → trigger() + process() pre-advance
+    s.GateOff();      // → release(); value must be 1.0 here, not 0
+
+    // Now render 300 frames (covers delay round-trip + release fade)
+    float peak = run_blocks(s, 300, 32);
+
+    std::cout << "  peak output over 300 frames: " << peak << "\n";
+
+    result("T20 same-tick GateOn+GateOff produces audible sound",
+           peak > 1e-4f,
+           "voice was silent after same-tick trigger+release — master_env killed at value=0");
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 int main() {
     std::cout << "=== RIPPLERX HW-DEBUG UNIT TESTS ===\n";
     std::cout << "Testing HW-vs-UT discrepancies that could cause hardware silence.\n";
@@ -905,6 +940,7 @@ int main() {
     test_pitch_bend();
     test_pitch_bend_persists_to_new_note();
     test_pitch_compensation_accuracy();
+    test_same_tick_gate();
 
     std::cout << "\n=== RESULTS: " << g_pass << " passed, " << g_fail << " failed ===\n";
     return g_fail == 0 ? 0 : 1;

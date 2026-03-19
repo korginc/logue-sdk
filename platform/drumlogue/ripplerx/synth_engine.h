@@ -822,6 +822,12 @@ public:
         v.exciter.master_env.decay_rate = 0.0f;
         v.exciter.master_env.sustain_level = 1.0f;
         v.exciter.master_env.trigger();
+        // Pre-advance through the 1-sample attack so a same-tick GateOff doesn't
+        // silence the voice.  On the Drumlogue, gate_on + gate_off can both fire
+        // before the first audio block (drum one-shot trigger model).  Without this
+        // call, release() finds value=0 → ENV_RELEASE → ENV_IDLE in one sample → 0.
+        // With attack_rate=0.99, one process() call: value 0→1.0, state→ENV_DECAY.
+        v.exciter.master_env.process();
 #endif
     }
 
@@ -935,7 +941,13 @@ inline void NoteOff(uint8_t note) {
         wg.buffer[wg.write_ptr] = new_val;
         wg.write_ptr = (wg.write_ptr + 1) & DELAY_MASK;
 
-        return delay_out;
+        // Return new_val (exciter + filtered feedback) rather than delay_out.
+        // This matches the f84af87 behaviour: the exciter signal passes through
+        // immediately on frame 0 so samples and mallet strikes are audible at
+        // once, not after one full delay-line round-trip (~4 ms at note 60).
+        // The fundamental pitch is still determined by delay_length; the change
+        // only affects the output tap point, not the feedback loop stability.
+        return new_val;
     }
 
     // Processes the Exciter (Generates the initial "strike" or sample burst)

@@ -7,8 +7,8 @@ Frame 48: Sequencer sends GateOff()...
 --- STARTING DIAGNOSTIC DSP UNIT TEST 2 ---
 
 [X-RAY 1: PITCH & TUNING]
-Note 60 Delay Length: 189.77 (Should be ~183.47)
-Read Pointer Offset : -188.77
+Note 60 Delay Length: 181.46 (Should be ~183.47)
+Read Pointer Offset : -180.46
 
 [X-RAY 2: EXCITERS & UI BINDING]
 Mallet Stiffness  : 0.5
