@@ -134,16 +134,16 @@ fast_inline void envelope_detector_init(envelope_detector_t* env, float sr) {
     env->sample_rate = sr;
 
     // Default 10ms attack, 100ms release
-    env->attack_coeff = expf(-1.0f / (0.01f * sr));
-    env->release_coeff = expf(-1.0f / (0.1f * sr));
+    env->attack_coeff = e_expff(-1.0f / (0.01f * sr));
+    env->release_coeff = e_expff(-1.0f / (0.1f * sr));
 }
 
 // Set attack/release times
 fast_inline void envelope_set_attack_release(envelope_detector_t* env,
                                              float attack_ms,
                                              float release_ms) {
-    env->attack_coeff = expf(-1.0f / (attack_ms * 0.001f * env->sample_rate));
-    env->release_coeff = expf(-1.0f / (release_ms * 0.001f * env->sample_rate));
+    env->attack_coeff = e_expff(-1.0f / (attack_ms * 0.001f * env->sample_rate));
+    env->release_coeff = e_expff(-1.0f / (release_ms * 0.001f * env->sample_rate));
 }
 
 // Process 4 samples through envelope detector
@@ -338,8 +338,8 @@ typedef struct {
  */
 fast_inline void smoothing_init(smoothing_t* sm, float sr) {
     sm->current_gain = vdupq_n_f32(0.0f);
-    sm->attack_coeff = expf(-1.0f / (0.01f * sr));    // 10ms default
-    sm->release_coeff = expf(-1.0f / (0.1f * sr));    // 100ms default
+    sm->attack_coeff = e_expff(-1.0f / (0.01f * sr));    // 10ms default
+    sm->release_coeff = e_expff(-1.0f / (0.1f * sr));    // 100ms default
     sm->sample_rate = sr;
 }
 
@@ -370,6 +370,6 @@ fast_inline float32x4_t smoothing_process(smoothing_t* sm,
 fast_inline void smoothing_set_times(smoothing_t* sm,
                                      float attack_ms,
                                      float release_ms) {
-    sm->attack_coeff = expf(-1.0f / (attack_ms * 0.001f * sm->sample_rate));
-    sm->release_coeff = expf(-1.0f / (release_ms * 0.001f * sm->sample_rate));
+    sm->attack_coeff = e_expff(-1.0f / (attack_ms * 0.001f * sm->sample_rate));
+    sm->release_coeff = e_expff(-1.0f / (release_ms * 0.001f * sm->sample_rate));
 }

@@ -17,7 +17,7 @@
 #define A4_FREQ 440.0f
 
 // Semitone ratio = 2^(1/12) - precomputed for speed
-#define SEMITONE_RATIO 1.0594630943592953f  // 2^(1/12)
+constexpr float SEMITONE_RATIO = 1.0594630943592953f;  // 2^(1/12)
 
 // 12-tone equal temperament ratios (precomputed for direct lookup)
 static const float NOTE_RATIOS[12] = {
