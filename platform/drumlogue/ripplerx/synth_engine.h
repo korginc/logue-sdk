@@ -831,7 +831,7 @@ public:
 #endif
     }
 
-inline void NoteOff(uint8_t note) {
+    inline void NoteOff(uint8_t note) {
         for (int i = 0; i < NUM_VOICES; ++i) {
             VoiceState& v = state.voices[i];
 
