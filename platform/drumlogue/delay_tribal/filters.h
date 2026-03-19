@@ -6,8 +6,7 @@
 #include "constants.h"
 #include "spatial_modes.h"
 
-// Filter constants
-#define FILTER_Q_BUTTERWORTH 0.707f
+// Local filter constants (FILTER_Q_BUTTERWORTH comes from constants.h)
 #define FILTER_SAMPLE_RATE 48000.0f
 #define FILTER_PI 3.141592653589793f
 
@@ -34,11 +33,16 @@ typedef struct {
 } neon_biquad_t;
 
 /**
- * Mode filter state with multiple biquads
+ * Mode filter state with multiple biquads.
+ * 4 biquads per clone group (indices g*4+0..g*4+3):
+ *   g*4+0 = L pre  (HPF for Angel, single-stage for Tribal/Military)
+ *   g*4+1 = L post (LPF for Angel, unused for Tribal/Military)
+ *   g*4+2 = R pre
+ *   g*4+3 = R post
  */
 typedef struct {
     spatial_mode_t mode;
-    neon_biquad_t filters[CLONE_GROUPS * 2];  // [group*2] = pre, [group*2+1] = post
+    neon_biquad_t filters[CLONE_GROUPS * 4];
     float depth_param;
     float last_depth_param;
     uint32_t ramp_samples;
@@ -165,7 +169,7 @@ fast_inline void init_mode_filters(
     filters->last_depth_param = depth;
     filters->ramp_samples = 0;
 
-    for (int i = 0; i < CLONE_GROUPS * 2; i++) {
+    for (int i = 0; i < CLONE_GROUPS * 4; i++) {
         biquad_init_state(&filters->filters[i].state);
     }
 
@@ -200,10 +204,10 @@ fast_inline void update_filter_params(
                 return;
         }
 
-        // Apply to all clone groups
+        // Apply to all clone groups (L and R pre-filter slots; post unused for single-stage modes)
         for (int g = 0; g < CLONE_GROUPS; g++) {
-            filters->filters[g * 2].coeffs = coeffs;
-            filters->filters[g * 2 + 1].coeffs = coeffs;
+            filters->filters[g * 4].coeffs = coeffs;     // L pre
+            filters->filters[g * 4 + 2].coeffs = coeffs; // R pre
         }
     }
 }
@@ -217,36 +221,34 @@ fast_inline void apply_mode_filters(
 ) {
     if (!filters) return;
 
+    const uint32_t base = group_idx * 4;
+
     switch (filters->mode) {
         case MODE_TRIBAL:
         case MODE_MILITARY: {
-            // Same filter for both channels
+            // Single-stage filter: L uses slot base+0, R uses slot base+2
             *samples_l = biquad_process(*samples_l,
-                &filters->filters[group_idx * 2].coeffs,
-                &filters->filters[group_idx * 2].state);
+                &filters->filters[base].coeffs,
+                &filters->filters[base].state);
             *samples_r = biquad_process(*samples_r,
-                &filters->filters[group_idx * 2 + 1].coeffs,
-                &filters->filters[group_idx * 2 + 1].state);
+                &filters->filters[base + 2].coeffs,
+                &filters->filters[base + 2].state);
             break;
         }
 
         case MODE_ANGEL: {
-            // Angel: HPF + LPF in series
+            // Angel: HPF (pre) + LPF (post) in series, separate states per stage and channel
             biquad_coeffs_t hpf_coeffs, lpf_coeffs;
             calculate_highpass_coeffs(&hpf_coeffs, 500.0f, 1.0f);
             calculate_lowpass_coeffs(&lpf_coeffs, 4000.0f + depth * 2000.0f, 1.0f);
 
-            // HPF
-            *samples_l = biquad_process(*samples_l,
-                &hpf_coeffs, &filters->filters[group_idx * 2].state);
-            *samples_r = biquad_process(*samples_r,
-                &hpf_coeffs, &filters->filters[group_idx * 2 + 1].state);
+            // L channel: HPF (base+0) then LPF (base+1)
+            *samples_l = biquad_process(*samples_l, &hpf_coeffs, &filters->filters[base].state);
+            *samples_l = biquad_process(*samples_l, &lpf_coeffs, &filters->filters[base + 1].state);
 
-            // LPF
-            *samples_l = biquad_process(*samples_l,
-                &lpf_coeffs, &filters->filters[group_idx * 2].state);
-            *samples_r = biquad_process(*samples_r,
-                &lpf_coeffs, &filters->filters[group_idx * 2 + 1].state);
+            // R channel: HPF (base+2) then LPF (base+3)
+            *samples_r = biquad_process(*samples_r, &hpf_coeffs, &filters->filters[base + 2].state);
+            *samples_r = biquad_process(*samples_r, &lpf_coeffs, &filters->filters[base + 3].state);
             break;
         }
     }
