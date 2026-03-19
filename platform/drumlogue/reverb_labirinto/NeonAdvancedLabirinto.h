@@ -673,9 +673,9 @@ private:
     bool initialized;
     interleaved_frame_t* delayLine __attribute__((aligned(64)));
 
-    float32x4_t hadamardCols[FDN_CHANNELS][FDN_CHANNELS/4];  // Column-major for NEON
+    float32x4_t hadamardCols[FDN_CHANNELS][FDN_CHANNELS/4] __attribute__((aligned(16)));  // Column-major for NEON
     float delayTimes[FDN_CHANNELS] __attribute__((aligned(16)));
     float32x4_t modPhaseVec[FDN_CHANNELS] __attribute__((aligned(16)));
     float32x4_t lpfState[FDN_CHANNELS] __attribute__((aligned(16)));
-    float hadamard[FDN_CHANNELS][FDN_CHANNELS] __attribute__((aligned(16)));
+    float hadamard[FDN_CHANNELS][FDN_CHANNELS] __attribute__((aligned(64)));
 };
