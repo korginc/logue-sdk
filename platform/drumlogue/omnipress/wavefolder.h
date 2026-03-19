@@ -102,6 +102,7 @@ fast_inline float32x4_t soft_clip(float32x4_t x) {
     float32x4_t one = vdupq_n_f32(1.0f);
     float32x4_t three = vdupq_n_f32(3.0f);
 
+    // x - x^3/3 for small x, clamp to ±1 for large x
     float32x4_t x2 = vmulq_f32(x, x);
     float32x4_t x3 = vmulq_f32(x, x2);
     float32x4_t approx = vsubq_f32(x, vdivq_f32(x3, three));
@@ -125,6 +126,7 @@ fast_inline float32x4_t triangle_folder(float32x4_t x) {
     float32x4_t two = vdupq_n_f32(2.0f);
     float32x4_t four = vdupq_n_f32(4.0f);
 
+    // y = |(x + 1) % 4 - 2| - 1
     float32x4_t shifted = vaddq_f32(x, one);
     float32x4_t div = vmulq_f32(shifted, vdupq_n_f32(0.25f));
     int32x4_t floor_div = vcvtq_s32_f32(div);
@@ -145,6 +147,7 @@ fast_inline float32x4_t sine_folder(float32x4_t x) {
     x = vmaxq_f32(vminq_f32(x, two), vnegq_f32(two));
     float32x4_t angle = vmulq_f32(x, half_pi);
 
+    // sin(angle) ≈ angle - angle^3/6
     float32x4_t a2 = vmulq_f32(angle, angle);
     float32x4_t a3 = vmulq_f32(angle, a2);
     return vsubq_f32(angle, vmulq_f32(a3, vdupq_n_f32(1.0f/6.0f)));

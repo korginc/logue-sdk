@@ -43,8 +43,8 @@ public:
     MasterFX(void) : samplerate_(48000.0f) {
         // Initialize all DSP modules
         compressor_init(&comp_);
-        hpf_init(&sc_hpf_);
-        wavefolder_init(&folder_);
+        sidechain_hpf_init(&sc_hpf_);
+        wavefolder_init(&wavefolder_);
         distressor_init(&distressor_);
         multiband_init(&multiband_, samplerate_);
 
@@ -81,8 +81,8 @@ public:
     inline void Reset() {
         // Reset all components
         compressor_reset(&comp_);
-        hpf_reset(&sc_hpf_);
-        wavefolder_reset(&folder_);
+        sidechain_hpf_init(&sc_hpf_);
+        wavefolder_init(&wavefolder_);
         distressor_init(&distressor_);
         multiband_init(&multiband_, samplerate_);
         smoothing_init(&smoother_, samplerate_);
@@ -280,7 +280,7 @@ private:
         // 5. DRIVE / WAVEFOLDER
         // =================================================================
         if (drive_ > 0.01f) {
-            float32x4x2_t driven = wavefolder_process(&folder_,
+            float32x4x2_t driven = wavefolder_process(&wavefolder_,
                                                        processed_l,
                                                        processed_r,
                                                        drive_);
@@ -397,7 +397,7 @@ private:
 
             case 5: // DRIVE (0 to 100%)
                 drive_ = value * 0.01f;
-                wavefolder_set_drive(&folder_, value);
+                wavefolder_set_drive(&wavefolder_, value);
                 break;
 
             case 6: // MIX (-100 to +100)
@@ -519,7 +519,7 @@ private:
     float release_ms_;
     float makeup_db_;
     float drive_;
-    float mix_;
+    float mix_;   // 0.0 = dry, 1.0 = wet
     float sc_hpf_hz_;
 
     // DSP coefficients
@@ -535,7 +535,7 @@ private:
     // DSP Modules
     compressor_t comp_;
     sidechain_hpf_t sc_hpf_;
-    wavefolder_t folder_;
+    wavefolder_t wavefolder_;
     distressor_t distressor_;
     multiband_t multiband_;
     envelope_detector_t envelope_;
