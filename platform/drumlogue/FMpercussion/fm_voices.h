@@ -10,9 +10,11 @@
 #include <arm_neon.h>
 #include <stdint.h>
 #include "constants.h"
+#include "envelope_rom.h"
+#include "lfo_enhanced.h"
 
-// Maximum operators per voice
-constexpr int MAX_OPERATORS = 4;
+    // Maximum operators per voice
+    constexpr int MAX_OPERATORS = 4;
 
 /**
  * Operator data for 4 voices (SoA format)

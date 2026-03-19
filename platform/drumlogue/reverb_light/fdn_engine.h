@@ -21,6 +21,7 @@
 #include <cmath>
 #include <cstring>
 #include <malloc.h>
+#include <algorithm>
 
 // Buffer size - must be power of 2 for efficient modulo
 #define FDN_BUFFER_SIZE 32768  // 2^15

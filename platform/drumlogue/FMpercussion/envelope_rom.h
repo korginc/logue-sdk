@@ -24,8 +24,8 @@
 
 typedef struct {
     uint8_t attack_ms;    // 0-50ms
-    uint8_t decay_ms;     // 20-500ms
-    uint8_t release_ms;   // 10-500ms
+    uint16_t decay_ms;     // 20-500ms
+    uint16_t release_ms;   // 10-500ms
     uint8_t curve_type;   // 0=linear, 1=exponential
 } env_curve_t;
 

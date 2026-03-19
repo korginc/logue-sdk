@@ -14,6 +14,7 @@
 
 #include <arm_neon.h>
 #include "fm_voices.h"
+#include "sine_neon.h"
 #include "envelope_rom.h"
 
 // Kick engine constants
@@ -105,10 +106,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
     // At note-on (envelope=1): freq = base * (1 + sweep_depth * KICK_SWEEP_OCTAVES)
     // At tail    (envelope=0): freq = base  (sweeps DOWN as envelope decays)
     float32x4_t one = vdupq_n_f32(1.0f);
-    float32x4_t sweep_scale = vdupq_n_f32(KICK_SWEEP_OCTAVES);
-    float32x4_t sweep_factor = vmlaq_f32(one,
-                                          vmulq_f32(kick->sweep_depth, sweep_scale),
-                                          envelope);
+    float32x4_t sweep_factor = vmlsq_f32(one, kick->sweep_depth, envelope);
 
     // Apply sweep to carrier frequency
     float32x4_t carrier_freq = vmulq_f32(kick->carrier_freq_base, sweep_factor);

@@ -99,6 +99,9 @@ constexpr uint8_t PARAM_VOICE_ALLOC = 21;    // Voice allocation (0-11)
 constexpr uint8_t PARAM_RES_MODE = 22;       // Resonant mode (0-4)
 constexpr uint8_t PARAM_RES_MORPH = 23;      // Resonant morph (0-100%)
 
+// marker for end of user editable parameters
+constexpr uint8_t PARAM_TOTAL = 24;          // For maintenace
+
 // ============================================================================
 // LFO Target Constants
 // ============================================================================
@@ -123,16 +126,12 @@ constexpr int LFO_SHAPE_COMBO_COUNT = 9;       // 3×3 = 9 combinations
 // Phase offset to prevent cancellation (90° = 0.25 cycle)
 constexpr float LFO_PHASE_OFFSET = 0.25f;
 
-// LFO rate range
-constexpr float LFO_RATE_MIN = 0.1f;           // 0.1 Hz
-constexpr float LFO_RATE_MAX = 10.0f;          // 10 Hz
-
 // ============================================================================
 // Voice Allocation Constants
 // ============================================================================
 constexpr int VOICE_ALLOC_COUNT = 12;        // 12 valid allocations
 constexpr int VOICE_ALLOC_MIN = 0;
-constexpr int VOICE_ALLOC_MAX = 11;
+constexpr int VOICE_ALLOC_MAX = 4;
 
 // ============================================================================
 // Engine Mode Constants
@@ -173,6 +172,15 @@ constexpr float RES_GAIN_DEFAULT = 1.0f;
 constexpr float RESONANT_DENOM_EPSILON = 0.0001f;
 
 
+// LFO Depth range (bipolar)
+constexpr int LFO_DEPTH_MIN = -100;
+constexpr int LFO_DEPTH_MAX = 100;
+constexpr int LFO_DEPTH_DEFAULT = 50;  // +50% modulation
+
+// LFO Rate range (unipolar)
+constexpr int LFO_RATE_MIN = 0;
+constexpr int LFO_RATE_MAX = 100;
+constexpr int LFO_RATE_DEFAULT = 30;
 // ============================================================================
 // Envelope ROM Constants
 // ============================================================================
@@ -190,42 +198,6 @@ constexpr int ENV_STATE_OFF = 3;
 // Envelope curve types
 constexpr int ENV_CURVE_LINEAR = 0;
 constexpr int ENV_CURVE_EXPONENTIAL = 1;
-
-// ============================================================================
-// FM Engine Parameter Ranges
-// ============================================================================
-
-// Kick engine
-constexpr float KICK_SWEEP_MIN = 0.0f;
-constexpr float KICK_SWEEP_MAX = 1.0f;
-constexpr float KICK_SWEEP_DEFAULT = 0.5f;
-constexpr float KICK_DECAY_MIN = 0.0f;
-constexpr float KICK_DECAY_MAX = 1.0f;
-constexpr float KICK_DECAY_DEFAULT = 0.5f;
-
-// Snare engine
-constexpr float SNARE_NOISE_MIN = 0.0f;
-constexpr float SNARE_NOISE_MAX = 1.0f;
-constexpr float SNARE_NOISE_DEFAULT = 0.3f;
-constexpr float SNARE_BODY_MIN = 0.0f;
-constexpr float SNARE_BODY_MAX = 1.0f;
-constexpr float SNARE_BODY_DEFAULT = 0.5f;
-
-// Metal engine
-constexpr float METAL_INHARM_MIN = 0.0f;
-constexpr float METAL_INHARM_MAX = 1.0f;
-constexpr float METAL_INHARM_DEFAULT = 0.5f;
-constexpr float METAL_BRIGHT_MIN = 0.0f;
-constexpr float METAL_BRIGHT_MAX = 1.0f;
-constexpr float METAL_BRIGHT_DEFAULT = 0.7f;
-
-// Perc engine
-constexpr float PERC_RATIO_MIN = 1.0f;
-constexpr float PERC_RATIO_MAX = 4.0f;
-constexpr float PERC_RATIO_DEFAULT = 2.0f;
-constexpr float PERC_VAR_MIN = 0.0f;
-constexpr float PERC_VAR_MAX = 1.0f;
-constexpr float PERC_VAR_DEFAULT = 0.3f;
 
 // ============================================================================
 // PRNG (Pseudo-Random Number Generator) Constants

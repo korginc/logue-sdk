@@ -13,6 +13,7 @@
 
 #include <arm_neon.h>
 #include "fm_voices.h"
+#include "sine_neon.h"
 
 // Base ratios for metal (inharmonic)
 #define METAL_RATIO1 1.0f

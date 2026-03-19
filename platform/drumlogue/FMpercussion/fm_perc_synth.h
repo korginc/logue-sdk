@@ -28,7 +28,7 @@
 
 // Voice allocation table - 12 combinations (no duplicates)
 // Format: [voice0, voice1, voice2, voice3] engine assignments
-static const uint8_t VOICE_ALLOC_TABLE[12][4] = {
+static const uint8_t VOICE_ALLOC_TABLE[VOICE_ALLOC_COUNT][VOICE_ALLOC_MAX] = {
     {ENGINE_KICK, ENGINE_SNARE, ENGINE_METAL, ENGINE_PERC},     // 0: K-S-M-P (no resonant)
     {ENGINE_KICK, ENGINE_SNARE, ENGINE_METAL, ENGINE_RESONANT}, // 1: K-S-M-R
     {ENGINE_KICK, ENGINE_SNARE, ENGINE_RESONANT, ENGINE_PERC},  // 2: K-S-R-P
@@ -69,19 +69,19 @@ typedef struct {
     midi_handler_t midi;
 
     // Current parameters (cached)
-    uint8_t params[24];
+    uint8_t params[PARAM_TOTAL];
 
     // Voice allocation
-    uint8_t voice_engine[4];        // Engine type for each voice (0-4)
+    uint8_t voice_engine[VOICE_ALLOC_MAX];        // Engine type for each voice (0-4)
     uint8_t allocation_idx;         // Current allocation (0-11)
 
     // Masks for efficient NEON processing
     uint32x4_t engine_mask[ENGINE_COUNT];
 
     // Voice activity and probabilities
-    uint32x4_t voice_active;
+    float32x4_t voice_active;
     uint32x4_t voice_triggered;
-    uint32_t voice_probs[4];         // Per-voice probabilities (0-100)
+    uint32_t voice_probs[VOICE_ALLOC_MAX];         // Per-voice probabilities (0-100)
 
     // Resonant morph parameter
     float resonant_morph;            // 0-1
@@ -102,15 +102,15 @@ fast_inline void update_voice_allocation(fm_perc_synth_t* synth, uint8_t alloc_i
     synth->allocation_idx = alloc_idx;
 
     // Copy allocation to voice_engine array
-    for (int v = 0; v < 4; v++) {
+    for (int v = 0; v < VOICE_ALLOC_MAX; v++) {
         synth->voice_engine[v] = VOICE_ALLOC_TABLE[alloc_idx][v];
     }
 
     // Build per-lane NEON masks for each engine type.
     // Each lane gets 0xFFFFFFFF if that voice uses this engine, 0 otherwise.
     for (int e = 0; e < ENGINE_COUNT; e++) {
-        uint32_t lanes[4];
-        for (int v = 0; v < 4; v++) {
+        uint32_t lanes[NEON_LANES];
+        for (int v = 0; v < VOICE_ALLOC_MAX; v++) {
             lanes[v] = (synth->voice_engine[v] == e) ? 0xFFFFFFFFU : 0U;
         }
         synth->engine_mask[e] = vld1q_u32(lanes);
@@ -154,7 +154,7 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
     load_fm_preset(0, synth->params);
 
     // Update voice allocation from params
-    update_voice_allocation(synth, synth->params[21]);
+    update_voice_allocation(synth, synth->params[PARAM_VOICE_ALLOC]);
     fm_perc_synth_update_params(synth);
 }
 
@@ -167,73 +167,73 @@ fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
     // =================================================================
     // Update voice probabilities (Page 1, params 0-3)
     // =================================================================
-    synth->voice_probs[0] = p[0];
-    synth->voice_probs[1] = p[1];
-    synth->voice_probs[2] = p[2];
-    synth->voice_probs[3] = p[3];
+    synth->voice_probs[PARAM_VOICE1_PROB] = p[PARAM_VOICE1_PROB];
+    synth->voice_probs[PARAM_VOICE2_PROB] = p[PARAM_VOICE2_PROB];
+    synth->voice_probs[PARAM_VOICE3_PROB] = p[PARAM_VOICE3_PROB];
+    synth->voice_probs[PARAM_VOICE4_PROB] = p[PARAM_VOICE4_PROB];
 
     // =================================================================
     // Check if voice allocation changed (param 21)
     // =================================================================
     static uint8_t last_alloc = 0xFF;
-    if (p[21] != last_alloc) {
-        update_voice_allocation(synth, p[21]);
-        last_alloc = p[21];
+    if (p[PARAM_VOICE_ALLOC] != last_alloc) {
+        update_voice_allocation(synth, p[PARAM_VOICE_ALLOC]);
+        last_alloc = p[PARAM_VOICE_ALLOC];
     }
 
     // =================================================================
     // Update resonant morph (param 23)
     // =================================================================
-    synth->resonant_morph = p[23] / 100.0f;
+    synth->resonant_morph = p[PARAM_RES_MORPH] / 100.0f;
 
     // Apply morph to resonant parameters
     // Morph controls multiple parameters: mode, frequency, resonance
-    apply_resonant_morph(&synth->resonant, synth->resonant_morph, p[22]);
+    apply_resonant_morph(&synth->resonant, synth->resonant_morph, p[PARAM_RES_MODE]);
 
     // =================================================================
     // Update FM engines (always update all - they'll be used based on allocation)
     // =================================================================
     kick_engine_update(&synth->kick,
-                       vdupq_n_f32(p[4] / 100.0f),
-                       vdupq_n_f32(p[5] / 100.0f));
+                       vdupq_n_f32(p[PARAM_KICK_SWEEP] / 100.0f),
+                       vdupq_n_f32(p[PARAM_KICK_DECAY] / 100.0f));
 
     snare_engine_update(&synth->snare,
-                        vdupq_n_f32(p[6] / 100.0f),
-                        vdupq_n_f32(p[7] / 100.0f));
+                        vdupq_n_f32(p[PARAM_SNARE_NOISE] / 100.0f),
+                        vdupq_n_f32(p[PARAM_SNARE_BODY] / 100.0f));
 
     metal_engine_update(&synth->metal,
-                        vdupq_n_f32(p[8] / 100.0f),
-                        vdupq_n_f32(p[9] / 100.0f));
+                        vdupq_n_f32(p[PARAM_METAL_INHARM] / 100.0f),
+                        vdupq_n_f32(p[PARAM_METAL_BRIGHT] / 100.0f));
 
     perc_engine_update(&synth->perc,
-                       vdupq_n_f32(p[10] / 100.0f),
-                       vdupq_n_f32(p[11] / 100.0f));
+                       vdupq_n_f32(p[PARAM_PERC_RATIO] / 100.0f),
+                       vdupq_n_f32(p[PARAM_PERC_VAR] / 100.0f));
 
     // =================================================================
     // Update resonant base parameters (mode from param 22)
     // =================================================================
     resonant_synth_set_mode(&synth->resonant,
                            vdupq_n_u32(0xFFFFFFFF),
-                           (resonant_mode_t)(p[22] % 5));
+                           (resonant_mode_t)(p[PARAM_RES_MODE] % 5));
 
     // =================================================================
     // Update LFO (params 12-19)
     // =================================================================
     uint32x4_t all_voices = vdupq_n_u32(0xFFFFFFFF);
-    int8_t depth1 = (int8_t)(p[15] - 100);
-    int8_t depth2 = (int8_t)(p[19] - 100);
+    int8_t depth1 = (int8_t)(p[PARAM_LFO1_DEPTH] - 100);
+    int8_t depth2 = (int8_t)(p[PARAM_LFO2_DEPTH] - 100);
 
-    lfo_smoother_set_rate(&synth->lfo_smooth, 0, p[13] / 100.0f, all_voices);
-    lfo_smoother_set_rate(&synth->lfo_smooth, 1, p[17] / 100.0f, all_voices);
+    lfo_smoother_set_rate(&synth->lfo_smooth, 0, p[PARAM_LFO1_RATE] / 100.0f, all_voices);
+    lfo_smoother_set_rate(&synth->lfo_smooth, 1, p[PARAM_LFO2_RATE] / 100.0f, all_voices);
     lfo_smoother_set_depth(&synth->lfo_smooth, 0, depth1 / 100.0f, all_voices);
     lfo_smoother_set_depth(&synth->lfo_smooth, 1, depth2 / 100.0f, all_voices);
-    lfo_smoother_set_target(&synth->lfo_smooth, 0, p[14], all_voices);
-    lfo_smoother_set_target(&synth->lfo_smooth, 1, p[18], all_voices);
+    lfo_smoother_set_target(&synth->lfo_smooth, 0, p[PARAM_LFO1_TARGET], all_voices);
+    lfo_smoother_set_target(&synth->lfo_smooth, 1, p[PARAM_LFO2_TARGET], all_voices);
 
     // =================================================================
     // Update envelope shape (param 20)
     // =================================================================
-    synth->current_env_shape = p[20];
+    synth->current_env_shape = p[PARAM_ENV_SHAPE];
 }
 
 /**
@@ -299,10 +299,10 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
                                        uint8_t velocity) {
     // Generate probability gate for all 4 voices at once
     uint32x4_t gate = probability_gate_neon(&synth->prng,
-                                            synth->voice_probs[0],
-                                            synth->voice_probs[1],
-                                            synth->voice_probs[2],
-                                            synth->voice_probs[3]);
+                                            synth->voice_probs[PARAM_VOICE1_PROB],
+                                            synth->voice_probs[PARAM_VOICE2_PROB],
+                                            synth->voice_probs[PARAM_VOICE3_PROB],
+                                            synth->voice_probs[PARAM_VOICE4_PROB]);
 
     // Extract which voices triggered
     uint32_t gate_bits = 0;
@@ -325,7 +325,7 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
     // Set note for each triggered voice based on its engine assignment
     float32x4_t midi_note = vdupq_n_f32(note);
 
-    for (int v = 0; v < 4; v++) {
+    for (int v = 0; v < VOICE_ALLOC_MAX; v++) {
         if (gate_bits & (1 << v)) {
             // Per-lane mask: 0xFFFFFFFF for the triggered voice lane, 0 for others
             // comparing a vector containing the current voice index v with a constant vector of indices {0, 1, 2, 3} by means of compound literal
@@ -369,7 +369,7 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     lfo_smoother_process(&synth->lfo_smooth);
 
     lfo_enhanced_update(&synth->lfo,
-                        synth->params[12],
+                        synth->params[PARAM_LFO1_SHAPE],
                         vgetq_lane_u32(synth->lfo_smooth.current_target1, 0),
                         vgetq_lane_u32(synth->lfo_smooth.current_target2, 0),
                         vgetq_lane_f32(synth->lfo_smooth.current_depth1, 0) * 100.0f,

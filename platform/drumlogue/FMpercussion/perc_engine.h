@@ -14,6 +14,7 @@
 #pragma once
 
 #include <arm_neon.h>
+#include "sine_neon.h"
 #include "fm_voices.h"
 
 #define PERC_RATIO_MIN 1.0f
