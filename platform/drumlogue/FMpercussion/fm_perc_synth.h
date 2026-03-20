@@ -134,11 +134,11 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
     neon_envelope_init(&synth->envelope);
 
     // Initialize PRNG and MIDI
-    neon_prng_init(&synth->prng, 0x12345678);
+    neon_prng_init(&synth->prng, RAND_DEFAULT_SEED);
     midi_handler_init(&synth->midi);
 
     // Initialize parameters
-    synth->voice_active = vdupq_n_u32(0);
+    synth->voice_active = vdupq_n_f32(0.0f);
     synth->voice_triggered = vdupq_n_u32(0);
     synth->voice_velocity = vdupq_n_f32(1.0f);
     synth->master_gain = 0.25f;

@@ -10,14 +10,8 @@
 #include <stdint.h>
 #include "prng.h"
 #include "fm_voices.h"
+#include "constants.h"
 #include "float_math.h"  // Include KORG's fast math library
-
-// MIDI note to frequency conversion (A4 = 440Hz)
-#define A4_MIDI 69
-#define A4_FREQ 440.0f
-
-// Semitone ratio = 2^(1/12) - precomputed for speed
-constexpr float SEMITONE_RATIO = 1.0594630943592953f;  // 2^(1/12)
 
 // 12-tone equal temperament ratios (precomputed for direct lookup)
 static const float NOTE_RATIOS[12] = {

@@ -57,8 +57,7 @@ public:
         , dampingCoeff(0.5f)
         , lowDecayMult(1.0f)
         , highDecayMult(0.5f)
-        , initialized(false)
-        , delayLine(nullptr) {
+        , initialized(false) {
 
         // Initialize delay times (prime-based for smooth diffusion)
         float baseDelays[FDN_CHANNELS] = {
@@ -86,10 +85,6 @@ public:
     }
 
     ~NeonAdvancedLabirinto() {
-        if (delayLine != nullptr) {
-            free(delayLine);
-            delayLine = nullptr;
-        }
     }
 
     /**
@@ -97,13 +92,6 @@ public:
      * @return true if initialization successful
      */
     bool init() {
-        // Use posix_memalign for cache-line alignment
-        if (posix_memalign((void**)&delayLine, 64,
-                           BUFFER_SIZE * sizeof(interleaved_frame_t)) != 0) {
-            initialized = false;
-            return false;
-        }
-
         // Clear buffer
         clear();
 
@@ -115,20 +103,18 @@ public:
      * Clear all delay lines and filter states
      */
     void clear() {
-        if (delayLine != nullptr) {
-            // Use NEON to clear efficiently
-            float32x4_t zero = vdupq_n_f32(0.0f);
-            for (int i = 0; i < BUFFER_SIZE; i++) {
-                // Clear 8 channels using 2 NEON stores
-                vst1q_f32(&delayLine[i].samples[0], zero);
-                vst1q_f32(&delayLine[i].samples[4], zero);
-            }
+        // Use NEON to clear efficiently
+        float32x4_t zero = vdupq_n_f32(0.0f);
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            // Clear 8 channels using 2 NEON stores
+            vst1q_f32(&delayLine[i].samples[0], zero);
+            vst1q_f32(&delayLine[i].samples[4], zero);
         }
 
         writePos = 0;
 
         // Reset modulation phases with proper per-lane offsets
-	// lane k = k * incPerSample so sequential
+	    // lane k = k * incPerSample so sequential
         // samples start at phase 0, inc, 2*inc, 3*inc
         float incPerSample = modRate * 2.0f * M_PI / sampleRate;
         float32x4_t init_phases = {
@@ -142,7 +128,6 @@ public:
         }
 
         // Reset filter states
-        float32x4_t zero = vdupq_n_f32(0.0f);
         for (int i = 0; i < FDN_CHANNELS; i++) {
             lpfState[i] = zero;
         }
@@ -196,8 +181,8 @@ public:
                  float* outL, float* outR,
                  int numSamples) {
 
-	// Safety check - if memory not allocated, bypass
-        if (!initialized || delayLine == nullptr) {
+	// Safety check
+        if (!initialized) {
             memcpy(outL, inL, numSamples * sizeof(float));
             memcpy(outR, inR, numSamples * sizeof(float));
             return;
@@ -339,36 +324,6 @@ private:
     /*===========================================================================*/
     /* Vectorized Hadamard Transform */
     /*===========================================================================*/
-
-    void initHadamardMatrix() {
-        float norm = 1.0f / sqrtf(8.0f);
-
-        // Store in row-major for scalar access
-        for (int i = 0; i < FDN_CHANNELS; i++) {
-            for (int j = 0; j < FDN_CHANNELS; j++) {
-                int bits = i & j;
-                int parity = 0;
-                while (bits) {
-                    parity ^= (bits & 1);
-                    bits >>= 1;
-                }
-                hadamard[i][j] = parity ? -norm : norm;
-            }
-        }
-
-        // Pre-transpose into column-major NEON-friendly format
-        for (int j = 0; j < FDN_CHANNELS; j++) {
-            for (int i = 0; i < FDN_CHANNELS; i += 4) {
-                float32x4_t col = {
-                    hadamard[i][j],
-                    hadamard[i + 1][j],
-                    hadamard[i + 2][j],
-                    hadamard[i + 3][j]
-                };
-                hadamardCols[j][i/4] = col;
-            }
-        }
-    }
 
     void applyHadamard4(const float32x4_t* in, float32x4_t* out) {
         // Clear accumulators
@@ -575,8 +530,8 @@ private:
             int idx_next = (idx + 1) & BUFFER_MASK;
             float frac = readPos - idx;
 
-            float s1 = fdnMem[ch * BUFFER_SIZE + idx];
-            float s2 = fdnMem[ch * BUFFER_SIZE + idx_next];
+            float s1 = delayLine[idx].samples[ch];
+            float s2 = delayLine[idx_next].samples[ch];
             delayOut[ch] = s1 + frac * (s2 - s1);
 
             // Update scalar phase (only for lane 0)
@@ -603,7 +558,7 @@ private:
         mixed[0] += input * (1.0f - decay);
 
         for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-            fdnMem[ch * BUFFER_SIZE + writePos] = mixed[ch];
+            delayLine[writePos].samples[ch] = mixed[ch];
         }
         writePos = (writePos + 1) & BUFFER_MASK;
 
@@ -625,11 +580,11 @@ private:
     /* Fast sine approximation (from float_math.h) */
     /*===========================================================================*/
     fast_inline float32x4_t fast_sin_neon(float32x4_t x) {
-        // Use faster_sinf from float_math.h
+        // Use fastersinfullf from float_math.h
         float32x4_t result;
         for (int i = 0; i < 4; i++) {
             float val = vgetq_lane_f32(x, i);
-            val = faster_sinf(val);
+            val = fastersinfullf(val);
             result = vsetq_lane_f32(val, result, i);
         }
         return result;
@@ -640,18 +595,29 @@ private:
     /*===========================================================================*/
 
     void initHadamardMatrix() {
-        float norm = 1.0f / sqrtf(8.0f);
-        for (int i = 0; i < FDN_CHANNELS; i++) {
-            for (int j = 0; j < FDN_CHANNELS; j++) {
-                int bits = i & j;
-                int parity = 0;
-                while (bits) {
-                    parity ^= (bits & 1);
-                    bits >>= 1;
-                }
-                hadamard[i][j] = parity ? -norm : norm;
-            }
+      float norm = 1.0f / sqrtf(8.0f);
+
+      // Store in row-major for scalar access
+      for (int i = 0; i < FDN_CHANNELS; i++) {
+        for (int j = 0; j < FDN_CHANNELS; j++) {
+          int bits = i & j;
+          int parity = 0;
+          while (bits) {
+            parity ^= (bits & 1);
+            bits >>= 1;
+          }
+          hadamard[i][j] = parity ? -norm : norm;
         }
+      }
+
+      // Pre-transpose into column-major NEON-friendly format
+      for (int j = 0; j < FDN_CHANNELS; j++) {
+        for (int i = 0; i < FDN_CHANNELS; i += 4) {
+          float32x4_t col = {hadamard[i][j], hadamard[i + 1][j],
+                             hadamard[i + 2][j], hadamard[i + 3][j]};
+          hadamardCols[j][i / 4] = col;
+        }
+      }
     }
 
     /*===========================================================================*/
@@ -671,7 +637,7 @@ private:
     float highDecayMult; // high-freq decay multiplier
 
     bool initialized;
-    interleaved_frame_t* delayLine __attribute__((aligned(64)));
+    interleaved_frame_t delayLine[BUFFER_SIZE] __attribute__((aligned(64)));
 
     float32x4_t hadamardCols[FDN_CHANNELS][FDN_CHANNELS/4] __attribute__((aligned(16)));  // Column-major for NEON
     float delayTimes[FDN_CHANNELS] __attribute__((aligned(16)));

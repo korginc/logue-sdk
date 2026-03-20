@@ -346,10 +346,10 @@ fast_inline float32x4_t resonant_synth_process(resonant_synth_t* rs,
     denom = vmaxq_f32(denom, rs->epsilon);
 
     // Single-sided (low-pass) component
-    float32x4_t low_pass = vdivq_f32(sin_f0, denom);
+    float32x4_t low_pass = fast_div_neon(sin_f0, denom);
 
     // Double-sided (band-pass) component
-    float32x4_t band_pass = vdivq_f32(vmulq_f32(vsubq_f32(rs->one, a_sq), sin_f0), denom);
+    float32x4_t band_pass = fast_div_neon(vmulq_f32(vsubq_f32(rs->one, a_sq), sin_f0), denom);
 
     // =================================================================
     // 6. Apply mode-specific transformations

@@ -28,11 +28,11 @@ void benchmark_resonant_operations() {
     // Benchmark 1: Standard division (slow)
     uint32_t start = read_cycle_counter();
     for (int i = 0; i < ITERATIONS; i++) {
-        result = vdivq_f32(a, b);
+        result = fast_div_neon(a, b);
     }
     uint32_t end = read_cycle_counter();
     uint32_t div_cycles = (end - start) / ITERATIONS;
-    printf("vdivq_f32: %d cycles\n", div_cycles);
+    printf("fast_div_neon: %d cycles\n", div_cycles);
 
     // Benchmark 2: Division using reciprocal + multiply (faster)
     start = read_cycle_counter();
@@ -59,7 +59,7 @@ void benchmark_resonant_operations() {
     printf("protected division: %d cycles\n", protected_cycles);
 
     // Expected results:
-    // - vdivq_f32: ~20-30 cycles
+    // - fast_div_neon: ~20-30 cycles
     // - reciprocal method: ~8-12 cycles
     // - protected division: ~10-14 cycles
 }

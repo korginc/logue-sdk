@@ -1055,8 +1055,30 @@ float eucDist2Bett(const float x1, const float y1, const float x2, const float y
     return sqrtsum2bett(dx, dy);
 }
 
+/**
+ * Fast NEON division: num / den
+ * Uses reciprocal estimate + 1 Newton-Raphson refinement step.
+ */
+inline float32x4_t fast_div_neon(float32x4_t num, float32x4_t den) {
+  // 1. Initial estimate of (1.0 / den)
+  // Accurate to about ~8 bits
+  float32x4_t recip = vrecpeq_f32(den);
 
+  // 2. Newton-Raphson step to improve accuracy to ~16 bits
+  // step = 2.0 - (den * recip)
+  float32x4_t step = vrecpsq_f32(den, recip);
 
+  // recip = recip * step
+  recip = vmulq_f32(recip, step);
+
+  // Optional: Add a second step if you need full 24-bit+ f32 precision,
+  // though 1 step is often fine for filter coefficients/audio.
+  // step = vrecpsq_f32(den, recip);
+  // recip = vmulq_f32(recip, step);
+
+  // 3. Multiply numerator by the reciprocal (num * 1/den)
+  return vmulq_f32(num, recip);
+}
 
 /** @} */
 

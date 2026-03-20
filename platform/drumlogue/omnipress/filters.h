@@ -292,7 +292,7 @@ fast_inline float32x4_t gain_computer_process(gain_computer_t* gc,
             uint32x4_t above_knee = vcgtq_f32(envelope_db, knee_end);
 
             // Calculate gain reduction for knee region (quadratic)
-            float32x4_t x = vdivq_f32(vsubq_f32(envelope_db, knee_start), knee_w);
+            float32x4_t x = fast_div_neon(vsubq_f32(envelope_db, knee_start), knee_w);
             float32x4_t knee_gr = vmulq_f32(vmulq_f32(x, x), vdupq_n_f32(0.5f));
             knee_gr = vmulq_f32(knee_gr, vsubq_f32(one, vrecpeq_f32(ratio_v)));
 
@@ -311,7 +311,7 @@ fast_inline float32x4_t gain_computer_process(gain_computer_t* gc,
 
             // Linear interpolation in knee region
             float32x4_t slope = vsubq_f32(one, vrecpeq_f32(ratio_v));
-            float32x4_t in_knee_amt = vdivq_f32(vsubq_f32(envelope_db, knee_start), knee_w);
+            float32x4_t in_knee_amt = fast_div_neon(vsubq_f32(envelope_db, knee_start), knee_w);
             in_knee_amt = vmaxq_f32(vminq_f32(in_knee_amt, one), vdupq_n_f32(0.0f));
 
             gain_red = vmulq_f32(vmulq_f32(overshoot, slope), in_knee_amt);

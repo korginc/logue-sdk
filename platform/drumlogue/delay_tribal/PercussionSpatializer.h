@@ -20,22 +20,20 @@
 #include "spatial_modes.h"
 #include "filters.h"
 
-// At the top of PercussionSpatializer.h, after includes:
 extern float lfo_table[LFO_TABLE_SIZE] __attribute__((aligned(16)));
-
 
 /**
  * Per-clone parameters with randomization and modulation
  */
 typedef struct __attribute__((aligned(CACHE_LINE_SIZE))) {
     float32x4_t delay_offsets;    // Micro-delay for vibrato (4 clones)
-    float32x4_t left_gains;        // Left channel pan (4 clones)
-    float32x4_t right_gains;       // Right channel pan (4 clones)
-    float32x4_t mod_phases;        // LFO phases (4 clones)
-    float32x4_t pitch_mod;         // Pitch modulation depth (tape wobble)
-    float32x4_t velocity;          // Random velocity per hit (0.7-1.0)
-    uint32x4_t phase_flags;         // Phase inversion flags
-    uint32x4_t active;              // Which clones are active
+    float32x4_t left_gains;       // Left channel pan (4 clones)
+    float32x4_t right_gains;      // Right channel pan (4 clones)
+    float32x4_t mod_phases;       // LFO phases (4 clones)
+    float32x4_t pitch_mod;        // Pitch modulation depth (tape wobble)
+    float32x4_t velocity;         // Random velocity per hit (0.7-1.0)
+    uint32x4_t phase_flags;       // Phase inversion flags
+    uint32x4_t active;            // Which clones are active
 } clone_group_t;
 
 static_assert(sizeof(clone_group_t) % CACHE_LINE_SIZE == 0,
@@ -52,15 +50,6 @@ static_assert(sizeof(clone_group_t) % CACHE_LINE_SIZE == 0,
 typedef struct __attribute__((aligned(16))) {
     float samples[8];  // [L0, L1, L2, L3, R0, R1, R2, R3] at a SINGLE time position
 } interleaved_frame_t;
-
-/**
- * Spatial mode enumeration
- */
-typedef enum {
-    MODE_TRIBAL = 0,      // Circular panning
-    MODE_MILITARY = 1,    // Linear array
-    MODE_ANGEL = 2        // Stochastic positioning
-} spatial_mode_t;
 
 /**
  * PRNG state (Xorshift128+)
@@ -80,8 +69,7 @@ public:
     /*===========================================================================*/
 
     PercussionSpatializer()
-        : delay_line_(nullptr)
-        , write_ptr_(0)
+        : write_ptr_(0)
         , clone_count_(4)
         , current_mode_(MODE_TRIBAL)
         , bypass_(true)
@@ -134,10 +122,6 @@ public:
     }
 
     ~PercussionSpatializer() {
-        if (delay_line_ != nullptr) {
-            free(delay_line_);
-            delay_line_ = nullptr;
-        }
     }
 
     inline int8_t Init(const unit_runtime_desc_t* desc) {
@@ -146,19 +130,6 @@ public:
             return k_unit_err_geometry;
 
         sample_rate_ = desc->samplerate;
-
-        if (delay_line_ != nullptr) {
-            free(delay_line_);
-            delay_line_ = nullptr;
-        }
-
-        // OPTIMIZED: Use posix_memalign for better alignment
-        if (posix_memalign((void**)&delay_line_, CACHE_LINE_SIZE,
-                           DELAY_MAX_SAMPLES * sizeof(interleaved_frame_t)) != 0) {
-            initialized_ = false;
-            bypass_ = true;
-            return k_unit_err_memory;
-        }
 
         initialized_ = true;
         bypass_ = false;
@@ -170,7 +141,7 @@ public:
     inline void Teardown() {}
 
     inline void Reset() {
-        if (!initialized_ || delay_line_ == nullptr) {
+        if (!initialized_) {
             bypass_ = true;
             return;
         }
@@ -204,7 +175,7 @@ public:
     /*===========================================================================*/
 
     fast_inline void Process(const float* in, float* out, size_t frames) {
-        if (bypass_ || !initialized_ || delay_line_ == nullptr) {
+        if (bypass_ || !initialized_) {
             memcpy(out, in, frames * 2 * sizeof(float));
             return;
         }
@@ -722,7 +693,7 @@ private:
     /* Private Member Variables */
     /*===========================================================================*/
 
-    interleaved_frame_t* delay_line_ __attribute__((aligned(CACHE_LINE_SIZE)));
+    interleaved_frame_t delay_line_[DELAY_MAX_SAMPLES] __attribute__((aligned(CACHE_LINE_SIZE)));
     uint32_t write_ptr_;
 
     clone_group_t clone_groups_[CLONE_GROUPS] __attribute__((aligned(CACHE_LINE_SIZE)));
@@ -765,8 +736,3 @@ private:
     uint32_t crossfade_counter_;
     bool crossfade_active_;
 };
-
-// Static member initialization
-float PercussionSpatializer::sin_table[360] = {0};
-float PercussionSpatializer::cos_table[360] = {0};
-bool PercussionSpatializer::tables_initialized = false;

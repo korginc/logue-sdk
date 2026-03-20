@@ -91,8 +91,8 @@ fast_inline void kick_engine_set_note(kick_engine_t* kick,
 
     // Reset phases for triggered voices so every hit has a consistent attack click
     float32x4_t zero = vdupq_n_f32(0.0f);
-    kick->carrier_phase   = vbslq_f32(voice_mask), zero, kick->carrier_phase;
-    kick->modulator_phase = vbslq_f32(voice_mask), zero, kick->modulator_phase;
+    kick->carrier_phase   = vbslq_f32(voice_mask, zero, kick->carrier_phase);
+    kick->modulator_phase = vbslq_f32(voice_mask, zero, kick->modulator_phase);
 }
 
 /**

@@ -203,6 +203,7 @@ constexpr int ENV_CURVE_EXPONENTIAL = 1;
 // PRNG (Pseudo-Random Number Generator) Constants
 // ============================================================================
 constexpr uint32_t PRNG_DEFAULT_SEED = 0x9E3779B9;  // Golden ratio constant
+constexpr uint32_t RAND_DEFAULT_SEED = 0x12345678;  // Trivial
 
 // ============================================================================
 // Parameter Smoothing Constants

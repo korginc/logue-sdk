@@ -10,6 +10,11 @@
 static const char* s_clone_strings[3] = { "4", "8", "16" };
 static const char* s_mode_strings[3]  = { "Tribal", "Military", "Angel" };
 
+// Definition and initialization of static class members
+float PercussionSpatializer::sin_table[360] = {0};
+float PercussionSpatializer::cos_table[360] = {0};
+bool  PercussionSpatializer::tables_initialized = false;
+
 static PercussionSpatializer s_delay_instance;
 static unit_runtime_desc_t s_runtime_desc;
 

@@ -105,7 +105,7 @@ fast_inline float32x4_t soft_clip(float32x4_t x) {
     // x - x^3/3 for small x, clamp to ±1 for large x
     float32x4_t x2 = vmulq_f32(x, x);
     float32x4_t x3 = vmulq_f32(x, x2);
-    float32x4_t approx = vsubq_f32(x, vdivq_f32(x3, three));
+    float32x4_t approx = vsubq_f32(x, fast_div_neon(x3, three));
 
     return vmaxq_f32(vminq_f32(approx, one), vnegq_f32(one));
 }

@@ -159,6 +159,40 @@ fast_inline void calculate_lowpass_coeffs(
 /* Mode Filter Management */
 /*===========================================================================*/
 
+fast_inline void update_filter_params(
+    mode_filters_t * filters,
+    float depth,
+    uint32_t ramp_time) {
+  filters->depth_param = depth;
+  filters->ramp_samples = ramp_time;
+
+  if (ramp_time == 0) {
+    biquad_coeffs_t coeffs;
+
+    switch (filters->mode) {
+      case MODE_TRIBAL: {
+        float freq = 80.0f + depth * (800.0f - 80.0f);
+        calculate_bandpass_coeffs(&coeffs, freq, 2.0f);
+        break;
+      }
+      case MODE_MILITARY: {
+        float freq = 1000.0f + depth * (8000.0f - 1000.0f);
+        calculate_highpass_coeffs(&coeffs, freq, 0.707f);
+        break;
+      }
+      case MODE_ANGEL:
+        // For Angel mode, we'll set in apply function
+        return;
+    }
+
+    // Apply to all clone groups (L and R pre-filter slots; post unused for single-stage modes)
+    for (int g = 0; g < CLONE_GROUPS; g++) {
+      filters->filters[g * 4].coeffs = coeffs;      // L pre
+      filters->filters[g * 4 + 2].coeffs = coeffs;  // R pre
+    }
+  }
+}
+
 fast_inline void init_mode_filters(
     mode_filters_t* filters,
     spatial_mode_t mode,
@@ -175,41 +209,6 @@ fast_inline void init_mode_filters(
 
     // Set initial coefficients
     update_filter_params(filters, depth, 0);
-}
-
-fast_inline void update_filter_params(
-    mode_filters_t* filters,
-    float depth,
-    uint32_t ramp_time
-) {
-    filters->depth_param = depth;
-    filters->ramp_samples = ramp_time;
-
-    if (ramp_time == 0) {
-        biquad_coeffs_t coeffs;
-
-        switch (filters->mode) {
-            case MODE_TRIBAL: {
-                float freq = 80.0f + depth * (800.0f - 80.0f);
-                calculate_bandpass_coeffs(&coeffs, freq, 2.0f);
-                break;
-            }
-            case MODE_MILITARY: {
-                float freq = 1000.0f + depth * (8000.0f - 1000.0f);
-                calculate_highpass_coeffs(&coeffs, freq, 0.707f);
-                break;
-            }
-            case MODE_ANGEL:
-                // For Angel mode, we'll set in apply function
-                return;
-        }
-
-        // Apply to all clone groups (L and R pre-filter slots; post unused for single-stage modes)
-        for (int g = 0; g < CLONE_GROUPS; g++) {
-            filters->filters[g * 4].coeffs = coeffs;     // L pre
-            filters->filters[g * 4 + 2].coeffs = coeffs; // R pre
-        }
-    }
 }
 
 fast_inline void apply_mode_filters(
