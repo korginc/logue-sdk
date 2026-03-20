@@ -916,6 +916,164 @@ static void test_same_tick_gate() {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
+// T21 — OS parameter-initialisation sequence
+//
+//   The Drumlogue SDK documentation states: "Unit parameters are expected to be
+//   set to [their init value] after the initialization phase."  In practice the
+//   OS calls unit_set_param_value(i, header_default[i]) for every parameter
+//   AFTER unit_init() returns.
+//
+//   One header.c default differs from the Init preset:
+//     k_paramModel (index 9): header default = 3 (Membrane), Init preset = 0 (String)
+//   If the OS overrides the preset after init, the model is Membrane when the
+//   first note is played.  This test verifies that the unit still produces sound
+//   even when all 24 header defaults are sent after init (simulating OS init).
+// ════════════════════════════════════════════════════════════════════════════
+static void test_os_param_init_sequence() {
+    std::cout << "\n── T21: OS parameter-init sequence (header defaults sent after Init) ──\n";
+
+    unit_runtime_desc_t desc = make_desc();
+    RipplerXWaveguide s;
+    s.Init(&desc);
+
+    // Send all 24 header.c default values exactly as the Drumlogue OS does
+    // Format: setParameter(index, header_default_value)
+    // Source: header.c params array — columns are min,max,center,DEFAULT,type,...
+    static const int32_t header_defaults[24] = {
+        0,      // 0: Program
+        60,     // 1: Note
+        0,      // 2: Bank
+        1,      // 3: Sample
+        500,    // 4: MlltRes
+        2500,   // 5: MlltStif
+        0,      // 6: VlMllRes
+        0,      // 7: VlMllStf
+        3,      // 8: Partls
+        3,      // 9: Model  ← DIFFERS: header=3 (Membrane), Init preset=0 (String)
+        250,    // 10: Dkay
+        10,     // 11: Mterl
+        0,      // 12: Tone
+        26,     // 13: HitPos
+        10,     // 14: Rel
+        300,    // 15: Inharm
+        1,      // 16: LowCut
+        5,      // 17: TubRad
+        0,      // 18: Gain
+        0,      // 19: NzMix
+        0,      // 20: NzRes  ← DIFFERS: header=0, Init preset=300
+        0,      // 21: NzFltr
+        20,     // 22: NzFltFrq  ← DIFFERS: header=20, Init preset=12000
+        707,    // 23: Resnc
+    };
+
+    for (int i = 0; i < 24; ++i) {
+        s.setParameter((uint8_t)i, header_defaults[i]);
+    }
+
+    std::cout << "  All 24 header.c defaults sent. Model is now 3 (Membrane).\n";
+
+    // Same-tick trigger: matches the most demanding hardware scenario
+    s.GateOn(127);
+    s.GateOff();
+
+    float peak = run_blocks(s, 300, 32);
+    std::cout << "  peak output over 300 frames: " << peak << "\n";
+
+    result("T21 same-tick trigger after OS param init produces sound",
+           peak > 1e-4f,
+           "silent after OS sends header defaults then same-tick GateOn+GateOff");
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// T22 — master_env value trace at critical frames
+//
+//   Directly traces the master_env value through the same-tick scenario to
+//   verify that the Phase 18 pre-advance fix actually produces value=1.0 before
+//   the first audio block, and that the release decays slowly (not instantly).
+//   If this test fails, the pre-advance fix is not working correctly.
+// ════════════════════════════════════════════════════════════════════════════
+static void test_master_env_trace() {
+    std::cout << "\n── T22: master_env value trace through same-tick trigger ──\n";
+
+    unit_runtime_desc_t desc = make_desc();
+    RipplerXWaveguide s;
+    s.Init(&desc);
+
+    // Probe master_env by reading the voice's exciter state after each event.
+    // Voice index 1 (next_voice_idx advances from 0 to 1 on first NoteOn).
+    s.GateOn(127);   // NoteOn: trigger() + process() → value should be 1.0
+    float val_after_noteon = s.state.voices[1].exciter.master_env.value;
+    int   state_after_noteon = (int)s.state.voices[1].exciter.master_env.state;
+
+    s.GateOff();     // NoteOff: release() → state should be ENV_RELEASE (2)
+    float val_after_gateoff = s.state.voices[1].exciter.master_env.value;
+    int   state_after_gateoff = (int)s.state.voices[1].exciter.master_env.state;
+
+    std::cout << "  After GateOn:  value=" << val_after_noteon
+              << " state=" << state_after_noteon << " (expect: 1.0 / ENV_DECAY=2)\n";
+    std::cout << "  After GateOff: value=" << val_after_gateoff
+              << " state=" << state_after_gateoff << " (expect: 1.0 / ENV_RELEASE=3)\n";
+
+    // Render one sample to get the damper_fade value in frame 0
+    float buf[2] = {0.0f, 0.0f};
+    s.processBlock(buf, 1);
+    std::cout << "  Frame 0 output: L=" << buf[0] << " (should be ~0.5 or higher)\n";
+
+    result("T22a master_env value=1.0 after NoteOn pre-advance",
+           val_after_noteon >= 0.99f,
+           "pre-advance did not advance value to 1.0 — same-tick GateOff will silence voice");
+
+    result("T22b master_env in ENV_RELEASE (not ENV_IDLE) after GateOff",
+           state_after_gateoff == 3,  // ENV_RELEASE = 3
+           "GateOff put master_env in wrong state (IDLE=0, ATTACK=1, DECAY=2, RELEASE=3)");
+
+    result("T22c frame 0 output is audible (> 0.1)",
+           buf[0] > 0.1f,
+           "first audio sample is near-zero despite pre-advance fix");
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// T23 — Exciter output independent of master_env
+//
+//   Verifies that the mallet strike at frame 0 is nonzero WITHOUT any envelope
+//   involvement, by checking the exciter output before the master_env is applied.
+//   This isolates the waveguide exciter path from the envelope gate path.
+//   Uses the UNIT_TEST_DEBUG hooks (ut_exciter_out, ut_voice_out).
+// ════════════════════════════════════════════════════════════════════════════
+static void test_exciter_independent_of_env() {
+    std::cout << "\n── T23: Exciter output at frame 0 (mallet strike, no sample) ──\n";
+
+    unit_runtime_desc_t desc = make_desc();
+    RipplerXWaveguide s;
+    s.Init(&desc);
+
+    // GateOn only — no GateOff — so master_env stays at 1.0 (sustained, ENV_DECAY)
+    s.GateOn(127);
+
+    // Process exactly 1 frame to capture frame-0 values via the UT debug hooks
+    ut_exciter_out = 0.0f;
+    ut_voice_out   = 0.0f;
+    float buf[2] = {0.0f, 0.0f};
+    s.processBlock(buf, 1);
+
+    std::cout << "  Frame 0 exciter_out = " << ut_exciter_out << " (mallet impulse, expect ~3-5)\n";
+    std::cout << "  Frame 0 voice_out   = " << ut_voice_out   << " (post-env, expect > 0)\n";
+    std::cout << "  Frame 0 L channel   = " << buf[0]         << " (final output, expect > 0.1)\n";
+
+    result("T23a mallet produces nonzero exciter at frame 0",
+           ut_exciter_out > 0.5f,
+           "mallet impulse is near-zero — mallet_stiffness or mallet_res_coeff may be 0");
+
+    result("T23b voice_out is nonzero (waveguide+env path works)",
+           ut_voice_out > 0.1f,
+           "voice_out is near-zero despite nonzero exciter — check feedback/env path");
+
+    result("T23c final frame 0 output > 0.1 (whole chain passes through)",
+           buf[0] > 0.1f,
+           "final output near-zero — master_filter or master_drive may be wrong");
+}
+
+// ════════════════════════════════════════════════════════════════════════════
 int main() {
     std::cout << "=== RIPPLERX HW-DEBUG UNIT TESTS ===\n";
     std::cout << "Testing HW-vs-UT discrepancies that could cause hardware silence.\n";
@@ -941,6 +1099,9 @@ int main() {
     test_pitch_bend_persists_to_new_note();
     test_pitch_compensation_accuracy();
     test_same_tick_gate();
+    test_os_param_init_sequence();
+    test_master_env_trace();
+    test_exciter_independent_of_env();
 
     std::cout << "\n=== RESULTS: " << g_pass << " passed, " << g_fail << " failed ===\n";
     return g_fail == 0 ? 0 : 1;
