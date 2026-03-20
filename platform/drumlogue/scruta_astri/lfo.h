@@ -16,6 +16,7 @@ struct FastLFO {
     float phase_inc = 0.0f;
     float current_val = 0.0f;
     int wave_type = LFO_TRIANGLE;
+    uint32_t rand_seed = 2463534242UL; // Per-instance RNG state for LFO_RANDOM
 
     inline void set_rate(float hz, float srate) {
         phase_inc = hz / srate;
@@ -40,14 +41,13 @@ struct FastLFO {
                 break;
             case LFO_RANDOM:
                 if (phase < phase_inc) {
-                    static uint32_t seed = 2463534242UL;
-                    seed ^= seed << 13; seed ^= seed >> 17; seed ^= seed << 5;
-                    current_val = ((float)(int32_t)seed / 2147483648.0f);
+                    rand_seed ^= rand_seed << 13; rand_seed ^= rand_seed >> 17; rand_seed ^= rand_seed << 5;
+                    current_val = ((float)(int32_t)rand_seed / 2147483648.0f);
                 }
                 break;
             case LFO_EXP_DECAY:
                 // ADSR-like shape: Snaps to 1.0 at phase 0, then exponentially decays to 0.0
-                current_val = fasterpowf(2.71828f, -5.0f * phase);
+                current_val = fasterexpf(-5.0f * phase);
                 break;
         }
         return current_val;

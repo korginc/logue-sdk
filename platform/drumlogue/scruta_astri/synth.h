@@ -1,7 +1,5 @@
 #pragma once
-#include <atomic>
 #include <cstdint>
-#include <cmath>
 #include "float_math.h"
 #include "unit.h"
 
@@ -130,7 +128,7 @@ public:
 
     inline void NoteOn(uint8_t note, uint8_t velocity) {
         // Calculate Base Frequency from MIDI Note
-        m_base_hz = 440.0f * fasterpowf(2.0f, ((float)note - 69.0f) / 12.0f);
+        m_base_hz = 440.0f * fasterpow2f(((float)note - 69.0f) / 12.0f);
 
         // Push immediate frequency updates to oscillators
         updateOscillators();
@@ -180,7 +178,7 @@ public:
             float mixed_sig = sig1 + sig2;
 
             // 3. FILTER 1 (Pass l3_val for the Sherman resonance modulation)
-            float f1_mod_hz = m_f1_base_hz * fasterpowf(2.0f, l1_val * 3.0f);
+            float f1_mod_hz = m_f1_base_hz * fasterpow2f(l1_val * 3.0f);
             filter1.set_coeffs(f1_mod_hz, m_f1_q, 48000.0f);
             mixed_sig = filter1.process(mixed_sig, l3_val);
 
@@ -197,7 +195,7 @@ public:
             }
 
             // 5. FILTER 2 (YOUR DYNAMIC ASYMMETRY CONCEPT!)
-            float f2_mod_hz = m_f2_base_hz * fasterpowf(2.0f, l2_val * 3.0f);
+            float f2_mod_hz = m_f2_base_hz * fasterpow2f(l2_val * 3.0f);
             filter2.set_coeffs(f2_mod_hz, m_f2_q, 48000.0f);
 
             // Inject the raw wavetable shape (sig1) into Filter 2's asymmetry,

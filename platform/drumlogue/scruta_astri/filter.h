@@ -1,5 +1,4 @@
 #pragma once
-#include <cmath>
 #include "float_math.h"
 
 struct MorphingFilter {
@@ -13,7 +12,11 @@ struct MorphingFilter {
     float lfo_res_mod = 0.0f;     // How much LFO3 rips the resonance apart
 
     inline void set_coeffs(float cutoff_hz, float resonance, float srate) {
-        f = 2.0f * sinf(3.14159265f * cutoff_hz / srate);
+        // Clamp to just below Nyquist to keep f < 2 and the SVF stable.
+        // Without clamping, LFO-modulated cutoff can exceed srate/2, causing
+        // sinf to wrap and f to flip sign, instantly destabilising the filter.
+        cutoff_hz = fminf(cutoff_hz, srate * 0.49f);
+        f = 2.0f * fastersinfullf(3.14159265f * cutoff_hz / srate);
         q = 1.0f / resonance;
     }
 
