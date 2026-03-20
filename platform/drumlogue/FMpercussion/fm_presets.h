@@ -7,6 +7,12 @@
 
 #pragma once
 
+// Treat as C to avoid the “designator outside aggregate initializer” error
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdint.h>
 #include "constants.h"
 #include "resonant_synthesis.h"
@@ -61,9 +67,11 @@ typedef struct {
 
     // Page 6: Envelope
     uint8_t env_shape;      // 0-127
+    uint8_t voice_index;    // 0-VOICE_ALLOC_COUNT
 
     // NEW: Resonant parameters (using params 21-23)
     uint8_t resonant_mode;   // 0-4 (LP, BP, HP, Notch, Peak)
+    uint8_t resonant_morph;  // 0-100
     uint8_t resonant_res;    // 0-100
     uint8_t resonant_center; // 0-100 (maps to 50-8000 Hz)
     uint8_t engine_map[4];   // Which engine each voice uses
@@ -82,6 +90,8 @@ static const fm_preset_t FM_PRESETS[12] = {
         .lfo1_shape = 0, .lfo1_rate = 20, .lfo1_target = LFO_TARGET_PITCH, .lfo1_depth = 30,
         .lfo2_shape = 1, .lfo2_rate = 5, .lfo2_target = LFO_TARGET_INDEX, .lfo2_depth = 20,
         .env_shape = 20,
+        .voice_index = 0,
+        .resonant_morph = 2,
         .resonant_mode = RESONANT_MODE_BANDPASS,
         .resonant_res = 50,
         .resonant_center = 30,  // ~2400 Hz
@@ -99,6 +109,8 @@ static const fm_preset_t FM_PRESETS[12] = {
         .lfo1_shape = 6, .lfo1_rate = 60, .lfo1_target = LFO_TARGET_PITCH, .lfo1_depth = 20,
         .lfo2_shape = 4, .lfo2_rate = 80, .lfo2_target = LFO_TARGET_LFO1_PHASE, .lfo2_depth = 50,
         .env_shape = 5,
+        .voice_index = 0,
+        .resonant_morph = 90,
         .resonant_mode = RESONANT_MODE_PEAK,
         .resonant_res = 70,
         .resonant_center = 60,  // ~4800 Hz
@@ -107,7 +119,7 @@ static const fm_preset_t FM_PRESETS[12] = {
 
     // Preset 2: "Chordal Perc" (original)
     {
-        .name = "Chordal Perc",
+        .name = "ChordalPerc",
         .prob_kick = 70, .prob_snare = 70, .prob_metal = 70, .prob_perc = 70,
         .kick_sweep = 50, .kick_decay = 50,
         .snare_noise = 40, .snare_body = 50,
@@ -116,6 +128,8 @@ static const fm_preset_t FM_PRESETS[12] = {
         .lfo1_shape = 2, .lfo1_rate = 30, .lfo1_target = LFO_TARGET_PITCH, .lfo1_depth = 40,
         .lfo2_shape = 2, .lfo2_rate = 15, .lfo2_target = LFO_TARGET_PITCH, .lfo2_depth = -30,
         .env_shape = 40,
+        .voice_index = 0,
+        .resonant_morph = 50,
         .resonant_mode = RESONANT_MODE_LOWPASS,
         .resonant_res = 30,
         .resonant_center = 20,  // ~1600 Hz
@@ -133,6 +147,8 @@ static const fm_preset_t FM_PRESETS[12] = {
         .lfo1_shape = 3, .lfo1_rate = 45, .lfo1_target = LFO_TARGET_LFO2_PHASE, .lfo1_depth = 70,
         .lfo2_shape = 5, .lfo2_rate = 30, .lfo2_target = LFO_TARGET_LFO1_PHASE, .lfo2_depth = 70,
         .env_shape = 30,
+        .voice_index = 0,
+        .resonant_morph = 25,
         .resonant_mode = RESONANT_MODE_HIGHPASS,
         .resonant_res = 40,
         .resonant_center = 40,  // ~3200 Hz
@@ -141,7 +157,7 @@ static const fm_preset_t FM_PRESETS[12] = {
 
     // Preset 4: "Bipolar Bass" (original)
     {
-        .name = "Bipolar Bass",
+        .name = "BipolarBass",
         .prob_kick = 100, .prob_snare = 40, .prob_metal = 30, .prob_perc = 50,
         .kick_sweep = 90, .kick_decay = 80,
         .snare_noise = 20, .snare_body = 30,
@@ -150,6 +166,8 @@ static const fm_preset_t FM_PRESETS[12] = {
         .lfo1_shape = 1, .lfo1_rate = 10, .lfo1_target = LFO_TARGET_PITCH, .lfo1_depth = -50,
         .lfo2_shape = 0, .lfo2_rate = 25, .lfo2_target = LFO_TARGET_NONE, .lfo2_depth = 0,
         .env_shape = 10,
+        .voice_index = 0,
+        .resonant_morph = 10,
         .resonant_mode = RESONANT_MODE_LOWPASS,
         .resonant_res = 20,
         .resonant_center = 10,  // ~800 Hz
@@ -167,6 +185,8 @@ static const fm_preset_t FM_PRESETS[12] = {
         .lfo1_shape = 1, .lfo1_rate = 90, .lfo1_target = LFO_TARGET_INDEX, .lfo1_depth = 60,
         .lfo2_shape = 1, .lfo2_rate = 45, .lfo2_target = LFO_TARGET_PITCH, .lfo2_depth = 20,
         .env_shape = 15,
+        .voice_index = 0,
+        .resonant_morph = 2,
         .resonant_mode = RESONANT_MODE_PEAK,
         .resonant_res = 60,
         .resonant_center = 70,  // ~5600 Hz
@@ -175,7 +195,7 @@ static const fm_preset_t FM_PRESETS[12] = {
 
     // Preset 6: "Ambient Metals" (original)
     {
-        .name = "Ambient Mtl",
+        .name = "AmbientMetl",
         .prob_kick = 40, .prob_snare = 50, .prob_metal = 100, .prob_perc = 60,
         .kick_sweep = 30, .kick_decay = 70,
         .snare_noise = 40, .snare_body = 50,
@@ -184,6 +204,8 @@ static const fm_preset_t FM_PRESETS[12] = {
         .lfo1_shape = 0, .lfo1_rate = 15, .lfo1_target = LFO_TARGET_ENV, .lfo1_depth = 40,
         .lfo2_shape = 8, .lfo2_rate = 40, .lfo2_target = LFO_TARGET_PITCH, .lfo2_depth = 20,
         .env_shape = 90,
+        .voice_index = 0,
+        .resonant_morph = 70,
         .resonant_mode = RESONANT_MODE_NOTCH,
         .resonant_res = 80,
         .resonant_center = 50,  // ~4000 Hz
@@ -201,6 +223,8 @@ static const fm_preset_t FM_PRESETS[12] = {
         .lfo1_shape = 4, .lfo1_rate = 35, .lfo1_target = LFO_TARGET_PITCH, .lfo1_depth = 30,
         .lfo2_shape = 7, .lfo2_rate = 55, .lfo2_target = LFO_TARGET_PITCH, .lfo2_depth = 30,
         .env_shape = 25,
+        .voice_index = 0,
+        .resonant_morph = 50,
         .resonant_mode = RESONANT_MODE_BANDPASS,
         .resonant_res = 50,
         .resonant_center = 30,  // ~2400 Hz
@@ -220,10 +244,12 @@ static const fm_preset_t FM_PRESETS[12] = {
         .lfo1_shape = 0, .lfo1_rate = 10, .lfo1_target = LFO_TARGET_PITCH, .lfo1_depth = 20,
         .lfo2_shape = 0, .lfo2_rate = 5, .lfo2_target = LFO_TARGET_NONE, .lfo2_depth = 0,
         .env_shape = 25,  // Medium decay
+        .voice_index = 8,
+        .resonant_morph = 20,
         .resonant_mode = RESONANT_MODE_LOWPASS,
         .resonant_res = 40,
         .resonant_center = 15,  // ~1200 Hz
-        .engine_map = {ENGINE_RESONANT, ENGINE_RESONANT, ENGINE_RESONANT, ENGINE_RESONANT}
+        .engine_map = {ENGINE_RESONANT, ENGINE_SNARE, ENGINE_KICK, ENGINE_PERC}
     },
 
     // Preset 9: "ResoTom" - Resonant tom
@@ -237,10 +263,12 @@ static const fm_preset_t FM_PRESETS[12] = {
         .lfo1_shape = 1, .lfo1_rate = 15, .lfo1_target = LFO_TARGET_PITCH, .lfo1_depth = 30,
         .lfo2_shape = 1, .lfo2_rate = 8, .lfo2_target = LFO_TARGET_INDEX, .lfo2_depth = 20,
         .env_shape = 35,  // Longer decay
+        .voice_index = 1,
+        .resonant_morph = 20,
         .resonant_mode = RESONANT_MODE_BANDPASS,
         .resonant_res = 60,
         .resonant_center = 25,  // ~2000 Hz
-        .engine_map = {ENGINE_RESONANT, ENGINE_RESONANT, ENGINE_RESONANT, ENGINE_RESONANT}
+        .engine_map = {ENGINE_KICK, ENGINE_SNARE, ENGINE_METAL, ENGINE_RESONANT}
     },
 
     // Preset 10: "ResoSnare" - Resonant snare
@@ -254,10 +282,12 @@ static const fm_preset_t FM_PRESETS[12] = {
         .lfo1_shape = 2, .lfo1_rate = 20, .lfo1_target = LFO_TARGET_PITCH, .lfo1_depth = 40,
         .lfo2_shape = 2, .lfo2_rate = 10, .lfo2_target = LFO_TARGET_INDEX, .lfo2_depth = 30,
         .env_shape = 20,  // Short decay
+        .voice_index = 3,
+        .resonant_morph = 20,
         .resonant_mode = RESONANT_MODE_HIGHPASS,
         .resonant_res = 50,
         .resonant_center = 45,  // ~3600 Hz
-        .engine_map = {ENGINE_RESONANT, ENGINE_RESONANT, ENGINE_RESONANT, ENGINE_RESONANT}
+        .engine_map = {ENGINE_KICK, ENGINE_RESONANT, ENGINE_METAL, ENGINE_PERC}
     },
 
     // Preset 11: "ResoMetal" - Resonant metal/cymbal
@@ -271,9 +301,15 @@ static const fm_preset_t FM_PRESETS[12] = {
         .lfo1_shape = 8, .lfo1_rate = 30, .lfo1_target = LFO_TARGET_PITCH, .lfo1_depth = 50,
         .lfo2_shape = 6, .lfo2_rate = 40, .lfo2_target = LFO_TARGET_INDEX, .lfo2_depth = 40,
         .env_shape = 10,  // Very short decay
+        .voice_index = 2,
+        .resonant_morph = 20,
         .resonant_mode = RESONANT_MODE_PEAK,
         .resonant_res = 80,
         .resonant_center = 80,  // ~6400 Hz
-        .engine_map = {ENGINE_RESONANT, ENGINE_RESONANT, ENGINE_RESONANT, ENGINE_RESONANT}
+        .engine_map = {ENGINE_KICK, ENGINE_SNARE, ENGINE_RESONANT, ENGINE_PERC}
     }
 };
+
+#ifdef __cplusplus
+}
+#endif

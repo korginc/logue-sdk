@@ -10,6 +10,10 @@
  * - 12 valid allocations encoded in VoiceAlloc param
  * - Per-voice probability triggering
  * - Resonant morph parameter for expressive control
+ * - Enhanced LFO system with bipolar modulation
+ * - Envelope ROM
+ * - Parameter smoothing
+ * - Preset system
  */
 
 #include <arm_neon.h>
@@ -117,46 +121,6 @@ fast_inline void update_voice_allocation(fm_perc_synth_t* synth, uint8_t alloc_i
     }
 }
 
-/**
- * Initialize synthesizer
- */
-fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
-    // Initialize all engines
-    kick_engine_init(&synth->kick);
-    snare_engine_init(&synth->snare);
-    metal_engine_init(&synth->metal);
-    perc_engine_init(&synth->perc);
-    resonant_synth_init(&synth->resonant);
-
-    // Initialize LFO and envelope
-    lfo_enhanced_init(&synth->lfo);
-    lfo_smoother_init(&synth->lfo_smooth);
-    neon_envelope_init(&synth->envelope);
-
-    // Initialize PRNG and MIDI
-    neon_prng_init(&synth->prng, RAND_DEFAULT_SEED);
-    midi_handler_init(&synth->midi);
-
-    // Initialize parameters
-    synth->voice_active = vdupq_n_f32(0.0f);
-    synth->voice_triggered = vdupq_n_u32(0);
-    synth->voice_velocity = vdupq_n_f32(1.0f);
-    synth->master_gain = 0.25f;
-    synth->current_env_shape = 40;
-    synth->resonant_morph = 0.5f;
-
-    // Default probabilities (all 100%)
-    for (int i = 0; i < 4; i++) {
-        synth->voice_probs[i] = 100;
-    }
-
-    // Load default preset
-    load_fm_preset(0, synth->params);
-
-    // Update voice allocation from params
-    update_voice_allocation(synth, synth->params[PARAM_VOICE_ALLOC]);
-    fm_perc_synth_update_params(synth);
-}
 
 /**
  * Update all parameters from UI
@@ -193,21 +157,26 @@ fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
     // =================================================================
     // Update FM engines (always update all - they'll be used based on allocation)
     // =================================================================
+
+    // Kick engine: param1 = sweep depth (0-1), param2 = decay shape (0-1)
     kick_engine_update(&synth->kick,
-                       vdupq_n_f32(p[PARAM_KICK_SWEEP] / 100.0f),
-                       vdupq_n_f32(p[PARAM_KICK_DECAY] / 100.0f));
+                       vdupq_n_f32(p[PARAM_KICK_SWEEP] / 100.0f),   // Kick sweep
+                       vdupq_n_f32(p[PARAM_KICK_DECAY] / 100.0f));  // Kick decay
 
+    // Snare engine: param1 = noise mix (0-1), param2 = body resonance (0-1)
     snare_engine_update(&synth->snare,
-                        vdupq_n_f32(p[PARAM_SNARE_NOISE] / 100.0f),
-                        vdupq_n_f32(p[PARAM_SNARE_BODY] / 100.0f));
+                        vdupq_n_f32(p[PARAM_SNARE_NOISE] / 100.0f),  // Snare noise mix
+                        vdupq_n_f32(p[PARAM_SNARE_BODY] / 100.0f)); // Snare body resonance
 
+    // Metal engine: param1 = inharmonicity (0-1), param2 = brightness (0-1)
     metal_engine_update(&synth->metal,
-                        vdupq_n_f32(p[PARAM_METAL_INHARM] / 100.0f),
-                        vdupq_n_f32(p[PARAM_METAL_BRIGHT] / 100.0f));
+                        vdupq_n_f32(p[PARAM_METAL_INHARM] / 100.0f),  // Metal inharmonicity
+                        vdupq_n_f32(p[PARAM_METAL_BRIGHT] / 100.0f)); // Metal brightness
 
+    // Perc engine: param1 = ratio center (0-1), param2 = variation (0-1)
     perc_engine_update(&synth->perc,
-                       vdupq_n_f32(p[PARAM_PERC_RATIO] / 100.0f),
-                       vdupq_n_f32(p[PARAM_PERC_VAR] / 100.0f));
+                       vdupq_n_f32(p[PARAM_PERC_RATIO] / 100.0f),  // Perc ratio center
+                       vdupq_n_f32(p[PARAM_PERC_VAR] / 100.0f)); // Perc variation
 
     // =================================================================
     // Update resonant base parameters (mode from param 22)
@@ -234,6 +203,78 @@ fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
     // Update envelope shape (param 20)
     // =================================================================
     synth->current_env_shape = p[PARAM_ENV_SHAPE];
+}
+
+/**
+ * Initialize synthesizer
+ */
+fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
+    // Initialize all engines
+    kick_engine_init(&synth->kick);
+    snare_engine_init(&synth->snare);
+    metal_engine_init(&synth->metal);
+    perc_engine_init(&synth->perc);
+    resonant_synth_init(&synth->resonant);
+
+    // Initialize LFO and envelope
+    lfo_enhanced_init(&synth->lfo);
+    lfo_smoother_init(&synth->lfo_smooth);
+    neon_envelope_init(&synth->envelope);
+
+    // Initialize PRNG and MIDI
+    neon_prng_init(&synth->prng, RAND_DEFAULT_SEED);
+    midi_handler_init(&synth->midi);
+
+    // Initialize parameters
+    synth->voice_active = vdupq_n_f32(0.0f);
+    synth->voice_triggered = vdupq_n_u32(0);
+    synth->voice_velocity = vdupq_n_f32(1.0f);
+    synth->master_gain = 0.25f;
+    synth->current_env_shape = 40;
+    synth->resonant_morph = 0.5f;
+
+    // Default probabilities (all 100%)
+    for (int i = 0; i < 4; i++) {
+        synth->voice_probs[i] = 100;
+    }
+
+    // Load default preset
+    load_preset(0, synth->params);
+
+    // Update voice allocation from params
+    update_voice_allocation(synth, synth->params[PARAM_VOICE_ALLOC]);
+    fm_perc_synth_update_params(synth);
+}
+
+/**
+ * Fast NEON horizontal sum of 4 floats
+ * Returns sum of all 4 lanes
+ */
+fast_inline float neon_horizontal_sum(float32x4_t v) {
+    // Step 1: Pairwise add low and high halves
+    float32x2_t sum_low = vpadd_f32(vget_low_f32(v), vget_high_f32(v));
+
+    // Step 2: Pairwise add again to get final sum
+    float32x2_t sum_total = vpadd_f32(sum_low, sum_low);
+
+    // Step 3: Extract result
+    return vget_lane_f32(sum_total, 0);
+}
+
+/**
+ * Alternative method using vaddvq_f32 for ARMv8/AArch64
+ * For ARMv7 (drumlogue), use the vpadd method above
+ */
+fast_inline float neon_horizontal_sum_alt(float32x4_t v) {
+    #if defined(__aarch64__)
+    // ARMv8/AArch64 has dedicated instruction
+    return vaddvq_f32(v);
+    #else
+    // ARMv7 fallback
+    float32x2_t sum_low = vpadd_f32(vget_low_f32(v), vget_high_f32(v));
+    float32x2_t sum_total = vpadd_f32(sum_low, sum_low);
+    return vget_lane_f32(sum_total, 0);
+    #endif
 }
 
 /**
@@ -360,7 +401,22 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
 }
 
 /**
- * Process one audio sample with full LFO modulation support
+ * MIDI Note Off handler
+ */
+fast_inline void fm_perc_synth_note_off(fm_perc_synth_t* synth, uint8_t note) {
+    uint8_t releasing[4];
+    uint32_t num_releasing = midi_note_off(&synth->midi, note, releasing);
+
+    // For now, envelope release is triggered when any voice releases
+    // In a more sophisticated version, we'd track per-voice release
+    if (num_releasing > 0) {
+        // Signal release stage
+        // This would need per-voice release tracking
+    }
+}
+
+/**
+  * Process one audio sample with full LFO modulation support
  */
 fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     // =================================================================
@@ -502,8 +558,12 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     // Scale each voice lane by its stored velocity before summing
     mixed = vmulq_f32(mixed, synth->voice_velocity);
 
-    // Efficient horizontal sum
+
+    // =================================================================
+    // FIXED: Efficient horizontal sum using NEON vpadd
+    // =================================================================
     float sum = neon_horizontal_sum(mixed);
 
+    // Apply master gain
     return sum * synth->master_gain;
 }
