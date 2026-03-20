@@ -33,13 +33,15 @@ PROJECT ?= my_unit
 TARGET_ARCH := armv7a
 
 # Set to 'yes' if you want to see the full log while compiling.
-VERBOSE_COMPILE := yes
+VERBOSE_COMPILE := no
 
 ##############################################################################
 # Additional source related definitions
 #
 
 DINCDIR := $(COMMON_INC_PATH)
+DDEFS += -D__ARM_NEON__
+DINCDIR += $(realpath $(PROJECT_ROOT)/../common) $(realpath $(PROJECT_ROOT)/../common/dsp)
 
 CSRC += $(realpath $(COMMON_SRC_PATH)/_unit_base.c)
 
@@ -71,7 +73,6 @@ ifeq ($(USE_OPT),)
   USE_CXXOPT += -fstrict-aliasing
   USE_CXXOPT += -falign-functions=16
   USE_CXXOPT += -fno-math-errno
-  USE_CXXOPT += -fconcepts
   # USE_CXXOPT += -fpermissive
   # USE_CXXOPT += -fmessage-length=0
 endif
@@ -112,7 +113,7 @@ else
   endif
 
   USE_VECTORIZATION := yes
-endif 
+endif
 
 ifneq ($(NO_INLINE),)
   USE_COPT += -fno-inline
@@ -433,3 +434,52 @@ CLEAN_RULE_HOOK:
 # Include the dependency files, should be the last of the makefile
 #
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
+
+# ============================================================================
+# Test and Benchmark Targets
+# ============================================================================
+
+.PHONY: test test-alloc test-prob test-morph test-engines test-integration \
+        bench bench-division bench-engines bench-memory bench-allocation
+
+# Run all tests
+test:
+	@./run_unit_tests.sh all
+
+# Individual tests
+test-alloc:
+	@./run_unit_tests.sh alloc
+
+test-prob:
+	@./run_unit_tests.sh prob
+
+test-morph:
+	@./run_unit_tests.sh morph
+
+test-engines:
+	@./run_unit_tests.sh engines
+
+test-integration:
+	@./run_unit_tests.sh integration
+
+# Run all benchmarks
+bench:
+	@./run_benchmarks.sh all
+
+# Individual benchmarks
+bench-division:
+	@./run_benchmarks.sh division
+
+bench-engines:
+	@./run_benchmarks.sh engines
+
+bench-memory:
+	@./run_benchmarks.sh memory
+
+bench-allocation:
+	@./run_benchmarks.sh allocation
+
+# Clean test artifacts
+clean-tests:
+	rm -rf build/test_*
+	rm -rf build/bench_*
