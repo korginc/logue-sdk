@@ -29,7 +29,9 @@ const __unit_header unit_header_t unit_header = {
 
         // Page 2: Mallet
         {0, 1000, 500, 500, k_unit_param_type_none, 1, 1, 0, {"MlltRes"}},
-        {100, 5000, 250, 2500, k_unit_param_type_none, 0, 0, 0, {"MlltStif"}},
+        // Stored ÷10: range 10–500 represents 100–5000. Step of 10 on the encoder.
+        // getParameterStrValue shows the real ×10 value (100–5000).
+        {10, 500, 25, 250, k_unit_param_type_strings, 0, 0, 0, {"MlltStif"}},
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"VlMllRes"}},
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"VlMllStf"}},
 
@@ -39,8 +41,9 @@ const __unit_header unit_header_t unit_header = {
         {0, 7, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Partls"}},
         // [0..8] String , Beam ,  Square , Membrn , Plate , Drumhd , Marmb , OpnTub , ClsTub
         {0, 8, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Model"}},
-        // [0..2000]
-        {0, 2000, 250, 250, k_unit_param_type_none, 0, 0, 0, {"Dkay"}},
+        // Stored ÷10: range 0–200 represents 0–2000. Step of 10 on the encoder.
+        // getParameterStrValue shows the real ×10 value (0–2000).
+        {0, 200, 25, 25, k_unit_param_type_strings, 0, 0, 0, {"Dkay"}},
         // [−10..30]
         {-10, 30, 0, 10, k_unit_param_type_none, 1, 1, 0, {"Mterl"}},
 
@@ -64,9 +67,9 @@ const __unit_header unit_header_t unit_header = {
         // Page 6: Noise II
         {0, 1000, 300, 0, k_unit_param_type_percent, 1, 1, 0, {"NzRes"}},
         {0, 2, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"NzFltr"}},
-        // Range change deferred: requires dedicated Noise SVF (Phase 13).
-        // When implemented: change to 2-2000 (type_strings), multiply by 10 in setParameter.
-        {20, 20000, 12000, 20, k_unit_param_type_hertz, 0, 0, 0, {"NzFltFrq"}},
+        // Stored ÷10: range 2–2000 represents 20–20000 Hz. Step of 10 Hz on the encoder.
+        // getParameterStrValue shows the real ×10 Hz/kHz value (same logic as LowCut).
+        {2, 2000, 1200, 2, k_unit_param_type_strings, 0, 0, 0, {"NzFltFrq"}},
         {707, 4000, 0, 707, k_unit_param_type_none, 0, 0, 0, {"Resnc"}}
     }
 };

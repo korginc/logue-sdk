@@ -939,18 +939,19 @@ static void test_os_param_init_sequence() {
     // Send all 24 header.c default values exactly as the Drumlogue OS does
     // Format: setParameter(index, header_default_value)
     // Source: header.c params array — columns are min,max,center,DEFAULT,type,...
+    // Reflects header.c after the ÷10 step-size change for MlltStif/Dkay/NzFltFrq
     static const int32_t header_defaults[24] = {
         0,      // 0: Program
         60,     // 1: Note
         0,      // 2: Bank
         1,      // 3: Sample
         500,    // 4: MlltRes
-        2500,   // 5: MlltStif
+        250,    // 5: MlltStif  (new default 250 = 2500 effective, ÷10 range)
         0,      // 6: VlMllRes
         0,      // 7: VlMllStf
         3,      // 8: Partls
         3,      // 9: Model  ← DIFFERS: header=3 (Membrane), Init preset=0 (String)
-        250,    // 10: Dkay
+        25,     // 10: Dkay   (new default 25 = 250 effective, ÷10 range)
         10,     // 11: Mterl
         0,      // 12: Tone
         26,     // 13: HitPos
@@ -962,7 +963,7 @@ static void test_os_param_init_sequence() {
         0,      // 19: NzMix
         0,      // 20: NzRes  ← DIFFERS: header=0, Init preset=300
         0,      // 21: NzFltr
-        20,     // 22: NzFltFrq  ← DIFFERS: header=20, Init preset=12000
+        2,      // 22: NzFltFrq  (new default 2 = 20 Hz effective, ÷10 range)
         707,    // 23: Resnc
     };
 
