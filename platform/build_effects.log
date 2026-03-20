@@ -10,8 +10,8 @@ compilation terminated.
 make: *** [Makefile:330: build/obj/header.o] Error 1
 make: *** Waiting for unfinished jobs....
 In file included from kick_engine.h:16:0,
-                 from fm_perc_synth.h:17,
-                 from synth.h:17,
+                 from fm_perc_synth.h:21,
+                 from synth.h:16,
                  from unit.cc:13:
 fm_voices.h: In function 'float32x4_t midi_to_freq_neon(uint32x4_t)':
 fm_voices.h:70:17: warning: unused variable 'semitone_offset' [-Wunused-variable]
@@ -19,8 +19,8 @@ fm_voices.h:70:17: warning: unused variable 'semitone_offset' [-Wunused-variable
                  ^~~~~~~~~~~~~~~
 In file included from sine_neon.h:15:0,
                  from kick_engine.h:17,
-                 from fm_perc_synth.h:17,
-                 from synth.h:17,
+                 from fm_perc_synth.h:21,
+                 from synth.h:16,
                  from unit.cc:13:
 float_math.h: In function 'float Q_rsqrt(float)':
 float_math.h:1014:21: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
@@ -29,67 +29,61 @@ float_math.h:1014:21: warning: dereferencing type-punned pointer will break stri
 float_math.h:1016:22: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
   y  = * ( float * ) &i;
                       ^
-In file included from fm_perc_synth.h:21:0,
-                 from synth.h:17,
+In file included from fm_perc_synth.h:25:0,
+                 from synth.h:16,
                  from unit.cc:13:
 resonant_synthesis.h: In function 'void resonant_synth_set_mode(resonant_synth_t*, uint32x4_t, resonant_mode_t)':
 resonant_synthesis.h:187:53: warning: unused parameter 'voice_mask' [-Wunused-parameter]
                                           uint32x4_t voice_mask,
                                                      ^~~~~~~~~~
-In file included from fm_perc_synth.h:27:0,
-                 from synth.h:17,
+In file included from fm_perc_synth.h:31:0,
+                 from synth.h:16,
                  from unit.cc:13:
 fm_presets.h: At global scope:
-fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
- };
- ^
-fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
-fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
-fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
-fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
-fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
-fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
-fm_presets.h:279:1: error: C99 designator 'name' outside aggregate initializer
-fm_presets.h:279:1: error: initializer-string for array of chars is too long [-fpermissive]
-fm_presets.h:279:1: error: initializer-string for array of chars is too long [-fpermissive]
-In file included from synth.h:17:0,
+fm_presets.h:459:81: error: C99 designator 'name' outside aggregate initializer
+         .engine_map = {ENGINE_KICK, ENGINE_SNARE, ENGINE_RESONANT, ENGINE_PERC}}};
+                                                                                 ^
+fm_presets.h:459:81: error: C99 designator 'name' outside aggregate initializer
+fm_presets.h:459:81: error: C99 designator 'name' outside aggregate initializer
+fm_presets.h:459:81: error: C99 designator 'name' outside aggregate initializer
+fm_presets.h:459:81: error: C99 designator 'name' outside aggregate initializer
+fm_presets.h:459:81: error: C99 designator 'name' outside aggregate initializer
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+fm_presets.h:459:81: sorry, unimplemented: non-trivial designated initializers not supported
+In file included from synth.h:16:0,
                  from unit.cc:13:
-fm_perc_synth.h: In function 'void fm_perc_synth_init(fm_perc_synth_t*)':
-fm_perc_synth.h:154:36: error: 'load_fm_preset' was not declared in this scope
-     load_fm_preset(0, synth->params);
-                                    ^
-fm_perc_synth.h:158:38: error: 'fm_perc_synth_update_params' was not declared in this scope
-     fm_perc_synth_update_params(synth);
-                                      ^
-fm_perc_synth.h: In function 'void fm_perc_synth_update_params(fm_perc_synth_t*)':
-fm_perc_synth.h:191:84: error: 'apply_resonant_morph' was not declared in this scope
-     apply_resonant_morph(&synth->resonant, synth->resonant_morph, p[PARAM_RES_MODE]);
-                                                                                    ^
 fm_perc_synth.h: In function 'void apply_resonant_morph(resonant_synth_t*, float, uint8_t)':
-fm_perc_synth.h:275:23: warning: unused variable 'width' [-Wunused-variable]
-                 float width = 0.1f + morph * 2.0f;  // Width multiplier
-                       ^~~~~
-fm_perc_synth.h:285:23: warning: unused variable 'gain' [-Wunused-variable]
-                 float gain = 1.0f + morph * 3.0f;     // 1-4x gain
-                       ^~~~
-In file included from synth.h:17:0,
-                 from unit.cc:13:
-fm_perc_synth.h: In function 'float fm_perc_synth_process(fm_perc_synth_t*)':
-fm_perc_synth.h:506:42: error: 'neon_horizontal_sum' was not declared in this scope
-     float sum = neon_horizontal_sum(mixed);
-                                          ^
-In file included from unit.cc:13:0:
-synth.h: In member function 'void Synth::NoteOff(uint8_t)':
-synth.h:102:45: error: 'fm_perc_synth_note_off' was not declared in this scope
-         fm_perc_synth_note_off(&synth_, note);
-                                             ^
-synth.h: In member function 'void Synth::AllNoteOff()':
-synth.h:122:46: error: 'fm_perc_synth_note_off' was not declared in this scope
-             fm_perc_synth_note_off(&synth_, i);
-                                              ^
+fm_perc_synth.h:157:13: warning: unused variable 'width' [-Wunused-variable]
+       float width = 0.1f + morph * 2.0f;  // Width multiplier
+             ^~~~~
+fm_perc_synth.h:166:13: warning: unused variable 'gain' [-Wunused-variable]
+       float gain = 1.0f + morph * 3.0f;     // 1-4x gain
+             ^~~~
 make: *** [Makefile:321: build/obj/unit.o] Error 1
 >> Installing /workspace/drumlogue/FMpercussion
-make: Warning: File 'build/obj' has modification time 0.32 s in the future
+make: Warning: File 'build/obj' has modification time 0.22 s in the future
 Compiling header.c
 In file included from header.c:7:0:
 constants.h:23:19: fatal error: cstdint: No such file or directory
@@ -140,7 +134,7 @@ chown: changing ownership of 'build/obj': Operation not permitted
 chown: changing ownership of 'build': Operation not permitted
 make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
 >> Installing /workspace/drumlogue/dummy-delfx
-make: Warning: File 'build' has modification time 0.25 s in the future
+make: Warning: File 'build' has modification time 0.16 s in the future
 Deploying to /workspace/drumlogue/dummy-delfx//dummy_delay.drmlgunit
 
 Done
@@ -155,11 +149,11 @@ Creating build/dummy_master.bin
 Creating build/dummy_master.dmp
 Creating build/dummy_master.list
 
+   text	   data	    bss	    dec	    hex	filename
+   3587	    344	     12	   3943	    f67	build/dummy_master.drmlgunit
 
 Done
 
-   text	   data	    bss	    dec	    hex	filename
-   3587	    344	     12	   3943	    f67	build/dummy_master.drmlgunit
 chown: changing ownership of 'build/dummy_master.bin': Operation not permitted
 chown: changing ownership of 'build/dummy_master.dmp': Operation not permitted
 chown: changing ownership of 'build/dummy_master.drmlgunit': Operation not permitted
@@ -177,7 +171,7 @@ chown: changing ownership of 'build/obj': Operation not permitted
 chown: changing ownership of 'build': Operation not permitted
 make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
 >> Installing /workspace/drumlogue/dummy-masterfx
-make: Warning: File 'build' has modification time 0.22 s in the future
+make: Warning: File 'build' has modification time 0.13 s in the future
 Deploying to /workspace/drumlogue/dummy-masterfx//dummy_master.drmlgunit
 
 Done
@@ -214,7 +208,7 @@ chown: changing ownership of 'build/obj': Operation not permitted
 chown: changing ownership of 'build': Operation not permitted
 make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
 >> Installing /workspace/drumlogue/dummy-revfx
-make: Warning: File 'build' has modification time 0.17 s in the future
+make: Warning: File 'build' has modification time 0.1 s in the future
 Deploying to /workspace/drumlogue/dummy-revfx//dummy_reverb.drmlgunit
 
 Done
@@ -248,7 +242,7 @@ chown: changing ownership of 'build/obj': Operation not permitted
 chown: changing ownership of 'build': Operation not permitted
 make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
 >> Installing /workspace/drumlogue/dummy-synth
-make: Warning: File 'build' has modification time 0.17 s in the future
+make: Warning: File 'build' has modification time 0.069 s in the future
 Deploying to /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
 
 Done
@@ -299,7 +293,7 @@ compilation terminated.
 collect2: error: ld returned 1 exit status
 make: *** [Makefile:360: build/neon_labirinto_reverb.drmlgunit] Error 1
 >> Installing /workspace/drumlogue/reverb_labirinto
-make: Warning: File 'build' has modification time 0.21 s in the future
+make: Warning: File 'build' has modification time 0.1 s in the future
 
 Linking build/neon_labirinto_reverb.drmlgunit
 In function 'vgetq_lane_f32',
@@ -367,7 +361,7 @@ compilation terminated.
 collect2: error: ld returned 1 exit status
 make: *** [Makefile:360: build/light_fdn_reverb.drmlgunit] Error 1
 >> Installing /workspace/drumlogue/reverb_light
-make: Warning: File 'build' has modification time 0.18 s in the future
+make: Warning: File 'build' has modification time 0.075 s in the future
 
 Linking build/light_fdn_reverb.drmlgunit
 In function 'vgetq_lane_f32',
@@ -392,21 +386,20 @@ collect2: error: ld returned 1 exit status
 make: *** [Makefile:360: build/light_fdn_reverb.drmlgunit] Error 1
 >> Building /workspace/drumlogue/scruta_astri
 
-Linking build/fm_perc_synth.drmlgunit
-Stripping build/fm_perc_synth.drmlgunit
-Creating build/fm_perc_synth.hex
-Creating build/fm_perc_synth.bin
-Creating build/fm_perc_synth.dmp
-Creating build/fm_perc_synth.list
+Linking build/scruta_astri.drmlgunit
+Stripping build/scruta_astri.drmlgunit
+Creating build/scruta_astri.hex
+Creating build/scruta_astri.bin
+Creating build/scruta_astri.dmp
+Creating build/scruta_astri.list
 
 
-   text	   data	    bss	    dec	    hex	filename
- 251964	    648	      4	 252616	  3dac8	build/fm_perc_synth.drmlgunit
 Done
+   text	   data	    bss	    dec	    hex	filename
+ 251964	    648	      4	 252616	  3dac8	build/scruta_astri.drmlgunit
 
 chown: changing ownership of 'build/fm_perc_synth.bin': Operation not permitted
 chown: changing ownership of 'build/fm_perc_synth.dmp': Operation not permitted
-chown: changing ownership of 'build/fm_perc_synth.drmlgunit': Operation not permitted
 chown: changing ownership of 'build/fm_perc_synth.hex': Operation not permitted
 chown: changing ownership of 'build/fm_perc_synth.list': Operation not permitted
 chown: changing ownership of 'build/fm_perc_synth.map': Operation not permitted
@@ -418,13 +411,17 @@ chown: changing ownership of 'build/obj/header.o': Operation not permitted
 chown: changing ownership of 'build/obj/unit.o': Operation not permitted
 chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
 chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.bin': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.dmp': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.hex': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.list': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.map': Operation not permitted
 chown: changing ownership of 'build': Operation not permitted
 make: *** [Makefile:292: POST_MAKE_ALL_RULE_HOOK] Error 1
 >> Installing /workspace/drumlogue/scruta_astri
-make: Warning: File 'build' has modification time 0.053 s in the future
-Deploying to /workspace/drumlogue/scruta_astri//fm_perc_synth.drmlgunit
+Deploying to /workspace/drumlogue/scruta_astri//scruta_astri.drmlgunit
 
 Done
 
-make: warning:  Clock skew detected.  Your build may be incomplete.
 >> Resetting environment

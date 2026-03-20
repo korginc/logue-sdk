@@ -47,7 +47,6 @@ public:
 
         // Initialize synth with default preset
         fm_perc_synth_init(&synth_);
-        load_preset(0);  // Load first preset
 
         return k_unit_err_none;
     }
@@ -186,7 +185,7 @@ public:
     /*===========================================================================*/
 
     inline void LoadPreset(uint8_t idx) {
-        load_preset(idx);
+      load_preset(idx);
     }
 
     inline uint8_t getPresetIndex() const {
@@ -206,47 +205,7 @@ private:
     /*===========================================================================*/
 
     inline void load_preset(uint8_t idx) {
-        if (idx >= 12) return;
-
-        const fm_preset_t* p = &FM_PRESETS[idx];
-
-        // Page 1
-        params[PARAM_VOICE1_PROB] = p->prob_kick;
-        params[PARAM_VOICE2_PROB] = p->prob_snare;
-        params[PARAM_VOICE3_PROB] = p->prob_metal;
-        params[PARAM_VOICE4_PROB] = p->prob_perc;
-
-        // Page 2
-        params[PARAM_KICK_SWEEP] = p->kick_sweep;
-        params[PARAM_KICK_DECAY] = p->kick_decay;
-        params[PARAM_SNARE_NOISE] = p->snare_noise;
-        params[PARAM_SNARE_BODY] = p->snare_body;
-
-        // Page 3
-        params[PARAM_METAL_INHARM] = p->metal_inharm;
-        params[PARAM_METAL_BRIGHT] = p->metal_bright;
-        params[PARAM_PERC_RATIO] = p->perc_ratio;
-        params[PARAM_PERC_VAR] = p->perc_var;
-
-        // Page 4 (LFO1)
-        params[PARAM_LFO1_SHAPE] = p->lfo1_shape;
-        params[PARAM_LFO1_RATE] = p->lfo1_rate;
-        params[PARAM_LFO1_TARGET] = p->lfo1_target;
-        params[PARAM_LFO1_DEPTH] = (uint8_t)(p->lfo1_depth + 100);  // Convert -100..100 to 0..200
-
-        // Page 5 (LFO2)
-        params[PARAM_LFO2_SHAPE] = p->lfo2_shape;
-        params[PARAM_LFO2_RATE] = p->lfo2_rate;
-        params[PARAM_LFO2_TARGET] = p->lfo2_target;
-        params[PARAM_LFO2_DEPTH] = (uint8_t)(p->lfo2_depth + 100);
-
-        // Page 6
-        params[PARAM_ENV_SHAPE] = p->env_shape;
-        params[PARAM_VOICE_ALLOC] = p->voice_index;
-        params[PARAM_RES_MODE] = p->resonant_mode;
-        params[PARAM_RES_MORPH] = p->resonant_morph;
-    }
-
+        load_fm_preset(idx, synth_.params);
         // Update synth with new parameters
         fm_perc_synth_update_params(&synth_);
         current_preset_ = idx;

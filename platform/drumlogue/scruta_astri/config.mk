@@ -2,7 +2,7 @@
 # Project Configuration
 #
 
-PROJECT := fm_perc_synth
+PROJECT := scruta_astri
 PROJECT_TYPE := synth
 
 ##############################################################################

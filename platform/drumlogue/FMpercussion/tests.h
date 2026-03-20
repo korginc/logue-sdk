@@ -615,7 +615,7 @@ bool test_16_beat_stability(void) {
     fm_perc_synth_init(&synth);
 
     // Load a preset with all voices active
-    load_preset(0, synth.params);  // "Deep Tribal"
+    load_fm_preset(1, synth.params);  // "Metal Storm"
     fm_perc_synth_update_params(&synth);
 
     // Calculate samples per beat at 120 BPM

@@ -121,6 +121,55 @@ fast_inline void update_voice_allocation(fm_perc_synth_t* synth, uint8_t alloc_i
     }
 }
 
+/**
+ * Apply resonant morph parameter - controls multiple dimensions
+ */
+fast_inline void apply_resonant_morph(resonant_synth_t * res, float morph, uint8_t mode) {
+  uint32x4_t all_voices = vdupq_n_u32(0xFFFFFFFF);
+
+  // Morph zones with different behaviors based on mode
+  switch (mode) {
+    case 0:  // LowPass - morph controls cutoff frequency
+    {
+      float fc = 50.0f + morph * 7950.0f;  // 50-8000 Hz
+      resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
+      resonant_synth_set_resonance(res, all_voices, 50.0f);  // Fixed resonance
+    } break;
+
+    case 1:  // BandPass - morph controls Q/resonance
+    {
+      float fc = 1000.0f;                       // Fixed center
+      float resonance = 10.0f + morph * 80.0f;  // 10-90%
+      resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
+      resonant_synth_set_resonance(res, all_voices, resonance);
+    } break;
+
+    case 2:  // HighPass - morph controls cutoff with inverse curve
+    {
+      float fc = 8000.0f - morph * 7950.0f;  // 8000-50 Hz (inverse)
+      resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
+      resonant_synth_set_resonance(res, all_voices, 30.0f);
+    } break;
+
+    case 3:  // Notch - morph controls notch width
+    {
+      float fc = 1000.0f;
+      float width = 0.1f + morph * 2.0f;  // Width multiplier
+      // Width affects Q internally
+      resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
+      resonant_synth_set_resonance(res, all_voices, 20.0f + morph * 60.0f);
+    } break;
+
+    case 4:  // Peak - morph controls both frequency and gain
+    {
+      float fc = 200.0f + morph * 3800.0f;  // 200-4000 Hz
+      float gain = 1.0f + morph * 3.0f;     // 1-4x gain
+      resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
+      resonant_synth_set_resonance(res, all_voices, 30.0f + morph * 60.0f);
+      // Gain applied in process function
+    } break;
+  }
+}
 
 /**
  * Update all parameters from UI
@@ -141,8 +190,8 @@ fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
     // =================================================================
     static uint8_t last_alloc = 0xFF;
     if (p[PARAM_VOICE_ALLOC] != last_alloc) {
-        update_voice_allocation(synth, p[PARAM_VOICE_ALLOC]);
-        last_alloc = p[PARAM_VOICE_ALLOC];
+    update_voice_allocation(synth, p[PARAM_VOICE_ALLOC]);
+    last_alloc = p[PARAM_VOICE_ALLOC];
     }
 
     // =================================================================
@@ -160,30 +209,30 @@ fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
 
     // Kick engine: param1 = sweep depth (0-1), param2 = decay shape (0-1)
     kick_engine_update(&synth->kick,
-                       vdupq_n_f32(p[PARAM_KICK_SWEEP] / 100.0f),   // Kick sweep
-                       vdupq_n_f32(p[PARAM_KICK_DECAY] / 100.0f));  // Kick decay
+                        vdupq_n_f32(p[PARAM_KICK_SWEEP] / 100.0f),   // Kick sweep
+                        vdupq_n_f32(p[PARAM_KICK_DECAY] / 100.0f));  // Kick decay
 
     // Snare engine: param1 = noise mix (0-1), param2 = body resonance (0-1)
     snare_engine_update(&synth->snare,
                         vdupq_n_f32(p[PARAM_SNARE_NOISE] / 100.0f),  // Snare noise mix
-                        vdupq_n_f32(p[PARAM_SNARE_BODY] / 100.0f)); // Snare body resonance
+                        vdupq_n_f32(p[PARAM_SNARE_BODY] / 100.0f));  // Snare body resonance
 
     // Metal engine: param1 = inharmonicity (0-1), param2 = brightness (0-1)
     metal_engine_update(&synth->metal,
-                        vdupq_n_f32(p[PARAM_METAL_INHARM] / 100.0f),  // Metal inharmonicity
-                        vdupq_n_f32(p[PARAM_METAL_BRIGHT] / 100.0f)); // Metal brightness
+                        vdupq_n_f32(p[PARAM_METAL_INHARM] / 100.0f),   // Metal inharmonicity
+                        vdupq_n_f32(p[PARAM_METAL_BRIGHT] / 100.0f));  // Metal brightness
 
     // Perc engine: param1 = ratio center (0-1), param2 = variation (0-1)
     perc_engine_update(&synth->perc,
-                       vdupq_n_f32(p[PARAM_PERC_RATIO] / 100.0f),  // Perc ratio center
-                       vdupq_n_f32(p[PARAM_PERC_VAR] / 100.0f)); // Perc variation
+                        vdupq_n_f32(p[PARAM_PERC_RATIO] / 100.0f),  // Perc ratio center
+                        vdupq_n_f32(p[PARAM_PERC_VAR] / 100.0f));   // Perc variation
 
     // =================================================================
     // Update resonant base parameters (mode from param 22)
     // =================================================================
     resonant_synth_set_mode(&synth->resonant,
-                           vdupq_n_u32(0xFFFFFFFF),
-                           (resonant_mode_t)(p[PARAM_RES_MODE] % 5));
+                            vdupq_n_u32(0xFFFFFFFF),
+                            (resonant_mode_t)(p[PARAM_RES_MODE] % 5));
 
     // =================================================================
     // Update LFO (params 12-19)
@@ -206,9 +255,54 @@ fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
 }
 
 /**
- * Initialize synthesizer
+ * standalone function similar to load_preset
  */
-fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
+fast_inline void load_fm_preset(uint8_t idx, uint8_t * params) {
+    if (idx >= NUM_OF_PRESETS) return;
+
+    const fm_preset_t * p = &FM_PRESETS[idx];
+
+    // Page 1
+    params[PARAM_VOICE1_PROB] = p->prob_kick;
+    params[PARAM_VOICE2_PROB] = p->prob_snare;
+    params[PARAM_VOICE3_PROB] = p->prob_metal;
+    params[PARAM_VOICE4_PROB] = p->prob_perc;
+
+    // Page 2
+    params[PARAM_KICK_SWEEP] = p->kick_sweep;
+    params[PARAM_KICK_DECAY] = p->kick_decay;
+    params[PARAM_SNARE_NOISE] = p->snare_noise;
+    params[PARAM_SNARE_BODY] = p->snare_body;
+
+    // Page 3
+    params[PARAM_METAL_INHARM] = p->metal_inharm;
+    params[PARAM_METAL_BRIGHT] = p->metal_bright;
+    params[PARAM_PERC_RATIO] = p->perc_ratio;
+    params[PARAM_PERC_VAR] = p->perc_var;
+
+    // Page 4 (LFO1)
+    params[PARAM_LFO1_SHAPE] = p->lfo1_shape;
+    params[PARAM_LFO1_RATE] = p->lfo1_rate;
+    params[PARAM_LFO1_TARGET] = p->lfo1_target;
+    params[PARAM_LFO1_DEPTH] = (uint8_t)(p->lfo1_depth + 100);  // Convert -100..100 to 0..200
+
+    // Page 5 (LFO2)
+    params[PARAM_LFO2_SHAPE] = p->lfo2_shape;
+    params[PARAM_LFO2_RATE] = p->lfo2_rate;
+    params[PARAM_LFO2_TARGET] = p->lfo2_target;
+    params[PARAM_LFO2_DEPTH] = (uint8_t)(p->lfo2_depth + 100);
+
+    // Page 6
+    params[PARAM_ENV_SHAPE] = p->env_shape;
+    params[PARAM_VOICE_ALLOC] = p->voice_index;
+    params[PARAM_RES_MODE] = p->resonant_mode;
+    params[PARAM_RES_MORPH] = p->resonant_morph;
+}
+
+/**
+* Initialize synthesizer
+*/
+fast_inline void fm_perc_synth_init(fm_perc_synth_t * synth) {
     // Initialize all engines
     kick_engine_init(&synth->kick);
     snare_engine_init(&synth->snare);
@@ -234,15 +328,14 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
     synth->resonant_morph = 0.5f;
 
     // Default probabilities (all 100%)
-    for (int i = 0; i < 4; i++) {
-        synth->voice_probs[i] = 100;
+    for (int i = 0; i < VOICE_ALLOC_MAX; i++) {
+      synth->voice_probs[i] = 100;
     }
 
     // Load default preset
-    load_preset(0, synth->params);
+    load_fm_preset(0, synth->params);
 
     // Update voice allocation from params
-    update_voice_allocation(synth, synth->params[PARAM_VOICE_ALLOC]);
     fm_perc_synth_update_params(synth);
 }
 
@@ -275,61 +368,6 @@ fast_inline float neon_horizontal_sum_alt(float32x4_t v) {
     float32x2_t sum_total = vpadd_f32(sum_low, sum_low);
     return vget_lane_f32(sum_total, 0);
     #endif
-}
-
-/**
- * Apply resonant morph parameter - controls multiple dimensions
- */
-fast_inline void apply_resonant_morph(resonant_synth_t* res, float morph, uint8_t mode) {
-    uint32x4_t all_voices = vdupq_n_u32(0xFFFFFFFF);
-
-    // Morph zones with different behaviors based on mode
-    switch (mode) {
-        case 0: // LowPass - morph controls cutoff frequency
-            {
-                float fc = 50.0f + morph * 7950.0f;  // 50-8000 Hz
-                resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
-                resonant_synth_set_resonance(res, all_voices, 50.0f); // Fixed resonance
-            }
-            break;
-
-        case 1: // BandPass - morph controls Q/resonance
-            {
-                float fc = 1000.0f;  // Fixed center
-                float resonance = 10.0f + morph * 80.0f;  // 10-90%
-                resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
-                resonant_synth_set_resonance(res, all_voices, resonance);
-            }
-            break;
-
-        case 2: // HighPass - morph controls cutoff with inverse curve
-            {
-                float fc = 8000.0f - morph * 7950.0f;  // 8000-50 Hz (inverse)
-                resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
-                resonant_synth_set_resonance(res, all_voices, 30.0f);
-            }
-            break;
-
-        case 3: // Notch - morph controls notch width
-            {
-                float fc = 1000.0f;
-                float width = 0.1f + morph * 2.0f;  // Width multiplier
-                // Width affects Q internally
-                resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
-                resonant_synth_set_resonance(res, all_voices, 20.0f + morph * 60.0f);
-            }
-            break;
-
-        case 4: // Peak - morph controls both frequency and gain
-            {
-                float fc = 200.0f + morph * 3800.0f;  // 200-4000 Hz
-                float gain = 1.0f + morph * 3.0f;     // 1-4x gain
-                resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
-                resonant_synth_set_resonance(res, all_voices, 30.0f + morph * 60.0f);
-                // Gain applied in process function
-            }
-            break;
-    }
 }
 
 /**
