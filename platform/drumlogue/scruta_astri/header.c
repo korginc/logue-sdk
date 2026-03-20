@@ -19,8 +19,8 @@ const __unit_header unit_header_t unit_header = {
         // Page 1: Base
         {0, 15, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Program"}},
         {24, 126, 1, 36, k_unit_param_type_midi_note, 0, 0, 0, {"Note"}},
-        {0, 89, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Osc1Wave"}},
-        {0, 89, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Osc2Wave"}},
+        {0, 239, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Osc1Wave"}},
+        {0, 239, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Osc2Wave"}},
 
         // Page 2: Osc 2 Controls
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Detune"}},

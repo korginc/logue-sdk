@@ -25,7 +25,7 @@ struct WavetableOsc {
         // Find exact position in the wavetable
         float exact_pos = phase * (float)table_length;
         uint32_t index_A = (uint32_t)exact_pos;
-        uint32_t index_B = (index_A + 1) % table_length;
+        uint32_t index_B = (index_A + 1) & 255u; // table is always 256 samples (power-of-2)
 
         // Linear Interpolation for smooth sub-octave pitching
         float frac = exact_pos - (float)index_A;
