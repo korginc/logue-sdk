@@ -31,6 +31,9 @@
 
 //*/
 
+#ifndef B3D63EBA_2110_4FB3_8C9B_FDBBC451F353
+#define B3D63EBA_2110_4FB3_8C9B_FDBBC451F353
+
 /**
  * @file    float_math.h
  * @brief   Floating Point Math Utilities.
@@ -46,9 +49,17 @@
 #ifndef __float_math_h
 #define __float_math_h
 
+#ifdef fmax
+#undef fmax
+#endif
+#ifdef fmin
+#undef fmin
+#endif
 #include <math.h>
 #include <stdint.h>
+#if defined(__arm__) || defined(__aarch64__)
 #include <arm_neon.h>
+#endif
 
 // this is stdfloat.h content
 #ifdef __cplusplus
@@ -149,6 +160,15 @@ typedef float float64_t;
 #define M_1_SQRT2 0.7071067811865475f
 #endif
 
+#ifndef M_LOG2_E
+#define M_LOG2_E 1.4426950408889634f
+#endif
+
+// ln(2) = 1 / ln(e)
+#ifndef M_INV_LOG2_E
+#define M_INV_LOG2_E 0.6931471805599453f
+#endif
+
 // 20 / ln(10)
 #ifndef M_LOGTODB
 #define M_LOGTODB 8.6858896380650365530225783783321f
@@ -157,6 +177,12 @@ typedef float float64_t;
 #ifndef M_DBTOLOG
 #define M_DBTOLOG 0.11512925464970228420089957273422f
 #endif
+
+// Constants for optimized logarithmic scaling
+#define FASTERLOGF_10000      9.204111f
+#define FASTERLOGF_50         3.89179f
+#define INV_FASTERLOGF_10000  0.10857362f // 1.0f / 9.21034037f (ln(10000))
+#define INV_FASTERLOGF_50     0.25562225f // 1.0f / 3.91202301f (ln(50))
 
 /** @} */
 
@@ -560,28 +586,19 @@ float fastersinf(float x) {
   vx.i &= 0x7FFFFFFF;
   const float qpprox = M_4_PI * x - M_4_PI2 * x * vx.f;
   p.i |= sign;
-  return qpprox * (q + p.f * qpprox);
+  return fmaxf(-1.0f, fminf(1.0f, qpprox * (q + p.f * qpprox)));
 }
 
 /** "Fast" sine approximation, valid on full x domain
  * @note Adapted from Paul Mineiro's FastFloat
  */
 static inline __attribute__((optimize("Ofast"), always_inline))
-float fastsinfullf(float x) {
+float fastersinfullf(float x) {
   const int32_t k = (int32_t)(x * M_1_TWOPI);
   const float half = (x < 0) ? -0.5f : 0.5f;
   return fastsinf((half + k) * M_TWOPI - x);
 }
 
-/** "Faster" sine approximation, valid on full x domain
- * @note Adapted from Paul Mineiro's FastFloat
- */
-static inline __attribute__((optimize("Ofast"), always_inline))
-float fastersinfullf(float x) {
-  const int32_t k = (int32_t)(x * M_1_TWOPI);
-  const float half = (x < 0) ? -0.5f : 0.5f;
-  return fastersinf((half + k) * M_TWOPI - x);
-}
 
 /** "Fast" cosine approximation, valid for x in [-M_PI, M_PI]
  * @note Adapted from Paul Mineiro's FastFloat
@@ -605,14 +622,6 @@ float fastercosf(float x) {
   return qpprox + p * qpprox * (1.0f - qpprox * qpprox);
 }
 
-/** "Fast" cosine approximation, valid on full x domain
- * @note Adapted from Paul Mineiro's FastFloat
- * @note Warning: can be slower than libc version!
- */
-static inline __attribute__((optimize("Ofast"), always_inline))
-float fastcosfullf(float x) {
-  return fastersinfullf(x + M_PI_2);
-}
 
 /** "Faster" cosine approximation, valid on full x domain
  * @note Adapted from Paul Mineiro's FastFloat
@@ -703,8 +712,20 @@ float fasterlogf(float x) {
   return M_LN2 * fasterlog2f(x);
 }
 
+// Real-time Audio (Frequency modulation, envelopes).
+static inline float fast_pow2(float p) {
+    // 2^p approximation using IEEE-754 floating point trick
+    // 8388608.0f = 2^23
+    // 1065353216 = 127 << 23 (exponent bias)
+    union { float f; int32_t i; } u;
+    u.i = (int32_t)(p * 8388608.0f) + 1065353216;
+    return u.f;
+}
+
+
 /** "Fast" power of 2 approximation, valid for x in [ -126, ... as precision allows.
  * @note Adapted from Paul Mineiro's FastFloat
+ * Precision-critical math (e.g. tuning tables).
  */
 static inline __attribute__((optimize("Ofast"), always_inline))
 float fastpow2f(float p) {
@@ -720,6 +741,7 @@ float fastpow2f(float p) {
 
 /** "Faster" power of 2 approximation, valid for x in [ -126, ... as precision allows.
  * @note Adapted from Paul Mineiro's FastFloat
+ * General purpose where input might be $-\infty$.
  */
 static inline __attribute__((optimize("Ofast"), always_inline))
 float fasterpow2f(float p) {
@@ -975,6 +997,32 @@ float sqrtsum2bett(const float dx, const float dy) {
     return (maxD * _1007div1024) + (minD * _441div1024) - term3;
 }
 
+/** This the famous Fast inverse square root code from Quake III!
+ * https://en.wikipedia.org/wiki/Fast_inverse_square_root
+ */
+static inline __attribute__((optimize("Ofast"), always_inline))
+float Q_rsqrt( float number )
+{
+  // safety check against zero division
+  if (number <= 0.0f) {
+    number = 1.0e-9f;
+  }
+
+	long i;
+	float x2, y;
+	const float threehalfs = 1.5F;
+
+	x2 = number * 0.5F;
+	y  = number;
+	i  = * ( long * ) &y;                       // evil floating point bit level hacking
+	i  = 0x5f3759df - ( i >> 1 );               // what the fuck?
+	y  = * ( float * ) &i;
+	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
+//	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
+
+	return y;
+}
+
 
 /** Fast but imprecise approximation for the euclidean distance
  * given carthesian coordinates for two points (x1,y1) and (x2,y2)
@@ -1011,9 +1059,13 @@ float eucDist2Bett(const float x1, const float y1, const float x2, const float y
 }
 
 
+
+
 /** @} */
 
 #endif // __float_math_h
 
 /** @} @} */
 
+
+#endif /* B3D63EBA_2110_4FB3_8C9B_FDBBC451F353 */

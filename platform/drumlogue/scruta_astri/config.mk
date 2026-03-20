@@ -2,7 +2,7 @@
 # Project Configuration
 #
 
-PROJECT := resonator
+PROJECT := fm_perc_synth
 PROJECT_TYPE := synth
 
 ##############################################################################
@@ -13,18 +13,21 @@ PROJECT_TYPE := synth
 CSRC = header.c
 
 # C++ sources
-CXXSRC = unit.cc ripplerx.cc Envelope.cc Filter.cc Mallet.cc Resonator.cc Partial.cc Waveguide.cc Noise.cc Voice.cc Models.cc Sampler.cc
+CXXSRC = unit.cc
 
-# List ASM source files here
-ASMSRC =
-
-ASMXSRC =
+# List all your FM percussion synth source files
+# Note: These are all headers, so no need to list them in sources
+# They will be included via synth.h
 
 ##############################################################################
 # Include Paths
 #
 
-UINCDIR  =
+UINCDIR  = .
+
+##############################################################################
+# Compiler Flags
+#
 
 ##############################################################################
 # Library Paths
@@ -44,4 +47,3 @@ ULIBS += -lc
 #
 
 UDEFS =
-

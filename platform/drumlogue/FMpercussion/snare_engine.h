@@ -17,7 +17,6 @@
 #include "fm_voices.h"
 #include "sine_neon.h"
 #include "prng.h"
-#include "sine_neon.h"
 
 // Snare engine constants
 #define SNARE_CARRIER_BASE 200.0f    // Base frequency
