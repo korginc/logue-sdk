@@ -65,9 +65,11 @@ float32x4_t Partial::process(float32x4_t input)
     float32x4_t num = vmlaq_f32(vmulq_f32(x2, b2_vec), input, b0_vec);
     // Feedback: a1*y1 + a2*y2
     float32x4_t denom_corr = vmlaq_f32(vmulq_f32(y2, a2_vec), y1, a1_vec);
-	// Final: (numerator - feedback) / a0 using reciprocal approximation for audio fidelity
-	// Safe because a0 is validated as non-zero in update()
+	// Reciprocal of a0 with one Newton-Raphson refinement step for full float precision.
+	// vrecpeq_f32 alone is ~8-bit accurate; vrecpsq_f32 brings it to ~24-bit.
+	// Safe because a0 is validated as non-zero in update().
 	float32x4_t recip_a0 = vrecpeq_f32(a0_vec);
+	recip_a0 = vmulq_f32(vrecpsq_f32(a0_vec, recip_a0), recip_a0);
 	float32x4_t output = vmulq_f32(vsubq_f32(num, denom_corr), recip_a0);
 
 	x2 = x1;

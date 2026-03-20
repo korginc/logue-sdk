@@ -45,7 +45,7 @@ void Voice::trigger(/**uint64_t timestamp,*/ float32_t srate, int _note,
 	}
 	else if (((resA.on && resA.active) || (resB.on && resB.active))) {
 		isFading = true;
-		fadeTotalSamples = (int)(c_repeatNoteFadeMs * 0.001 * srate);
+		fadeTotalSamples = (int)(c_repeatNoteFadeMs * 0.001f * srate);
 		fadeSamples = fadeTotalSamples;
 		updateResonators();
 	}
@@ -61,7 +61,7 @@ float32_t Voice::fadeOut()
 		isFading = false;
 		triggerStart(true);
 	}
-	return isFading ? (double)fadeSamples / (double)fadeTotalSamples : 1.0;
+	return isFading ? (float)fadeSamples / (float)fadeTotalSamples : 1.0f;
 }
 
 void Voice::triggerStart(bool reset)
@@ -417,14 +417,17 @@ void Voice::updateResonators()
                     x_count_tile = vaddq_f32(x_count_tile, dx_masked);
 
                     // 2. k_count: +1 if dx > 0, -1 if dx < 0 (only where valid)
+                    // NEON comparison masks are 0x00000000/0xFFFFFFFF — NOT 0/1.
+                    // vreinterpretq_f32_u32(0xFFFFFFFF) = NaN, so we must convert
+                    // the mask to 0.0f/1.0f via: uint32 >> 31 gives 0 or 1, then cvt.
                     uint32x4_t dx_positive = vcgtq_f32(dx_vec, v_zero);
                     uint32x4_t dx_negative = vcltq_f32(dx_vec, v_zero);
 
                     uint32x4_t active_positive = vandq_u32(valid_mask, dx_positive);
                     uint32x4_t active_negative = vandq_u32(valid_mask, dx_negative);
 
-                    float32x4_t k_inc = vreinterpretq_f32_u32(active_positive);
-                    float32x4_t k_dec = vreinterpretq_f32_u32(active_negative);
+                    float32x4_t k_inc = vcvtq_f32_u32(vshrq_n_u32(active_positive, 31));
+                    float32x4_t k_dec = vcvtq_f32_u32(vshrq_n_u32(active_negative, 31));
 
                     k_count_tile = vaddq_f32(k_count_tile, k_inc);
                     k_count_tile = vsubq_f32(k_count_tile, k_dec);
@@ -440,7 +443,8 @@ void Voice::updateResonators()
                     uint32x4_t abs_dy_gte_dx = vcgeq_f32(v_dy, abs_dx);
                     uint32x4_t active_dy_max = vandq_u32(valid_mask, abs_dy_gte_dx);
 
-                    float32x4_t dy_contrib = vreinterpretq_f32_u32(active_dy_max);
+                    // Same mask→float conversion as k_count above
+                    float32x4_t dy_contrib = vcvtq_f32_u32(vshrq_n_u32(active_dy_max, 31));
                     dy_max_tile = vaddq_f32(dy_max_tile, dy_contrib);
                 }
             }

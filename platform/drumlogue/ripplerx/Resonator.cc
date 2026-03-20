@@ -56,10 +56,10 @@ void Resonator::setParams(float32_t _srate, bool _on, int _model, int _partials,
 
 void Resonator::validateAndSetModel(int _model)
 {
-	// Clamp model to valid range [0, 7] for different resonator types
+	// Clamp model to valid range [0, 8] (String..ClosedTube)
 	// See ModelNames enum for valid values
 	if (_model < 0) nmodel = 0;
-	else if (_model > ModelNames::OpenTube) nmodel = ModelNames::OpenTube;
+	else if (_model > ModelNames::ClosedTube) nmodel = ModelNames::ClosedTube;
 	else nmodel = _model;
 }
 
@@ -123,9 +123,10 @@ float32x4_t Resonator::process(float32x4_t input)
 	float32x2_t sum_pair = vadd_f32(sum_high, sum_low);
 	float32_t total = vget_lane_f32(vpadd_f32(sum_pair, sum_pair), 0);
 
-	silence += (total > c_silence_threshold * 4.0f) ? 1 : 0;
+	// Reset counter while signal is present; count up only during silence.
+	// When silence has persisted for ~1 second, deactivate the resonator.
+	silence = (total > c_silence_threshold * 4.0f) ? 0 : silence + 1;
 
-	// Deactivate if silent for ~1 second
 	if (silence >= static_cast<int>(srate)) {
 		active = false;
 	}
