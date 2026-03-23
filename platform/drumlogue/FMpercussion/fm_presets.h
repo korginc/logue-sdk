@@ -7,15 +7,9 @@
 
 #pragma once
 
-// Treat as C to avoid the “designator outside aggregate initializer” error
-#ifdef __cplusplus
-extern "C"
-{
-#endif
-
 #include <stdint.h>
-#include "constants.h"
-#include "resonant_synthesis.h"
+#include “constants.h”
+#include “resonant_synthesis.h”
 
 // LFO target values (from lfo_enhanced.h)
 #define LFO_TARGET_NONE     0
@@ -82,8 +76,19 @@ typedef struct {
     uint8_t engine_map[4];   // Which engine each voice uses
 } fm_preset_t;
 
-// Factory presets (now with 4 resonant examples)
-static const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
+// Array defined in fm_presets.c (C compilation) to support C99 designated
+// initializers that GCC 6 C++ does not implement for char array / array fields.
+#ifdef __cplusplus
+extern "C" {
+#endif
+extern const fm_preset_t FM_PRESETS[NUM_OF_PRESETS];
+#ifdef __cplusplus
+}
+#endif
+
+/* ---- full definition is in fm_presets.c ---- */
+#ifdef FM_PRESETS_DEFINE_DATA
+const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
     // Preset 0: "Deep Tribal" (original)
     {
         .name = "Deep Tribal",
@@ -457,7 +462,4 @@ static const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
         .resonant_res = 80,
         .resonant_center = 80,  // ~6400 Hz
         .engine_map = {ENGINE_KICK, ENGINE_SNARE, ENGINE_RESONANT, ENGINE_PERC}}};
-
-#ifdef __cplusplus
-}
-#endif
+#endif /* FM_PRESETS_DEFINE_DATA */

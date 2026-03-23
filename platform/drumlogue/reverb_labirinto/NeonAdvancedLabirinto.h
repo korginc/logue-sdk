@@ -299,23 +299,20 @@ private:
                 float pos = baseIndices[chGroup][sampleIdx] - baseIdx;
                 float32x4_t frac = vdupq_n_f32(pos);
 
-                // Interpolate each channel
+                // Interpolate each channel.
+                // vgetq_lane_f32/vsetq_lane_f32 require a compile-time constant
+                // lane index; use vst1q_f32/vld1q_f32 to spill/fill via a
+                // float[4] array instead so sampleIdx can be a variable.
                 for (int chOffset = 0; chOffset < 4; chOffset++) {
-                    // Get the sample for this channel at the base time
-                    float32x4_t s0 = frames0.val[chOffset];
-                    float s0_val = vgetq_lane_f32(s0, sampleIdx);
+                    float s0_lanes[4], s1_lanes[4], out_lanes[4];
+                    vst1q_f32(s0_lanes, frames0.val[chOffset]);
+                    vst1q_f32(s1_lanes, frames1.val[chOffset]);
+                    vst1q_f32(out_lanes, out[chGroup + chOffset]);
 
-                    // Get the sample for this channel at next time
-                    float32x4_t s1 = frames1.val[chOffset];
-                    float s1_val = vgetq_lane_f32(s1, sampleIdx);
+                    float sample = s0_lanes[sampleIdx] + pos * (s1_lanes[sampleIdx] - s0_lanes[sampleIdx]);
+                    out_lanes[sampleIdx] = sample;
 
-                    // Linear interpolation
-                    float sample = s0_val + pos * (s1_val - s0_val);
-
-                    // Store in output vector
-                    float32x4_t temp = out[chGroup + chOffset];
-                    temp = vsetq_lane_f32(sample, temp, sampleIdx);
-                    out[chGroup + chOffset] = temp;
+                    out[chGroup + chOffset] = vld1q_f32(out_lanes);
                 }
             }
         }
@@ -376,14 +373,16 @@ private:
     /*===========================================================================*/
 
     void writeDelayLines4(const float32x4_t* signals) {
-        // Write 4 samples to interleaved delay line
+        // Spill all channel vectors once; index by sample position (variable s)
+        // to avoid vgetq_lane_f32(v, variable) which requires a constant index.
+        float ch_lanes[FDN_CHANNELS][4];
+        for (int ch = 0; ch < FDN_CHANNELS; ch++)
+            vst1q_f32(ch_lanes[ch], signals[ch]);
+
         for (int s = 0; s < 4; s++) {
             uint32_t pos = (writePos + s) & BUFFER_MASK;
-
-            // Write all 8 channels for this time position
-            for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-                delayLine[pos].samples[ch] = vgetq_lane_f32(signals[ch], s);
-            }
+            for (int ch = 0; ch < FDN_CHANNELS; ch++)
+                delayLine[pos].samples[ch] = ch_lanes[ch][s];
         }
 
         writePos = (writePos + 4) & BUFFER_MASK;
@@ -580,13 +579,13 @@ private:
     /* Fast sine approximation (from float_math.h) */
     /*===========================================================================*/
     fast_inline float32x4_t fast_sin_neon(float32x4_t x) {
-        // Use fastersinfullf from float_math.h
+        // Manually unrolled: vgetq_lane_f32 / vsetq_lane_f32 require constant
+        // lane indices; a loop variable is not accepted by the compiler.
         float32x4_t result;
-        for (int i = 0; i < 4; i++) {
-            float val = vgetq_lane_f32(x, i);
-            val = fastersinfullf(val);
-            result = vsetq_lane_f32(val, result, i);
-        }
+        result = vsetq_lane_f32(fastersinfullf(vgetq_lane_f32(x, 0)), result, 0);
+        result = vsetq_lane_f32(fastersinfullf(vgetq_lane_f32(x, 1)), result, 1);
+        result = vsetq_lane_f32(fastersinfullf(vgetq_lane_f32(x, 2)), result, 2);
+        result = vsetq_lane_f32(fastersinfullf(vgetq_lane_f32(x, 3)), result, 3);
         return result;
     }
 

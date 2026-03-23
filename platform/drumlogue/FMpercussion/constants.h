@@ -20,8 +20,13 @@
  * - Envelope ROM constants
  */
 
+#ifdef __cplusplus
 #include <cstdint>
 #include <cmath>
+#else
+#include <stdint.h>
+#include <math.h>
+#endif
 
 // ============================================================================
 // NEON Optimization Constants

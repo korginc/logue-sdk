@@ -13,7 +13,7 @@ PROJECT_TYPE := delfx
 CSRC = header.c
 
 # C++ sources
-CXXSRC = unit.cc PercussionSpatializer.cpp
+CXXSRC = unit.cc PercussionSpatializer.cc
 
 # List ASM source files here
 ASMSRC =

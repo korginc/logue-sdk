@@ -66,8 +66,9 @@ fast_inline float32x4_t midi_to_freq_neon(uint32x4_t midi_notes) {
     float32x4_t a4_freq = vdupq_n_f32(A4_FREQ);
     float32x4_t a4_midi = vdupq_n_f32(A4_MIDI);
 
-    // Calculate semitone offset
+    // Calculate semitone offset (TODO: use for full pitch calc; placeholder for now)
     float32x4_t semitone_offset = vsubq_f32(vcvtq_f32_u32(midi_notes), a4_midi);
+    (void)semitone_offset;
 
     // 2^(offset/12) using approximation or table
     // In practice, you'd use a fast approximation

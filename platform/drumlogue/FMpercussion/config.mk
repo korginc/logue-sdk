@@ -10,7 +10,7 @@ PROJECT_TYPE := synth
 #
 
 # C sources
-CSRC = header.c
+CSRC = header.c fm_presets.c
 
 # C++ sources
 CXXSRC = unit.cc

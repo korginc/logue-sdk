@@ -279,6 +279,11 @@ public:
         // =================================================================
         float mixed[FDN_CHANNELS][4];
 
+        // Spill inMono to a plain array before the loop: vgetq_lane_f32 requires
+        // a compile-time constant lane index; a loop variable is not accepted.
+        float inMonoArr[4];
+        vst1q_f32(inMonoArr, inMono);
+
         // For each sample position
         for (int s = 0; s < 4; s++) {
             // Load one sample from each channel into a vector
@@ -342,7 +347,7 @@ public:
             total_hi = vmulq_f32(total_hi, decay4);
 
             // Store channels 0-3 (inject input into channel 0 only)
-            float inSample = vgetq_lane_f32(inMono, s);
+            float inSample = inMonoArr[s]; // spilled above; variable index safe
             mixed[0][s] = vgetq_lane_f32(total_lo, 0) + inSample * (1.0f - decay);
             mixed[1][s] = vgetq_lane_f32(total_lo, 1);
             mixed[2][s] = vgetq_lane_f32(total_lo, 2);
@@ -375,6 +380,11 @@ public:
         // =================================================================
         // Stereo downmix (channels 0-3 to left, 4-7 to right)
         // =================================================================
+        // Spill stereo input vectors for variable-index access (same reason as inMono above)
+        float inLArr[4], inRArr[4];
+        vst1q_f32(inLArr, inL4);
+        vst1q_f32(inRArr, inR4);
+
         for (int s = 0; s < 4; s++) {
             float leftOut = 0.0f, rightOut = 0.0f;
             for (int ch = 0; ch < 4; ch++) {
@@ -393,8 +403,8 @@ public:
             float wetL = colorLpfL + brightness * (leftOut  - colorLpfL);
             float wetR = colorLpfR + brightness * (rightOut - colorLpfR);
 
-            float inLVal = vgetq_lane_f32(inL4, s);
-            float inRVal = vgetq_lane_f32(inR4, s);
+            float inLVal = inLArr[s];
+            float inRVal = inRArr[s];
 
             outL[s] = inLVal * (1.0f - glow) + wetL * glow;
             outR[s] = inRVal * (1.0f - glow) + wetR * glow;

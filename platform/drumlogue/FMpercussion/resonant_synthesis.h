@@ -186,6 +186,7 @@ fast_inline void resonant_synth_apply_lfo_resonance(resonant_synth_t* rs,
 fast_inline void resonant_synth_set_mode(resonant_synth_t* rs,
                                          uint32x4_t voice_mask,
                                          resonant_mode_t mode) {
+    (void)voice_mask; // reserved for per-voice masking (not yet implemented)
     rs->mode = mode;
 }
 
