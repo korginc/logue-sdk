@@ -1126,8 +1126,39 @@ public:
                     ut_voice_out   = voice_out;
                 }
 #endif
+
+#if RENDER_STAGE < 3
+                // ── Stage 1/2: voice lifetime management ───────────────────
+                // Without Stage 3 squelch, voices stay is_active=true forever.
+                // Deactivate once the mallet has fully decayed and (if Phase 5)
+                // the noise envelope is also idle — keeps voice slots free for
+                // re-triggering and prevents stale voices burning CPU.
+#ifdef ENABLE_PHASE_5_EXCITERS
+                if (voice.is_releasing &&
+                        voice.exciter.mallet_lp2 < 1e-6f &&
+                        voice.exciter.noise_env.state == ENV_IDLE) {
+                    voice.is_active = false;
+                }
+#else
+                if (voice.is_releasing && voice.exciter.mallet_lp2 < 1e-6f) {
+                    voice.is_active = false;
+                }
+#endif
+#endif // RENDER_STAGE < 3
+
             }
         }
+
+#if RENDER_STAGE < 4
+        // ── Stage 1–3: hard-clip output ────────────────────────────────────
+        // Stage 4 uses soft-clip + overdrive.  For debug stages the raw mallet
+        // impulse (~3–4 × full-scale) must be clamped or the Drumlogue DAC
+        // saturates on the first note and may engage hardware protection.
+        for (size_t i = 0; i < frames; ++i) {
+            main_out[i * 2]     = fmaxf(-0.99f, fminf(0.99f, main_out[i * 2]));
+            main_out[i * 2 + 1] = fmaxf(-0.99f, fminf(0.99f, main_out[i * 2 + 1]));
+        }
+#endif // RENDER_STAGE < 4
 
 #if RENDER_STAGE >= 4
         // ── Stage 4b: Master FX (filter + overdrive + brickwall) ──────────
