@@ -276,6 +276,10 @@ public:
     // Called by unit_set_param_value(0, value) to load a new patch
     inline void LoadPreset(uint8_t idx) {
         m_preset_idx = idx;
+        // Keep m_params[0] in sync so unit_get_param_value(0) returns the correct
+        // preset index regardless of whether LoadPreset was called via setParameter
+        // (Program knob) or directly via unit_load_preset().
+        m_params[k_paramProgram] = idx;
 
         // Columns Map: NOTE keep the justification so it's easier to read!!
         // 0:Prgram | 1:Note | 2:Bank | 3:Sample | 4:MlltRes | 5:MlltStif | 6:VlMllR | 7:VlMllS
@@ -1018,48 +1022,59 @@ public:
     // ==============================================================================
     // 6. The Master Audio Loop (Called by Drumlogue OS)
     // ==============================================================================
+    //
+    // RENDER_STAGE: Incremental isolation for hardware silence debugging.
+    // Set in config.mk:  UDEFS += -DRENDER_STAGE=1
+    //
+    //   Stage 1 — Raw exciter only (mallet impulse / PCM sample, no waveguide, no env, no FX)
+    //             If silent: gate callbacks or voice activation are broken.
+    //   Stage 2 — + Waveguide resonators
+    //             If silent: delay_length or feedback_gain is 0 on ARM.
+    //   Stage 3 — + master_env fade + squelch (Phase 18 fix)
+    //             If silent: pre-advance fix not working on ARM; revert to exciter-only.
+    //   Stage 4 — + Tone EQ + master filter + overdrive (full render, default)
+    //             If silent: tone or FX path issue.
+    // ==============================================================================
+#ifndef RENDER_STAGE
+#define RENDER_STAGE 4
+#endif
+
     inline void processBlock(float* __restrict main_out, size_t frames) {
 
-        // CRITICAL FIX 1: Clear the hardware buffer!
-        // If we don't do this, the += accumulation can cause NaN silence.
-        for (size_t i = 0; i < frames * 2; ++i) {
+        // Clear the output buffer — mandatory; without this the += accumulation
+        // can corrupt with stale or NaN data from the previous block.
+        for (size_t i = 0; i < frames * 2; ++i)
             main_out[i] = 0.0f;
-        }
 
-        // Cache tone once per block — avoids reading m_params[] on every sample
-        // and eliminates the theoretical UI/audio-thread race on that array access.
+        // Hoist tone read outside all loops — avoids UI/audio-thread race.
         const float tone_val = state.tone;
 
-        // Sum active voices into the master buffer
         for (int voice_idx = 0; voice_idx < NUM_VOICES; ++voice_idx) {
             VoiceState& voice = state.voices[voice_idx];
-
             if (!voice.is_active) continue;
 
-            // Process the block for this voice
             for (size_t i = 0; i < frames; ++i) {
 
-                // 1. Generate the Exciter burst
+                // ── Stage 1: Raw exciter (always executes) ─────────────────
+                // Mallet impulse and/or PCM sample — the most direct signal
+                // possible.  If Stage 1 is silent, the voice is never activated
+                // or unit_gate_on / unit_render are not being called.
                 float exciter_sig = process_exciter(voice.exciter);
+                float voice_out   = exciter_sig * voice.current_velocity;
 
-                // 2. Mutual Coupling (Partls 0–4 → 0.0–1.0 coupling depth).
-                // Use m_coupling_depth, not m_params[k_paramPartls], because
-                // Partls=5/6 (editor-select modes) must not change the coupling.
-                float coupling_amt = m_coupling_depth;
+                // outA kept at 0 here so the debug probe below always compiles.
+                float outA = 0.0f;
 
-                // Symmetric bidirectional coupling via 1-sample-delayed outputs.
-                // Both resonators receive each other's PREVIOUS-sample output so the
-                // coupling is physically reciprocal.  The old code used outA (current
-                // sample) to feed ResB — zero delay on that path, 1-sample delay on
-                // the reverse path — creating an asymmetric formant artefact at high
-                // coupling depths.
-                float inputA = exciter_sig + (voice.resB_out_prev * coupling_amt * 0.5f);
-                float outA = process_waveguide(voice.resA, inputA);
+#if RENDER_STAGE >= 2
+                // ── Stage 2: Waveguide resonators ──────────────────────────
+                // If Stage 2 is silent but Stage 1 is not, the waveguide has
+                // zero delay_length or zero feedback_gain on this hardware.
+                float inputA = exciter_sig + (voice.resB_out_prev * m_coupling_depth * 0.5f);
+                outA = process_waveguide(voice.resA, inputA);
                 float outB = 0.0f;
 
-                // Enable ResB for 16+ partials; 4 or 8 partials runs single-resonator to save CPU.
                 if (m_active_partials >= 16) {
-                    float inputB = exciter_sig + (voice.resA_out_prev * coupling_amt * 0.5f);
+                    float inputB = exciter_sig + (voice.resA_out_prev * m_coupling_depth * 0.5f);
                     outB = process_waveguide(voice.resB, inputB);
                     voice.resA_out_prev = outA;
                     voice.resB_out_prev = outB;
@@ -1068,98 +1083,69 @@ public:
                     voice.resB_out_prev = 0.0f;
                 }
 
-                // 3. Mix the resonators together
-                float voice_out = (outA * (1.0f - state.mix_ab)) + (outB * state.mix_ab);
+                voice_out = ((outA * (1.0f - state.mix_ab)) + (outB * state.mix_ab))
+                            * voice.current_velocity;
+#endif // RENDER_STAGE >= 2
 
-                // Apply note velocity
-                voice_out *= voice.current_velocity;
-
-                // 4. Voice Tilt EQ (Tone parameter: -10 to 30)
-                // Extracts a ~2.7 kHz LP component and either blends towards it (dark) or
-                // boosts the complementary HP component (bright).
-                // tone_val is hoisted above the voice loop (state.tone, set by setParameter).
-                // Define tuning constants for the tilt EQ
-                voice.tone_lp = (voice_out * kToneLpMix) + (voice.tone_lp * (1.0f - kToneLpMix));
-                if (tone_val < zeroThreshold) {
-                    // Negative Tone: interpolate towards lowpass (cuts highs)
-                    float cut_amt = -tone_val / kToneCutDivisor;
-                    voice_out = voice_out + (voice.tone_lp - voice_out) * cut_amt;
-                } else if (tone_val > zeroThreshold) {
-                    // Positive Tone: boost the highpass component (adds highs)
-                    float hp = voice_out - voice.tone_lp;
-                    float boost_amt = tone_val / kToneBoostDivisor; // up to 2.0× high-shelf boost at Tone=30
-                    voice_out += hp * boost_amt;
-                }
-
-// [UT4: GATE-OFF CHOKE FIX] - The "Damper Pedal" Squelch + Dynamic Energy Squelch
+#if RENDER_STAGE >= 3
+                // ── Stage 3: master_env fade + squelch ────────────────────
+                // If Stage 3 is silent but Stage 2 is not, the Phase 18
+                // pre-advance fix is not working on this ARM binary — the
+                // envelope is stuck at 0 on the first GateOff tick.
 #ifdef ENABLE_PHASE_5_EXCITERS
-                // 1. Track the acoustic energy of the waveguide model BEFORE applying
-                //    the master-envelope fade.  This distinguishes "the tube is silent"
-                //    from "the user released the gate".  α=0.01 → τ ≈ 2 ms at 48 kHz.
                 voice.mag_env = (fabsf(voice_out) * alpha) + (voice.mag_env * limiter);
-
-                // 2. Process the Master Envelope (smooth fade-out during release).
-                //    During gate-on it holds at 1.0 — no audible effect on the tail.
-                //    On GateOff/NoteOff it fades to 0 at the rate set by k_paramRel.
                 float damper_fade = voice.exciter.master_env.process();
                 voice_out *= damper_fade;
-
-                // 3. Dynamic Energy Squelch: yield CPU as soon as the acoustic model is
-                //    inaudible (−80 dB ≈ 0.0001), without waiting for the full release
-                //    fade to run to ENV_IDLE.
-                //    Guard: current_frame > 1000 (~20 ms) prevents mis-fires during the
-                //    delay-line round-trip window where voice_out is legitimately 0.
                 if (voice.is_releasing && voice.exciter.current_frame > kSquelchGuardSamples) {
-                    if (voice.mag_env < kSquelchThreshold || voice.exciter.master_env.state == ENV_IDLE) {
+                    if (voice.mag_env < kSquelchThreshold ||
+                            voice.exciter.master_env.state == ENV_IDLE) {
                         voice.is_active = false;
                     }
                 }
-#endif
+#endif // ENABLE_PHASE_5_EXCITERS
+#endif // RENDER_STAGE >= 3
 
-                // 4. Sum into the master interleaved stereo buffer (L and R)
-                main_out[i * 2]     += voice_out * state.master_gain; // Left
-                main_out[i * 2 + 1] += voice_out * state.master_gain; // Right
+#if RENDER_STAGE >= 4
+                // ── Stage 4a: Tilt EQ ──────────────────────────────────────
+                voice.tone_lp = (voice_out * kToneLpMix) + (voice.tone_lp * (1.0f - kToneLpMix));
+                if (tone_val < zeroThreshold) {
+                    voice_out = voice_out + (voice.tone_lp - voice_out) * (-tone_val / kToneCutDivisor);
+                } else if (tone_val > zeroThreshold) {
+                    float hp = voice_out - voice.tone_lp;
+                    voice_out += hp * (tone_val / kToneBoostDivisor);
+                }
+#endif // RENDER_STAGE >= 4
 
-// ==============================================================================
-// [UT1/UT2/UT3] TRACK ACTIVE SIGNAL FOR UNIT TEST
-// ==============================================================================
+                main_out[i * 2]     += voice_out * state.master_gain;
+                main_out[i * 2 + 1] += voice_out * state.master_gain;
+
 #ifdef UNIT_TEST_DEBUG
                 if (voice_idx == state.next_voice_idx) {
                     ut_exciter_out = exciter_sig;
-                    ut_delay_read = outA;
-                    ut_voice_out = voice_out;
+                    ut_delay_read  = outA;
+                    ut_voice_out   = voice_out;
                 }
 #endif
             }
         }
 
-        // 4. Master Effects & Overdrive
+#if RENDER_STAGE >= 4
+        // ── Stage 4b: Master FX (filter + overdrive + brickwall) ──────────
         for (size_t i = 0; i < frames; ++i) {
             float mix_l = main_out[i * 2];
             float mix_r = main_out[i * 2 + 1];
-
 #ifdef ENABLE_PHASE_6_FILTERS
-            // master_filter is a single mono SVF instance. Calling process() once
-            // advances its internal state by one sample. Since all voices sum to
-            // identical L/R signals (mono), process L only and copy to R.
             mix_l = state.master_filter.process(mix_l);
             mix_r = mix_l;
 #endif
-
-            // --- THE NEW DRUM OVERDRIVE ---
-            // 1. Multiply by the UI Gain parameter (e.g., 1.0x to 10.0x)
             mix_l *= state.master_drive;
             mix_r *= state.master_drive;
-
-            // 2. Soft-Clipping (Distortion Curve)
-            // Equation: x / (1.0 + abs(x)) curves the peaks mathematically
             float clipped_l = mix_l / (1.0f + fabsf(mix_l));
             float clipped_r = mix_r / (1.0f + fabsf(mix_r));
-
-            // 5. The Hardware Safety Net (Brickwall Limiter)
             main_out[i * 2]     = fmaxf(-0.99f, fminf(0.99f, clipped_l));
             main_out[i * 2 + 1] = fmaxf(-0.99f, fminf(0.99f, clipped_r));
         }
+#endif // RENDER_STAGE >= 4
     }
 
     inline void GateOn(uint8_t velocity) {
