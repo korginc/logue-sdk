@@ -151,11 +151,10 @@ fast_inline void apply_resonant_morph(resonant_synth_t * res, float morph, uint8
       resonant_synth_set_resonance(res, all_voices, 30.0f);
     } break;
 
-    case 3:  // Notch - morph controls notch width
+    case 3:  // Notch - morph controls notch sharpness
     {
+      // Higher resonance 'a' = narrower notch (resonance IS the width control)
       float fc = 1000.0f;
-      float width = 0.1f + morph * 2.0f;  // Width multiplier (TODO: pass to resonance calc)
-      (void)width; // Width affects Q internally
       resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
       resonant_synth_set_resonance(res, all_voices, 20.0f + morph * 60.0f);
     } break;
@@ -163,10 +162,10 @@ fast_inline void apply_resonant_morph(resonant_synth_t * res, float morph, uint8
     case 4:  // Peak - morph controls both frequency and gain
     {
       float fc = 200.0f + morph * 3800.0f;  // 200-4000 Hz
-      float gain = 1.0f + morph * 3.0f;     // 1-4x gain (TODO: apply in process function)
-      (void)gain;
+      float gain = 1.0f + morph * 3.0f;     // 1-4x gain
       resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
       resonant_synth_set_resonance(res, all_voices, 30.0f + morph * 60.0f);
+      res->gain = vdupq_n_f32(gain);
     } break;
   }
 }
