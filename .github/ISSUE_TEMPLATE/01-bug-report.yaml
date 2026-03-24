@@ -1,0 +1,94 @@
+name: Bug Report
+description: File a bug report.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+#projects: [""]
+#assignees:
+type: bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank for creating a bug report to help us improve the logue sdk.
+  - type: checkboxes
+    id: pre-issue-check
+    attributes:
+      label: Submission check
+      description: "Before submitting this report, please confirm the following:"
+      options:
+        - label: You have updated to the latest firmware for your device
+          required: true
+        - label: You have pulled the latest version of the logue sdk from github
+          required: true
+        - label: You have checked this repository for duplicate issues 
+          required: true
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Details
+      description: How can we get in touch with you if we need more information?
+      placeholder: ex. email@example.com
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: Alternatively, feel free to join the logue sdk discord at https://discord.com/invite/pqW5VpdQkZ
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: What platform did the bug occur on?
+      options:
+        - Prologue
+        - NTS-1
+        - Minilogue-XD
+        - NTS-1 MKII
+        - NTS-3
+        - Drumlogue
+        - microkorg2
+        - multiple (please list all affected platforms in your report)
+      default: 0
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Please include as much detail as possible, especially steps for reproducing the problem.
+      placeholder: Describe the problem
+      value: "Describe the problem"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: upload
+    id: pictures
+    attributes:
+      label: Upload pictures of the issue
+      description: If applicable, add pictures to help explain your problem.
+    validations:
+      required: false
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

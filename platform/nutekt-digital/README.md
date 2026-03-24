@@ -209,10 +209,6 @@ The following variables are declared:
 * ULIB : Linker library flags.
 * ULIBDIR : Linker library search paths.
 
-### tests/
-
-The *tests/* directory contains very simple code that illustrates how to write oscillators and effects. They are not meant to do anything useful, nor claim to be optimized. You can refer to these as examples of how to use the different interfaces and test your setup.
-
 ## Core API
 
 Here's an overview of the core API for custom oscillator/effects. 
