@@ -741,8 +741,11 @@ static void test_energy_squelch() {
         }
 
         std::cout << "  low-gain voice killed after " << frames_to_death << " frames post-GateOff\n";
+        // master_env.release_rate is now set from Decay (not Rel), so at Init
+        // preset Dkay=25 the gate is ~112ms (5374 frames).  The voice is killed
+        // earlier by mag_env < kSquelchThreshold (empirically ~4651 frames = 97ms).
         result("T16a near-zero feedback_gain voice is killed after GateOff",
-               frames_to_death > 0 && frames_to_death < 4000,
+               frames_to_death > 0 && frames_to_death < 5500,
                "Squelch never fired — voice consumed CPU for the full envelope release");
     }
 

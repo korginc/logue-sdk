@@ -467,11 +467,22 @@ public:
                 if (value <= 200) {
                     float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 200.0f));
                     float g = 0.85f + (norm * 0.149f);
+                    // master_env gate: exponential 50ms (Decay=0) → 10s (Decay=200).
+                    // Decay is the primary sustain control; Rel only gates the noise
+                    // burst.  Without this, the master_env would kill the waveguide
+                    // resonance at ~28 ms (default Rel) regardless of Decay setting.
+                    float t_s = 0.05f * powf(200.0f, norm); // 50ms..10s
+                    float master_rate = 6.908f / (t_s * 48000.0f);
                     for (int i = 0; i < NUM_VOICES; ++i) {
                         if (m_is_resonator_a)
                             state.voices[i].resA.feedback_gain = g;
                         if (m_is_resonator_b)
                             state.voices[i].resB.feedback_gain = g;
+#ifdef ENABLE_PHASE_5_EXCITERS
+                        // Always update regardless of which resonator is selected —
+                        // master_env is voice-level, not per-resonator.
+                        state.voices[i].exciter.master_env.release_rate = master_rate;
+#endif
                     }
                 }
                 break;
@@ -510,12 +521,13 @@ public:
 
             case k_paramRel: {
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 20.0f));
-                // Much slower release fade to prevent clicking when GateOff is received
+                // Rel controls only the noise burst release time (0→fast snap,
+                // 20→slow noise tail).  master_env gate is tied to Decay instead,
+                // so the waveguide resonance isn't prematurely killed by a short Rel.
                 float rel_rate = 0.00005f + ((1.0f - norm) * 0.01f);
                 for (int i = 0; i < NUM_VOICES; ++i) {
 #ifdef ENABLE_PHASE_5_EXCITERS
                     state.voices[i].exciter.noise_env.release_rate = rel_rate;
-                    state.voices[i].exciter.master_env.release_rate = rel_rate;
 #endif
                 }
                 break;
