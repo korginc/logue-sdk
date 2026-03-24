@@ -26,7 +26,3 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Riffline](https://payhip.com/b/aidtV) | FrostMod Audio | 4 voice polyphonic supersaw synthesizer | drum | donation |
 | [Acidbass](https://payhip.com/b/lr6Nk) | FrostMod Audio |  monophonic acid bass synthesizer | drum | donation |
 | Nano | Sinevibes |             | drum | built-in |
-| [JIMI Kaoss](https://mrglennjones.gumroad.com/l/jimikaoss) | Glenn Jones | Electric guitar synthesizer | nts-3 | free |
-| [KaossKhord](https://mrglennjones.gumroad.com/l/KaossKhord) | Glenn Jones | Diatonic FM chord synthesizer | nts-3 | paid |
-| [DIZI笛子](https://mrglennjones.gumroad.com/l/dizi) | Glenn Jones | Chinese bamboo flute synthesizer | nts-3 | paid |
-| [MEUH](https://mrglennjones.gumroad.com/l/meuh) | Glenn Jones | Cowbell synthesizer | nts-3 | free |

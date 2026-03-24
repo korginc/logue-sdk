@@ -43,5 +43,3 @@ _Note: The delay effect section can contain effects that perform other functions
 | [Isomer](https://www.sinevibes.com/korgisomer/ ) | Sinevibes | Tempo synced ensemble delay | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [Rerun](https://www.sinevibes.com/korgrerun/) | Sinevibes | Self-randomizing audio repeater | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [Integer](https://www.sinevibes.com/korginteger/) | Sinevibes | Digital-analog buffer delay | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
-| [Drymon Echo](https://mrglennjones.gumroad.com/l/drymonecho) | Glenn Jones | Tape saturation & doubletracker | nts-3 | free |
-| [VULPECULA](https://mrglennjones.gumroad.com/l/vulpecula) | Glenn Jones | Dual delay effect | nts-3 | free |

@@ -17,10 +17,8 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [noiser](https://joerg.piringer.net/index.php?href=software/noiser.xml) | jörg piringer | noise oscillator with various noise variants | nts-3 | paid |
 | [microlooper](https://joerg.piringer.net/index.php?href=software/microlooper.xml) | jörg piringer | audio looper | nts-3 | paid |
 | [talker](https://jpiringer.gumroad.com/l/talker) | jörg piringer | vintage computer voice | nts-3 | paid |
-| [Retroreverb](https://mrglennjones.gumroad.com/l/sgfee) | Glenn Jones | PS1 & SNES Reverbs | nts-3 | paid |
 | [ShapeSync](https://mrglennjones.gumroad.com/l/shapesync) | Glenn Jones | Rhythmic Modulation | nts-3 | paid |
 | [Menzler Machine](https://mrglennjones.gumroad.com/l/menzlermachine) | Glenn Jones | Rhythmic white noise generator | nts-3 | paid |
-| [Drymon Echo](https://mrglennjones.gumroad.com/l/drymonecho) | Glenn Jones | Tape Saturation & Doubletracker | nts-3 | free |
 | [The Full English](https://mrglennjones.gumroad.com/l/thefullenglish) | Glenn Jones | Experimental noise drone generator | nts-3 | free |
 | [Zammo's Stash](https://mrglennjones.gumroad.com/l/zammosstash) | Glenn Jones | Experimental FX | nts-3 | free |
 | [VULPECULA](https://mrglennjones.gumroad.com/l/vulpecula) | Glenn Jones | Dual delay effect | nts-3 | free |
@@ -32,3 +30,5 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Warehouse Drum Kit](https://mrglennjones.gumroad.com/l/wdk01) | Glenn Jones | Full drum kit | nts-3 | paid |
 | [U-SPLICE](https://mrglennjones.gumroad.com/l/usplice) | Glenn Jones | Instant punch-in tape loop | nts-3 | paid |
 | [DOMINATOR](https://mrglennjones.gumroad.com/l/dominator) | Glenn Jones | Gesture-Looped Hoover Synthesizer | nts-3 | paid |
+| [RetroReverb](https://mrglennjones.gumroad.com/l/sgfee) | Glenn Jones | PS1 & SNES Reverb | nts-3 | paid |
+| [Drymon Echo](https://mrglennjones.gumroad.com/l/drymonecho) | Glenn Jones | Tape saturation & doubletracker | nts-3 | free |
