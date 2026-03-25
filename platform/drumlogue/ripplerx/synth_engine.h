@@ -253,7 +253,7 @@ public:
     // 1. UI State & Preset Management
     // ==============================================================================
 
-    // Tracks the raw UI integer for all 24 parameter slots (indices 0–23)
+    // Tracks the raw UI integer for all 24 parameter slots (indices 0-23)
     int32_t m_params[k_lastParamIndex] = {0};
     uint8_t m_preset_idx = 0;
 
@@ -397,7 +397,7 @@ public:
                 m_sample_number = value;
                 break;
             case k_paramMlltStif: {
-                // Stored ÷10 (10–500 represents 100–5000). Divide by 500 (new max).
+                // Stored ÷10 (10-500 represents 100-5000). Divide by 500 (new max).
                 float norm = fmaxf(0.01f, fminf(1.0f, (float)value / 500.0f));
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     state.voices[i].exciter.mallet_stiffness = norm;
@@ -406,7 +406,7 @@ public:
             }
 
             case k_paramMlltRes: {
-                // UI range 0–1000 (displays with 1 decimal via frac_type=1).
+                // UI range 0-1000 (displays with 1 decimal via frac_type=1).
                 // Maps to a second 1-pole LP coefficient stacked after mallet_stiffness LP.
                 // Low value → darker/softer mallet body. High value → brighter/sharper.
                 float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 1000.0f));
@@ -463,7 +463,7 @@ public:
 
             case k_paramDkay: {
                 // 0.85 = instant dead thud. 0.999 = rings for ~5 seconds.
-                // Stored ÷10 (0–200 represents 0–2000). Divide by 200 (new max).
+                // Stored ÷10 (0-200 represents 0-2000). Divide by 200 (new max).
                 if (value <= 200) {
                     float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 200.0f));
                     float g = 0.85f + (norm * 0.149f);
@@ -472,7 +472,7 @@ public:
                     // burst.  Without this, the master_env would kill the waveguide
                     // resonance at ~28 ms (default Rel) regardless of Decay setting.
                     float t_s = 0.05f * powf(200.0f, norm); // 50ms..10s
-                    float master_rate = 6.908f / (t_s * 48000.0f);
+                    float master_rate = 3.0f * M_LN10 / (t_s * default_sample_rate);
                     for (int i = 0; i < NUM_VOICES; ++i) {
                         if (m_is_resonator_a)
                             state.voices[i].resA.feedback_gain = g;
@@ -535,7 +535,7 @@ public:
 
             case k_paramInharm: {
                 if (value <= 1999) {
-                    // Stored 0–1999; effective range 0–19990 (×10). Divide by 2000 to normalise.
+                    // Stored 0-1999; effective range 0-19990 (×10). Divide by 2000 to normalise.
                     float norm = fmaxf(0.0f, fminf(1.0f, (float)value / 2000.0f));
                     for (int i = 0; i < NUM_VOICES; ++i) {
                         if (m_is_resonator_a)
@@ -548,9 +548,9 @@ public:
             }
             case k_paramLowCut: {
 #ifdef ENABLE_PHASE_6_FILTERS
-                // Stored 1–1999; effective range 10–19990 Hz (×10 scaling).
+                // Stored 1-1999; effective range 10-19990 Hz (×10 scaling).
                 m_master_cutoff = (float)value * 10.0f;
-                // Divide by 1000: UI stores 707–4000, filter needs 0.707–4.0
+                // Divide by 1000: UI stores 707-4000, filter needs 0.707-4.0
                 float res_val = fmaxf(0.707f, (float)m_params[k_paramResnc] / 1000.0f);
                 state.master_filter.set_coeffs(m_master_cutoff, res_val, default_sample_rate);
 #endif
@@ -607,7 +607,7 @@ public:
 
             case k_paramNzFltFrq: {
 #ifdef ENABLE_PHASE_6_FILTERS
-                // Stored ÷10 (2–2000 represents 20–20000 Hz). Multiply by 10 for real Hz.
+                // Stored ÷10 (2-2000 represents 20-20000 Hz). Multiply by 10 for real Hz.
                 float freq = fmaxf(20.0f, fminf(20000.0f, (float)value * 10.0f));
                 for (int i = 0; i < NUM_VOICES; ++i) {
                     state.voices[i].exciter.noise_filter.set_coeffs(freq, 0.707f, default_sample_rate);
@@ -664,17 +664,17 @@ public:
         } else if (index == k_paramNzFltr) {
             if (value >= 0 && value < 3) return nz_filter_names[value];
         } else if (index == k_paramMlltStif) {
-            // Stored ÷10; show real ×10 value (100–5000)
+            // Stored ÷10; show real ×10 value (100-5000)
             static char ms_buf[8];
             snprintf(ms_buf, sizeof(ms_buf), "%d", (int)(value * 10));
             return ms_buf;
         } else if (index == k_paramDkay) {
-            // Stored ÷10; show real ×10 value (0–2000)
+            // Stored ÷10; show real ×10 value (0-2000)
             static char dk_buf[8];
             snprintf(dk_buf, sizeof(dk_buf), "%d", (int)(value * 10));
             return dk_buf;
         } else if (index == k_paramNzFltFrq) {
-            // Stored ÷10; show real ×10 Hz/kHz value (20–20000 Hz)
+            // Stored ÷10; show real ×10 Hz/kHz value (20-20000 Hz)
             static char nf_buf[10];
             int32_t hz = value * 10;
             if (hz >= 1000) {
@@ -684,7 +684,7 @@ public:
             }
             return nf_buf;
         } else if (index == k_paramLowCut) {
-            // value is 1–1999; effective Hz is value×10 (10–19990 Hz).
+            // value is 1-1999; effective Hz is value×10 (10-19990 Hz).
             static char lc_buf[10];
             int32_t hz = value * 10;
             if (hz >= 1000) {
@@ -904,7 +904,7 @@ public:
     }
 
     inline void PitchBend(uint16_t bend) {
-        // MIDI pitch bend: 0–16383, centre = 8192.
+        // MIDI pitch bend: 0-16383, centre = 8192.
         // Map to ±2 semitones (standard default bend-sensitivity range).
         // PitchBend is not in the audio hot loop, so we use powf() for accuracy.
         // fasterpowf(2.0f, 0.0f) ≈ 0.9714 (not 1.0) due to fasterlog2f(2.0f)≈1.057
@@ -1162,9 +1162,9 @@ public:
         }
 
 #if RENDER_STAGE < 4
-        // ── Stage 1–3: hard-clip output ────────────────────────────────────
+        // ── Stage 1-3: hard-clip output ────────────────────────────────────
         // Stage 4 uses soft-clip + overdrive.  For debug stages the raw mallet
-        // impulse (~3–4 × full-scale) must be clamped or the Drumlogue DAC
+        // impulse (~3-4 × full-scale) must be clamped or the Drumlogue DAC
         // saturates on the first note and may engage hardware protection.
         for (size_t i = 0; i < frames; ++i) {
             main_out[i * 2]     = fmaxf(-0.99f, fminf(0.99f, main_out[i * 2]));
@@ -1233,7 +1233,7 @@ private:
     bool    m_is_resonator_b = true; // "copy" of res A
 
     uint8_t m_active_partials = 32; // Default: 32 partials (Partls index 3, ResB active)
-    float   m_coupling_depth  = 0.75f; // Coupling depth [0.0–1.0] from Partls UI index 0–4.
+    float   m_coupling_depth  = 0.75f; // Coupling depth [0.0-1.0] from Partls UI index 0-4.
     // Stored separately from m_params[k_paramPartls] so that Partls=5/6
     // (ResA/ResB editor-select modes) never corrupt the coupling amount.
     float   m_pitch_bend_mult = 1.0f; // Delay-length multiplier from MIDI pitch bend (1.0 = centred).
