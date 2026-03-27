@@ -857,17 +857,16 @@ public:
 #ifdef ENABLE_PHASE_5_EXCITERS
         // Trigger the envelopes when a note hits
         v.exciter.noise_env.trigger();
-        // Configure master envelope as a Gate (Instant attack, infinite sustain)
-        v.exciter.master_env.attack_rate = 0.99f;
+        // Configure master envelope as a fully-open gate (value=1.0, ENV_DECAY).
+        // Direct assignment avoids the  trigger() + process()  pattern that relied on
+        // the floating-point comparison  value >= 0.99f  after one multiply-add.
+        // ARM -ffast-math may emit an FMA whose rounding leaves value fractionally
+        // below 0.99f, keeping state in ENV_ATTACK and silencing the gate permanently.
+        // release_rate is already set for this voice by setParameter(k_paramDkay).
         v.exciter.master_env.decay_rate = 0.0f;
         v.exciter.master_env.sustain_level = 1.0f;
-        v.exciter.master_env.trigger();
-        // Pre-advance through the 1-sample attack so a same-tick GateOff doesn't
-        // silence the voice.  On the Drumlogue, gate_on + gate_off can both fire
-        // before the first audio block (drum one-shot trigger model).  Without this
-        // call, release() finds value=0 → ENV_RELEASE → ENV_IDLE in one sample → 0.
-        // With attack_rate=0.99, one process() call: value 0→1.0, state→ENV_DECAY.
-        v.exciter.master_env.process();
+        v.exciter.master_env.value = 1.0f;
+        v.exciter.master_env.state = ENV_DECAY;
 #endif
     }
 

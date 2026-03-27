@@ -129,7 +129,7 @@ void run_active_test2() {
     std::cout << "Buffer[0] Memory  : " << v.resA.buffer[0] << " (If 0.0, the waveguide multiplied the Mallet by zero!)\n";
 
     std::cout << "\n--- 2nd DIAGNOSTIC COMPLETE ---\n";
-    return 0;
+    return;
 }
 
 int main() {
