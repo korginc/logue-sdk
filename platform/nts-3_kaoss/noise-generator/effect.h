@@ -89,10 +89,10 @@ public:
     // Gain compensation constants for balanced perceived volume
     static const float k_gains[] = {
         1.0f, // White
-        1.5f, // Pink
-        4.0f, // Brown
-        0.5f, // Blue
-        0.3f  // Violet
+        0.3f, // Pink
+        0.7f, // Brown
+        0.7f, // Blue
+        0.5f  // Violet
     };
     const float type_gain = k_gains[p.type < NUM_TYPES ? p.type : WHITE];
 
