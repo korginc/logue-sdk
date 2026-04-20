@@ -134,8 +134,8 @@ public:
 
       float out_val = noise * amp_ * type_gain;
 
-      out_p[0] = out_val * pan_l;
-      out_p[1] = out_val * pan_r;
+      out_p[0] = out_val * pan_r;
+      out_p[1] = out_val * pan_l;
     }
   }
 
