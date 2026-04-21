@@ -26,19 +26,19 @@ This is where the magic happens. It contains your **DSP Logic**. This is where y
 
 ## 2. The Lifecycle of a Plugin
 
-Think of your plugin like a video game. It has specific stages:
+Thinking of your plugin like a video game. It has specific stages handled by "callback" functions:
 
-1.  **`Init()` (The Setup)**:
+1.  **`unit_init` (The Setup)**:
     - Called once when you select the plugin.
     - Use this to prepare your variables and allocate memory (like delay buffers).
-2.  **`Process()` (The Game Loop)**:
+2.  **`unit_render` (The Game Loop)**:
     - This is called hundreds of times per second.
-    - It receives a "buffer" (a small slice) of audio data.
+    - It receives a "buffer" containing multiple "frames" (slices) of audio data.
     - You modify that data and send it back out.
-3.  **`touchEvent()` (The Input)**:
+3.  **`unit_touch_event` (The Input)**:
     - Triggered whenever someone touches the pad.
-    - It gives you `X` and `Y` coordinates (0 to 1024).
-4.  **`Teardown()` (The Cleanup)**:
+    - It gives you `X` and `Y` coordinates (0 to 1023).
+4.  **`unit_teardown` (The Cleanup)**:
     - Called when you switch to a different plugin.
     - Use this to release any resources you used.
 
@@ -46,9 +46,10 @@ Think of your plugin like a video game. It has specific stages:
 
 ## 3. Beginner DSP Basics
 
-### Frames and Buffers
-Sound isn't processed one single sample at a time; it's processed in "frames."
-- **Stereo**: NTS-3 typically uses 2 channels (Left and Right).
+### Buffers and Frames
+Sound isn't processed one single sample at a time; it's processed in "buffers."
+- **Frames**: A frame represents one slice of time across all channels (Left and Right).
+- **Stereo**: NTS-3 typically uses 2 channels per frame.
 - **Float representation**: Sound is represented by numbers ranging from `-1.0` to `1.0`.
     - `0.0` is silence.
     - `1.0` and `-1.0` are maximum volume.
@@ -80,16 +81,14 @@ Large memory (like long delay lines) should be allocated in **SDRAM** using the 
 
 ---
 
-## 5. Interaction: The Touch Pad
-
 The touch pad is the heart of the NTS-3. Coordinates are:
-- **X**: 0 (left) to 1024 (right).
-- **Y**: 0 (bottom) to 1024 (top).
+- **X**: 0 (left) to 1023 (right).
+- **Y**: 0 (bottom) to 1023 (top).
 
-In `touchEvent`, you can map these to your parameters. For example:
+In `unit_touch_event`, you can map these to your parameters. For example:
 ```cpp
 // Simple example: Use X to control Depth
-params_.depth = (float)x / 1024.0f; 
+params_.depth = (float)x / 1023.0f; 
 ```
 
 ---
@@ -157,9 +156,9 @@ If you want a parameter to show "SINE", "SAW", "SQUARE" instead of "0, 1, 2":
 3.  Return a pointer to a static string based on the value.
 
 ### 🧠 Advanced Memory (SDRAM)
-- **Internal RAM**: Very fast, but very small (kilobytes). Use for simple variables and small state.
-- **SDRAM**: Larger (megabytes), but slightly slower. Use `desc->hooks.sdram_alloc()` in `Init()` to get large buffers for delays or reverbs.
-- **Progressive Clear**: If you need to clear a massive buffer, don't do it all at once in `Init()` if it takes too long. Do it in small chunks inside the `Process()` loop over several seconds.
+- **Internal RAM**: Very fast, but very small (32KB total load size). Use for simple variables and small state.
+- **SDRAM**: Larger (3MB per runtime), but slightly slower. Use `desc->hooks.sdram_alloc()` in `unit_init()` to get large buffers for delays or reverbs.
+- **Progressive Clear**: If you need to clear a massive buffer, don't do it all at once in `unit_init()` if it takes too long. Do it in small chunks inside the `unit_render()` loop over several seconds.
 
 ---
 
