@@ -83,8 +83,12 @@ public:
   inline void Teardown() {}
 
   inline void Reset() { reset_state(); }
-  inline void Resume() { is_active_ = true; }
-  inline void Suspend() { is_active_ = false; }
+  inline void Resume() { reset_state(); }
+  inline void Suspend() { 
+    is_active_ = false; 
+    is_touched_ = false; 
+    target_amp_ = 0.f; 
+  }
 
   inline void reset_state() {
     is_active_ = true;
@@ -152,6 +156,15 @@ public:
           advanceSequence();
           triggerNote();
         }
+
+        // Envelope logic: check gate length
+        float gate_samples = samples_per_step_ * params_.gate;
+        if (samples_per_tick_accum_ > gate_samples) {
+          target_amp_ = 0.f;
+        }
+      } else {
+        // Force release when not touched
+        target_amp_ = 0.f;
       }
 
       // Smooth frequency transitions
@@ -176,14 +189,6 @@ public:
       phase_ += w0;
       if (phase_ >= 1.f)
         phase_ -= 1.f;
-
-      // Envelope logic
-      // amp_ follows target_amp_ which is set in triggerNote and modulated by
-      // gate length gate check
-      float gate_samples = samples_per_step_ * params_.gate;
-      if (samples_per_tick_accum_ > gate_samples) {
-        target_amp_ = 0.f;
-      }
 
       amp_ += (target_amp_ - amp_) * 0.05f; // click-free smoothing
 
