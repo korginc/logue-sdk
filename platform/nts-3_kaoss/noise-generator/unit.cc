@@ -47,7 +47,7 @@ __unit_callback const char * unit_get_param_str_value(uint8_t id, int32_t value)
 }
 
 __unit_callback void unit_set_tempo(uint32_t tempo) {
-  (void)tempo;
+  s_instance.setTempo(tempo);
 }
 
 __unit_callback void unit_tempo_4ppqn_tick(uint32_t counter) {

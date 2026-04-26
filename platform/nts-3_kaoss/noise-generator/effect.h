@@ -17,7 +17,16 @@
 
 class NoiseGenerator {
 public:
-  enum { LEVEL = 0U, PAN, TYPE, NUM_PARAMS };
+  enum {
+    LEVEL = 0U,
+    PAN,
+    TYPE,
+    DRYWET,
+    AUTOPAN,
+    APAN_SPD,
+    APAN_SYNC,
+    NUM_PARAMS
+  };
 
   enum NoiseType { WHITE = 0, PINK, BROWN, BLUE, VIOLET, NUM_TYPES };
 
@@ -25,11 +34,19 @@ public:
     float level{0.5f};
     float pan{0.5f};
     uint8_t type{WHITE};
+    float drywet{1.0f};
+    float autopan_depth{0.0f};
+    float autopan_speed{0.5f};
+    uint8_t autopan_sync{0};
 
     void reset() {
       level = 0.5f;
       pan = 0.5f;
       type = WHITE;
+      drywet = 1.0f;
+      autopan_depth = 0.0f;
+      autopan_speed = 0.5f;
+      autopan_sync = 0;
     }
   };
 
@@ -60,11 +77,20 @@ public:
 
   inline void Suspend() { is_active_ = false; }
 
+  inline void setTempo(uint32_t tempo) {
+    // Tempo is passed in UQ16.16 representation
+    float bpm = (float)tempo / 65536.0f;
+    if (bpm < 1.0f)
+      bpm = 1.0f;
+    bpm_ = bpm;
+  }
+
   inline void reset_state() {
     pink_b0 = pink_b1 = pink_b2 = 0.f;
     brown_state = 0.f;
     last_white = 0.f;
     amp_ = 0.f;
+    autopan_phase_ = 0.f;
     is_active_ = false;
     is_touched_ = false;
   }
@@ -75,14 +101,6 @@ public:
     const float *out_e = out_p + (frames << 1);
 
     const Params p = params_;
-
-    // Constant-power panning coefficients
-    // Pan 0.0 -> Left, 0.5 -> Center, 1.0 -> Right
-    // angle = pan * PI/2
-    const float angle = p.pan * 1.57079632679f;
-    const float pan_l = osc_cosf(
-        angle * 0.159154943f); // osc_cosf expects 0-1 range (angle/2PI)
-    const float pan_r = osc_sinf(angle * 0.159154943f);
 
     const float target_amp = (is_active_ && is_touched_) ? p.level : 0.f;
 
@@ -95,6 +113,44 @@ public:
         0.5f  // Violet
     };
     const float type_gain = k_gains[p.type < NUM_TYPES ? p.type : WHITE];
+
+    const float wet = p.drywet;
+    const float dry = 1.0f - wet;
+
+    // Calculate LFO frequency for Autopan
+    float lfo_freq = 0.0f;
+    if (p.autopan_sync == 0) {
+      // Off: 0.1Hz to 10.0Hz
+      lfo_freq = 0.1f + p.autopan_speed * 9.9f;
+    } else {
+      // Tempo sync
+      float beats_per_sec = bpm_ / 60.0f;
+      float multiplier = 1.0f;
+      switch (p.autopan_sync) {
+      case 1:
+        multiplier = 0.25f;
+        break; // 1/1
+      case 2:
+        multiplier = 0.5f;
+        break; // 1/2
+      case 3:
+        multiplier = 1.0f;
+        break; // 1/4
+      case 4:
+        multiplier = 2.0f;
+        break; // 1/8
+      case 5:
+        multiplier = 4.0f;
+        break; // 1/16
+      case 6:
+        multiplier = 8.0f;
+        break; // 1/32
+      }
+      lfo_freq = beats_per_sec * multiplier;
+    }
+
+    const float lfo_inc = lfo_freq / 48000.0f;
+    const float lfo_depth = p.autopan_depth;
 
     for (; out_p != out_e; in_p += 2, out_p += 2) {
       float w = osc_white();
@@ -132,10 +188,30 @@ public:
       // Simple click-free gating/smoothing for amp
       amp_ += (target_amp - amp_) * 0.05f;
 
-      float out_val = noise * amp_ * type_gain;
+      const float out_val = noise * amp_ * type_gain;
 
-      out_p[0] = out_val * pan_r;
-      out_p[1] = out_val * pan_l;
+      // Autopan LFO
+      autopan_phase_ += lfo_inc;
+      if (autopan_phase_ >= 1.0f)
+        autopan_phase_ -= 1.0f;
+
+      // osc_sinf takes phase 0-1 and outputs -1 to 1
+      float lfo_val = osc_sinf(autopan_phase_);
+
+      // LFO pan oscillates fully between 0 and 1
+      float lfo_pan = 0.5f + lfo_val * 0.5f;
+
+      // Interpolate between manual pan and LFO pan
+      float current_pan = p.pan * (1.0f - lfo_depth) + lfo_pan * lfo_depth;
+      current_pan = clipminmaxf(0.0f, current_pan, 1.0f);
+
+      const float angle = current_pan * 1.57079632679f;
+      const float pan_l = osc_sinf(angle * 0.159154943f);
+      const float pan_r = osc_cosf(angle * 0.159154943f);
+
+      // Apply panning (out_p[0] is Left, out_p[1] is Right)
+      out_p[0] = in_p[0] * dry + out_val * pan_l * wet;
+      out_p[1] = in_p[1] * dry + out_val * pan_r * wet;
     }
   }
 
@@ -150,6 +226,18 @@ public:
     case TYPE:
       params_.type = clipminmaxi32(0, value, NUM_TYPES - 1);
       break;
+    case DRYWET:
+      params_.drywet = clipminmaxi32(0, value, 1023) / 1023.f;
+      break;
+    case AUTOPAN:
+      params_.autopan_depth = clipminmaxi32(0, value, 1023) / 1023.f;
+      break;
+    case APAN_SPD:
+      params_.autopan_speed = clipminmaxi32(0, value, 1023) / 1023.f;
+      break;
+    case APAN_SYNC:
+      params_.autopan_sync = clipminmaxi32(0, value, 6);
+      break;
     }
   }
 
@@ -161,6 +249,14 @@ public:
       return (int32_t)(params_.pan * 1023.f);
     case TYPE:
       return params_.type;
+    case DRYWET:
+      return (int32_t)(params_.drywet * 1023.f);
+    case AUTOPAN:
+      return (int32_t)(params_.autopan_depth * 1023.f);
+    case APAN_SPD:
+      return (int32_t)(params_.autopan_speed * 1023.f);
+    case APAN_SYNC:
+      return params_.autopan_sync;
     }
     return INT_MIN;
   }
@@ -170,6 +266,11 @@ public:
       static const char *names[] = {"White", "Pink", "Brown", "Blue", "Violet"};
       if (value >= 0 && value < NUM_TYPES)
         return names[value];
+    } else if (index == APAN_SYNC) {
+      static const char *sync_names[] = {"Off", "1/1",  "1/2", "1/4",
+                                         "1/8", "1/16", "1/32"};
+      if (value >= 0 && value <= 6)
+        return sync_names[value];
     }
     return nullptr;
   }
@@ -194,6 +295,8 @@ private:
   float brown_state;
   float last_white;
   float amp_;
+  float bpm_{120.0f};
+  float autopan_phase_{0.0f};
 
   bool is_active_;
   bool is_touched_;
