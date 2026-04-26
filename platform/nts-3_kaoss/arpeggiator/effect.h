@@ -19,7 +19,7 @@
 
 class Arpeggiator {
 public:
-  enum { ROOT = 0U, CHORD, GATE, PATTERN, MODE, RANGE, WAVE, NUM_PARAMS };
+  enum { ROOT = 0U, CHORD, GATE, PATTERN, MODE, RANGE, WAVE, LEVEL, NUM_PARAMS };
   enum { SAW = 0, SINE, SQUARE };
   enum { UP = 0, DOWN, UPDOWN, RANDOM, SEQ };
 
@@ -45,6 +45,7 @@ public:
     uint8_t mode{UP};       // Playback mode
     uint8_t range{1};       // Octave range
     uint8_t wave{SAW};      // Oscillator type
+    float level{0.5f};      // Output level (0-1)
 
     void reset() {
       root = 60;
@@ -54,6 +55,7 @@ public:
       mode = UP;
       range = 1;
       wave = SAW;
+      level = 0.5f;
     }
   };
 
@@ -192,7 +194,7 @@ public:
 
       amp_ += (target_amp_ - amp_) * 0.05f; // click-free smoothing
 
-      float out_val = sig * amp_;
+      float out_val = sig * amp_ * params_.level;
 
       // Mix with dry (as it's a "Generic FX" source)
       // Usually, sound sources in Generic FX might ignore the input or mix it.
@@ -231,6 +233,9 @@ public:
     case WAVE:
       params_.wave = value;
       break;
+    case LEVEL:
+      params_.level = value / 1023.f;
+      break;
     }
   }
 
@@ -250,6 +255,8 @@ public:
       return params_.range;
     case WAVE:
       return params_.wave;
+    case LEVEL:
+      return (int32_t)(params_.level * 1023.f);
     }
     return 0;
   }
