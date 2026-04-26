@@ -194,7 +194,8 @@ public:
 
       amp_ += (target_amp_ - amp_) * 0.05f; // click-free smoothing
 
-      float out_val = sig * amp_ * params_.level;
+      // Scale output by 0.15f to match internal logue-sdk headroom (-16.5dBFS)
+      float out_val = sig * amp_ * params_.level * 0.15f;
 
       // Mix with dry (as it's a "Generic FX" source)
       // Usually, sound sources in Generic FX might ignore the input or mix it.

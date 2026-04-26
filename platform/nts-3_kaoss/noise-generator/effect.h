@@ -188,7 +188,8 @@ public:
       // Simple click-free gating/smoothing for amp
       amp_ += (target_amp - amp_) * 0.05f;
 
-      const float out_val = noise * amp_ * type_gain;
+      // Scale output by 0.15f to match internal logue-sdk headroom
+      const float out_val = noise * amp_ * type_gain * 0.15f;
 
       // Autopan LFO
       autopan_phase_ += lfo_inc;

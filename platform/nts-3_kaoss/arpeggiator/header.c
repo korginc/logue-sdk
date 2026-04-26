@@ -68,5 +68,5 @@ const __unit_header genericfx_unit_header_t unit_header = {
          k_genericfx_curve_unipolar, 0, 2, 1},
          
         // LEVEL mapped to DEPTH control
-        {k_genericfx_param_assign_depth, k_genericfx_curve_linear,
+        {k_genericfx_param_assign_depth, k_genericfx_curve_exp,
          k_genericfx_curve_unipolar, 0, 1023, 512}}};

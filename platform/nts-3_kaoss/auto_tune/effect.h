@@ -118,7 +118,7 @@ public:
           speed = value;
           break;
         case 3: // MIX
-          mix = value / 100.0f;
+          mix = value / 1023.0f;
           break;
         default:
           break;
@@ -130,7 +130,7 @@ public:
         case 0: return root;
         case 1: return (int32_t)scale;
         case 2: return speed;
-        case 3: return (int32_t)(mix * 100);
+        case 3: return (int32_t)(mix * 1023.0f);
         default: return 0;
       }
     }

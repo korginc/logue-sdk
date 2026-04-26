@@ -55,7 +55,7 @@ const __unit_header genericfx_unit_header_t unit_header = {
         },
     .default_mappings = {
         // LEVEL mapped to Y axis
-        {k_genericfx_param_assign_y, k_genericfx_curve_linear,
+        {k_genericfx_param_assign_y, k_genericfx_curve_exp,
          k_genericfx_curve_unipolar, 0, 1023, 512},
 
         // PAN mapped to X axis
