@@ -84,6 +84,11 @@ public:
         if (is_gated) {
           tuned_l = l;
           tuned_r = r;
+          
+          // Keep read pointers synchronized on opposite sides of write pointer
+          read_ptr1 = (float)((shift_idx + SHIFT_BUFFER_SIZE / 2) % SHIFT_BUFFER_SIZE);
+          read_ptr2 = (float)((shift_idx + SHIFT_BUFFER_SIZE / 2 + CROSSFADE_LEN) % SHIFT_BUFFER_SIZE);
+          xfade_active = 0;
         } else {
           // Calculate target smoothing
           float alpha = 0.0001f + (1.0f - (speed / 1023.0f)) * 0.1f;
@@ -91,9 +96,64 @@ public:
           
           float ratio = (float)detected_lag / current_lag;
 
-          // Dual-tap crossfade resampling
-          tuned_l = readSample(shift_buf_l, ratio);
-          tuned_r = readSample(shift_buf_r, ratio);
+          // Advance read pointers ONCE per frame
+          read_ptr1 += ratio;
+          if (read_ptr1 >= SHIFT_BUFFER_SIZE) read_ptr1 -= SHIFT_BUFFER_SIZE;
+          read_ptr2 += ratio;
+          if (read_ptr2 >= SHIFT_BUFFER_SIZE) read_ptr2 -= SHIFT_BUFFER_SIZE;
+          
+          // Crossfade logic
+          float active_ptr = (xfade_active == 0 || xfade_active == 2) ? read_ptr1 : read_ptr2;
+          
+          // Distance from read pointer to write pointer (how far behind write pointer it is)
+          float dist = (float)shift_idx - active_ptr;
+          if (dist < 0.0f) dist += (float)SHIFT_BUFFER_SIZE;
+          
+          // Trigger crossfade if approaching write pointer
+          if (xfade_active == 0 || xfade_active == 1) {
+            if (dist < 100.0f || dist > (SHIFT_BUFFER_SIZE - 100.0f)) {
+              xfade_active = 2; // Transitioning
+              xfade_counter = 0;
+              
+              // Move the INACTIVE pointer to the safest spot (opposite side)
+              if (active_ptr == read_ptr1) {
+                read_ptr2 = (float)((shift_idx + SHIFT_BUFFER_SIZE / 2) % SHIFT_BUFFER_SIZE);
+              } else {
+                read_ptr1 = (float)((shift_idx + SHIFT_BUFFER_SIZE / 2) % SHIFT_BUFFER_SIZE);
+              }
+            }
+          }
+          
+          // Read from buffers
+          if (xfade_active == 2) {
+            float fade_in = (float)xfade_counter / CROSSFADE_LEN;
+            float fade_out = 1.0f - fade_in;
+            
+            float s1_l = readInterpolated(shift_buf_l, read_ptr1);
+            float s1_r = readInterpolated(shift_buf_r, read_ptr1);
+            float s2_l = readInterpolated(shift_buf_l, read_ptr2);
+            float s2_r = readInterpolated(shift_buf_r, read_ptr2);
+            
+            if (active_ptr == read_ptr1) { // Fading 1 -> 2
+              tuned_l = s1_l * fade_out + s2_l * fade_in;
+              tuned_r = s1_r * fade_out + s2_r * fade_in;
+            } else { // Fading 2 -> 1
+              tuned_l = s2_l * fade_out + s1_l * fade_in;
+              tuned_r = s2_r * fade_out + s1_r * fade_in;
+            }
+            
+            if (++xfade_counter >= CROSSFADE_LEN) {
+              xfade_active = (active_ptr == read_ptr1) ? 1 : 0;
+            }
+          } else {
+            if (xfade_active == 0) {
+              tuned_l = readInterpolated(shift_buf_l, read_ptr1);
+              tuned_r = readInterpolated(shift_buf_r, read_ptr1);
+            } else {
+              tuned_l = readInterpolated(shift_buf_l, read_ptr2);
+              tuned_r = readInterpolated(shift_buf_r, read_ptr2);
+            }
+          }
         }
 
         // 4. Mix
@@ -179,8 +239,8 @@ private:
     void detectPitch() {
       // 1. RMS Gate check
       float sum_sq = 0;
-      for (int i = 0; i < AMDF_STRIDE; i++) {
-        float s = amdf_buf[(amdf_idx - i + AMDF_BUFFER_SIZE) % AMDF_BUFFER_SIZE];
+      for (uint32_t i = 0; i < AMDF_STRIDE; i++) {
+        float s = amdf_buf[(amdf_idx + AMDF_BUFFER_SIZE - i) % AMDF_BUFFER_SIZE];
         sum_sq += s * s;
       }
       float rms = sqrtf(sum_sq / AMDF_STRIDE);
@@ -198,8 +258,8 @@ private:
         float diff = 0;
         // Optimization: Use a smaller window for AMDF to save CPU
         for (uint32_t i = 0; i < 256; i++) {
-          int idx1 = (amdf_idx - i + AMDF_BUFFER_SIZE) % AMDF_BUFFER_SIZE;
-          int idx2 = (amdf_idx - i - lag + AMDF_BUFFER_SIZE) % AMDF_BUFFER_SIZE;
+          uint32_t idx1 = (amdf_idx + AMDF_BUFFER_SIZE - i) % AMDF_BUFFER_SIZE;
+          uint32_t idx2 = (amdf_idx + AMDF_BUFFER_SIZE - i - lag) % AMDF_BUFFER_SIZE;
           diff += fabsf(amdf_buf[idx1] - amdf_buf[idx2]);
         }
         if (diff < min_diff) {
@@ -220,28 +280,10 @@ private:
       target_lag = 48000.0f / target_freq;
     }
 
-    float readSample(const float *buf, float ratio) {
-      // This is a simplified dual-tap crossfader.
-      // Every time one tap gets too far from the write pointer, we switch.
-      
-      // Update read pointer 1
-      read_ptr1 += ratio;
-      if (read_ptr1 >= SHIFT_BUFFER_SIZE) read_ptr1 -= SHIFT_BUFFER_SIZE;
-      
-      // For this version, we'll implement simple linear interpolation
-      // A more robust version would use cross-fading taps to avoid clicks,
-      // but let's see if this fits the CPU first.
-      
-      uint32_t i1 = (uint32_t)read_ptr1;
+    float readInterpolated(const float *buf, float ptr) {
+      uint32_t i1 = (uint32_t)ptr;
       uint32_t i2 = (i1 + 1) % SHIFT_BUFFER_SIZE;
-      float frac = read_ptr1 - i1;
-      
-      // Click prevention: if read_ptr crosses write_idx, jump it.
-      // (Simplified logic for now)
-      if (abs((int)i1 - (int)shift_idx) < 10) {
-          read_ptr1 = (shift_idx + SHIFT_BUFFER_SIZE / 2) % SHIFT_BUFFER_SIZE;
-      }
-
+      float frac = ptr - (float)i1;
       return buf[i1] * (1.0f - frac) + buf[i2] * frac;
     }
 };
