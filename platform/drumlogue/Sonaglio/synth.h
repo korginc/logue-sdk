@@ -59,50 +59,6 @@ extern const char* const euclidean_mode_strings[9];
 class Synth {
 public:
     /*===========================================================================*/
-    /* Parameter contract                                                         */
-    /*===========================================================================*/
-
-    enum ParamId : uint8_t {
-        // Per-engine selection and interaction
-        PARAM_INSTRUMENT = 0,   // 0..9
-        PARAM_BLEND,
-        PARAM_GAP,
-        PARAM_SCATTER,
-
-        // Kick + Snare
-        PARAM_KICK_ATK,
-        PARAM_KICK_BODY,
-        PARAM_SNARE_ATK,
-        PARAM_SNARE_BODY,
-
-        // Metal + Perc
-        PARAM_METAL_ATK,
-        PARAM_METAL_BODY,
-        PARAM_PERC_ATK,
-        PARAM_PERC_BODY,
-
-        // LFO1
-        PARAM_LFO1_SHAPE,
-        PARAM_LFO1_RATE,
-        PARAM_LFO1_TARGET,
-        PARAM_LFO1_DEPTH,
-
-        // Euclidean tuning + LFO2
-        PARAM_EUCL_TUN,
-        PARAM_LFO2_RATE,
-        PARAM_LFO2_TARGET,
-        PARAM_LFO2_DEPTH,
-
-        // Envelope + global shaping
-        PARAM_ENV_SHAPE,
-        PARAM_HIT_SHAPE,
-        PARAM_BODY_TILT,
-        PARAM_DRIVE,
-
-        PARAM_TOTAL = 24
-    };
-
-    /*===========================================================================*/
     /* Lifecycle Methods                                                          */
     /*===========================================================================*/
 
