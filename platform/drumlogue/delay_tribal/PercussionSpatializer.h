@@ -106,16 +106,20 @@ public:
     const uint8_t* getParameterBmpValue(uint8_t index, int32_t value) const;
 
     void Render(const float* in, float* out, size_t frames);
-
-private:
-    static constexpr int kMaxClones = 10;
-    static constexpr uint32_t kSmoothBlocks = 120;
-
-    void rebuild_profile();
-    void randomize_hit();
-    void update_clone_dynamics();
-    void advance_smoothing();
-
+    static fast_inline float horizontal_sum4(float32x4_t v) {
+#if defined(__aarch64__)
+      return vaddvq_f32(v);
+#else
+      float32x2_t s = vpadd_f32(vget_low_f32(v), vget_high_f32(v));
+      s = vpadd_f32(s, s);
+      return vget_lane_f32(s, 0);
+#endif
+    }
+    static fast_inline float horizontal_sum2(float32x2_t v) {
+      float32x2_t s = vpadd_f32(v, v);
+      return vget_lane_f32(s, 0);
+    }
+    // setters and getters are by definition public
     void set_clone_count_index(int idx);
     void set_mode(spatial_mode_t mode);
     void set_depth(float norm);
@@ -127,23 +131,33 @@ private:
     void set_attack_softening(float norm);
     void set_gap(float norm);
 
+    void set_delay(float in_l, float in_r);
+    float get_depth();
+    float get_spread();
+    float get_gap();
+    float get_rate();
+    float get_mix();
+    float get_wobble();
+    float get_attack_softening();
+    int   get_clone_count();
+    clone_t* get_clones();
+    float get_scatter();
+    delay_line_t& get_delay();
+
+        private : static constexpr int kMaxClones = 10;
+    static constexpr uint32_t kSmoothBlocks = 120;
+
+    void rebuild_profile();
+    void randomize_hit();
+    void update_clone_dynamics();
+    void advance_smoothing();
+
+
     void render_block4(const float* in, float* out);
     void render_scalar_frame(const float* in, float* out);
 
     static fast_inline float clamp01(float x) { return x < 0.f ? 0.f : (x > 1.f ? 1.f : x); }
-    static fast_inline float horizontal_sum4(float32x4_t v) {
-    #if defined(__aarch64__)
-        return vaddvq_f32(v);
-    #else
-        float32x2_t s = vpadd_f32(vget_low_f32(v), vget_high_f32(v));
-        s = vpadd_f32(s, s);
-        return vget_lane_f32(s, 0);
-    #endif
-    }
-    static fast_inline float horizontal_sum2(float32x2_t v) {
-        float32x2_t s = vpadd_f32(v, v);
-        return vget_lane_f32(s, 0);
-    }
+
 
 private:
     delay_line_t delay_;

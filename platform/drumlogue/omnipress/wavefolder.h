@@ -167,8 +167,8 @@ fast_inline float32x4_t suboctave_process(wavefolder_t* wf, float32x4_t in_v) {
     vst1q_f32(buf_in, in_v);
 
     // Extract scalar state from lane 0 — all lanes are now kept identical.
-    float last  = vget_lane_f32(wf->last_input, 0);
-    float phase = vget_lane_f32(wf->sub_phase,  0);
+    float last  = vgetq_lane_f32(wf->last_input, 0);
+    float phase = vgetq_lane_f32(wf->sub_phase,  0);
 
     for (int i = 0; i < 4; ++i) {
         const float x = buf_in[i];

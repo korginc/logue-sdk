@@ -82,6 +82,47 @@ void PercussionSpatializer::set_mix(float norm)             { mix_target_      =
 void PercussionSpatializer::set_wobble(float norm)          { wobble_target_   = clamp01(norm);  smoothing_remaining_ = kSmoothBlocks; }
 void PercussionSpatializer::set_attack_softening(float norm){ soft_atk_target_ = clamp01(norm);  smoothing_remaining_ = kSmoothBlocks; }
 
+void PercussionSpatializer::set_delay(float in_l, float in_r) {
+  delay_.push(in_l, in_r);
+}
+
+// ---------------------------------------------------------------------------
+// Parameter getters
+// ---------------------------------------------------------------------------
+float PercussionSpatializer::get_depth() {
+  return depth_;
+}
+float PercussionSpatializer::get_spread() {
+  return spread_;
+}
+float PercussionSpatializer::get_gap() {
+  return gap_;
+}
+float PercussionSpatializer::get_rate() {
+  return rate_;
+}
+float PercussionSpatializer::get_mix() {
+  return mix_target_;
+}
+float PercussionSpatializer::get_wobble() {
+  return wobble_target_;
+}
+float PercussionSpatializer::get_attack_softening() {
+  return soft_atk_target_;
+}
+int PercussionSpatializer::get_clone_count() {
+  return clone_count_;
+}
+clone_t* PercussionSpatializer::get_clones() {
+  return clones_;
+}
+float PercussionSpatializer::get_scatter() {
+  return scatter_;
+}
+delay_line_t& PercussionSpatializer::get_delay() {
+  return delay_;
+}
+
 // ---------------------------------------------------------------------------
 // Smoothing — called once per 4-frame block
 // Does NOT trigger rebuild_profile().  update_clone_dynamics() updates gains
@@ -307,8 +348,8 @@ static fast_inline void mix_clone_batch4(const clone_t* clones,
     float32x4_t vdr = vld1q_f32(dr);
     float32x4_t vgl = vld1q_f32(gainL);
     float32x4_t vgr = vld1q_f32(gainR);
-    wet_l += horizontal_sum4(vmulq_f32(vdl, vgl));
-    wet_r += horizontal_sum4(vmulq_f32(vdr, vgr));
+    wet_l += PercussionSpatializer::horizontal_sum4(vmulq_f32(vdl, vgl));
+    wet_r += PercussionSpatializer::horizontal_sum4(vmulq_f32(vdr, vgr));
 }
 
 static fast_inline void mix_clone_batch2(const clone_t* clones,
@@ -343,8 +384,8 @@ static fast_inline void mix_clone_batch2(const clone_t* clones,
     float32x2_t vdr = vld1_f32(dr);
     float32x2_t vgl = vld1_f32(gainL);
     float32x2_t vgr = vld1_f32(gainR);
-    wet_l += horizontal_sum2(vmul_f32(vdl, vgl));
-    wet_r += horizontal_sum2(vmul_f32(vdr, vgr));
+    wet_l += PercussionSpatializer::horizontal_sum2(vmul_f32(vdl, vgl));
+    wet_r += PercussionSpatializer::horizontal_sum2(vmul_f32(vdr, vgr));
 }
 
 static fast_inline void mix_clone_scalar(const clone_t& c,
@@ -374,29 +415,29 @@ static fast_inline void mix_clone_scalar(const clone_t& c,
 static fast_inline void render_one_frame(PercussionSpatializer* self,
                                          float in_l, float in_r,
                                          float& out_l, float& out_r) {
-    self->delay_.push(in_l, in_r);
+    self->set_delay(in_l, in_r);
 
     float wet_l = 0.0f;
     float wet_r = 0.0f;
-    const float gap_boost = 1.0f + self->gap_ * 0.22f + self->scatter_ * 0.10f;
+    const float gap_boost = 1.0f + self->get_gap() * 0.22f + self->get_scatter() * 0.10f;
 
     int i = 0;
-    for (; i + 3 < self->clone_count_; i += 4) {
-        mix_clone_batch4(self->clones_, i, self->delay_, self->rate_, gap_boost, wet_l, wet_r);
+    for (; i + 3 < self->get_clone_count(); i += 4) {
+        mix_clone_batch4(self->get_clones(), i, self->get_delay(), self->get_rate(), gap_boost, wet_l, wet_r);
     }
-    for (; i + 1 < self->clone_count_; i += 2) {
-        mix_clone_batch2(self->clones_, i, self->delay_, self->rate_, gap_boost, wet_l, wet_r);
+    for (; i + 1 < self->get_clone_count(); i += 2) {
+        mix_clone_batch2(self->get_clones(), i, self->get_delay(), self->get_rate(), gap_boost, wet_l, wet_r);
     }
-    for (; i < self->clone_count_; ++i) {
-        mix_clone_scalar(self->clones_[i], self->delay_, self->rate_, gap_boost, wet_l, wet_r);
+    for (; i < self->get_clone_count(); ++i) {
+        mix_clone_scalar(self->get_clones()[i], self->get_delay(), self->get_rate(), gap_boost, wet_l, wet_r);
     }
 
-    const float wet_drive = 1.0f + 0.18f * self->gap_ + 0.12f * self->scatter_;
+    const float wet_drive = 1.0f + 0.18f * self->get_gap() + 0.12f * self->get_scatter();
     wet_l *= wet_drive;
     wet_r *= wet_drive;
 
-    out_l = in_l * (1.0f - self->mix_) + wet_l * self->mix_;
-    out_r = in_r * (1.0f - self->mix_) + wet_r * self->mix_;
+    out_l = in_l * (1.0f - self->get_mix()) + wet_l * self->get_mix();
+    out_r = in_r * (1.0f - self->get_mix()) + wet_r * self->get_mix();
 }
 
 void PercussionSpatializer::render_block4(const float* in, float* out) {
