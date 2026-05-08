@@ -2,52 +2,134 @@
 
 /**
  * @file lfo_enhanced.h
- * @brief Enhanced LFO system with 8 targets (including resonant)
+ * @brief Lightweight dual-LFO system for Sonaglio
  *
- * Note: LFO target constants are now in constants.h
- * Targets 0-5: Standard, 6-7: Resonant parameters
+ * Current Sonaglio role:
+ * - two simple modulation sources
+ * - unipolar shape generation in the range 0..1
+ * - bipolar depth stored as -1..1
+ * - safe phase wrapping for positive and negative modulation
+ *
+ * Notes:
+ * - The active synth path decides how each target interprets the LFO value.
+ * - Do not put engine-specific behavior here.
+ * - LFO-to-LFO phase/rate modulation is kept but heavily scaled for safety.
  */
 
 #include <arm_neon.h>
 #include <stdint.h>
-#include "constants.h"  // Contains LFO_TARGET_* constants
+#include "constants.h"
 
+#ifndef LFO_ENHANCED_PHASE_MOD_SCALE
+// Phase-mod targets should never add raw ±1 cycle/sample.
+// This value is in cycles/sample at full depth and full bipolar LFO value.
+// 0.00035 ~= 16.8 Hz equivalent modulation at 48 kHz.
+#define LFO_ENHANCED_PHASE_MOD_SCALE 0.00035f
+#endif
+
+#ifndef LFO_ENHANCED_RATE_MIN_HZ
+#define LFO_ENHANCED_RATE_MIN_HZ 0.05f
+#endif
+
+#ifndef LFO_ENHANCED_RATE_MAX_HZ
+#define LFO_ENHANCED_RATE_MAX_HZ 18.0f
+#endif
+
+#ifndef LFO_ENHANCED_SAMPLE_RATE
+#define LFO_ENHANCED_SAMPLE_RATE SAMPLE_RATE
+#endif
 
 /**
- * Enhanced LFO state
+ * Enhanced LFO state.
+ *
+ * phase/rate/depth are NEON vectors because the previous architecture used one
+ * value per lane. In the reduced selector design all lanes often carry the same
+ * value, but keeping the vector form avoids touching the rest of the process
+ * layer and remains cheap on ARMv7 NEON.
  */
 typedef struct {
-    // Primary LFOs
-    float32x4_t phase1;      // LFO1 phase for all 4 voices
-    float32x4_t phase2;      // LFO2 phase for all 4 voices (90° offset)
+    float32x4_t phase1;
+    float32x4_t phase2;
 
-    // Parameters
-    uint32_t shape_combo;     // 0-8 encoding both LFO shapes
-    uint32_t target1;          // 0-7 (from constants.h)
-    uint32_t target2;          // 0-7 (from constants.h)
-    float32x4_t depth1;       // Bipolar depth (-1.0 to 1.0)
-    float32x4_t depth2;       // Bipolar depth (-1.0 to 1.0)
-    float32x4_t rate1;        // Rate as phase increment
-    float32x4_t rate2;        // Rate as phase increment
+    uint32_t shape_combo;   // 0..8, shape1 = combo / 3, shape2 = combo % 3
+    uint32_t target1;
+    uint32_t target2;
 
-    // Circular reference detection
+    float32x4_t depth1;     // -1..1
+    float32x4_t depth2;     // -1..1
+    float32x4_t rate1;      // cycles per sample
+    float32x4_t rate2;      // cycles per sample
+
     uint8_t mod_matrix[2][2];
 } lfo_enhanced_t;
 
+/* -------------------------------------------------------------------------
+ * Small helpers
+ * ------------------------------------------------------------------------- */
+
+fast_inline float lfo_clampf(float x, float lo, float hi) {
+    return (x < lo) ? lo : ((x > hi) ? hi : x);
+}
+
+fast_inline uint32_t lfo_clamp_u32(uint32_t x, uint32_t hi) {
+    return (x > hi) ? hi : x;
+}
+
 /**
- * Initialize LFOs with phase independence
+ * Wrap phase to [0, 1).
+ *
+ * This handles both positive overflow and negative phase. The old code only
+ * handled phase >= 1, which becomes unsafe if phase modulation can go negative.
+ */
+fast_inline float32x4_t lfo_wrap_phase(float32x4_t phase) {
+    const float32x4_t one = vdupq_n_f32(1.0f);
+    const float32x4_t zero = vdupq_n_f32(0.0f);
+
+    uint32x4_t ge_one = vcgeq_f32(phase, one);
+    phase = vbslq_f32(ge_one, vsubq_f32(phase, one), phase);
+
+    uint32x4_t lt_zero = vcltq_f32(phase, zero);
+    phase = vbslq_f32(lt_zero, vaddq_f32(phase, one), phase);
+
+    // One more positive wrap for safety when a high rate jumps more than one
+    // cycle. Normal configured rates should not require this.
+    ge_one = vcgeq_f32(phase, one);
+    phase = vbslq_f32(ge_one, vsubq_f32(phase, one), phase);
+
+    return phase;
+}
+
+/**
+ * Convert unipolar 0..1 LFO value to bipolar -1..1.
+ */
+fast_inline float32x4_t lfo_unipolar_to_bipolar(float32x4_t x) {
+    return vsubq_f32(vmulq_n_f32(x, 2.0f), vdupq_n_f32(1.0f));
+}
+
+/**
+ * Clamp vector to [lo, hi].
+ */
+fast_inline float32x4_t lfo_vclamp(float32x4_t x, float lo, float hi) {
+    return vmaxq_f32(vdupq_n_f32(lo), vminq_f32(vdupq_n_f32(hi), x));
+}
+
+/**
+ * Initialize LFOs with phase independence.
  */
 fast_inline void lfo_enhanced_init(lfo_enhanced_t* lfo) {
     lfo->phase1 = vdupq_n_f32(0.0f);
-    lfo->phase2 = vdupq_n_f32(LFO_PHASE_OFFSET);  // Using constant
+    lfo->phase2 = vdupq_n_f32(LFO_PHASE_OFFSET);
 
     lfo->shape_combo = 0;
     lfo->target1 = LFO_TARGET_NONE;
     lfo->target2 = LFO_TARGET_NONE;
+
     lfo->depth1 = vdupq_n_f32(0.0f);
     lfo->depth2 = vdupq_n_f32(0.0f);
-    lfo->rate1 = vdupq_n_f32(0.01f);
-    lfo->rate2 = vdupq_n_f32(0.01f);
+
+    const float default_rate = 1.0f / (float)LFO_ENHANCED_SAMPLE_RATE;
+    lfo->rate1 = vdupq_n_f32(default_rate);
+    lfo->rate2 = vdupq_n_f32(default_rate);
 
     lfo->mod_matrix[0][0] = 0;
     lfo->mod_matrix[0][1] = 0;
@@ -56,125 +138,119 @@ fast_inline void lfo_enhanced_init(lfo_enhanced_t* lfo) {
 }
 
 /**
- * Update LFO parameters with proper bipolar depth scaling
+ * Update LFO parameters.
  *
- * @param shape_combo 0-8 encoding both LFO shapes
- * @param target1 0-5 LFO1 target
- * @param target2 0-5 LFO2 target
- * @param depth1_value -100 to +100 (from UI) - maps to -1.0 to 1.0
- * @param depth2_value -100 to +100 (from UI) - maps to -1.0 to 1.0
- * @param rate1_percent 0-100 LFO1 rate
- * @param rate2_percent 0-100 LFO2 rate
+ * depth values are expected as -100..+100 from UI/smoother.
+ * rate values are expected as 0..100.
  */
 fast_inline void lfo_enhanced_update(lfo_enhanced_t* lfo,
                                      int32_t shape_combo,
                                      uint32_t target1,
                                      uint32_t target2,
-                                     float depth1_value,  // -100 to +100
-                                     float depth2_value,  // -100 to +100
+                                     float depth1_value,
+                                     float depth2_value,
                                      float rate1_percent,
                                      float rate2_percent) {
+    if (shape_combo < 0) shape_combo = 0;
+    if (shape_combo > 8) shape_combo = 8;
+    lfo->shape_combo = (uint32_t)shape_combo;
 
-    lfo->shape_combo = shape_combo;
-
-    // Check for circular references
     uint32_t new_target1 = target1;
     uint32_t new_target2 = target2;
 
-    if ((new_target1 == LFO_TARGET_LFO2_PHASE &&
-         new_target2 == LFO_TARGET_LFO1_PHASE) ||
-        (new_target2 == LFO_TARGET_LFO1_PHASE &&
-         new_target1 == LFO_TARGET_LFO2_PHASE)) {
-        // Circular reference detected!
-        if (new_target1 == LFO_TARGET_LFO2_PHASE) new_target1 = LFO_TARGET_NONE;
-        if (new_target2 == LFO_TARGET_LFO1_PHASE) new_target2 = LFO_TARGET_NONE;
+    // Keep the previous circular reference guard, but make the outcome
+    // deterministic: if both LFOs try to phase-mod each other, disable LFO2's
+    // phase target and keep LFO1's assignment.
+    if (new_target1 == LFO_TARGET_LFO2_PHASE &&
+        new_target2 == LFO_TARGET_LFO1_PHASE) {
+        new_target2 = LFO_TARGET_NONE;
     }
 
     lfo->target1 = new_target1;
     lfo->target2 = new_target2;
 
-    // Update modulation matrix
+    lfo->mod_matrix[0][0] = 0;
     lfo->mod_matrix[0][1] = (new_target1 == LFO_TARGET_LFO2_PHASE) ? 1 : 0;
     lfo->mod_matrix[1][0] = (new_target2 == LFO_TARGET_LFO1_PHASE) ? 1 : 0;
+    lfo->mod_matrix[1][1] = 0;
 
-    // =================================================================
-    // CORRECT BIPOLAR MAPPING: -100 to +100 → -1.0 to +1.0
-    // =================================================================
-    // Examples:
-    //   -100 → -1.0 (full negative modulation)
-    //   -50  → -0.5 (half negative)
-    //    0   →  0.0 (no modulation)
-    //   50   →  0.5 (half positive)
-    //  100   →  1.0 (full positive)
-    // =================================================================
-    float depth1 = depth1_value / 100.0f;
-    float depth2 = depth2_value / 100.0f;
+    const float d1 = lfo_clampf(depth1_value * 0.01f, -1.0f, 1.0f);
+    const float d2 = lfo_clampf(depth2_value * 0.01f, -1.0f, 1.0f);
 
-    // Clamp to ensure valid range (safety)
-    if (depth1 < -1.0f) depth1 = -1.0f;
-    if (depth1 > 1.0f) depth1 = 1.0f;
-    if (depth2 < -1.0f) depth2 = -1.0f;
-    if (depth2 > 1.0f) depth2 = 1.0f;
+    lfo->depth1 = vdupq_n_f32(d1);
+    lfo->depth2 = vdupq_n_f32(d2);
 
-    lfo->depth1 = vdupq_n_f32(depth1);
-    lfo->depth2 = vdupq_n_f32(depth2);
+    rate1_percent = lfo_clampf(rate1_percent, 0.0f, 100.0f);
+    rate2_percent = lfo_clampf(rate2_percent, 0.0f, 100.0f);
 
-    // Convert rate percentage to phase increment (0.1 to 20 Hz LFO range)
-    // rate_hz / sample_rate gives the fraction of the cycle advanced per sample
-    float rate1_hz = 0.1f + (rate1_percent / 100.0f) * 19.9f;
-    float rate2_hz = 0.1f + (rate2_percent / 100.0f) * 19.9f;
-    float rate1 = rate1_hz / 48000.0f;
-    float rate2 = rate2_hz / 48000.0f;
+    // Slightly conservative max rate for percussion macros. Very high LFO
+    // rates tend to become audio-rate AM/FM side effects rather than useful
+    // performance modulation.
+    const float rate_span = LFO_ENHANCED_RATE_MAX_HZ - LFO_ENHANCED_RATE_MIN_HZ;
+    const float rate1_hz = LFO_ENHANCED_RATE_MIN_HZ + (rate1_percent * 0.01f) * rate_span;
+    const float rate2_hz = LFO_ENHANCED_RATE_MIN_HZ + (rate2_percent * 0.01f) * rate_span;
 
-    lfo->rate1 = vdupq_n_f32(rate1);
-    lfo->rate2 = vdupq_n_f32(rate2);
+    lfo->rate1 = vdupq_n_f32(rate1_hz / (float)LFO_ENHANCED_SAMPLE_RATE);
+    lfo->rate2 = vdupq_n_f32(rate2_hz / (float)LFO_ENHANCED_SAMPLE_RATE);
 }
 
-/**
- * Get LFO shape from combo
+/** Important note - TODO
+
+This file still keeps the existing shape model:
+
+Triangle
+Ramp
+Chord
+
+I did not add new shapes yet. For the current reduced selector-based Sonaglio, I would keep it stable and only add new LFO shapes later if presets clearly need them.
+ */
+
+
+ /**
+ * Get LFO shape from combo.
  */
 fast_inline uint32_t lfo_get_shape(uint32_t combo, uint32_t lfo_num) {
-    if (lfo_num == 0) {
-        return combo / 3;
-    } else {
-        return combo % 3;
-    }
+    combo = lfo_clamp_u32(combo, 8);
+    return (lfo_num == 0) ? (combo / 3U) : (combo % 3U);
 }
 
 /**
- * Generate LFO value for a specific shape
+ * Generate unipolar LFO value in the range 0..1.
  */
 fast_inline float32x4_t lfo_generate_shape(uint32_t shape, float32x4_t phase) {
+    phase = lfo_wrap_phase(phase);
+
     switch (shape) {
         case LFO_SHAPE_TRIANGLE: {
-            float32x4_t half = vdupq_n_f32(0.5f);
-            float32x4_t two = vdupq_n_f32(2.0f);
-            float32x4_t diff = vsubq_f32(phase, half);
-            float32x4_t abs_diff = vabsq_f32(diff);
-            return vmulq_f32(abs_diff, two);
+            // Standard unipolar triangle:
+            // phase 0 -> 0, 0.5 -> 1, 1 -> 0.
+            const float32x4_t one = vdupq_n_f32(1.0f);
+            float32x4_t tri = vsubq_f32(one,
+                            vabsq_f32(vsubq_f32(vmulq_n_f32(phase, 2.0f),
+                                                one)));
+            return lfo_vclamp(tri, 0.0f, 1.0f);
         }
 
-        case LFO_SHAPE_RAMP: {
+        case LFO_SHAPE_RAMP:
             return phase;
-        }
 
         case LFO_SHAPE_CHORD: {
-            // Steps through root → major-3rd → perfect-5th at equal time.
-            // Output is in octave-fraction units so that:
-            //   pitch_octaves = value * depth * 2  →  0, 4, 7 semitones at depth=1
-            // root=0, 3rd=4/24≈0.167, 5th=7/24≈0.292
-            float32x4_t three = vdupq_n_f32(3.0f);
-            int32x4_t step = vcvtq_s32_f32(vmulq_f32(phase, three));
-            // Clamp to [0,2]: guards against phase==1.0 before wrap
+            // Root -> major 3rd -> perfect 5th.
+            // Output is intentionally small and unipolar because process code
+            // can use it directly for pitch/chord targets.
+            float32x4_t step_pos = vmulq_n_f32(phase, 3.0f);
+            int32x4_t step = vcvtq_s32_f32(step_pos);
             step = vmaxq_s32(vminq_s32(step, vdupq_n_s32(2)), vdupq_n_s32(0));
-            float32x4_t step_f = vcvtq_f32_s32(step);
 
-            float32x4_t root  = vdupq_n_f32(0.0f);           // 0 semitones
-            float32x4_t third = vdupq_n_f32(4.0f / 24.0f);   // 4 semitones
-            float32x4_t fifth = vdupq_n_f32(7.0f / 24.0f);   // 7 semitones
+            const uint32x4_t is0 = vceqq_s32(step, vdupq_n_s32(0));
+            const uint32x4_t is1 = vceqq_s32(step, vdupq_n_s32(1));
 
-            return vbslq_f32(vceqq_f32(step_f, vdupq_n_f32(0.0f)), root,
-                   vbslq_f32(vceqq_f32(step_f, vdupq_n_f32(1.0f)), third, fifth));
+            const float32x4_t root  = vdupq_n_f32(0.0f);
+            const float32x4_t third = vdupq_n_f32(4.0f / 24.0f);
+            const float32x4_t fifth = vdupq_n_f32(7.0f / 24.0f);
+
+            return vbslq_f32(is0, root,
+                   vbslq_f32(is1, third, fifth));
         }
 
         default:
@@ -183,61 +259,74 @@ fast_inline float32x4_t lfo_generate_shape(uint32_t shape, float32x4_t phase) {
 }
 
 /**
- * Process LFOs
+ * Process LFOs.
+ *
+ * Output values are unipolar 0..1. Target application can convert to bipolar
+ * where appropriate with lfo_unipolar_to_bipolar().
  */
 fast_inline void lfo_enhanced_process(lfo_enhanced_t* lfo,
                                       float32x4_t* lfo1_out,
                                       float32x4_t* lfo2_out) {
-    float32x4_t one = vdupq_n_f32(1.0f);
-
     float32x4_t phase1_inc = lfo->rate1;
     float32x4_t phase2_inc = lfo->rate2;
 
     if (lfo->mod_matrix[0][1]) {
-        float32x4_t lfo1_val = lfo_generate_shape(
-            lfo_get_shape(lfo->shape_combo, 0),
-            lfo->phase1);
+        float32x4_t lfo1_val = lfo_generate_shape(lfo_get_shape(lfo->shape_combo, 0),
+                                                  lfo->phase1);
+        float32x4_t lfo1_bipolar = lfo_unipolar_to_bipolar(lfo1_val);
         phase2_inc = vaddq_f32(phase2_inc,
-                               vmulq_f32(lfo1_val, lfo->depth1));
+                               vmulq_f32(vmulq_n_f32(lfo1_bipolar,
+                                                     LFO_ENHANCED_PHASE_MOD_SCALE),
+                                          lfo->depth1));
     }
 
     if (lfo->mod_matrix[1][0]) {
-        float32x4_t lfo2_val = lfo_generate_shape(
-            lfo_get_shape(lfo->shape_combo, 1),
-            lfo->phase2);
+        float32x4_t lfo2_val = lfo_generate_shape(lfo_get_shape(lfo->shape_combo, 1),
+                                                  lfo->phase2);
+        float32x4_t lfo2_bipolar = lfo_unipolar_to_bipolar(lfo2_val);
         phase1_inc = vaddq_f32(phase1_inc,
-                               vmulq_f32(lfo2_val, lfo->depth2));
+                               vmulq_f32(vmulq_n_f32(lfo2_bipolar,
+                                                     LFO_ENHANCED_PHASE_MOD_SCALE),
+                                          lfo->depth2));
     }
 
-    lfo->phase1 = vaddq_f32(lfo->phase1, phase1_inc);
-    lfo->phase2 = vaddq_f32(lfo->phase2, phase2_inc);
-
-    uint32x4_t wrap1 = vcgeq_f32(lfo->phase1, one);
-    uint32x4_t wrap2 = vcgeq_f32(lfo->phase2, one);
-
-    lfo->phase1 = vbslq_f32(wrap1, vsubq_f32(lfo->phase1, one), lfo->phase1);
-    lfo->phase2 = vbslq_f32(wrap2, vsubq_f32(lfo->phase2, one), lfo->phase2);
+    lfo->phase1 = lfo_wrap_phase(vaddq_f32(lfo->phase1, phase1_inc));
+    lfo->phase2 = lfo_wrap_phase(vaddq_f32(lfo->phase2, phase2_inc));
 
     *lfo1_out = lfo_generate_shape(lfo_get_shape(lfo->shape_combo, 0), lfo->phase1);
     *lfo2_out = lfo_generate_shape(lfo_get_shape(lfo->shape_combo, 1), lfo->phase2);
 }
 
 /**
- * Apply bipolar modulation to target
+ * Apply bipolar modulation to a target value.
+ *
+ * The LFO input is expected to be unipolar 0..1.
+ * depth is expected to be -1..1.
  */
 fast_inline float32x4_t lfo_apply_modulation(float32x4_t target_value,
                                              float32x4_t lfo_value,
                                              float32x4_t depth,
                                              float32_t min,
                                              float32_t max) {
-    float32x4_t lfo_bipolar = vsubq_f32(vmulq_f32(lfo_value, vdupq_n_f32(2.0f)),
-                                        vdupq_n_f32(1.0f));
+    float32x4_t bipolar = lfo_unipolar_to_bipolar(lfo_value);
+    float32x4_t result = vaddq_f32(target_value, vmulq_f32(bipolar, depth));
+    return vmaxq_f32(vdupq_n_f32(min), vminq_f32(vdupq_n_f32(max), result));
+}
 
-    float32x4_t modulation = vmulq_f32(lfo_bipolar, depth);
-    float32x4_t result = vaddq_f32(target_value, modulation);
-
-    result = vmaxq_f32(result, vdupq_n_f32(min));
-    result = vminq_f32(result, vdupq_n_f32(max));
-
-    return result;
+/**
+ * Apply scaled bipolar modulation.
+ *
+ * Useful for targets where full depth should mean "some musically safe amount"
+ * rather than raw ±1.0.
+ */
+fast_inline float32x4_t lfo_apply_modulation_scaled(float32x4_t target_value,
+                                                    float32x4_t lfo_value,
+                                                    float32x4_t depth,
+                                                    float amount,
+                                                    float32_t min,
+                                                    float32_t max) {
+    float32x4_t bipolar = lfo_unipolar_to_bipolar(lfo_value);
+    float32x4_t result = vaddq_f32(target_value,
+                                   vmulq_f32(vmulq_n_f32(bipolar, amount), depth));
+    return vmaxq_f32(vdupq_n_f32(min), vminq_f32(vdupq_n_f32(max), result));
 }
