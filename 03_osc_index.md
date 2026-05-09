@@ -126,5 +126,4 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [FunFM](https://github.com/mrf-r/FunFM-logue) | Eugene Chernyh | 2 alias supressed FM operators with variable waveshape | pro, xd, nts-1 | free |
 | [Acidbass Mini](https://payhip.com/b/2oNU4) | Frostmod Audio | monophonic acid bass synthesizer | nts-1 mkii | donation |
 | [Riffosc](https://payhip.com/b/VGsDh) | Frostmod Audio | Dual supersaw oscillator | microkorg2 | donation |
-| [Riffgate](https://payhip.com/b/S5qnP) | Frostmod Audio | Trance gate/stutter ModFX | microkorg2 | donation |
 | [C0mp4ct](https://payhip.com/b/zXEHp) | Frostmod Audio | 4 voice polyphonic synthesizer | nts-1 mkii | paid |
