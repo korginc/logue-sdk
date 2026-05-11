@@ -1,8 +1,3 @@
-#ifndef BAB284E3_FC80_41F4_8A86_21CD73AC89F4
-#define BAB284E3_FC80_41F4_8A86_21CD73AC89F4
-
-
-#endif /* BAB284E3_FC80_41F4_8A86_21CD73AC89F4 */
 #pragma once
 
 /**
@@ -20,18 +15,14 @@
 #include "float_math.h"  // For M_* constants if needed
 #include "constants.h"
 
-// Constants for sine approximation
-static const float32x4_t ONE = vdupq_n_f32(1.0f);
-static const float32x4_t HALF = vdupq_n_f32(0.5f);
-static const float32x4_t TWO = vdupq_n_f32(2.0f);
-static const float32x4_t PI = vdupq_n_f32(3.14159265359f);
-static const float32x4_t TWO_PI = vdupq_n_f32(6.28318530718f);
-static const float32x4_t INV_TWO_PI = vdupq_n_f32(0.159154943f);  // 1/(2π)
-
-// Polynomial coefficients for sin(x) on [-π, π]
-static const float32x4_t C1 = vdupq_n_f32(1.0f);           // x
-static const float32x4_t C3 = vdupq_n_f32(-0.166666667f);  // -x³/6
-static const float32x4_t C5 = vdupq_n_f32(0.008333333f);   // x⁵/120
+// Scalar constants — compiler folds these into immediate vdup.f32 instructions.
+// Never use file-scope static float32x4_t initialized by NEON intrinsics:
+// those require C++ runtime constructors that may not run on bare-metal
+// before unit_init() is called, causing load failure.
+static constexpr float kTwoPi    = 6.28318530718f;
+static constexpr float kInvTwoPi = 0.159154943f;   // 1/(2π)
+static constexpr float kSinC3    = -0.166666667f;  // -1/6
+static constexpr float kSinC5    =  0.008333333f;  // +1/120
 
 /**
  * Round to nearest integer using ARM NEON
@@ -55,29 +46,20 @@ fast_inline int32x4_t round_to_nearest_int(float32x4_t x) {
  * 2. Polynomial: sin(x) ≈ x - x³/6 + x⁵/120
  */
 fast_inline float32x4_t neon_sin(float32x4_t phases) {
-    // =================================================================
-    // Step 1: Range reduction to [-π, π] with proper rounding
-    // =================================================================
-    // Calculate n = round(phases / 2π)
-    float32x4_t n_float = vmulq_f32(phases, INV_TWO_PI);  // phases / 2π
+    const float32x4_t two_pi     = vdupq_n_f32(kTwoPi);
+    const float32x4_t inv_two_pi = vdupq_n_f32(kInvTwoPi);
 
-    // FIXED: Use proper rounding to nearest, not truncation
+    float32x4_t n_float = vmulq_f32(phases, inv_two_pi);
     int32x4_t n_int = round_to_nearest_int(n_float);
+    float32x4_t reduced = vmlsq_f32(phases, vcvtq_f32_s32(n_int), two_pi);
 
-    // phases = phases - 2π * n
-    float32x4_t reduced = vmlsq_f32(phases, vcvtq_f32_s32(n_int), TWO_PI);
+    float32x4_t x2 = vmulq_f32(reduced, reduced);
+    float32x4_t x3 = vmulq_f32(reduced, x2);
+    float32x4_t x5 = vmulq_f32(x3, x2);
 
-    // =================================================================
-    // Step 2: Polynomial approximation sin(x) ≈ x - x³/6 + x⁵/120
-    // =================================================================
-    float32x4_t x2 = vmulq_f32(reduced, reduced);  // x²
-    float32x4_t x3 = vmulq_f32(reduced, x2);       // x³
-    float32x4_t x5 = vmulq_f32(x3, x2);            // x⁵
-
-    // result = C1*x + C3*x³ + C5*x⁵
-    float32x4_t result = vmulq_f32(reduced, C1);
-    result = vmlaq_f32(result, x3, C3);
-    result = vmlaq_f32(result, x5, C5);
+    float32x4_t result = reduced;
+    result = vmlaq_f32(result, x3, vdupq_n_f32(kSinC3));
+    result = vmlaq_f32(result, x5, vdupq_n_f32(kSinC5));
 
     return result;
 }
@@ -87,23 +69,20 @@ fast_inline float32x4_t neon_sin(float32x4_t phases) {
  * Even more accurate but slightly slower
  */
 fast_inline float32x4_t neon_sin_accurate(float32x4_t phases) {
-    // Use modulo to get remainder in [-π, π]
-    float32x4_t n_float = vmulq_f32(phases, INV_TWO_PI);
+    const float32x4_t two_pi     = vdupq_n_f32(kTwoPi);
+    const float32x4_t inv_two_pi = vdupq_n_f32(kInvTwoPi);
 
-    // Round to nearest integer (fixed)
+    float32x4_t n_float = vmulq_f32(phases, inv_two_pi);
     int32x4_t n_int = round_to_nearest_int(n_float);
+    float32x4_t remainder = vmlsq_f32(phases, vcvtq_f32_s32(n_int), two_pi);
 
-    // remainder = phases - n_int * 2π
-    float32x4_t remainder = vmlsq_f32(phases, vcvtq_f32_s32(n_int), TWO_PI);
-
-    // Polynomial approximation as above
     float32x4_t x2 = vmulq_f32(remainder, remainder);
     float32x4_t x3 = vmulq_f32(remainder, x2);
     float32x4_t x5 = vmulq_f32(x3, x2);
 
-    float32x4_t result = vmulq_f32(remainder, C1);
-    result = vmlaq_f32(result, x3, C3);
-    result = vmlaq_f32(result, x5, C5);
+    float32x4_t result = remainder;
+    result = vmlaq_f32(result, x3, vdupq_n_f32(kSinC3));
+    result = vmlaq_f32(result, x5, vdupq_n_f32(kSinC5));
 
     return result;
 }
@@ -129,8 +108,9 @@ fast_inline float32x4_t neon_sine_osc(
     *phases = vaddq_f32(*phases, increments);
 
     // Wrap to [0, 2π)
-    uint32x4_t ge_2pi = vcgeq_f32(*phases, TWO_PI);
-    *phases = vbslq_f32(ge_2pi, vsubq_f32(*phases, TWO_PI), *phases);
+    const float32x4_t two_pi = vdupq_n_f32(kTwoPi);
+    uint32x4_t ge_2pi = vcgeq_f32(*phases, two_pi);
+    *phases = vbslq_f32(ge_2pi, vsubq_f32(*phases, two_pi), *phases);
 
     // Compute sine
     return neon_sin(*phases);
@@ -142,9 +122,11 @@ fast_inline float32x4_t neon_sine_osc(
  */
 fast_inline float32x4_t neon_sin_fast(float32x4_t phases) {
     // Range reduction with proper rounding
-    float32x4_t n_float = vmulq_f32(phases, INV_TWO_PI);
+    const float32x4_t two_pi     = vdupq_n_f32(kTwoPi);
+    const float32x4_t inv_two_pi = vdupq_n_f32(kInvTwoPi);
+    float32x4_t n_float = vmulq_f32(phases, inv_two_pi);
     int32x4_t n_int = round_to_nearest_int(n_float);
-    float32x4_t reduced = vmlsq_f32(phases, vcvtq_f32_s32(n_int), TWO_PI);
+    float32x4_t reduced = vmlsq_f32(phases, vcvtq_f32_s32(n_int), two_pi);
 
     // 4th order polynomial: x - x³/6
     float32x4_t x2 = vmulq_f32(reduced, reduced);
