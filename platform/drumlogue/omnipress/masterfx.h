@@ -215,13 +215,18 @@ public:
             mixed.val[0] = vmulq_f32(mixed.val[0], makeup_lin);
             mixed.val[1] = vmulq_f32(mixed.val[1], makeup_lin);
 
-            // Output limiter: hard clip to ±1.0 to prevent DAC overflow.
-            // The compressor should keep levels below this under normal use;
-            // this is a safety net for extreme makeup gain settings.
-            const float32x4_t clip_pos = vdupq_n_f32(1.0f);
-            const float32x4_t clip_neg = vdupq_n_f32(-1.0f);
-            mixed.val[0] = vmaxq_f32(vminq_f32(mixed.val[0], clip_pos), clip_neg);
-            mixed.val[1] = vmaxq_f32(vminq_f32(mixed.val[1], clip_pos), clip_neg);
+            // Output limiter: soft saturation x/(1+|x|) — bounded (-1,1), no discontinuities.
+            {
+                const float32x4_t one = vdupq_n_f32(1.0f);
+                float32x4_t denom_l = vaddq_f32(one, vabsq_f32(mixed.val[0]));
+                float32x4_t rcp_l   = vrecpeq_f32(denom_l);
+                rcp_l = vmulq_f32(vrecpsq_f32(denom_l, rcp_l), rcp_l);
+                float32x4_t denom_r = vaddq_f32(one, vabsq_f32(mixed.val[1]));
+                float32x4_t rcp_r   = vrecpeq_f32(denom_r);
+                rcp_r = vmulq_f32(vrecpsq_f32(denom_r, rcp_r), rcp_r);
+                mixed.val[0] = vmulq_f32(mixed.val[0], rcp_l);
+                mixed.val[1] = vmulq_f32(mixed.val[1], rcp_r);
+            }
 
             // Store results
             vst2q_f32(out_p, mixed);

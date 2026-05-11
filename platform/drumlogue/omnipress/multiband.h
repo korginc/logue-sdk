@@ -51,6 +51,12 @@ typedef struct {
     float32x4_t gr_mid;
     float32x4_t gr_high;
 
+    // Per-band envelope pre-smoother states (~1ms one-pole, eliminates half-cycle gain modulation)
+    float32x4_t env_state_low;
+    float32x4_t env_state_mid;
+    float32x4_t env_state_high;
+    float env_pre_coeff;
+
     // Sample rate
     float sample_rate;
 } multiband_t;
@@ -93,6 +99,11 @@ fast_inline void multiband_init(multiband_t* mb, float sample_rate) {
     mb->gr_low  = vdupq_n_f32(0.0f);
     mb->gr_mid  = vdupq_n_f32(0.0f);
     mb->gr_high = vdupq_n_f32(0.0f);
+
+    mb->env_state_low  = vdupq_n_f32(0.0f);
+    mb->env_state_mid  = vdupq_n_f32(0.0f);
+    mb->env_state_high = vdupq_n_f32(0.0f);
+    mb->env_pre_coeff  = expf(-1.0f / (0.001f * sample_rate));  // 1ms smoothing
 }
 
 fast_inline void multiband_reset(multiband_t* m) {
@@ -170,10 +181,21 @@ fast_inline void multiband_process(multiband_t* mb,
     // Now low_l, mid_l, high_l (and R) contain the three bands correctly.
     // ------------------------------------------------------------
 
-    // Calculate envelope for each band (absolute value for peak detection)
-    float32x4_t env_low  = vabsq_f32(low_l);
-    float32x4_t env_mid  = vabsq_f32(mid_l);
-    float32x4_t env_high = vabsq_f32(high_l);
+    // Stereo-linked instantaneous envelope (max of L and R absolute values)
+    float32x4_t inst_low  = vmaxq_f32(vabsq_f32(low_l),  vabsq_f32(low_r));
+    float32x4_t inst_mid  = vmaxq_f32(vabsq_f32(mid_l),  vabsq_f32(mid_r));
+    float32x4_t inst_high = vmaxq_f32(vabsq_f32(high_l), vabsq_f32(high_r));
+
+    // One-pole pre-smoothing (~1ms) prevents gain modulation at signal frequency
+    const float32x4_t pre_c  = vdupq_n_f32(mb->env_pre_coeff);
+    const float32x4_t pre_1c = vdupq_n_f32(1.0f - mb->env_pre_coeff);
+    mb->env_state_low  = vaddq_f32(vmulq_f32(inst_low,  pre_1c), vmulq_f32(mb->env_state_low,  pre_c));
+    mb->env_state_mid  = vaddq_f32(vmulq_f32(inst_mid,  pre_1c), vmulq_f32(mb->env_state_mid,  pre_c));
+    mb->env_state_high = vaddq_f32(vmulq_f32(inst_high, pre_1c), vmulq_f32(mb->env_state_high, pre_c));
+
+    float32x4_t env_low  = mb->env_state_low;
+    float32x4_t env_mid  = mb->env_state_mid;
+    float32x4_t env_high = mb->env_state_high;
 
     // Compute gain reduction for each band (compressor_calc_gain converts linear→dB internally)
     float32x4_t low_gr  = compressor_calc_gain(&mb->comp_low,  env_low,
