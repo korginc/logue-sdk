@@ -1084,10 +1084,10 @@ private:
         float loopGain = 0.7f + (decay * 0.295f);
         float unifiedDecay = fminf(0.95f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
         float32x4_t decayAll = vdupq_n_f32(unifiedDecay);
-        // Floor at 0.15 so the reverb onset is audible at all TIME settings.
+        // Floor at 0.25 so the reverb onset is immediately audible at all TIME settings.
         // Without this floor, TIME=90 → feedback=0.05 making the reverb take
-        // several seconds to become audible. Hard-clip below prevents accumulation.
-        float input_gain = fmaxf(0.15f, 1.0f - unifiedDecay);
+        // several seconds to become audible.
+        float input_gain = fmaxf(0.25f, 1.0f - unifiedDecay);
         float32x4_t feedback = vdupq_n_f32(input_gain);
 
         // =================================================================
@@ -1116,12 +1116,18 @@ private:
         // 6. Add input
         mixed[0] = vaddq_f32(mixed[0], vmulq_f32(delayedMono, feedback));
 
-        // 7. Hard-clip FDN channels: with input_gain floored at 0.15 the FDN can
-        // accumulate above 1.0 at very long TIME settings — clip to prevent runaway.
+        // 7. Soft saturation: x/(1+|x|) keeps FDN bounded at (-1,1) without DC lockup.
+        // Hard-clip was causing stellare crash: when all channels pin at +1, Hadamard
+        // ch0 = √8≈2.83 → clip→1.0 → self-sustaining, never decays. Soft sat avoids this.
         {
-            float32x4_t pos1 = vdupq_n_f32(1.0f), neg1 = vdupq_n_f32(-1.0f);
-            for (int i = 0; i < FDN_CHANNELS; i++)
-                mixed[i] = vmaxq_f32(vminq_f32(mixed[i], pos1), neg1);
+            float32x4_t one = vdupq_n_f32(1.0f);
+            for (int i = 0; i < FDN_CHANNELS; i++) {
+                float32x4_t abs_x = vabsq_f32(mixed[i]);
+                float32x4_t denom = vaddq_f32(one, abs_x);
+                float32x4_t rcp   = vrecpeq_f32(denom);
+                rcp = vmulq_f32(vrecpsq_f32(denom, rcp), rcp);  // Newton-Raphson refinement
+                mixed[i] = vmulq_f32(mixed[i], rcp);
+            }
         }
 
 
@@ -1160,10 +1166,12 @@ private:
             for (int i = 4; i < 4 + halfR; i++)
                 rightSum = vaddq_f32(rightSum, mixed[i]);
 
-            float normL = halfL > 0 ? 1.0f / halfL : 1.0f;
-            leftMix = vmulq_f32(leftSum, vdupq_n_f32(normL));
+            // Fixed 0.5 normalization (vs 1/halfL=0.25 for 8ch) gives 6dB more output,
+            // making the reverb tail immediately audible. Soft saturation above keeps
+            // individual channels < 1 so summing 4 channels × 0.5 stays below 2.0.
+            leftMix = vmulq_f32(leftSum, vdupq_n_f32(0.5f));
             if (halfR > 0)
-                rightMix = vmulq_f32(rightSum, vdupq_n_f32(1.0f / halfR));
+                rightMix = vmulq_f32(rightSum, vdupq_n_f32(0.5f));
             else
                 rightMix = leftMix; // PILL=0: mono fold
         }
@@ -1320,7 +1328,7 @@ private:
         float mixed[FDN_CHANNELS];
         float loopGain = 0.7f + (decay * 0.295f);
         float unifiedDecay = fminf(0.95f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
-        float scalar_input_gain = fmaxf(0.15f, 1.0f - unifiedDecay);
+        float scalar_input_gain = fmaxf(0.25f, 1.0f - unifiedDecay);
 
         applyHadamardScalar(delayOut, mixed);
 
@@ -1329,9 +1337,11 @@ private:
 
         mixed[0] += delayedInput * scalar_input_gain;
 
-        // Hard-clip: prevent runaway when input_gain exceeds (1 - unifiedDecay).
-        for (int ch = 0; ch < FDN_CHANNELS; ch++)
-            mixed[ch] = fmaxf(-1.0f, fminf(1.0f, mixed[ch]));
+        // Soft saturation: x/(1+|x|) — bounded (-1,1), no DC lockup.
+        for (int ch = 0; ch < FDN_CHANNELS; ch++) {
+            float x = mixed[ch];
+            mixed[ch] = x / (1.0f + fabsf(x));
+        }
 
         // Exotic "Low Pitching" Shimmer (PILL=4)
         // Injects a ring-modulated copy of the wet signal back into the network.
@@ -1381,9 +1391,9 @@ private:
             int halfR = activeCh > 4 ? activeCh - 4 : 0;
             for (int i = 0; i < halfL; i++)         leftRaw  += mixed[i];
             for (int i = 4; i < 4 + halfR; i++)     rightRaw += mixed[i];
-            leftRaw  /= (halfL > 0 ? (float)halfL : 1.0f);
+            leftRaw  *= 0.5f;
             if (halfR > 0)
-                rightRaw /= (float)halfR;
+                rightRaw *= 0.5f;
             else
                 rightRaw  = leftRaw;  // mono fold for very sparse (PILL=0)
         }
