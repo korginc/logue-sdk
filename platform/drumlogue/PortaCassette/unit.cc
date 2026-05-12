@@ -89,7 +89,7 @@ __unit_callback const char * unit_get_param_str_value(uint8_t id, int32_t value)
             }
 
         // Crosstalk Bleed
-        case PortaCassette::k_param_xtalk:
+        case PortaCassette::k_crosstalk:
             snprintf(buf, sizeof(buf), "%d %%", (int)value);
             return buf;
     }
