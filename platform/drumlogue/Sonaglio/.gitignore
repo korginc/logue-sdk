@@ -1,0 +1,8 @@
+test_lfo
+test_lfo_resonant
+test_stability
+test_alloc
+test_voice_allocation
+test_benchmark_resonant
+test_envelope_gating
+test_runner
