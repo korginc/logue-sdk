@@ -27,7 +27,7 @@ Firmware version >= 1.00 is required to run user units built with SDK version 2.
 
 ```
  $ docker/run_interactive.sh
- user@logue-sdk $ 
+ user@logue-sdk $
  ```
 
  1.1. (optional) List buildable projects
@@ -57,17 +57,17 @@ Firmware version >= 1.00 is required to run user units built with SDK version 2.
  Creating build/dummy_synth.bin
  Creating build/dummy_synth.dmp
  Creating build/dummy_synth.list
- 
- 
+
+
  Done
- 
+
     text	   data	    bss	    dec	    hex	filename
     3267	    316	      8	   3591	    e07	build/dummy_synth.drmlgunit
  >> Installing /workspace/drumlogue/dummy-synth
  Deploying to /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
- 
+
  Done
- 
+
  >> Resetting environment
  >> Cleaning up drumlogue development environment.
  ```
@@ -91,17 +91,17 @@ Firmware version >= 1.00 is required to run user units built with SDK version 2.
  Creating build/dummy_synth.bin
  Creating build/dummy_synth.dmp
  Creating build/dummy_synth.list
- 
- 
+
+
  Done
- 
+
     text	   data	    bss	    dec	    hex	filename
     3267	    316	      8	   3591	    e07	build/dummy_synth.drmlgunit
  >> Installing /workspace/drumlogue/dummy-synth
  Deploying to /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
- 
+
  Done
- 
+
  >> Resetting environment
  >> Cleaning up drumlogue development environment.
  ```
@@ -118,41 +118,41 @@ The final build product is the *.drmlgunit* file in the project directory (unles
 
 ```
  $ docker/run_interactive.sh
- user@logue-sdk $ 
+ user@logue-sdk $
  ```
- 
- 2. Clean the desired project (E.g. `drumlogue/dummy-synth`) 
+
+ 2. Clean the desired project (E.g. `drumlogue/dummy-synth`)
 
 ```
- user@logue-sdk:~$ build --clean drumlogue/dummy-synth 
+ user@logue-sdk:~$ build --clean drumlogue/dummy-synth
  >> Initializing drumlogue development environment.
  Note: run 'env -r' to reset the environment
  >> Cleaning /workspace/drumlogue/dummy-synth
- 
+
  Cleaning
  rm -fR .dep build /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
- 
+
  Done
- 
+
  >> Resetting environment
  >> Cleaning up drumlogue development environment.
  ```
 
 #### `run_cmd.sh` Alternative
 
- 1. Clean the desired project (E.g. `drumlogue/dummy-synth`) 
+ 1. Clean the desired project (E.g. `drumlogue/dummy-synth`)
 
 ```
- $ ./run_cmd.sh build --clean drumlogue/dummy-synth 
+ $ ./run_cmd.sh build --clean drumlogue/dummy-synth
  >> Initializing drumlogue development environment.
  Note: run 'env -r' to reset the environment
  >> Cleaning /workspace/drumlogue/dummy-synth
- 
+
  Cleaning
  rm -fR .dep build /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
- 
+
  Done
- 
+
  >> Resetting environment
  >> Cleaning up drumlogue development environment.
  ```
@@ -202,17 +202,17 @@ Field descriptions:
  * `.name` : Name for the current unit, as displayed on the device when loaded. Nul-terminated array of maximum 13 7-bit ASCII characters. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#$%&'()*+,-.:;<=>@`".
  * `.num_presets` : Number of exposed presets by the unit. See [Presets](#presets) for details.
  * `.num_params` : Number of exposed parameters by the unit. Up to 24 parameters can be exposed.
- * `.params` : Array of parameter descriptors. See [Parameter Descriptors](#parameter-descriptors) for details. 
- 
+ * `.params` : Array of parameter descriptors. See [Parameter Descriptors](#parameter-descriptors) for details.
+
 ### unit.cc
- 
+
  The *unit.cc* file is the main interface with the logue SDK API, it provides entry point implementations for the necessary API functions, and holds globally defined state and/or class instances.
 
 ### Developer Identifier
 
  Developers must choose a unique identifier (32-bit unsigned integer) in order to allow proper identification of units.
  A list of known identifiers is available [here](../../developer_ids.md), it is however not necessarily exhaustive.
- 
+
  *Note* The following developer identifiers are reserved and should not be used: 0x00000000, 0x4B4F5247 (KORG), 0x6B6F7267 (korg), or any upper/lower case combination of the previous two.
 
 ### Parameter Descriptors
@@ -232,7 +232,7 @@ Field descriptions:
   char name[UNIT_PARAM_NAME_LEN + 1];
  } unit_param_t;
  ```
- 
+
  * `min` and `max` are used to define parameter value boundaries.
  * `center` can be used to make it explicit that the parameter is bipolar, for unipolar parameters simply set it to the `min` value.
  * `init` is the initialization value. Unit parameters are expected to be set to this value after the initialization phase.
@@ -241,17 +241,17 @@ Field descriptions:
  * `frac_mode` determines the type of fractional value being described. When set to `0`, values will be assumed to be fixed point with the lower `frac` bits representing the fractional part. When set to `1`, values will be assumed to include a fractional part that is multiplied by 10 times `frac` number of decimals, allowing for base 10 fractional increment/decrements.
  * `reserved` should be set to 0 at all times.
  * `name` allows for a 12 character name. Should be nul-terminated and 7-bit ASCII encoded. Valid characters are: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#$%&'()*+,-.:;<=>@`".
- 
+
  *Note* `min`, `max`, `center` and `init` values must be take into account the `frac` and `frac_mode` values.
 
  Even when the number of parameter count is less than the maximum allowed, a descriptor must be provided for each 24 parameters. In order to indicate that a parameter index is not in use, the following parameter descriptor must be used:
- 
+
  ```
  {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}}
  ```
- 
+
  On the drumlogue, the 24 parameters are layed out over pages of 4 parameters, following the order of parameter indexes. It is possible to leave some parameter indexes unassigned in order to display certain parameters on a later page. To do so, simply introduce an unassigned parameter where the index should be skipped.
- 
+
  ```
  // Page 1
  {0, (100 << 1), 0, (25 << 1), k_unit_param_type_percent, 1, 0, 0, {"PARAM1"}},
@@ -264,8 +264,8 @@ Field descriptions:
  {0, 9, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"PARAM4"}},
  {0, 9, 0, 0, k_unit_param_type_bitmaps, 0, 0, 0, {"PARAM5"}},
  {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
- {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}}, 
- 
+ {0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""}},
+
  [...]
  ```
 
@@ -282,9 +282,9 @@ Field descriptions:
   * `k_unit_param_type_hertz` : Describes a Hertz value. `Hz` will be automatically appended to the displayed value.
   * `k_unit_param_type_khertz` : Describes a kilo Hertz value. `kHz` will be automatically appended to the displayed value.
   * `k_unit_param_type_bpm` : Describes a beat per minute value.
-  * `k_unit_param_type_msec` : Describes a milliseconds value. `ms` will be automatically appended to the displayed value. 
-  * `k_unit_param_type_sec` : Describes a seconds value. `s` will be automatically appended to the displayed value. 
-  * `k_unit_param_type_enum` : Describes a numerical enumeration value. If the value minimum is set to 0, the value will be incremented by 1 when displayed. 
+  * `k_unit_param_type_msec` : Describes a milliseconds value. `ms` will be automatically appended to the displayed value.
+  * `k_unit_param_type_sec` : Describes a seconds value. `s` will be automatically appended to the displayed value.
+  * `k_unit_param_type_enum` : Describes a numerical enumeration value. If the value minimum is set to 0, the value will be incremented by 1 when displayed.
   * `k_unit_param_type_strings` : Describes a value with custom string representation. The numerical value will be passed in a call to `unit_get_param_str_value(..)` in order to obtain the string representation. See [Strings](#strings) for details.
   * `k_unit_param_type_bitmaps` : Describes a value with custom bitmap representation. The numerical value will be passed in a call to `unit_get_param_bmp_value(..)` in order to obtain the bitmap representation. See [Bitmaps](#bitmaps) for details.
   * `k_unit_param_type_drywet` : Describes a dry/wet value. Negative values will be prepended with `D` for dry, positive values with `W` for wet, and zero value replaced with `BAL` to indicate a balanced mix.
@@ -315,9 +315,9 @@ All units must provide an implementation for the following functions. However, a
  * `__unit_callback const uint8_t * unit_get_param_bmp_value(uint8_t index, int32_t value)` : Called to obtain the bitmap representation of the specified value, for a `k_unit_param_type_bitmaps` typed parameter. It can be safely assumed that the pointer will not be cached or reused after `unit_get_param_bmp_value(..)` is called again, and thus the same memory area can be reused across calls (if convenient). For details concerning bitmap data format see [Bitmaps](#bitmaps).
  * `__unit_callback void unit_set_param_value(uint8_t index, int32_t value)` : Called to set the current value of the parameter designated by the specified index. Note that for the drumlogue values are stored as 16-bit integers, but to avoid future API changes, they are passed as 32bit integers. For additional safety, make sure to bound check values as per the min/max values declared in the header.
  * `__unit_callback void unit_set_tempo(uint32_t tempo)` : Called when a tempo change occurs. The tempo is formatted in fixed point format, with the BPM integer part in the upper 16 bits, and fractional part in the lower 16 bits (low endian). Care should be taken to keep CPU load as low as possible when handling tempo changes as this handler may be called frequently especially if externally synced.
- 
+
 ### Synth Unit Specific Functions
- 
+
  * `__unit_callback void unit_note_on(uint8_t note, uint8_t velocity)` : Called upon MIDI note on events, and upon internal sequencer gate on events if an explicit `unit_gate_on(..)` handler is not provided, in which case note will be set to 0xFFU. `velocity` is a 7-bit value.
  * `__unit_callback void unit_note_off(uint8_t note)` : Called upon MIDI note off events, and upon internal sequencer gate off events if an explicit `unit_gate_off(..)` handler is not provided, in which case note will be set to 0xFFU.
  * `__unit_callback void unit_gate_on(uint8_t velocity)` (optional) : If provided, will be called upon internal sequencer gate on events. `velocity` is a 7-bit value.
@@ -326,8 +326,8 @@ All units must provide an implementation for the following functions. However, a
  * `__unit_callback void unit_pitch_bend(uint16_t bend)` : Called upon MIDI pitch bend event. `bend` is a 14-bit value with neutral center at 0x2000U. Sensitivity can be defined according to the unit's needs.
  * `__unit_callback void unit_channel_pressure(uint8_t pressure)` : Called upon MIDI channel pressure events. `pressure` is a 7-bit value.
  * `__unit_callback void unit_aftertouch(uint8_t note, uint8_t aftertouch)` : Called upon MIDI aftertouch events. `afterotuch` is a 7-bit value.
- 
-### Runtime Descriptor 
+
+### Runtime Descriptor
 
  A reference to the runtime descriptor is passed to units during the initialization phase. The descriptor provides information on the current device and API, audio rate and buffer geometry, as well as pointers to callable API functions.
 
@@ -344,7 +344,7 @@ All units must provide an implementation for the following functions. However, a
   unit_runtime_get_sample_ptr get_sample;
  } unit_runtime_desc_t;
  ```
- 
+
  * `target` describes the current platform and module. It should be set to one of: `k_unit_target_drumlogue_delfx`, `k_unit_target_drumlogue_revfx`, `k_unit_target_drumlogue_synth`, `k_unit_target_drumlogue_masterfx`. The convenience macro `UNIT_TARGET_PLATFORM_IS_COMPAT(target)` can be used to check for compatibility of current unit with the runtime environment.
  * `api` describes the API version currently in use. The version is formatted with the major in the upper 16 bits, minor and patch number in the two lower bytes, respectively (e.g.: v1.2.3 -> 0x00010203U). The convenience macro `UNIT_API_IS_COMPAT(api)` can be used to check for compatibility of current unit with the runtime environment API.
  * `samplerate` describes the sample rate used for audio processing. On drumlogue this should always be set to 48000. However it should be checked and taken into account by the unit. A unit can reject inconvenient samplerates by returning `k_unit_err_samplerate*` from the `unit_init(..)` callback, which will prevent the unit from being fully loaded.
@@ -384,67 +384,67 @@ All units must provide an implementation for the following functions. However, a
 
  Units can expose presets by setting `.num_presets` to a non-zero value in the [header structure](#header-c), and implementing the `unit_get_preset_index(..)`, `unit_get_preset_name(..)` and `unit_load_preset(..)` callbacks, for the corresponding preset indexes.
  When presets are exposed, a preset selection UI will be displayed.
- 
+
  Loading a preset should be considered as setting a base configuration on top of which exposed parameters can be further modified. Modifying the exposed parameters should not cause the current preset index to change. However, loading a preset can cause exposed parameters to change value as a side effect.
 
 ### Strings
 
  Strings provided via `unit_get_param_str_value(..)` should be nul terminated C character arrays of 7-bit ASCII characters from the following list: "` ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!?#$%&'()*+,-.:;<=>@`".
- 
+
  Parameter value strings can be effectively up to 32 characters long, however, the displayable area is narrow and strings that exceed the area will be truncated with `...`.
 
 ### Bitmaps
 
  *Note* Bitmap API is only supported on drumlogue firmware v1.1.0 and up.
- 
+
  Bitmaps are displayed as 16x16 black and white pixels, with origin in the upper left corner. The bitmap data provided via `unit_get_param_bmp_value(..)` should be formatted in 16x16 1bpp packed bitmap format, that is as a 32 byte array with each pair of bytes representing a single row of 16 pixels (0 for black, 1 for white), starting from the top row. Each byte is processed from the least significant bit to the most, displaying corresponding pixels from left to right.
 
  A tutorial on how to create such bitmap data using [Gimp](https://www.gimp.org/) can be found [here](https://zilogic.com/creating-glcd-bitmaps-using-gimp/).
- 
+
  Alternatively, a tutorial using MS Paint is also available [here](https://exploreembedded.com/wiki/Displaying_Images_and_Icons_on_GLCD).
 
  Here a few examples:
- 
+
  *White square*
  ```
  const uint8_t bmp[32] = {
-   0xFFU, 0xFFU, 
-   0xFFU, 0xFFU, 
-   0xFFU, 0xFFU, 
-   0xFFU, 0xFFU, 
-   0xFFU, 0xFFU, 
-   0xFFU, 0xFFU, 
-   0xFFU, 0xFFU, 
    0xFFU, 0xFFU,
-   0xFFU, 0xFFU, 
-   0xFFU, 0xFFU, 
-   0xFFU, 0xFFU, 
-   0xFFU, 0xFFU, 
-   0xFFU, 0xFFU, 
-   0xFFU, 0xFFU, 
-   0xFFU, 0xFFU, 
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
+   0xFFU, 0xFFU,
    0xFFU, 0xFFU
  };
  ```
- 
+
  *Alternating horizontal lines*
  ```
  const uint8_t bmp[32] = {
-   0xFFU, 0xFFU, 
-   0x00U, 0x00U, 
-   0xFFU, 0xFFU, 
-   0x00U, 0x00U, 
-   0xFFU, 0xFFU, 
-   0x00U, 0x00U, 
-   0xFFU, 0xFFU, 
+   0xFFU, 0xFFU,
    0x00U, 0x00U,
-   0xFFU, 0xFFU, 
-   0x00U, 0x00U, 
-   0xFFU, 0xFFU, 
-   0x00U, 0x00U, 
-   0xFFU, 0xFFU, 
-   0x00U, 0x00U, 
-   0xFFU, 0xFFU, 
+   0xFFU, 0xFFU,
+   0x00U, 0x00U,
+   0xFFU, 0xFFU,
+   0x00U, 0x00U,
+   0xFFU, 0xFFU,
+   0x00U, 0x00U,
+   0xFFU, 0xFFU,
+   0x00U, 0x00U,
+   0xFFU, 0xFFU,
+   0x00U, 0x00U,
+   0xFFU, 0xFFU,
+   0x00U, 0x00U,
+   0xFFU, 0xFFU,
    0x00U, 0x00U
  };
  ```
@@ -452,21 +452,21 @@ All units must provide an implementation for the following functions. However, a
  *Alternating vertical lines*
  ```
  const uint8_t bmp[32] = {
-   0xAAU, 0xAAU, 
-   0xAAU, 0xAAU, 
-   0xAAU, 0xAAU, 
-   0xAAU, 0xAAU, 
-   0xAAU, 0xAAU, 
-   0xAAU, 0xAAU, 
-   0xAAU, 0xAAU, 
    0xAAU, 0xAAU,
-   0xAAU, 0xAAU, 
-   0xAAU, 0xAAU, 
-   0xAAU, 0xAAU, 
-   0xAAU, 0xAAU, 
-   0xAAU, 0xAAU, 
-   0xAAU, 0xAAU, 
-   0xAAU, 0xAAU, 
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
+   0xAAU, 0xAAU,
    0xAAU, 0xAAU
  };
  ```
@@ -474,23 +474,47 @@ All units must provide an implementation for the following functions. However, a
  *Box outline with diagonal between upper left and lower right corner*
   ```
  const uint8_t bmp[32] = {
-   0xFFU, 0xFFU, 
-   0x03U, 0x80U, 
-   0x05U, 0x80U, 
-   0x09U, 0x80U, 
-   0x11U, 0x80U, 
+   0xFFU, 0xFFU,
+   0x03U, 0x80U,
+   0x05U, 0x80U,
+   0x09U, 0x80U,
+   0x11U, 0x80U,
    0x21U, 0x80U,
-   0x41U, 0x80U, 
-   0x81U, 0x80U, 
-   0x01U, 0x81U, 
-   0x01U, 0x82U, 
-   0x01U, 0x84U, 
+   0x41U, 0x80U,
+   0x81U, 0x80U,
+   0x01U, 0x81U,
+   0x01U, 0x82U,
+   0x01U, 0x84U,
    0x01U, 0x88U,
-   0x01U, 0x90U, 
-   0x01U, 0xA0U, 
-   0x01U, 0xC0U, 
+   0x01U, 0x90U,
+   0x01U, 0xA0U,
+   0x01U, 0xC0U,
    0xFFU, 0xFFU
  };
  ```
 
+#### How to run the test:
+- there are bash scripts that will do the compile and then call the test that are wrappers for main functions.
+- On native Linux, just run the scripts directly:
+```
+.\run_sonaglio_tests.sh
+.\run_sonaglio_benchmarks.sh
+```
+- On WSL they will use qemu (please install it before) for ARM Neon testing:
+```
+cd /path/to/logue-sdk/Sonaglio
 
+chmod +x run_sonaglio_tests.sh run_sonaglio_benchmarks.sh
+
+ROOT_DIR=/path/to/logue-sdk \
+CXX=/mnt/d/drumlogue/arm-unknown-linux-gnueabihf/bin/arm-unknown-linux-gnueabihf-g++ \
+RUNNER=qemu-arm \
+SDK_INCLUDE_DIR=/mnt/d/drumlogue/arm-unknown-linux-gnueabihf/arm-unknown-linux-gnueabihf \
+./run_sonaglio_tests.sh
+
+ROOT_DIR=/mnt/d/Fede/drumlogue \
+CXX=/mnt/d/Fede/drumlogue/arm-unknown-linux-gnueabihf/bin/arm-unknown-linux-gnueabihf-g++ \
+RUNNER=qemu-arm \
+SDK_INCLUDE_DIR=/mnt/d/Fede/drumlogue/arm-unknown-linux-gnueabihf/arm-unknown-linux-gnueabihf \
+./run_sonaglio_benchmarks.sh
+```
