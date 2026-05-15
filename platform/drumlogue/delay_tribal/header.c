@@ -21,7 +21,7 @@ const __unit_header unit_header_t unit_header = {
     .params = {
         // Page 1
         // ID 0: Clones  0=2, 1=4, 2=6, 3=8, 4=10
-        { 0, 5, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"Clones"} },
+        { 0, 4, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"Clones"} },
         // ID 1: Mode  0=Tribal, 1=Military, 2=Angel
         { 0, 2, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"Mode"} },
         // ID 2: Depth  0-100%
@@ -42,7 +42,8 @@ const __unit_header unit_header_t unit_header = {
         // Pages 3-6: blank padding to fill 24 slots
         // ID 8: SoftAtk (Attack Softening)  0-100%
         { 0, 100, 0, 20, k_unit_param_type_percent, 0, 0, 0, {"SoftAtk"} },
-        { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
+        // ID 9: Gap (distance between hits)  0-100%
+        { 0, 100, 0, 20, k_unit_param_type_percent, 0, 0, 0, {"Gap"} },
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },

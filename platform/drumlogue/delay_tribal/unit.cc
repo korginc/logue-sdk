@@ -7,10 +7,6 @@
 #include "PercussionSpatializer.h"
 
 // Definition and initialization of static class members
-float PercussionSpatializer::sin_table[360] = {0};
-float PercussionSpatializer::cos_table[360] = {0};
-bool  PercussionSpatializer::tables_initialized = false;
-
 static PercussionSpatializer s_delay_instance;
 static unit_runtime_desc_t s_runtime_desc;
 
@@ -35,7 +31,7 @@ __unit_callback void unit_resume() {}
 __unit_callback void unit_suspend() { s_delay_instance.Reset(); }
 
 __unit_callback void unit_render(const float * in, float * out, uint32_t frames) {
-    s_delay_instance.Process(in, out, frames);
+    s_delay_instance.Render(in, out, frames);
 }
 
 __unit_callback void unit_set_param_value(uint8_t id, int32_t value) {

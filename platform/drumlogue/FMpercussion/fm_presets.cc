@@ -250,7 +250,7 @@ const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
         1, 5, LFO_TARGET_NOISE_MIX, 90,  // LFO1: slow ramp → noise blend
         0, 20, LFO_TARGET_PITCH, -20,    // LFO2: slight negative pitch wobble
         20, 0,
-        RESONANT_MODE_HIGHPASS, 30, 50, 45,
+        RESONANT_MODE_HIGHPASS, 30,
         {ENGINE_KICK, ENGINE_SNARE, ENGINE_METAL, ENGINE_PERC}
     },
 
@@ -431,7 +431,7 @@ const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
         10, 0,
         RESONANT_MODE_HIGHPASS, 20,
         {ENGINE_KICK, ENGINE_SNARE, ENGINE_METAL, ENGINE_PERC}
-    }
+    },
 
     // Preset 24: "WholTone"
     // Demonstrating the EuclTun (Euclidean Tuning) feature on the Perc engine.

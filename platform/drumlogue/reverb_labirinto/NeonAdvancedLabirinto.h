@@ -55,8 +55,8 @@ typedef enum {
 
 enum parameterState {
   k_paramProgram = 0,
-  k_mix, k_time, k_low, k_high, k_damp,
-  k_wide, k_comp, k_pill, k_shimmer_freq,
+  k_time, k_low, k_high, k_damp,
+  k_wide, k_diffusion, k_pill, k_shimmer_freq,
   k_pre_delay, k_vibr,
   k_total
 };
@@ -66,18 +66,18 @@ static const char *k_preset_names[k_preset_number] =
 // ============================================================================
 // Factory Presets
 // ============================================================================
-// Each preset: {PRESET, MIX, TIME, LOW, HIGH, DAMP, WIDE, COMP, PILL, VIBR}
+// Each preset: {PRESET, TIME, LOW, HIGH, DAMP, WIDE, DFSN, PILL, SHMR, PDLY, VIBR}
 static const int32_t k_presets[k_preset_number][k_total] = {
     // 0: foresta - mellow, sparse, "wood" (warm lows, short, moderate decay)
-    {k_foresta, 60, 40, 60, 40, 200, 80, 60, 3, 0, 0, 10},
+    {k_foresta, 40, 60, 40, 200, 80, 60, 3, 0, 0, 10},
     // 1: tempio  - sombre, "stone" (heavy lows, long, dark, 6-ch)
-    {k_tempio, 70, 70, 80, 25, 130, 130, 80, 2, 0, 0, 10},
+    {k_tempio, 70, 80, 25, 130, 130, 80, 2, 0, 0, 10},
     // 2: labirinto - center values with random ping-pong stereo bouncing
-    {k_labirinto, 50, 60, 50, 50, 510, 100, 50, 1, 0, 10, 10},
+    {k_labirinto, 60, 50, 50, 510, 100, 50, 1, 0, 10, 10},
     // 3: esotico - microtonal echoes on non-Western scale
-    {k_esotico, 45, 40, 60, 80, 100, 100, 50, 4, 5, 5, 20},
+    {k_esotico, 40, 60, 80, 100, 100, 50, 4, 5, 5, 20},
     // 4: stellare - long, subtle, "spacey" shimmer (8-ch + shimmer)
-    {k_stellare, 40, 90, 50, 80, 800, 180, 30, 4, 35, 20, 10},
+    {k_stellare, 90, 50, 80, 800, 180, 30, 4, 35, 20, 10},
 };
 
 // ============================================================================
@@ -97,7 +97,6 @@ public:
         , diffusion(0.3f)
         , modDepth(0.1f)
         , modRate(0.5f)
-        , mix(0.3f)
         , width(1.0f)
         , dampingCoeff(0.5f)
         , lowDecayMult(1.0f)
@@ -108,6 +107,9 @@ public:
         , shimmerDepth_(0.0f)
         , shimmerPhase_(0.0f)
         , shimmerFreq_ (35.0f)
+        , preDelayWritePos(0)
+        , currentPreDelaySamples(0.0f)
+        , targetPreDelaySamples(0.0f)
         , currentPreset(0)
         , lfoSpeed(1.0f)
         , randomLfoValue(0.0f)
@@ -117,9 +119,7 @@ public:
         , noiseSeed(132465798U)
         , noiseColour(2.0f)
         , noiseGain(0.0f)
-        , currentPreDelaySamples(0.0f)
-        , targetPreDelaySamples(0.0f)
-        , preDelayWritePos(0)
+        , noiseEnvelope(0.0f)
         , pingMapIndex(0) {
 
         // Initialize delay times (prime-based for smooth diffusion)
@@ -218,6 +218,7 @@ public:
             noiseStates[i] = 0.0f;
             noiseStates2[i] = 0.0f;
         }
+        noiseEnvelope = 0.0f;
     }
 
     /*===========================================================================*/
@@ -228,10 +229,11 @@ public:
     }
 
     inline void loadPreset(int32_t value) {
-        currentPreset = value;
-        setFilterType(value);
-        for (uint8_t i = 0; i < k_total; i++) {
-            setParameter(i, k_presets[value][i]);
+        if (currentPreset != value) {
+            setFilterType(value);
+            for (uint8_t i = 0; i < k_total; i++) {
+                setParameter(i, k_presets[value][i]);
+            }
         }
     }
 
@@ -246,10 +248,7 @@ public:
 
         switch (index) {
         case k_paramProgram:
-            // do nothing to avoid recursion
-            break;
-        case k_mix: // MIX  0..100 → 0.0..1.0
-            setMix(value * 0.01f);
+          if (currentPreset != value) loadPreset(value);
             break;
         case k_time: // TIME  1..100 → decay 0.01..0.99
             setDecay(0.01f + (value - 1) / 99.0f * 0.98f);
@@ -266,7 +265,7 @@ public:
         case k_wide: // WIDE  0..200 → stereo width 0.0..2.0
             setWidth(value * 0.01f);
             break;
-        case k_comp: // COMP  0..100 → diffusion 0.0..1.0
+        case k_diffusion: // DFSN  0..100 → diffusion 0.0..1.0
             setDiffusion(value * 0.01f);
             break;
         case k_pill: // PILL  0..4  - pillar routing mode
@@ -294,7 +293,7 @@ public:
             // Map to 0=Brown, 1=Pink, 2=White, 3=Blue, 4=Violet, 5=Grey
             noiseColour = diffusion * 5.999f;
         }
-        // Modulation depth depends on pillar (as before) and COMP (diffusion)
+        // Modulation depth depends on pillar (as before) and DFSN (diffusion)
         setModDepth(((pillar_ == 0) ? 0.6f : (pillar_ == 1) ? 0.4f :
                         (pillar_ == 2) ? 0.2f : 0.1f) * diffusion);
     }
@@ -313,7 +312,7 @@ public:
         pingPong_     = (pillar_ == 1);
         shimmerDepth_ = (pillar_ == 4) ? 0.4f * modDepth : 0.0f;
         shimmerPhase_ = 0.0f;
-        // Modulation depth depends on pillar (as before) and COMP (diffusion)
+        // Modulation depth depends on pillar (as before) and DFSN (diffusion)
         setModDepth(((pillar_ == 0) ? 0.6f : (pillar_ == 1) ? 0.4f :
                         (pillar_ == 2) ? 0.2f : 0.1f) * diffusion);
         updateModRate();
@@ -324,7 +323,6 @@ public:
     // Uses a fixed base rate of 1.0 Hz so the result is always deterministic
     // regardless of how many times this is called.
     void updateModRate() { modRate = fmaxf(0.1f, fminf(10.0f, lfoSpeed * modDepth)); }
-    void setMix(float m) { mix = fmaxf(0.0f, fminf(1.0f, m)); }
     void setWidth(float w) { width = fmaxf(0.0f, fminf(2.0f, w)); } // UNUSED
     // 3 Hz to 8 Hz: Creates Cochrane's "microtonal beating" — a nervous, spicy, disconcerting chorusing.
     // 20 Hz to 55 Hz: Creates the "low pitching" cascade — thick, dark, metallic undertones that dive deeper as the reverb decays.
@@ -519,30 +517,30 @@ public:
         // ---------------------------------------------------------
         // PROPER SCALAR IIR BIQUAD PROCESSING (same as before, but using current coefficients)
         // ---------------------------------------------------------
-        for (int ch = 0; ch < FDN_CHANNELS; ch++) {
+        for (int ch = 0; ch < numChannels; ch++) {
 
-            // 1. Unpack the 4 consecutive samples from the NEON vector
-            float in_samps[4];
-            vst1q_f32(in_samps, signals[ch]);
+          // 1. Unpack the 4 consecutive samples from the NEON vector
+          float in_samps[NEON_LANES];
+          vst1q_f32(in_samps, signals[ch]);
 
-            float out_samps[4];
+          float out_samps[NEON_LANES];
 
-            // 2. Process sequentially to maintain the IIR feedback loop
-            for (int s = 0; s < 4; s++) {
-                float in_val = in_samps[s];
+          // 2. Process sequentially to maintain the IIR feedback loop
+          for (int s = 0; s < NEON_LANES; s++) {
+            float in_val = in_samps[s];
 
-                // Direct Form II Transposed Biquad Math
-                float out_val = (in_val * biquadA0) + filterState1[ch];
+            // Direct Form II Transposed Biquad Math
+            float out_val = (in_val * biquadA0) + filterState1[ch];
 
-                // Update history states immediately for the next sample
-                filterState1[ch] = (in_val * biquadA1) - (out_val * biquadB1) + filterState2[ch];
-                filterState2[ch] = (in_val * biquadA2) - (out_val * biquadB2);
+            // Update history states immediately for the next sample
+            filterState1[ch] = (in_val * biquadA1) - (out_val * biquadB1) + filterState2[ch];
+            filterState2[ch] = (in_val * biquadA2) - (out_val * biquadB2);
 
-                out_samps[s] = out_val;
-            }
+            out_samps[s] = out_val;
+          }
 
-            // 3. Repack back into the NEON vector to continue the delay network
-            signals[ch] = vld1q_f32(out_samps);
+          // 3. Repack back into the NEON vector to continue the delay network
+          signals[ch] = vld1q_f32(out_samps);
         }
     }
 
@@ -591,7 +589,7 @@ public:
         }
     }
 
-    void addColouredNoise(float32x4_t* signals, int numChannels) {
+    void addColouredNoise(float32x4_t* signals, int numChannels, float gainScale = 0.5f) {
         if (filterMode != kFilterNoise || noiseGain < 0.001f) return;
 
         for (int ch = 0; ch < numChannels; ch++) {
@@ -623,14 +621,14 @@ public:
                 } else {
                     // 5: Grey (Notch filter around 2kHz using z^-2)
                     // y[n] = x[n] + x[n-2] creates a comb notch
-                    n_out[i] = (n + noiseStates2[ch]) * 0.707f;
+                    n_out[i] = (n + noiseStates2[ch]) * 0.778f;
                     noiseStates2[ch] = noiseStates[ch];
                     noiseStates[ch] = n;
                 }
             }
             // Inject the colored noise into the FDN channel
             float32x4_t noise = vld1q_f32(n_out);
-            signals[ch] = vmlaq_n_f32(signals[ch], noise, noiseGain);
+            signals[ch] = vmlaq_n_f32(signals[ch], noise, noiseGain * gainScale);
         }
     }
 
@@ -724,13 +722,11 @@ public:
                 // SCALAR PATH: Process remaining 1-3 samples
                 // =================================================================
                 for (int i = 0; i < blockSize; i++) {
-                    float dryL = inL[samplesProcessed + i];
-                    float dryR = inR[samplesProcessed + i];
-                    float mono = (dryL + dryR) * 0.5f;
+                    float mono = (inL[samplesProcessed + i] + inR[samplesProcessed + i]) * 0.5f;
                     float wetL, wetR;
                     processScalar(mono, wetL, wetR);
-                    outL[samplesProcessed + i] = dryL * (1.0f - mix) + wetL * mix;
-                    outR[samplesProcessed + i] = dryR * (1.0f - mix) + wetR * mix;
+                    outL[samplesProcessed + i] = wetL;
+                    outR[samplesProcessed + i] = wetR;
                 }
             }
 
@@ -750,26 +746,32 @@ private:
             (float)(writePos + 2),
             (float)(writePos + 3)
         };
+        float32x4_t mods[FDN_CHANNELS];
+        // DELAY READ POINTER CALCULATIONS
+        float32x4_t readPositions[FDN_CHANNELS];
+        uint32_t baseIndices[FDN_CHANNELS][NEON_LANES];
+        float fracParts[FDN_CHANNELS][NEON_LANES];
 
         // ====================================================================
         // DYNAMIC NEON MODULATION (SWIRL & COCHRANE SHIMMER)
         // ====================================================================
-        float32x4_t mods[FDN_CHANNELS];
 
         for (int ch = 0; ch < FDN_CHANNELS; ch++) {
 
             // 1. Select Rate and Depth based on current Mode
-            float current_rate = 0.0f;
-            float current_depth = 0.0f;
+            float current_rate = 0.5f;
+            float current_depth = 1.0f;
 
+            // use shimmer only on the last two presets, not available for all
             if (currentPreset == k_esotico) {
                 // Cochrane 18-EDO Shimmer Mode
                 current_rate = microtonalRate_[ch];
                 current_depth = shimmerDepth_ * 45.0f; // Deep, slow microtonal stretch
-            } else {
-                // Standard Swirl / Chorus Mode
-                current_rate = swirlRate_[ch] * (1.0f + modRate); // Scale with UI, where modRate is mapping of VIBR  LFO speed for random modulation
-                current_depth = modDepth * 20.0f; // Standard subtle diffusion
+            }
+            else if(currentPreset == k_stellare) {
+              // Standard Swirl / Chorus Mode
+              current_rate = swirlRate_[ch] * (1.0f + modRate); // Scale with UI, where modRate is mapping of VIBR LFO speed for random modulation
+              current_depth = modDepth * 20.0f; // Standard subtle diffusion
             }
 
             // 2. Generate the 4 sequential phases for this NEON block
@@ -790,16 +792,13 @@ private:
 
             // 6. Scale by modulation depth (in samples)
             mods[ch] = vmulq_f32(sin_vals, vdupq_n_f32(current_depth));
-        }
+        // }
 
         // ====================================================================
         // DELAY READ POINTER CALCULATIONS
         // ====================================================================
-        float32x4_t readPositions[FDN_CHANNELS];
-        uint32_t baseIndices[FDN_CHANNELS][NEON_LANES];
-        float fracParts[FDN_CHANNELS][NEON_LANES];
 
-        for (int ch = 0; ch < FDN_CHANNELS; ch++) {
+        // for (int ch = 0; ch < FDN_CHANNELS; ch++) {
             float delaySamples = delayTimes[ch] * sampleRate;
 
             // Subtract delay length AND our new dynamic modulation
@@ -809,7 +808,7 @@ private:
             // Wrap to [0, BUFFER_SIZE)
             float pos_vals[NEON_LANES];
             vst1q_f32(pos_vals, readPositions[ch]);
-
+            float out_lanes[NEON_LANES];
             for (int s = 0; s < NEON_LANES; s++) {
                 // Adding a large multiple of BUFFER_SIZE guarantees the float is positive
                 // before casting to int, avoiding C++ negative-integer-truncation issues.
@@ -821,16 +820,15 @@ private:
                 // Store the wrapped index so we can read from it!
                 baseIndices[ch][s] = base;
                 fracParts[ch][s] = safe_pos - (float)idx;
-            }
-        }
+            // }
+        // }
 
         // Read each channel independently: each channel has its own read position
         // (baseIndices[ch][s]) so we cannot share a single vld4q_f32 across channels.
         // Scalar interpolation per channel avoids the previous cross-frame read bug.
-        for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-            float out_lanes[NEON_LANES];
+        // for (int ch = 0; ch < FDN_CHANNELS; ch++) {
 
-            for (int s = 0; s < NEON_LANES; s++) {
+            // for (int s = 0; s < NEON_LANES; s++) {
                 uint32_t idx0 = baseIndices[ch][s] & BUFFER_MASK;
                 uint32_t idx1 = (idx0 + 1) & BUFFER_MASK;
                 float frac = fracParts[ch][s];
@@ -908,6 +906,12 @@ private:
 
             // 3. Calculate phase increments for 4 parallel samples
             float inc = M_TWOPI * shimmerFreq_ / sampleRate;
+            // Those multipliers (1.0f, 2.0f, 3.0f) are not artistic DSP parameters. They are strict structural math representing the linear flow of time.
+            // Instead of moving smoothly through the delay buffer, your 4 audio samples will be randomly grabbed from completely different, disconnected points in the pitch-shifter's memory.
+            // possible alternative
+            // Makes the shimmer warble slightly like light through a prism
+            // float lfo_wobble = sinf(some_lfo_phase) * 0.05f;
+            // float inc = 2.0f + lfo_wobble;
             float32x4_t phaseVec = {
                 shimmerPhase_,
                 shimmerPhase_ + inc,
@@ -966,21 +970,27 @@ private:
         // from the delayed signal is after the pre-delay write, which is itself
         // gated by this guard — so without a raw-input check here the reverb
         // would never activate from bypass.
+        bool signal_active_4 = false;
         {
             float32x4_t absL = vabsq_f32(inL4);
             float32x4_t absR = vabsq_f32(inR4);
             float32x4_t absIn = vmaxq_f32(absL, absR);
             float32x4_t mx1 = vmaxq_f32(absIn, vextq_f32(absIn, absIn, 2));
             float mx = vgetq_lane_f32(vmaxq_f32(mx1, vextq_f32(mx1, mx1, 1)), 0);
+            signal_active_4 = (mx > 1e-4f);
             if (mx > 1e-5f)
                 activeSampleCount = (int)(sampleRate * (1.0f + decay * 5.0f));
         }
+        // Noise envelope: fast attack (~83ms), slow release (~2s) for smooth stellare onset/offset.
+        if (signal_active_4)
+            noiseEnvelope += 0.001f * (1.0f - noiseEnvelope);
+        else
+            noiseEnvelope -= 0.0000417f * noiseEnvelope;
 
         if (activeSampleCount <= 0) {
-            // Apply dry gain so volume stays constant when bypassed!
-            float32x4_t dryGain = vdupq_n_f32(1.0f - mix);
-            vst1q_f32(outL, vmulq_f32(inL4, dryGain));
-            vst1q_f32(outR, vmulq_f32(inR4, dryGain));
+            float32x4_t zero = vdupq_n_f32(0.0f);
+            vst1q_f32(outL, zero);
+            vst1q_f32(outR, zero);
             return;
         }
 
@@ -1045,9 +1055,9 @@ private:
 
         // If counter has expired, bypass FDN processing to save cycles
         if (activeSampleCount <= 0) {
-            float32x4_t dryGain = vdupq_n_f32(1.0f - mix);
-            vst1q_f32(outL, vmulq_f32(inL4, dryGain));
-            vst1q_f32(outR, vmulq_f32(inR4, dryGain));
+            float32x4_t zero = vdupq_n_f32(0.0f);
+            vst1q_f32(outL, zero);
+            vst1q_f32(outR, zero);
             writePos = (writePos + NEON_LANES) & BUFFER_MASK;
             return;
         }
@@ -1064,8 +1074,21 @@ private:
         updateModulation4();
         updateRandomLfo();
 
-        float modAmount = diffusion * modDepth;   // diffusion is COMP (0..1)
+        float modAmount = diffusion * modDepth;   // diffusion is DFSN (0..1)
         float fcMod = smoothedLfoValue * modAmount * 500.0f;  // ± up to 500 Hz
+
+        // =================================================================
+        // Compute unified loop gain (needed before noise injection)
+        // Cap at 0.95: gives ~5.7s RT60 for the 42ms channel, builds to 71% in 1 second.
+        // =================================================================
+        float loopGain = 0.7f + (decay * 0.295f);
+        float unifiedDecay = fminf(0.95f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
+        float32x4_t decayAll = vdupq_n_f32(unifiedDecay);
+        // Floor at 0.25 so the reverb onset is immediately audible at all TIME settings.
+        // Without this floor, TIME=90 → feedback=0.05 making the reverb take
+        // several seconds to become audible.
+        float input_gain = fmaxf(0.25f, 1.0f - unifiedDecay);
+        float32x4_t feedback = vdupq_n_f32(input_gain);
 
         // =================================================================
         // Apply Hadamard mixing matrix (vectorized)
@@ -1080,28 +1103,32 @@ private:
         applyResonantFilterModulated(mixed, FDN_CHANNELS, fcMod);
 
         // 3. Inject Environmental Noise (Brown, Pink, White, Blue, Violet, Grey)
-        addColouredNoise(mixed, FDN_CHANNELS);
+        // noiseEnvelope smoothly fades noise in/out with signal activity (prevents
+        // abrupt onset/offset of stellare noise). gainScale bounds steady-state level.
+        addColouredNoise(mixed, FDN_CHANNELS, (1.0f - unifiedDecay) * noiseEnvelope);
 
         // 4. Apply cross‑channel feedback
         applyCrossFeedback(mixed);
 
-        // =================================================================
-        // Apply decay uniformly to all channels using the geometric mean of
-        // highDecayMult and lowDecayMult. This preserves the warmth/brightness
-        // balance controls while avoiding L/R stereo imbalance that would result
-        // from applying different decay multipliers to the two channel groups.
-        // =================================================================
-        // 4. Apply decay (using unified decay factor)
-        // FIX: Map 0.0-1.0 to 0.7-0.995 for realistic RT60 tails
-        float loopGain = 0.7f + (decay * 0.295f);
-        float unifiedDecay = fminf(0.995f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
-        float32x4_t decayAll = vdupq_n_f32(unifiedDecay);
-        float32x4_t feedback = vdupq_n_f32(1.0f - decay);
-
+        // 5. Apply decay
         for (int i = 0; i < FDN_CHANNELS; i++) mixed[i] = vmulq_f32(mixed[i], decayAll);
 
-        // 5. Add input (feedback)
+        // 6. Add input
         mixed[0] = vaddq_f32(mixed[0], vmulq_f32(delayedMono, feedback));
+
+        // 7. Soft saturation: x/(1+|x|) keeps FDN bounded at (-1,1) without DC lockup.
+        // Hard-clip was causing stellare crash: when all channels pin at +1, Hadamard
+        // ch0 = √8≈2.83 → clip→1.0 → self-sustaining, never decays. Soft sat avoids this.
+        {
+            float32x4_t one = vdupq_n_f32(1.0f);
+            for (int i = 0; i < FDN_CHANNELS; i++) {
+                float32x4_t abs_x = vabsq_f32(mixed[i]);
+                float32x4_t denom = vaddq_f32(one, abs_x);
+                float32x4_t rcp   = vrecpeq_f32(denom);
+                rcp = vmulq_f32(vrecpsq_f32(denom, rcp), rcp);  // Newton-Raphson refinement
+                mixed[i] = vmulq_f32(mixed[i], rcp);
+            }
+        }
 
 
         // =================================================================
@@ -1139,10 +1166,12 @@ private:
             for (int i = 4; i < 4 + halfR; i++)
                 rightSum = vaddq_f32(rightSum, mixed[i]);
 
-            float normL = halfL > 0 ? 1.0f / halfL : 1.0f;
-            leftMix = vmulq_f32(leftSum, vdupq_n_f32(normL));
+            // Fixed 0.5 normalization (vs 1/halfL=0.25 for 8ch) gives 6dB more output,
+            // making the reverb tail immediately audible. Soft saturation above keeps
+            // individual channels < 1 so summing 4 channels × 0.5 stays below 2.0.
+            leftMix = vmulq_f32(leftSum, vdupq_n_f32(0.5f));
             if (halfR > 0)
-                rightMix = vmulq_f32(rightSum, vdupq_n_f32(1.0f / halfR));
+                rightMix = vmulq_f32(rightSum, vdupq_n_f32(0.5f));
             else
                 rightMix = leftMix; // PILL=0: mono fold
         }
@@ -1156,16 +1185,9 @@ private:
         float32x4_t wetL = vaddq_f32(mid, vmulq_f32(side, width4));
         float32x4_t wetR = vsubq_f32(mid, vmulq_f32(side, width4));
 
-        // Wet/dry mix
-        float32x4_t wetGain = vdupq_n_f32(mix);
-        float32x4_t dryGain = vdupq_n_f32(1.0f - mix);
-
-        float32x4_t outL4 = vaddq_f32(vmulq_f32(inL4, dryGain), vmulq_f32(wetL, wetGain));
-        float32x4_t outR4 = vaddq_f32(vmulq_f32(inR4, dryGain), vmulq_f32(wetR, wetGain));
-
-        // Store results
-        vst1q_f32(outL, outL4);
-        vst1q_f32(outR, outR4);
+        // Store wet signal directly (hardware handles dry+wet blend)
+        vst1q_f32(outL, wetL);
+        vst1q_f32(outR, wetR);
     }
 
     void updateModulation4() {
@@ -1303,13 +1325,23 @@ private:
             modPhaseVec[ch] = temp;
         }
 
-        // Frequency-dependent decay
         float mixed[FDN_CHANNELS];
         float loopGain = 0.7f + (decay * 0.295f);
+        float unifiedDecay = fminf(0.95f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
+        float scalar_input_gain = fmaxf(0.25f, 1.0f - unifiedDecay);
 
         applyHadamardScalar(delayOut, mixed);
 
-        mixed[0] += delayedInput * (1.0f - decay);
+        // Apply same loop gain as process4Samples (was missing — scalar path had no decay).
+        for (int ch = 0; ch < FDN_CHANNELS; ch++) mixed[ch] *= unifiedDecay;
+
+        mixed[0] += delayedInput * scalar_input_gain;
+
+        // Soft saturation: x/(1+|x|) — bounded (-1,1), no DC lockup.
+        for (int ch = 0; ch < FDN_CHANNELS; ch++) {
+            float x = mixed[ch];
+            mixed[ch] = x / (1.0f + fabsf(x));
+        }
 
         // Exotic "Low Pitching" Shimmer (PILL=4)
         // Injects a ring-modulated copy of the wet signal back into the network.
@@ -1359,9 +1391,9 @@ private:
             int halfR = activeCh > 4 ? activeCh - 4 : 0;
             for (int i = 0; i < halfL; i++)         leftRaw  += mixed[i];
             for (int i = 4; i < 4 + halfR; i++)     rightRaw += mixed[i];
-            leftRaw  /= (halfL > 0 ? (float)halfL : 1.0f);
+            leftRaw  *= 0.5f;
             if (halfR > 0)
-                rightRaw /= (float)halfR;
+                rightRaw *= 0.5f;
             else
                 rightRaw  = leftRaw;  // mono fold for very sparse (PILL=0)
         }
@@ -1414,19 +1446,17 @@ private:
     // ID 4:  HIGH   1..100             default 70
     // ID 5:  DAMP   20..1000           default 250  (×10 in code → 2500 Hz)
     // ID 6:  WIDE   0..200 %           default 100
-    // ID 7:  COMP   0..1000 (x0.1%)    default 1000
+    // ID 7:  DFSN   0..1000 (x0.1%)    default 1000
     // ID 8:  PILL   0..4               default 3
     // ID 9:  SHMR 0..100               default 35 (Hz)
     // ID 10: PDLY   0..100             default 0 (ms)
     int32_t params_[k_total]  __attribute__((aligned(16)));
-
     float sampleRate;
     int writePos;
     float decay;
     float diffusion;
     float modDepth;
     float modRate;
-    float mix;           // wet/dry blend  0..1
     float width;         // stereo width   0..2
     float dampingCoeff;  // one-pole LPF coeff for damping
     float lowDecayMult;  // low-freq decay multiplier
@@ -1478,6 +1508,7 @@ private:
     uint32_t noiseSeed;
     float noiseColour;                 // 0=brown .. 4=violet
     float noiseGain;                   // from DAMP
+    float noiseEnvelope;               // 0..1 smooth fade-in/out of stellare noise
     float noiseStates[FDN_CHANNELS];   // z^-1 for noise filtering
     float noiseStates2[FDN_CHANNELS];  // z^-2 for Grey noise notch
 
@@ -1489,7 +1520,7 @@ private:
     int pingMapIndex;
 
     float baseFc;                   // base cutoff frequency (Hz) for current preset/damping
-    float filterModRange;           // max modulation range (Hz) derived from COMP and pillar
+    float filterModRange;           // max modulation range (Hz) derived from DFSN and pillar
 };
 
 const float NeonAdvancedLabirinto::crossGain[5] = {0.15f, 0.10f, 0.07f, 0.04f, 0.04f};

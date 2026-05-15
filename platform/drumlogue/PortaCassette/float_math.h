@@ -31,6 +31,12 @@
 
 //*/
 
+#ifndef EA6548FA_47B1_4C3A_8F20_B95C1960B267
+#define EA6548FA_47B1_4C3A_8F20_B95C1960B267
+
+#ifndef E0C1B4BE_4BFE_40C1_8890_35FB808FA82C
+#define E0C1B4BE_4BFE_40C1_8890_35FB808FA82C
+
 #ifndef BBAC8CC0_8473_452E_801A_60AD28A72398
 #define BBAC8CC0_8473_452E_801A_60AD28A72398
 
@@ -1210,8 +1216,8 @@ v4sf log_ps(v4sf x) {
 #define c_cephes_exp_p5 5.0000001201E-1
 
 /* exp() computed for 4 float at once */
-static inline __attribute__((optimize("Ofast"), always_inline)) v4sf
-exp_ps(v4sf x) {
+static inline __attribute__((optimize("Ofast"), always_inline))
+v4sf exp_ps(v4sf x) {
   v4sf tmp, fx;
 
   v4sf one = vdupq_n_f32(1);
@@ -1297,8 +1303,7 @@ exp_ps(v4sf x) {
    almost no extra price so both sin_ps and cos_ps make use of
    sincos_ps..
   */
-static inline __attribute__((optimize("Ofast"), always_inline)) void
-sincos_ps(v4sf x, v4sf *ysin, v4sf *ycos) { // any x
+static inline __attribute__((optimize("Ofast"), always_inline)) void sincos_ps(v4sf x, v4sf * ysin, v4sf * ycos) {  // any x
   v4sf xmm1, xmm2, xmm3, y;
 
   v4su emm2;
@@ -1364,33 +1369,23 @@ sincos_ps(v4sf x, v4sf *ysin, v4sf *ycos) { // any x
   *ysin = vbslq_f32(sign_mask_sin, vnegq_f32(ys), ys);
   *ycos = vbslq_f32(sign_mask_cos, yc, vnegq_f32(yc));
 }
-static inline __attribute__((optimize("Ofast"), always_inline)) v4sf
-sin_ps(v4sf x) {
+
+static inline __attribute__((optimize("Ofast"), always_inline))
+v4sf sin_ps(v4sf x) {
   v4sf ysin, ycos;
   sincos_ps(x, &ysin, &ycos);
   return ysin;
 }
-static inline __attribute__((optimize("Ofast"), always_inline)) v4sf
-cos_ps(v4sf x) {
+
+static inline __attribute__((optimize("Ofast"), always_inline))
+v4sf cos_ps(v4sf x) {
   v4sf ysin, ycos;
   sincos_ps(x, &ysin, &ycos);
   return ycos;
 }
 
-// ==========================================================
-// Fast Polynomial Tanh Approximation
-// ==========================================================
-inline float fast_tanh(float x) {
-  // Clamp first so the cubic stays in its valid range (|x| <= sqrt(3) ≈ 1.73).
-  // BUG-FIX: x^2 must be computed from the clamped value. Using the raw x makes
-  // the polynomial return large negative outputs for |x| > 1.73, which flips
-  // the sign of filter integrator increments and causes NaN within a few
-  // samples.
-  float cx = fmaxf(-1.0f, fminf(1.0f, x));
-  // Multiply by 1.5f so the output scales to a full [-1.0, 1.0] range
-  // instead of stopping at 0.666. This gives you maximum audio headroom.
-  return cx * (1.0f - cx * cx * 0.33333f) * 1.5f;
-}
+
+
 
 /** @} */
 
@@ -1403,3 +1398,9 @@ inline float fast_tanh(float x) {
 
 
 #endif /* BBAC8CC0_8473_452E_801A_60AD28A72398 */
+
+
+#endif /* E0C1B4BE_4BFE_40C1_8890_35FB808FA82C */
+
+
+#endif /* EA6548FA_47B1_4C3A_8F20_B95C1960B267 */

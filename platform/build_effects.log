@@ -1,157 +1,297 @@
-ren^H    user@logue-sdk:~$ renv drumlogue[1P
+envuser@logue-sdk:~$ env drumlogue
 >> Initializing drumlogue development environment.
 Note: run 'env -r' to reset the environment
-[31m[drumlogue] [0m~ $ [Kbuild -l
-- drumlogue/FMpercussion
-- drumlogue/delay_tribal
-- drumlogue/dummy-delfx
-- drumlogue/dummy-masterfx
-- drumlogue/dummy-revfx
-- drumlogue/dummy-synth
-- drumlogue/omnipress
-- drumlogue/reverb_labirinto
-- drumlogue/reverb_light
-- drumlogue/scruta_astri
-- minilogue-xd/dummy-delfx
-- minilogue-xd/dummy-modfx
-- minilogue-xd/dummy-osc
-- minilogue-xd/dummy-revfx
-- minilogue-xd/waves
-- nutekt-digital/dummy-delfx
-- nutekt-digital/dummy-modfx
-- nutekt-digital/dummy-osc
-- nutekt-digital/dummy-revfx
-- nutekt-digital/waves
-- prologue/dummy-delfx
-- prologue/dummy-modfx
-- prologue/dummy-osc
-- prologue/dummy-revfx
-- prologue/waves
-- nts-1_mkii/dummy-delfx
-- nts-1_mkii/dummy-modfx
-- nts-1_mkii/dummy-osc
-- nts-1_mkii/dummy-revfx
-- nts-1_mkii/waves
-- nts-3_kaoss/dummy-genericfx
-- microkorg2/MorphEQ
-- microkorg2/MultitapDelay
-- microkorg2/Vibrato
-- microkorg2/breveR
-- microkorg2/dummy-delfx
-- microkorg2/dummy-modfx
-- microkorg2/dummy-osc
-- microkorg2/dummy-revfx
-- microkorg2/vox
-- microkorg2/waves
-[31m[drumlogue] [0m~ $ build drumlogue/FMpercussion
->> Building /workspace/drumlogue/FMpercussion
-Compiling unit.cc
-Compiling fm_presets.cc
-In file included from [01m[Ksine_neon.h:16:0[m[K,
-                 from [01m[Kresonant_synthesis.h:14[m[K,
-                 from [01m[Kfm_presets.h:12[m[K,
-                 from [01m[Kfm_presets.cc:6[m[K:
-[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
-[01m[Kfloat_math.h:1014:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
-  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
-                     [01;35m[K^[m[K
-[01m[Kfloat_math.h:1016:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
-  y  = * ( float * ) &[01;35m[Ki[m[K;
-                      [01;35m[K^[m[K
-In file included from [01m[Kresonant_synthesis.h:15:0[m[K,
-                 from [01m[Kfm_presets.h:12[m[K,
-                 from [01m[Kfm_presets.cc:6[m[K:
-[01m[Kfm_voices.h:[m[K In function '[01m[Kfloat32x4_t one_pole_lpf(one_pole_t*, float32x4_t, float32x4_t)[m[K':
-[01m[Kfm_voices.h:55:82:[m[K [01;31m[Kerror: [m[K'[01m[Kvdupq_f32[m[K' was not declared in this scope
-   float32x4_t alpha = vdupq_f32(fast_div_neon(two_pi_f, (two_pi_f + SAMPLE_RATE))[01;31m[K)[m[K;
-                                                                                  [01;31m[K^[m[K
-[01m[Kfm_presets.cc:[m[K At global scope:
-[01m[Kfm_presets.cc:183:1:[m[K [01;31m[Kerror: [m[Kbraces around scalar initializer for type '[01m[Kuint8_t {aka unsigned char}[m[K'
- [01;31m[K}[m[K;
- [01;31m[K^[m[K
-In file included from [01m[Kkick_engine.h:16:0[m[K,
-                 from [01m[Kfm_perc_synth.h:21[m[K,
-                 from [01m[Ksynth.h:15[m[K,
-                 from [01m[Kunit.cc:13[m[K:
-[01m[Kfm_voices.h:[m[K In function '[01m[Kfloat32x4_t one_pole_lpf(one_pole_t*, float32x4_t, float32x4_t)[m[K':
-[01m[Kfm_voices.h:55:81:[m[K [01;31m[Kerror: [m[K'[01m[Kfast_div_neon[m[K' was not declared in this scope
-   float32x4_t alpha = vdupq_f32(fast_div_neon(two_pi_f, (two_pi_f + SAMPLE_RATE)[01;31m[K)[m[K);
-                                                                                 [01;31m[K^[m[K
-[01m[Kfm_voices.h:55:82:[m[K [01;31m[Kerror: [m[K'[01m[Kvdupq_f32[m[K' was not declared in this scope
-   float32x4_t alpha = vdupq_f32(fast_div_neon(two_pi_f, (two_pi_f + SAMPLE_RATE))[01;31m[K)[m[K;
-                                                                                  [01;31m[K^[m[K
-In file included from [01m[Ksine_neon.h:16:0[m[K,
-                 from [01m[Kkick_engine.h:17[m[K,
-                 from [01m[Kfm_perc_synth.h:21[m[K,
-                 from [01m[Ksynth.h:15[m[K,
-                 from [01m[Kunit.cc:13[m[K:
-[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
-[01m[Kfloat_math.h:1014:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
-  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
-                     [01;35m[K^[m[K
-[01m[Kfloat_math.h:1016:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
-  y  = * ( float * ) &[01;35m[Ki[m[K;
-                      [01;35m[K^[m[K
-In file included from [01m[Kfm_perc_synth.h:21:0[m[K,
-                 from [01m[Ksynth.h:15[m[K,
-                 from [01m[Kunit.cc:13[m[K:
-[01m[Kkick_engine.h:[m[K In function '[01m[Kfloat32x4_t kick_engine_process(kick_engine_t*, float32x4_t, uint32x4_t, float32x4_t, float32x4_t)[m[K':
-[01m[Kkick_engine.h:158:17:[m[K [01;35m[Kwarning: [m[Kunused variable '[01m[Kshape_factor[m[K' [[01;35m[K-Wunused-variable[m[K]
-     float32x4_t [01;35m[Kshape_factor[m[K = vmulq_f32(kick->decay_shape, envelope);
-                 [01;35m[K^~~~~~~~~~~~[m[K
-make: *** [Makefile:321: build/obj/fm_presets.o] Error 1
-make: *** Waiting for unfinished jobs....
-In file included from [01m[Kfm_perc_synth.h:22:0[m[K,
-                 from [01m[Ksynth.h:15[m[K,
-                 from [01m[Kunit.cc:13[m[K:
-[01m[Ksnare_engine.h:[m[K In function '[01m[Kfloat32x4_t snare_engine_process(snare_engine_t*, float32x4_t, uint32x4_t, float32x4_t, float32x4_t, float32x4_t)[m[K':
-[01m[Ksnare_engine.h:172:17:[m[K [01;35m[Kwarning: [m[Kunused variable '[01m[Kpitch_env[m[K' [[01;35m[K-Wunused-variable[m[K]
-     float32x4_t [01;35m[Kpitch_env[m[K = vmulq_f32(snare->body_resonance, env2);
-                 [01;35m[K^~~~~~~~~[m[K
-make: *** [Makefile:321: build/obj/unit.o] Error 1
->> Installing /workspace/drumlogue/FMpercussion
-Compiling unit.cc
-In file included from [01m[Kkick_engine.h:16:0[m[K,
-                 from [01m[Kfm_perc_synth.h:21[m[K,
-                 from [01m[Ksynth.h:15[m[K,
-                 from [01m[Kunit.cc:13[m[K:
-[01m[Kfm_voices.h:[m[K In function '[01m[Kfloat32x4_t one_pole_lpf(one_pole_t*, float32x4_t, float32x4_t)[m[K':
-[01m[Kfm_voices.h:55:81:[m[K [01;31m[Kerror: [m[K'[01m[Kfast_div_neon[m[K' was not declared in this scope
-   float32x4_t alpha = vdupq_f32(fast_div_neon(two_pi_f, (two_pi_f + SAMPLE_RATE)[01;31m[K)[m[K);
-                                                                                 [01;31m[K^[m[K
-[01m[Kfm_voices.h:55:82:[m[K [01;31m[Kerror: [m[K'[01m[Kvdupq_f32[m[K' was not declared in this scope
-   float32x4_t alpha = vdupq_f32(fast_div_neon(two_pi_f, (two_pi_f + SAMPLE_RATE))[01;31m[K)[m[K;
-                                                                                  [01;31m[K^[m[K
-In file included from [01m[Ksine_neon.h:16:0[m[K,
-                 from [01m[Kkick_engine.h:17[m[K,
-                 from [01m[Kfm_perc_synth.h:21[m[K,
-                 from [01m[Ksynth.h:15[m[K,
-                 from [01m[Kunit.cc:13[m[K:
-[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
-[01m[Kfloat_math.h:1014:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
-  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
-                     [01;35m[K^[m[K
-[01m[Kfloat_math.h:1016:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
-  y  = * ( float * ) &[01;35m[Ki[m[K;
-                      [01;35m[K^[m[K
-In file included from [01m[Kfm_perc_synth.h:21:0[m[K,
-                 from [01m[Ksynth.h:15[m[K,
-                 from [01m[Kunit.cc:13[m[K:
-[01m[Kkick_engine.h:[m[K In function '[01m[Kfloat32x4_t kick_engine_process(kick_engine_t*, float32x4_t, uint32x4_t, float32x4_t, float32x4_t)[m[K':
-[01m[Kkick_engine.h:158:17:[m[K [01;35m[Kwarning: [m[Kunused variable '[01m[Kshape_factor[m[K' [[01;35m[K-Wunused-variable[m[K]
-     float32x4_t [01;35m[Kshape_factor[m[K = vmulq_f32(kick->decay_shape, envelope);
-                 [01;35m[K^~~~~~~~~~~~[m[K
-In file included from [01m[Kfm_perc_synth.h:22:0[m[K,
-                 from [01m[Ksynth.h:15[m[K,
-                 from [01m[Kunit.cc:13[m[K:
-[01m[Ksnare_engine.h:[m[K In function '[01m[Kfloat32x4_t snare_engine_process(snare_engine_t*, float32x4_t, uint32x4_t, float32x4_t, float32x4_t, float32x4_t)[m[K':
-[01m[Ksnare_engine.h:172:17:[m[K [01;35m[Kwarning: [m[Kunused variable '[01m[Kpitch_env[m[K' [[01;35m[K-Wunused-variable[m[K]
-     float32x4_t [01;35m[Kpitch_env[m[K = vmulq_f32(snare->body_resonance, env2);
-                 [01;35m[K^~~~~~~~~[m[K
-make: *** [Makefile:321: build/obj/unit.o] Error 1
+[31m[drumlogue] [0m~ $ [Kbuild -c
+>> Cleaning all detected projects
+>> Cleaning /workspace/drumlogue/FMpercussion
+
+Cleaning
+rm -fR .dep build /workspace/drumlogue/FMpercussion//fm_perc_synth.drmlgunit
+
+Done
+
+>> Cleaning /workspace/drumlogue/delay_tribal
+
+Cleaning
+rm -fR .dep build /workspace/drumlogue/delay_tribal//delay_tribal.drmlgunit
+
+Done
+
+>> Cleaning /workspace/drumlogue/dummy-delfx
+
+Cleaning
+rm -fR .dep build /workspace/drumlogue/dummy-delfx//dummy_delay.drmlgunit
+
+Done
+
+>> Cleaning /workspace/drumlogue/dummy-masterfx
+
+Cleaning
+rm -fR .dep build /workspace/drumlogue/dummy-masterfx//dummy_master.drmlgunit
+
+Done
+
+>> Cleaning /workspace/drumlogue/dummy-revfx
+
+Cleaning
+rm -fR .dep build /workspace/drumlogue/dummy-revfx//dummy_reverb.drmlgunit
+
+Done
+
+>> Cleaning /workspace/drumlogue/dummy-synth
+
+Cleaning
+rm -fR .dep build /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
+
+Done
+
+>> Cleaning /workspace/drumlogue/omnipress
+
+Cleaning
+rm -fR .dep build /workspace/drumlogue/omnipress//omnipress.drmlgunit
+
+Done
+
+>> Cleaning /workspace/drumlogue/reverb_labirinto
+
+Cleaning
+rm -fR .dep build /workspace/drumlogue/reverb_labirinto//neon_labirinto_reverb.drmlgunit
+
+Done
+
+>> Cleaning /workspace/drumlogue/reverb_light
+
+Cleaning
+rm -fR .dep build /workspace/drumlogue/reverb_light//luce_al_neon.drmlgunit
+
+Done
+
+>> Cleaning /workspace/drumlogue/scruta_astri
+
+Cleaning
+rm -fR .dep build /workspace/drumlogue/scruta_astri//scruta_astri.drmlgunit
+
+Done
+
+[Warn] 'drumlogue' development environment already loaded.
 >> Resetting environment
-[31m[drumlogue] [0m~ $ [Kbuild drumlogue/FMpercussion
+/app/env: line 119: reset_env: command not found
+>> Initializing minilogue-xd development environment.
+Note: run 'env -r' to reset the environment
+>> Cleaning /workspace/minilogue-xd/dummy-delfx
+Cleaning
+rm -fR /workspace/minilogue-xd/dummy-delfx/.dep /workspace/minilogue-xd/dummy-delfx/build /workspace/minilogue-xd/dummy-delfx/dummy_delfx.mnlgxdunit
+Done
+
+>> Cleaning /workspace/minilogue-xd/dummy-modfx
+Cleaning
+rm -fR /workspace/minilogue-xd/dummy-modfx/.dep /workspace/minilogue-xd/dummy-modfx/build /workspace/minilogue-xd/dummy-modfx/dummy_modfx.mnlgxdunit
+Done
+
+>> Cleaning /workspace/minilogue-xd/dummy-osc
+Cleaning
+rm -fR /workspace/minilogue-xd/dummy-osc/.dep /workspace/minilogue-xd/dummy-osc/build /workspace/minilogue-xd/dummy-osc/dummy_osc.mnlgxdunit
+Done
+
+>> Cleaning /workspace/minilogue-xd/dummy-revfx
+Cleaning
+rm -fR /workspace/minilogue-xd/dummy-revfx/.dep /workspace/minilogue-xd/dummy-revfx/build /workspace/minilogue-xd/dummy-revfx/dummy_revfx.mnlgxdunit
+Done
+
+>> Cleaning /workspace/minilogue-xd/waves
+Cleaning
+rm -fR /workspace/minilogue-xd/waves/.dep /workspace/minilogue-xd/waves/build /workspace/minilogue-xd/waves/waves.mnlgxdunit
+Done
+
+[Warn] 'minilogue-xd' development environment already loaded.
+>> Resetting environment
+>> Cleaning up minilogue-xd development environment.
+>> Initializing NTS-1 development environment.
+Note: run 'env -r' to reset the environment
+>> Cleaning /workspace/nutekt-digital/dummy-delfx
+Cleaning
+rm -fR /workspace/nutekt-digital/dummy-delfx/.dep /workspace/nutekt-digital/dummy-delfx/build /workspace/nutekt-digital/dummy-delfx/dummy_delfx.ntkdigunit
+Done
+
+>> Cleaning /workspace/nutekt-digital/dummy-modfx
+Cleaning
+rm -fR /workspace/nutekt-digital/dummy-modfx/.dep /workspace/nutekt-digital/dummy-modfx/build /workspace/nutekt-digital/dummy-modfx/dummy_modfx.ntkdigunit
+Done
+
+>> Cleaning /workspace/nutekt-digital/dummy-osc
+Cleaning
+rm -fR /workspace/nutekt-digital/dummy-osc/.dep /workspace/nutekt-digital/dummy-osc/build /workspace/nutekt-digital/dummy-osc/dummy_osc.ntkdigunit
+Done
+
+>> Cleaning /workspace/nutekt-digital/dummy-revfx
+Cleaning
+rm -fR /workspace/nutekt-digital/dummy-revfx/.dep /workspace/nutekt-digital/dummy-revfx/build /workspace/nutekt-digital/dummy-revfx/dummy_revfx.ntkdigunit
+Done
+
+>> Cleaning /workspace/nutekt-digital/waves
+Cleaning
+rm -fR /workspace/nutekt-digital/waves/.dep /workspace/nutekt-digital/waves/build /workspace/nutekt-digital/waves/waves.ntkdigunit
+Done
+
+[Warn] 'nts-1' development environment already loaded.
+>> Resetting environment
+>> Cleaning up NTS-1 development environment.
+>> Initializing prologue development environment.
+Note: run 'env -r' to reset the environment
+>> Cleaning /workspace/prologue/dummy-delfx
+Cleaning
+rm -fR /workspace/prologue/dummy-delfx/.dep /workspace/prologue/dummy-delfx/build /workspace/prologue/dummy-delfx/dummy_delfx.prlgunit
+Done
+
+>> Cleaning /workspace/prologue/dummy-modfx
+Cleaning
+rm -fR /workspace/prologue/dummy-modfx/.dep /workspace/prologue/dummy-modfx/build /workspace/prologue/dummy-modfx/dummy_modfx.prlgunit
+Done
+
+>> Cleaning /workspace/prologue/dummy-osc
+Cleaning
+rm -fR /workspace/prologue/dummy-osc/.dep /workspace/prologue/dummy-osc/build /workspace/prologue/dummy-osc/dummy_osc.prlgunit
+Done
+
+>> Cleaning /workspace/prologue/dummy-revfx
+Cleaning
+rm -fR /workspace/prologue/dummy-revfx/.dep /workspace/prologue/dummy-revfx/build /workspace/prologue/dummy-revfx/dummy_revfx.prlgunit
+Done
+
+>> Cleaning /workspace/prologue/waves
+Cleaning
+rm -fR /workspace/prologue/waves/.dep /workspace/prologue/waves/build /workspace/prologue/waves/waves.prlgunit
+Done
+
+[Warn] 'prologue' development environment already loaded.
+>> Resetting environment
+>> Cleaning up prologue development environment.
+>> Initializing NTS-1 mkii development environment.
+Note: run 'env -r' to reset the environment
+>> Cleaning /workspace/nts-1_mkii/dummy-delfx
+Cleaning
+rm -fR /workspace/nts-1_mkii/dummy-delfx//.dep /workspace/nts-1_mkii/dummy-delfx//build /workspace/nts-1_mkii/dummy-delfx//dummy_delfx.nts1mkiiunit /workspace/nts-1_mkii/dummy-delfx//sim
+Done
+
+>> Cleaning /workspace/nts-1_mkii/dummy-modfx
+Cleaning
+rm -fR /workspace/nts-1_mkii/dummy-modfx//.dep /workspace/nts-1_mkii/dummy-modfx//build /workspace/nts-1_mkii/dummy-modfx//dummy_modfx.nts1mkiiunit /workspace/nts-1_mkii/dummy-modfx//sim
+Done
+
+>> Cleaning /workspace/nts-1_mkii/dummy-osc
+Cleaning
+rm -fR /workspace/nts-1_mkii/dummy-osc//.dep /workspace/nts-1_mkii/dummy-osc//build /workspace/nts-1_mkii/dummy-osc//dummy_osc.nts1mkiiunit /workspace/nts-1_mkii/dummy-osc//sim
+Done
+
+>> Cleaning /workspace/nts-1_mkii/dummy-revfx
+Cleaning
+rm -fR /workspace/nts-1_mkii/dummy-revfx//.dep /workspace/nts-1_mkii/dummy-revfx//build /workspace/nts-1_mkii/dummy-revfx//dummy_revfx.nts1mkiiunit /workspace/nts-1_mkii/dummy-revfx//sim
+Done
+
+>> Cleaning /workspace/nts-1_mkii/waves
+Cleaning
+rm -fR /workspace/nts-1_mkii/waves//.dep /workspace/nts-1_mkii/waves//build /workspace/nts-1_mkii/waves//waves.nts1mkiiunit /workspace/nts-1_mkii/waves//sim
+Done
+
+[Warn] 'nts-1_mkii' development environment already loaded.
+>> Resetting environment
+>> Cleaning up NTS-1 development environment.
+>> Initializing NTS-3 kaoss development environment.
+Note: run 'env -r' to reset the environment
+>> Cleaning /workspace/nts-3_kaoss/dummy-genericfx
+Cleaning
+rm -fR /workspace/nts-3_kaoss/dummy-genericfx//.dep /workspace/nts-3_kaoss/dummy-genericfx//build /workspace/nts-3_kaoss/dummy-genericfx//dummy_genericfx.nts3unit /workspace/nts-3_kaoss/dummy-genericfx//sim
+Done
+
+[Warn] 'nts-3_kaoss' development environment already loaded.
+>> Resetting environment
+>> Cleaning up NTS-3 kaoss development environment.
+>> Initializing microkorg2 development environment.
+Note: run 'env -r' to reset the environment
+>> Cleaning /workspace/microkorg2/MorphEQ
+
+Cleaning
+rm -fR .dep build /workspace/microkorg2/MorphEQ//MorphEQ.mk2unit
+
+Done
+
+>> Cleaning /workspace/microkorg2/MultitapDelay
+
+Cleaning
+rm -fR .dep build /workspace/microkorg2/MultitapDelay//MultitapDelay.mk2unit
+
+Done
+
+>> Cleaning /workspace/microkorg2/Vibrato
+
+Cleaning
+rm -fR .dep build /workspace/microkorg2/Vibrato//Vibrato.mk2unit
+
+Done
+
+>> Cleaning /workspace/microkorg2/breveR
+b
+Cleaning
+rm -fR .dep build /workspace/microkorg2/breveR//breveR.mk2unit
+
+Done
+
+>> Cleaning /workspace/microkorg2/dummy-delfx
+ui
+Cleaning
+rm -fR .dep build /workspace/microkorg2/dummy-delfx//dummy.mk2unit
+
+Done
+
+>> Cleaning /workspace/microkorg2/dummy-modfx
+l
+Cleaning
+rm -fR .dep build /workspace/microkorg2/dummy-modfx//dummy.mk2unit
+
+Done
+
+>> Cleaning /workspace/microkorg2/dummy-osc
+d
+Cleaning
+rm -fR .dep build /workspace/microkorg2/dummy-osc//dummy.mk2unit
+
+Done
+
+>> Cleaning /workspace/microkorg2/dummy-revfx
+ 
+Cleaning
+rm -fR .dep build /workspace/microkorg2/dummy-revfx//dummy.mk2unit
+-
+Done
+
+>> Cleaning /workspace/microkorg2/vox
+-
+Cleaning
+rm -fR .dep build /workspace/microkorg2/vox//vox.mk2unit
+
+Done
+
+>> Cleaning /workspace/microkorg2/waves
+dru
+Cleaning
+rm -fR .dep build /workspace/microkorg2/waves//waves.mk2unit
+
+Done
+
+>> Resetting environment
+>> Cleaning up microkorg2 development environment.
+[31m[drumlogue] [0m~ $ build --drumlogue
+>> Building 'drumlogue' projects
 >> Building /workspace/drumlogue/FMpercussion
+Compiler Options
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/ -D__ARM_NEON__ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common -I/workspace/drumlogue/common -I. xxxx.c -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -fno-threadsafe-statics -std=gnu++14 -W -Wall -Wextra -Wno-ignored-qualifiers -fPIC -Wa,-alms=build/lst/ -D__ARM_NEON__ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common -I/workspace/drumlogue/common -I. xxxx.cc -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common -I/workspace/drumlogue/common -I. xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common -I/workspace/drumlogue/common -I. xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ xxxx.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -shared -Wl,-Map=build/fm_perc_synth.map,--cref -lm -lc -o build/fm_perc_synth.elf
+
+Compiling header.c
+Compiling _unit_base.c
 Compiling unit.cc
 Compiling fm_presets.cc
 In file included from [01m[Ksine_neon.h:16:0[m[K,
@@ -166,11 +306,10 @@ In file included from [01m[Ksine_neon.h:16:0[m[K,
   y  = * ( float * ) &[01;35m[Ki[m[K;
                       [01;35m[K^[m[K
 [01m[Kfm_presets.cc:[m[K At global scope:
-[01m[Kfm_presets.cc:183:1:[m[K [01;31m[Kerror: [m[Kbraces around scalar initializer for type '[01m[Kuint8_t {aka unsigned char}[m[K'
- [01;31m[K}[m[K;
- [01;31m[K^[m[K
-make: *** [Makefile:321: build/obj/fm_presets.o] Error 1
-make: *** Waiting for unfinished jobs....
+[01m[Kfm_presets.cc:439:5:[m[K [01;31m[Kerror: [m[Kexpected '[01m[K}[m[K' before '[01m[K{[m[K' token
+     [01;31m[K{[m[K
+     [01;31m[K^[m[K
+[01m[Kfm_presets.cc:439:5:[m[K [01;31m[Kerror: [m[Kbraces around scalar initializer for type '[01m[Kuint8_t {aka unsigned char}[m[K'
 In file included from [01m[Kfm_voices.h:15:0[m[K,
                  from [01m[Kkick_engine.h:16[m[K,
                  from [01m[Kfm_perc_synth.h:21[m[K,
@@ -183,6 +322,8 @@ In file included from [01m[Kfm_voices.h:15:0[m[K,
 [01m[Kfloat_math.h:1016:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
   y  = * ( float * ) &[01;35m[Ki[m[K;
                       [01;35m[K^[m[K
+make: *** [Makefile:321: build/obj/fm_presets.o] Error 1
+make: *** Waiting for unfinished jobs....
 In file included from [01m[Kfm_perc_synth.h:21:0[m[K,
                  from [01m[Ksynth.h:15[m[K,
                  from [01m[Kunit.cc:13[m[K:
@@ -211,9 +352,1847 @@ In file included from [01m[Ksine_neon.h:16:0[m[K,
   y  = * ( float * ) &[01;35m[Ki[m[K;
                       [01;35m[K^[m[K
 [01m[Kfm_presets.cc:[m[K At global scope:
-[01m[Kfm_presets.cc:183:1:[m[K [01;31m[Kerror: [m[Kbraces around scalar initializer for type '[01m[Kuint8_t {aka unsigned char}[m[K'
+[01m[Kfm_presets.cc:439:5:[m[K [01;31m[Kerror: [m[Kexpected '[01m[K}[m[K' before '[01m[K{[m[K' token
+     [01;31m[K{[m[K
+     [01;31m[K^[m[K
+[01m[Kfm_presets.cc:439:5:[m[K [01;31m[Kerror: [m[Kbraces around scalar initializer for type '[01m[Kuint8_t {aka unsigned char}[m[K'
+make: *** [Makefile:321: build/obj/fm_presets.o] Error 1
+>> Building /workspace/drumlogue/delay_tribal
+Compiler Options
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.c -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fconcepts -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -fno-threadsafe-statics -std=gnu++14 -W -Wall -Wextra -Wno-ignored-qualifiers -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.cc -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ xxxx.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -shared -Wl,-Map=build/delay_tribal.map,--cref -lm -lc -o build/delay_tribal.elf
+
+Compiling header.c
+Compiling _unit_base.c
+Compiling unit.cc
+Compiling PercussionSpatializer.cc
+[01m[KPercussionSpatializer.cc:326:131:[m[K [01;31m[Kerror: [m[Kinvalid digit "8" in octal constant
+         float scatter_jit = (xorshift_f32(rng_state) * 2.0f - 1.0f) * (scatter_amount * 2.4f) * (0.25f + (float)(base + lane) * 0,[01;31m[K08333333333f[m[K);  // approx 0.75f / 9.0f
+                                                                                                                                   [01;31m[K^~~~~~~~~~~~[m[K
+[01m[KPercussionSpatializer.cc:372:131:[m[K [01;31m[Kerror: [m[Kinvalid digit "8" in octal constant
+         float scatter_jit = (xorshift_f32(rng_state) * 2.0f - 1.0f) * (scatter_amount * 2.4f) * (0.25f + (float)(base + lane) * 0,[01;31m[K08333333333f[m[K);  // approx 0.75f / 9.0f
+                                                                                                                                   [01;31m[K^~~~~~~~~~~~[m[K
+[01m[KPercussionSpatializer.cc:421:129:[m[K [01;31m[Kerror: [m[Kinvalid digit "8" in octal constant
+         float scatter_jit = (xorshift_f32(rng_state_) * 2.0f - 1.0f) * (profile_.scatter_amount * 2.4f) * (0.25f + (float)i * 0,[01;31m[K08333333333f[m[K);  // approx 0.75f / 9.0f
+                                                                                                                                 [01;31m[K^~~~~~~~~~~~[m[K
+In file included from [01m[KPercussionSpatializer.h:29:0[m[K,
+                 from [01m[Kunit.cc:7[m[K:
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat fasterSqrt_15bits(float)[m[K':
+[01m[Kfloat_math.h:959:23:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+ {   int i = *(int*) & [01;35m[Kx[m[K;
+                       [01;35m[K^[m[K
+[01m[Kfloat_math.h:961:27:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+     float y = *(float*) & [01;35m[Ki[m[K;
+                           [01;35m[K^[m[K
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[Kfloat_math.h:1037:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[Kfloat_math.h:1039:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+[01m[Kunit.cc:[m[K At global scope:
+[01m[Kunit.cc:10:43:[m[K [01;31m[Kerror: [m[K'[01m[Kfloat PercussionSpatializer::sin_table [360][m[K' is not a static data member of '[01m[Kclass PercussionSpatializer[m[K'
+ float PercussionSpatializer::sin_table[360[01;31m[K][m[K = {0};
+                                           [01;31m[K^[m[K
+[01m[Kunit.cc:11:43:[m[K [01;31m[Kerror: [m[K'[01m[Kfloat PercussionSpatializer::cos_table [360][m[K' is not a static data member of '[01m[Kclass PercussionSpatializer[m[K'
+ float PercussionSpatializer::cos_table[360[01;31m[K][m[K = {0};
+                                           [01;31m[K^[m[K
+[01m[Kunit.cc:12:30:[m[K [01;31m[Kerror: [m[K'[01m[Kbool PercussionSpatializer::tables_initialized[m[K' is not a static data member of '[01m[Kclass PercussionSpatializer[m[K'
+ bool  PercussionSpatializer::[01;31m[Ktables_initialized[m[K = false;
+                              [01;31m[K^~~~~~~~~~~~~~~~~~[m[K
+[01m[Kunit.cc:[m[K In function '[01m[Kvoid unit_render(const float*, float*, uint32_t)[m[K':
+[01m[Kunit.cc:38:22:[m[K [01;31m[Kerror: [m[K'[01m[Kclass PercussionSpatializer[m[K' has no member named '[01m[KProcess[m[K'
+     s_delay_instance.[01;31m[KProcess[m[K(in, out, frames);
+                      [01;31m[K^~~~~~~[m[K
+In file included from [01m[Kunit.cc:7:0[m[K:
+[01m[KPercussionSpatializer.h:[m[K At global scope:
+[01m[KPercussionSpatializer.h:114:19:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kint8_t PercussionSpatializer::Init(const unit_runtime_desc_t*)[m[K' used but never defined
+     inline int8_t [01;35m[KInit[m[K(const unit_runtime_desc_t* desc);
+                   [01;35m[K^~~~[m[K
+[01m[KPercussionSpatializer.h:116:17:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kvoid PercussionSpatializer::Reset()[m[K' used but never defined
+     inline void [01;35m[KReset[m[K();
+                 [01;35m[K^~~~~[m[K
+[01m[KPercussionSpatializer.h:120:17:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kvoid PercussionSpatializer::setParameter(uint8_t, int32_t)[m[K' used but never defined
+     inline void [01;35m[KsetParameter[m[K(uint8_t index, int32_t value);
+                 [01;35m[K^~~~~~~~~~~~[m[K
+[01m[KPercussionSpatializer.h:121:20:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kint32_t PercussionSpatializer::getParameterValue(uint8_t) const[m[K' used but never defined
+     inline int32_t [01;35m[KgetParameterValue[m[K(uint8_t index) const;
+                    [01;35m[K^~~~~~~~~~~~~~~~~[m[K
+[01m[KPercussionSpatializer.h:122:24:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kconst char* PercussionSpatializer::getParameterStrValue(uint8_t, int32_t) const[m[K' used but never defined
+     inline const char* [01;35m[KgetParameterStrValue[m[K(uint8_t index, int32_t value) const;
+                        [01;35m[K^~~~~~~~~~~~~~~~~~~~[m[K
+In file included from [01m[KPercussionSpatializer.h:29:0[m[K,
+                 from [01m[KPercussionSpatializer.cc:1[m[K:
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat fasterSqrt_15bits(float)[m[K':
+[01m[Kfloat_math.h:959:23:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+ {   int i = *(int*) & [01;35m[Kx[m[K;
+                       [01;35m[K^[m[K
+[01m[Kfloat_math.h:961:27:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+     float y = *(float*) & [01;35m[Ki[m[K;
+                           [01;35m[K^[m[K
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[Kfloat_math.h:1037:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[Kfloat_math.h:1039:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+make: *** [Makefile:320: build/obj/unit.o] Error 1
+make: *** Waiting for unfinished jobs....
+[01m[KPercussionSpatializer.cc:[m[K In function '[01m[Kvoid mix_clone_batch4(const clone_t*, int, const delay_line_t&, float, float, float, float, uint32_t&, float&, float&)[m[K':
+[01m[KPercussionSpatializer.cc:335:9:[m[K [01;31m[Kerror: [m[K'[01m[Ksoft[m[K' was not declared in this scope
+         [01;31m[Ksoft[m[K[lane] = 1.0f;
+         [01;31m[K^~~~[m[K
+[01m[KPercussionSpatializer.cc:[m[K In function '[01m[Kvoid mix_clone_batch2(const clone_t*, int, const delay_line_t&, float, float, float, float, uint32_t&, float&, float&)[m[K':
+[01m[KPercussionSpatializer.cc:381:9:[m[K [01;31m[Kerror: [m[K'[01m[Ksoft[m[K' was not declared in this scope
+         [01;31m[Ksoft[m[K[lane] = 1.0f;
+         [01;31m[K^~~~[m[K
+make: *** [Makefile:320: build/obj/PercussionSpatializer.o] Error 1
+>> Installing /workspace/drumlogue/delay_tribal
+Compiling unit.cc
+In file included from [01m[KPercussionSpatializer.h:29:0[m[K,
+                 from [01m[Kunit.cc:7[m[K:
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat fasterSqrt_15bits(float)[m[K':
+[01m[Kfloat_math.h:959:23:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+ {   int i = *(int*) & [01;35m[Kx[m[K;
+                       [01;35m[K^[m[K
+[01m[Kfloat_math.h:961:27:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+     float y = *(float*) & [01;35m[Ki[m[K;
+                           [01;35m[K^[m[K
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[Kfloat_math.h:1037:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[Kfloat_math.h:1039:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+[01m[Kunit.cc:[m[K At global scope:
+[01m[Kunit.cc:10:43:[m[K [01;31m[Kerror: [m[K'[01m[Kfloat PercussionSpatializer::sin_table [360][m[K' is not a static data member of '[01m[Kclass PercussionSpatializer[m[K'
+ float PercussionSpatializer::sin_table[360[01;31m[K][m[K = {0};
+                                           [01;31m[K^[m[K
+[01m[Kunit.cc:11:43:[m[K [01;31m[Kerror: [m[K'[01m[Kfloat PercussionSpatializer::cos_table [360][m[K' is not a static data member of '[01m[Kclass PercussionSpatializer[m[K'
+ float PercussionSpatializer::cos_table[360[01;31m[K][m[K = {0};
+                                           [01;31m[K^[m[K
+[01m[Kunit.cc:12:30:[m[K [01;31m[Kerror: [m[K'[01m[Kbool PercussionSpatializer::tables_initialized[m[K' is not a static data member of '[01m[Kclass PercussionSpatializer[m[K'
+ bool  PercussionSpatializer::[01;31m[Ktables_initialized[m[K = false;
+                              [01;31m[K^~~~~~~~~~~~~~~~~~[m[K
+[01m[Kunit.cc:[m[K In function '[01m[Kvoid unit_render(const float*, float*, uint32_t)[m[K':
+[01m[Kunit.cc:38:22:[m[K [01;31m[Kerror: [m[K'[01m[Kclass PercussionSpatializer[m[K' has no member named '[01m[KProcess[m[K'
+     s_delay_instance.[01;31m[KProcess[m[K(in, out, frames);
+                      [01;31m[K^~~~~~~[m[K
+In file included from [01m[Kunit.cc:7:0[m[K:
+[01m[KPercussionSpatializer.h:[m[K At global scope:
+[01m[KPercussionSpatializer.h:114:19:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kint8_t PercussionSpatializer::Init(const unit_runtime_desc_t*)[m[K' used but never defined
+     inline int8_t [01;35m[KInit[m[K(const unit_runtime_desc_t* desc);
+                   [01;35m[K^~~~[m[K
+[01m[KPercussionSpatializer.h:116:17:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kvoid PercussionSpatializer::Reset()[m[K' used but never defined
+     inline void [01;35m[KReset[m[K();
+                 [01;35m[K^~~~~[m[K
+[01m[KPercussionSpatializer.h:120:17:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kvoid PercussionSpatializer::setParameter(uint8_t, int32_t)[m[K' used but never defined
+     inline void [01;35m[KsetParameter[m[K(uint8_t index, int32_t value);
+                 [01;35m[K^~~~~~~~~~~~[m[K
+[01m[KPercussionSpatializer.h:121:20:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kint32_t PercussionSpatializer::getParameterValue(uint8_t) const[m[K' used but never defined
+     inline int32_t [01;35m[KgetParameterValue[m[K(uint8_t index) const;
+                    [01;35m[K^~~~~~~~~~~~~~~~~[m[K
+[01m[KPercussionSpatializer.h:122:24:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kconst char* PercussionSpatializer::getParameterStrValue(uint8_t, int32_t) const[m[K' used but never defined
+     inline const char* [01;35m[KgetParameterStrValue[m[K(uint8_t index, int32_t value) const;
+                        [01;35m[K^~~~~~~~~~~~~~~~~~~~[m[K
+make: *** [Makefile:320: build/obj/unit.o] Error 1
+>> Building /workspace/drumlogue/dummy-delfx
+Compiler Options
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.c -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fconcepts -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -fno-threadsafe-statics -std=gnu++14 -W -Wall -Wextra -Wno-ignored-qualifiers -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.cc -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ xxxx.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -shared -Wl,-Map=build/dummy_delay.map,--cref -lm -lc -o build/dummy_delay.elf
+
+Compiling header.c
+Compiling _unit_base.c
+Compiling unit.cc
+
+Linking build/dummy_delay.drmlgunit
+Stripping build/dummy_delay.drmlgunit
+Creating build/dummy_delay.hex
+Creating build/dummy_delay.bin
+Creating build/dummy_delay.dmp
+Creating build/dummy_delay.list
+
+
+Done
+
+   text	   data	    bss	    dec	    hex	filename
+   3593	    344	 192032	 195969	  2fd81	build/dummy_delay.drmlgunit
+chown: changing ownership of 'build/dummy_delay.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.list': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-delfx
+Deploying to /workspace/drumlogue/dummy-delfx//dummy_delay.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-masterfx
+Compiler Options
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.c -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fconcepts -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -fno-threadsafe-statics -std=gnu++14 -W -Wall -Wextra -Wno-ignored-qualifiers -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.cc -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ xxxx.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -shared -Wl,-Map=build/dummy_master.map,--cref -lm -lc -o build/dummy_master.elf
+
+Compiling header.c
+Compiling _unit_base.c
+Compiling unit.cc
+
+Linking build/dummy_master.drmlgunit
+Stripping build/dummy_master.drmlgunit
+Creating build/dummy_master.hex
+Creating build/dummy_master.bin
+Creating build/dummy_master.dmp
+Creating build/dummy_master.list
+
+   text	   data	    bss	    dec	    hex	filename
+   3587	    344	     12	   3943	    f67	build/dummy_master.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/dummy_master.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_master.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_master.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_master.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_master.list': Operation not permitted
+chown: changing ownership of 'build/dummy_master.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-masterfx
+Deploying to /workspace/drumlogue/dummy-masterfx//dummy_master.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-revfx
+Compiler Options
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.c -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fconcepts -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -fno-threadsafe-statics -std=gnu++14 -W -Wall -Wextra -Wno-ignored-qualifiers -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.cc -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ xxxx.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -shared -Wl,-Map=build/dummy_reverb.map,--cref -lm -lc -o build/dummy_reverb.elf
+
+Compiling header.c
+Compiling _unit_base.c
+Compiling unit.cc
+
+Linking build/dummy_reverb.drmlgunit
+Stripping build/dummy_reverb.drmlgunit
+Creating build/dummy_reverb.hex
+Creating build/dummy_reverb.bin
+Creating build/dummy_reverb.dmp
+Creating build/dummy_reverb.list
+
+   text	   data	    bss	    dec	    hex	filename
+   3595	    344	 192032	 195971	  2fd83	build/dummy_reverb.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/dummy_reverb.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.list': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-revfx
+Deploying to /workspace/drumlogue/dummy-revfx//dummy_reverb.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-synth
+
+
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations  -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/header.lst -D__arm__ -D__cortex_a7__  -MMD -MP -MF .dep/header.o.d  -I. -I/workspace/drumlogue/common header.c -o build/obj/header.o
+
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations  -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/_unit_base.lst -D__arm__ -D__cortex_a7__  -MMD -MP -MF .dep/_unit_base.o.d  -I. -I/workspace/drumlogue/common /workspace/drumlogue/common/_unit_base.c -o build/obj/_unit_base.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations  -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fconcepts -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -fno-threadsafe-statics -std=gnu++14 -W -Wall -Wextra -Wno-ignored-qualifiers -fPIC -Wa,-alms=build/lst/unit.lst -D__arm__ -D__cortex_a7__  -MMD -MP -MF .dep/unit.o.d  -I. -I/workspace/drumlogue/common unit.cc -o build/obj/unit.o
+
+arm-unknown-linux-gnueabihf-g++   build/obj/header.o build/obj/_unit_base.o build/obj/unit.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations   -shared -Wl,-Map=build/dummy_synth.map,--cref  -lm -lc -o build/dummy_synth.drmlgunit
+arm-unknown-linux-gnueabihf-strip build/dummy_synth.drmlgunit
+arm-unknown-linux-gnueabihf-objcopy -O ihex build/dummy_synth.drmlgunit build/dummy_synth.hex
+arm-unknown-linux-gnueabihf-objcopy -O binary build/dummy_synth.drmlgunit build/dummy_synth.bin
+arm-unknown-linux-gnueabihf-objdump -x --syms build/dummy_synth.drmlgunit > build/dummy_synth.dmp
+arm-unknown-linux-gnueabihf-objdump -S build/dummy_synth.drmlgunit > build/dummy_synth.list
+arm-unknown-linux-gnueabihf-size build/dummy_synth.drmlgunit
+   text	   data	    bss	    dec	    hex	filename
+   3267	    316	      8	   3591	    e07	build/dummy_synth.drmlgunit
+chown: changing ownership of 'build/dummy_synth.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.list': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-synth
+Deploying to /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/omnipress
+Compiler Options
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -DARM_NEON_OPTIMIZATION -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common -I. xxxx.c -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fconcepts -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -fno-threadsafe-statics -std=gnu++14 -W -Wall -Wextra -Wno-ignored-qualifiers -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -DARM_NEON_OPTIMIZATION -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common -I. xxxx.cc -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common -I. xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common -I. xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ xxxx.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -shared -Wl,-Map=build/omnipress.map,--cref -lm -lc -o build/omnipress.elf
+
+Compiling header.c
+Compiling _unit_base.c
+Compiling unit.cc
+In file included from [01m[Kcompressor_core.h:11:0[m[K,
+                 from [01m[Kmasterfx.h:29[m[K,
+                 from [01m[Kunit.cc:9[m[K:
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[Kfloat_math.h:1017:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[Kfloat_math.h:1019:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+In file included from [01m[Kmasterfx.h:32:0[m[K,
+                 from [01m[Kunit.cc:9[m[K:
+[01m[Koperation_overlord.h:[m[K In function '[01m[Kvoid overlord_init(overlord_t*, float)[m[K':
+[01m[Koperation_overlord.h:44:54:[m[K [01;35m[Kwarning: [m[Kunused parameter '[01m[Ksample_rate[m[K' [[01;35m[K-Wunused-parameter[m[K]
+ fast_inline void overlord_init(overlord_t* ov, float [01;35m[Ksample_rate[m[K) {
+                                                      [01;35m[K^~~~~~~~~~~[m[K
+In file included from [01m[Kmultiband.h:11:0[m[K,
+                 from [01m[Kmasterfx.h:34[m[K,
+                 from [01m[Kunit.cc:9[m[K:
+[01m[Kcrossover.h:[m[K In function '[01m[Kvoid crossover_process(crossover_t*, float32x4_t, float32x4_t, float32x4_t*, float32x4_t*, float32x4_t*, float32x4_t*, float32x4_t*, float32x4_t*, float, float)[m[K':
+[01m[Kcrossover.h:121:49:[m[K [01;35m[Kwarning: [m[Kunused parameter '[01m[Kmid_l[m[K' [[01;35m[K-Wunused-parameter[m[K]
+                                    float32x4_t* [01;35m[Kmid_l[m[K,
+                                                 [01;35m[K^~~~~[m[K
+[01m[Kcrossover.h:122:49:[m[K [01;35m[Kwarning: [m[Kunused parameter '[01m[Kmid_r[m[K' [[01;35m[K-Wunused-parameter[m[K]
+                                    float32x4_t* [01;35m[Kmid_r[m[K,
+                                                 [01;35m[K^~~~~[m[K
+
+Linking build/omnipress.drmlgunit
+Stripping build/omnipress.drmlgunit
+Creating build/omnipress.hex
+Creating build/omnipress.bin
+Creating build/omnipress.dmp
+Creating build/omnipress.list
+
+   text	   data	    bss	    dec	    hex	filename
+  45187	    524	   2224	  47935	   bb3f	build/omnipress.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build/omnipress.bin': Operation not permitted
+chown: changing ownership of 'build/omnipress.dmp': Operation not permitted
+chown: changing ownership of 'build/omnipress.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/omnipress.hex': Operation not permitted
+chown: changing ownership of 'build/omnipress.list': Operation not permitted
+chown: changing ownership of 'build/omnipress.map': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/omnipress
+Deploying to /workspace/drumlogue/omnipress//omnipress.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/reverb_labirinto
+Compiler Options
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.c -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fconcepts -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -fno-threadsafe-statics -std=gnu++14 -W -Wall -Wextra -Wno-ignored-qualifiers -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.cc -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ xxxx.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -shared -Wl,-Map=build/neon_labirinto_reverb.map,--cref -lm -lc -o build/neon_labirinto_reverb.elf
+
+Compiling header.c
+Compiling _unit_base.c
+Compiling unit.cc
+In file included from [01m[KNeonAdvancedLabirinto.h:18:0[m[K,
+                 from [01m[Kunit.cc:19[m[K:
+[01m[K./float_math.h:[m[K In function '[01m[Kfloat fasterSqrt_15bits(float)[m[K':
+[01m[K./float_math.h:956:23:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+ {   int i = *(int*) & [01;35m[Kx[m[K;
+                       [01;35m[K^[m[K
+[01m[K./float_math.h:958:27:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+     float y = *(float*) & [01;35m[Ki[m[K;
+                           [01;35m[K^[m[K
+[01m[K./float_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[K./float_math.h:1034:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[K./float_math.h:1036:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+In file included from [01m[Kunit.cc:19:0[m[K:
+[01m[KNeonAdvancedLabirinto.h:[m[K In constructor '[01m[KNeonAdvancedLabirinto::NeonAdvancedLabirinto()[m[K':
+[01m[KNeonAdvancedLabirinto.h:1480:11:[m[K [01;35m[Kwarning: [m[K'[01m[KNeonAdvancedLabirinto::noiseGain[m[K' will be initialized after [[01;35m[K-Wreorder[m[K]
+     float [01;35m[KnoiseGain[m[K;                   // from DAMP
+           [01;35m[K^~~~~~~~~[m[K
+[01m[KNeonAdvancedLabirinto.h:1456:11:[m[K [01;35m[Kwarning: [m[K  '[01m[Kfloat NeonAdvancedLabirinto::currentPreDelaySamples[m[K' [[01;35m[K-Wreorder[m[K]
+     float [01;35m[KcurrentPreDelaySamples[m[K;
+           [01;35m[K^~~~~~~~~~~~~~~~~~~~~~[m[K
+In file included from [01m[Kunit.cc:19:0[m[K:
+[01m[KNeonAdvancedLabirinto.h:93:5:[m[K [01;35m[Kwarning: [m[K  when initialized here [[01;35m[K-Wreorder[m[K]
+     [01;35m[KNeonAdvancedLabirinto[m[K()
+     [01;35m[K^~~~~~~~~~~~~~~~~~~~~[m[K
+In file included from [01m[Kunit.cc:19:0[m[K:
+[01m[KNeonAdvancedLabirinto.h:1457:11:[m[K [01;35m[Kwarning: [m[K'[01m[KNeonAdvancedLabirinto::targetPreDelaySamples[m[K' will be initialized after [[01;35m[K-Wreorder[m[K]
+     float [01;35m[KtargetPreDelaySamples[m[K;
+           [01;35m[K^~~~~~~~~~~~~~~~~~~~~[m[K
+[01m[KNeonAdvancedLabirinto.h:1454:9:[m[K [01;35m[Kwarning: [m[K  '[01m[Kint NeonAdvancedLabirinto::preDelayWritePos[m[K' [[01;35m[K-Wreorder[m[K]
+     int [01;35m[KpreDelayWritePos[m[K;
+         [01;35m[K^~~~~~~~~~~~~~~~[m[K
+In file included from [01m[Kunit.cc:19:0[m[K:
+[01m[KNeonAdvancedLabirinto.h:93:5:[m[K [01;35m[Kwarning: [m[K  when initialized here [[01;35m[K-Wreorder[m[K]
+     [01;35m[KNeonAdvancedLabirinto[m[K()
+     [01;35m[K^~~~~~~~~~~~~~~~~~~~~[m[K
+In file included from [01m[Kunit.cc:19:0[m[K:
+[01m[KNeonAdvancedLabirinto.h:[m[K In member function '[01m[Kvoid NeonAdvancedLabirinto::applyResonantFilterModulated(float32x4_t*, int, float)[m[K':
+[01m[KNeonAdvancedLabirinto.h:512:65:[m[K [01;35m[Kwarning: [m[Kunused parameter '[01m[KnumChannels[m[K' [[01;35m[K-Wunused-parameter[m[K]
+     void applyResonantFilterModulated(float32x4_t* signals, int [01;35m[KnumChannels[m[K, float fcMod) {
+                                                                 [01;35m[K^~~~~~~~~~~[m[K
+[01m[KNeonAdvancedLabirinto.h:[m[K In member function '[01m[Kvoid NeonAdvancedLabirinto::processScalar(float, float&, float&)[m[K':
+[01m[KNeonAdvancedLabirinto.h:1308:15:[m[K [01;35m[Kwarning: [m[Kunused variable '[01m[KloopGain[m[K' [[01;35m[K-Wunused-variable[m[K]
+         float [01;35m[KloopGain[m[K = 0.7f + (decay * 0.295f);
+               [01;35m[K^~~~~~~~[m[K
+[01m[Kunit.cc:[m[K At global scope:
+[01m[Kunit.cc:37:16:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_current_preset[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static uint8_t [01;35m[Ks_current_preset[m[K = 0;
+                [01;35m[K^~~~~~~~~~~~~~~~[m[K
+
+Linking build/neon_labirinto_reverb.drmlgunit
+Stripping build/neon_labirinto_reverb.drmlgunit
+Creating build/neon_labirinto_reverb.hex
+Creating build/neon_labirinto_reverb.bin
+Creating build/neon_labirinto_reverb.dmp
+Creating build/neon_labirinto_reverb.list
+
+   text	   data	    bss	    dec	    hex	filename
+  14665	    368	2167760	2182793	 214e89	build/neon_labirinto_reverb.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.bin': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.dmp': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.hex': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.list': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.map': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/reverb_labirinto
+Deploying to /workspace/drumlogue/reverb_labirinto//neon_labirinto_reverb.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/reverb_light
+Compiler Options
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.c -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fconcepts -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -fno-threadsafe-statics -std=gnu++14 -W -Wall -Wextra -Wno-ignored-qualifiers -fPIC -Wa,-alms=build/lst/ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.cc -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ xxxx.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -shared -Wl,-Map=build/luce_al_neon.map,--cref -lm -lc -o build/luce_al_neon.elf
+
+Compiling header.c
+Compiling _unit_base.c
+Compiling unit.cc
+In file included from [01m[Kfdn_engine.h:4:0[m[K,
+                 from [01m[Kunit.cc:16[m[K:
+[01m[K./float_math.h:[m[K In function '[01m[Kfloat fasterSqrt_15bits(float)[m[K':
+[01m[K./float_math.h:956:23:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+ {   int i = *(int*) & [01;35m[Kx[m[K;
+                       [01;35m[K^[m[K
+[01m[K./float_math.h:958:27:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+     float y = *(float*) & [01;35m[Ki[m[K;
+                           [01;35m[K^[m[K
+[01m[K./float_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[K./float_math.h:1034:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[K./float_math.h:1036:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+In file included from [01m[Kunit.cc:16:0[m[K:
+[01m[Kfdn_engine.h:[m[K In member function '[01m[Kvoid FDNEngine::processBlock(const float*, float*, int)[m[K':
+[01m[Kfdn_engine.h:713:63:[m[K [01;31m[Kerror: [m[K'[01m[Kfast_tanh[m[K' was not declared in this scope
+                     irid_raw_l = fast_tanh(irid_raw_l * 1.359f[01;31m[K)[m[K;
+                                                               [01;31m[K^[m[K
+[01m[Kunit.cc:[m[K At global scope:
+[01m[Kunit.cc:52:14:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_outR[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static float [01;35m[Ks_outR[m[K[kMaxFrames];
+              [01;35m[K^~~~~~[m[K
+[01m[Kunit.cc:51:14:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_outL[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static float [01;35m[Ks_outL[m[K[kMaxFrames];
+              [01;35m[K^~~~~~[m[K
+[01m[Kunit.cc:50:14:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_inR[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static float [01;35m[Ks_inR[m[K[kMaxFrames];
+              [01;35m[K^~~~~[m[K
+[01m[Kunit.cc:49:14:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_inL[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static float [01;35m[Ks_inL[m[K[kMaxFrames];
+              [01;35m[K^~~~~[m[K
+make: *** [Makefile:320: build/obj/unit.o] Error 1
+>> Installing /workspace/drumlogue/reverb_light
+Compiling unit.cc
+In file included from [01m[Kfdn_engine.h:4:0[m[K,
+                 from [01m[Kunit.cc:16[m[K:
+[01m[K./float_math.h:[m[K In function '[01m[Kfloat fasterSqrt_15bits(float)[m[K':
+[01m[K./float_math.h:956:23:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+ {   int i = *(int*) & [01;35m[Kx[m[K;
+                       [01;35m[K^[m[K
+[01m[K./float_math.h:958:27:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+     float y = *(float*) & [01;35m[Ki[m[K;
+                           [01;35m[K^[m[K
+[01m[K./float_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[K./float_math.h:1034:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[K./float_math.h:1036:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+In file included from [01m[Kunit.cc:16:0[m[K:
+[01m[Kfdn_engine.h:[m[K In member function '[01m[Kvoid FDNEngine::processBlock(const float*, float*, int)[m[K':
+[01m[Kfdn_engine.h:713:63:[m[K [01;31m[Kerror: [m[K'[01m[Kfast_tanh[m[K' was not declared in this scope
+                     irid_raw_l = fast_tanh(irid_raw_l * 1.359f[01;31m[K)[m[K;
+                                                               [01;31m[K^[m[K
+[01m[Kunit.cc:[m[K At global scope:
+[01m[Kunit.cc:52:14:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_outR[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static float [01;35m[Ks_outR[m[K[kMaxFrames];
+              [01;35m[K^~~~~~[m[K
+[01m[Kunit.cc:51:14:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_outL[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static float [01;35m[Ks_outL[m[K[kMaxFrames];
+              [01;35m[K^~~~~~[m[K
+[01m[Kunit.cc:50:14:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_inR[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static float [01;35m[Ks_inR[m[K[kMaxFrames];
+              [01;35m[K^~~~~[m[K
+[01m[Kunit.cc:49:14:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_inL[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static float [01;35m[Ks_inL[m[K[kMaxFrames];
+              [01;35m[K^~~~~[m[K
+make: *** [Makefile:320: build/obj/unit.o] Error 1
+>> Building /workspace/drumlogue/scruta_astri
+Compiler Options
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -std=c11 -W -Wall -Wextra -fPIC -Wa,-alms=build/lst/ -D__ARM_NEON__ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common -I/workspace/drumlogue/common -I. xxxx.c -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -pipe -ffast-math -fsigned-char -fno-stack-protector -fstrict-aliasing -falign-functions=16 -fno-math-errno -fomit-frame-pointer -finline-limit=9999999999 --param max-inline-insns-single=9999999999 -fno-threadsafe-statics -std=gnu++14 -W -Wall -Wextra -Wno-ignored-qualifiers -fPIC -Wa,-alms=build/lst/ -D__ARM_NEON__ -D__arm__ -D__cortex_a7__ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common -I/workspace/drumlogue/common -I. xxxx.cc -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common -I/workspace/drumlogue/common -I. xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-gcc -c -march=armv7-a -mtune=cortex-a7 -marm -fPIC -Wa,-amhls=build/lst/ -MMD -MP -MF .dep/build.d -I. -I/workspace/drumlogue/common -I/workspace/drumlogue/common -I. xxxx.s -o build/obj/xxxx.o
+arm-unknown-linux-gnueabihf-g++ xxxx.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations -shared -Wl,-Map=build/scruta_astri.map,--cref -lm -lc -o build/scruta_astri.elf
+
+Compiling header.c
+Compiling _unit_base.c
+Compiling unit.cc
+In file included from [01m[Ksynth.h:5:0[m[K,
+                 from [01m[Kunit.cc:2[m[K:
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat fasterSqrt_15bits(float)[m[K':
+[01m[Kfloat_math.h:956:23:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+ {   int i = *(int*) & [01;35m[Kx[m[K;
+                       [01;35m[K^[m[K
+[01m[Kfloat_math.h:958:27:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+     float y = *(float*) & [01;35m[Ki[m[K;
+                           [01;35m[K^[m[K
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[Kfloat_math.h:1034:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[Kfloat_math.h:1036:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+In file included from [01m[Kunit.cc:2:0[m[K:
+[01m[Ksynth.h:[m[K In member function '[01m[Kvoid ScrutaAstri::NoteOn(uint8_t, uint8_t)[m[K':
+[01m[Ksynth.h:226:46:[m[K [01;35m[Kwarning: [m[Kunused parameter '[01m[Kvelocity[m[K' [[01;35m[K-Wunused-parameter[m[K]
+     inline void NoteOn(uint8_t note, uint8_t [01;35m[Kvelocity[m[K) {
+                                              [01;35m[K^~~~~~~~[m[K
+[01m[Kunit.cc:[m[K In function '[01m[Kvoid unit_render(const float*, float*, uint32_t)[m[K':
+[01m[Kunit.cc:16:48:[m[K [01;35m[Kwarning: [m[Kunused parameter '[01m[Kin[m[K' [[01;35m[K-Wunused-parameter[m[K]
+ __unit_callback void unit_render(const float * [01;35m[Kin[m[K, float * out, uint32_t frames) {
+                                                [01;35m[K^~[m[K
+[01m[Kunit.cc:[m[K In function '[01m[Kvoid unit_note_off(uint8_t)[m[K':
+[01m[Kunit.cc:60:44:[m[K [01;35m[Kwarning: [m[Kunused parameter '[01m[Knote[m[K' [[01;35m[K-Wunused-parameter[m[K]
+ __unit_callback void unit_note_off(uint8_t [01;35m[Knote[m[K) { }
+                                            [01;35m[K^~~~[m[K
+[01m[Kunit.cc:[m[K In function '[01m[Kvoid unit_gate_on(uint8_t)[m[K':
+[01m[Kunit.cc:61:43:[m[K [01;35m[Kwarning: [m[Kunused parameter '[01m[Kvelocity[m[K' [[01;35m[K-Wunused-parameter[m[K]
+ __unit_callback void unit_gate_on(uint8_t [01;35m[Kvelocity[m[K) { }
+                                           [01;35m[K^~~~~~~~[m[K
+[01m[Kunit.cc:[m[K In function '[01m[Kvoid unit_pitch_bend(uint16_t)[m[K':
+[01m[Kunit.cc:64:47:[m[K [01;35m[Kwarning: [m[Kunused parameter '[01m[Kbend[m[K' [[01;35m[K-Wunused-parameter[m[K]
+ __unit_callback void unit_pitch_bend(uint16_t [01;35m[Kbend[m[K) { }
+                                               [01;35m[K^~~~[m[K
+[01m[Kunit.cc:[m[K In function '[01m[Kvoid unit_channel_pressure(uint8_t)[m[K':
+[01m[Kunit.cc:65:52:[m[K [01;35m[Kwarning: [m[Kunused parameter '[01m[Kpressure[m[K' [[01;35m[K-Wunused-parameter[m[K]
+ __unit_callback void unit_channel_pressure(uint8_t [01;35m[Kpressure[m[K) { }
+                                                    [01;35m[K^~~~~~~~[m[K
+[01m[Kunit.cc:[m[K In function '[01m[Kvoid unit_aftertouch(uint8_t, uint8_t)[m[K':
+[01m[Kunit.cc:66:46:[m[K [01;35m[Kwarning: [m[Kunused parameter '[01m[Knote[m[K' [[01;35m[K-Wunused-parameter[m[K]
+ __unit_callback void unit_aftertouch(uint8_t [01;35m[Knote[m[K, uint8_t aftertouch) { }
+                                              [01;35m[K^~~~[m[K
+[01m[Kunit.cc:66:60:[m[K [01;35m[Kwarning: [m[Kunused parameter '[01m[Kaftertouch[m[K' [[01;35m[K-Wunused-parameter[m[K]
+ __unit_callback void unit_aftertouch(uint8_t note, uint8_t [01;35m[Kaftertouch[m[K) { }
+                                                            [01;35m[K^~~~~~~~~~[m[K
+
+Linking build/scruta_astri.drmlgunit
+Stripping build/scruta_astri.drmlgunit
+Creating build/scruta_astri.hex
+Creating build/scruta_astri.bin
+Creating build/scruta_astri.dmp
+Creating build/scruta_astri.list
+
+   text	   data	    bss	    dec	    hex	filename
+ 255715	    768	     24	 256507	  3e9fb	build/scruta_astri.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.bin': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.dmp': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.hex': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.list': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.map': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:292: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/scruta_astri
+Deploying to /workspace/drumlogue/scruta_astri//scruta_astri.drmlgunit
+
+Done
+
+>> Resetting environment
+[31m[drumlogue] [0m~ $ [Kbuild --drumlogue
+>> Building 'drumlogue' projects
+>> Building /workspace/drumlogue/FMpercussion
+Compiling fm_presets.cc
+In file included from [01m[Ksine_neon.h:16:0[m[K,
+                 from [01m[Kresonant_synthesis.h:14[m[K,
+                 from [01m[Kfm_presets.h:12[m[K,
+                 from [01m[Kfm_presets.cc:6[m[K:
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[Kfloat_math.h:1014:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[Kfloat_math.h:1016:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+[01m[Kfm_presets.cc:[m[K At global scope:
+[01m[Kfm_presets.cc:464:1:[m[K [01;31m[Kerror: [m[Kbraces around scalar initializer for type '[01m[Kuint8_t {aka unsigned char}[m[K'
  [01;31m[K}[m[K;
  [01;31m[K^[m[K
 make: *** [Makefile:321: build/obj/fm_presets.o] Error 1
+>> Installing /workspace/drumlogue/FMpercussion
+Compiling fm_presets.cc
+In file included from [01m[Ksine_neon.h:16:0[m[K,
+                 from [01m[Kresonant_synthesis.h:14[m[K,
+                 from [01m[Kfm_presets.h:12[m[K,
+                 from [01m[Kfm_presets.cc:6[m[K:
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[Kfloat_math.h:1014:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[Kfloat_math.h:1016:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+[01m[Kfm_presets.cc:[m[K At global scope:
+[01m[Kfm_presets.cc:464:1:[m[K [01;31m[Kerror: [m[Kbraces around scalar initializer for type '[01m[Kuint8_t {aka unsigned char}[m[K'
+ [01;31m[K}[m[K;
+ [01;31m[K^[m[K
+make: *** [Makefile:321: build/obj/fm_presets.o] Error 1
+>> Building /workspace/drumlogue/delay_tribal
+Compiling unit.cc
+Compiling PercussionSpatializer.cc
+In file included from [01m[KPercussionSpatializer.h:29:0[m[K,
+                 from [01m[Kunit.cc:7[m[K:
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat fasterSqrt_15bits(float)[m[K':
+[01m[Kfloat_math.h:959:23:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+ {   int i = *(int*) & [01;35m[Kx[m[K;
+                       [01;35m[K^[m[K
+[01m[Kfloat_math.h:961:27:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+     float y = *(float*) & [01;35m[Ki[m[K;
+                           [01;35m[K^[m[K
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[Kfloat_math.h:1037:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[Kfloat_math.h:1039:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+In file included from [01m[Kunit.cc:7:0[m[K:
+[01m[KPercussionSpatializer.h:[m[K At global scope:
+[01m[KPercussionSpatializer.h:114:19:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kint8_t PercussionSpatializer::Init(const unit_runtime_desc_t*)[m[K' used but never defined
+     inline int8_t [01;35m[KInit[m[K(const unit_runtime_desc_t* desc);
+                   [01;35m[K^~~~[m[K
+[01m[KPercussionSpatializer.h:116:17:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kvoid PercussionSpatializer::Reset()[m[K' used but never defined
+     inline void [01;35m[KReset[m[K();
+                 [01;35m[K^~~~~[m[K
+[01m[KPercussionSpatializer.h:125:17:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kvoid PercussionSpatializer::Render(const float*, float*, size_t)[m[K' used but never defined
+     inline void [01;35m[KRender[m[K(const float* in, float* out, size_t frames);
+                 [01;35m[K^~~~~~[m[K
+[01m[KPercussionSpatializer.h:120:17:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kvoid PercussionSpatializer::setParameter(uint8_t, int32_t)[m[K' used but never defined
+     inline void [01;35m[KsetParameter[m[K(uint8_t index, int32_t value);
+                 [01;35m[K^~~~~~~~~~~~[m[K
+[01m[KPercussionSpatializer.h:121:20:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kint32_t PercussionSpatializer::getParameterValue(uint8_t) const[m[K' used but never defined
+     inline int32_t [01;35m[KgetParameterValue[m[K(uint8_t index) const;
+                    [01;35m[K^~~~~~~~~~~~~~~~~[m[K
+[01m[KPercussionSpatializer.h:122:24:[m[K [01;35m[Kwarning: [m[Kinline function '[01m[Kconst char* PercussionSpatializer::getParameterStrValue(uint8_t, int32_t) const[m[K' used but never defined
+     inline const char* [01;35m[KgetParameterStrValue[m[K(uint8_t index, int32_t value) const;
+                        [01;35m[K^~~~~~~~~~~~~~~~~~~~[m[K
+In file included from [01m[KPercussionSpatializer.h:29:0[m[K,
+                 from [01m[KPercussionSpatializer.cc:1[m[K:
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat fasterSqrt_15bits(float)[m[K':
+[01m[Kfloat_math.h:959:23:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+ {   int i = *(int*) & [01;35m[Kx[m[K;
+                       [01;35m[K^[m[K
+[01m[Kfloat_math.h:961:27:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+     float y = *(float*) & [01;35m[Ki[m[K;
+                           [01;35m[K^[m[K
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[Kfloat_math.h:1037:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[Kfloat_math.h:1039:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+
+Linking build/delay_tribal.drmlgunit
+Stripping build/delay_tribal.drmlgunit
+Creating build/delay_tribal.hex
+Creating build/delay_tribal.bin
+Creating build/delay_tribal.dmp
+Creating build/delay_tribal.list
+
+   text	   data	    bss	    dec	    hex	filename
+  10992	    376	   1844	  13212	   339c	build/delay_tribal.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/delay_tribal.bin': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.dmp': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.hex': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.list': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/PercussionSpatializer.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/PercussionSpatializer.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/delay_tribal
+Deploying to /workspace/drumlogue/delay_tribal//delay_tribal.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-delfx
+
+Linking build/dummy_delay.drmlgunit
+Stripping build/dummy_delay.drmlgunit
+Creating build/dummy_delay.hex
+Creating build/dummy_delay.bin
+Creating build/dummy_delay.dmp
+Creating build/dummy_delay.list
+
+
+Done
+
+   text	   data	    bss	    dec	    hex	filename
+   3593	    344	 192032	 195969	  2fd81	build/dummy_delay.drmlgunit
+chown: changing ownership of 'build/dummy_delay.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.list': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-delfx
+Deploying to /workspace/drumlogue/dummy-delfx//dummy_delay.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-masterfx
+
+Linking build/dummy_master.drmlgunit
+Stripping build/dummy_master.drmlgunit
+Creating build/dummy_master.hex
+Creating build/dummy_master.bin
+Creating build/dummy_master.dmp
+Creating build/dummy_master.list
+
+
+Done
+
+   text	   data	    bss	    dec	    hex	filename
+   3587	    344	     12	   3943	    f67	build/dummy_master.drmlgunit
+chown: changing ownership of 'build/dummy_master.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_master.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_master.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_master.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_master.list': Operation not permitted
+chown: changing ownership of 'build/dummy_master.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-masterfx
+Deploying to /workspace/drumlogue/dummy-masterfx//dummy_master.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-revfx
+
+Linking build/dummy_reverb.drmlgunit
+Stripping build/dummy_reverb.drmlgunit
+Creating build/dummy_reverb.hex
+Creating build/dummy_reverb.bin
+Creating build/dummy_reverb.dmp
+Creating build/dummy_reverb.list
+
+
+Done
+
+   text	   data	    bss	    dec	    hex	filename
+   3595	    344	 192032	 195971	  2fd83	build/dummy_reverb.drmlgunit
+chown: changing ownership of 'build/dummy_reverb.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.list': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-revfx
+Deploying to /workspace/drumlogue/dummy-revfx//dummy_reverb.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-synth
+
+arm-unknown-linux-gnueabihf-g++   build/obj/header.o build/obj/_unit_base.o build/obj/unit.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations   -shared -Wl,-Map=build/dummy_synth.map,--cref  -lm -lc -o build/dummy_synth.drmlgunit
+arm-unknown-linux-gnueabihf-strip build/dummy_synth.drmlgunit
+arm-unknown-linux-gnueabihf-objcopy -O ihex build/dummy_synth.drmlgunit build/dummy_synth.hex
+arm-unknown-linux-gnueabihf-objcopy -O binary build/dummy_synth.drmlgunit build/dummy_synth.bin
+arm-unknown-linux-gnueabihf-objdump -x --syms build/dummy_synth.drmlgunit > build/dummy_synth.dmp
+arm-unknown-linux-gnueabihf-objdump -S build/dummy_synth.drmlgunit > build/dummy_synth.list
+arm-unknown-linux-gnueabihf-size build/dummy_synth.drmlgunit
+   text	   data	    bss	    dec	    hex	filename
+   3267	    316	      8	   3591	    e07	build/dummy_synth.drmlgunit
+chown: changing ownership of 'build/dummy_synth.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.list': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-synth
+Deploying to /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/omnipress
+
+Linking build/omnipress.drmlgunit
+Stripping build/omnipress.drmlgunit
+Creating build/omnipress.hex
+Creating build/omnipress.bin
+Creating build/omnipress.dmp
+Creating build/omnipress.list
+
+   text	   data	    bss	    dec	    hex	filename
+  45187	    524	   2224	  47935	   bb3f	build/omnipress.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build/omnipress.bin': Operation not permitted
+chown: changing ownership of 'build/omnipress.dmp': Operation not permitted
+chown: changing ownership of 'build/omnipress.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/omnipress.hex': Operation not permitted
+chown: changing ownership of 'build/omnipress.list': Operation not permitted
+chown: changing ownership of 'build/omnipress.map': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/omnipress
+Deploying to /workspace/drumlogue/omnipress//omnipress.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/reverb_labirinto
+
+Linking build/neon_labirinto_reverb.drmlgunit
+Stripping build/neon_labirinto_reverb.drmlgunit
+Creating build/neon_labirinto_reverb.hex
+Creating build/neon_labirinto_reverb.bin
+Creating build/neon_labirinto_reverb.dmp
+Creating build/neon_labirinto_reverb.list
+
+   text	   data	    bss	    dec	    hex	filename
+  14665	    368	2167760	2182793	 214e89	build/neon_labirinto_reverb.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.bin': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.dmp': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.hex': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.list': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.map': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/reverb_labirinto
+Deploying to /workspace/drumlogue/reverb_labirinto//neon_labirinto_reverb.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/reverb_light
+Compiling unit.cc
+In file included from [01m[Kfdn_engine.h:4:0[m[K,
+                 from [01m[Kunit.cc:16[m[K:
+[01m[K./float_math.h:[m[K In function '[01m[Kfloat fasterSqrt_15bits(float)[m[K':
+[01m[K./float_math.h:956:23:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+ {   int i = *(int*) & [01;35m[Kx[m[K;
+                       [01;35m[K^[m[K
+[01m[K./float_math.h:958:27:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+     float y = *(float*) & [01;35m[Ki[m[K;
+                           [01;35m[K^[m[K
+[01m[K./float_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[K./float_math.h:1034:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[K./float_math.h:1036:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+[01m[Kunit.cc:[m[K At global scope:
+[01m[Kunit.cc:52:14:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_outR[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static float [01;35m[Ks_outR[m[K[kMaxFrames];
+              [01;35m[K^~~~~~[m[K
+[01m[Kunit.cc:51:14:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_outL[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static float [01;35m[Ks_outL[m[K[kMaxFrames];
+              [01;35m[K^~~~~~[m[K
+[01m[Kunit.cc:50:14:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_inR[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static float [01;35m[Ks_inR[m[K[kMaxFrames];
+              [01;35m[K^~~~~[m[K
+[01m[Kunit.cc:49:14:[m[K [01;35m[Kwarning: [m[K'[01m[Ks_inL[m[K' defined but not used [[01;35m[K-Wunused-variable[m[K]
+ static float [01;35m[Ks_inL[m[K[kMaxFrames];
+              [01;35m[K^~~~~[m[K
+
+Linking build/luce_al_neon.drmlgunit
+Stripping build/luce_al_neon.drmlgunit
+Creating build/luce_al_neon.hex
+Creating build/luce_al_neon.bin
+Creating build/luce_al_neon.dmp
+Creating build/luce_al_neon.list
+
+   text	   data	    bss	    dec	    hex	filename
+   9828	    356	1180596	1190780	 122b7c	build/luce_al_neon.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.bin': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.dmp': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.hex': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.list': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.map': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/reverb_light
+Deploying to /workspace/drumlogue/reverb_light//luce_al_neon.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/scruta_astri
+
+Linking build/scruta_astri.drmlgunit
+Stripping build/scruta_astri.drmlgunit
+Creating build/scruta_astri.hex
+Creating build/scruta_astri.bin
+Creating build/scruta_astri.dmp
+Creating build/scruta_astri.list
+
+   text	   data	    bss	    dec	    hex	filename
+ 255715	    768	     24	 256507	  3e9fb	build/scruta_astri.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.bin': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.dmp': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.hex': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.list': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.map': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:292: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/scruta_astri
+Deploying to /workspace/drumlogue/scruta_astri//scruta_astri.drmlgunit
+
+Done
+
 >> Resetting environment
-[31m[drumlogue] [0m~ $ [Ktime="2026-04-25T16:29:42+02:00" level=error msg="error waiting for container: unexpected EOF"
+[31m[drumlogue] [0m~ $ [Kbuild --drumlogue
+>> Building 'drumlogue' projects
+>> Building /workspace/drumlogue/FMpercussion
+Compiling fm_presets.cc
+In file included from [01m[Ksine_neon.h:16:0[m[K,
+                 from [01m[Kresonant_synthesis.h:14[m[K,
+                 from [01m[Kfm_presets.h:12[m[K,
+                 from [01m[Kfm_presets.cc:6[m[K:
+[01m[Kfloat_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[Kfloat_math.h:1014:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[Kfloat_math.h:1016:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+
+Linking build/fm_perc_synth.drmlgunit
+Stripping build/fm_perc_synth.drmlgunit
+Creating build/fm_perc_synth.hex
+Creating build/fm_perc_synth.bin
+Creating build/fm_perc_synth.dmp
+Creating build/fm_perc_synth.list
+
+   text	   data	    bss	    dec	    hex	filename
+  36854	    540	   2648	  40042	   9c6a	build/fm_perc_synth.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/fm_perc_synth.bin': Operation not permitted
+chown: changing ownership of 'build/fm_perc_synth.dmp': Operation not permitted
+chown: changing ownership of 'build/fm_perc_synth.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/fm_perc_synth.hex': Operation not permitted
+chown: changing ownership of 'build/fm_perc_synth.list': Operation not permitted
+chown: changing ownership of 'build/fm_perc_synth.map': Operation not permitted
+chown: changing ownership of 'build/lst/fm_presets.lst': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/fm_presets.o': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:292: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/FMpercussion
+Deploying to /workspace/drumlogue/FMpercussion//fm_perc_synth.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/delay_tribal
+
+Linking build/delay_tribal.drmlgunit
+Stripping build/delay_tribal.drmlgunit
+Creating build/delay_tribal.hex
+Creating build/delay_tribal.bin
+Creating build/delay_tribal.dmp
+Creating build/delay_tribal.list
+
+   text	   data	    bss	    dec	    hex	filename
+  10992	    376	   1844	  13212	   339c	build/delay_tribal.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/delay_tribal.bin': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.dmp': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.hex': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.list': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/PercussionSpatializer.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/PercussionSpatializer.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/delay_tribal
+Deploying to /workspace/drumlogue/delay_tribal//delay_tribal.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-delfx
+
+Linking build/dummy_delay.drmlgunit
+Stripping build/dummy_delay.drmlgunit
+Creating build/dummy_delay.hex
+Creating build/dummy_delay.bin
+Creating build/dummy_delay.dmp
+Creating build/dummy_delay.list
+
+
+Done
+
+   text	   data	    bss	    dec	    hex	filename
+   3593	    344	 192032	 195969	  2fd81	build/dummy_delay.drmlgunit
+chown: changing ownership of 'build/dummy_delay.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.list': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-delfx
+Deploying to /workspace/drumlogue/dummy-delfx//dummy_delay.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-masterfx
+
+Linking build/dummy_master.drmlgunit
+Stripping build/dummy_master.drmlgunit
+Creating build/dummy_master.hex
+Creating build/dummy_master.bin
+Creating build/dummy_master.dmp
+Creating build/dummy_master.list
+
+
+Done
+
+   text	   data	    bss	    dec	    hex	filename
+   3587	    344	     12	   3943	    f67	build/dummy_master.drmlgunit
+chown: changing ownership of 'build/dummy_master.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_master.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_master.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_master.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_master.list': Operation not permitted
+chown: changing ownership of 'build/dummy_master.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-masterfx
+Deploying to /workspace/drumlogue/dummy-masterfx//dummy_master.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-revfx
+
+Linking build/dummy_reverb.drmlgunit
+Stripping build/dummy_reverb.drmlgunit
+Creating build/dummy_reverb.hex
+Creating build/dummy_reverb.bin
+Creating build/dummy_reverb.dmp
+Creating build/dummy_reverb.list
+
+
+Done
+
+   text	   data	    bss	    dec	    hex	filename
+   3595	    344	 192032	 195971	  2fd83	build/dummy_reverb.drmlgunit
+chown: changing ownership of 'build/dummy_reverb.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.list': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-revfx
+Deploying to /workspace/drumlogue/dummy-revfx//dummy_reverb.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-synth
+
+arm-unknown-linux-gnueabihf-g++   build/obj/header.o build/obj/_unit_base.o build/obj/unit.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations   -shared -Wl,-Map=build/dummy_synth.map,--cref  -lm -lc -o build/dummy_synth.drmlgunit
+arm-unknown-linux-gnueabihf-strip build/dummy_synth.drmlgunit
+arm-unknown-linux-gnueabihf-objcopy -O ihex build/dummy_synth.drmlgunit build/dummy_synth.hex
+arm-unknown-linux-gnueabihf-objcopy -O binary build/dummy_synth.drmlgunit build/dummy_synth.bin
+arm-unknown-linux-gnueabihf-objdump -x --syms build/dummy_synth.drmlgunit > build/dummy_synth.dmp
+arm-unknown-linux-gnueabihf-objdump -S build/dummy_synth.drmlgunit > build/dummy_synth.list
+arm-unknown-linux-gnueabihf-size build/dummy_synth.drmlgunit
+   text	   data	    bss	    dec	    hex	filename
+   3267	    316	      8	   3591	    e07	build/dummy_synth.drmlgunit
+chown: changing ownership of 'build/dummy_synth.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.list': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-synth
+Deploying to /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/omnipress
+
+Linking build/omnipress.drmlgunit
+Stripping build/omnipress.drmlgunit
+Creating build/omnipress.hex
+Creating build/omnipress.dmp
+Creating build/omnipress.bin
+Creating build/omnipress.list
+
+   text	   data	    bss	    dec	    hex	filename
+  45187	    524	   2224	  47935	   bb3f	build/omnipress.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build/omnipress.bin': Operation not permitted
+chown: changing ownership of 'build/omnipress.dmp': Operation not permitted
+chown: changing ownership of 'build/omnipress.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/omnipress.hex': Operation not permitted
+chown: changing ownership of 'build/omnipress.list': Operation not permitted
+chown: changing ownership of 'build/omnipress.map': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/omnipress
+Deploying to /workspace/drumlogue/omnipress//omnipress.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/reverb_labirinto
+
+Linking build/neon_labirinto_reverb.drmlgunit
+Stripping build/neon_labirinto_reverb.drmlgunit
+Creating build/neon_labirinto_reverb.hex
+Creating build/neon_labirinto_reverb.bin
+Creating build/neon_labirinto_reverb.dmp
+Creating build/neon_labirinto_reverb.list
+
+   text	   data	    bss	    dec	    hex	filename
+  14665	    368	2167760	2182793	 214e89	build/neon_labirinto_reverb.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.bin': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.dmp': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.hex': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.list': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.map': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/reverb_labirinto
+Deploying to /workspace/drumlogue/reverb_labirinto//neon_labirinto_reverb.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/reverb_light
+
+Linking build/luce_al_neon.drmlgunit
+Stripping build/luce_al_neon.drmlgunit
+Creating build/luce_al_neon.hex
+Creating build/luce_al_neon.bin
+Creating build/luce_al_neon.dmp
+Creating build/luce_al_neon.list
+
+   text	   data	    bss	    dec	    hex	filename
+   9828	    356	1180596	1190780	 122b7c	build/luce_al_neon.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.bin': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.dmp': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.hex': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.list': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.map': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/reverb_light
+Deploying to /workspace/drumlogue/reverb_light//luce_al_neon.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/scruta_astri
+
+Linking build/scruta_astri.drmlgunit
+Stripping build/scruta_astri.drmlgunit
+Creating build/scruta_astri.hex
+Creating build/scruta_astri.bin
+Creating build/scruta_astri.dmp
+Creating build/scruta_astri.list
+
+   text	   data	    bss	    dec	    hex	filename
+ 255715	    768	     24	 256507	  3e9fb	build/scruta_astri.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.bin': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.dmp': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.hex': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.list': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.map': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:292: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/scruta_astri
+Deploying to /workspace/drumlogue/scruta_astri//scruta_astri.drmlgunit
+
+Done
+
+>> Resetting environment
+[31m[drumlogue] [0m~ $ [Kbuild --drumlogue
+>> Building 'drumlogue' projects
+>> Building /workspace/drumlogue/FMpercussion
+
+Linking build/fm_perc_synth.drmlgunit
+Stripping build/fm_perc_synth.drmlgunit
+Creating build/fm_perc_synth.hex
+Creating build/fm_perc_synth.bin
+Creating build/fm_perc_synth.dmp
+Creating build/fm_perc_synth.list
+
+   text	   data	    bss	    dec	    hex	filename
+  36854	    540	   2648	  40042	   9c6a	build/fm_perc_synth.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/fm_perc_synth.bin': Operation not permitted
+chown: changing ownership of 'build/fm_perc_synth.dmp': Operation not permitted
+chown: changing ownership of 'build/fm_perc_synth.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/fm_perc_synth.hex': Operation not permitted
+chown: changing ownership of 'build/fm_perc_synth.list': Operation not permitted
+chown: changing ownership of 'build/fm_perc_synth.map': Operation not permitted
+chown: changing ownership of 'build/lst/fm_presets.lst': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/fm_presets.o': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:292: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/FMpercussion
+Deploying to /workspace/drumlogue/FMpercussion//fm_perc_synth.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/delay_tribal
+
+Linking build/delay_tribal.drmlgunit
+Stripping build/delay_tribal.drmlgunit
+Creating build/delay_tribal.hex
+Creating build/delay_tribal.bin
+Creating build/delay_tribal.dmp
+Creating build/delay_tribal.list
+
+   text	   data	    bss	    dec	    hex	filename
+  10992	    376	   1844	  13212	   339c	build/delay_tribal.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/delay_tribal.bin': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.dmp': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.hex': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.list': Operation not permitted
+chown: changing ownership of 'build/delay_tribal.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/PercussionSpatializer.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/PercussionSpatializer.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/delay_tribal
+Deploying to /workspace/drumlogue/delay_tribal//delay_tribal.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-delfx
+
+Linking build/dummy_delay.drmlgunit
+Stripping build/dummy_delay.drmlgunit
+Creating build/dummy_delay.hex
+Creating build/dummy_delay.bin
+Creating build/dummy_delay.dmp
+Creating build/dummy_delay.list
+
+
+Done
+
+   text	   data	    bss	    dec	    hex	filename
+   3593	    344	 192032	 195969	  2fd81	build/dummy_delay.drmlgunit
+chown: changing ownership of 'build/dummy_delay.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.list': Operation not permitted
+chown: changing ownership of 'build/dummy_delay.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-delfx
+Deploying to /workspace/drumlogue/dummy-delfx//dummy_delay.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-masterfx
+
+Linking build/dummy_master.drmlgunit
+Stripping build/dummy_master.drmlgunit
+Creating build/dummy_master.hex
+Creating build/dummy_master.bin
+Creating build/dummy_master.dmp
+Creating build/dummy_master.list
+
+   text	   data	    bss	    dec	    hex	filename
+   3587	    344	     12	   3943	    f67	build/dummy_master.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/dummy_master.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_master.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_master.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_master.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_master.list': Operation not permitted
+chown: changing ownership of 'build/dummy_master.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-masterfx
+Deploying to /workspace/drumlogue/dummy-masterfx//dummy_master.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-revfx
+
+Linking build/dummy_reverb.drmlgunit
+Stripping build/dummy_reverb.drmlgunit
+Creating build/dummy_reverb.hex
+Creating build/dummy_reverb.bin
+Creating build/dummy_reverb.dmp
+Creating build/dummy_reverb.list
+
+
+Done
+
+   text	   data	    bss	    dec	    hex	filename
+   3595	    344	 192032	 195971	  2fd83	build/dummy_reverb.drmlgunit
+chown: changing ownership of 'build/dummy_reverb.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.list': Operation not permitted
+chown: changing ownership of 'build/dummy_reverb.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-revfx
+Deploying to /workspace/drumlogue/dummy-revfx//dummy_reverb.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/dummy-synth
+
+arm-unknown-linux-gnueabihf-g++   build/obj/header.o build/obj/_unit_base.o build/obj/unit.o -march=armv7-a -mtune=cortex-a7 -marm -Os -flto -mfloat-abi=hard -mfpu=neon-vfpv4 -mvectorize-with-neon-quad -ftree-vectorize -ftree-vectorizer-verbose=4 -funsafe-math-optimizations   -shared -Wl,-Map=build/dummy_synth.map,--cref  -lm -lc -o build/dummy_synth.drmlgunit
+arm-unknown-linux-gnueabihf-strip build/dummy_synth.drmlgunit
+arm-unknown-linux-gnueabihf-objcopy -O ihex build/dummy_synth.drmlgunit build/dummy_synth.hex
+arm-unknown-linux-gnueabihf-objcopy -O binary build/dummy_synth.drmlgunit build/dummy_synth.bin
+arm-unknown-linux-gnueabihf-objdump -x --syms build/dummy_synth.drmlgunit > build/dummy_synth.dmp
+arm-unknown-linux-gnueabihf-objdump -S build/dummy_synth.drmlgunit > build/dummy_synth.list
+arm-unknown-linux-gnueabihf-size build/dummy_synth.drmlgunit
+   text	   data	    bss	    dec	    hex	filename
+   3267	    316	      8	   3591	    e07	build/dummy_synth.drmlgunit
+chown: changing ownership of 'build/dummy_synth.bin': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.dmp': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.hex': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.list': Operation not permitted
+chown: changing ownership of 'build/dummy_synth.map': Operation not permitted
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/dummy-synth
+Deploying to /workspace/drumlogue/dummy-synth//dummy_synth.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/omnipress
+
+Linking build/omnipress.drmlgunit
+Stripping build/omnipress.drmlgunit
+Creating build/omnipress.hex
+Creating build/omnipress.bin
+Creating build/omnipress.dmp
+Creating build/omnipress.list
+
+   text	   data	    bss	    dec	    hex	filename
+  45187	    524	   2224	  47935	   bb3f	build/omnipress.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build/omnipress.bin': Operation not permitted
+chown: changing ownership of 'build/omnipress.dmp': Operation not permitted
+chown: changing ownership of 'build/omnipress.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/omnipress.hex': Operation not permitted
+chown: changing ownership of 'build/omnipress.list': Operation not permitted
+chown: changing ownership of 'build/omnipress.map': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/omnipress
+Deploying to /workspace/drumlogue/omnipress//omnipress.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/reverb_labirinto
+
+Linking build/neon_labirinto_reverb.drmlgunit
+Stripping build/neon_labirinto_reverb.drmlgunit
+Creating build/neon_labirinto_reverb.hex
+Creating build/neon_labirinto_reverb.bin
+Creating build/neon_labirinto_reverb.dmp
+Creating build/neon_labirinto_reverb.list
+
+   text	   data	    bss	    dec	    hex	filename
+  14665	    368	2167760	2182793	 214e89	build/neon_labirinto_reverb.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.bin': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.dmp': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.hex': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.list': Operation not permitted
+chown: changing ownership of 'build/neon_labirinto_reverb.map': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/reverb_labirinto
+Deploying to /workspace/drumlogue/reverb_labirinto//neon_labirinto_reverb.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/reverb_light
+Compiling unit.cc
+In file included from [01m[Kfdn_engine.h:4:0[m[K,
+                 from [01m[Kunit.cc:16[m[K:
+[01m[K./float_math.h:[m[K In function '[01m[Kfloat fasterSqrt_15bits(float)[m[K':
+[01m[K./float_math.h:956:23:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+ {   int i = *(int*) & [01;35m[Kx[m[K;
+                       [01;35m[K^[m[K
+[01m[K./float_math.h:958:27:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+     float y = *(float*) & [01;35m[Ki[m[K;
+                           [01;35m[K^[m[K
+[01m[K./float_math.h:[m[K In function '[01m[Kfloat Q_rsqrt(float)[m[K':
+[01m[K./float_math.h:1034:21:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  i  = * ( long * ) &[01;35m[Ky[m[K;                       // evil floating point bit level hacking
+                     [01;35m[K^[m[K
+[01m[K./float_math.h:1036:22:[m[K [01;35m[Kwarning: [m[Kdereferencing type-punned pointer will break strict-aliasing rules [[01;35m[K-Wstrict-aliasing[m[K]
+  y  = * ( float * ) &[01;35m[Ki[m[K;
+                      [01;35m[K^[m[K
+
+Linking build/luce_al_neon.drmlgunit
+Stripping build/luce_al_neon.drmlgunit
+Creating build/luce_al_neon.hex
+Creating build/luce_al_neon.bin
+Creating build/luce_al_neon.dmp
+Creating build/luce_al_neon.list
+
+   text	   data	    bss	    dec	    hex	filename
+   9828	    356	1180596	1190780	 122b7c	build/luce_al_neon.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.bin': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.dmp': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.hex': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.list': Operation not permitted
+chown: changing ownership of 'build/luce_al_neon.map': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:291: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/reverb_light
+Deploying to /workspace/drumlogue/reverb_light//luce_al_neon.drmlgunit
+
+Done
+
+>> Building /workspace/drumlogue/scruta_astri
+
+Linking build/scruta_astri.drmlgunit
+Stripping build/scruta_astri.drmlgunit
+Creating build/scruta_astri.hex
+Creating build/scruta_astri.bin
+Creating build/scruta_astri.dmp
+Creating build/scruta_astri.list
+
+   text	   data	    bss	    dec	    hex	filename
+ 255715	    768	     24	 256507	  3e9fb	build/scruta_astri.drmlgunit
+
+Done
+
+chown: changing ownership of 'build/lst/header.lst': Operation not permitted
+chown: changing ownership of 'build/lst/unit.lst': Operation not permitted
+chown: changing ownership of 'build/lst/_unit_base.lst': Operation not permitted
+chown: changing ownership of 'build/lst': Operation not permitted
+chown: changing ownership of 'build/obj/header.o': Operation not permitted
+chown: changing ownership of 'build/obj/unit.o': Operation not permitted
+chown: changing ownership of 'build/obj/_unit_base.o': Operation not permitted
+chown: changing ownership of 'build/obj': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.bin': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.dmp': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.drmlgunit': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.hex': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.list': Operation not permitted
+chown: changing ownership of 'build/scruta_astri.map': Operation not permitted
+chown: changing ownership of 'build': Operation not permitted
+make: *** [Makefile:292: POST_MAKE_ALL_RULE_HOOK] Error 1
+>> Installing /workspace/drumlogue/scruta_astri
+Deploying to /workspace/drumlogue/scruta_astri//scruta_astri.drmlgunit
+
+Done
+
+>> Resetting environment
+[31m[drumlogue] [0m~ $ [Kfind . -name "*.drmlgunit" -exec cp {} "builds" \;
+[31m[drumlogue] [0m~ $ [Ktime="2026-04-30T18:37:40+02:00" level=error msg="error waiting for container: unexpected EOF"

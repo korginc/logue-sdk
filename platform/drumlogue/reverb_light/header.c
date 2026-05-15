@@ -15,8 +15,8 @@ const __unit_header unit_header_t unit_header = {
     .unit_id     = 0x00020000U,
     .version     = 0x00010000U,   // v1.0.0
     .name        = "LuceAlNeon",
-    .num_presets = 4,
-    .num_params  = 15,
+    .num_presets = 0,
+    .num_params  = 14,
     .params = {
         // Page 1
 
@@ -46,24 +46,24 @@ const __unit_header unit_header_t unit_header = {
         { 0, 100, 30, 30, k_unit_param_type_percent, 0, 0, 0, {"BASS"} },
         // ID 10: CLRQ  tone color shift  -100%-100%
         { -100, 100, 10, 10, k_unit_param_type_percent, 0, 0, 0, {"CLRQ"} },
+        // ID 11: RATE  glow LFO speed  0%-100% (mapped to 0.05-4.0 Hz exponential)
+        { 0, 100, 0, 20, k_unit_param_type_percent, 0, 0, 0, {"RATE"} },
 
         // Page 4
-        // ID 11: MIX  global wet/dry  0%-100%
-        { 0, 100, 0, 50, k_unit_param_type_percent, 0, 0, 0, {"MIX"} },
-        // ID 12: RATE  glow LFO speed  0%-100% (mapped to 0.05-4.0 Hz exponential)
-        { 0, 100, 0, 20, k_unit_param_type_percent, 0, 0, 0, {"RATE"} },
-        // ID 13: IRID  iridiscence (saturated optical halo)  0%-100%
+        // ID 12: IRID  iridiscence (saturated optical halo)  0%-100%
         { 0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"IRID"} },
-        // ID 14: WDTH  stereo width  0%-100% (0=mono, 50=unity, 100=extra wide)
+        // ID 13: WDTH  stereo width  0%-100% (0=mono, 50=unity, 100=extra wide)
         { 0, 100, 0, 50, k_unit_param_type_percent, 0, 0, 0, {"WDTH"} },
 
-        // Pages 5-6: blank
+        // Pages 4-6: blank padding
+        { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
+        { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
+
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
 
-        { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },

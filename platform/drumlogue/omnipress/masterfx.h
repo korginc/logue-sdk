@@ -143,6 +143,9 @@ public:
         multiband_init(&multiband_, samplerate_);
         distressor_reset(&distressor_, samplerate_);
         update_opto_coeff(&distressor_, release_coeff_);
+        // Sync distressor envelope detector to current user attack/release so all
+        // three modes have the same detector timing and produce matching output levels.
+        envelope_set_attack_release(&distressor_.distressor_env, attack_ms_, release_ms_);
         overlord_init(&overlord_, samplerate_);
         smoothing_init(&smoother_, samplerate_);
         envelope_detector_init(&envelope_, samplerate_);
@@ -212,13 +215,18 @@ public:
             mixed.val[0] = vmulq_f32(mixed.val[0], makeup_lin);
             mixed.val[1] = vmulq_f32(mixed.val[1], makeup_lin);
 
-            // Output limiter: hard clip to ±1.0 to prevent DAC overflow.
-            // The compressor should keep levels below this under normal use;
-            // this is a safety net for extreme makeup gain settings.
-            const float32x4_t clip_pos = vdupq_n_f32(1.0f);
-            const float32x4_t clip_neg = vdupq_n_f32(-1.0f);
-            mixed.val[0] = vmaxq_f32(vminq_f32(mixed.val[0], clip_pos), clip_neg);
-            mixed.val[1] = vmaxq_f32(vminq_f32(mixed.val[1], clip_pos), clip_neg);
+            // Output limiter: soft saturation x/(1+|x|) — bounded (-1,1), no discontinuities.
+            {
+                const float32x4_t one = vdupq_n_f32(1.0f);
+                float32x4_t denom_l = vaddq_f32(one, vabsq_f32(mixed.val[0]));
+                float32x4_t rcp_l   = vrecpeq_f32(denom_l);
+                rcp_l = vmulq_f32(vrecpsq_f32(denom_l, rcp_l), rcp_l);
+                float32x4_t denom_r = vaddq_f32(one, vabsq_f32(mixed.val[1]));
+                float32x4_t rcp_r   = vrecpeq_f32(denom_r);
+                rcp_r = vmulq_f32(vrecpsq_f32(denom_r, rcp_r), rcp_r);
+                mixed.val[0] = vmulq_f32(mixed.val[0], rcp_l);
+                mixed.val[1] = vmulq_f32(mixed.val[1], rcp_r);
+            }
 
             // Store results
             vst2q_f32(out_p, mixed);
@@ -428,14 +436,21 @@ private:
             case DIST_MODE_DIST2:
             case DIST_MODE_DIST3:
             case DIST_MODE_BOTH: {
-                // Apply harmonics BEFORE compression: x^2 and x^3 terms are
-                // imperceptibly small on the already-attenuated compressed signal.
-                // Distorting the full-level input then compressing gives audible
-                // harmonic content, emulating "drive into compressor" signal chain.
-                float32x4_t harm_l = generate_harmonics(&distressor_, main_l, distressor_.dist_mode);
-                float32x4_t harm_r = generate_harmonics(&distressor_, main_r, distressor_.dist_mode);
-                *out_l = vmulq_f32(harm_l, gain_lin);
-                *out_r = vmulq_f32(harm_r, gain_lin);
+                // Apply saturation to the COMPRESSED signal (not raw input).
+                // A base drive of 2x ensures audible harmonic content at all drive
+                // settings; DRIVE knob adds up to 4x on top (2..6x total).
+                // makeup = 1.8 / sat_drive compensates for pre-gain + the ~0.8 gain
+                // loss that the saturator introduces at typical operating levels.
+                float sat_drive = 2.0f + drive_ * 4.0f;
+                float makeup    = 1.8f / sat_drive;
+                float32x4_t drv = vdupq_n_f32(sat_drive);
+                float32x4_t mkp = vdupq_n_f32(makeup);
+                *out_l = vmulq_f32(generate_harmonics(&distressor_,
+                                                      vmulq_f32(comp_l, drv),
+                                                      distressor_.dist_mode), mkp);
+                *out_r = vmulq_f32(generate_harmonics(&distressor_,
+                                                      vmulq_f32(comp_r, drv),
+                                                      distressor_.dist_mode), mkp);
                 break;
             }
             case DIST_MODE_CLEAN:
@@ -472,6 +487,7 @@ public:
                 attack_ms_ = value * 0.1f;
                 attack_coeff_ = fasterexpf(-1.0f / (attack_ms_ * 0.001f * samplerate_));
                 envelope_set_attack_release(&envelope_, attack_ms_, release_ms_);
+                envelope_set_attack_release(&distressor_.distressor_env, attack_ms_, release_ms_);
                 smoothing_set_times(&smoother_, attack_ms_, release_ms_);
                 break;
 
@@ -479,6 +495,7 @@ public:
                 release_ms_ = static_cast<float>(value);
                 release_coeff_ = fasterexpf(-1.0f / (release_ms_ * 0.001f * samplerate_));
                 envelope_set_attack_release(&envelope_, attack_ms_, release_ms_);
+                envelope_set_attack_release(&distressor_.distressor_env, attack_ms_, release_ms_);
                 smoothing_set_times(&smoother_, attack_ms_, release_ms_);
                 update_opto_coeff(&distressor_, release_coeff_);
                 break;

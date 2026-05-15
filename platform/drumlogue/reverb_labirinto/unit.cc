@@ -34,8 +34,6 @@ static NeonAdvancedLabirinto* s_reverb = &s_reverb_instance;
 static unit_runtime_desc_t s_runtime_desc;
 static bool s_initialized = false;
 
-static uint8_t s_current_preset = 0;
-
 // ============================================================================
 // Static Buffers (Safe - allocated in BSS, not on stack)
 // ============================================================================

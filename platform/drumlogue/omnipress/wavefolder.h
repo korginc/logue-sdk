@@ -158,39 +158,34 @@ fast_inline float32x4_t sine_folder(float32x4_t x) {
     return vsubq_f32(angle, vmulq_f32(a3, vdupq_n_f32(1.0f/6.0f)));
 }
 
-/**
- * FIXED: Sub-octave generator with proper PRNG
- * Uses deterministic Xorshift PRNG instead of rand()
- */
-fast_inline float32x4_t suboctave_process(wavefolder_t* wf, float32x4_t in) {
-    // Detect zero crossing
-    uint32x4_t last_neg = vcltq_f32(wf->last_input, vdupq_n_f32(0.0f));
-    uint32x4_t curr_pos = vcgeq_f32(in, vdupq_n_f32(0.0f));
-    uint32x4_t cross = vandq_u32(last_neg, curr_pos);
+// Sub-octave generator — sequential scalar processing for correct zero-crossing detection.
+// The old NEON version used float32x4_t last_input/sub_phase where each lane had its
+// own independent history, causing 3 of the 4 lanes to detect wrong zero crossings
+// (comparing sample n-4,n-3,n-2 against current instead of n-1) → erratic noise.
+fast_inline float32x4_t suboctave_process(wavefolder_t* wf, float32x4_t in_v) {
+    float buf_in[4], buf_out[4];
+    vst1q_f32(buf_in, in_v);
 
-    // Increment phase on zero crossing (half frequency)
-    // Add a small random variation using PRNG for organic feel
-    float32_t random = (prng_simple_next(&wf->prng) & 0xFFFF) / 65536.0f;
-    float32x4_t random_offset = vdupq_n_f32(random * 0.1f);  // 10% max variation
+    // Extract scalar state from lane 0 — all lanes are now kept identical.
+    float last  = vgetq_lane_f32(wf->last_input, 0);
+    float phase = vgetq_lane_f32(wf->sub_phase,  0);
 
-    wf->sub_phase = vbslq_f32(cross,
-                              vaddq_f32(wf->sub_phase, vaddq_f32(vdupq_n_f32(0.5f), random_offset)),
-                              wf->sub_phase);
+    for (int i = 0; i < 4; ++i) {
+        const float x = buf_in[i];
+        if (last < 0.0f && x >= 0.0f) {
+            // Positive zero crossing: advance sub-octave by a half cycle.
+            // 3% jitter gives organic feel without audible pitch noise.
+            float rnd = (float)(prng_simple_next(&wf->prng) & 0x3FFF) / 16384.0f;
+            phase += 0.5f + rnd * 0.03f;
+            if (phase >= 1.0f) phase -= 1.0f;
+        }
+        buf_out[i] = (phase < 0.5f) ? 1.0f : -1.0f;
+        last = x;
+    }
 
-    // Wrap phase
-    uint32x4_t wrap = vcgeq_f32(wf->sub_phase, vdupq_n_f32(1.0f));
-    wf->sub_phase = vbslq_f32(wrap,
-                              vsubq_f32(wf->sub_phase, vdupq_n_f32(1.0f)),
-                              wf->sub_phase);
-
-    // Square wave
-    uint32x4_t square_high = vcltq_f32(wf->sub_phase, vdupq_n_f32(0.5f));
-    float32x4_t square = vbslq_f32(square_high,
-                                   vdupq_n_f32(1.0f),
-                                   vdupq_n_f32(-1.0f));
-
-    wf->last_input = in;
-    return square;
+    wf->last_input = vdupq_n_f32(last);
+    wf->sub_phase  = vdupq_n_f32(phase);
+    return vld1q_f32(buf_out);
 }
 
 /**
@@ -233,10 +228,15 @@ fast_inline float32x4x2_t wavefolder_process(wavefolder_t* wf,
             out.val[1] = sine_folder(driven_r);
             break;
 
-        case DRIVE_MODE_SUBOCTAVE:
-            out.val[0] = suboctave_process(wf, driven_l);
-            out.val[1] = suboctave_process(wf, driven_r);
+        case DRIVE_MODE_SUBOCTAVE: {
+            float32x4_t sub_l = suboctave_process(wf, driven_l);
+            float32x4_t sub_r = suboctave_process(wf, driven_r);
+            // Scale the ±1 square wave by the pre-drive input amplitude so the
+            // sub-octave tracks signal dynamics instead of always blasting full scale.
+            out.val[0] = vmulq_f32(sub_l, vabsq_f32(in_l));
+            out.val[1] = vmulq_f32(sub_r, vabsq_f32(in_r));
             break;
+        }
 
         default:
             out.val[0] = driven_l;

@@ -165,7 +165,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
     // now even low sweep have a click
     float32x4_t click_boost = vmulq_f32(env8,
                                         vaddq_f32(
-                                            vmulq_n_f32(kick->sweep_depth, 3.0f),
+                                            vmulq_n_f32(kick->sweep_depth, 4.0f),
                                             vdupq_n_f32(1.0f)));
     index = vaddq_f32(vaddq_f32(index, lfo_index_add), click_boost);
 
@@ -183,7 +183,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
         vmulq_f32(neon_sin(modulated_phase), attack_gain));
 
     // Output
-    output = vmulq_f32(output, envelope);
+    output = vmulq_f32(output, shape_factor);
     return vbslq_f32(active_mask, output, vdupq_n_f32(0.0f));
 }
 

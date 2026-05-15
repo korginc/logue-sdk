@@ -46,10 +46,10 @@ static bool s_initialized = false;
 // Static Buffers (Safe - allocated in BSS, not on stack)
 // ============================================================================
 
-static float s_inL[kMaxFrames];
-static float s_inR[kMaxFrames];
-static float s_outL[kMaxFrames];
-static float s_outR[kMaxFrames];
+// static float s_inL[kMaxFrames];
+// static float s_inR[kMaxFrames];
+// static float s_outL[kMaxFrames];
+// static float s_outR[kMaxFrames];
 
 // ============================================================================
 // Callback Implementations
@@ -110,7 +110,7 @@ __unit_callback void unit_render(const float* in, float* out, uint32_t frames) {
     // ========================================================================
     // Process through reverb engine (expects deinterleaved buffers)
     // ========================================================================
-    s_fdn_engine.processBlock(in, out, frames);
+    s_fdn_engine.processBlock(in, out, frames * 2);
 }
 
 __unit_callback void unit_set_param_value(uint8_t id, int32_t value) {

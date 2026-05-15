@@ -22,9 +22,8 @@
  * --------------------------------------------------------------------------- */
 
 typedef struct {
-    float32x4_t z1;           // Delay elements for 4 parallel channels
-    float32x4_t z2;
-    float b0, b1, b2, a1, a2; // Biquad coefficients (shared)
+    float z1, z2;              // Scalar biquad state (sequential IIR feedback)
+    float b0, b1, b2, a1, a2; // Biquad coefficients
     float cutoff_hz;
     float sample_rate;
 } sidechain_hpf_t;
@@ -37,8 +36,8 @@ typedef struct {
 fast_inline void sidechain_hpf_init(sidechain_hpf_t* f, float cutoff, float sr) {
     f->cutoff_hz = cutoff;
     f->sample_rate = sr;
-    f->z1 = vdupq_n_f32(0.0f);
-    f->z2 = vdupq_n_f32(0.0f);
+    f->z1 = 0.0f;
+    f->z2 = 0.0f;
 
     // Digital angular frequency for coefficient calculation
     float w0 = 2.0f * M_PI * cutoff / sr;
@@ -65,36 +64,22 @@ fast_inline void sidechain_hpf_init(sidechain_hpf_t* f, float cutoff, float sr) 
     f->a2 /= a0;
 }
 
-/**
- * Process 4 samples through sidechain HPF
- * Uses Transposed Direct Form II for efficiency and stability
- *
- * Transposed Direct Form II:
- *   y[n] = b0 * x[n] + z1[n]
- *   z1[n+1] = b1 * x[n] - a1 * y[n] + z2[n]
- *   z2[n+1] = b2 * x[n] - a2 * y[n]
- */
+// Process 4 consecutive mono samples through the sidechain HPF.
+// Scalar state guarantees correct IIR feedback: each y[n] updates z1/z2 before y[n+1].
 fast_inline float32x4_t sidechain_hpf_process(sidechain_hpf_t* f, float32x4_t in) {
-    // Load coefficients (same for all 4 channels)
-    float32x4_t b0 = vdupq_n_f32(f->b0);
-    float32x4_t b1 = vdupq_n_f32(f->b1);
-    float32x4_t b2 = vdupq_n_f32(f->b2);
-    float32x4_t a1 = vdupq_n_f32(f->a1);
-    float32x4_t a2 = vdupq_n_f32(f->a2);
-
-    // Transposed Direct Form II
-    // y[n] = b0 * x[n] + z1[n]
-    float32x4_t out = vmlaq_f32(f->z1, in, b0);
-
-    // Update states for next sample
-    // z1_new = b1 * x[n] - a1 * y[n] + z2_old
-    f->z1 = vmlaq_f32(f->z2, in, b1);
-    f->z1 = vmlsq_f32(f->z1, out, a1);
-
-    // z2_new = b2 * x[n] - a2 * y[n]
-    f->z2 = vsubq_f32(vmulq_f32(in, b2), vmulq_f32(out, a2));
-
-    return out;
+    float buf[4];
+    vst1q_f32(buf, in);
+    float lz1 = f->z1, lz2 = f->z2;
+    const float b0 = f->b0, b1 = f->b1, b2 = f->b2, a1 = f->a1, a2 = f->a2;
+    for (int i = 0; i < 4; ++i) {
+        const float x = buf[i];
+        const float y = b0 * x + lz1;
+        lz1 = b1 * x - a1 * y + lz2;
+        lz2 = b2 * x - a2 * y;
+        buf[i] = y;
+    }
+    f->z1 = lz1; f->z2 = lz2;
+    return vld1q_f32(buf);
 }
 
 /**
@@ -102,7 +87,20 @@ fast_inline float32x4_t sidechain_hpf_process(sidechain_hpf_t* f, float32x4_t in
  */
 fast_inline void sidechain_hpf_set_cutoff(sidechain_hpf_t* f, float cutoff) {
     if (fabsf(cutoff - f->cutoff_hz) > 1.0f) {
-        sidechain_hpf_init(f, cutoff, f->sample_rate);
+        // Recompute coefficients only; preserve filter state to avoid click.
+        float sr = f->sample_rate;
+        f->cutoff_hz = cutoff;
+        float w0 = 2.0f * M_PI * cutoff / sr;
+        float cos_w0 = cosf(w0);
+        float sin_w0 = sinf(w0);
+        float Q = 0.5f;
+        float alpha = sin_w0 / (2.0f * Q);
+        float a0 = 1.0f + alpha;
+        f->b0 = (1.0f + cos_w0) * 0.5f / a0;
+        f->b1 = -(1.0f + cos_w0) / a0;
+        f->b2 = f->b0;
+        f->a1 = -2.0f * cos_w0 / a0;
+        f->a2 = (1.0f - alpha) / a0;
     }
 }
 
@@ -382,25 +380,27 @@ fast_inline void smoothing_set_times(smoothing_t* sm,
  * 5. OPERATION OVERLORD DISTORTION
  * --------------------------------------------------------------------------- */
 
- typedef struct {
-    float32x4_t z1;
-    float32x4_t z2;
+// Biquad state with scalar IIR history and cached coefficients.
+// Coefficients are recomputed only when freq/gain_db change (not every block).
+typedef struct {
+    float z1, z2;              // Scalar state for correct sequential IIR feedback
+    float b0, b1, b2, a1, a2; // Cached normalized coefficients
+    float last_freq;
+    float last_gain_db;
+    int   last_low_shelf;
 } biquad_state_t;
 
 fast_inline void biquad_init_state(biquad_state_t* state) {
-    state->z1 = vdupq_n_f32(0.0f);
-    state->z2 = vdupq_n_f32(0.0f);
+    state->z1 = 0.0f; state->z2 = 0.0f;
+    state->b0 = state->b1 = state->b2 = state->a1 = state->a2 = 0.0f;
+    state->last_freq = -1.0f;
+    state->last_gain_db = -999.0f;
+    state->last_low_shelf = -1;
 }
 
-/**
- * Shelving filter using Audio EQ Cookbook formulas (RBJ).
- * @param in        Input sample vector (4 NEON lanes = 4 sequential samples, mono)
- * @param state     Biquad state (per-channel, must not be shared between L and R)
- * @param freq      Shelf corner frequency (Hz)
- * @param gain_db   Gain at shelf (dB); 0 dB returns input unchanged
- * @param low_shelf 1 for low shelf, 0 for high shelf
- * @param sr        Sample rate
- */
+// Shelving filter — Audio EQ Cookbook (RBJ).
+// Coefficients are cached in state and only recomputed when freq or gain_db change.
+// 4 samples processed sequentially for correct IIR feedback.
 fast_inline float32x4_t shelving_filter(float32x4_t in,
                                         biquad_state_t* state,
                                         float freq,
@@ -409,47 +409,59 @@ fast_inline float32x4_t shelving_filter(float32x4_t in,
                                         float sr) {
     if (fabsf(gain_db) < 0.01f) return in;
 
-    // A = linear amplitude ratio = 10^(dBgain/40), per Audio EQ Cookbook
-    float A      = fasterpowf(10.0f, gain_db / 40.0f);
-    float sqrtA  = fasterSqrt(A);
-    float w0     = 2.0f * M_PI * freq / sr;
-    float cos_w0 = fastercosfullf(w0);
-    float sin_w0 = fastersinfullf(w0);
+    // Recompute coefficients only when parameters actually change.
+    if (freq != state->last_freq || gain_db != state->last_gain_db ||
+        low_shelf != state->last_low_shelf) {
 
-    // alpha with shelf slope S=1: sin(w0)/sqrt(2), gain-independent (no div-by-zero)
-    float alpha = sin_w0 * 0.70711f;  // sin(w0) / sqrt(2)
+        float A      = fasterpowf(10.0f, gain_db / 40.0f);
+        float sqrtA  = fasterSqrt(A);
+        float w0     = 2.0f * M_PI * freq / sr;
+        float cos_w0 = fastercosfullf(w0);
+        float sin_w0 = fastersinfullf(w0);
+        float alpha  = sin_w0 * 0.70711f;   // sin(w0) / sqrt(2)
 
-    float b0, b1, b2, a0, a1, a2;
-
-    if (low_shelf) {
-        // Audio EQ Cookbook low-shelf
-        b0 =    A * ((A+1) - (A-1)*cos_w0 + 2.0f*sqrtA*alpha);
-        b1 =  2*A * ((A-1) - (A+1)*cos_w0                   );
-        b2 =    A * ((A+1) - (A-1)*cos_w0 - 2.0f*sqrtA*alpha);
-        a0 =        ((A+1) + (A-1)*cos_w0 + 2.0f*sqrtA*alpha);
-        a1 =  -2  * ((A-1) + (A+1)*cos_w0                   );
-        a2 =        ((A+1) + (A-1)*cos_w0 - 2.0f*sqrtA*alpha);
-    } else {
-        // Audio EQ Cookbook high-shelf
-        b0 =    A * ((A+1) + (A-1)*cos_w0 + 2.0f*sqrtA*alpha);
-        b1 = -2*A * ((A-1) + (A+1)*cos_w0                   );
-        b2 =    A * ((A+1) + (A-1)*cos_w0 - 2.0f*sqrtA*alpha);
-        a0 =        ((A+1) - (A-1)*cos_w0 + 2.0f*sqrtA*alpha);
-        a1 =   2  * ((A-1) - (A+1)*cos_w0                   );
-        a2 =        ((A+1) - (A-1)*cos_w0 - 2.0f*sqrtA*alpha);
+        float b0, b1, b2, a0, a1, a2;
+        if (low_shelf) {
+            b0 =    A * ((A+1) - (A-1)*cos_w0 + 2.0f*sqrtA*alpha);
+            b1 =  2*A * ((A-1) - (A+1)*cos_w0);
+            b2 =    A * ((A+1) - (A-1)*cos_w0 - 2.0f*sqrtA*alpha);
+            a0 =        ((A+1) + (A-1)*cos_w0 + 2.0f*sqrtA*alpha);
+            a1 =  -2  * ((A-1) + (A+1)*cos_w0);
+            a2 =        ((A+1) + (A-1)*cos_w0 - 2.0f*sqrtA*alpha);
+        } else {
+            b0 =    A * ((A+1) + (A-1)*cos_w0 + 2.0f*sqrtA*alpha);
+            b1 = -2*A * ((A-1) + (A+1)*cos_w0);
+            b2 =    A * ((A+1) + (A-1)*cos_w0 - 2.0f*sqrtA*alpha);
+            a0 =        ((A+1) - (A-1)*cos_w0 + 2.0f*sqrtA*alpha);
+            a1 =   2  * ((A-1) - (A+1)*cos_w0);
+            a2 =        ((A+1) - (A-1)*cos_w0 - 2.0f*sqrtA*alpha);
+        }
+        float inv_a0 = 1.0f / a0;
+        state->b0 = b0 * inv_a0;
+        state->b1 = b1 * inv_a0;
+        state->b2 = b2 * inv_a0;
+        state->a1 = a1 * inv_a0;
+        state->a2 = a2 * inv_a0;
+        state->last_freq      = freq;
+        state->last_gain_db   = gain_db;
+        state->last_low_shelf = low_shelf;
     }
 
-    float inv_a0 = 1.0f / a0;
-    b0 *= inv_a0; b1 *= inv_a0; b2 *= inv_a0;
-    a1 *= inv_a0; a2 *= inv_a0;
-
-    // Transposed Direct Form II
-    float32x4_t y = vmlaq_f32(state->z1, in, vdupq_n_f32(b0));
-    state->z1 = vmlaq_f32(state->z2, in, vdupq_n_f32(b1));
-    state->z1 = vmlsq_f32(state->z1, y, vdupq_n_f32(a1));
-    state->z2 = vsubq_f32(vmulq_f32(in, vdupq_n_f32(b2)), vmulq_f32(y, vdupq_n_f32(a2)));
-
-    return y;
+    // Sequential scalar IIR — correct feedback chain across all 4 samples.
+    float buf[4];
+    vst1q_f32(buf, in);
+    float lz1 = state->z1, lz2 = state->z2;
+    const float b0 = state->b0, b1 = state->b1, b2 = state->b2;
+    const float a1 = state->a1, a2 = state->a2;
+    for (int i = 0; i < 4; ++i) {
+        const float x = buf[i];
+        const float y = b0 * x + lz1;
+        lz1 = b1 * x - a1 * y + lz2;
+        lz2 = b2 * x - a2 * y;
+        buf[i] = y;
+    }
+    state->z1 = lz1; state->z2 = lz2;
+    return vld1q_f32(buf);
 }
 
 // High-shelf convenience wrapper

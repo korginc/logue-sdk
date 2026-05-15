@@ -196,7 +196,7 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
     float32x4_t index =
         vmulq_f32(transient,
                   vaddq_f32(vdupq_n_f32(1.0f),
-                            vmulq_n_f32(snare->body_resonance, 5.0f)));
+                            vmulq_n_f32(pitch_env, 5.0f)));
     index = vaddq_f32(index, lfo_index_add); // Add LFO index mod
     // 4.1 Generate sine waves
     float32x4_t modulator = neon_sin(snare->modulator_phase);

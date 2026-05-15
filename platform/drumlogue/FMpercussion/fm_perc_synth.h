@@ -170,7 +170,7 @@ fast_inline void apply_resonant_morph(resonant_synth_t * res, float morph, uint8
   switch (mode) {
     case 0:  // LowPass - morph controls cutoff frequency
     {
-      float fc = 50.0f + morph * 7950.0f;  // 50-8000 Hz
+      float fc = 50.0f + morph * 15950.0f;  // 50-16000 Hz, as morph is 0..1
       resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
       resonant_synth_set_resonance(res, all_voices, 50.0f);  // Fixed resonance
     } break;
@@ -185,7 +185,7 @@ fast_inline void apply_resonant_morph(resonant_synth_t * res, float morph, uint8
 
     case 2:  // HighPass - morph controls cutoff with inverse curve
     {
-      float fc = 8000.0f - morph * 7950.0f;  // 8000-50 Hz (inverse)
+      float fc = 16000.0f - morph * 15950.0f;  // 16000-50 Hz (inverse)
       resonant_synth_set_center(res, all_voices, vdupq_n_f32(fc));
       resonant_synth_set_resonance(res, all_voices, 30.0f);
     } break;

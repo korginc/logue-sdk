@@ -234,16 +234,16 @@ static void test_fixed_boundary_values() {
 /* =========================================================================
  * Test 17: Multi-knob scenario — three rapid parameter events
  *
- * Simulates: user tweaks VIBR, then COMP, then PILLAR in quick succession.
+ * Simulates: user tweaks VIBR, then DFSN, then PILLAR in quick succession.
  * Each triggers updateModRate().  With the fix, all three should land on
  * exactly the same final modRate.
  * ====================================================================== */
 static void test_multi_knob_scenario() {
-    printf("\n=== Test 17: Multi-knob scenario (VIBR + COMP + PILLAR) ===\n");
+    printf("\n=== Test 17: Multi-knob scenario (VIBR + DFSN + PILLAR) ===\n");
 
     /* State snapshot before the three events */
     float lfoSpeed = 1.5f;    /* VIBR=15 → value*0.1 = 1.5 Hz */
-    float diffusion = 0.7f;   /* COMP=700/1000 = 0.7 */
+    float diffusion = 0.7f;   /* DFSN=700/1000 = 0.7 */
     int   pillar    = 3;      /* full FDN → pillar multiplier = 0.1 */
 
     /* Pillar multipliers matching NeonAdvancedLabirinto.h setPillar() */
@@ -259,7 +259,7 @@ static void test_multi_knob_scenario() {
     modRate = updateModRate_fixed(lfoSpeed, modDepth);
     float after_vibr = modRate;
 
-    /* Event 2: COMP knob → setDiffusion → setModDepth → updateModRate */
+    /* Event 2: DFSN knob → setDiffusion → setModDepth → updateModRate */
     modRate = updateModRate_fixed(lfoSpeed, modDepth);
     float after_comp = modRate;
 
@@ -268,11 +268,11 @@ static void test_multi_knob_scenario() {
     float after_pillar = modRate;
 
     printf("  modRate after VIBR  event: %.6f\n", after_vibr);
-    printf("  modRate after COMP  event: %.6f\n", after_comp);
+    printf("  modRate after DFSN  event: %.6f\n", after_comp);
     printf("  modRate after PILLAR event: %.6f\n", after_pillar);
 
-    assert(fabsf(after_vibr - after_comp)   < EPSILON && "modRate must be stable after VIBR+COMP");
-    assert(fabsf(after_comp - after_pillar) < EPSILON && "modRate must be stable after COMP+PILLAR");
+    assert(fabsf(after_vibr - after_comp)   < EPSILON && "modRate must be stable after VIBR+DFSN");
+    assert(fabsf(after_comp - after_pillar) < EPSILON && "modRate must be stable after DFSN+PILLAR");
 
     printf("  PASS: modRate stable across all three knob events\n");
     printf("  Test 17 PASSED\n");

@@ -22,7 +22,7 @@ Instead of standard 1-pole high-frequency damping, NeonLabirinto utilizes true 2
 The material filter is selected automatically when loading a preset; it cannot be changed independently of preset selection.
 
 ### 2. Coloured Noise Injection
-When the filter mode is set to **Noise** (*stellare* preset), the reverb acts as an acoustic resonator for an internal pseudo-random noise generator. The noise color sweeps smoothly from deep Brown, through Pink and Grey (notched), up to harsh Violet. Use **COMP** (diffusion) to shape the noise density and **DAMP** to control the noise injection gain.
+When the filter mode is set to **Noise** (*stellare* preset), the reverb acts as an acoustic resonator for an internal pseudo-random noise generator. The noise color sweeps smoothly from deep Brown, through Pink and Grey (notched), up to harsh Violet. Use **DFSN** (diffusion) to shape the noise density and **DAMP** to control the noise injection gain.
 
 ### 3. Cochrane 18-EDO Microtonal Shimmer (PILL = 4)
 Instead of relying on synthetic ring modulation, the *Stellare* and *Esotico* presets implement a genuine **Cochrane Shimmer** (PILL = 4). The 8 delay lines are subjected to deep, independent Doppler pitch-shifts locked to an 18-EDO (Equal Division of the Octave) microtonal scale. When these echoes collide in the Hadamard matrix, they generate massive, non-Western acoustic beating and dense harmonic interference. **SHMR** controls the shimmer frequency (0–100 maps to the pitch-shift frequency range).
@@ -47,7 +47,7 @@ NeonLabirinto has **12 parameters** across 3 pages.
 | 4 | HIGH | 0.1–10.0 s | High-frequency RT60 (treble tail length) |
 | 5 | DAMP | 200–10000 Hz | Damping crossover — frequencies above this decay faster |
 | 6 | WIDE | 0–200% | Stereo width of the reverb tail |
-| 7 | COMP | 0–100.0% | Diffusion / complexity — how much the delay lines interleave |
+| 7 | DFSN | 0–100.0% | Diffusion / complexity — how much the delay lines interleave |
 
 ### Page 3: Routing & Shimmer
 

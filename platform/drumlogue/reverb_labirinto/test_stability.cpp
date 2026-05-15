@@ -12,7 +12,7 @@
  *   unifiedDecay = min(0.99, 0.99 * sqrt(1.5*1.0)) = min(0.99, 1.21) = 0.99 → stable
  *   DAMP=1000 → damping freq=10000 Hz  (high-freq pass-through)
  *   WIDE=200  → stereo width=2.0       (extreme wide)
- *   COMP=1000 → diffusion=1.0          (maximum diffusion)
+ *   DFSN=1000 → diffusion=1.0          (maximum diffusion)
  *   MIX=1000  → 100% wet
  *
  * Compile: g++ -std=c++14 -O2 -o test_stability test_stability.cpp -lm
@@ -162,7 +162,7 @@ static void lab_process_sample(ScalarLabirinto *lab, float inL, float inR,
     }
     mixed[0] += input * (1.0f - lab->decay);
 
-    /* One-pole LPF (DAMP + COMP diffusion) */
+    /* One-pole LPF (DAMP + DFSN diffusion) */
     float pole = lab->diffusion * lab->dampingCoeff;
     for (int ch = 0; ch < FDN_CH; ch++) {
         lab->lpfState[ch] = mixed[ch] * (1.0f - pole) + lab->lpfState[ch] * pole;
@@ -219,7 +219,7 @@ static void test_stability_max_params() {
      * MIX=1000 → 1.0,  TIME=100 → decay=0.99,
      * LOW=100  → lowDecayMult=1.5,  HIGH=100 → highDecayMult=1.0,
      * DAMP=1000 → 10000 Hz,  WIDE=200 → width=2.0,
-     * COMP=1000 → diffusion=1.0,  modDepth=0.1, modRate=0.5 (defaults) */
+     * DFSN=1000 → diffusion=1.0,  modDepth=0.1, modRate=0.5 (defaults) */
     float mix           = 1000 / 1000.0f;             /* 1.0 */
     float decay         = 0.01f + (100-1)/99.0f*0.98f;/* 0.99 */
     float lowDecayMult  = 0.9f + (100/100.0f)*0.6f;   /* 1.5 */
