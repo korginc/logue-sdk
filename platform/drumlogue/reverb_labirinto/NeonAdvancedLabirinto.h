@@ -1087,15 +1087,16 @@ private:
         // =================================================================
         // Compute unified loop gain (needed before noise injection)
         // =================================================================
-        float loopGain = 0.7f + (decay * 0.295f);
-        // Cap at 0.88: limits max RT60 to ~7s and build-up to ~2.5s for the longest
-        // delay channel. 0.95 caused 19s RT60 and 6s build-up at TIME=100.
+        float loopGain = 0.30f + (decay * 0.55f);
+        // Cap at 0.88: safety net when lowDecayMult*highDecayMult > 1 can push
+        // loopGain above 1.  With the new base formula the cap only activates when
+        // both LOW and HIGH are near maximum AND TIME=100.
         float unifiedDecay = fminf(0.88f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
         float32x4_t decayAll = vdupq_n_f32(unifiedDecay);
-        // Floor at 0.25 so the reverb onset is immediately audible at all TIME settings.
-        // Without this floor, TIME=90 → feedback=0.05 making the reverb take
-        // several seconds to become audible.
-        float input_gain = fmaxf(0.25f, 1.0f - unifiedDecay);
+        // Floor at 0.35: ensures the input signal contributes at ≥35% on every
+        // block, so the first reflection is immediately audible even at TIME=100
+        // (loopGain=0.845 → 1-0.845=0.155, floored to 0.35).
+        float input_gain = fmaxf(0.35f, 1.0f - unifiedDecay);
         float32x4_t feedback = vdupq_n_f32(input_gain);
 
         // =================================================================
@@ -1334,11 +1335,9 @@ private:
         }
 
         float mixed[FDN_CHANNELS];
-        float loopGain = 0.7f + (decay * 0.295f);
-        // Cap at 0.88: limits max RT60 to ~7s and build-up to ~2.5s for the longest
-        // delay channel. 0.95 caused 19s RT60 and 6s build-up at TIME=100.
+        float loopGain = 0.30f + (decay * 0.55f);
         float unifiedDecay = fminf(0.88f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
-        float scalar_input_gain = fmaxf(0.25f, 1.0f - unifiedDecay);
+        float scalar_input_gain = fmaxf(0.35f, 1.0f - unifiedDecay);
 
         applyHadamardScalar(delayOut, mixed);
 
