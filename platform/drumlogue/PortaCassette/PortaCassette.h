@@ -206,6 +206,9 @@ public:
                     vdupq_n_f32(1e-6f));
                 float32x4_t enc_gain = vrsqrteq_f32(env);
                 enc_gain = vmulq_f32(vrsqrtsq_f32(vmulq_f32(env, enc_gain), enc_gain), enc_gain);
+                // Clamp encode gain: prevents 1000x boost during silence → loud transient onset.
+                // 6.0x ≈ +15.6 dB max NR action; matches typical dbx Type II spec.
+                enc_gain = vminq_f32(enc_gain, vdupq_n_f32(6.0f));
                 sig_l = vmulq_f32(sig_l, enc_gain);
                 sig_r = vmulq_f32(sig_r, enc_gain);
             }
@@ -443,7 +446,7 @@ private:
             (void)biquad_process1(&dbx_hf_r_, &coeff_dbx_hf_, sr);
             float wb_env = fmaxf(vgetq_lane_f32(dbx_enc_rms_,    0), 1e-6f);
             float hf_env = fmaxf(vgetq_lane_f32(dbx_hf_enc_rms_, 0), 1e-6f);
-            float gain = 1.0f / sqrtf(wb_env * 0.7f + hf_env * 0.3f);
+            float gain = fminf(1.0f / sqrtf(wb_env * 0.7f + hf_env * 0.3f), 6.0f);
             sl *= gain; sr *= gain;
         }
 

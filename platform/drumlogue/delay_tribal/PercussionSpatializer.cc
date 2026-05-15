@@ -193,10 +193,14 @@ static pan_model_t mode_pan_model(spatial_mode_t mode) {
 // ---------------------------------------------------------------------------
 void PercussionSpatializer::rebuild_profile() {
     // Base delay times (ms) per mode
-    static const float tribal[MAX_CLONES]   = { 18.f, 24.f, 31.f, 39.f, 48.f, 58.f, 67.f, 77.f, 88.f,100.f };
-    // Military: wider spread, more distinct hits for ensemble feel
-    static const float military[MAX_CLONES] = { 15.f, 21.f, 28.f, 37.f, 47.f, 58.f, 70.f, 84.f, 99.f,115.f };
-    static const float angel[MAX_CLONES]    = { 16.f, 23.f, 31.f, 40.f, 50.f, 61.f, 73.f, 86.f,100.f,115.f };
+    // Base delays (ms): span 50-450ms so each clone sits ~40ms apart — the minimum
+    // perceptual gap to hear distinct hits rather than a flam/shake. Previous values
+    // (18-115ms, ~11ms gaps) collapsed all clones into a single smeared transient.
+    static const float tribal[MAX_CLONES]   = {  50.f,  85.f, 125.f, 170.f, 220.f, 270.f, 315.f, 360.f, 405.f, 450.f };
+    // Military: slightly earlier entries, wider mid-range spread, ensemble punch
+    static const float military[MAX_CLONES] = {  40.f,  75.f, 115.f, 165.f, 225.f, 290.f, 355.f, 405.f, 435.f, 450.f };
+    // Angel: long-tailed, wider gaps for airy / spatially diffuse feel
+    static const float angel[MAX_CLONES]    = {  60.f, 100.f, 150.f, 205.f, 265.f, 325.f, 380.f, 420.f, 445.f, 455.f };
 
     const float* base_delay = (mode_ == MODE_MILITARY) ? military :
                               (mode_ == MODE_ANGEL)    ? angel    : tribal;

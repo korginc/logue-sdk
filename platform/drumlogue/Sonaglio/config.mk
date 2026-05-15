@@ -13,7 +13,7 @@ PROJECT_TYPE := synth
 CSRC = header.c
 
 # C++ sources
-CXXSRC = unit.cc
+CXXSRC = unit.cc fm_presets.cc
 
 # List ASM source files here
 ASMSRC =

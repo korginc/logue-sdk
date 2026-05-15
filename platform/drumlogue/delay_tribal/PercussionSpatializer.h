@@ -34,7 +34,7 @@
 #endif
 
 struct delay_line_t {
-    static constexpr int kLen  = 8192;
+    static constexpr int kLen  = 32768;
     static constexpr int kMask = kLen - 1;
 
     float l[kLen];

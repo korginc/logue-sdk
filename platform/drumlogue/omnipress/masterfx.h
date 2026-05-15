@@ -215,17 +215,12 @@ public:
             mixed.val[0] = vmulq_f32(mixed.val[0], makeup_lin);
             mixed.val[1] = vmulq_f32(mixed.val[1], makeup_lin);
 
-            // Output limiter: soft saturation x/(1+|x|) — bounded (-1,1), no discontinuities.
+            // Output limiter: hard clip to [-1, 1] — transparent below clipping level.
             {
-                const float32x4_t one = vdupq_n_f32(1.0f);
-                float32x4_t denom_l = vaddq_f32(one, vabsq_f32(mixed.val[0]));
-                float32x4_t rcp_l   = vrecpeq_f32(denom_l);
-                rcp_l = vmulq_f32(vrecpsq_f32(denom_l, rcp_l), rcp_l);
-                float32x4_t denom_r = vaddq_f32(one, vabsq_f32(mixed.val[1]));
-                float32x4_t rcp_r   = vrecpeq_f32(denom_r);
-                rcp_r = vmulq_f32(vrecpsq_f32(denom_r, rcp_r), rcp_r);
-                mixed.val[0] = vmulq_f32(mixed.val[0], rcp_l);
-                mixed.val[1] = vmulq_f32(mixed.val[1], rcp_r);
+                const float32x4_t one  = vdupq_n_f32( 1.0f);
+                const float32x4_t mone = vdupq_n_f32(-1.0f);
+                mixed.val[0] = vmaxq_f32(mone, vminq_f32(one, mixed.val[0]));
+                mixed.val[1] = vmaxq_f32(mone, vminq_f32(one, mixed.val[1]));
             }
 
             // Store results
@@ -437,11 +432,10 @@ private:
             case DIST_MODE_DIST3:
             case DIST_MODE_BOTH: {
                 // Apply saturation to the COMPRESSED signal (not raw input).
-                // A base drive of 2x ensures audible harmonic content at all drive
-                // settings; DRIVE knob adds up to 4x on top (2..6x total).
-                // makeup = 1.8 / sat_drive compensates for pre-gain + the ~0.8 gain
-                // loss that the saturator introduces at typical operating levels.
-                float sat_drive = 2.0f + drive_ * 4.0f;
+                // Base drive of 4x pushes a typical -15 dBFS compressed signal into
+                // the saturator's nonlinear region; DRIVE knob adds up to 8x on top
+                // (4..12x total). makeup = 1.8 / sat_drive compensates level.
+                float sat_drive = 4.0f + drive_ * 8.0f;
                 float makeup    = 1.8f / sat_drive;
                 float32x4_t drv = vdupq_n_f32(sat_drive);
                 float32x4_t mkp = vdupq_n_f32(makeup);
