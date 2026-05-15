@@ -8,7 +8,7 @@
 // Struct layout: min, max, center, init, type, frac, frac_mode, reserved, name
 const __unit_header unit_header_t unit_header = {
     .header_size = sizeof(unit_header_t),
-    .target      = UNIT_TARGET_PLATFORM | k_unit_module_master, // Master bus effect
+    .target      = UNIT_TARGET_PLATFORM | k_unit_module_masterfx, // Master bus effect
     .api         = UNIT_API_VERSION,
     .dev_id      = 0x46654465U,   // 'FeDe'
     .unit_id     = 0x506F7274U,   // 'Port'
