@@ -1,5 +1,22 @@
 # Sonaglio — Progress and Design Roadmap
 
+## Hardware Verified Fix — Unit Load Failure (unit error 4)
+
+**Status: CONFIRMED FIXED on hardware.**
+
+Sonaglio was failing to load on the drumlogue with "unit error 4" (`k_unit_err_samplerate = -4` in SDK), which in practice means the shared library had an unresolved symbol at dynamic link time.
+
+Root cause: `FM_PRESETS[]` is defined in `fm_presets.cc`, but `config.mk` only listed `unit.cc` in `CXXSRC`. The linker built the `.drmlgunit` without `fm_presets.cc`, leaving `FM_PRESETS` as an undefined external reference. The drumlogue runtime rejected the unit when it could not resolve that symbol.
+
+Fix applied to `config.mk`:
+```
+CXXSRC = unit.cc fm_presets.cc
+```
+
+A secondary issue was also fixed: `synth.h` declared `extern const char* const instruments_strings[10]` (double `const`) which did not match the definition in `header.c` (`const char* instruments_strings[10]`). The extra `const` was removed.
+
+---
+
 ## Current status
 
 The project has moved from a 5-engine / allocation-driven layout to a **fixed 4-engine FM percussion instrument**.

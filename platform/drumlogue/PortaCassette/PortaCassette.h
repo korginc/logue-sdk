@@ -188,6 +188,7 @@ public:
             // 4. dbx NR Encode (Record path: HF emphasis + 2:1 RMS compression)
             //    Type II HF spectral path: HF content tracked separately and blended
             //    into the total envelope so loud transients with HF get more reduction.
+            float32x4_t dec_gain = vdupq_n_f32(1.0f);  // set inside encode block when active
             if (dbx_mode_ != k_off) {
                 sig_l = biquad_process4(&dbx_pre_l_, &coeff_dbx_pre_, sig_l);
                 sig_r = biquad_process4(&dbx_pre_r_, &coeff_dbx_pre_, sig_r);
@@ -209,6 +210,12 @@ public:
                 // Clamp encode gain: prevents 1000x boost during silence → loud transient onset.
                 // 6.0x ≈ +15.6 dB max NR action; matches typical dbx Type II spec.
                 enc_gain = vminq_f32(enc_gain, vdupq_n_f32(6.0f));
+                // Synchronized decode gain = 1/enc_gain.  Computing it here (from the
+                // same enc_gain used to boost the signal) guarantees enc × dec = 1.0
+                // at all times, eliminating the timing mismatch between independent
+                // encode/decode RMS followers that caused rhythm-matched clicks.
+                dec_gain = vrecpeq_f32(enc_gain);
+                dec_gain = vmulq_f32(vrecpsq_f32(enc_gain, dec_gain), dec_gain);
                 sig_l = vmulq_f32(sig_l, enc_gain);
                 sig_r = vmulq_f32(sig_r, enc_gain);
             }
@@ -304,20 +311,15 @@ public:
 
             // 7. dbx NR Decode (Playback path: 1:2 expansion + de-emphasis)
             if (dbx_mode_ == k_active) {
-                // Track mean square of the post-tape signal (separate from encode state)
-                float32x4_t sq = vaddq_f32(vmulq_f32(sig_l, sig_l), vmulq_f32(sig_r, sig_r));
-                dbx_dec_rms_ = vmlaq_n_f32(vmulq_n_f32(dbx_dec_rms_, 0.99f), sq, 0.01f);
-
-                // Expansion gain = sqrt(rms_env) — inverse of 2:1 encode
-                // Compute via rsqrt + one Newton-Raphson step, then multiply by env
-                float32x4_t env = vmaxq_f32(dbx_dec_rms_, vdupq_n_f32(1e-6f));
-                float32x4_t rsq = vrsqrteq_f32(env);
-                rsq = vmulq_f32(vrsqrtsq_f32(vmulq_f32(env, rsq), rsq), rsq);
-                // Clamp at +12 dB (4×) to prevent runaway expansion on silence→transient
-                float32x4_t exp_gain = vminq_f32(vmulq_f32(env, rsq), vdupq_n_f32(4.0f));
-
-                sig_l = vmulq_f32(sig_l, exp_gain);
-                sig_r = vmulq_f32(sig_r, exp_gain);
+                // Use the synchronized dec_gain = 1/enc_gain computed in step 4.
+                // This guarantees enc_gain × dec_gain = 1.0 at every block, making the
+                // NR system transparent (net gain = 0 dB) except for tape nonlinearity.
+                // The old approach (independent dec_rms tracking) caused enc/dec timing
+                // mismatch: on the first hit after silence enc_gain = 6.0× but dec_gain
+                // was still sqrt(1e-6) ≈ 0.001, producing a near-zero decoded output
+                // that sounded like a loud click followed by silence.
+                sig_l = vmulq_f32(sig_l, dec_gain);
+                sig_r = vmulq_f32(sig_r, dec_gain);
 
                 sig_l = biquad_process4(&dbx_de_l_, &coeff_dbx_de_, sig_l);
                 sig_r = biquad_process4(&dbx_de_r_, &coeff_dbx_de_, sig_r);
@@ -428,6 +430,7 @@ private:
     // Scalar path — mirrors the NEON block path for 0-3 remainder samples
     // =========================================================================
     inline void process_scalar(float dry_l, float dry_r, float& out_l, float& out_r) {
+        float dec_gain = 1.0f;  // synchronized decode gain; set in encode block below
         float sl = dry_l * current_preamp_;
         float sr = dry_r * current_preamp_;
 
@@ -447,6 +450,7 @@ private:
             float wb_env = fmaxf(vgetq_lane_f32(dbx_enc_rms_,    0), 1e-6f);
             float hf_env = fmaxf(vgetq_lane_f32(dbx_hf_enc_rms_, 0), 1e-6f);
             float gain = fminf(1.0f / sqrtf(wb_env * 0.7f + hf_env * 0.3f), 6.0f);
+            dec_gain   = 1.0f / gain;  // synchronized decode gain
             sl *= gain; sr *= gain;
         }
 
@@ -503,9 +507,7 @@ private:
         }
 
         if (dbx_mode_ == k_active) {
-            float env = fmaxf(vgetq_lane_f32(dbx_dec_rms_, 0), 1e-6f);
-            float eg  = fminf(sqrtf(env), 4.0f);
-            sl *= eg; sr *= eg;
+            sl *= dec_gain; sr *= dec_gain;
             sl = biquad_process1(&dbx_de_l_, &coeff_dbx_de_, sl);
             sr = biquad_process1(&dbx_de_r_, &coeff_dbx_de_, sr);
         }

@@ -229,12 +229,15 @@ fast_inline float32x4x2_t wavefolder_process(wavefolder_t* wf,
             break;
 
         case DRIVE_MODE_SUBOCTAVE: {
-            float32x4_t sub_l = suboctave_process(wf, driven_l);
-            float32x4_t sub_r = suboctave_process(wf, driven_r);
-            // Scale the ±1 square wave by the pre-drive input amplitude so the
-            // sub-octave tracks signal dynamics instead of always blasting full scale.
-            out.val[0] = vmulq_f32(sub_l, vabsq_f32(in_l));
-            out.val[1] = vmulq_f32(sub_r, vabsq_f32(in_r));
+            // Use a mono mix for zero-crossing detection. Processing L and R as
+            // separate detectors causes independent sub-octave phases that drift
+            // apart, creating stereo incoherence heard as fuzziness/noise.
+            // A single detector gives a phase-coherent ±1 square wave; the stereo
+            // image is preserved by amplitude-modulating each channel independently.
+            float32x4_t mono = vmulq_n_f32(vaddq_f32(driven_l, driven_r), 0.5f);
+            float32x4_t sub  = suboctave_process(wf, mono);
+            out.val[0] = vmulq_f32(sub, vabsq_f32(in_l));
+            out.val[1] = vmulq_f32(sub, vabsq_f32(in_r));
             break;
         }
 

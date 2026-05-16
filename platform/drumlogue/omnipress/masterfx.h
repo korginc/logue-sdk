@@ -126,10 +126,10 @@ public:
         setParameter(k_distressor_ratio, DIST_RATIO_1_1);            // DSTR RATIO: Warm mode
         setParameter(k_distressor_drive_wave_mode, DRIVE_MODE_SOFT_CLIP); // DSTR WAVE: Soft Clip
         setParameter(k_multiband_band_selection, BAND_LOW);          // BAND SEL: Low
-        setParameter(k_multiband_band_threshold, THRESH_DEFAULT);    // L THRESH: -10.0 dB
+        setParameter(k_multiband_band_threshold, -300);               // L THRESH: -30.0 dB (catches drums)
         setParameter(k_multiband_band_ratio, RATIO_DEFAULT);         // L RATIO: 4.0
-        setParameter(k_multiband_band_attack, 10);                   // ATTACK: 10 ms
-        setParameter(k_multiband_band_release, 10);                  // RELEASE: 100 ms
+        setParameter(k_multiband_band_attack, 5);                    // ATTACK: 0.5 ms (fast, minimal click)
+        setParameter(k_multiband_band_release, 50);                  // RELEASE: 50 ms (punchy)
         setParameter(k_multiband_band_makeup, MAKEUP_DEFAULT);       // MAKEUP: 0 dB
         setParameter(k_multiband_band_mute, 0);                      // MUTE off
         setParameter(k_multiband_band_solo, 0);                      // SOLO off
@@ -432,11 +432,14 @@ private:
             case DIST_MODE_DIST3:
             case DIST_MODE_BOTH: {
                 // Apply saturation to the COMPRESSED signal (not raw input).
-                // Base drive of 4x pushes a typical -15 dBFS compressed signal into
-                // the saturator's nonlinear region; DRIVE knob adds up to 8x on top
-                // (4..12x total). makeup = 1.8 / sat_drive compensates level.
-                float sat_drive = 4.0f + drive_ * 8.0f;
-                float makeup    = 1.8f / sat_drive;
+                // sat_drive range: 2x (DRIVE=0) to 12x (DRIVE=100) — pushes the
+                // signal into the saturator nonlinear region.
+                // makeup = 1.0 keeps output level comparable to the input so
+                // harmonic character is always audible. The output hard-clip limiter
+                // prevents clipping. Do NOT divide by sat_drive (old formula made
+                // the distorted output quieter than dry, masking the effect).
+                float sat_drive = 2.0f + drive_ * 10.0f;
+                float makeup    = 1.0f;
                 float32x4_t drv = vdupq_n_f32(sat_drive);
                 float32x4_t mkp = vdupq_n_f32(makeup);
                 *out_l = vmulq_f32(generate_harmonics(&distressor_,
