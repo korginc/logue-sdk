@@ -126,7 +126,7 @@ public:
         setParameter(k_distressor_ratio, DIST_RATIO_1_1);            // DSTR RATIO: Warm mode
         setParameter(k_distressor_drive_wave_mode, DRIVE_MODE_SOFT_CLIP); // DSTR WAVE: Soft Clip
         setParameter(k_multiband_band_selection, BAND_LOW);          // BAND SEL: Low
-        setParameter(k_multiband_band_threshold, -300);               // L THRESH: -30.0 dB (catches drums)
+        setParameter(k_multiband_band_threshold, -200);               // L THRESH: -20.0 dB (BAND_THRESH_DEFAULT)
         setParameter(k_multiband_band_ratio, RATIO_DEFAULT);         // L RATIO: 4.0
         setParameter(k_multiband_band_attack, 5);                    // ATTACK: 0.5 ms (fast, minimal click)
         setParameter(k_multiband_band_release, 50);                  // RELEASE: 50 ms (punchy)
@@ -439,15 +439,13 @@ private:
                 // prevents clipping. Do NOT divide by sat_drive (old formula made
                 // the distorted output quieter than dry, masking the effect).
                 float sat_drive = 2.0f + drive_ * 10.0f;
-                float makeup    = 1.0f;
                 float32x4_t drv = vdupq_n_f32(sat_drive);
-                float32x4_t mkp = vdupq_n_f32(makeup);
-                *out_l = vmulq_f32(generate_harmonics(&distressor_,
-                                                      vmulq_f32(comp_l, drv),
-                                                      distressor_.dist_mode), mkp);
-                *out_r = vmulq_f32(generate_harmonics(&distressor_,
-                                                      vmulq_f32(comp_r, drv),
-                                                      distressor_.dist_mode), mkp);
+                *out_l = generate_harmonics(&distressor_,
+                                            vmulq_f32(comp_l, drv),
+                                            distressor_.dist_mode);
+                *out_r = generate_harmonics(&distressor_,
+                                            vmulq_f32(comp_r, drv),
+                                            distressor_.dist_mode);
                 break;
             }
             case DIST_MODE_CLEAN:

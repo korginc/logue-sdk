@@ -376,8 +376,11 @@ private:
     biquad_state_t dbx_hf_l_,    dbx_hf_r_;    // dbx Type II HF spectral path
     biquad_state_t xtalk_hpf_l_, xtalk_hpf_r_; // frequency-dependent crosstalk
 
-    // dbx RMS envelope states — encode and decode are independent
+    // dbx RMS envelope states
     float32x4_t dbx_enc_rms_;
+    // dbx_dec_rms_ kept for struct-size stability but is dead code:
+    // decode gain is now derived as 1/enc_gain (synchronized) rather than
+    // from an independent post-tape RMS tracker. Updated only in Reset().
     float32x4_t dbx_dec_rms_;
     float32x4_t dbx_hf_enc_rms_; // HF spectral envelope (encode side)
 
