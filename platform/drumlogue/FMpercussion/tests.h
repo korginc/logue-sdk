@@ -262,7 +262,8 @@ bool test_envelope_rom_values(void) {
     char error[256] = "";
 
     // Test a few key envelope shapes
-    uint8_t a, d, r, c;
+    uint8_t a, c;
+    uint16_t d, r;
 
     get_envelope(0, &a, &d, &r, &c);
     if (a != 0 || d != 20 || r != 10) {

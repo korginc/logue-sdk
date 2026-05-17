@@ -88,16 +88,20 @@ fast_inline float32x4_t tube_saturate(float32x4_t in, float drive) {
     clipped = vbslq_f32(pos, pos_clip, clipped);
     clipped = vbslq_f32(neg, vnegq_f32(neg_clip), clipped);
 
-    // Soft knee for tube warmth
+    // Soft knee: quadratic roll-off from 0.9*pos_clip to pos_clip.
+    // t=0 at knee start (0.72), t=1 at clip level (0.80).
+    // output = knee_start + knee_width * t*(2-t)  → smooth S from 0.72 to 0.80.
+    // The old 10:1 linear slope amplified in the knee region instead of compressing.
     uint32x4_t knee_region = vandq_u32(
         vcgtq_f32(driven, vmulq_f32(pos_clip, vdupq_n_f32(0.9f))),
         vcltq_f32(driven, pos_clip)
     );
-
-    float32x4_t knee = vsubq_f32(driven, vmulq_f32(pos_clip, vdupq_n_f32(0.9f)));
-    knee = vmulq_f32(knee, vdupq_n_f32(10.0f));  // 10:1 knee slope
-
-    clipped = vbslq_f32(knee_region, vaddq_f32(vmulq_f32(pos_clip, vdupq_n_f32(0.9f)), knee), clipped);
+    float32x4_t knee_start = vmulq_f32(pos_clip, vdupq_n_f32(0.9f));
+    float32x4_t knee_width = vsubq_f32(pos_clip, knee_start);
+    float32x4_t t = fast_div_neon(vsubq_f32(driven, knee_start), knee_width);
+    float32x4_t knee_out = vaddq_f32(knee_start,
+        vmulq_f32(knee_width, vmulq_f32(t, vsubq_f32(vdupq_n_f32(2.0f), t))));
+    clipped = vbslq_f32(knee_region, knee_out, clipped);
 
     return clipped;
 }
@@ -130,7 +134,7 @@ fast_inline float32x4x2_t overlord_apply_eq(overlord_t* ov,
     float active_threshold = 0.01f;
     if (fabsf(ov->bass - 0.5f) < active_threshold &&
         fabsf(ov->treble - 0.5f) < active_threshold &&
-        fabsf(ov->presence) < active_threshold) {
+        fabsf(ov->presence - 0.5f) < active_threshold) {
         float32x4x2_t bypass;
         bypass.val[0] = in_l;
         bypass.val[1] = in_r;
@@ -140,7 +144,8 @@ fast_inline float32x4x2_t overlord_apply_eq(overlord_t* ov,
     float32x4_t eq_l = baxandall_eq(in_l, &ov->bass_boost_l, &ov->treble_boost_l, ov->bass, ov->treble, sample_rate);
     float32x4_t eq_r = baxandall_eq(in_r, &ov->bass_boost_r, &ov->treble_boost_r, ov->bass, ov->treble, sample_rate);
 
-    float presence_gain = ov->presence * 12.0f;
+    // presence=0.5 → flat (0 dB), 0.0 → −12 dB, 1.0 → +12 dB
+    float presence_gain = (ov->presence - 0.5f) * 24.0f;
     float32x4_t out_l = high_shelf_filter(eq_l, &ov->presence_l, 5000.0f,
                                            presence_gain, 1.0f, sample_rate);
     float32x4_t out_r = high_shelf_filter(eq_r, &ov->presence_r, 5000.0f,
@@ -157,12 +162,11 @@ fast_inline float32x4x2_t overlord_process(overlord_t* ov,
                                            float32x4_t in_l,
                                            float32x4_t in_r,
                                            float sample_rate) {
-                                             // Check if any processing is active
     float active_threshold = 0.01f;
     if (ov->drive < active_threshold &&
         fabsf(ov->bass - 0.5f) < active_threshold &&  // 0.5 = flat
         fabsf(ov->treble - 0.5f) < active_threshold &&
-        fabsf(ov->presence) < active_threshold) {
+        fabsf(ov->presence - 0.5f) < active_threshold) {
         // Bypass - return dry signal
         float32x4x2_t bypass;
         bypass.val[0] = in_l;
@@ -189,8 +193,8 @@ fast_inline float32x4x2_t overlord_process(overlord_t* ov,
         baxandall_eq(tube2_r, &ov->bass_boost_r, &ov->treble_boost_r, ov->bass,
                      ov->treble, sample_rate);
 
-    // 3. Presence control (high shelf boost)
-    float presence_gain = ov->presence * 12.0f;  // 0 to +12 dB
+    // 3. Presence control (high shelf ±12 dB, flat at presence=0.5)
+    float presence_gain = (ov->presence - 0.5f) * 24.0f;
     float32x4_t presence_l = high_shelf_filter(
         eq_l, &ov->presence_l, 5000.0f, presence_gain, 1.0f, sample_rate);
     float32x4_t presence_r = high_shelf_filter(

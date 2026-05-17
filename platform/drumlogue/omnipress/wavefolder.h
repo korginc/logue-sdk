@@ -101,18 +101,17 @@ fast_inline void wavefolder_set_drive(wavefolder_t* wf, float drive_percent) {
 }
 
 /**
- * Soft clip (tanh approximation)
+ * Soft clip: x/(1+|x|)
+ * Monotone, bounded in (-1,+1) for all inputs.
+ * The cubic x-x³/3 is non-monotonic above |x|≈0.577 and produces polarity
+ * inversion for driven signals — this replaces it with a true saturator.
  */
 fast_inline float32x4_t soft_clip(float32x4_t x) {
-    float32x4_t one = vdupq_n_f32(1.0f);
-    float32x4_t three = vdupq_n_f32(3.0f);
-
-    // x - x^3/3 for small x, clamp to ±1 for large x
-    float32x4_t x2 = vmulq_f32(x, x);
-    float32x4_t x3 = vmulq_f32(x, x2);
-    float32x4_t approx = vsubq_f32(x, fast_div_neon(x3, three));
-
-    return vmaxq_f32(vminq_f32(approx, one), vnegq_f32(one));
+    float32x4_t abs_x = vabsq_f32(x);
+    float32x4_t denom = vaddq_f32(vdupq_n_f32(1.0f), abs_x);
+    float32x4_t rec = vrecpeq_f32(denom);
+    rec = vmulq_f32(vrecpsq_f32(denom, rec), rec);  // one NR step → ~16-bit accuracy
+    return vmulq_f32(x, rec);
 }
 
 /**

@@ -41,7 +41,7 @@ void PercussionSpatializer::Teardown() {}
 void PercussionSpatializer::Reset() {
     if (!initialized_) return;
     delay_.clear();
-    rng_state_  = 0x9E3729B9u;
+    rng_state_  = 0x9E3779B9u;  // same constant as constructor (was 0x9E3729B9 — one-bit typo)
     prev_mag_   = 0.0f;
     smoothing_remaining_ = 0;
     rebuild_profile();
@@ -102,7 +102,7 @@ float PercussionSpatializer::get_rate() {
   return rate_;
 }
 float PercussionSpatializer::get_mix() {
-  return mix_target_;
+  return mix_;  // smoothed value — not mix_target_ which would bypass smoothing
 }
 float PercussionSpatializer::get_wobble() {
   return wobble_target_;
@@ -272,9 +272,12 @@ void PercussionSpatializer::rebuild_profile() {
         float a     = 0.5f * (px + 1.0f);
         float pl    = fasterpowf(1.0f - a, profile_.pan_exponent);
         float pr    = fasterpowf(a, profile_.pan_exponent);
+        // pn normalizes the pair so the sum-of-squares is 1; divide (not multiply).
+        // Multiplying by pn inverts the normalization — 4.7 dB deficit at center.
         float pn    = my_sqrt_f(pl * pl + pr * pr + 1e-12f);
-        float pan_l = pl * pn * spread_;
-        float pan_r = pr * pn * spread_;
+        float inv_pn = 1.0f / (pn + 1e-20f);
+        float pan_l = pl * inv_pn * spread_;
+        float pan_r = pr * inv_pn * spread_;
 
         // HP/LP attenuation baked into pan_gain (eliminates per-sample division)
         float hp_hz   = hp_base * (1.0f + follower * hp_follow);
@@ -327,13 +330,14 @@ static fast_inline void mix_clone_batch4(const clone_t* clones,
                                          float gap_boost,
                                          float& wet_l,
                                          float& wet_r) {
+    (void)rate;  // wobble_phase now accumulates in render_block4; rate no longer used here
     alignas(16) float dl[4], dr[4], gainL[4], gainR[4];
 
     for (int lane = 0; lane < 4; ++lane) {
         const clone_t& c = clones[base + lane];
         float total_d = c.delay_samples + c.scatter_samples;
         if (total_d < 2.0f) total_d = 2.0f;
-        total_d += fastersinfullf(c.wobble_phase + rate * 0.0015f * c.wobble_rate_mul) * c.wobble_depth_samples;
+        total_d += fastersinfullf(c.wobble_phase) * c.wobble_depth_samples;
 
         float raw_pos = (float)(delay.write - 1) - total_d;
         float safe_pos = raw_pos + (float)(delay_line_t::kLen * 8);
@@ -363,13 +367,14 @@ static fast_inline void mix_clone_batch2(const clone_t* clones,
                                          float gap_boost,
                                          float& wet_l,
                                          float& wet_r) {
+    (void)rate;
     alignas(16) float dl[2], dr[2], gainL[2], gainR[2];
 
     for (int lane = 0; lane < 2; ++lane) {
         const clone_t& c = clones[base + lane];
         float total_d = c.delay_samples + c.scatter_samples;
         if (total_d < 2.0f) total_d = 2.0f;
-        total_d += fastersinfullf(c.wobble_phase + rate * 0.0015f * c.wobble_rate_mul) * c.wobble_depth_samples;
+        total_d += fastersinfullf(c.wobble_phase) * c.wobble_depth_samples;
 
         float raw_pos = (float)(delay.write - 1) - total_d;
         float safe_pos = raw_pos + (float)(delay_line_t::kLen * 8);
@@ -398,9 +403,10 @@ static fast_inline void mix_clone_scalar(const clone_t& c,
                                          float gap_boost,
                                          float& wet_l,
                                          float& wet_r) {
+    (void)rate;
     float total_d = c.delay_samples + c.scatter_samples;
     if (total_d < 2.0f) total_d = 2.0f;
-    total_d += fastersinfullf(c.wobble_phase + rate * 0.0015f * c.wobble_rate_mul) * c.wobble_depth_samples;
+    total_d += fastersinfullf(c.wobble_phase) * c.wobble_depth_samples;
 
     float raw_pos = (float)(delay.write - 1) - total_d;
     float safe_pos = raw_pos + (float)(delay_line_t::kLen * 8);
@@ -445,20 +451,34 @@ static fast_inline void render_one_frame(PercussionSpatializer* self,
 }
 
 void PercussionSpatializer::render_block4(const float* in, float* out) {
-    // 2. Transient detection — check peak of 4 frames
+    // 2. Transient detection — check peak of 4 frames.
+    // Use a one-pole envelope decay so a near-zero crossing at the last sample
+    // of the previous block does not set prev_mag_ to ~0 and cause false triggers.
     float mag_max = 0.0f;
     for (int s = 0; s < 4; ++s) {
         float m = 0.5f * (fabsf(in[s * 2]) + fabsf(in[s * 2 + 1]));
         if (m > mag_max) mag_max = m;
     }
     const bool transient = (mag_max > prev_mag_ * 1.9f) && (mag_max > 0.002f);
-    prev_mag_ = 0.5f * (fabsf(in[6]) + fabsf(in[7]));  // last frame
+    // Decay envelope: ~10 ms half-life at 48kHz/4 = 12000 blocks/s → coeff=exp(-1/120)≈0.9917
+    prev_mag_ = fmaxf(mag_max, prev_mag_ * 0.9917f);
 
     // 3. Advance smoothing + rebuild if needed; THEN randomize on transient
     //    (ensures randomize_hit uses the freshly rebuilt profile)
     advance_smoothing();
     if (pending_profile_rebuild_) rebuild_profile();
     if (transient) randomize_hit();
+
+    // 4. Advance wobble LFO phase for each clone.
+    // rate_ ∈ [0.05, 10.0] maps directly to LFO Hz. Per 4-sample block:
+    // Δphase = 2π * rate_hz * 4 / sample_rate.
+    {
+        const float phase_inc_base = 6.2831853f * rate_ * 4.0f / (float)sample_rate_;
+        for (int i = 0; i < clone_count_; ++i) {
+            clones_[i].wobble_phase += phase_inc_base * clones_[i].wobble_rate_mul;
+            if (clones_[i].wobble_phase >= 6.2831853f) clones_[i].wobble_phase -= 6.2831853f;
+        }
+    }
 
     for (int s = 0; s < 4; ++s) {
         float ol = 0.0f, orr = 0.0f;

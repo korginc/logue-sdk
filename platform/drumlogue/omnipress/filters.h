@@ -180,21 +180,29 @@ fast_inline float32x4_t envelope_detect(envelope_detector_t* env,
             env->rms_accum = vaddq_f32(vmulq_f32(squared, vdupq_n_f32(alpha)),
                                        vmulq_f32(env->rms_accum, vdupq_n_f32(1.0f - alpha)));
 
-            // Approximate square root
-            envelope = vrsqrteq_f32(env->rms_accum);  // 1/sqrt(x)
-            envelope = vmulq_f32(env->rms_accum, envelope);  // x * 1/sqrt(x) = sqrt(x)
+            // Guard against zero: vrsqrteq_f32(0) = INF, and 0*INF = NaN (sticky).
+            float32x4_t safe_rms = vmaxq_f32(env->rms_accum, vdupq_n_f32(1e-30f));
+            float32x4_t rsq = vrsqrteq_f32(safe_rms);
+            rsq = vmulq_f32(vrsqrtsq_f32(vmulq_f32(safe_rms, rsq), rsq), rsq);  // NR step
+            envelope = vmulq_f32(safe_rms, rsq);
             break;
         }
 
         case DETECT_MODE_BLEND: {
-            // Blend peak and RMS (like SSL console)
+            // Blend peak and RMS (like SSL console).
+            // Peak hold is updated in DETECT_MODE_PEAK path above; read it here
+            // without duplicating the hold logic.
             float32x4_t peak = env->peak_hold;
 
             float32x4_t squared = vmulq_f32(sidechain, sidechain);
             float alpha = 0.01f;
             env->rms_accum = vaddq_f32(vmulq_f32(squared, vdupq_n_f32(alpha)),
                                        vmulq_f32(env->rms_accum, vdupq_n_f32(1.0f - alpha)));
-            float32x4_t rms = vmulq_f32(env->rms_accum, vrsqrteq_f32(env->rms_accum));
+
+            float32x4_t safe_rms = vmaxq_f32(env->rms_accum, vdupq_n_f32(1e-30f));
+            float32x4_t rsq = vrsqrteq_f32(safe_rms);
+            rsq = vmulq_f32(vrsqrtsq_f32(vmulq_f32(safe_rms, rsq), rsq), rsq);  // NR step
+            float32x4_t rms = vmulq_f32(safe_rms, rsq);
 
             envelope = vaddq_f32(vmulq_f32(peak, vdupq_n_f32(0.7f)),
                                  vmulq_f32(rms, vdupq_n_f32(0.3f)));
@@ -291,9 +299,12 @@ fast_inline float32x4_t gain_computer_process(gain_computer_t* gc,
             // Above knee
             uint32x4_t above_knee = vcgtq_f32(envelope_db, knee_end);
 
-            // Calculate gain reduction for knee region (quadratic)
-            float32x4_t x = fast_div_neon(vsubq_f32(envelope_db, knee_start), knee_w);
-            float32x4_t knee_gr = vmulq_f32(vmulq_f32(x, x), vdupq_n_f32(0.5f));
+            // AES soft-knee: GR = overshoot² / (2*knee_w) * (1 - 1/ratio)
+            // Previous code used x=(overshoot/knee_w), knee_gr=0.5*x²*(…) which
+            // gave overshoot²/knee_w² — off by factor knee_w (too little GR).
+            float32x4_t overshoot_knee = vsubq_f32(envelope_db, knee_start);
+            float32x4_t knee_gr = vmulq_f32(vmulq_f32(overshoot_knee, overshoot_knee),
+                                             fast_div_neon(vdupq_n_f32(0.5f), knee_w));
             knee_gr = vmulq_f32(knee_gr, vsubq_f32(one, vrecpeq_f32(ratio_v)));
 
             gain_red = vbslq_f32(in_knee, knee_gr,
