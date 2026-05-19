@@ -24,7 +24,7 @@ const __unit_header unit_header_t unit_header = {
 
         // Page 2: Osc 2 & Mix
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Dtun"}},
-        {0, 3, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Sub"}}, // 0..3 Range!
+        {0, 4, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Sub"}}, // 0..4 Range (4 = +1.8 oct)
         {0, 100, 50, 50, k_unit_param_type_percent, 0, 0, 0, {"O2Mix"}},
         {0, 100, 50, 80, k_unit_param_type_percent, 0, 0, 0, {"Volume"}},
 
