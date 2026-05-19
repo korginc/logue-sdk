@@ -126,10 +126,10 @@ public:
         setParameter(k_distressor_ratio, DIST_RATIO_1_1);            // DSTR RATIO: Warm mode
         setParameter(k_distressor_drive_wave_mode, DRIVE_MODE_SOFT_CLIP); // DSTR WAVE: Soft Clip
         setParameter(k_multiband_band_selection, BAND_LOW);          // BAND SEL: Low
-        setParameter(k_multiband_band_threshold, THRESH_DEFAULT);    // L THRESH: -10.0 dB
+        setParameter(k_multiband_band_threshold, -200);               // L THRESH: -20.0 dB (BAND_THRESH_DEFAULT)
         setParameter(k_multiband_band_ratio, RATIO_DEFAULT);         // L RATIO: 4.0
-        setParameter(k_multiband_band_attack, 10);                   // ATTACK: 10 ms
-        setParameter(k_multiband_band_release, 10);                  // RELEASE: 100 ms
+        setParameter(k_multiband_band_attack, 5);                    // ATTACK: 0.5 ms (fast, minimal click)
+        setParameter(k_multiband_band_release, 50);                  // RELEASE: 50 ms (punchy)
         setParameter(k_multiband_band_makeup, MAKEUP_DEFAULT);       // MAKEUP: 0 dB
         setParameter(k_multiband_band_mute, 0);                      // MUTE off
         setParameter(k_multiband_band_solo, 0);                      // SOLO off
@@ -215,17 +215,12 @@ public:
             mixed.val[0] = vmulq_f32(mixed.val[0], makeup_lin);
             mixed.val[1] = vmulq_f32(mixed.val[1], makeup_lin);
 
-            // Output limiter: soft saturation x/(1+|x|) — bounded (-1,1), no discontinuities.
+            // Output limiter: hard clip to [-1, 1] — transparent below clipping level.
             {
-                const float32x4_t one = vdupq_n_f32(1.0f);
-                float32x4_t denom_l = vaddq_f32(one, vabsq_f32(mixed.val[0]));
-                float32x4_t rcp_l   = vrecpeq_f32(denom_l);
-                rcp_l = vmulq_f32(vrecpsq_f32(denom_l, rcp_l), rcp_l);
-                float32x4_t denom_r = vaddq_f32(one, vabsq_f32(mixed.val[1]));
-                float32x4_t rcp_r   = vrecpeq_f32(denom_r);
-                rcp_r = vmulq_f32(vrecpsq_f32(denom_r, rcp_r), rcp_r);
-                mixed.val[0] = vmulq_f32(mixed.val[0], rcp_l);
-                mixed.val[1] = vmulq_f32(mixed.val[1], rcp_r);
+                const float32x4_t one  = vdupq_n_f32( 1.0f);
+                const float32x4_t mone = vdupq_n_f32(-1.0f);
+                mixed.val[0] = vmaxq_f32(mone, vminq_f32(one, mixed.val[0]));
+                mixed.val[1] = vmaxq_f32(mone, vminq_f32(one, mixed.val[1]));
             }
 
             // Store results
@@ -437,20 +432,20 @@ private:
             case DIST_MODE_DIST3:
             case DIST_MODE_BOTH: {
                 // Apply saturation to the COMPRESSED signal (not raw input).
-                // A base drive of 2x ensures audible harmonic content at all drive
-                // settings; DRIVE knob adds up to 4x on top (2..6x total).
-                // makeup = 1.8 / sat_drive compensates for pre-gain + the ~0.8 gain
-                // loss that the saturator introduces at typical operating levels.
-                float sat_drive = 2.0f + drive_ * 4.0f;
-                float makeup    = 1.8f / sat_drive;
+                // sat_drive range: 2x (DRIVE=0) to 12x (DRIVE=100) — pushes the
+                // signal into the saturator nonlinear region.
+                // makeup = 1.0 keeps output level comparable to the input so
+                // harmonic character is always audible. The output hard-clip limiter
+                // prevents clipping. Do NOT divide by sat_drive (old formula made
+                // the distorted output quieter than dry, masking the effect).
+                float sat_drive = 2.0f + drive_ * 10.0f;
                 float32x4_t drv = vdupq_n_f32(sat_drive);
-                float32x4_t mkp = vdupq_n_f32(makeup);
-                *out_l = vmulq_f32(generate_harmonics(&distressor_,
-                                                      vmulq_f32(comp_l, drv),
-                                                      distressor_.dist_mode), mkp);
-                *out_r = vmulq_f32(generate_harmonics(&distressor_,
-                                                      vmulq_f32(comp_r, drv),
-                                                      distressor_.dist_mode), mkp);
+                *out_l = generate_harmonics(&distressor_,
+                                            vmulq_f32(comp_l, drv),
+                                            distressor_.dist_mode);
+                *out_r = generate_harmonics(&distressor_,
+                                            vmulq_f32(comp_r, drv),
+                                            distressor_.dist_mode);
                 break;
             }
             case DIST_MODE_CLEAN:

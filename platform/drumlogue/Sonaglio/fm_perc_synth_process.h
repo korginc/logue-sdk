@@ -247,6 +247,14 @@ static fast_inline void process_pending_triggers(fm_perc_synth_t* synth) {
 
         synth->engine_gain[ev->engine] = ev->gain;
         fire_engine(synth, ev->engine, ev->note_f);
+
+        // Selector model uses delayed combo/shadow triggers.
+        // Retrigger the shared envelope here so delayed hits are audible instead
+        // of falling into the tail of the first trigger.
+        neon_envelope_trigger(&synth->envelope,
+                              active_lane_mask(),
+                              synth->current_env_shape);
+
         ev->active = 0;
     }
 }
@@ -298,41 +306,8 @@ fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
     }
 }
 
-fast_inline void load_fm_preset(uint8_t idx, int8_t* params) {
-    if (idx >= NUM_OF_PRESETS || params == NULL) return;
-
-    const fm_preset_t* p = &FM_PRESETS[idx];
-
-    params[PARAM_INSTRUMENT] = p->instrument_sel;
-    params[PARAM_BLEND]      = p->blend;
-    params[PARAM_GAP]        = p->gap;
-    params[PARAM_SCATTER]    = p->scatter;
-
-    params[PARAM_KICK_ATK]   = p->kick_attack;
-    params[PARAM_KICK_BODY]  = p->kick_body;
-    params[PARAM_SNARE_ATK]  = p->snare_attack;
-    params[PARAM_SNARE_BODY] = p->snare_body;
-
-    params[PARAM_METAL_ATK]  = p->metal_attack;
-    params[PARAM_METAL_BODY] = p->metal_body;
-    params[PARAM_PERC_ATK]   = p->perc_attack;
-    params[PARAM_PERC_BODY]  = p->perc_body;
-
-    params[PARAM_LFO1_SHAPE]  = p->lfo1_shape;
-    params[PARAM_LFO1_RATE]   = p->lfo1_rate;
-    params[PARAM_LFO1_TARGET] = p->lfo1_target;
-    params[PARAM_LFO1_DEPTH]  = p->lfo1_depth;
-
-    params[PARAM_EUCL_TUN]    = p->eucl_tun;
-    params[PARAM_LFO2_RATE]   = p->lfo2_rate;
-    params[PARAM_LFO2_TARGET] = p->lfo2_target;
-    params[PARAM_LFO2_DEPTH]  = p->lfo2_depth;
-
-    params[PARAM_ENV_SHAPE] = p->env_shape;
-    params[PARAM_HIT_SHAPE] = p->hit_shape;
-    params[PARAM_BODY_TILT] = p->body_tilt;
-    params[PARAM_DRIVE]     = p->drive;
-}
+// load_fm_preset() is provided by fm_presets.cc.
+// Keep preset data out of the hot process header to avoid duplicate definitions.
 
 // ============================================================================
 // Initialization
@@ -353,7 +328,7 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
 
     synth->current_env_shape = ENV_SHAPE_DEFAULT;
     synth->euclid_offsets = vdupq_n_f32(0.0f);
-    synth->master_gain = 0.25f;
+    synth->master_gain = 0.85f;  // Selector model uses only lane 0; previous 0.25 was too quiet on HW.
 
     synth->instrument_sel = INST_KICK;
     synth->blend = 0.5f;
@@ -596,10 +571,13 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     );
 
     float32x4_t mix = vdupq_n_f32(0.0f);
-    mix = vaddq_f32(mix, vmulq_n_f32(kick_out,  0.28f));
-    mix = vaddq_f32(mix, vmulq_n_f32(snare_out, 0.24f));
-    mix = vaddq_f32(mix, vmulq_n_f32(metal_out, 0.22f));
-    mix = vaddq_f32(mix, vmulq_n_f32(perc_out,  0.26f));
+    // Selector model: only one lane and usually one/two engines are active.
+    // These are no longer four-voice summing weights; they are nominal engine
+    // output trims. Keep them strong enough for direct HW monitoring.
+    mix = vaddq_f32(mix, vmulq_n_f32(kick_out,  0.95f));
+    mix = vaddq_f32(mix, vmulq_n_f32(snare_out, 0.90f));
+    mix = vaddq_f32(mix, vmulq_n_f32(metal_out, 0.78f));
+    mix = vaddq_f32(mix, vmulq_n_f32(perc_out,  0.88f));
 
     mix = vmulq_f32(mix, fm_make_drive_gain(drive));
     mix = fm_soft_clip(mix);

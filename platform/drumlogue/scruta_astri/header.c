@@ -24,7 +24,7 @@ const __unit_header unit_header_t unit_header = {
 
         // Page 2: Osc 2 & Mix
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Dtun"}},
-        {0, 3, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Sub"}}, // 0..3 Range!
+        {0, 4, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Sub"}}, // 0..4 Range (4 = +1.8 oct)
         {0, 100, 50, 50, k_unit_param_type_percent, 0, 0, 0, {"O2Mix"}},
         {0, 100, 50, 80, k_unit_param_type_percent, 0, 0, 0, {"Volume"}},
 
@@ -35,15 +35,15 @@ const __unit_header unit_header_t unit_header = {
         {0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"F2Res"}},
 
         // Page 4: LFO 1 & 2
-        {0, 5, 0, 0, k_unit_param_type_none, 0, 0, 0, {"L1Wave"}},
+        {0, 8, 0, 0, k_unit_param_type_none, 0, 0, 0, {"L1Wave"}},
         {0, 100, 10, 10, k_unit_param_type_none, 0, 0, 0, {"L1Rate"}},
         {0, 100, 20, 0, k_unit_param_type_percent, 0, 0, 0, {"L1Dpth"}},
-        {0, 5, 0, 0, k_unit_param_type_none, 0, 0, 0, {"L2Wave"}},
+        {0, 8, 0, 0, k_unit_param_type_none, 0, 0, 0, {"L2Wave"}},
 
         // Page 5: LFO 2 & 3
         {0, 100, 10, 10, k_unit_param_type_none, 0, 0, 0, {"L2Rate"}},
         {0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"L2Dpth"}},
-        {0, 5, 0, 0, k_unit_param_type_none, 0, 0, 0, {"L3Wave"}},
+        {0, 8, 0, 0, k_unit_param_type_none, 0, 0, 0, {"L3Wave"}},
         {0, 100, 10, 70, k_unit_param_type_none, 0, 0, 0, {"L3Rate"}},
 
         // Page 6: FX

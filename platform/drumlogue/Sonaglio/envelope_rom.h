@@ -53,6 +53,143 @@ The runtime fix should come before the ROM redesign */
 
 // 128 predefined envelope curves (as previously defined)
 static const env_curve_t ENV_ROM[128] = {
+    // Sonaglio v3 curated envelopes.
+    // Ranges are intentionally longer than the previous table because
+    // first HW testing showed low indices were too short/nearly inaudible.
+    // 0-15 tight, 16-31 punch, 32-47 body, 48-63 long body,
+    // 64-79 gated/flam, 80-95 open linear, 96-111 metallic, 112-127 experimental.
+    {0, 45, 20, 1},  // 0: Tight click/body
+    {0, 55, 26, 1},  // 1: Tight click/body
+    {0, 65, 32, 1},  // 2: Tight click/body
+    {0, 75, 38, 1},  // 3: Tight click/body
+    {1, 85, 44, 1},  // 4: Tight click/body
+    {1, 95, 50, 1},  // 5: Tight click/body
+    {1, 105, 56, 1},  // 6: Tight click/body
+    {1, 115, 62, 1},  // 7: Tight click/body
+    {1, 125, 68, 1},  // 8: Tight click/body
+    {1, 135, 74, 1},  // 9: Tight click/body
+    {2, 145, 80, 1},  // 10: Tight click/body
+    {2, 155, 86, 1},  // 11: Tight click/body
+    {2, 165, 92, 1},  // 12: Tight click/body
+    {2, 175, 98, 1},  // 13: Tight click/body
+    {2, 185, 104, 1},  // 14: Tight click/body
+    {2, 195, 110, 1},  // 15: Tight click/body
+    {1, 180, 90, 1},  // 16: Punch drum
+    {1, 198, 100, 1},  // 17: Punch drum
+    {1, 216, 110, 1},  // 18: Punch drum
+    {1, 234, 120, 1},  // 19: Punch drum
+    {2, 252, 130, 1},  // 20: Punch drum
+    {2, 270, 140, 1},  // 21: Punch drum
+    {2, 288, 150, 1},  // 22: Punch drum
+    {2, 306, 160, 1},  // 23: Punch drum
+    {3, 324, 170, 1},  // 24: Punch drum
+    {3, 342, 180, 1},  // 25: Punch drum
+    {3, 360, 190, 1},  // 26: Punch drum
+    {3, 378, 200, 1},  // 27: Punch drum
+    {4, 396, 210, 1},  // 28: Punch drum
+    {4, 414, 220, 1},  // 29: Punch drum
+    {4, 432, 230, 1},  // 30: Punch drum
+    {4, 450, 240, 1},  // 31: Punch drum
+    {2, 380, 180, 1},  // 32: Body drum
+    {2, 405, 196, 1},  // 33: Body drum
+    {2, 430, 212, 1},  // 34: Body drum
+    {2, 455, 228, 1},  // 35: Body drum
+    {2, 480, 244, 1},  // 36: Body drum
+    {3, 505, 260, 1},  // 37: Body drum
+    {3, 530, 276, 1},  // 38: Body drum
+    {3, 555, 292, 1},  // 39: Body drum
+    {3, 580, 308, 1},  // 40: Body drum
+    {3, 605, 324, 1},  // 41: Body drum
+    {4, 630, 340, 1},  // 42: Body drum
+    {4, 655, 356, 1},  // 43: Body drum
+    {4, 680, 372, 1},  // 44: Body drum
+    {4, 705, 388, 1},  // 45: Body drum
+    {4, 730, 404, 1},  // 46: Body drum
+    {5, 755, 420, 1},  // 47: Body drum
+    {3, 650, 280, 1},  // 48: Long body
+    {3, 685, 300, 1},  // 49: Long body
+    {3, 720, 320, 1},  // 50: Long body
+    {3, 755, 340, 1},  // 51: Long body
+    {4, 790, 360, 1},  // 52: Long body
+    {4, 825, 380, 1},  // 53: Long body
+    {4, 860, 400, 1},  // 54: Long body
+    {4, 895, 420, 1},  // 55: Long body
+    {5, 930, 440, 1},  // 56: Long body
+    {5, 965, 460, 1},  // 57: Long body
+    {5, 1000, 480, 1},  // 58: Long body
+    {5, 1035, 500, 1},  // 59: Long body
+    {6, 1070, 520, 1},  // 60: Long body
+    {6, 1105, 540, 1},  // 61: Long body
+    {6, 1140, 560, 1},  // 62: Long body
+    {6, 1175, 580, 1},  // 63: Long body
+    {0, 120, 300, 1},  // 64: Gate/flam
+    {0, 138, 330, 1},  // 65: Gate/flam
+    {0, 156, 360, 1},  // 66: Gate/flam
+    {0, 174, 390, 1},  // 67: Gate/flam
+    {0, 192, 420, 1},  // 68: Gate/flam
+    {0, 210, 450, 1},  // 69: Gate/flam
+    {1, 228, 480, 1},  // 70: Gate/flam
+    {1, 246, 510, 1},  // 71: Gate/flam
+    {1, 264, 540, 1},  // 72: Gate/flam
+    {1, 282, 570, 1},  // 73: Gate/flam
+    {1, 300, 600, 1},  // 74: Gate/flam
+    {1, 318, 630, 1},  // 75: Gate/flam
+    {2, 336, 660, 1},  // 76: Gate/flam
+    {2, 354, 690, 1},  // 77: Gate/flam
+    {2, 372, 720, 1},  // 78: Gate/flam
+    {2, 390, 750, 1},  // 79: Gate/flam
+    {4, 500, 420, 0},  // 80: Open linear
+    {4, 545, 445, 0},  // 81: Open linear
+    {4, 590, 470, 0},  // 82: Open linear
+    {5, 635, 495, 0},  // 83: Open linear
+    {5, 680, 520, 0},  // 84: Open linear
+    {5, 725, 545, 0},  // 85: Open linear
+    {6, 770, 570, 0},  // 86: Open linear
+    {6, 815, 595, 0},  // 87: Open linear
+    {6, 860, 620, 0},  // 88: Open linear
+    {7, 905, 645, 0},  // 89: Open linear
+    {7, 950, 670, 0},  // 90: Open linear
+    {7, 995, 695, 0},  // 91: Open linear
+    {8, 1040, 720, 0},  // 92: Open linear
+    {8, 1085, 745, 0},  // 93: Open linear
+    {8, 1130, 770, 0},  // 94: Open linear
+    {9, 1175, 795, 0},  // 95: Open linear
+    {0, 350, 200, 1},  // 96: Metallic tail
+    {0, 405, 225, 1},  // 97: Metallic tail
+    {0, 460, 250, 1},  // 98: Metallic tail
+    {0, 515, 275, 1},  // 99: Metallic tail
+    {0, 570, 300, 1},  // 100: Metallic tail
+    {0, 625, 325, 1},  // 101: Metallic tail
+    {1, 680, 350, 1},  // 102: Metallic tail
+    {1, 735, 375, 1},  // 103: Metallic tail
+    {1, 790, 400, 1},  // 104: Metallic tail
+    {1, 845, 425, 1},  // 105: Metallic tail
+    {1, 900, 450, 1},  // 106: Metallic tail
+    {1, 955, 475, 1},  // 107: Metallic tail
+    {1, 1010, 500, 1},  // 108: Metallic tail
+    {1, 1065, 525, 1},  // 109: Metallic tail
+    {1, 1120, 550, 1},  // 110: Metallic tail
+    {1, 1175, 575, 1},  // 111: Metallic tail
+    {2, 800, 500, 0},  // 112: Experimental long
+    {2, 870, 535, 0},  // 113: Experimental long
+    {2, 940, 570, 0},  // 114: Experimental long
+    {2, 1010, 605, 0},  // 115: Experimental long
+    {3, 1080, 640, 0},  // 116: Experimental long
+    {3, 1150, 675, 0},  // 117: Experimental long
+    {3, 1220, 710, 0},  // 118: Experimental long
+    {3, 1290, 745, 0},  // 119: Experimental long
+    {4, 1360, 780, 0},  // 120: Experimental long
+    {4, 1430, 815, 0},  // 121: Experimental long
+    {4, 1500, 850, 0},  // 122: Experimental long
+    {4, 1570, 885, 0},  // 123: Experimental long
+    {5, 1640, 920, 0},  // 124: Experimental long
+    {5, 1710, 955, 0},  // 125: Experimental long
+    {5, 1780, 990, 0},  // 126: Experimental long
+    {5, 1850, 1025, 0}  // 127: Experimental long
+};
+
+// previous values, before Sonaglio v3 redesign and runtime fix. Still here for reference and testing, but will likely be removed after confirming the new ROM and runtime are solid.
+static const env_curve_t OLD_ENV_ROM[128] = {
     // Range 0-15: Tight & Dry (fast attack, short decay)
     {0, 20, 10, 1},   // 0: Fastest click
     {0, 30, 15, 1},   // 1

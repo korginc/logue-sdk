@@ -160,10 +160,10 @@ public:
                 break;
             }
 
-            // -- LFO Waves (Updated UI maximum to 5 in header.c)
-            case k_paramL1Wave: lfo1.wave_type = value % 6; break;
-            case k_paramL2Wave: lfo2.wave_type = value % 6; break;
-            case k_paramL3Wave: lfo3.wave_type = value % 6; break;
+            // -- LFO Waves (Updated UI maximum to 8 in header.c)
+            case k_paramL1Wave: lfo1.wave_type = value % 9; break;
+            case k_paramL2Wave: lfo2.wave_type = value % 9; break;
+            case k_paramL3Wave: lfo3.wave_type = value % 9; break;
 
             // -- LFO Depths (0.0 to 1.0)
             case k_paramL1Depth: m_lfo1_depth = (float)value / percent_normalizer; break;
@@ -234,24 +234,16 @@ public:
         // Apply direction to Target Osc 1
         m_osc1_target_hz = m_base_hz * m_osc1_dir;
 
-        // Calculate Target for Osc 2
+        // Calculate target for Osc 2 (sub-oct multiplier is smoothed at runtime)
         float detune_hz = (((float)m_params[k_paramO2Detune] / 50.0f) - 1.0f) * 5.0f;
-        float osc2_hz = m_base_hz + detune_hz;
-
-        switch (m_params[k_paramO2SubOct]) {
-            case 1: osc2_hz *= 0.5f; break;   // -1 Octave
-            case 2: osc2_hz *= 0.25f; break;  // -2 Octaves
-            case 3: osc2_hz *= 2.0f; break;   // +1 Octave
-            default: break;                   // 0 = Unison
-        }
-
-        // Apply direction to Target Osc 2
-        m_osc2_target_hz = osc2_hz * m_osc2_dir;
+        m_osc2_target_hz = (m_base_hz + detune_hz) * m_osc2_dir;
+        m_osc2_suboct_target_mult = sub_oct_ratio_for_value(m_params[k_paramO2SubOct]);
 
         // Immediately set oscillator frequencies so sound starts on the first sample.
         // Zero-crossing updates in the audio loop handle live pitch changes without clicks.
         osc1.set_frequency(m_osc1_target_hz, SAMPLE_RATE_F);
-        osc2.set_frequency(m_osc2_target_hz, SAMPLE_RATE_F);
+        m_osc2_suboct_smooth_mult = m_osc2_suboct_target_mult;
+        osc2.set_frequency(m_osc2_target_hz * m_osc2_suboct_smooth_mult, SAMPLE_RATE_F);
     }
 
     // The Drumlogue sends this when the sequencer stops!
@@ -312,6 +304,20 @@ public:
         l3_val = (l3_raw * (1.0f - ring3_mod_amount)) + (l3_multiplied * ring3_mod_amount);
     }
 
+    inline float lfo_rate_from_param(float param_value) {
+        return 0.01f * fasterpowf(Audio_Rate_Freq, param_value / percent_normalizer);
+    }
+
+    inline float sub_oct_ratio_for_value(int32_t sub_oct_value) {
+        switch (sub_oct_value) {
+            case 1: return 0.5f;
+            case 2: return 0.25f;
+            case 3: return 2.0f;
+            case 4: return fasterpow2f(1.8f); // +1.8 octaves (intentionally non-musical)
+            default: return 1.0f;
+        }
+    }
+
     inline void processBlock(float* __restrict main_out, size_t frames) {
 
         int buf_idx = 0;
@@ -340,8 +346,9 @@ public:
             // Apply smooth APC pitch modulation continuously
             if (m_pitch_mod_multiplier != 1.0f) {
                 osc1.set_frequency(m_osc1_target_hz * m_pitch_mod_multiplier, SAMPLE_RATE_F);
-                osc2.set_frequency(m_osc2_target_hz * m_pitch_mod_multiplier, SAMPLE_RATE_F);
+                osc2.set_frequency(m_osc2_target_hz * m_osc2_suboct_smooth_mult * m_pitch_mod_multiplier, SAMPLE_RATE_F);
             }
+            m_osc2_suboct_smooth_mult += (m_osc2_suboct_target_mult - m_osc2_suboct_smooth_mult) * m_osc2_suboct_slew;
 
             // 3 ACTIVE PARTIAL COUNTING (APC) BLOCK
             // Evaluate complex modulation targets only every 4 samples to save CPU cycles
@@ -370,6 +377,12 @@ public:
                 // are they are used in above ring_modulation(), so cannot be placed
                 // right here
                 switch (mod_target) {
+                    case k_paramProgram:
+                        // Macro target: subtle movement across multiple destinations.
+                        m_pitch_mod_multiplier = fasterpow2f((l1_val + l2_val) * 0.25f);
+                        m_mix2_mod_offset = l3_val * 0.2f;
+                        m_volume_mod_multiplier = l3_val * 0.1f;
+                        break;
                     case k_paramNote:
                         // Modulate global pitch by +/- 12 semitones using LFO 1
                         m_pitch_mod_multiplier = fasterpow2f(l1_val);
@@ -427,14 +440,42 @@ public:
                                                   (l3_val * m_lfo3_depth);
                         break;
 
-                    // -----------------------------------------------------
-                    // 2. LFO 1 RATE (FM Wobble / Chaos) - TODO
-                    // -----------------------------------------------------
-                    // case k_paramL1Rate:  // TODO
-                    //     m_lfo1_rate_mod_multiplier = (l1_val * m_lfo1_depth) +
-                    //                                  (l2_val * m_lfo2_depth) +
-                    //                                  (l3_val * m_lfo3_depth);
-                    //     break;
+                    case k_paramL1Rate: {
+                        float rate_mix = (l1_val * m_lfo1_depth) + (l2_val * m_lfo2_depth) + (l3_val * m_lfo3_depth);
+                        float mod_param = fmaxf(0.0f, fminf(100.0f, (float)m_params[k_paramL1Rate] + (rate_mix * 25.0f)));
+                        lfo1.set_rate(lfo_rate_from_param(mod_param), SAMPLE_RATE_F);
+                        break;
+                    }
+                    case k_paramL2Rate: {
+                        float rate_mix = (l1_val * m_lfo1_depth) + (l2_val * m_lfo2_depth) + (l3_val * m_lfo3_depth);
+                        float mod_param = fmaxf(0.0f, fminf(100.0f, (float)m_params[k_paramL2Rate] + (rate_mix * 25.0f)));
+                        lfo2.set_rate(lfo_rate_from_param(mod_param), SAMPLE_RATE_F);
+                        break;
+                    }
+                    case k_paramL3Rate: {
+                        float rate_mix = (l1_val * m_lfo1_depth) + (l2_val * m_lfo2_depth) + (l3_val * m_lfo3_depth);
+                        float mod_param = fmaxf(0.0f, fminf(100.0f, (float)m_params[k_paramL3Rate] + (rate_mix * 25.0f)));
+                        lfo3.set_rate(lfo_rate_from_param(mod_param), SAMPLE_RATE_F);
+                        break;
+                    }
+                    case k_paramL1Depth:
+                        m_lfo1_mod_val = fmaxf(-1.0f, fminf(1.0f, m_lfo1_depth + (l1_val * 0.5f)));
+                        break;
+                    case k_paramL2Depth:
+                        m_lfo2_mod_val = fmaxf(-1.0f, fminf(1.0f, m_lfo2_depth + (l2_val * 0.5f)));
+                        break;
+                    case k_paramL3Depth:
+                        m_lfo3_mod_val = fmaxf(-1.0f, fminf(1.0f, m_lfo3_depth + (l3_val * 0.5f)));
+                        break;
+                    case k_paramL3Wave:
+                        // Continuously scan LFO3 waveform for evolving motion.
+                        lfo3.wave_type = ((int)m_params[k_paramL3Wave] + (int)(l3_val * 3.0f) + 9) % 9;
+                        break;
+                    case k_paramBitRed:
+                        // Dynamic bit depth variation around user value.
+                        m_brr_steps = 1.0f + fasterpowf(2.0f, (float)m_params[k_paramBitRed] * 0.08f + (l2_val * 2.0f));
+                        if (m_brr_steps > 65536.0f) m_brr_steps = 65536.0f;
+                        break;
 
                     // -----------------------------------------------------
                     // 3. THE "FAKE RESONANCE" (CPU-Safe Filter Drive)
@@ -476,7 +517,7 @@ public:
 
             bool osc2_wrapped = (m_osc2_dir > 0.0f) ? (osc2.phase < pre_phase2) : (osc2.phase > pre_phase2);
             if (osc2_wrapped) {
-                osc2.set_frequency(m_osc2_target_hz * m_osc2_fm_mult, SAMPLE_RATE_F);
+                osc2.set_frequency(m_osc2_target_hz * m_osc2_suboct_smooth_mult * m_osc2_fm_mult, SAMPLE_RATE_F);
             }
 
             // 5. FILTER 1
@@ -655,6 +696,9 @@ private:
     float m_mix2_mod_offset = 0.0f;
     float m_pitch_mod_multiplier = 1.0f;
     float m_osc2_fm_mult = 1.0f;        // FM via LFO for k_paramO2Detune preset
+    float m_osc2_suboct_target_mult = 1.0f;
+    float m_osc2_suboct_smooth_mult = 1.0f;
+    float m_osc2_suboct_slew = 0.0025f;
     float m_volume_mod_multiplier = 1.0f;
     // float m_lfo1_rate_mod_multiplier = 1.0f; // TODO
     float m_drv1_mod_multiplier = 1.0f;

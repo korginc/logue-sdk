@@ -205,16 +205,18 @@ fast_inline void neon_envelope_init(neon_envelope_t* env) {
 }
 
 /**
- * Get envelope parameters from ROM
+ * Get envelope parameters from ROM.
+ * decay_ms and release_ms are uint16_t in the ROM (up to 500 ms).
+ * Passing uint8_t* would silently truncate values > 255 ms — use uint16_t*.
  */
 fast_inline void get_envelope(uint8_t shape_idx,
-                              uint8_t* attack_ms,
-                              uint8_t* decay_ms,
-                              uint8_t* release_ms,
-                              uint8_t* curve_type) {
+                              uint8_t*  attack_ms,
+                              uint16_t* decay_ms,
+                              uint16_t* release_ms,
+                              uint8_t*  curve_type) {
     const env_curve_t* env = &ENV_ROM[shape_idx];
-    *attack_ms = env->attack_ms;
-    *decay_ms = env->decay_ms;
+    *attack_ms  = env->attack_ms;
+    *decay_ms   = env->decay_ms;
     *release_ms = env->release_ms;
     *curve_type = env->curve_type;
 }
@@ -228,7 +230,8 @@ fast_inline void get_envelope(uint8_t shape_idx,
 fast_inline void neon_envelope_trigger(neon_envelope_t* env,
                                        uint32x4_t voice_mask,
                                        uint8_t shape_idx) {
-    uint8_t a_ms, d_ms, r_ms, curve;
+    uint8_t a_ms, curve;
+    uint16_t d_ms, r_ms;
     get_envelope(shape_idx, &a_ms, &d_ms, &r_ms, &curve);
 
     // Convert ms to samples at 48kHz

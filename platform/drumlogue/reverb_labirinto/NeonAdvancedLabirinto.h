@@ -75,7 +75,7 @@ static const int32_t k_presets[k_preset_number][k_total] = {
     // 2: labirinto - center values with random ping-pong stereo bouncing
     {k_labirinto, 60, 50, 50, 510, 100, 50, 1, 0, 10, 10},
     // 3: esotico - microtonal echoes on non-Western scale
-    {k_esotico, 40, 60, 80, 100, 100, 50, 4, 5, 5, 20},
+    {k_esotico, 40, 60, 80, 800, 100, 50, 4, 5, 5, 20},
     // 4: stellare - long, subtle, "spacey" shimmer (8-ch + shimmer)
     {k_stellare, 90, 50, 80, 800, 180, 30, 4, 35, 20, 10},
 };
@@ -348,7 +348,9 @@ public:
         updateFilterCoeffs();   // recalc wood/stone/metal filters
         updateBaseFc();
         if (filterMode == kFilterNoise) {
-            noiseGain = diffusion * dampingCoeff;
+            // Scale by 0.05: steady-state noise level = noiseGain per channel.
+            // Without the scale factor, accumulated noise at high decay overwhelms reverb.
+            noiseGain = diffusion * dampingCoeff * 0.05f;
         }
     }
 
@@ -405,10 +407,14 @@ public:
                 fc = 80.0f + dampingCoeff * 420.0f;    // 80..500 Hz
                 break;
             case kFilterMetal:
-                fc = 800.0f + dampingCoeff * 3200.0f;  // 800..4000 Hz  (glassy high-Q ringing)
+                // 300..1200 Hz: covers kick body and snare fundamentals so
+                // drums with energy in this range trigger the metallic resonance.
+                fc = 300.0f + dampingCoeff * 900.0f;
                 break;
             case kFilterCrystal:
-                fc = 2000.0f + dampingCoeff * 5000.0f; // 2000..7000 Hz (bright shimmer for esotico)
+                // 1000..3000 Hz: snare crack / hi-hat body. Stays below DAMP LPF
+                // even at moderate DAMP settings so the crystal character survives.
+                fc = 1000.0f + dampingCoeff * 2000.0f;
                 break;
             default:
                 fc = 1000.0f;
@@ -439,9 +445,10 @@ public:
         // standard Direct Form Biquad calculates its output using this mathematical formula:
         // y[n] = (b0 * x[n]) + (b1 * x[n-1]) + (b2 * x[n-2]) - (a1 * y[n-1]) - (a2 * y[n-2])
         if (filterMode == kFilterMetal) {
-            // METAL: High-Q Bandpass (Constant Peak Gain)
-            // Creates a glassy, inharmonic ringing resonance — used by labirinto
-            float Q = 8.0f;
+            // METAL: Bandpass resonance for Labirinto — Q=3 keeps the band wide
+            // enough to capture drum fundamentals (kick/snare) while still adding
+            // metallic ring. High-Q=8 was inaudible on broad-spectrum percussion.
+            float Q = 3.0f;
             alpha = sin_w0 / (2.0f * Q);
 
             b0 = alpha;
@@ -1079,15 +1086,17 @@ private:
 
         // =================================================================
         // Compute unified loop gain (needed before noise injection)
-        // Cap at 0.95: gives ~5.7s RT60 for the 42ms channel, builds to 71% in 1 second.
         // =================================================================
-        float loopGain = 0.7f + (decay * 0.295f);
-        float unifiedDecay = fminf(0.95f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
+        float loopGain = 0.30f + (decay * 0.55f);
+        // Cap at 0.88: safety net when lowDecayMult*highDecayMult > 1 can push
+        // loopGain above 1.  With the new base formula the cap only activates when
+        // both LOW and HIGH are near maximum AND TIME=100.
+        float unifiedDecay = fminf(0.88f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
         float32x4_t decayAll = vdupq_n_f32(unifiedDecay);
-        // Floor at 0.25 so the reverb onset is immediately audible at all TIME settings.
-        // Without this floor, TIME=90 → feedback=0.05 making the reverb take
-        // several seconds to become audible.
-        float input_gain = fmaxf(0.25f, 1.0f - unifiedDecay);
+        // Floor at 0.35: ensures the input signal contributes at ≥35% on every
+        // block, so the first reflection is immediately audible even at TIME=100
+        // (loopGain=0.845 → 1-0.845=0.155, floored to 0.35).
+        float input_gain = fmaxf(0.35f, 1.0f - unifiedDecay);
         float32x4_t feedback = vdupq_n_f32(input_gain);
 
         // =================================================================
@@ -1326,9 +1335,9 @@ private:
         }
 
         float mixed[FDN_CHANNELS];
-        float loopGain = 0.7f + (decay * 0.295f);
-        float unifiedDecay = fminf(0.95f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
-        float scalar_input_gain = fmaxf(0.25f, 1.0f - unifiedDecay);
+        float loopGain = 0.30f + (decay * 0.55f);
+        float unifiedDecay = fminf(0.88f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
+        float scalar_input_gain = fmaxf(0.35f, 1.0f - unifiedDecay);
 
         applyHadamardScalar(delayOut, mixed);
 

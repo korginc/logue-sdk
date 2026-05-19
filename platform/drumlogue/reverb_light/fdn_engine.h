@@ -429,9 +429,9 @@ public:
             float readPos = (float)writePos - dt;
             if (readPos < 0.0f) readPos += FDN_BUFFER_SIZE;
 
-            int idx1 = (int)readPos;
+            int idx1 = (int)readPos & FDN_BUFFER_MASK;  // mask required: readPos can be negative-corrected but still non-modular
             int idx2 = (idx1 + 1) & FDN_BUFFER_MASK;
-            float frac = readPos - idx1;
+            float frac = readPos - (float)(int)readPos;
 
             float val1 = fdnMem[ch * FDN_BUFFER_SIZE + idx1];
             float val2 = fdnMem[ch * FDN_BUFFER_SIZE + idx2];
@@ -560,7 +560,11 @@ public:
                 float out1 = dark_buffer[i1 & 4095] + f1 * (dark_buffer[(i1 + 1) & 4095] - dark_buffer[i1 & 4095]);
 
                 // 4. Read Head 2 (Offset by exactly half the window to hide the looping click)
-                float r2 = (float)dark_write - fmodf(dark_phase + 1024.0f, 2048.0f);
+                // Replace fmodf (expensive libc call) with conditional subtraction.
+                // dark_phase ∈ [0, 2048), so dark_phase + 1024 ∈ [1024, 3072) → at most one wrap.
+                float dp2 = dark_phase + 1024.0f;
+                if (dp2 >= 2048.0f) dp2 -= 2048.0f;
+                float r2 = (float)dark_write - dp2;
                 if (r2 < 0.0f) r2 += 4096.0f;
                 int i2 = (int)r2;
                 float f2 = r2 - i2;

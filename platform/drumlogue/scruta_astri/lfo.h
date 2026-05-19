@@ -8,7 +8,10 @@ enum LFOWaveform {
     LFO_SAW_UP,
     LFO_SQUARE,
     LFO_RANDOM,
-    LFO_EXP_DECAY // ADSR-like percussive strike
+    LFO_EXP_DECAY, // ADSR-like percussive strike
+    LFO_SINE,
+    LFO_PULSE_25,
+    LFO_SMOOTH_RANDOM
 };
 
 struct FastLFO {
@@ -50,6 +53,20 @@ struct FastLFO {
                 // CPU-efficient exponential decay from 1.0 down to -1.0.
                 float inv = 1.0f - phase;
                 current_val = (inv * inv * inv) * 2.0f - 1.0f;
+                break;
+            }
+            case LFO_SINE:
+                current_val = fastsinf((phase * 2.0f * 3.14159265359f) - 1.57079632679f);
+                break;
+            case LFO_PULSE_25:
+                current_val = (phase < 0.25f) ? 1.0f : -1.0f;
+                break;
+            case LFO_SMOOTH_RANDOM: {
+                if (phase < phase_inc) {
+                    rand_seed ^= rand_seed << 13; rand_seed ^= rand_seed >> 17; rand_seed ^= rand_seed << 5;
+                    float target = ((float)(int32_t)rand_seed / 2147483648.0f);
+                    current_val = (current_val * 0.7f) + (target * 0.3f);
+                }
                 break;
             }
             default:

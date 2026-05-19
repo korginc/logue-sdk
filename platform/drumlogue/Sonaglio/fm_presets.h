@@ -8,6 +8,13 @@
  * - 3 global controls: HitShape / BodyTilt / Drive
  *
  * Resonant / voice-allocation data removed from the active preset model.
+ *
+ * Current file is a hardware-test bank:
+ * - preset names are test1..test26
+ * - first four values are Instrument / Blend / Gap / Scatter
+ * - remaining values exercise engines, envelopes, LFO, and global shaping
+ *
+ * Replace with musical factory presets after HW tuning.
  */
 
 #pragma once
@@ -58,7 +65,7 @@ typedef enum {
 typedef struct {
     char name[NAME_LENGTH];
 
-    // Page 1: Probabilities
+    // Page 1: Instrument selector + macros
     uint8_t instrument_sel;
     uint8_t blend;
     uint8_t gap;
