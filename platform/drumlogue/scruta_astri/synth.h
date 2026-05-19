@@ -160,10 +160,10 @@ public:
                 break;
             }
 
-            // -- LFO Waves (Updated UI maximum to 5 in header.c)
-            case k_paramL1Wave: lfo1.wave_type = value % 6; break;
-            case k_paramL2Wave: lfo2.wave_type = value % 6; break;
-            case k_paramL3Wave: lfo3.wave_type = value % 6; break;
+            // -- LFO Waves (Updated UI maximum to 8 in header.c)
+            case k_paramL1Wave: lfo1.wave_type = value % 9; break;
+            case k_paramL2Wave: lfo2.wave_type = value % 9; break;
+            case k_paramL3Wave: lfo3.wave_type = value % 9; break;
 
             // -- LFO Depths (0.0 to 1.0)
             case k_paramL1Depth: m_lfo1_depth = (float)value / percent_normalizer; break;
@@ -466,7 +466,7 @@ public:
                         break;
                     case k_paramL3Wave:
                         // Continuously scan LFO3 waveform for evolving motion.
-                        lfo3.wave_type = ((int)m_params[k_paramL3Wave] + (int)(l3_val * 3.0f) + 6) % 6;
+                        lfo3.wave_type = ((int)m_params[k_paramL3Wave] + (int)(l3_val * 3.0f) + 9) % 9;
                         break;
                     case k_paramBitRed:
                         // Dynamic bit depth variation around user value.
