@@ -32,3 +32,4 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [DOMINATOR](https://mrglennjones.gumroad.com/l/dominator) | Glenn Jones | Gesture-Looped Hoover Synthesizer | nts-3 | paid |
 | [RetroReverb](https://mrglennjones.gumroad.com/l/sgfee) | Glenn Jones | PS1 & SNES Reverb | nts-3 | paid |
 | [Drymon Echo](https://mrglennjones.gumroad.com/l/drymonecho) | Glenn Jones | Tape saturation & doubletracker | nts-3 | free |
+| [BitKrusher](https://mrglennjones.gumroad.com/l/bitcrusher) | Glenn Jones | Bit depth and sample rate crusher | nts-3 | free |
