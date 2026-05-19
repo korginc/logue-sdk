@@ -48,7 +48,7 @@
 extern "C" {
 #endif
 // defined in header.c
-extern const char* instruments_strings[10];
+extern const char* const instruments_strings[10];
 extern const char* const lfo_shape_strings[9];
 extern const char* const lfo_target_strings[11];
 extern const char* const euclidean_mode_strings[9];

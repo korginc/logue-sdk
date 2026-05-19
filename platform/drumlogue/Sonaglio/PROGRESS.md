@@ -1,22 +1,5 @@
 # Sonaglio — Progress and Design Roadmap
 
-## Hardware Verified Fix — Unit Load Failure (unit error 4)
-
-**Status: CONFIRMED FIXED on hardware.**
-
-Sonaglio was failing to load on the drumlogue with "unit error 4" (`k_unit_err_samplerate = -4` in SDK), which in practice means the shared library had an unresolved symbol at dynamic link time.
-
-Root cause: `FM_PRESETS[]` is defined in `fm_presets.cc`, but `config.mk` only listed `unit.cc` in `CXXSRC`. The linker built the `.drmlgunit` without `fm_presets.cc`, leaving `FM_PRESETS` as an undefined external reference. The drumlogue runtime rejected the unit when it could not resolve that symbol.
-
-Fix applied to `config.mk`:
-```
-CXXSRC = unit.cc fm_presets.cc
-```
-
-A secondary issue was also fixed: `synth.h` declared `extern const char* const instruments_strings[10]` (double `const`) which did not match the definition in `header.c` (`const char* instruments_strings[10]`). The extra `const` was removed.
-
----
-
 ## Current status
 
 The project has moved from a 5-engine / allocation-driven layout to a **fixed 4-engine FM percussion instrument**.
@@ -185,4 +168,159 @@ The current stage is complete when:
 - presets are meaningfully distinct
 - the three global controls clearly affect sound
 - the test suite confirms the expected control behavior
+
+# Sonaglio — HW Test Follow-up Progress
+
+## Current Status
+
+First hardware smoke test passed:
+
+- the unit loads after adding the preset source file to `config.mk`
+- sound is produced
+- parameter/UI path is alive enough for first evaluation
+
+Main HW findings:
+
+- output level is too low
+- many presets are too short/tight
+- envelope indices above ~95 are more audible
+- sound shaping/filtering is not yet enough to judge the instrument properly
+- engine design needs a second review after envelope/gain fixes
+
+## Immediate Fixes in This Patch
+
+### 1. Output Gain / Selector Mix
+
+The selector model now uses only lane 0, but the previous output stage still behaved like a reduced four-voice sum:
+
+- low master gain
+- very small per-engine mix weights
+
+Patch:
+
+- `master_gain` increased from `0.25f` to `0.85f`
+- per-engine output trims changed to stronger nominal values:
+  - Kick: `0.95`
+  - Snare: `0.90`
+  - Metal: `0.78`
+  - Perc/Tom: `0.88`
+
+This should make the instrument much easier to monitor on hardware.
+
+### 2. Delayed Trigger Envelope Retrigger
+
+The selector model uses delayed combo/shadow hits through `pending[]`.
+
+Previously delayed triggers could fire while the shared envelope was already decaying or nearly off.
+
+Patch:
+
+- `process_pending_triggers()` now retriggers the shared envelope when an event fires.
+
+This should make `Gap`, combo modes, and shadow hits more audible.
+
+### 3. Envelope ROM Reshape
+
+The previous ROM had many very short low-index envelopes, and the first HW test confirmed they were nearly inaudible.
+
+Patch:
+
+- `envelope_rom.h` now contains a curated Sonaglio v3 table.
+- The lower indices are still tight, but no longer microscopic.
+- Indices 80–95 remain open/linear and are now explicitly useful for HW testing.
+- Reverse/pad-like slow-attack regions have been replaced by percussive long/metal/experimental shapes.
+
+New ranges:
+
+- `0–15`: tight click/body
+- `16–31`: punch drum
+- `32–47`: body drum
+- `48–63`: long body
+- `64–79`: gated/flam
+- `80–95`: open linear
+- `96–111`: metallic tail
+- `112–127`: experimental long
+
+### 4. Test Preset Bank
+
+The preset file is now a hardware-test bank:
+
+- `test1` … `test26`
+
+The goal is not musical factory presets yet. The goal is to evaluate:
+
+- single engines
+- combos
+- longer envelopes
+- gap/scatter behavior
+- LFO safety
+- drive/output level
+- metal/perc tails
+
+### 5. Preset Source Ownership
+
+`load_fm_preset()` is now expected to come from `fm_presets.cc`.
+
+The duplicate inline implementation was removed from `fm_perc_synth_process.h` to avoid duplicate-definition risk now that `fm_presets.cc` is compiled.
+
+## Build Note
+
+`config.mk` must include the preset source file.
+
+Example:
+
+```make
+CXXSRC = unit.cc fm_presets.cc
+```
+
+or equivalent, depending on the current project layout.
+
+## Files Updated
+
+- `fm_perc_synth_process.h`
+- `envelope_rom.h`
+- `fm_presets.cc`
+- `fm_presets.h`
+
+## Next Hardware Test
+
+Test this patch before deep engine redesign.
+
+Recommended checks:
+
+1. Confirm compile still succeeds with `fm_presets.cc` included.
+2. Confirm all presets `test1` … `test26` are visible/loadable.
+3. Check whether `test1`–`test8` are now clearly audible.
+4. Compare short envelopes around `test24` against longer envelopes around `test25`.
+5. Check combo audibility:
+   - `test9` K+S
+   - `test10` K+T
+   - `test11` K+M
+   - `test12` S+T
+   - `test13` S+M
+   - `test14` T+M
+6. Check whether output is now strong but not clipping.
+7. Check if delayed/shadow hits are now audible.
+
+## After This Test
+
+If the output/envelopes are now usable, continue with engine review in this order:
+
+1. Kick
+   - low-end strength
+   - attack click
+   - body stability
+2. Snare
+   - noise filtering
+   - crack/body balance
+   - tail audibility
+3. Perc/Tom
+   - body tuning
+   - block/tom distinction
+4. Metal
+   - brightness filtering
+   - tail control
+   - avoiding hash
+
+Do not redesign all engines until the envelope and output-gain layer has been validated on hardware.
 
