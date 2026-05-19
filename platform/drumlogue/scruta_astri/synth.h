@@ -312,6 +312,10 @@ public:
         l3_val = (l3_raw * (1.0f - ring3_mod_amount)) + (l3_multiplied * ring3_mod_amount);
     }
 
+    inline float lfo_rate_from_param(float param_value) {
+        return 0.01f * fasterpowf(Audio_Rate_Freq, param_value / percent_normalizer);
+    }
+
     inline void processBlock(float* __restrict main_out, size_t frames) {
 
         int buf_idx = 0;
@@ -370,6 +374,12 @@ public:
                 // are they are used in above ring_modulation(), so cannot be placed
                 // right here
                 switch (mod_target) {
+                    case k_paramProgram:
+                        // Macro target: subtle movement across multiple destinations.
+                        m_pitch_mod_multiplier = fasterpow2f((l1_val + l2_val) * 0.25f);
+                        m_mix2_mod_offset = l3_val * 0.2f;
+                        m_volume_mod_multiplier = l3_val * 0.1f;
+                        break;
                     case k_paramNote:
                         // Modulate global pitch by +/- 12 semitones using LFO 1
                         m_pitch_mod_multiplier = fasterpow2f(l1_val);
@@ -427,14 +437,42 @@ public:
                                                   (l3_val * m_lfo3_depth);
                         break;
 
-                    // -----------------------------------------------------
-                    // 2. LFO 1 RATE (FM Wobble / Chaos) - TODO
-                    // -----------------------------------------------------
-                    // case k_paramL1Rate:  // TODO
-                    //     m_lfo1_rate_mod_multiplier = (l1_val * m_lfo1_depth) +
-                    //                                  (l2_val * m_lfo2_depth) +
-                    //                                  (l3_val * m_lfo3_depth);
-                    //     break;
+                    case k_paramL1Rate: {
+                        float rate_mix = (l1_val * m_lfo1_depth) + (l2_val * m_lfo2_depth) + (l3_val * m_lfo3_depth);
+                        float mod_param = fmaxf(0.0f, fminf(100.0f, (float)m_params[k_paramL1Rate] + (rate_mix * 25.0f)));
+                        lfo1.set_rate(lfo_rate_from_param(mod_param), SAMPLE_RATE_F);
+                        break;
+                    }
+                    case k_paramL2Rate: {
+                        float rate_mix = (l1_val * m_lfo1_depth) + (l2_val * m_lfo2_depth) + (l3_val * m_lfo3_depth);
+                        float mod_param = fmaxf(0.0f, fminf(100.0f, (float)m_params[k_paramL2Rate] + (rate_mix * 25.0f)));
+                        lfo2.set_rate(lfo_rate_from_param(mod_param), SAMPLE_RATE_F);
+                        break;
+                    }
+                    case k_paramL3Rate: {
+                        float rate_mix = (l1_val * m_lfo1_depth) + (l2_val * m_lfo2_depth) + (l3_val * m_lfo3_depth);
+                        float mod_param = fmaxf(0.0f, fminf(100.0f, (float)m_params[k_paramL3Rate] + (rate_mix * 25.0f)));
+                        lfo3.set_rate(lfo_rate_from_param(mod_param), SAMPLE_RATE_F);
+                        break;
+                    }
+                    case k_paramL1Depth:
+                        m_lfo1_mod_val = fmaxf(-1.0f, fminf(1.0f, m_lfo1_depth + (l1_val * 0.5f)));
+                        break;
+                    case k_paramL2Depth:
+                        m_lfo2_mod_val = fmaxf(-1.0f, fminf(1.0f, m_lfo2_depth + (l2_val * 0.5f)));
+                        break;
+                    case k_paramL3Depth:
+                        m_lfo3_mod_val = fmaxf(-1.0f, fminf(1.0f, m_lfo3_depth + (l3_val * 0.5f)));
+                        break;
+                    case k_paramL3Wave:
+                        // Continuously scan LFO3 waveform for evolving motion.
+                        lfo3.wave_type = ((int)m_params[k_paramL3Wave] + (int)(l3_val * 3.0f) + 6) % 6;
+                        break;
+                    case k_paramBitRed:
+                        // Dynamic bit depth variation around user value.
+                        m_brr_steps = 1.0f + fasterpowf(2.0f, (float)m_params[k_paramBitRed] * 0.08f + (l2_val * 2.0f));
+                        if (m_brr_steps > 65536.0f) m_brr_steps = 65536.0f;
+                        break;
 
                     // -----------------------------------------------------
                     // 3. THE "FAKE RESONANCE" (CPU-Safe Filter Drive)
