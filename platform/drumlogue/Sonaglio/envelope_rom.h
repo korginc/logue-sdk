@@ -386,9 +386,17 @@ fast_inline void get_envelope(uint8_t shape_idx,
                               uint8_t* curve_type) {
     shape_idx &= 0x7F;
     const env_curve_t* env = &ENV_ROM[shape_idx];
-    *attack_ms = env->attack_ms;
-    *decay_ms = env->decay_ms;
-    *release_ms = env->release_ms;
+    // Runtime curation for Sonaglio percussion: keep onsets fast and tails
+    // controlled even when ROM entries are broad/experimental.
+    uint8_t a = env->attack_ms;
+    uint16_t d = env->decay_ms;
+    uint16_t r = env->release_ms;
+    if (a > 6) a = 6;
+    if (d > 480) d = 480;
+    if (r > 320) r = 320;
+    *attack_ms = a;
+    *decay_ms = d;
+    *release_ms = r;
     *curve_type = env->curve_type;
 }
 

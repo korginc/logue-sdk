@@ -218,9 +218,14 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
     float32x4_t env2 = vmulq_f32(envelope, envelope);
     float32x4_t env4 = vmulq_f32(env2, env2);
     float32x4_t env8 = vmulq_f32(env4, env4);
+    // Explicit domains per synthesis block.
+    float32x4_t amp_env = envelope;
+    float32x4_t pitch_env = env8;        // keep pitch transient short
+    float32x4_t index_env = env8;        // FM brightness dies quickly
+    float32x4_t noise_env = env2;        // longer than index, shorter than amp
 
     // Very short pitch lift for a sharper crack.
-    float32x4_t pitch_mult = exp2_neon(vmulq_f32(env8, snare->pitch_lift));
+    float32x4_t pitch_mult = exp2_neon(vmulq_f32(pitch_env, snare->pitch_lift));
 
     float32x4_t carrier_freq = vmulq_f32(snare->carrier_freq_base, lfo_pitch_mult);
     carrier_freq = vmulq_f32(carrier_freq, pitch_mult);
@@ -245,7 +250,7 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
     // - body_index gives a short shell/body tone
     // - crack_index is very transient
     float32x4_t index = vaddq_f32(vmulq_f32(env4, snare->body_index),
-                                  vmulq_f32(env8, snare->crack_index));
+                                  vmulq_f32(index_env, snare->crack_index));
     index = vaddq_f32(index, lfo_index_add);
 
     float32x4_t modulator = neon_sin(snare->modulator_phase);
@@ -264,7 +269,7 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
     float32x4_t tone_gain = vmulq_f32(env4, snare->tone_gain_base);
 
     // Noise can last with the envelope, but its level remains attack-weighted.
-    float32x4_t noise_gain = vmulq_f32(envelope,
+    float32x4_t noise_gain = vmulq_f32(noise_env,
                                        vmulq_f32(snare->noise_gain_base,
                                                  vaddq_f32(vdupq_n_f32(0.42f),
                                                            vmulq_n_f32(mix, 0.58f))));
@@ -274,8 +279,8 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
                                   vmulq_f32(env8, snare->click_gain));
 
     float32x4_t body = vmulq_f32(tone, tone_gain);
-    float32x4_t transient = vaddq_f32(vmulq_f32(noise, vmulq_n_f32(noise_gain, 0.55f)), click);
-    float32x4_t noise_tail = vmulq_f32(noise, vmulq_f32(noise_gain, envelope));
+    float32x4_t transient = vaddq_f32(vmulq_f32(noise, vmulq_n_f32(noise_gain, 0.65f)), click);
+    float32x4_t noise_tail = vmulq_f32(noise, vmulq_f32(noise_gain, amp_env));
     float32x4_t output = vaddq_f32(body, vaddq_f32(transient, noise_tail));
 
     // Short transient saturation, not a long tail distortion.

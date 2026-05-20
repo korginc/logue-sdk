@@ -171,10 +171,17 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
     float32x4_t env2 = vmulq_f32(envelope, envelope);
     float32x4_t env4 = vmulq_f32(env2, env2);
     float32x4_t env8 = vmulq_f32(env4, env4);
+    // Explicit envelope domains:
+    // - amp_env: overall loudness/body
+    // - pitch_env: short sweep so pitch drop is less exposed
+    // - index_env: shorter FM brightness than amp
+    float32x4_t amp_env = envelope;
+    float32x4_t pitch_env = env8;
+    float32x4_t index_env = env8;
 
     // Pitch sweep. exp2_neon remains the main expensive operation, but the
     // sweep depth is now precomputed in update().
-    float32x4_t sweep_octaves = vmulq_f32(env8, kick->sweep_depth);
+    float32x4_t sweep_octaves = vmulq_f32(pitch_env, kick->sweep_depth);
     float32x4_t pitch_mult = exp2_neon(sweep_octaves);
 
     float32x4_t carrier_freq = vmulq_f32(kick->carrier_freq_base, lfo_pitch_mult);
@@ -199,7 +206,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
 
     // FM index: body remains present; click is extremely front-loaded.
     float32x4_t body_index = vmulq_f32(env4, kick->body_index);
-    float32x4_t click_index = vmulq_f32(env8, kick->click_index);
+    float32x4_t click_index = vmulq_f32(index_env, kick->click_index);
     float32x4_t index = vaddq_f32(body_index, click_index);
     index = vaddq_f32(index, lfo_index_add);
 
@@ -209,7 +216,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
 
     float32x4_t body = neon_sin(modulated_phase);
     float32x4_t transient = vmulq_f32(modulator, vmulq_f32(env8, vdupq_n_f32(0.22f)));
-    float32x4_t output = vaddq_f32(vmulq_f32(body, envelope), transient);
+    float32x4_t output = vaddq_f32(vmulq_f32(body, amp_env), transient);
 
     // Transient drive: stronger only at the front of the hit.
     float32x4_t drive_gain = vaddq_f32(vdupq_n_f32(1.0f),

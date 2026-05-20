@@ -15,7 +15,7 @@
 #include "fm_presets.h"
 #include <stddef.h>
 
-const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
+const fm_preset_t FM_PRESETS_TEST[NUM_OF_PRESETS] = {
     // test1
     {
         "test1",
@@ -303,8 +303,7 @@ const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
     }
 };
 
-// to be restored when testing is done
-const fm_preset_t FM_PRESETS_ORIG[NUM_OF_PRESETS] = {
+const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
     // 0: TightKick
     {
         "TightKick",
