@@ -25,6 +25,7 @@
 #define SNARE_FREQ_MAX           650.0f
 #define SNARE_NOISE_HPF_CUTOFF   900.0f
 #define SNARE_NOISE_LPF_CUTOFF  6200.0f
+#define SNARE_NOISE_LOWP_CUTOFF  2200.0f
 
 typedef struct {
     // FM operators
@@ -50,6 +51,7 @@ typedef struct {
     // Noise section
     one_pole_t  noise_hpf;
     one_pole_t  noise_lpf;
+    one_pole_t  noise_lowp;
     neon_prng_t noise_prng;
 } snare_engine_t;
 
@@ -90,6 +92,7 @@ fast_inline void snare_engine_init(snare_engine_t* snare) {
 
     snare->noise_hpf.z1 = vdupq_n_f32(0.0f);
     snare->noise_lpf.z1 = vdupq_n_f32(0.0f);
+    snare->noise_lowp.z1 = vdupq_n_f32(0.0f);
 
     {
         uint64_t s0[2] = { 0xDEADBEEFCAFEBABEULL, 0x0123456789ABCDEFULL };
@@ -191,12 +194,13 @@ fast_inline void snare_engine_set_note(snare_engine_t* snare,
  */
 fast_inline float32x4_t snare_generate_noise(snare_engine_t* snare) {
     float32x4_t white = white_noise(&snare->noise_prng);
-
-    float32x4_t lp_hp = one_pole_lpf(&snare->noise_hpf, white, SNARE_NOISE_HPF_CUTOFF);
-    float32x4_t hpf_out = vsubq_f32(white, lp_hp);
-    float32x4_t bpf_out = one_pole_lpf(&snare->noise_lpf, hpf_out, SNARE_NOISE_LPF_CUTOFF);
-
-    return bpf_out;
+    float32x4_t low = one_pole_lpf(&snare->noise_lowp, white, SNARE_NOISE_LOWP_CUTOFF);
+    float32x4_t hp_lp = one_pole_lpf(&snare->noise_hpf, white, SNARE_NOISE_HPF_CUTOFF);
+    float32x4_t high = vsubq_f32(white, hp_lp);
+    float32x4_t band = one_pole_lpf(&snare->noise_lpf, high, SNARE_NOISE_LPF_CUTOFF);
+    return vaddq_f32(vmulq_n_f32(low, 0.18f),
+                     vaddq_f32(vmulq_n_f32(band, 0.62f),
+                               vmulq_n_f32(high, 0.20f)));
 }
 
 /**
@@ -216,7 +220,7 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
     float32x4_t env8 = vmulq_f32(env4, env4);
 
     // Very short pitch lift for a sharper crack.
-    float32x4_t pitch_mult = exp2_neon(vmulq_f32(env4, snare->pitch_lift));
+    float32x4_t pitch_mult = exp2_neon(vmulq_f32(env8, snare->pitch_lift));
 
     float32x4_t carrier_freq = vmulq_f32(snare->carrier_freq_base, lfo_pitch_mult);
     carrier_freq = vmulq_f32(carrier_freq, pitch_mult);
@@ -240,7 +244,7 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
     // FM index:
     // - body_index gives a short shell/body tone
     // - crack_index is very transient
-    float32x4_t index = vaddq_f32(vmulq_f32(env2, snare->body_index),
+    float32x4_t index = vaddq_f32(vmulq_f32(env4, snare->body_index),
                                   vmulq_f32(env8, snare->crack_index));
     index = vaddq_f32(index, lfo_index_add);
 
@@ -257,7 +261,7 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
     float32x4_t noise = snare_generate_noise(snare);
 
     // Tone is intentionally shorter than noise so the snare does not become a tom.
-    float32x4_t tone_gain = vmulq_f32(env2, snare->tone_gain_base);
+    float32x4_t tone_gain = vmulq_f32(env4, snare->tone_gain_base);
 
     // Noise can last with the envelope, but its level remains attack-weighted.
     float32x4_t noise_gain = vmulq_f32(envelope,
@@ -269,8 +273,10 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
     float32x4_t click = vmulq_f32(noise,
                                   vmulq_f32(env8, snare->click_gain));
 
-    float32x4_t output = vaddq_f32(vmulq_f32(tone, tone_gain),
-                                   vaddq_f32(vmulq_f32(noise, noise_gain), click));
+    float32x4_t body = vmulq_f32(tone, tone_gain);
+    float32x4_t transient = vaddq_f32(vmulq_f32(noise, vmulq_n_f32(noise_gain, 0.55f)), click);
+    float32x4_t noise_tail = vmulq_f32(noise, vmulq_f32(noise_gain, envelope));
+    float32x4_t output = vaddq_f32(body, vaddq_f32(transient, noise_tail));
 
     // Short transient saturation, not a long tail distortion.
     float32x4_t drive_gain = vaddq_f32(vdupq_n_f32(1.0f),

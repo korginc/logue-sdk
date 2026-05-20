@@ -328,7 +328,7 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
 
     synth->current_env_shape = ENV_SHAPE_DEFAULT;
     synth->euclid_offsets = vdupq_n_f32(0.0f);
-    synth->master_gain = 0.85f;  // Selector model uses only lane 0; previous 0.25 was too quiet on HW.
+    synth->master_gain = 1.05f;  // Raise post-clip output for stronger HW monitoring level.
 
     synth->instrument_sel = INST_KICK;
     synth->blend = 0.5f;
@@ -462,6 +462,10 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     float32x4_t lfo1 = vdupq_n_f32(0.0f);
     float32x4_t lfo2 = vdupq_n_f32(0.0f);
     lfo_enhanced_process(&synth->lfo, &lfo1, &lfo2);
+    // Most macro targets expect bipolar modulation around zero. Convert once
+    // here so target handlers below can apply stronger, symmetric movement.
+    float32x4_t lfo1_bipolar = lfo_unipolar_to_bipolar(lfo1);
+    float32x4_t lfo2_bipolar = lfo_unipolar_to_bipolar(lfo2);
 
     neon_envelope_process(&synth->envelope);
     float32x4_t envelope = synth->envelope.level;
@@ -476,21 +480,26 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     const uint32_t t2 = synth->lfo.target2;
     const float32x4_t d1 = synth->lfo.depth1;
     const float32x4_t d2 = synth->lfo.depth2;
+    // Onset randomization derived from dual-LFO decorrelation. This creates
+    // tiny per-hit instability (detune/jitter) without adding extra RNG in DSP.
+    float32x4_t onset_rand = vsubq_f32(lfo1_bipolar, lfo2_bipolar);
 
     switch (t1) {
         case LFO_TARGET_PITCH:
-            lfo_pitch_mult = vaddq_f32(lfo_pitch_mult, vmulq_f32(lfo1, d1));
+            lfo_pitch_mult = vaddq_f32(lfo_pitch_mult,
+                                       vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(0.65f)));
             break;
         case LFO_TARGET_INDEX:
             lfo_index_add = vaddq_f32(lfo_index_add,
-                                      vmulq_f32(vmulq_f32(lfo1, d1), vdupq_n_f32(0.25f)));
+                                      vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(0.45f)));
             break;
         case LFO_TARGET_ENV:
-            lfo_env_mult = vaddq_f32(lfo_env_mult, vmulq_f32(lfo1, d1));
+            lfo_env_mult = vaddq_f32(lfo_env_mult,
+                                     vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(0.55f)));
             break;
         case LFO_TARGET_NOISE_MIX:
             lfo_noise_add = vaddq_f32(lfo_noise_add,
-                                      vmulq_f32(vmulq_f32(lfo1, d1), vdupq_n_f32(0.15f)));
+                                      vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(0.30f)));
             break;
         case LFO_TARGET_METAL_GATE:
             lfo_metal_gate = vaddq_f32(vdupq_n_f32(0.5f),
@@ -503,18 +512,20 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
 
     switch (t2) {
         case LFO_TARGET_PITCH:
-            lfo_pitch_mult = vaddq_f32(lfo_pitch_mult, vmulq_f32(lfo2, d2));
+            lfo_pitch_mult = vaddq_f32(lfo_pitch_mult,
+                                       vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(0.65f)));
             break;
         case LFO_TARGET_INDEX:
             lfo_index_add = vaddq_f32(lfo_index_add,
-                                      vmulq_f32(vmulq_f32(lfo2, d2), vdupq_n_f32(0.25f)));
+                                      vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(0.45f)));
             break;
         case LFO_TARGET_ENV:
-            lfo_env_mult = vaddq_f32(lfo_env_mult, vmulq_f32(lfo2, d2));
+            lfo_env_mult = vaddq_f32(lfo_env_mult,
+                                     vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(0.55f)));
             break;
         case LFO_TARGET_NOISE_MIX:
             lfo_noise_add = vaddq_f32(lfo_noise_add,
-                                      vmulq_f32(vmulq_f32(lfo2, d2), vdupq_n_f32(0.15f)));
+                                      vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(0.30f)));
             break;
         case LFO_TARGET_METAL_GATE:
             lfo_metal_gate = vaddq_f32(vdupq_n_f32(0.5f),
@@ -525,7 +536,9 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
             break;
     }
 
-    lfo_pitch_mult = vmaxq_f32(lfo_pitch_mult, vdupq_n_f32(0.125f));
+    lfo_pitch_mult = vaddq_f32(lfo_pitch_mult, vmulq_n_f32(onset_rand, 0.04f));
+    lfo_index_add = vaddq_f32(lfo_index_add, vmulq_n_f32(onset_rand, 0.08f));
+    lfo_pitch_mult = lfo_vclamp(lfo_pitch_mult, 0.60f, 1.55f);
     envelope = vmulq_f32(envelope, fm_vclamp01(lfo_env_mult));
 
     uint32x4_t active_mask = vmvnq_u32(vceqq_u32(synth->envelope.stage,
@@ -574,10 +587,10 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     // Selector model: only one lane and usually one/two engines are active.
     // These are no longer four-voice summing weights; they are nominal engine
     // output trims. Keep them strong enough for direct HW monitoring.
-    mix = vaddq_f32(mix, vmulq_n_f32(kick_out,  0.95f));
-    mix = vaddq_f32(mix, vmulq_n_f32(snare_out, 0.90f));
-    mix = vaddq_f32(mix, vmulq_n_f32(metal_out, 0.78f));
-    mix = vaddq_f32(mix, vmulq_n_f32(perc_out,  0.88f));
+    mix = vaddq_f32(mix, vmulq_n_f32(kick_out,  1.00f));
+    mix = vaddq_f32(mix, vmulq_n_f32(snare_out, 0.96f));
+    mix = vaddq_f32(mix, vmulq_n_f32(metal_out, 0.84f));
+    mix = vaddq_f32(mix, vmulq_n_f32(perc_out,  0.93f));
 
     mix = vmulq_f32(mix, fm_make_drive_gain(drive));
     mix = fm_soft_clip(mix);

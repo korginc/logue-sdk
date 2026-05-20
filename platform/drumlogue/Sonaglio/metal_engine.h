@@ -74,6 +74,7 @@ typedef struct {
     // Noise layer
     neon_prng_t noise_prng;
     one_pole_t noise_hpf;
+    one_pole_t noise_bpf;
 } metal_engine_t;
 
 fast_inline float32x4_t metal_clamp01(float32x4_t x) {
@@ -190,6 +191,7 @@ fast_inline void metal_engine_init(metal_engine_t* metal) {
     }
 
     metal->noise_hpf.z1 = vdupq_n_f32(0.0f);
+    metal->noise_bpf.z1 = vdupq_n_f32(0.0f);
 
     metal_engine_recompute(metal);
 }
@@ -342,13 +344,16 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
         float32x4_t white = white_noise(&metal->noise_prng);
         float32x4_t lp = one_pole_lpf_a(&metal->noise_hpf, white, METAL_NOISE_HP_A);
         float32x4_t noise_hp = vsubq_f32(white, lp);
+        float32x4_t noise_bp = one_pole_lpf(&metal->noise_bpf, noise_hp, 7600.0f);
+        float32x4_t noise_colored = vaddq_f32(vmulq_n_f32(noise_hp, 0.58f),
+                                              vmulq_n_f32(noise_bp, 0.42f));
 
         float32x4_t noise_level = vmulq_f32(metal->noise_gain,
                                             vaddq_f32(vdupq_n_f32(0.65f),
                                                        vmulq_n_f32(live_brightness, 0.65f)));
 
         fm_output = vaddq_f32(fm_output,
-                              vmulq_f32(noise_hp, vmulq_f32(noise_level, env4)));
+                              vmulq_f32(noise_colored, vmulq_f32(noise_level, env4)));
     }
 
     fm_output = vmulq_f32(fm_output, metal->output_gain);

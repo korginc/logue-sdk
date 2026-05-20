@@ -113,8 +113,8 @@ fast_inline void perc_engine_update(perc_engine_t* perc,
 
     // Short pitch lift at the attack. This decays downward naturally because
     // process() multiplies it by env4.
-    perc->pitch_lift = vaddq_f32(vdupq_n_f32(0.05f),
-                                 vaddq_f32(vmulq_n_f32(perc->attack, 0.38f),
+    perc->pitch_lift = vaddq_f32(vdupq_n_f32(0.03f),
+                                 vaddq_f32(vmulq_n_f32(perc->attack, 0.22f),
                                             vmulq_n_f32(inv_body, 0.10f)));
 
     // Stable body index. Kept moderate so it does not become a melodic FM tone.
@@ -122,8 +122,8 @@ fast_inline void perc_engine_update(perc_engine_t* perc,
                                  vmulq_n_f32(perc->body, 0.95f));
 
     // Short strike index. This is where Attack gets most of its personality.
-    perc->strike_index = vaddq_f32(vdupq_n_f32(0.45f),
-                                   vaddq_f32(vmulq_n_f32(perc->attack, 2.10f),
+    perc->strike_index = vaddq_f32(vdupq_n_f32(0.35f),
+                                   vaddq_f32(vmulq_n_f32(perc->attack, 1.35f),
                                               vmulq_n_f32(inv_body, 0.35f)));
 
     // Body makes the hit feel present; Attack adds a little controlled push.
@@ -182,7 +182,7 @@ fast_inline float32x4_t perc_engine_process(perc_engine_t* perc,
 
     // Short transient pitch lift. This makes the hit read as a strike instead
     // of a static FM tone.
-    float32x4_t pitch_mult = exp2_neon(vmulq_f32(env4, perc->pitch_lift));
+    float32x4_t pitch_mult = exp2_neon(vmulq_f32(env8, perc->pitch_lift));
 
     float32x4_t carrier_freq = vmulq_f32(perc->carrier_freq_base, lfo_pitch_mult);
     carrier_freq = vmulq_f32(carrier_freq, pitch_mult);
@@ -214,7 +214,7 @@ fast_inline float32x4_t perc_engine_process(perc_engine_t* perc,
     float32x4_t mod2 = neon_sin(perc->phase[2]);
 
     float32x4_t body_part = vmulq_f32(mod1,
-                                      vmulq_f32(envelope, perc->body_index));
+                                      vmulq_f32(env4, perc->body_index));
     float32x4_t strike_part = vmulq_f32(mod2,
                                         vmulq_f32(env8, perc->strike_index));
 
@@ -224,7 +224,9 @@ fast_inline float32x4_t perc_engine_process(perc_engine_t* perc,
     float32x4_t modulated_phase = vaddq_f32(perc->phase[0],
                                             vmulq_n_f32(modulation, 1.85f));
 
-    float32x4_t output = neon_sin(modulated_phase);
+    float32x4_t body = neon_sin(modulated_phase);
+    float32x4_t transient = vmulq_f32(mod2, vmulq_f32(env8, vdupq_n_f32(0.18f)));
+    float32x4_t output = vaddq_f32(vmulq_f32(body, envelope), transient);
 
     // Short attack saturation for more "hit" without making the tail harsh.
     float32x4_t drive_gain = vaddq_f32(vdupq_n_f32(1.0f),

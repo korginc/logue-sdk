@@ -108,8 +108,8 @@ fast_inline void kick_engine_update(kick_engine_t* kick,
     // Attack gives a sharper drop. Body slightly restrains the drop so the kick
     // stays low and solid instead of becoming a tom-like chirp.
     // Approx range: 0.45 .. 3.10 octaves.
-    kick->sweep_depth = vaddq_f32(vdupq_n_f32(0.45f),
-                                  vaddq_f32(vmulq_n_f32(kick->attack, 2.30f),
+    kick->sweep_depth = vaddq_f32(vdupq_n_f32(0.18f),
+                                  vaddq_f32(vmulq_n_f32(kick->attack, 1.10f),
                                              vmulq_n_f32(inv_body, 0.35f)));
 
     // Sustained body FM remains moderate. Too much sustained FM weakens the
@@ -174,7 +174,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
 
     // Pitch sweep. exp2_neon remains the main expensive operation, but the
     // sweep depth is now precomputed in update().
-    float32x4_t sweep_octaves = vmulq_f32(env4, kick->sweep_depth);
+    float32x4_t sweep_octaves = vmulq_f32(env8, kick->sweep_depth);
     float32x4_t pitch_mult = exp2_neon(sweep_octaves);
 
     float32x4_t carrier_freq = vmulq_f32(kick->carrier_freq_base, lfo_pitch_mult);
@@ -198,15 +198,18 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
                                       kick->modulator_phase);
 
     // FM index: body remains present; click is extremely front-loaded.
-    float32x4_t index = vaddq_f32(vmulq_f32(envelope, kick->body_index),
-                                  vmulq_f32(env8, kick->click_index));
+    float32x4_t body_index = vmulq_f32(env4, kick->body_index);
+    float32x4_t click_index = vmulq_f32(env8, kick->click_index);
+    float32x4_t index = vaddq_f32(body_index, click_index);
     index = vaddq_f32(index, lfo_index_add);
 
     float32x4_t modulator = neon_sin(kick->modulator_phase);
     float32x4_t modulated_phase = vaddq_f32(kick->carrier_phase,
                                             vmulq_f32(modulator, index));
 
-    float32x4_t output = neon_sin(modulated_phase);
+    float32x4_t body = neon_sin(modulated_phase);
+    float32x4_t transient = vmulq_f32(modulator, vmulq_f32(env8, vdupq_n_f32(0.22f)));
+    float32x4_t output = vaddq_f32(vmulq_f32(body, envelope), transient);
 
     // Transient drive: stronger only at the front of the hit.
     float32x4_t drive_gain = vaddq_f32(vdupq_n_f32(1.0f),
@@ -215,7 +218,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
     output = kick_clip_cubic(output);
 
     // Body compensation.
-    output = vmulq_f32(output, vmulq_f32(envelope, kick->output_gain));
+    output = vmulq_f32(output, kick->output_gain);
 
     return vbslq_f32(active_mask, output, vdupq_n_f32(0.0f));
 }
