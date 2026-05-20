@@ -62,6 +62,7 @@ struct delay_line_t {
     }
 };
 
+// Update the clone_t struct to include filter parameters
 typedef struct {
     float delay_samples;
     float wobble_depth_samples;
@@ -73,6 +74,11 @@ typedef struct {
     float net_gain_r;
     float wobble_phase;
     float wobble_rate_mul;
+
+    // Add these for real one-pole IIR low-pass filtering
+    float lp_coef;
+    float lp_state_l;
+    float lp_state_r;
 } clone_t;
 
 enum params {

@@ -41,9 +41,16 @@ void PercussionSpatializer::Teardown() {}
 void PercussionSpatializer::Reset() {
     if (!initialized_) return;
     delay_.clear();
-    rng_state_  = 0x9E3779B9u;  // same constant as constructor (was 0x9E3729B9 — one-bit typo)
+    rng_state_  = 0x9E3779B9u;
     prev_mag_   = 0.0f;
     smoothing_remaining_ = 0;
+
+    // Clear filter histories to prevent pops on reset
+    for (int i = 0; i < kMaxClones; ++i) {
+        clones_[i].lp_state_l = 0.0f;
+        clones_[i].lp_state_r = 0.0f;
+    }
+
     rebuild_profile();
     randomize_hit();
 }
@@ -196,17 +203,21 @@ void PercussionSpatializer::rebuild_profile() {
     // Base delays (ms): span 50-450ms so each clone sits ~40ms apart — the minimum
     // perceptual gap to hear distinct hits rather than a flam/shake. Previous values
     // (18-115ms, ~11ms gaps) collapsed all clones into a single smeared transient.
-    static const float tribal[MAX_CLONES]   = {  50.f,  85.f, 125.f, 170.f, 220.f, 270.f, 315.f, 360.f, 405.f, 450.f };
+    // compress the delay times to pull them back into the ensemble fusion window, drop the fake lp_attn scalar,
+    // and calculate a standard, stable one-pole low-pass filter coefficient using:
+    // $$\omega = \frac{2\pi \cdot f_c}{f_s}$$$$\alpha = \frac{\omega}{\omega + 1}$$
+    static const float tribal[MAX_CLONES]   = {  8.f, 16.f, 25.f, 35.f, 46.f, 58.f, 70.f, 82.f, 94.f, 106.f };
     // Military: slightly earlier entries, wider mid-range spread, ensemble punch
-    static const float military[MAX_CLONES] = {  40.f,  75.f, 115.f, 165.f, 225.f, 290.f, 355.f, 405.f, 435.f, 450.f };
+    static const float military[MAX_CLONES] = {  6.f, 12.f, 19.f, 27.f, 36.f, 46.f, 57.f, 69.f, 81.f,  93.f };
     // Angel: long-tailed, wider gaps for airy / spatially diffuse feel
-    static const float angel[MAX_CLONES]    = {  60.f, 100.f, 150.f, 205.f, 265.f, 325.f, 380.f, 420.f, 445.f, 455.f };
+    static const float angel[MAX_CLONES]    = { 10.f, 19.f, 29.f, 40.f, 52.f, 65.f, 79.f, 94.f, 110.f, 126.f };
+
 
     const float* base_delay = (mode_ == MODE_MILITARY) ? military :
                               (mode_ == MODE_ANGEL)    ? angel    : tribal;
 
     // Profile fields consumed by randomize_hit()
-    profile_.jitter_ms      = 0.8f + depth_ * 3.2f + gap_ * 1.5f;
+    profile_.jitter_ms      = 0.4f + depth_ * 1.6f + gap_ * 0.8f; // tightened jitter
     profile_.scatter_amount = (mode_ == MODE_ANGEL ? 0.18f : 0.08f) + scatter_ * (mode_ == MODE_ANGEL ? 0.82f : 0.55f);
     profile_.pan_exponent   = mode_pan_exponent(mode_);
     profile_.pan_model      = mode_pan_model(mode_);
@@ -214,24 +225,25 @@ void PercussionSpatializer::rebuild_profile() {
     // HP/LP base frequencies and per-follower multipliers
     float hp_base, lp_base, hp_follow;
     if (mode_ == MODE_TRIBAL) {
-        hp_base = 55.0f; lp_base = 3200.0f; hp_follow = 0.35f;
+        hp_base = 60.0f; lp_base = 3500.0f; hp_follow = 0.35f;
     } else if (mode_ == MODE_MILITARY) {
         // Lower HP preserves the body/punch of each stroke.
         // Was 900 Hz (killed everything below — followers became inaudible).
-        hp_base = 130.0f; lp_base = 7000.0f; hp_follow = 0.28f;
+        hp_base = 130.0f; lp_base = 7500.0f; hp_follow = 0.28f;
     } else {
-        hp_base = 180.0f; lp_base = 5200.0f; hp_follow = 0.35f;
+        hp_base = 180.0f; lp_base = 5500.0f; hp_follow = 0.35f;
     }
 
     // Gain rolloff: exponential avoids the linear formula going negative at i>=9
     // Military: 0.92^i — slow rolloff keeps late clones audible (ensemble presence)
-    const float gain_step = (mode_ == MODE_MILITARY) ? 0.93f :
-                            (mode_ == MODE_ANGEL)    ? 0.90f : 0.94f;
+    // Faster gain decay profile to control the tail length
+    const float gain_step = (mode_ == MODE_MILITARY) ? 0.84f :
+                            (mode_ == MODE_ANGEL)    ? 0.78f : 0.86f;
 
     const float ms_to_smp = (float)sample_rate_ * 0.001f;
-    const float wobble_ms = 0.20f + wobble_ * 2.8f;
+    const float wobble_ms = 0.15f + wobble_ * 1.8f; // reduced extreme wobble depth
     const float inv_cnt1  = 1.0f / (float)(clone_count_ > 1 ? clone_count_ - 1 : 1);
-    const float gap_ms    = 6.0f + gap_ * 44.0f;
+    const float gap_ms    = 3.0f + gap_ * 22.0f; // tighter gap scaling
 
     for (int i = 0; i < clone_count_; ++i) {
         const float t        = (float)i * inv_cnt1;
@@ -239,7 +251,7 @@ void PercussionSpatializer::rebuild_profile() {
 
         // Delay and wobble (samples)
         const float gap_spread = gap_ms * (0.40f + 0.95f * t);
-        float dms = base_delay[i] * (0.60f + 0.60f * depth_) + depth_ * 18.0f * t + gap_spread;
+        float dms = base_delay[i] * (0.70f + 0.50f * depth_) + depth_ * 10.0f * t + gap_spread;
         clones_[i].delay_samples = dms * ms_to_smp;
         clones_[i].wobble_depth_samples = wobble_ms * (0.20f + 0.30f * t) * ms_to_smp;
 
@@ -281,11 +293,16 @@ void PercussionSpatializer::rebuild_profile() {
 
         // HP/LP attenuation baked into pan_gain (eliminates per-sample division)
         float hp_hz   = hp_base * (1.0f + follower * hp_follow);
-        float lp_hz   = lp_base * (1.0f - follower * (mode_ == MODE_TRIBAL ? 0.28f : 0.18f));
+        float lp_hz   = lp_base * (1.0f - follower * (mode_ == MODE_TRIBAL ? 0.38f : 0.25f)); // wider filter dispersion
         float hp_attn = 1.0f / (1.0f + hp_hz * 0.0012f);
-        float lp_attn = 1.0f - fminf(0.85f, lp_hz * inv_12000);
-        clones_[i].pan_gain_l = pan_l * hp_attn * lp_attn;
-        clones_[i].pan_gain_r = pan_r * hp_attn * lp_attn;
+
+        // Compute actual one-pole filter coefficient for this clone
+        float lp_omega = 2.0f * M_PI * lp_hz / (float)sample_rate_;
+        clones_[i].lp_coef = lp_omega / (lp_omega + 1.0f);
+
+        // Store gains without the artificial amplitude-only LPF attenuation
+        clones_[i].pan_gain_l = pan_l * hp_attn;
+        clones_[i].pan_gain_r = pan_r * hp_attn;
 
         // Base gain: exponential rolloff × scatter detachment
         float raw_gain       = fasterpowf(gain_step, (float)i);
@@ -323,7 +340,7 @@ void PercussionSpatializer::randomize_hit() {
 // ---------------------------------------------------------------------------
 // render_block4 — 4 frames, NEON interpolation across time
 // ---------------------------------------------------------------------------
-static fast_inline void mix_clone_batch4(const clone_t* clones,
+static fast_inline void mix_clone_batch4(clone_t* clones,
                                          int base,
                                          const delay_line_t& delay,
                                          float rate,
@@ -334,7 +351,7 @@ static fast_inline void mix_clone_batch4(const clone_t* clones,
     alignas(16) float dl[4], dr[4], gainL[4], gainR[4];
 
     for (int lane = 0; lane < 4; ++lane) {
-        const clone_t& c = clones[base + lane];
+        clone_t& c = clones[base + lane];
         float total_d = c.delay_samples + c.scatter_samples;
         if (total_d < 2.0f) total_d = 2.0f;
         total_d += fastersinfullf(c.wobble_phase) * c.wobble_depth_samples;
@@ -346,8 +363,15 @@ static fast_inline void mix_clone_batch4(const clone_t* clones,
         int i0 = base_int & delay_line_t::kMask;
         int i1 = (i0 + 1) & delay_line_t::kMask;
 
-        dl[lane] = delay.l[i0] + (delay.l[i1] - delay.l[i0]) * fr;
-        dr[lane] = delay.r[i0] + (delay.r[i1] - delay.r[i0]) * fr;
+        float raw_dl = delay.l[i0] + (delay.l[i1] - delay.l[i0]) * fr;
+        float raw_dr = delay.r[i0] + (delay.r[i1] - delay.r[i0]) * fr;
+
+        // --- ACTUAL IIR FILTERING ---
+        c.lp_state_l += c.lp_coef * (raw_dl - c.lp_state_l);
+        c.lp_state_r += c.lp_coef * (raw_dr - c.lp_state_r);
+
+        dl[lane] = c.lp_state_l;
+        dr[lane] = c.lp_state_r;
         gainL[lane] = c.net_gain_l * gap_boost;
         gainR[lane] = c.net_gain_r * gap_boost;
     }
@@ -360,7 +384,81 @@ static fast_inline void mix_clone_batch4(const clone_t* clones,
     wet_r += PercussionSpatializer::horizontal_sum4(vmulq_f32(vdr, vgr));
 }
 
-static fast_inline void mix_clone_batch2(const clone_t* clones,
+static fast_inline void mix_clone_batch2(clone_t* clones,
+                                         int base,
+                                         const delay_line_t& delay,
+                                         float rate,
+                                         float gap_boost,
+                                         float& wet_l,
+                                         float& wet_r) {
+    (void)rate;
+    alignas(16) float dl[2], dr[2], gainL[2], gainR[2];
+
+    for (int lane = 0; lane < 2; ++lane) {
+        clone_t& c = clones[base + lane];
+        float total_d = c.delay_samples + c.scatter_samples;
+        if (total_d < 2.0f) total_d = 2.0f;
+        total_d += fastersinfullf(c.wobble_phase) * c.wobble_depth_samples;
+
+        float raw_pos = (float)(delay.write - 1) - total_d;
+        float safe_pos = raw_pos + (float)(delay_line_t::kLen * 8);
+        int base_int = (int)safe_pos;
+        float fr = safe_pos - (float)base_int;
+        int i0 = base_int & delay_line_t::kMask;
+        int i1 = (i0 + 1) & delay_line_t::kMask;
+
+        float raw_dl = delay.l[i0] + (delay.l[i1] - delay.l[i0]) * fr;
+        float raw_dr = delay.r[i0] + (delay.r[i1] - delay.r[i0]) * fr;
+
+        // --- ACTUAL IIR FILTERING ---
+        c.lp_state_l += c.lp_coef * (raw_dl - c.lp_state_l);
+        c.lp_state_r += c.lp_coef * (raw_dr - c.lp_state_r);
+
+        dl[lane] = c.lp_state_l;
+        dr[lane] = c.lp_state_r;
+        gainL[lane] = c.net_gain_l * gap_boost;
+        gainR[lane] = c.net_gain_r * gap_boost;
+    }
+
+    float32x2_t vdl = vld1_f32(dl);
+    float32x2_t vdr = vld1_f32(dr);
+    float32x2_t vgl = vld1_f32(gainL);
+    float32x2_t vgr = vld1_f32(gainR);
+    wet_l += PercussionSpatializer::horizontal_sum2(vmul_f32(vdl, vgl));
+    wet_r += PercussionSpatializer::horizontal_sum2(vmul_f32(vdr, vgr));
+}
+
+static fast_inline void mix_clone_scalar(clone_t& c,
+                                         const delay_line_t& delay,
+                                         float rate,
+                                         float gap_boost,
+                                         float& wet_l,
+                                         float& wet_r) {
+    (void)rate;
+    float total_d = c.delay_samples + c.scatter_samples;
+    if (total_d < 2.0f) total_d = 2.0f;
+    total_d += fastersinfullf(c.wobble_phase) * c.wobble_depth_samples;
+
+    float raw_pos = (float)(delay.write - 1) - total_d;
+    float safe_pos = raw_pos + (float)(delay_line_t::kLen * 8);
+    int base_int = (int)safe_pos;
+    float fr = safe_pos - (float)base_int;
+    int i0 = base_int & delay_line_t::kMask;
+    int i1 = (i0 + 1) & delay_line_t::kMask;
+
+    float raw_dl = delay.l[i0] + (delay.l[i1] - delay.l[i0]) * fr;
+    float raw_dr = delay.r[i0] + (delay.r[i1] - delay.r[i0]) * fr;
+
+    // --- ACTUAL IIR FILTERING ---
+    c.lp_state_l += c.lp_coef * (raw_dl - c.lp_state_l);
+    c.lp_state_r += c.lp_coef * (raw_dr - c.lp_state_r);
+
+    wet_l += c.lp_state_l * c.net_gain_l * gap_boost;
+    wet_r += c.lp_state_r * c.net_gain_r * gap_boost;
+}
+
+
+static fast_inline void mix_clone_batch2(clone_t* clones,
                                          int base,
                                          const delay_line_t& delay,
                                          float rate,
@@ -397,7 +495,7 @@ static fast_inline void mix_clone_batch2(const clone_t* clones,
     wet_r += PercussionSpatializer::horizontal_sum2(vmul_f32(vdr, vgr));
 }
 
-static fast_inline void mix_clone_scalar(const clone_t& c,
+static fast_inline void mix_clone_scalar(clone_t& c,
                                          const delay_line_t& delay,
                                          float rate,
                                          float gap_boost,
