@@ -126,6 +126,12 @@ typedef struct {
 
     // Output gain
     float master_gain;
+    // Post-engine separation filters (lane0 active in selector model).
+    one_pole_t kick_lp;
+    one_pole_t snare_hp;
+    one_pole_t perc_bp_lp;
+    one_pole_t perc_bp_hp;
+    one_pole_t metal_hp;
 } fm_perc_synth_t;
 
 // ============================================================================
@@ -329,6 +335,11 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
     synth->current_env_shape = ENV_SHAPE_DEFAULT;
     synth->euclid_offsets = vdupq_n_f32(0.0f);
     synth->master_gain = 1.05f;  // Raise post-clip output for stronger HW monitoring level.
+    one_pole_reset(&synth->kick_lp);
+    one_pole_reset(&synth->snare_hp);
+    one_pole_reset(&synth->perc_bp_lp);
+    one_pole_reset(&synth->perc_bp_hp);
+    one_pole_reset(&synth->metal_hp);
 
     synth->instrument_sel = INST_KICK;
     synth->blend = 0.5f;
@@ -584,13 +595,22 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     );
 
     float32x4_t mix = vdupq_n_f32(0.0f);
+    // Separation EQ per engine (lightweight one-pole):
+    // kick: low-passed body support, snare: high-passed crack/noise,
+    // metal: brighter high-pass, perc: mid-focused band-pass-ish layer.
+    float32x4_t kick_sep = one_pole_lpf(&synth->kick_lp, kick_out, 190.0f);
+    float32x4_t snare_sep = one_pole_hpf(&synth->snare_hp, snare_out, 420.0f);
+    float32x4_t metal_sep = one_pole_hpf(&synth->metal_hp, metal_out, 1800.0f);
+    float32x4_t perc_lp = one_pole_lpf(&synth->perc_bp_lp, perc_out, 1400.0f);
+    float32x4_t perc_hp = one_pole_hpf(&synth->perc_bp_hp, perc_lp, 220.0f);
+    float32x4_t perc_sep = perc_hp;
     // Selector model: only one lane and usually one/two engines are active.
     // These are no longer four-voice summing weights; they are nominal engine
     // output trims. Keep them strong enough for direct HW monitoring.
-    mix = vaddq_f32(mix, vmulq_n_f32(kick_out,  1.00f));
-    mix = vaddq_f32(mix, vmulq_n_f32(snare_out, 0.96f));
-    mix = vaddq_f32(mix, vmulq_n_f32(metal_out, 0.84f));
-    mix = vaddq_f32(mix, vmulq_n_f32(perc_out,  0.93f));
+    mix = vaddq_f32(mix, vmulq_n_f32(kick_sep,  1.00f));
+    mix = vaddq_f32(mix, vmulq_n_f32(snare_sep, 0.96f));
+    mix = vaddq_f32(mix, vmulq_n_f32(metal_sep, 0.84f));
+    mix = vaddq_f32(mix, vmulq_n_f32(perc_sep,  0.93f));
 
     mix = vmulq_f32(mix, fm_make_drive_gain(drive));
     mix = fm_soft_clip(mix);
