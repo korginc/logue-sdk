@@ -21,6 +21,7 @@
 // Wow & Flutter delay: 512 samples ≈ 10.7 ms at 48 kHz, max depth ≤ 30 samples
 #define WF_BUFFER_SIZE 512
 #define WF_BUFFER_MASK (WF_BUFFER_SIZE - 1)
+#define NEON_LANES (4)
 
 // PRNG state (Xorshift128+, two 64-bit lanes each)
 struct prng_t { uint64x2_t state0, state1; };
@@ -78,7 +79,6 @@ public:
 
         // Small positive seed prevents 1/sqrt(0) divergence on first block
         dbx_enc_rms_    = vdupq_n_f32(1e-6f);
-        dbx_dec_rms_    = vdupq_n_f32(1e-6f);
         dbx_hf_enc_rms_ = vdupq_n_f32(1e-6f);
 
         b_bypass_ = false;
@@ -89,13 +89,20 @@ public:
         // Defaults matching header.c init values
         model_    = k_244;
         dbx_mode_ = k_active;
-        tape_age_ = 0.10f;   // init=10  → norm=0.10
+        tape_age_ = 0.10f;      // init=10  → norm=0.10
         xtalk_amount_ = 0.05f;  // init=5  → norm=0.05
         hiss_amount_  = 0.003f; // init=15 → norm=0.15 * 0.02
+        pop_env_decay_ = 0.92f; // ~12 ms decay at 48 kHz, controls dust pop duration
+        pop_env_       = prng_rand_float(); // envelope for simulating dust pop decay/release
 
         target_preamp_ = current_preamp_ = 1.0f + 0.20f * 2.0f; // init=20
-        target_drive_  = current_drive_  = 0.40f;                // init=40
-        target_mix_    = current_mix_    = 1.0f;                  // init=100
+        target_drive_  = current_drive_  = 0.40f;               // init=40
+        target_mix_    = current_mix_    = 1.0f;                // init=100
+
+        // set initial tape saturation
+        x_prev = vdupq_n_f32(0.0f);
+        y_prev = vdupq_n_f32(0.0f);
+        R = vdupq_n_f32(0.995f);
 
         wf_phase_inc_ = M_TWOPI * 1.5f / samplerate_;
 
@@ -137,10 +144,215 @@ public:
         return (id < k_num_params) ? raw_params_[id] : 0;
     }
 
+    fast_inline void parametric_eq(float32x4_t &sig_l, float32x4_t &sig_r) {
+        sig_l = biquad_process4(&eq_low_l_,  &coeff_eq_low_,  sig_l);
+        sig_l = biquad_process4(&eq_mid_l_,  &coeff_eq_mid_,  sig_l);
+        sig_l = biquad_process4(&eq_high_l_, &coeff_eq_high_, sig_l);
+        sig_r = biquad_process4(&eq_low_r_,  &coeff_eq_low_,  sig_r);
+        sig_r = biquad_process4(&eq_mid_r_,  &coeff_eq_mid_,  sig_r);
+        sig_r = biquad_process4(&eq_high_r_, &coeff_eq_high_, sig_r);
+    }
+
+    fast_inline float32x4_t dbx_nr_encode(float32x4_t &sig_l, float32x4_t &sig_r) {
+        float32x4_t dec_gain = vdupq_n_f32(1.0f);  // set inside encode block when active
+        if (dbx_mode_ != k_off) {
+            sig_l = biquad_process4(&dbx_pre_l_, &coeff_dbx_pre_, sig_l);
+            sig_r = biquad_process4(&dbx_pre_r_, &coeff_dbx_pre_, sig_r);
+
+            float attack  = 0.0050f;    // slower attach
+            float release = 0.0002f;    // much slower release
+
+            // HF spectral envelope (HPF'd signal above ~2 kHz)
+            float32x4_t hf_l = biquad_process4(&dbx_hf_l_, &coeff_dbx_hf_, sig_l);
+            float32x4_t hf_r = biquad_process4(&dbx_hf_r_, &coeff_dbx_hf_, sig_r);
+            float32x4_t hf_sq = vaddq_f32(vmulq_f32(hf_l, hf_l), vmulq_f32(hf_r, hf_r));
+            dbx_hf_enc_rms_ = vmlaq_n_f32(vmulq_n_f32(dbx_hf_enc_rms_, attack), hf_sq, release);
+
+            // Wideband envelope + NR-refined rsqrt for accurate 2:1 compression
+            float32x4_t wb_sq = vaddq_f32(vmulq_f32(sig_l, sig_l), vmulq_f32(sig_r, sig_r));
+            dbx_enc_rms_ = vmlaq_n_f32(vmulq_n_f32(dbx_enc_rms_, attack), wb_sq, release);
+            float32x4_t env = vmaxq_f32(
+                vmlaq_n_f32(vmulq_n_f32(dbx_enc_rms_, 0.7f), dbx_hf_enc_rms_, 0.3f),
+                vdupq_n_f32(1e-6f));
+            float32x4_t enc_gain = vrsqrteq_f32(env);
+            enc_gain = vmulq_f32(vrsqrtsq_f32(vmulq_f32(env, enc_gain), enc_gain), enc_gain);
+            // Clamp encode gain: prevents 1000x boost during silence → loud transient onset.
+            // 3.0x ≈ +9.5 dB max NR action; less than typical dbx Type II spec.
+            enc_gain = vminq_f32(enc_gain, vdupq_n_f32(3.0f));
+            // Synchronized decode gain = 1/enc_gain.  Computing it here (from the
+            // same enc_gain used to boost the signal) guarantees enc × dec = 1.0
+            // at all times, eliminating the timing mismatch between independent
+            // encode/decode RMS followers that caused rhythm-matched clicks.
+            dec_gain = vrecpeq_f32(enc_gain);
+            dec_gain = vmulq_f32(vrecpsq_f32(enc_gain, dec_gain), dec_gain);
+            sig_l = vmulq_f32(sig_l, enc_gain);
+            sig_r = vmulq_f32(sig_r, enc_gain);
+        }
+        return dec_gain;
+    }
+
+    fast_inline void head_bump(float32x4_t &sig_l, float32x4_t &sig_r) {
+        sig_l = biquad_process4(&tape_head_l_, &coeff_tape_head_, sig_l);
+        sig_r = biquad_process4(&tape_head_r_, &coeff_tape_head_, sig_r);
+    }
+
+    fast_inline void drive_into_soft_saturation(float32x4_t &sig_l, float32x4_t &sig_r) {
+        const float drive  = 1.0f + current_drive_ * 3.0f;
+        const float makeup = Q_rsqrt(current_drive_ if (current_drive_ > 0.0f) : 0.85f);
+        if (model_ == k_vinyl)
+        {
+            sig_l = vmulq_n_f32(sat_neon(vmulq_n_f32(sig_l, drive)), makeup);
+            sig_r = vmulq_n_f32(sat_neon(vmulq_n_f32(sig_r, drive)), makeup);
+        }
+        else    // tape like
+        {
+            sig_l = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_l, drive)), makeup);
+            sig_r = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_r, drive)), makeup);
+        }
+    }
+
+    fast_inline void tape_age(float32x4_t &sig_l, float32x4_t &sig_r) {
+        sig_l = biquad_process4(&tape_lpf_l_, &coeff_tape_lpf_, sig_l);
+        sig_r = biquad_process4(&tape_lpf_r_, &coeff_tape_lpf_, sig_r);
+    }
+
+    fast_inline void preamp(float32x4_t &sig_l, float32x4_t &sig_r) {
+        sig_l = vmulq_n_f32(sig_l, current_preamp_);
+        sig_r = vmulq_n_f32(sig_r, current_preamp_);
+    }
+
+    // Interpolates a single point given 4 control points and a fractional offset f
+    fast_inline float hermite4_neon(float p0, float p1, float p2, float p3, float f) {
+        // 1. Load points into a NEON vector
+        float points[4] = {p0, p1, p2, p3};
+        float32x4_t P = vld1q_f32(points);
+
+        // 2. Compute powers of f: [1, f, f*f, f*f*f]
+        float t2 = f * f;
+        float t3 = t2 * f;
+        float32x4_t T = {1.0f, f, t2, t3};
+
+        // 3. Define the Hermite/Catmull-Rom matrix columns (transposed)
+        // Coeff 0: P0*0 + P1*2 + P2*0 + P3*0
+        // Coeff 1: P0*(-1) + P1*0 + P2*1 + P3*0
+        // Coeff 2: P0*2 + P1*(-5) + P2*4 + P3*(-1)
+        // Coeff 3: P0*(-1) + P1*3 + P2*(-3) + P3*1
+        float32x4_t C0 = { 0.0f, -1.0f,  2.0f, -1.0f};
+        float32x4_t C1 = { 2.0f,  0.0f, -5.0f,  3.0f};
+        float32x4_t C2 = { 0.0f,  1.0f,  4.0f, -3.0f};
+        float32x4_t C3 = { 0.0f,  0.0f, -1.0f,  1.0f};
+
+        // 4. Dot product per channel (Polynomial evaluation)
+        float32x4_t V0 = vmulq_f32(vdupq_f32(vgetq_lane_f32(P, 0)), C0);
+        float32x4_t V1 = vmulq_f32(vdupq_f32(vgetq_lane_f32(P, 1)), C1);
+        float32x4_t V2 = vmulq_f32(vdupq_f32(vgetq_lane_f32(P, 2)), C2);
+        float32x4_t V3 = vmulq_f32(vdupq_f32(vgetq_lane_f32(P, 3)), C3);
+
+        // 5. Sum the weighted columns
+        float32x4_t sum_vec = vaddq_f32(vaddq_f32(V0, V1), vaddq_f32(V2, V3));
+
+        // 6. Multiply by T and divide by 2
+        float32x4_t final_poly = vmulq_f32(sum_vec, T);
+        float result = vaddvq_f32(final_poly) * 0.5f;
+
+        return result;
+    }
+
+    fast_inline void wow_and_flutter(float32x4_t &sig_l, float32x4_t &sig_r) {
+        const float lfo_val     = fastersinfullf(wf_lfo_phase_);
+        const float flutter_val = fastersinfullf(wf_flutter_phase_);
+        wf_lfo_phase_     += wf_phase_inc_         * 4.0f;
+        wf_flutter_phase_ += wf_flutter_phase_inc_ * 4.0f;
+        if (wf_lfo_phase_     >= M_TWOPI) wf_lfo_phase_     -= M_TWOPI;
+        if (wf_flutter_phase_ >= M_TWOPI) wf_flutter_phase_ -= M_TWOPI;
+
+        const float wow_depth     = 5.0f + tape_age_ * 25.0f;
+        const float flutter_depth = 0.8f + tape_age_ * 2.0f;
+        const float rd_off = wow_depth * (1.0f + 0.8f * lfo_val)
+                            + flutter_depth * flutter_val;
+
+        float l4[NEON_LANES], r4[NEON_LANES];
+        vst1q_f32(l4, sig_l);
+        vst1q_f32(r4, sig_r);
+
+        for (int s = 0; s < NEON_LANES; ++s) {
+            wf_delay_l_[wf_write_pos_] = l4[s];
+            wf_delay_r_[wf_write_pos_] = r4[s];
+
+            // Read with linear interpolation from the past
+            float pos = (float)wf_write_pos_ - rd_off + (float)WF_BUFFER_SIZE;
+            int32_t  i0 = (int32_t)pos;
+            float    fr = pos - (float)i0;
+            uint32_t m0 = (uint32_t)i0 & WF_BUFFER_MASK;
+            uint32_t m1 = (m0 + 1u) & WF_BUFFER_MASK;
+            uint32_t m2 = (m0 + 2u) & WF_BUFFER_MASK;
+            uint32_t m3 = (m0 + 3u) & WF_BUFFER_MASK;
+            // cubic interpolation from 4 points: https://www.paulinternet.nl/?page=bicubic
+            l4[s] = hermite4_neon(wf_delay_l_[m0], wf_delay_l_[m1], wf_delay_l_[m2], wf_delay_l_[m3], fr);
+            r4[s] = hermite4_neon(wf_delay_r_[m0], wf_delay_r_[m1], wf_delay_r_[m2], wf_delay_r_[m3], fr);
+            // linear: a + frac*(b-a)
+            // l4[s] = wf_delay_l_[m0] + fr * (wf_delay_l_[m1] - wf_delay_l_[m0]);
+            // r4[s] = wf_delay_r_[m0] + fr * (wf_delay_r_[m1] - wf_delay_r_[m0]);
+
+            wf_write_pos_ = (wf_write_pos_ + 3u) & WF_BUFFER_MASK;
+        }
+        sig_l = vld1q_f32(l4);
+        sig_r = vld1q_f32(r4);
+    }
+
+    fast_inline void crosstalk(float32x4_t &sig_l, float32x4_t &sig_r) {
+            float32x4_t bleed_r = biquad_process4(&xtalk_hpf_r_, &coeff_xtalk_hpf_, sig_r);
+            float32x4_t bleed_l = biquad_process4(&xtalk_hpf_l_, &coeff_xtalk_hpf_, sig_l);
+            float32x4_t xl = vmlaq_n_f32(sig_l, bleed_r, xtalk_amount_);
+            float32x4_t xr = vmlaq_n_f32(sig_r, bleed_l, xtalk_amount_);
+            sig_l = xl; sig_r = xr;
+    }
+
+    fast_inline void tape_hiss_vinyl_dust(float32x4_t &sig_l, float32x4_t &sig_r) {
+        if (hiss_amount_ > 0.0f && dbx_mode_ != k_active) {
+            // 4 white-noise samples at once: [0,1) → [-1,1)
+            float32x4_t noise = vsubq_f32(
+                vmulq_n_f32(prng_rand_float(), 2.0f), vdupq_n_f32(1.0f));
+                if (model_ == k_vinyl) {
+                    // ~0.02% chance of a dust pop (5-6× spike) per sample
+                    uint32x4_t is_pop = vcgtq_f32(prng_rand_float(), vdupq_n_f32(0.9998f));
+                    noise = vmulq_f32(noise,
+                        vbslq_f32(is_pop, vdupq_n_f32(5.0f), vdupq_n_f32(1.0f)));
+                    // Trigger pop envelope on any pop sample
+                    noise = vaddq_f32(vmulq_n_f32(noise, 0.7f), vmulq_f32(vmulq_n_f32(previous_noise, 0.3f), pop_env_));
+                    previous_noise = noise; // store pre-decay noise for shaping
+            }
+
+            // Filter to coloured hiss; invert for R to widen the stereo image
+            float32x4_t fl = biquad_process4(&hiss_hpf_l_, &coeff_hiss_hpf_, noise);
+            float32x4_t fr = vmlaq_n_f32(fl, prng_rand_float(), 0.7f); // decorrelate R from L for a wider image
+            // Older tape sheds oxide → noisier floor; scale hiss with age
+            const float hiss_scaled = hiss_amount_ * (1.0f + tape_age_ * 2.0f);
+            sig_l = vmlaq_n_f32(sig_l, fl, hiss_scaled);
+            sig_r = vmlaq_n_f32(sig_r, fr, hiss_scaled);
+        }
+    }
+
+    fast_inline void dbx_nr_decode(float32x4_t &sig_l, float32x4_t &sig_r, float32x4_t dec_gain) {
+        if (dbx_mode_ == k_active) {
+            // Use the synchronized dec_gain = 1/enc_gain computed in step 4.
+                    // This guarantees enc_gain × dec_gain = 1.0 at every block, making the
+                    // NR system transparent (net gain = 0 dB) except for tape nonlinearity.
+                    // The old approach (independent dec_rms tracking) caused enc/dec timing
+                    // mismatch: on the first hit after silence enc_gain = 6.0× but dec_gain
+                    // was still sqrt(1e-6) ≈ 0.001, producing a near-zero decoded output
+                    // that sounded like a loud click followed by silence.
+            sig_l = vmulq_f32(sig_l, dec_gain);
+            sig_r = vmulq_f32(sig_r, dec_gain);
+            sig_l = biquad_process4(&dbx_de_l_, &coeff_dbx_de_, sig_l);
+            sig_r = biquad_process4(&dbx_de_r_, &coeff_dbx_de_, sig_r);
+        }
+    }
+
     // =========================================================================
     // MAIN DSP PROCESSING LOOP
     // =========================================================================
-    fast_inline void ProcessBlock(const float* in, float* out, uint32_t frames) {
+        fast_inline void ProcessBlock(const float* in, float* out, uint32_t frames) {
         if (b_bypass_) {
             if (in != out) memcpy(out, in, frames * 2u * sizeof(float));
             return;
@@ -164,9 +376,9 @@ public:
             // ------------------------------------------------------------------
             // Parameter smoothing (1-pole, one step per 4-sample block)
             // ------------------------------------------------------------------
-            current_preamp_ += 0.005f * (target_preamp_ - current_preamp_);
-            current_drive_  += 0.005f * (target_drive_  - current_drive_);
-            current_mix_    += 0.005f * (target_mix_    - current_mix_);
+            current_preamp_ += 0.01f * (target_preamp_ - current_preamp_);  // use 0.01 instead of 0.005 for faster response
+            current_drive_  += 0.01f * (target_drive_  - current_drive_);
+            current_mix_    += 0.01f * (target_mix_    - current_mix_);
 
             // 1. Load & de-interleave stereo
             float32x4x2_t vi = vld2q_f32(pIn);
@@ -174,161 +386,47 @@ public:
             const float32x4_t dry_r = vi.val[1];
 
             // 2. Pre-amp
-            float32x4_t sig_l = vmulq_n_f32(dry_l, current_preamp_);
-            float32x4_t sig_r = vmulq_n_f32(dry_r, current_preamp_);
+            preamp(dry_l, dry_r);
 
             // 3. Parametric EQ (3-band, L and R share coefficients, independent states)
-            sig_l = biquad_process4(&eq_low_l_,  &coeff_eq_low_,  sig_l);
-            sig_l = biquad_process4(&eq_mid_l_,  &coeff_eq_mid_,  sig_l);
-            sig_l = biquad_process4(&eq_high_l_, &coeff_eq_high_, sig_l);
-            sig_r = biquad_process4(&eq_low_r_,  &coeff_eq_low_,  sig_r);
-            sig_r = biquad_process4(&eq_mid_r_,  &coeff_eq_mid_,  sig_r);
-            sig_r = biquad_process4(&eq_high_r_, &coeff_eq_high_, sig_r);
+            parametric_eq(sig_l, sig_r);
 
             // 4. dbx NR Encode (Record path: HF emphasis + 2:1 RMS compression)
             //    Type II HF spectral path: HF content tracked separately and blended
             //    into the total envelope so loud transients with HF get more reduction.
-            float32x4_t dec_gain = vdupq_n_f32(1.0f);  // set inside encode block when active
-            if (dbx_mode_ != k_off) {
-                sig_l = biquad_process4(&dbx_pre_l_, &coeff_dbx_pre_, sig_l);
-                sig_r = biquad_process4(&dbx_pre_r_, &coeff_dbx_pre_, sig_r);
+            float32x4_t dec_gain = dbx_nr_encode(sig_l, sig_r);
 
-                // HF spectral envelope (HPF'd signal above ~2 kHz)
-                float32x4_t hf_l = biquad_process4(&dbx_hf_l_, &coeff_dbx_hf_, sig_l);
-                float32x4_t hf_r = biquad_process4(&dbx_hf_r_, &coeff_dbx_hf_, sig_r);
-                float32x4_t hf_sq = vaddq_f32(vmulq_f32(hf_l, hf_l), vmulq_f32(hf_r, hf_r));
-                dbx_hf_enc_rms_ = vmlaq_n_f32(vmulq_n_f32(dbx_hf_enc_rms_, 0.99f), hf_sq, 0.01f);
-
-                // Wideband envelope + NR-refined rsqrt for accurate 2:1 compression
-                float32x4_t wb_sq = vaddq_f32(vmulq_f32(sig_l, sig_l), vmulq_f32(sig_r, sig_r));
-                dbx_enc_rms_ = vmlaq_n_f32(vmulq_n_f32(dbx_enc_rms_, 0.99f), wb_sq, 0.01f);
-                float32x4_t env = vmaxq_f32(
-                    vmlaq_n_f32(vmulq_n_f32(dbx_enc_rms_, 0.7f), dbx_hf_enc_rms_, 0.3f),
-                    vdupq_n_f32(1e-6f));
-                float32x4_t enc_gain = vrsqrteq_f32(env);
-                enc_gain = vmulq_f32(vrsqrtsq_f32(vmulq_f32(env, enc_gain), enc_gain), enc_gain);
-                // Clamp encode gain: prevents 1000x boost during silence → loud transient onset.
-                // 6.0x ≈ +15.6 dB max NR action; matches typical dbx Type II spec.
-                enc_gain = vminq_f32(enc_gain, vdupq_n_f32(6.0f));
-                // Synchronized decode gain = 1/enc_gain.  Computing it here (from the
-                // same enc_gain used to boost the signal) guarantees enc × dec = 1.0
-                // at all times, eliminating the timing mismatch between independent
-                // encode/decode RMS followers that caused rhythm-matched clicks.
-                dec_gain = vrecpeq_f32(enc_gain);
-                dec_gain = vmulq_f32(vrecpsq_f32(enc_gain, dec_gain), dec_gain);
-                sig_l = vmulq_f32(sig_l, enc_gain);
-                sig_r = vmulq_f32(sig_r, enc_gain);
-            }
+            // 4.5 Tape bias hiss / vinyl dust pops: moved before saturation to get hiss naturally softened.
+            //     Added in k_encode_only and k_off modes (dbx active suppresses it naturally)
+            tape_hiss_vinyl_dust(sig_l, sig_r);
 
             // 5. Tape Magnetic Saturation
             //    a) Head bump (low-mid resonance)
-            sig_l = biquad_process4(&tape_head_l_, &coeff_tape_head_, sig_l);
-            sig_r = biquad_process4(&tape_head_r_, &coeff_tape_head_, sig_r);
+            head_bump(sig_l, sig_r);
 
             //    b) Drive into soft saturation, auto-makeup to maintain level
-            {
-                const float drive  = 1.0f + current_drive_ * 4.0f;
-                const float makeup = 1.0f / (1.0f + current_drive_ * 3.0f);
-                sig_l = vmulq_n_f32(sat_neon(vmulq_n_f32(sig_l, drive)), makeup);
-                sig_r = vmulq_n_f32(sat_neon(vmulq_n_f32(sig_r, drive)), makeup);
-            }
+            drive_into_soft_saturation(sig_l, sig_r);
 
             //    c) Tape age → HF roll-off
-            sig_l = biquad_process4(&tape_lpf_l_, &coeff_tape_lpf_, sig_l);
-            sig_r = biquad_process4(&tape_lpf_r_, &coeff_tape_lpf_, sig_r);
+            tape_age(sig_l, sig_r);
 
             // 6. Wow & Flutter — both LFOs computed once per block
             //    Wow (~1.5 Hz): slow capstan irregularities (5-30 samples depth)
             //    Flutter (~25 Hz): roller eccentricity (0.8-2.8 samples depth)
-            {
-                const float lfo_val     = fastersinfullf(wf_lfo_phase_);
-                const float flutter_val = fastersinfullf(wf_flutter_phase_);
-                wf_lfo_phase_     += wf_phase_inc_         * 4.0f;
-                wf_flutter_phase_ += wf_flutter_phase_inc_ * 4.0f;
-                if (wf_lfo_phase_     >= M_TWOPI) wf_lfo_phase_     -= M_TWOPI;
-                if (wf_flutter_phase_ >= M_TWOPI) wf_flutter_phase_ -= M_TWOPI;
-
-                const float wow_depth     = 5.0f + tape_age_ * 25.0f;
-                const float flutter_depth = 0.8f + tape_age_ * 2.0f;
-                const float rd_off = wow_depth * (1.0f + 0.8f * lfo_val)
-                                   + flutter_depth * flutter_val;
-
-                float l4[4], r4[4];
-                vst1q_f32(l4, sig_l);
-                vst1q_f32(r4, sig_r);
-
-                for (int s = 0; s < 4; ++s) {
-                    wf_delay_l_[wf_write_pos_] = l4[s];
-                    wf_delay_r_[wf_write_pos_] = r4[s];
-
-                    // Read with linear interpolation from the past
-                    float pos = (float)wf_write_pos_ - rd_off + (float)WF_BUFFER_SIZE;
-                    int32_t  i0 = (int32_t)pos;
-                    float    fr = pos - (float)i0;
-                    uint32_t m0 = (uint32_t)i0 & WF_BUFFER_MASK;
-                    uint32_t m1 = (m0 + 1u) & WF_BUFFER_MASK;
-
-                    l4[s] = wf_delay_l_[m0] + fr * (wf_delay_l_[m1] - wf_delay_l_[m0]);
-                    r4[s] = wf_delay_r_[m0] + fr * (wf_delay_r_[m1] - wf_delay_r_[m0]);
-                    wf_write_pos_ = (wf_write_pos_ + 1u) & WF_BUFFER_MASK;
-                }
-                sig_l = vld1q_f32(l4);
-                sig_r = vld1q_f32(r4);
-            }
+            wow_and_flutter(sig_l, sig_r);
 
             // 6.5 Stereo crosstalk — treble bleeds more than bass on cassette tape
             //     (shorter wavelengths flux-leak more easily between adjacent tracks)
-            {
-                float32x4_t bleed_r = biquad_process4(&xtalk_hpf_r_, &coeff_xtalk_hpf_, sig_r);
-                float32x4_t bleed_l = biquad_process4(&xtalk_hpf_l_, &coeff_xtalk_hpf_, sig_l);
-                float32x4_t xl = vmlaq_n_f32(sig_l, bleed_r, xtalk_amount_);
-                float32x4_t xr = vmlaq_n_f32(sig_r, bleed_l, xtalk_amount_);
-                sig_l = xl; sig_r = xr;
-            }
-
-            // 6.7 Tape bias hiss / vinyl dust pops
-            //     Added in k_encode_only and k_off modes (dbx active suppresses it naturally)
-            if (hiss_amount_ > 0.0f && dbx_mode_ != k_active) {
-                // 4 white-noise samples at once: [0,1) → [-1,1)
-                float32x4_t noise = vsubq_f32(
-                    vmulq_n_f32(prng_rand_float(), 2.0f), vdupq_n_f32(1.0f));
-
-                if (model_ == k_vinyl) {
-                    // ~0.02% chance of a dust pop (40× spike) per sample
-                    uint32x4_t is_pop = vcgtq_f32(prng_rand_float(), vdupq_n_f32(0.9998f));
-                    noise = vmulq_f32(noise,
-                        vbslq_f32(is_pop, vdupq_n_f32(40.0f), vdupq_n_f32(1.0f)));
-                }
-
-                // Filter to coloured hiss; invert for R to widen the stereo image
-                float32x4_t fl = biquad_process4(&hiss_hpf_l_, &coeff_hiss_hpf_, noise);
-                float32x4_t fr = vnegq_f32(fl);
-                // Older tape sheds oxide → noisier floor; scale hiss with age
-                const float hiss_scaled = hiss_amount_ * (1.0f + tape_age_ * 2.0f);
-                sig_l = vmlaq_n_f32(sig_l, fl, hiss_scaled);
-                sig_r = vmlaq_n_f32(sig_r, fr, hiss_scaled);
-            }
+            crosstalk(sig_l, sig_r);
 
             // 7. dbx NR Decode (Playback path: 1:2 expansion + de-emphasis)
-            if (dbx_mode_ == k_active) {
-                // Use the synchronized dec_gain = 1/enc_gain computed in step 4.
-                // This guarantees enc_gain × dec_gain = 1.0 at every block, making the
-                // NR system transparent (net gain = 0 dB) except for tape nonlinearity.
-                // The old approach (independent dec_rms tracking) caused enc/dec timing
-                // mismatch: on the first hit after silence enc_gain = 6.0× but dec_gain
-                // was still sqrt(1e-6) ≈ 0.001, producing a near-zero decoded output
-                // that sounded like a loud click followed by silence.
-                sig_l = vmulq_f32(sig_l, dec_gain);
-                sig_r = vmulq_f32(sig_r, dec_gain);
-
-                sig_l = biquad_process4(&dbx_de_l_, &coeff_dbx_de_, sig_l);
-                sig_r = biquad_process4(&dbx_de_r_, &coeff_dbx_de_, sig_r);
-            }
+            dbx_nr_decode(sig_l, sig_r, dec_gain);
 
             // 8. Dry/wet mix
             const float inv_mix = 1.0f - current_mix_;
-            float32x4_t out_l = vmlaq_n_f32(vmulq_n_f32(dry_l, inv_mix), sig_l, current_mix_);
-            float32x4_t out_r = vmlaq_n_f32(vmulq_n_f32(dry_r, inv_mix), sig_r, current_mix_);
+            const float target_output_gain_ = 2.0f; // add +3dB
+            float32x4_t out_l = vmlaq_n_f32(vmulq_n_f32(dry_l, inv_mix), sig_l, current_mix_ * target_output_gain_);
+            float32x4_t out_r = vmlaq_n_f32(vmulq_n_f32(dry_r, inv_mix), sig_r, current_mix_ * target_output_gain_);
 
             float32x4x2_t vo = {{ out_l, out_r }};
             vst2q_f32(pOut, vo);
@@ -362,6 +460,18 @@ private:
     float wf_flutter_phase_;
     float wf_flutter_phase_inc_;  // precomputed per-sample increment for 25 Hz flutter
 
+    float32x4_t previous_noise; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
+    float32x4_t pop_env_; // envelope to shape vinyl dust pops (attack-decay, triggered on each pop sample, decays faster with age)
+    float       pop_env_decay_; // precomputed per-sample decay increment for the pop envelope
+    // State variables for the DC blocker (assumes 4 independent channels)
+    float32x4_t x_prev;
+    float32x4_t y_prev;
+
+    // R controls the cutoff frequency. 0.995 is a standard coefficient
+    // for a pole very close to DC (roughly 20Hz at 44.1kHz).
+    float32x4_t R;
+
+
     prng_t prng_;
 
     // Biquad states — L and R fully independent for correct stereo processing
@@ -378,10 +488,8 @@ private:
 
     // dbx RMS envelope states
     float32x4_t dbx_enc_rms_;
-    // dbx_dec_rms_ kept for struct-size stability but is dead code:
     // decode gain is now derived as 1/enc_gain (synchronized) rather than
-    // from an independent post-tape RMS tracker. Updated only in Reset().
-    float32x4_t dbx_dec_rms_;
+    // from an independent post-tape RMS tracker.
     float32x4_t dbx_hf_enc_rms_; // HF spectral envelope (encode side)
 
     float    wf_delay_l_[WF_BUFFER_SIZE] __attribute__((aligned(16)));
@@ -402,7 +510,7 @@ private:
     biquad_coeffs_t coeff_xtalk_hpf_;   // HPF ~1.5 kHz for frequency-dep crosstalk
 
     // =========================================================================
-    // Tape saturation via fastertanhf Padé polynomial — odd-harmonic dominant,
+    // Tape saturation via fastertanhf Padé polynomial — not odd-harmonic dominant,
     // softer knee than x/(1+|x|), matches real magnetic saturation character.
     // Clamped at ±5 where tanh(5)≈0.9999 and polynomial error < 0.5%.
     // =========================================================================
@@ -422,6 +530,52 @@ private:
         rcp = vmulq_f32(vrecpsq_f32(d, rcp), rcp);
         return vmulq_f32(n, rcp);
     }
+
+    // =========================================================================
+    // Fixed Tape saturation: Enforces odd symmetry and f(0) = 0
+    // =========================================================================
+    fast_inline float32x4_t sat_neon_new(float32x4_t x, bool enable_dc_blocker = true) {
+        const float32x4_t lim = vdupq_n_f32(5.0f);
+        x = vmaxq_f32(vminq_f32(x, lim), vnegq_f32(lim));
+
+        // 1. Extract the sign bit and compute absolute value for symmetric evaluation
+        uint32x4_t sign_mask = vandq_u32(vreinterpretq_u32_f32(x), vdupq_n_u32(0x80000000));
+        float32x4_t abs_x = vabsq_f32(x);
+
+        // 2. Evaluate polynomial using abs_x
+        float32x4_t n = vmulq_n_f32(abs_x, 0.3357335044280075e-1f);
+        n = vmulq_f32(vaddq_f32(n, vdupq_n_f32(0.583691066395175e-1f)), abs_x);
+        n = vmulq_f32(vaddq_f32(n, vdupq_n_f32(0.2468149110712040f)),   abs_x);
+        // Changed constant to 0.0f to guarantee f(0) = 0 and stop baseline DC
+        n = vaddq_f32(n, vdupq_n_f32(0.0f));
+
+        float32x4_t d = vmulq_n_f32(abs_x, 0.2874707922475963e-1f);
+        d = vmulq_f32(vaddq_f32(d, vdupq_n_f32(0.1086202599228572f)),   abs_x);
+        d = vmulq_f32(vaddq_f32(d, vdupq_n_f32(0.609347197060491e-1f)), abs_x);
+        d = vaddq_f32(d, vdupq_n_f32(0.2464845986383725f));
+
+        float32x4_t rcp = vrecpeq_f32(d);
+        rcp = vmulq_f32(vrecpsq_f32(d, rcp), rcp);
+
+        // 3. Compute magnitude, then re-apply the original sign
+        float32x4_t mag = vmulq_f32(n, rcp);
+        float32x4_t sat_x = vreinterpretq_f32_u32(vorrq_u32(vreinterpretq_u32_f32(mag), sign_mask));
+
+        // 4. Optional DC Blocker
+        if (enable_dc_blocker) {
+            // Formula: y[n] = x[n] - x[n-1] + R * y[n-1]
+            float32x4_t y = vsubq_f32(sat_x, x_prev);
+            y = vmlaq_f32(y, R, y_prev);
+
+            x_prev = sat_x;
+            y_prev = y;
+
+            return y;
+        }
+
+        return sat_x;
+    }
+
 
     static fast_inline float sat1(float x) {
         if (x >  5.0f) x =  5.0f;
@@ -502,7 +656,10 @@ private:
 
         if (hiss_amount_ > 0.0f && dbx_mode_ != k_active) {
             float n  = vgetq_lane_f32(prng_rand_float(), 0) * 2.0f - 1.0f;
-            if (model_ == k_vinyl && vgetq_lane_f32(prng_rand_float(), 0) > 0.9998f) n *= 40.0f;
+            if (model_ == k_vinyl && vgetq_lane_f32(prng_rand_float(), 0) > 0.9998f)
+            {
+                n *= 2.5f + vgetq_lane_f32(prng_rand_float(), 2) * 3.0f;
+            }
             float fn = biquad_process1(&hiss_hpf_l_, &coeff_hiss_hpf_, n);
             const float hiss_scaled = hiss_amount_ * (1.0f + tape_age_ * 2.0f);
             sl += fn * hiss_scaled;
