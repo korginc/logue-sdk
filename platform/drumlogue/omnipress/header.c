@@ -57,16 +57,18 @@ const __unit_header unit_header_t unit_header = {
 
         // Page 5: Multiband per-band parameters
         // ID 16: BAND THRESH  -60.0..0.0 dB  (per-band threshold)
-        { -600, 0, -600, -200, k_unit_param_type_db, 1, 1, 0, {"MBndThr"} },
+        { -600, 0, -600, -200, k_unit_param_type_strings, 1, 1, 0, {"MBndThr"} }, // dB
         // ID 17: BAND RATIO   1.0..20.0:1
-        { 10, 200, 10, 40, k_unit_param_type_none, 1, 1, 0, {"MBndRto"} },
-        { 1, 1000, 1, 150, k_unit_param_type_msec, 1, 1, 0, {"MBndAtk"} },      // ID 18
-        { 10, 2000, 10, 200, k_unit_param_type_msec, 0, 0, 0, {"MBndRtoRel"} }, // ID 19
+        { 10, 200, 10, 40, k_unit_param_type_strings, 1, 1, 0, {"MBndRto"} },      // ID 17 - ratio (param none)
+        // ID 18: BAND ATTACK  1..1000 ms
+        { 1, 1000, 1, 150, k_unit_param_type_strings, 1, 1, 0, {"MBndAtk"} },      // ID 18 - ms
+        // ID 19: BAND RELEASE 10..2000 ms
+        { 10, 2000, 10, 200, k_unit_param_type_strings, 0, 0, 0, {"MBndRtoRel"} }, // ID 19 - ms
 
         // Page 6:
-        { 0, 240, 0, 0, k_unit_param_type_db, 1, 1, 0, {"MBndMkp"} },           // ID 20
-        { 0, 1, 0, 0, k_unit_param_type_none, 0, 0, 0, {"MBndMut"} },           // ID 21
-        { 0, 1, 0, 0, k_unit_param_type_none, 0, 0, 0, {"MBndSOl"} },           // ID 22
+        { 0, 240, 0, 0, k_unit_param_type_strings, 1, 1, 0, {"MBndMkp"} },         // ID 20 - dB
+        { 0, 1, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"MBndMut"} },           // ID 21 (param none) - Mute (0=off, 1=on)
+        { 0, 1, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"MBndSOl"} },           // ID 22 (param none) - Solo (0=off, 1=on)
         // ID 23: DETECT MODE
         //   Standard/Multiband: 0=Peak, 1=RMS, 2=Blend
         //   Distressor:         0=Basic, 1=Emph, 2=Link, 3=Emph+Link
