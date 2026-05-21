@@ -92,11 +92,11 @@ fast_inline void wavefolder_set_drive(wavefolder_t* wf, float drive_percent) {
     float drive = drive_percent * 0.01f;
     wf->drive = vdupq_n_f32(drive);
 
-    // Makeup gain compensates for the pre-gain (1 + drive*2) applied in
+    // Makeup gain compensates for the pre-gain (1 + drive*3) applied in
     // wavefolder_process. At drive=0 this is 1.0 (passthrough, matches CLEAN
-    // mode level). At drive=1.0 it is 0.33 which cancels the 3x pre-gain for
+    // mode level). At drive=1.0 it is 0.25 which cancels the 4x pre-gain for
     // signals still in the linear range of the waveshaper.
-    float makeup = 1.0f / (1.0f + drive * 2.0f);
+    float makeup = 1.0f / (1.0f + drive * 3.0f);
     wf->output_gain = vdupq_n_f32(makeup);
 }
 
@@ -198,12 +198,12 @@ fast_inline float32x4x2_t wavefolder_process(wavefolder_t* wf,
 
     float32x4x2_t out;
 
-    // Apply drive gain: 1+drive*2 gives 1x at drive=0 (passthrough) to 3x at drive=100%.
+    // Apply drive gain: 1+drive*3 gives 1x at drive=0 (passthrough) to 4x at drive=100%.
     // Matches the makeup formula in wavefolder_set_drive so level is consistent.
     float32x4_t driven_l = vmulq_f32(in_l, vaddq_f32(vdupq_n_f32(1.0f),
-                                                      vmulq_f32(wf->drive, vdupq_n_f32(2.0f))));
+                                                      vmulq_f32(wf->drive, vdupq_n_f32(3.0f))));
     float32x4_t driven_r = vmulq_f32(in_r, vaddq_f32(vdupq_n_f32(1.0f),
-                                                      vmulq_f32(wf->drive, vdupq_n_f32(2.0f))));
+                                                      vmulq_f32(wf->drive, vdupq_n_f32(3.0f))));
 
     // Apply selected waveshaping
     switch (wf->mode) {

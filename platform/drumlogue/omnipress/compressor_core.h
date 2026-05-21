@@ -35,18 +35,22 @@ fast_inline void compressor_reset(compressor_t* comp) {
     compressor_init(comp);
 }
 
-// RMS processing (simplified - uses single pole on squared input)
+// RMS processing (simplified - uses single pole on squared input - Fixed for sequential IIR correctness)
 fast_inline float32x4_t compressor_rms_process(compressor_t* comp,
-                                                float32x4_t squared) {
+                                               float32x4_t squared) {
+    float squares[NEON_LANES];
+    float out[NEON_LANES];
+    vst1q_f32(squares, squared);
+
+    // Carry over the scalar history from the last lane of the previous block
+    float state = vgetq_lane_f32(comp->rms_state, 3);
+
     // One-pole lowpass with 10ms time constant (simplified)
-    float32x4_t alpha = vdupq_n_f32(0.01f);
-    float32x4_t one_minus_alpha = vdupq_n_f32(0.99f);
-
-    comp->rms_state = vaddq_f32(vmulq_f32(squared, alpha),
-                                 vmulq_f32(comp->rms_state, one_minus_alpha));
-
-    // Return square root (ARMv7-compatible approximation)
-    return neon_sqrtq_f32(comp->rms_state);
+    for (int i = 0; i < NEON_LANES; ++i) {
+        state = squares[i] * 0.01f + state * 0.99f;
+        out[i] = fasterSqrt(state);
+    }
+    return vld1q_f32(out);
 }
 
 // Gain computer with negative ratio support
@@ -108,23 +112,35 @@ fast_inline float32x4_t compressor_calc_gain(compressor_t* comp,
     return vnegq_f32(gain_red);  // Negative because we're reducing gain
 }
 
-// Attack/release smoothing
+// Attack/release smoothing (Fixed for sequential IIR correctness)
 fast_inline float32x4_t compressor_smooth(compressor_t* comp,
-                                           float32x4_t target_db,
-                                           float attack_coeff,
-                                           float release_coeff) {
-    // Determine if we're attacking or releasing
-    uint32x4_t attacking = vcltq_f32(target_db, comp->gain_state);
+                                          float32x4_t target_db,
+                                          float attack_coeff,
+                                          float release_coeff) {
+    float targets[NEON_LANES];
+    float out[NEON_LANES];
+    vst1q_f32(targets, target_db);
 
-    // Select appropriate coefficient
-    float32x4_t coeff = vbslq_f32(attacking,
-                                   vdupq_n_f32(attack_coeff),
-                                   vdupq_n_f32(release_coeff));
+    // Carry over the scalar history from the last lane of the previous block
+    float state = vgetq_lane_f32(comp->gain_state, 3);
 
-    // One-pole smoothing
-    float32x4_t one_minus_coeff = vsubq_f32(vdupq_n_f32(1.0f), coeff);
-    comp->gain_state = vaddq_f32(vmulq_f32(target_db, one_minus_coeff),
-                                  vmulq_f32(comp->gain_state, coeff));
+    // originally there was (targets[i] < state) to get either attack or release coeff,
+    // but this causes branching which is bad for SIMD performance.
+    // 1. Pre-calculate these constants OUTSIDE the loop
+    const float coeff_avg  = 0.5f * (attack_coeff + release_coeff);
+    const float coeff_diff = 0.5f * (attack_coeff - release_coeff);
 
+    // 2. Run the branchless loop
+    for (int i = 0; i < NEON_LANES; ++i) {
+        float diff = state - targets[i];
+
+        // std::fabs is branchless on modern hardware (just clears the sign bit).
+        float product = (coeff_avg * diff) + (coeff_diff * fabsf(diff));
+
+        state = targets[i] + product;
+        out[i] = state;
+    }
+
+    comp->gain_state = vld1q_f32(out);
     return comp->gain_state;
 }

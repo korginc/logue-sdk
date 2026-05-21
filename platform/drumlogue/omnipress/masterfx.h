@@ -432,13 +432,13 @@ private:
             case DIST_MODE_DIST3:
             case DIST_MODE_BOTH: {
                 // Apply saturation to the COMPRESSED signal (not raw input).
-                // sat_drive range: 2x (DRIVE=0) to 12x (DRIVE=100) — pushes the
+                // sat_drive range: 2x (DRIVE=0) to 14x (DRIVE=100) — pushes the
                 // signal into the saturator nonlinear region.
                 // makeup = 1.0 keeps output level comparable to the input so
                 // harmonic character is always audible. The output hard-clip limiter
                 // prevents clipping. Do NOT divide by sat_drive (old formula made
                 // the distorted output quieter than dry, masking the effect).
-                float sat_drive = 2.0f + drive_ * 10.0f;
+                float sat_drive = 2.0f + drive_ * 12.0f;
                 float32x4_t drv = vdupq_n_f32(sat_drive);
                 *out_l = generate_harmonics(&distressor_,
                                             vmulq_f32(comp_l, drv),

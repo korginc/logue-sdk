@@ -144,6 +144,24 @@ fast_inline void multiband_set_param(multiband_t* mb,
     }
 }
 
+// Get band parameter
+fast_inline float multiband_get_param(multiband_t* mb,
+                                      uint8_t band,
+                                      uint8_t param_id) {
+    if (band > BAND_HIGH) return 0.0f;
+
+    switch (param_id) {
+        case 0: return mb->bands[band].thresh_db;
+        case 1: return mb->bands[band].ratio;
+        case 2: return mb->bands[band].makeup_db;
+        case 3: return mb->bands[band].attack_ms;
+        case 4: return mb->bands[band].release_ms;
+        case 5: return mb->bands[band].mute;
+        case 6: return mb->bands[band].solo;
+        default: return 0.0f;
+    }
+}
+
 // Process multiband compressor (stereo, 4 samples at a time)
 fast_inline void multiband_process(multiband_t* mb,
                                    float32x4_t in_l,
@@ -186,12 +204,35 @@ fast_inline void multiband_process(multiband_t* mb,
     float32x4_t inst_mid  = vmaxq_f32(vabsq_f32(mid_l),  vabsq_f32(mid_r));
     float32x4_t inst_high = vmaxq_f32(vabsq_f32(high_l), vabsq_f32(high_r));
 
-    // One-pole pre-smoothing (~1ms) prevents gain modulation at signal frequency
-    const float32x4_t pre_c  = vdupq_n_f32(mb->env_pre_coeff);
-    const float32x4_t pre_1c = vdupq_n_f32(1.0f - mb->env_pre_coeff);
-    mb->env_state_low  = vaddq_f32(vmulq_f32(inst_low,  pre_1c), vmulq_f32(mb->env_state_low,  pre_c));
-    mb->env_state_mid  = vaddq_f32(vmulq_f32(inst_mid,  pre_1c), vmulq_f32(mb->env_state_mid,  pre_c));
-    mb->env_state_high = vaddq_f32(vmulq_f32(inst_high, pre_1c), vmulq_f32(mb->env_state_high, pre_c));
+    // One-pole pre-smoothing (~1ms) prevents gain modulation at signal frequency- Fixed for sequential IIR correctness
+    float ilow[NEON_LANES], imid[NEON_LANES], ihigh[NEON_LANES];
+    float olow[NEON_LANES], omid[NEON_LANES], ohigh[NEON_LANES];
+
+    vst1q_f32(ilow, inst_low);
+    vst1q_f32(imid, inst_mid);
+    vst1q_f32(ihigh, inst_high);
+
+    // Carry over histories
+    float slow = vgetq_lane_f32(mb->env_state_low, 3);
+    float smid = vgetq_lane_f32(mb->env_state_mid, 3);
+    float shigh = vgetq_lane_f32(mb->env_state_high, 3);
+
+    float pre_c  = mb->env_pre_coeff;
+    float pre_1c = 1.0f - pre_c;
+
+    for (int i = 0; i < NEON_LANES; ++i) {
+        slow  = ilow[i] * pre_1c + slow * pre_c;
+        smid  = imid[i] * pre_1c + smid * pre_c;
+        shigh = ihigh[i] * pre_1c + shigh * pre_c;
+
+        olow[i]  = slow;
+        omid[i]  = smid;
+        ohigh[i] = shigh;
+    }
+
+    mb->env_state_low  = vld1q_f32(olow);
+    mb->env_state_mid  = vld1q_f32(omid);
+    mb->env_state_high = vld1q_f32(ohigh);
 
     float32x4_t env_low  = mb->env_state_low;
     float32x4_t env_mid  = mb->env_state_mid;
