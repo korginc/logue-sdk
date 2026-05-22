@@ -35,7 +35,7 @@
 enum parameters
 {
     k_threhold,
-    k_ratio,
+    k_slope,
     k_attack,
     k_release,
     k_makeup,
@@ -110,7 +110,7 @@ public:
     inline void Reset() {
         // Set default parameters
         setParameter(k_threhold, THRESH_DEFAULT);   // Thresh: -10.0 dB
-        setParameter(k_ratio, RATIO_DEFAULT);       // Ratio: 4.0
+        setParameter(k_slope, SLOPE_DEFAULT);       // Slope: 0.4 (4.0:1)
         setParameter(k_attack, ATTACK_DEFAULT);     // Attack: 15.0 ms
         setParameter(k_release, RELEASE_DEFAULT);   // Release: 200 ms
         setParameter(k_makeup, MAKEUP_DEFAULT);     // Makeup: 0 dB
@@ -118,15 +118,15 @@ public:
         setParameter(k_mix, MIX_DEFAULT);           // Mix: 100% wet
         setParameter(k_sc_hpf, SC_HPF_DEFAULT);     // SC HPF: 20 Hz
         setParameter(k_compressor_mode, COMP_MODE_STANDARD);         // COMP MODE: Standard
-        setParameter(k_bass, 50);       // BASS: flat (matches header.c init)
-        setParameter(k_treble, 50);     // TREBLE: flat (matches header.c init)
-        setParameter(k_presence, 50);   // PRESENCE: centre (matches header.c init)
+        setParameter(k_bass, 50);                   // BASS: flat (matches header.c init)
+        setParameter(k_treble, 50);                 // TREBLE: flat (matches header.c init)
+        setParameter(k_presence, 50);               // PRESENCE: centre (matches header.c init)
         setParameter(k_distressor_distortion_type, DIST_MODE_CLEAN); // DSTR DIST: None
         setParameter(k_distressor_ratio, DIST_RATIO_1_1);            // DSTR RATIO: Warm mode
         setParameter(k_distressor_drive_wave_mode, DRIVE_MODE_SOFT_CLIP); // DSTR WAVE: Soft Clip
         setParameter(k_multiband_band_selection, BAND_LOW);          // BAND SEL: Low
-        setParameter(k_multiband_band_threshold, -200);               // L THRESH: -20.0 dB (BAND_THRESH_DEFAULT)
-        setParameter(k_multiband_band_ratio, RATIO_DEFAULT);         // L RATIO: 4.0
+        setParameter(k_multiband_band_threshold, -200);              // L THRESH: -20.0 dB (BAND_THRESH_DEFAULT)
+        setParameter(k_multiband_band_ratio, SLOPE_DEFAULT);         // L RATIO: 4.0
         setParameter(k_multiband_band_attack, 5);                    // ATTACK: 0.5 ms (fast, minimal click)
         setParameter(k_multiband_band_release, 50);                  // RELEASE: 50 ms (punchy)
         setParameter(k_multiband_band_makeup, MAKEUP_DEFAULT);       // MAKEUP: 0 dB
@@ -206,9 +206,9 @@ public:
             // Mix stage
             float32x4x2_t mixed;
             mixed.val[0] = vaddq_f32(vmulq_f32(dry_l, dry_gain),
-                                      vmulq_f32(processed.val[0], wet_gain));
+                                     vmulq_f32(processed.val[0], wet_gain));
             mixed.val[1] = vaddq_f32(vmulq_f32(dry_r, dry_gain),
-                                      vmulq_f32(processed.val[1], wet_gain));
+                                     vmulq_f32(processed.val[1], wet_gain));
 
             // Apply makeup gain
             mixed.val[0] = vmulq_f32(mixed.val[0], makeup_lin);
@@ -241,7 +241,7 @@ public:
                 in_p += 4;
             } else {
                 main_l = in_p[0]; main_r = in_p[1];
-                sc_l = main_l;    sc_r = main_r;
+                sc_l   = main_l;  sc_r   = main_r;
                 in_p += 2;
             }
 
@@ -399,20 +399,24 @@ private:
                                       float32x4_t envelope_db,
                                       float32x4_t* out_l,
                                       float32x4_t* out_r) {
-        // Gain computer with knee
-        float32x4_t target_gain_db = gain_computer_process(&gain_comp_,
-                                                           envelope_db,
-                                                           thresh_db_,
-                                                           ratio_);
+        // 1. Calculate bidirectional displacement from the threshold pivot point
+        float32x4_t excess_db = vsubq_f32(envelope_db, vdupq_n_f32(thresh_db_));
 
-        // Attack/release smoothing
+        // 2. Multiply by the slope (No clamping to zero! Both positive and negative excess matter)
+        float32x4_t target_gain_db = vmulq_f32(excess_db, vdupq_n_f32(function_slope_));
+
+        // 3. Hardware Clamping: Protects against out-of-control signals during high expansion/reversal
+        target_gain_db = vmaxq_f32(target_gain_db, vdupq_n_f32(atten_limit_db_));
+        target_gain_db = vminq_f32(target_gain_db, vdupq_n_f32(gain_limit_db_));
+
+        // 4. Pass the calculated target directly to your existing smoothing process
         float32x4_t smoothed_gain_db = smoothing_process(&smoother_, target_gain_db);
 
-        // Convert to linear gain (ARMv7-compatible)
+        // 5. Convert dB back to a linear multiplier
         float32x4_t gain_lin = neon_expq_f32(vmulq_f32(smoothed_gain_db,
-                                                        vdupq_n_f32(0.115129f)));
+                                                        vdupq_n_f32(0.11512925f)));
 
-        // Apply gain reduction
+        // 6. Apply to VCA channels
         *out_l = vmulq_f32(main_l, gain_lin);
         *out_r = vmulq_f32(main_r, gain_lin);
     }
@@ -495,8 +499,29 @@ public:
                 thresh_db_ = value * 0.1f;
                 break;
 
-            case k_ratio: // RATIO (10..200, x0.1 → 1.0..20.0)
-                ratio_ = value * 0.1f;
+            case k_slope: // RATIO: map 0 to 100 into 0.0 to 1.0 representing the physical knob turn
+                {
+                    // Map your raw value to a normalized float position (0.0 to 1.0)
+                    // Adjust the math below depending on your actual minimum/maximum raw values
+                    float knob = value * 0.01f;
+
+                    // Map the normalized knob position across the 3 hardware regions:
+                    if (knob < 0.333f) {
+                        // 0.0 to 0.333: Expansion/Gating region
+                        // Slopes from +3.0 (Max expansion) down to 0.0 (Linear pass-through)
+                        function_slope_ = 3.0f * (1.0f - (knob / 0.333f));
+                    }
+                    else if (knob < 0.666f) {
+                        // 0.333 to 0.666: Compression region
+                        // Slopes from 0.0 down to -1.0 (Infinite limiting)
+                        function_slope_ = -1.0f * ((knob - 0.333f) / 0.333f);
+                    }
+                    else {
+                        // 0.666 to 1.0: Dynamic Reversal region
+                        // Slopes from -1.0 down to -2.0 (Extreme reverse sucking envelope)
+                        function_slope_ = -1.0f - ((knob - 0.666f) / 0.334f);
+                    }
+                }
                 break;
 
             case k_attack: // ATTACK (0.1 to 100.0 ms)
@@ -731,7 +756,7 @@ public:
                 break;
             }
 
-            case k_ratio: // RATIO (1.0 to 20.0) - show special cases
+            case k_slope: // RATIO (1.0 to 20.0) - show special cases
                 {
                     float ratio = value * 0.1f;
                     if (fabsf(ratio - 20.0f) < 0.1f)
@@ -802,7 +827,7 @@ private:
 
     // Floating-point parameters
     float thresh_db_;
-    float ratio_;
+    float function_slope_;
     float attack_ms_;
     float release_ms_;
     float makeup_db_;

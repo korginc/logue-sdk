@@ -261,7 +261,7 @@ fast_inline float32x4_t linear_to_db(float32x4_t linear) {
     return vmulq_f32(log2, vdupq_n_f32(6.0206f));  // 20 * log10(2)
 }
 
-// Compute gain reduction with knee
+// Compute gain reduction with knee - obsolete
 fast_inline float32x4_t gain_computer_process(gain_computer_t* gc,
                                               float32x4_t envelope_db,
                                               float thresh_db,

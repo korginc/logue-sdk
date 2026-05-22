@@ -39,7 +39,7 @@ constexpr int THRESH_DEFAULT = -100;   // -10.0 dB
 
 constexpr int RATIO_MIN = 10;          // 1.0:1
 constexpr int RATIO_MAX = 200;         // 20.0:1
-constexpr int RATIO_DEFAULT = 40;      // 4.0:1
+constexpr int SLOPE_DEFAULT = 40;      // 4.0:1
 
 constexpr int ATTACK_MIN = 1;           // 0.1 ms
 constexpr int ATTACK_MAX = 1000;        // 100.0 ms

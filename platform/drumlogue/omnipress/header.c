@@ -22,8 +22,11 @@ const __unit_header unit_header_t unit_header = {
         // Page 1: Core Dynamics
         // ID 0: THRESH  -60.0..0.0 dB  (x0.1, stored -600..0)
         { -600, 0, -600, -200, k_unit_param_type_db, 1, 1, 0, {"THRESH"} },
-        // ID 1: RATIO   1.0:1..20.0:1  (x0.1, stored 10..200)
-        { 10, 200, 10, 40, k_unit_param_type_none, 1, 1, 0, {"RATIO"} },
+        // ID 1: SLOPE   1.0:1..10.0:1
+        // 0.00 -> 0.33 : Expansion (Slope +3.0 down to 0.0)
+        // 0.33 -> 0.66 : Compression (Slope 0.0 down to -1.0 limit)
+        // 0.66 -> 1.00 : Negative Compression (Slope -1.0 down to -2.0 reverse)
+        { 1, 100, 10, 40, k_unit_param_type_none, 2, 1, 0, {"SLOPE"} },
         // ID 2: ATTACK  1..1000 ms  (x0.1 ms, stored 1..1000)
         { 1, 1000, 1, 150, k_unit_param_type_msec, 1, 1, 0, {"ATTACK"} },
         // ID 3: RELEASE 10..2000 ms
@@ -70,7 +73,7 @@ const __unit_header unit_header_t unit_header = {
         { 0, 1, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"MBndMut"} },           // ID 21 (param none) - Mute (0=off, 1=on)
         { 0, 1, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"MBndSOl"} },           // ID 22 (param none) - Solo (0=off, 1=on)
         // ID 23: DETECT MODE
-        //   Standard/Multiband: 0=Peak, 1=RMS, 2=Blend
+        //   Standard/Multiband: 0=Peak,  1=RMS,  2=Blend
         //   Distressor:         0=Basic, 1=Emph, 2=Link, 3=Emph+Link
         { 0, 3, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"DtctMOD"} },        // ID 23
     }

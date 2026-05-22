@@ -232,7 +232,7 @@ fast_inline float32x4_t pirkle_triode_engine(float32x4_t in, float drive, float*
     return vnegq_f32(vmulq_f32(v_gk, vmulq_f32(rsq_est, rsq_step))); // Includes phase inversion
 }
 
-// RESTORED PARAMETER ACCESS: Fused branchless compressor node pulling straight from parameter cache
+// Fused branchless compressor node pulling straight from parameter cache
 fast_inline float32x4_t process_compressor_lane(float32x4_t* gain_state, float32x4_t env_linear,
                                                 float thresh_db, float ratio,
                                                 float att_coeff, float rel_coeff) {

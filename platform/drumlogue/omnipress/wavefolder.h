@@ -133,7 +133,7 @@ fast_inline float32x4_t triangle_folder(float32x4_t x) {
     // y = |(x + 1) % 4 - 2| - 1
     float32x4_t shifted = vaddq_f32(x, one);
     float32x4_t div = vmulq_f32(shifted, vdupq_n_f32(0.25f));
-    int32x4_t floor_div = vcvtq_s32_f32(div);
+    int32x4_t   floor_div = vcvtq_s32_f32(div);
     float32x4_t mod = vsubq_f32(shifted,
                                 vmulq_f32(vcvtq_f32_s32(floor_div), four));
 
@@ -191,9 +191,9 @@ fast_inline float32x4_t suboctave_process(wavefolder_t* wf, float32x4_t in_v) {
  * Main wavefolder processing with drive and blend
  */
 fast_inline float32x4x2_t wavefolder_process(wavefolder_t* wf,
-                                              float32x4_t in_l,
-                                              float32x4_t in_r,
-                                              float drive) {
+                                             float32x4_t in_l,
+                                             float32x4_t in_r,
+                                             float drive) {
     (void)drive; // drive is stored in wf->drive
 
     float32x4x2_t out;

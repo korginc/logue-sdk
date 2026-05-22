@@ -265,10 +265,10 @@ fast_inline float32x4x2_t overlord_process(overlord_t* ov, float32x4_t in_l, flo
     // Macro Gain Staging
     float drive_sq = ov->drive * ov->drive;
     float32x4_t v_drive_stage1 = vdupq_n_f32(1.0f + (drive_sq * 35.0f)); // Warm preamp push
-    float32x4_t v_drive_stage2 = vdupq_n_f32(1.0f + (ov->drive * 4.5f));  // Harder triode slam
+    float32x4_t v_drive_stage2 = vdupq_n_f32(1.0f + (ov->drive * 4.5f)); // Harder triode slam
 
     float32x4_t v_static_bias2 = vdupq_n_f32(-0.18f); // Triode operating cutoff point
-    const float alpha_bias = 0.0025f;                  // Capacitor discharge tracker
+    const float alpha_bias = 0.0025f;                 // Capacitor discharge tracker
 
     // ==========================================
     // CHANNEL LEFT HYBRID LAYER
