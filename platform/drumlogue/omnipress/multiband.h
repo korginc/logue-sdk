@@ -356,10 +356,10 @@ fast_inline void multiband_process(multiband_t* mb,
     sat_l_mid  = dc_block_lane(&mb->dc_blockers_l[BAND_MID],  sat_l_mid,  0.995f);
     sat_l_high = dc_block_lane(&mb->dc_blockers_l[BAND_HIGH], sat_l_high, 0.995f);
 
-    // Right Channel Processing
-    float32x4_t sat_r_low  = pirkle_triode_engine(low_r,  mb->bands[BAND_LOW].drive,  &mb->tube_bias_r[BAND_LOW]);
-    float32x4_t sat_r_mid  = pirkle_triode_engine(mid_r,  mb->bands[BAND_MID].drive,  &mb->tube_bias_r[BAND_MID]);
-    float32x4_t sat_r_high = pirkle_triode_engine(high_r, mb->bands[BAND_HIGH].drive, &mb->tube_bias_r[BAND_HIGH]);
+    // Right Channel Processing - TODO use different values? set values to constant array?
+    float32x4_t sat_r_low  = pirkle_triode_engine(low_r,  mb->bands[BAND_LOW].drive,  &mb->tube_bias_r[BAND_LOW], 3.2f, 1.1f);
+    float32x4_t sat_r_mid  = pirkle_triode_engine(mid_r,  mb->bands[BAND_MID].drive,  &mb->tube_bias_r[BAND_MID], 5.5f, 1.8f);
+    float32x4_t sat_r_high = pirkle_triode_engine(high_r, mb->bands[BAND_HIGH].drive, &mb->tube_bias_r[BAND_HIGH], 6.0f, 2.5f);
 
     sat_r_low  = dc_block_lane(&mb->dc_blockers_r[BAND_LOW],  sat_r_low,  0.995f);
     sat_r_mid  = dc_block_lane(&mb->dc_blockers_r[BAND_MID],  sat_r_mid,  0.995f);

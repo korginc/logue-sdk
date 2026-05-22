@@ -101,9 +101,11 @@ public:
         target_mix_    = current_mix_    = 1.0f;                // init=100
 
         // set initial tape saturation
-        x_prev = vdupq_n_f32(0.0f);
-        y_prev = vdupq_n_f32(0.0f);
-        R = vdupq_n_f32(0.995f);
+        x_prev_l = vdupq_n_f32(0.0f);
+        y_prev_l = vdupq_n_f32(0.0f);
+        x_prev_r = vdupq_n_f32(0.0f);
+        y_prev_r = vdupq_n_f32(0.0f);
+        R = 0.995f; // standard DC blocker coefficient for ~20 Hz cutoff at 44.1 kHz, also used in sat_neon_new
 
         wf_phase_inc_ = M_TWOPI * 1.5f / samplerate_;
 
@@ -207,8 +209,8 @@ public:
         }
         else    // tape like
         {
-            sig_l = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_l, drive)), makeup);
-            sig_r = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_r, drive)), makeup);
+            sig_l = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_l, drive)), makeup, false);
+            sig_r = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_r, drive)), makeup, true);
         }
     }
 
@@ -231,17 +233,32 @@ public:
         // 2. Compute powers of f: [1, f, f*f, f*f*f]
         float t2 = f * f;
         float t3 = t2 * f;
-        float32x4_t T = {1.0f, f, t2, t3};
+        float32x4_t T = vdupq_n_f32(1.0f);
+        T = vsetq_lane_f32(f, T, 1);
+        T = vsetq_lane_f32(t2, T, 2);
+        T = vsetq_lane_f32(t3, T, 3);
 
         // 3. Define the Hermite/Catmull-Rom matrix columns (transposed)
         // Coeff 0: P0*0 + P1*2 + P2*0 + P3*0
         // Coeff 1: P0*(-1) + P1*0 + P2*1 + P3*0
         // Coeff 2: P0*2 + P1*(-5) + P2*4 + P3*(-1)
         // Coeff 3: P0*(-1) + P1*3 + P2*(-3) + P3*1
-        float32x4_t C0 = { 0.0f, -1.0f,  2.0f, -1.0f};
-        float32x4_t C1 = { 2.0f,  0.0f, -5.0f,  3.0f};
-        float32x4_t C2 = { 0.0f,  1.0f,  4.0f, -3.0f};
-        float32x4_t C3 = { 0.0f,  0.0f, -1.0f,  1.0f};
+        float32x4_t C0 = vdupq_n_f32(0.0f);
+        C0 = vsetq_lane_f32(-1.0f, C0, 1);
+        C0 = vsetq_lane_f32(2.0f, C0, 2);
+        C0 = vsetq_lane_f32(-1.0f, C0, 3);
+        float32x4_t C1 = vdupq_n_f32(2.0f);
+        C1 = vsetq_lane_f32(0.0f, C1, 1);
+        C1 = vsetq_lane_f32(-5.0f, C1, 2);
+        C1 = vsetq_lane_f32(3.0f, C1, 3);
+        float32x4_t C2 = vdupq_n_f32(0.0f);
+        C2 = vsetq_lane_f32(1.0f, C2, 1);
+        C2 = vsetq_lane_f32(4.0f, C2, 2);
+        C2 = vsetq_lane_f32(-3.0f, C2, 3);
+        float32x4_t C3 = vdupq_n_f32(0.0f);
+        C3 = vsetq_lane_f32(0.0f, C3, 1);
+        C3 = vsetq_lane_f32(-1.0f, C3, 2);
+        C3 = vsetq_lane_f32(1.0f, C3, 3);
 
         // 4. Dot product per channel (Polynomial evaluation)
         float32x4_t V0 = vmulq_f32(vdupq_n_f32(vgetq_lane_f32(P, 0)), C0);
@@ -544,14 +561,15 @@ private:
     float32x4_t previous_noise_r_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
     float32x4_t pop_env_; // precomputed per-sample decay increment for the pop envelope
     // State variables for the DC blocker (assumes 4 independent channels)
-    float32x4_t x_prev;
-    float32x4_t y_prev;
+    float32x4_t x_prev_l;
+    float32x4_t x_prev_r;
+    float32x4_t y_prev_l;
+    float32x4_t y_prev_r;
 
     // R controls the cutoff frequency. 0.995 is a standard coefficient
     // for a pole very close to DC (roughly 20Hz at 44.1kHz).
-    float32x4_t R;
-
-
+    float  R;
+    // PRNG state for vinyl dust and tape hiss (Xorshift128+)
     prng_t prng_;
 
     // Biquad states — L and R fully independent for correct stereo processing
@@ -614,7 +632,7 @@ private:
     // =========================================================================
     // Fixed Tape saturation: Enforces odd symmetry and f(0) = 0
     // =========================================================================
-    fast_inline float32x4_t sat_neon_new(float32x4_t x, bool enable_dc_blocker = true) {
+    fast_inline float32x4_t sat_neon_new(float32x4_t x, bool right_channel = true) {
         const float32x4_t lim = vdupq_n_f32(5.0f);
         x = vmaxq_f32(vminq_f32(x, lim), vnegq_f32(lim));
 
@@ -641,19 +659,29 @@ private:
         float32x4_t mag = vmulq_f32(n, rcp);
         float32x4_t sat_x = vreinterpretq_f32_u32(vorrq_u32(vreinterpretq_u32_f32(mag), sign_mask));
 
-        // 4. Optional DC Blocker
-        if (enable_dc_blocker) {
-            // Formula: y[n] = x[n] - x[n-1] + R * y[n-1]
-            float32x4_t y = vsubq_f32(sat_x, x_prev);
-            y = vmlaq_f32(y, R, y_prev);
+        // 4. DC Blocker - IIR filter: y[n] = x[n] - x[n-1] + R * y[n-1]
+        float x_prev[NEON_LANES];
+        float y_prev[NEON_LANES];
+        float out[NEON_LANES];
 
-            x_prev = sat_x;
-            y_prev = y;
-
-            return y;
+        // each channel must have its own independent filter state to
+        // prevent cross-channel bleeding and ensure the high-pass filter
+        // (HPF) implementation is correct.
+        if (right_channel) {
+            vst1q_f32(x_prev, x_prev_r);
+            vst1q_f32(y_prev, y_prev_r);
+        }
+        else {
+            vst1q_f32(x_prev, x_prev_l);
+            vst1q_f32(y_prev, y_prev_l);
+        }
+        for (int i = 0; i < NEON_LANES; ++i) {
+            out[i] = sat_x[i] - x_prev[i] + R * y_prev[i];
+            x_prev[i] = sat_x[i];
+            y_prev[i] = out[i];
         }
 
-        return sat_x;
+        return vld1q_f32(out);
     }
 
 

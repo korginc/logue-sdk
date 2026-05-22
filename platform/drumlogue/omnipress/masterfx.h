@@ -281,8 +281,9 @@ private:
         }
     }
 
-    fast_inline const char* handle_get_multiband_parameter(int p_id, char* str_buf) {
+    fast_inline const char* handle_get_multiband_parameter(int p_id) {
         float value = 0.0f;
+        static char str_buf[16];
         if (band_select_ == BAND_LOW || band_select_ == BAND_LOW_MID || band_select_ == BAND_LOW_HI || band_select_ == BAND_ALL) {
             value = multiband_get_param(&multiband_, BAND_LOW, p_id);
         }
