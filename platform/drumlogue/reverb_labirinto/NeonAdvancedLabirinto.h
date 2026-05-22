@@ -432,9 +432,8 @@ public:
     /* Advanced features */
     /*===========================================================================*/
 
-    void updateFilterCoeffs() {
-        // Calculate standard angular frequency
-        float w0 = 2.0f * M_PI * baseFc / sampleRate;
+    void updateFilterCoeffsAt(float fc) {
+        float w0 = 2.0f * M_PI * fc / sampleRate;
         float cos_w0 = fastercosfullf(w0);
         float sin_w0 = fastersinfullf(w0);
 
@@ -522,12 +521,16 @@ public:
         biquadB2 = a2 * invA0;
     }
 
+    void updateFilterCoeffs() { updateFilterCoeffsAt(baseFc); }
+
     void applyResonantFilterModulated(float32x4_t* signals, int numChannels, float fcMod) {
         if (filterMode == kFilterNoise) return;
-        float fc = baseFc + fcMod;
-        fc = fmaxf(20.0f, fminf(sampleRate * 0.45f, fc));
-        baseFc = fc;
-        updateFilterCoeffs();
+        // Compute modulated frequency but do NOT write back to baseFc.
+        // The old code did `baseFc = fc` here, which permanently accumulated the LFO
+        // offset on every call (12000 times/second), drifting baseFc to sampleRate*0.45
+        // where the bandpass filter becomes a Nyquist-frequency resonator and blows up.
+        float fc = fmaxf(20.0f, fminf(sampleRate * 0.45f, baseFc + fcMod));
+        updateFilterCoeffsAt(fc);
 
         // ---------------------------------------------------------
         // PROPER SCALAR IIR BIQUAD PROCESSING (same as before, but using current coefficients)
@@ -551,7 +554,14 @@ public:
             filterState1[ch] = (in_val * biquadA1) - (out_val * biquadB1) + filterState2[ch];
             filterState2[ch] = (in_val * biquadA2) - (out_val * biquadB2);
 
-            out_samps[s] = out_val;
+            // kFilterCrystal (esotico): the bandpass alone attenuates by ~20 dB
+            // (peak gain ≈ alpha/(1+alpha) ≈ 0.04), making the reverb tail inaudible.
+            // Blend additively: passband stays at full level + resonant colour at fc.
+            // All other modes replace the signal (LPF/HPF shape the tail spectrum).
+            if (filterMode == kFilterCrystal)
+                out_samps[s] = in_val + out_val * 6.0f;
+            else
+                out_samps[s] = out_val;
           }
 
           // 3. Repack back into the NEON vector to continue the delay network
@@ -596,7 +606,10 @@ public:
                 filterState1[ch] = (in_val * biquadA1) - (out_val * biquadB1) + filterState2[ch];
                 filterState2[ch] = (in_val * biquadA2) - (out_val * biquadB2);
 
-                out_samps[s] = out_val;
+                if (filterMode == kFilterCrystal)
+                    out_samps[s] = in_val + out_val * 6.0f;
+                else
+                    out_samps[s] = out_val;
             }
 
             // 3. Repack back into NEON vector
@@ -650,32 +663,47 @@ public:
     void applyCrossFeedback(float32x4_t* signals) {
         float gain = crossGain[pillar_];
         if (gain < 0.001f) return;
+        // All cases must use temporaries to read original values before writing.
+        // In-place updates (a += gain*b; b += gain*a) read the modified 'a' for 'b',
+        // making the effective matrix asymmetric with max eigenvalue 1+gain+gain²
+        // (e.g. 1.162 at gain=0.15) which can exceed unifiedDecay=0.88 → instability.
+        float32x4_t t0, t1;
         switch (pillar_) {
-            case 0: // 2 channels
-                signals[0] = vaddq_f32(signals[0], vmulq_n_f32(signals[1], gain));
-                signals[1] = vaddq_f32(signals[1], vmulq_n_f32(signals[0], gain));
+            case 0: { // 2 channels — simultaneous update
+                t0 = signals[0]; t1 = signals[1];
+                signals[0] = vaddq_f32(t0, vmulq_n_f32(t1, gain));
+                signals[1] = vaddq_f32(t1, vmulq_n_f32(t0, gain));
                 break;
-            case 1: // 4 channels (random ping‑pong)
+            }
+            case 1: { // 4 channels (ping-pong) — 2 independent pairs
                 for (int i = 0; i < 4; i += 2) {
-                    signals[i]   = vaddq_f32(signals[i],   vmulq_n_f32(signals[i+1], gain));
-                    signals[i+1] = vaddq_f32(signals[i+1], vmulq_n_f32(signals[i], gain));
+                    t0 = signals[i]; t1 = signals[i+1];
+                    signals[i]   = vaddq_f32(t0, vmulq_n_f32(t1, gain));
+                    signals[i+1] = vaddq_f32(t1, vmulq_n_f32(t0, gain));
                 }
                 break;
-            case 2: // 6 channels
+            }
+            case 2: { // 6 channels — 2 independent 3-way rings
                 for (int i = 0; i < 6; i += 3) {
-                    signals[i]   = vaddq_f32(signals[i],   vmulq_n_f32(signals[i+1], gain));
-                    signals[i+1] = vaddq_f32(signals[i+1], vmulq_n_f32(signals[i+2], gain));
-                    signals[i+2] = vaddq_f32(signals[i+2], vmulq_n_f32(signals[i], gain));
+                    float32x4_t t2 = signals[i+2];
+                    t0 = signals[i]; t1 = signals[i+1];
+                    signals[i]   = vaddq_f32(t0, vmulq_n_f32(t1, gain));
+                    signals[i+1] = vaddq_f32(t1, vmulq_n_f32(t2, gain));
+                    signals[i+2] = vaddq_f32(t2, vmulq_n_f32(t0, gain));
                 }
                 break;
-            default: // 8 channels
+            }
+            default: { // 8 channels — 2 independent 4-way rings
                 for (int i = 0; i < 8; i += 4) {
-                    signals[i]   = vaddq_f32(signals[i],   vmulq_n_f32(signals[i+2], gain));
-                    signals[i+2] = vaddq_f32(signals[i+2], vmulq_n_f32(signals[i], gain));
-                    signals[i+1] = vaddq_f32(signals[i+1], vmulq_n_f32(signals[i+3], gain));
-                    signals[i+3] = vaddq_f32(signals[i+3], vmulq_n_f32(signals[i+1], gain));
+                    float32x4_t t2 = signals[i+2], t3 = signals[i+3];
+                    t0 = signals[i]; t1 = signals[i+1];
+                    signals[i]   = vaddq_f32(t0, vmulq_n_f32(t2, gain));
+                    signals[i+2] = vaddq_f32(t2, vmulq_n_f32(t0, gain));
+                    signals[i+1] = vaddq_f32(t1, vmulq_n_f32(t3, gain));
+                    signals[i+3] = vaddq_f32(t3, vmulq_n_f32(t1, gain));
                 }
                 break;
+            }
         }
     }
 
