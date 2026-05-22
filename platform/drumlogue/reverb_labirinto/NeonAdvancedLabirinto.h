@@ -1167,6 +1167,13 @@ private:
             float32x4_t zero = vdupq_n_f32(0.0f);
             vst1q_f32(outL, zero);
             vst1q_f32(outR, zero);
+            // Zero the positions being skipped so old reverb data doesn't
+            // replay when the FDN reactivates after silence.
+            for (int s = 0; s < NEON_LANES; s++) {
+                uint32_t pos = (writePos + s) & BUFFER_MASK;
+                vst1q_f32(&delayLine[pos].samples[0], zero);
+                vst1q_f32(&delayLine[pos].samples[4], zero);
+            }
             writePos = (writePos + NEON_LANES) & BUFFER_MASK;
             return;
         }
@@ -1371,7 +1378,10 @@ private:
         if (activeSampleCount <= 0) {
             // Apply dry gain so volume stays constant when bypassed!
             wetL = 0.0f; wetR = 0.0f;
-            writePos = (writePos + 1) & BUFFER_MASK;    // mask prevents audible glitches when the reverb 'wakes up' from APC bypass
+            // Zero the position being skipped so old reverb data doesn't
+            // replay when the FDN reactivates after silence.
+            memset(&delayLine[writePos & BUFFER_MASK], 0, sizeof(interleaved_frame_t));
+            writePos = (writePos + 1) & BUFFER_MASK;
             return;
         }
 
