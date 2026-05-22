@@ -26,7 +26,6 @@
 
 #include "unit.h"
 #include "constants.h"
-#include "compressor_core.h"
 #include "filters.h"
 #include "wavefolder.h"
 #include "operation_overlord.h"
@@ -282,20 +281,25 @@ private:
         }
     }
 
-    fast_inline const char* handle_get_multiband_parameter(int p_id) const {
-      static char str_buf[16];
-      float value_low = 0.0f, value_mid = 0.0f, value_high = 0.0f;
-      if (band_select_ == BAND_LOW || band_select_ == BAND_LOW_MID ||
-          band_select_ == BAND_LOW_HI || band_select_ == BAND_ALL) {
-        value_low = multiband_get_param(&multiband_, BAND_LOW, p_id);
+    fast_inline const char* handle_get_multiband_parameter(int p_id, char* str_buf) {
+        float value = 0.0f;
+        if (band_select_ == BAND_LOW || band_select_ == BAND_LOW_MID || band_select_ == BAND_LOW_HI || band_select_ == BAND_ALL) {
+            value = multiband_get_param(&multiband_, BAND_LOW, p_id);
         }
-        if (band_select_ == BAND_MID || band_select_ == BAND_LOW_MID || band_select_ == BAND_MID_HI || band_select_ == BAND_ALL) {
-            value_mid = multiband_get_param(&multiband_, BAND_MID, p_id);
+        if (band_select_ == BAND_MID || band_select_ == BAND_MID_HI) {
+            value = multiband_get_param(&multiband_, BAND_MID, p_id);
         }
-        if (band_select_ == BAND_HIGH || band_select_ == BAND_LOW_HI || band_select_ == BAND_MID_HI || band_select_ == BAND_ALL) {
-            value_high = multiband_get_param(&multiband_, BAND_HIGH, p_id);
+        if (band_select_ == BAND_HIGH) {
+            value = multiband_get_param(&multiband_, BAND_HIGH, p_id);
         }
-        snprintf(str_buf, 256, "%.1f|%.1f|%.1f", value_low, value_mid, value_high);
+        // I would have liked to has all the three values shown together, but it's not possible.
+        // choose the lower one if multiple bands selected, since it's more likely to be audible and relevant for the user.
+        static const char *bands[] = {"L", "M", "H", "LM", "LH", "MH", "All"};
+        if (band_select_ >= 0 && band_select_ < BAND_TOTAL) {
+            snprintf(str_buf, 256, "%s:%.1f", bands[band_select_], value);
+        } else {
+            snprintf(str_buf, 256, "---");
+        }
         return str_buf;
     }
 
@@ -817,7 +821,6 @@ private:
     uint8_t detection_mode_;     // 0=peak, 1=RMS, 2=blend
 
     // DSP Modules
-    compressor_t comp_;
     sidechain_hpf_t sc_hpf_;
     wavefolder_t wavefolder_;
     distressor_t distressor_;
