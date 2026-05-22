@@ -89,10 +89,10 @@ public:
         // Defaults matching header.c init values
         model_    = k_244;
         dbx_mode_ = k_active;
-        tape_age_ = 0.10f;      // init=10  → norm=0.10
-        xtalk_amount_ = 0.05f;  // init=5  → norm=0.05
-        hiss_amount_  = 0.003f; // init=15 → norm=0.15 * 0.02
-        pop_env_decay_ = 0.92f; // ~12 ms decay at 48 kHz, controls dust pop duration
+        tape_age_ = 0.10f;       // init=10  → norm=0.10
+        xtalk_amount_  = 0.05f;  // init=5  → norm=0.05
+        hiss_amount_   = 0.003f; // init=15 → norm=0.15 * 0.02
+        pop_env_decay_ = 0.92f;  // ~12 ms decay at 48 kHz, controls dust pop duration
         pop_env_       = prng_rand_float(); // envelope for simulating dust pop decay/release
 
         target_preamp_ = current_preamp_ = 1.0f + 0.20f * 2.0f; // init=20
@@ -122,8 +122,8 @@ public:
                 b_update_filters_.store(true);  // tape model affects LPF/head coeffs
                 break;
             case k_param_preamp: target_preamp_ = 1.0f + norm * 2.0f; break;
-            case k_param_drive:  target_drive_  = norm;                break;
-            case k_param_mix:    target_mix_    = norm;                break;
+            case k_param_drive:  target_drive_  = norm;               break;
+            case k_param_mix:    target_mix_    = norm;               break;
             case k_param_dbx:    dbx_mode_ = (uint8_t)value;          break;
             case k_param_age:
                 tape_age_ = norm;
@@ -318,10 +318,10 @@ public:
             float32x4_t noise = vsubq_f32(
                 vmulq_n_f32(prng_rand_float(), 2.0f), vdupq_n_f32(1.0f));
                 if (model_ == k_vinyl) {
-                    // ~0.02% chance of a dust pop (5-6× spike) per sample
+                    // ~0.02% chance of a dust pop (3× spike) per sample
                     uint32x4_t is_pop = vcgtq_f32(prng_rand_float(), vdupq_n_f32(0.9998f));
                     noise = vmulq_f32(noise,
-                        vbslq_f32(is_pop, vdupq_n_f32(5.0f), vdupq_n_f32(1.0f)));
+                        vbslq_f32(is_pop, vdupq_n_f32(3.0f), vdupq_n_f32(1.0f)));
                     // Trigger pop envelope on any pop sample
                     noise = vaddq_f32(vmulq_n_f32(noise, 0.7f), vmulq_f32(vmulq_n_f32(previous_noise, 0.3f), pop_env_));
                     previous_noise = noise; // store pre-decay noise for shaping
