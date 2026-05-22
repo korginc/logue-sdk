@@ -113,7 +113,7 @@ fast_inline void sidechain_hpf_set_cutoff(sidechain_hpf_t* f, float cutoff) {
 #define DETECT_MODE_BLEND 2
 
 typedef struct {
-    float32x4_t rms_accum;      // Running sum for RMS
+    float32x4_t rms_accum;       // Running sum for RMS
     float32x4_t peak_hold;       // Peak hold value
     uint32x4_t hold_counter;     // Hold time counter
     float32x4_t last_envelope;   // Previous envelope value
