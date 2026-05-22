@@ -457,69 +457,6 @@ static fast_inline void mix_clone_scalar(clone_t& c,
     wet_r += c.lp_state_r * c.net_gain_r * gap_boost;
 }
 
-
-static fast_inline void mix_clone_batch2(clone_t* clones,
-                                         int base,
-                                         const delay_line_t& delay,
-                                         float rate,
-                                         float gap_boost,
-                                         float& wet_l,
-                                         float& wet_r) {
-    (void)rate;
-    alignas(16) float dl[2], dr[2], gainL[2], gainR[2];
-
-    for (int lane = 0; lane < 2; ++lane) {
-        const clone_t& c = clones[base + lane];
-        float total_d = c.delay_samples + c.scatter_samples;
-        if (total_d < 2.0f) total_d = 2.0f;
-        total_d += fastersinfullf(c.wobble_phase) * c.wobble_depth_samples;
-
-        float raw_pos = (float)(delay.write - 1) - total_d;
-        float safe_pos = raw_pos + (float)(delay_line_t::kLen * 8);
-        int base_int = (int)safe_pos;
-        float fr = safe_pos - (float)base_int;
-        int i0 = base_int & delay_line_t::kMask;
-        int i1 = (i0 + 1) & delay_line_t::kMask;
-
-        dl[lane] = delay.l[i0] + (delay.l[i1] - delay.l[i0]) * fr;
-        dr[lane] = delay.r[i0] + (delay.r[i1] - delay.r[i0]) * fr;
-        gainL[lane] = c.net_gain_l * gap_boost;
-        gainR[lane] = c.net_gain_r * gap_boost;
-    }
-
-    float32x2_t vdl = vld1_f32(dl);
-    float32x2_t vdr = vld1_f32(dr);
-    float32x2_t vgl = vld1_f32(gainL);
-    float32x2_t vgr = vld1_f32(gainR);
-    wet_l += PercussionSpatializer::horizontal_sum2(vmul_f32(vdl, vgl));
-    wet_r += PercussionSpatializer::horizontal_sum2(vmul_f32(vdr, vgr));
-}
-
-static fast_inline void mix_clone_scalar(clone_t& c,
-                                         const delay_line_t& delay,
-                                         float rate,
-                                         float gap_boost,
-                                         float& wet_l,
-                                         float& wet_r) {
-    (void)rate;
-    float total_d = c.delay_samples + c.scatter_samples;
-    if (total_d < 2.0f) total_d = 2.0f;
-    total_d += fastersinfullf(c.wobble_phase) * c.wobble_depth_samples;
-
-    float raw_pos = (float)(delay.write - 1) - total_d;
-    float safe_pos = raw_pos + (float)(delay_line_t::kLen * 8);
-    int base_int = (int)safe_pos;
-    float fr = safe_pos - (float)base_int;
-    int i0 = base_int & delay_line_t::kMask;
-    int i1 = (i0 + 1) & delay_line_t::kMask;
-
-    float dl = delay.l[i0] + (delay.l[i1] - delay.l[i0]) * fr;
-    float dr = delay.r[i0] + (delay.r[i1] - delay.r[i0]) * fr;
-
-    wet_l += dl * c.net_gain_l * gap_boost;
-    wet_r += dr * c.net_gain_r * gap_boost;
-}
-
 static fast_inline void render_one_frame(PercussionSpatializer* self,
                                          float in_l, float in_r,
                                          float& out_l, float& out_r) {

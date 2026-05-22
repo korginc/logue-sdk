@@ -145,7 +145,7 @@ fast_inline void multiband_set_param(multiband_t* mb,
 }
 
 // Get band parameter
-fast_inline float multiband_get_param(multiband_t* mb,
+fast_inline float multiband_get_param(const multiband_t* mb,
                                       uint8_t band,
                                       uint8_t param_id) {
     if (band > BAND_HIGH) return 0.0f;

@@ -73,8 +73,8 @@ static void test_max_params_drone() {
     /* Apply max values for every parameter */
     synth.setParameter(ScrutaAstri::k_paramProgram,    95);
     synth.setParameter(ScrutaAstri::k_paramNote,      126);
-    synth.setParameter(ScrutaAstri::k_paramOsc1Wave,  239);
-    synth.setParameter(ScrutaAstri::k_paramOsc2Wave,  239);
+    synth.setParameter(ScrutaAstri::k_paramOsc1Wave,  247);
+    synth.setParameter(ScrutaAstri::k_paramOsc2Wave,  247);
     synth.setParameter(ScrutaAstri::k_paramO2Detune,  100);
     synth.setParameter(ScrutaAstri::k_paramO2SubOct,    3);
     synth.setParameter(ScrutaAstri::k_paramOsc2Mix,   100);

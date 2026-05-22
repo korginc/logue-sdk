@@ -198,7 +198,8 @@ public:
 
     fast_inline void drive_into_soft_saturation(float32x4_t &sig_l, float32x4_t &sig_r) {
         const float drive  = 1.0f + current_drive_ * 3.0f;
-        const float makeup = Q_rsqrt(current_drive_ if (current_drive_ > 0.0f) : 0.85f);
+        const float makeup =
+            (current_drive_ > 0.0f) ? Q_rsqrt(current_drive_) : 0.85f; // makeup gain reduces as drive increases, but never below -3 dB
         if (model_ == k_vinyl)
         {
             sig_l = vmulq_n_f32(sat_neon(vmulq_n_f32(sig_l, drive)), makeup);
@@ -243,17 +244,20 @@ public:
         float32x4_t C3 = { 0.0f,  0.0f, -1.0f,  1.0f};
 
         // 4. Dot product per channel (Polynomial evaluation)
-        float32x4_t V0 = vmulq_f32(vdupq_f32(vgetq_lane_f32(P, 0)), C0);
-        float32x4_t V1 = vmulq_f32(vdupq_f32(vgetq_lane_f32(P, 1)), C1);
-        float32x4_t V2 = vmulq_f32(vdupq_f32(vgetq_lane_f32(P, 2)), C2);
-        float32x4_t V3 = vmulq_f32(vdupq_f32(vgetq_lane_f32(P, 3)), C3);
+        float32x4_t V0 = vmulq_f32(vdupq_n_f32(vgetq_lane_f32(P, 0)), C0);
+        float32x4_t V1 = vmulq_f32(vdupq_n_f32(vgetq_lane_f32(P, 1)), C1);
+        float32x4_t V2 = vmulq_f32(vdupq_n_f32(vgetq_lane_f32(P, 2)), C2);
+        float32x4_t V3 = vmulq_f32(vdupq_n_f32(vgetq_lane_f32(P, 3)), C3);
 
         // 5. Sum the weighted columns
         float32x4_t sum_vec = vaddq_f32(vaddq_f32(V0, V1), vaddq_f32(V2, V3));
 
         // 6. Multiply by T and divide by 2
         float32x4_t final_poly = vmulq_f32(sum_vec, T);
-        float result = vaddvq_f32(final_poly) * 0.5f;
+        float result = (vgetq_lane_f32(final_poly, 0) +
+                        vgetq_lane_f32(final_poly, 1) +
+                        vgetq_lane_f32(final_poly, 2) +
+                        vgetq_lane_f32(final_poly, 3)) * 0.5f;
 
         return result;
     }
@@ -382,11 +386,13 @@ public:
 
             // 1. Load & de-interleave stereo
             float32x4x2_t vi = vld2q_f32(pIn);
-            const float32x4_t dry_l = vi.val[0];
+            const float32x4_t dry_l = vi.val[0];    // dry
             const float32x4_t dry_r = vi.val[1];
+            float32x4_t sig_l = dry_l;        // wet (processed) signal starts as dry and is transformed in-place through the chain; used for both encode and decode paths to maintain correct timing of the NR system's envelope followers, which track the actual signal hitting the tape nonlinearity
+            float32x4_t sig_r = dry_r;
 
             // 2. Pre-amp
-            preamp(dry_l, dry_r);
+            preamp(sig_l, sig_r);
 
             // 3. Parametric EQ (3-band, L and R share coefficients, independent states)
             parametric_eq(sig_l, sig_r);

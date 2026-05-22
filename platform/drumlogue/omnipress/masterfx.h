@@ -282,10 +282,12 @@ private:
         }
     }
 
-    fast_inline const char* handle_get_multiband_parameter(int p_id, char* str_buf) {
-        float value_low = 0.0f, value_mid = 0.0f, value_high = 0.0f;
-        if (band_select_ == BAND_LOW || band_select_ == BAND_LOW_MID || band_select_ == BAND_LOW_HI || band_select_ == BAND_ALL) {
-            value_low = multiband_get_param(&multiband_, BAND_LOW, p_id);
+    fast_inline const char* handle_get_multiband_parameter(int p_id) const {
+      static char str_buf[16];
+      float value_low = 0.0f, value_mid = 0.0f, value_high = 0.0f;
+      if (band_select_ == BAND_LOW || band_select_ == BAND_LOW_MID ||
+          band_select_ == BAND_LOW_HI || band_select_ == BAND_ALL) {
+        value_low = multiband_get_param(&multiband_, BAND_LOW, p_id);
         }
         if (band_select_ == BAND_MID || band_select_ == BAND_LOW_MID || band_select_ == BAND_MID_HI || band_select_ == BAND_ALL) {
             value_mid = multiband_get_param(&multiband_, BAND_MID, p_id);
@@ -454,7 +456,7 @@ private:
                 // prevents clipping. Do NOT divide by sat_drive (old formula made
                 // the distorted output quieter than dry, masking the effect).
                 float sat_drive = 2.0f + drive_ * 12.0f;
- 12             float32x4_t drv = vdupq_n_f32(sat_drive);
+                float32x4_t drv = vdupq_n_f32(sat_drive);
                 *out_l = generate_harmonics(&distressor_,
                                             vmulq_f32(comp_l, drv),
                                             distressor_.dist_mode);
@@ -685,47 +687,45 @@ public:
             case k_multiband_band_threshold: // L THRESH (multiband low threshold) - param_id=0
             {
                 const int p_id = 0;
-                return handle_get_multiband_parameter(p_id, str_buf);
+                return handle_get_multiband_parameter(p_id);
                 break;
             }
             case k_multiband_band_ratio: // L RATIO (multiband low ratio) - param_id=1
             {
                 const int p_id = 1;
-                return handle_get_multiband_parameter(p_id, str_buf);
+                return handle_get_multiband_parameter(p_id);
                 break;
             }
             case k_multiband_band_attack:  // BAND ATTACK
             {
                 const int p_id = 3;         // param_id 3 = attack_ms in multiband_set_param
-                return handle_get_multiband_parameter(p_id, str_buf);
+                return handle_get_multiband_parameter(p_id);
                 break;
             }
             case k_multiband_band_release:  // BAND RELEASE
             {
                 const int p_id = 4;         // param_id 4 = release_ms
-                return handle_get_multiband_parameter(p_id, str_buf);
+                return handle_get_multiband_parameter(p_id);
                 break;
             }
             case k_multiband_band_makeup:   // BAND MAKEUP
             {
                 const int p_id = 2;         // param_id 2 = makeup_db
-                return handle_get_multiband_parameter(p_id, str_buf);
+                return handle_get_multiband_parameter(p_id);
                 break;
             }
             case k_multiband_band_mute:     // BAND MUTE
             {
                 const int p_id = 5;         // param_id 5 = mute
-                return handle_get_multiband_parameter(p_id, str_buf);
+                return handle_get_multiband_parameter(p_id);
                 break;
             }
             case k_multiband_band_solo:     // BAND SOLO
             {
                 const int p_id = 6;         // param_id 6 = solo
-                return handle_get_multiband_parameter(p_id, str_buf);
+                return handle_get_multiband_parameter(p_id);
                 break;
             }
-
-
 
             case k_ratio: // RATIO (1.0 to 20.0) - show special cases
                 {
