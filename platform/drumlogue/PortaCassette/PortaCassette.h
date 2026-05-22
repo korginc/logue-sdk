@@ -92,8 +92,9 @@ public:
         tape_age_ = 0.10f;       // init=10  → norm=0.10
         xtalk_amount_  = 0.05f;  // init=5  → norm=0.05
         hiss_amount_   = 0.003f; // init=15 → norm=0.15 * 0.02
-        pop_env_decay_ = 0.92f;  // ~12 ms decay at 48 kHz, controls dust pop duration
-        pop_env_       = prng_rand_float(); // envelope for simulating dust pop decay/release
+        previous_noise_l_ = vdupq_n_f32(0.0f);
+        previous_noise_r_ = vdupq_n_f32(0.0f);
+        pop_env_          = vdupq_n_f32(0.0f);
 
         target_preamp_ = current_preamp_ = 1.0f + 0.20f * 2.0f; // init=20
         target_drive_  = current_drive_  = 0.40f;               // init=40
@@ -198,8 +199,7 @@ public:
 
     fast_inline void drive_into_soft_saturation(float32x4_t &sig_l, float32x4_t &sig_r) {
         const float drive  = 1.0f + current_drive_ * 3.0f;
-        const float makeup =
-            (current_drive_ > 0.0f) ? Q_rsqrt(current_drive_) : 0.85f; // makeup gain reduces as drive increases, but never below -3 dB
+        const float makeup = 0.9f; // Tape saturation is not inverse-energy compensated.
         if (model_ == k_vinyl)
         {
             sig_l = vmulq_n_f32(sat_neon(vmulq_n_f32(sig_l, drive)), makeup);
@@ -288,9 +288,9 @@ public:
             int32_t  i0 = (int32_t)pos;
             float    fr = pos - (float)i0;
             uint32_t m0 = (uint32_t)i0 & WF_BUFFER_MASK;
-            uint32_t m1 = (m0 + 1u) & WF_BUFFER_MASK;
-            uint32_t m2 = (m0 + 2u) & WF_BUFFER_MASK;
-            uint32_t m3 = (m0 + 3u) & WF_BUFFER_MASK;
+            uint32_t m1 = (m0 - 1u) & WF_BUFFER_MASK;
+            uint32_t m2 = (m0 + 1u) & WF_BUFFER_MASK;
+            uint32_t m3 = (m0 + 2u) & WF_BUFFER_MASK;
             // cubic interpolation from 4 points: https://www.paulinternet.nl/?page=bicubic
             l4[s] = hermite4_neon(wf_delay_l_[m0], wf_delay_l_[m1], wf_delay_l_[m2], wf_delay_l_[m3], fr);
             r4[s] = hermite4_neon(wf_delay_r_[m0], wf_delay_r_[m1], wf_delay_r_[m2], wf_delay_r_[m3], fr);
@@ -298,7 +298,7 @@ public:
             // l4[s] = wf_delay_l_[m0] + fr * (wf_delay_l_[m1] - wf_delay_l_[m0]);
             // r4[s] = wf_delay_r_[m0] + fr * (wf_delay_r_[m1] - wf_delay_r_[m0]);
 
-            wf_write_pos_ = (wf_write_pos_ + 3u) & WF_BUFFER_MASK;
+            wf_write_pos_ = (wf_write_pos_ + 1u) & WF_BUFFER_MASK;
         }
         sig_l = vld1q_f32(l4);
         sig_r = vld1q_f32(r4);
@@ -312,24 +312,98 @@ public:
             sig_l = xl; sig_r = xr;
     }
 
-    fast_inline void tape_hiss_vinyl_dust(float32x4_t &sig_l, float32x4_t &sig_r) {
+    fast_inline void vinyl_dust(float32x4_t &sig_l, float32x4_t &sig_r) {
+        // ------------------------------------------------------------------------
+        // 1. Generate independent white noise sources
+        // ------------------------------------------------------------------------
+        float32x4_t white_l = vsubq_f32(
+            vmulq_n_f32(prng_rand_float(), 2.0f),
+            vdupq_n_f32(1.0f));
+
+        float32x4_t white_r = vsubq_f32(
+            vmulq_n_f32(prng_rand_float(), 2.0f),
+            vdupq_n_f32(1.0f));
+
+        // ------------------------------------------------------------------------
+        // 2. Sparse random trigger for dust pops
+        //    ~0.03% probability per sample
+        // ------------------------------------------------------------------------
+        uint32x4_t trigger =
+            vcgtq_f32(prng_rand_float(), vdupq_n_f32(0.9997f));
+
+        // ------------------------------------------------------------------------
+        // 3. Random pop amplitude
+        //    softer and more realistic than huge spikes
+        // ------------------------------------------------------------------------
+        float32x4_t rand_amp =
+            vmlaq_n_f32(
+                vdupq_n_f32(0.25f),     // minimum
+                prng_rand_float(),
+                0.45f);                 // random extra
+
+        // ------------------------------------------------------------------------
+        // 4. Trigger envelope
+        //    if trigger occurs:
+        //        pop_env_ = rand_amp
+        // ------------------------------------------------------------------------
+        pop_env_ = vbslq_f32(trigger, rand_amp, pop_env_);
+
+        // ------------------------------------------------------------------------
+        // 5. Exponential decay
+        // ------------------------------------------------------------------------
+        pop_env_ = vmulq_n_f32(pop_env_, pop_env_decay_);
+
+        // ------------------------------------------------------------------------
+        // 6. Shape transient
+        //    Adds temporal continuity instead of single-sample spikes
+        // ------------------------------------------------------------------------
+        float32x4_t crackle_l =
+            vaddq_f32(
+                vmulq_n_f32(white_l, 0.82f),
+                vmulq_n_f32(previous_noise_l_, 0.18f));
+
+        float32x4_t crackle_r =
+            vaddq_f32(
+                vmulq_n_f32(white_r, 0.82f),
+                vmulq_n_f32(previous_noise_r_, 0.18f));
+
+        previous_noise_l_ = white_l;
+        previous_noise_r_ = white_r;
+
+        // ------------------------------------------------------------------------
+        // 7. Apply envelope
+        // ------------------------------------------------------------------------
+        crackle_l = vmulq_f32(crackle_l, pop_env_);
+        crackle_r = vmulq_f32(crackle_r, pop_env_);
+
+        // ------------------------------------------------------------------------
+        // 8. Band-limit the crackle
+        //    Real vinyl dust is mid/high focused, not full-band impulses
+        // ------------------------------------------------------------------------
+        crackle_l =
+            biquad_process4(&hiss_hpf_l_, &coeff_hiss_hpf_, crackle_l);
+
+        crackle_r =
+            biquad_process4(&hiss_hpf_r_, &coeff_hiss_hpf_, crackle_r);
+
+        // ------------------------------------------------------------------------
+        // 9. Mix quietly
+        // ------------------------------------------------------------------------
+        const float dust_level = 0.12f + tape_age_ * 0.08f;
+
+        sig_l = vmlaq_n_f32(sig_l, crackle_l, dust_level);
+        sig_r = vmlaq_n_f32(sig_r, crackle_r, dust_level);
+    }
+
+    fast_inline void tape_hiss(float32x4_t &sig_l, float32x4_t &sig_r) {
         if (hiss_amount_ > 0.0f && dbx_mode_ != k_active) {
             // 4 white-noise samples at once: [0,1) → [-1,1)
             float32x4_t noise = vsubq_f32(
                 vmulq_n_f32(prng_rand_float(), 2.0f), vdupq_n_f32(1.0f));
-                if (model_ == k_vinyl) {
-                    // ~0.02% chance of a dust pop (3× spike) per sample
-                    uint32x4_t is_pop = vcgtq_f32(prng_rand_float(), vdupq_n_f32(0.9998f));
-                    noise = vmulq_f32(noise,
-                        vbslq_f32(is_pop, vdupq_n_f32(3.0f), vdupq_n_f32(1.0f)));
-                    // Trigger pop envelope on any pop sample
-                    noise = vaddq_f32(vmulq_n_f32(noise, 0.7f), vmulq_f32(vmulq_n_f32(previous_noise, 0.3f), pop_env_));
-                    previous_noise = noise; // store pre-decay noise for shaping
-            }
-
             // Filter to coloured hiss; invert for R to widen the stereo image
             float32x4_t fl = biquad_process4(&hiss_hpf_l_, &coeff_hiss_hpf_, noise);
-            float32x4_t fr = vmlaq_n_f32(fl, prng_rand_float(), 0.7f); // decorrelate R from L for a wider image
+            float32x4_t fr = vmulq_n_f32(fl, 0.3f);
+            fr = vmlaq_n_f32(fr, prng_rand_float(), 0.7f); // decorrelate R from L for a wider image
             // Older tape sheds oxide → noisier floor; scale hiss with age
             const float hiss_scaled = hiss_amount_ * (1.0f + tape_age_ * 2.0f);
             sig_l = vmlaq_n_f32(sig_l, fl, hiss_scaled);
@@ -404,7 +478,7 @@ public:
 
             // 4.5 Tape bias hiss / vinyl dust pops: moved before saturation to get hiss naturally softened.
             //     Added in k_encode_only and k_off modes (dbx active suppresses it naturally)
-            tape_hiss_vinyl_dust(sig_l, sig_r);
+            if (model_ == k_vinyl) vinyl_dust(sig_l, sig_r); else tape_hiss(sig_l, sig_r);
 
             // 5. Tape Magnetic Saturation
             //    a) Head bump (low-mid resonance)
@@ -466,9 +540,9 @@ private:
     float wf_flutter_phase_;
     float wf_flutter_phase_inc_;  // precomputed per-sample increment for 25 Hz flutter
 
-    float32x4_t previous_noise; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
-    float32x4_t pop_env_; // envelope to shape vinyl dust pops (attack-decay, triggered on each pop sample, decays faster with age)
-    float       pop_env_decay_; // precomputed per-sample decay increment for the pop envelope
+    float32x4_t previous_noise_l_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
+    float32x4_t previous_noise_r_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
+    float32x4_t pop_env_; // precomputed per-sample decay increment for the pop envelope
     // State variables for the DC blocker (assumes 4 independent channels)
     float32x4_t x_prev;
     float32x4_t y_prev;
