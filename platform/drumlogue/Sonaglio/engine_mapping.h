@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include "float_math.h"
 #include "unit.h"
+#include "fm_voices.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -175,6 +176,20 @@ ENGINE_MAPPING_INLINE float32x4_t fm_soft_clip(float32x4_t x) {
  *
  * y = 1.5x - 0.5x^3, after clamping x to [-1, 1].
  */
+/**
+ * MIDI note number to clamped Hz.
+ * Shared by all engine set_note functions.
+ */
+ENGINE_MAPPING_INLINE float32x4_t fm_midi_to_freq(float32x4_t midi_notes,
+                                                   float freq_min,
+                                                   float freq_max) {
+    float32x4_t exponent = vmulq_n_f32(vsubq_f32(midi_notes, vdupq_n_f32(69.0f)),
+                                       1.0f / 12.0f);
+    float32x4_t base_freq = vmulq_n_f32(exp2_neon(exponent), 440.0f);
+    return vmaxq_f32(vdupq_n_f32(freq_min),
+                     vminq_f32(vdupq_n_f32(freq_max), base_freq));
+}
+
 ENGINE_MAPPING_INLINE float32x4_t fm_cubic_clip(float32x4_t x) {
     x = vmaxq_f32(vdupq_n_f32(-1.0f), vminq_f32(vdupq_n_f32(1.0f), x));
     const float32x4_t x2 = vmulq_f32(x, x);

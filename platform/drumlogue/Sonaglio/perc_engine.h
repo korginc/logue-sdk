@@ -21,6 +21,7 @@
 #include <arm_neon.h>
 #include "sine_neon.h"
 #include "fm_voices.h"
+#include "engine_mapping.h"
 
 #define PERC_CARRIER_BASE 200.0f
 #define PERC_FREQ_MIN      45.0f
@@ -46,21 +47,6 @@ typedef struct {
     float32x4_t output_gain;     // body compensation
     float32x4_t drive;           // attack saturation amount
 } perc_engine_t;
-
-fast_inline float32x4_t perc_clip_cubic(float32x4_t x) {
-    // Cheap ARM-friendly soft clip:
-    // clamp to [-1,1], then y = 1.5x - 0.5x^3.
-    const float32x4_t one = vdupq_n_f32(1.0f);
-    const float32x4_t neg_one = vdupq_n_f32(-1.0f);
-
-    x = vmaxq_f32(neg_one, vminq_f32(one, x));
-
-    float32x4_t x2 = vmulq_f32(x, x);
-    float32x4_t x3 = vmulq_f32(x2, x);
-
-    return vsubq_f32(vmulq_n_f32(x, 1.5f),
-                     vmulq_n_f32(x3, 0.5f));
-}
 
 /**
  * Initialize perc engine
@@ -143,18 +129,7 @@ fast_inline void perc_engine_update(perc_engine_t* perc,
 fast_inline void perc_engine_set_note(perc_engine_t* perc,
                                       uint32x4_t voice_mask,
                                       float32x4_t midi_notes) {
-    float32x4_t a4_freq = vdupq_n_f32(440.0f);
-    float32x4_t a4_midi = vdupq_n_f32(69.0f);
-    float32x4_t twelfth = vdupq_n_f32(1.0f / 12.0f);
-
-    float32x4_t exponent = vmulq_f32(vsubq_f32(midi_notes, a4_midi), twelfth);
-    float32x4_t two_pow = exp2_neon(exponent);
-    float32x4_t base_freq = vmulq_f32(a4_freq, two_pow);
-
-    // Keep this engine in useful tom/block/percussion territory.
-    base_freq = vmaxq_f32(vdupq_n_f32(PERC_FREQ_MIN),
-                          vminq_f32(vdupq_n_f32(PERC_FREQ_MAX), base_freq));
-
+    float32x4_t base_freq = fm_midi_to_freq(midi_notes, PERC_FREQ_MIN, PERC_FREQ_MAX);
     perc->carrier_freq_base = vbslq_f32(voice_mask,
                                         base_freq,
                                         perc->carrier_freq_base);
@@ -211,8 +186,8 @@ fast_inline float32x4_t perc_engine_process(perc_engine_t* perc,
     // FM stack:
     // - Op2 provides the stable body.
     // - Op3 provides the short, brighter strike.
-    float32x4_t mod1 = neon_sin(perc->phase[1]);
-    float32x4_t mod2 = neon_sin(perc->phase[2]);
+    float32x4_t mod1 = neon_sin_fast(perc->phase[1]);
+    float32x4_t mod2 = neon_sin_fast(perc->phase[2]);
 
     float32x4_t body_part = vmulq_f32(mod1,
                                       vmulq_f32(env4, perc->body_index));
@@ -225,7 +200,7 @@ fast_inline float32x4_t perc_engine_process(perc_engine_t* perc,
     float32x4_t modulated_phase = vaddq_f32(perc->phase[0],
                                             vmulq_n_f32(modulation, 1.85f));
 
-    float32x4_t body = neon_sin(modulated_phase);
+    float32x4_t body = neon_sin_fast(modulated_phase);
     float32x4_t transient = vmulq_f32(mod2, vmulq_f32(env8, vdupq_n_f32(0.18f)));
     float32x4_t output = vaddq_f32(vmulq_f32(body, envelope), transient);
 
@@ -233,7 +208,7 @@ fast_inline float32x4_t perc_engine_process(perc_engine_t* perc,
     float32x4_t drive_gain = vaddq_f32(vdupq_n_f32(1.0f),
                                        vmulq_f32(perc->drive, env8));
     output = vmulq_f32(output, drive_gain);
-    output = perc_clip_cubic(output);
+    output = fm_cubic_clip(output);
 
     output = vmulq_f32(output, vmulq_f32(envelope, perc->output_gain));
 

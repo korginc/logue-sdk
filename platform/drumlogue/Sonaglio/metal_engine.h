@@ -22,6 +22,7 @@
 #include "fm_voices.h"
 #include "sine_neon.h"
 #include "prng.h"
+#include "engine_mapping.h"
 
 #define NUM_OPERATORS (4)
 
@@ -255,17 +256,7 @@ fast_inline void metal_engine_update(metal_engine_t* metal,
 fast_inline void metal_engine_set_note(metal_engine_t* metal,
                                        uint32x4_t voice_mask,
                                        float32x4_t midi_notes) {
-    float32x4_t a4_freq = vdupq_n_f32(440.0f);
-    float32x4_t a4_midi = vdupq_n_f32(69.0f);
-    float32x4_t twelfth = vdupq_n_f32(1.0f / 12.0f);
-
-    float32x4_t exponent = vmulq_f32(vsubq_f32(midi_notes, a4_midi), twelfth);
-    float32x4_t two_pow = exp2_neon(exponent);
-    float32x4_t base_freq = vmulq_f32(a4_freq, two_pow);
-
-    base_freq = vmaxq_f32(vdupq_n_f32(METAL_FREQ_MIN),
-                          vminq_f32(vdupq_n_f32(METAL_FREQ_MAX), base_freq));
-
+    float32x4_t base_freq = fm_midi_to_freq(midi_notes, METAL_FREQ_MIN, METAL_FREQ_MAX);
     metal->carrier_freq_base = vbslq_f32(voice_mask,
                                          base_freq,
                                          metal->carrier_freq_base);

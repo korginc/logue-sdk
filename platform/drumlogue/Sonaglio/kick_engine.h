@@ -22,6 +22,7 @@
 #include "fm_voices.h"
 #include "sine_neon.h"
 #include "envelope_rom.h"
+#include "engine_mapping.h"
 
 // Kick engine constants
 #define KICK_CARRIER_BASE   60.0f
@@ -45,22 +46,6 @@ typedef struct {
     float32x4_t output_gain;  // body compensation
     float32x4_t drive;        // transient saturation amount
 } kick_engine_t;
-
-fast_inline float32x4_t kick_clip_cubic(float32x4_t x) {
-    // Cheap soft clip:
-    // clamp to [-1,1], then smooth cubic saturation: y = 1.5x - 0.5x^3.
-    // This avoids division and behaves well on ARMv7.
-    const float32x4_t one = vdupq_n_f32(1.0f);
-    const float32x4_t neg_one = vdupq_n_f32(-1.0f);
-
-    x = vmaxq_f32(neg_one, vminq_f32(one, x));
-
-    float32x4_t x2 = vmulq_f32(x, x);
-    float32x4_t x3 = vmulq_f32(x2, x);
-
-    return vsubq_f32(vmulq_n_f32(x, 1.5f),
-                     vmulq_n_f32(x3, 0.5f));
-}
 
 /**
  * Initialize kick engine
@@ -135,18 +120,7 @@ fast_inline void kick_engine_update(kick_engine_t* kick,
 fast_inline void kick_engine_set_note(kick_engine_t* kick,
                                       uint32x4_t voice_mask,
                                       float32x4_t midi_notes) {
-    float32x4_t a4_freq = vdupq_n_f32(440.0f);
-    float32x4_t a4_midi = vdupq_n_f32(69.0f);
-    float32x4_t twelfth = vdupq_n_f32(1.0f / 12.0f);
-
-    float32x4_t exponent = vmulq_f32(vsubq_f32(midi_notes, a4_midi), twelfth);
-    float32x4_t two_pow = exp2_neon(exponent);
-    float32x4_t base_freq = vmulq_f32(a4_freq, two_pow);
-
-    // Prevent extreme MIDI notes from making the kick unusable or alias-prone.
-    base_freq = vmaxq_f32(vdupq_n_f32(KICK_FREQ_MIN),
-                          vminq_f32(vdupq_n_f32(KICK_FREQ_MAX), base_freq));
-
+    float32x4_t base_freq = fm_midi_to_freq(midi_notes, KICK_FREQ_MIN, KICK_FREQ_MAX);
     kick->carrier_freq_base = vbslq_f32(voice_mask,
                                         base_freq,
                                         kick->carrier_freq_base);
@@ -210,11 +184,11 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
     float32x4_t index = vaddq_f32(body_index, click_index);
     index = vaddq_f32(index, lfo_index_add);
 
-    float32x4_t modulator = neon_sin(kick->modulator_phase);
+    float32x4_t modulator = neon_sin_fast(kick->modulator_phase);
     float32x4_t modulated_phase = vaddq_f32(kick->carrier_phase,
                                             vmulq_f32(modulator, index));
 
-    float32x4_t body = neon_sin(modulated_phase);
+    float32x4_t body = neon_sin_fast(modulated_phase);
     float32x4_t transient = vmulq_f32(modulator, vmulq_f32(env8, vdupq_n_f32(0.22f)));
     float32x4_t output = vaddq_f32(vmulq_f32(body, amp_env), transient);
 
@@ -222,7 +196,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
     float32x4_t drive_gain = vaddq_f32(vdupq_n_f32(1.0f),
                                        vmulq_f32(kick->drive, env8));
     output = vmulq_f32(output, drive_gain);
-    output = kick_clip_cubic(output);
+    output = fm_cubic_clip(output);
 
     // Body compensation.
     output = vmulq_f32(output, kick->output_gain);

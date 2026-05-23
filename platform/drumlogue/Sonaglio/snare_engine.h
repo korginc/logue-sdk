@@ -19,6 +19,7 @@
 #include "fm_voices.h"
 #include "sine_neon.h"
 #include "prng.h"
+#include "engine_mapping.h"
 
 #define SNARE_CARRIER_BASE       200.0f
 #define SNARE_FREQ_MIN            90.0f
@@ -54,20 +55,6 @@ typedef struct {
     one_pole_t  noise_lowp;
     neon_prng_t noise_prng;
 } snare_engine_t;
-
-fast_inline float32x4_t snare_clip_cubic(float32x4_t x) {
-    // Cheap soft clip: clamp to [-1,1], then y = 1.5x - 0.5x^3.
-    const float32x4_t one = vdupq_n_f32(1.0f);
-    const float32x4_t neg_one = vdupq_n_f32(-1.0f);
-
-    x = vmaxq_f32(neg_one, vminq_f32(one, x));
-
-    float32x4_t x2 = vmulq_f32(x, x);
-    float32x4_t x3 = vmulq_f32(x2, x);
-
-    return vsubq_f32(vmulq_n_f32(x, 1.5f),
-                     vmulq_n_f32(x3, 0.5f));
-}
 
 /**
  * Initialize snare engine
@@ -164,18 +151,7 @@ fast_inline void snare_engine_update(snare_engine_t* snare,
 fast_inline void snare_engine_set_note(snare_engine_t* snare,
                                        uint32x4_t voice_mask,
                                        float32x4_t midi_notes) {
-    float32x4_t a4_freq = vdupq_n_f32(440.0f);
-    float32x4_t a4_midi = vdupq_n_f32(69.0f);
-    float32x4_t twelfth = vdupq_n_f32(1.0f / 12.0f);
-
-    float32x4_t exponent = vmulq_f32(vsubq_f32(midi_notes, a4_midi), twelfth);
-    float32x4_t two_pow = exp2_neon(exponent);
-    float32x4_t base_freq = vmulq_f32(a4_freq, two_pow);
-
-    // Keep snare body inside a useful shell/crack region.
-    base_freq = vmaxq_f32(vdupq_n_f32(SNARE_FREQ_MIN),
-                          vminq_f32(vdupq_n_f32(SNARE_FREQ_MAX), base_freq));
-
+    float32x4_t base_freq = fm_midi_to_freq(midi_notes, SNARE_FREQ_MIN, SNARE_FREQ_MAX);
     snare->carrier_freq_base = vbslq_f32(voice_mask,
                                          base_freq,
                                          snare->carrier_freq_base);
@@ -253,11 +229,11 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
                                   vmulq_f32(index_env, snare->crack_index));
     index = vaddq_f32(index, lfo_index_add);
 
-    float32x4_t modulator = neon_sin(snare->modulator_phase);
+    float32x4_t modulator = neon_sin_fast(snare->modulator_phase);
     float32x4_t modulated_phase = vaddq_f32(snare->carrier_phase,
                                             vmulq_f32(modulator, index));
 
-    float32x4_t tone = neon_sin(modulated_phase);
+    float32x4_t tone = neon_sin_fast(modulated_phase);
 
     // Noise blend, with LFO/noise modulation clamped.
     float32x4_t mix = vaddq_f32(snare->noise_mix, noise_add);
@@ -287,7 +263,7 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
     float32x4_t drive_gain = vaddq_f32(vdupq_n_f32(1.0f),
                                        vmulq_f32(snare->drive, env8));
     output = vmulq_f32(output, drive_gain);
-    output = snare_clip_cubic(output);
+    output = fm_cubic_clip(output);
 
     return vbslq_f32(active_mask, output, vdupq_n_f32(0.0f));
 }
