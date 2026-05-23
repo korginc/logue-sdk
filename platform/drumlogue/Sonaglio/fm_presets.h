@@ -57,7 +57,7 @@ typedef enum {
     PARAM_ENV_SHAPE,
     PARAM_HIT_SHAPE,
     PARAM_BODY_TILT,
-    PARAM_DRIVE,
+    PARAM_NOISE_CHAR,
 
     PARAM_TOTAL = 24
 } fm_param_index_t;
@@ -99,7 +99,7 @@ typedef struct {
     uint8_t env_shape;    // 0-255: bit7=metal character, bits[6:0]=envelope index
     uint8_t hit_shape;    // 0-100
     uint8_t body_tilt;    // 0-100
-    uint8_t drive;        // 0-100
+    uint8_t noise_char;   // 0-100: noise-to-FM blend (0=pure FM, 100=noisy)
 } fm_preset_t;
 
 #ifdef __cplusplus

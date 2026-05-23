@@ -29,8 +29,8 @@
 // This is alpha, not cutoff Hz.
 #define METAL_NOISE_HP_A 0.2820f
 
-#define METAL_FREQ_MIN 80.0f
-#define METAL_FREQ_MAX 6000.0f
+#define METAL_FREQ_MIN 500.0f
+#define METAL_FREQ_MAX 8000.0f
 
 // Character 0 — DX7-style cymbal / metallic strike
 #define METAL_RATIO1 1.000f
@@ -274,7 +274,8 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
                                              float32x4_t lfo_pitch_mult,
                                              float32x4_t lfo_index_add,
                                              float32x4_t brightness_add,
-                                             float32x4_t metal_gate) {
+                                             float32x4_t metal_gate,
+                                             float32x4_t noise_add) {
     const float32x4_t two_pi_over_sr = vdupq_n_f32(2.0f * M_PI * INV_SAMPLE_RATE);
     const float32x4_t two_pi = vdupq_n_f32(2.0f * M_PI);
 
@@ -360,7 +361,8 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
         float32x4_t noise_colored = vaddq_f32(vmulq_n_f32(noise_hp, 0.58f),
                                               vmulq_n_f32(noise_bp, 0.42f));
 
-        float32x4_t noise_level = vmulq_f32(metal->noise_gain,
+        float32x4_t adj_noise_gain = vaddq_f32(metal->noise_gain, noise_add);
+        float32x4_t noise_level = vmulq_f32(adj_noise_gain,
                                             vaddq_f32(vdupq_n_f32(0.65f),
                                                        vmulq_n_f32(live_brightness, 0.65f)));
 

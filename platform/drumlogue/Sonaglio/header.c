@@ -95,6 +95,6 @@ const __unit_header unit_header_t unit_header = {
         {0, 255, 0, 40, k_unit_param_type_none,    0, 0, 0, {"EnvShape"}},
         {0, 100, 0, 50, k_unit_param_type_percent, 0, 0, 0, {"HitShp"}},
         {0, 100, 0, 50, k_unit_param_type_percent, 0, 0, 0, {"BodyTilt"}},
-        {0, 100, 0, 50, k_unit_param_type_percent, 0, 0, 0, {"Drive"}}
+        {0, 100, 0, 20, k_unit_param_type_percent, 0, 0, 0, {"NoizChr"}}
     }
 };

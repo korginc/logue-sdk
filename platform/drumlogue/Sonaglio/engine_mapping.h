@@ -157,17 +157,6 @@ ENGINE_MAPPING_INLINE float32x4_t fm_make_body_env(float32x4_t envelope,
 }
 
 /**
- * Global drive gain.
- *
- * Drive is intentionally moderate here because the revised engines already
- * have local transient saturation. This acts as a final bus push.
- */
-ENGINE_MAPPING_INLINE float32x4_t fm_make_drive_gain(float32x4_t drive) {
-    drive = fm_vclamp01(drive);
-    return vaddq_f32(vdupq_n_f32(1.0f), vmulq_n_f32(drive, 0.75f));
-}
-
-/**
  * Fast soft clip for the output bus.
  *
  * y = x / (1 + |x|)

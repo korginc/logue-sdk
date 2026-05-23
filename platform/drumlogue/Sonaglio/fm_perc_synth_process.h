@@ -509,9 +509,12 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     neon_envelope_process(&synth->envelope);
     float32x4_t envelope = synth->envelope.level;
 
+    // PARAM_NOISE_CHAR baseline: directly sets the noise floor for all engines.
+    const float noise_char_v = fm_clampf01(synth->params[PARAM_NOISE_CHAR] * 0.01f);
+
     float32x4_t lfo_pitch_mult = vdupq_n_f32(1.0f);
     float32x4_t lfo_index_add  = vdupq_n_f32(0.0f);
-    float32x4_t lfo_noise_add  = vdupq_n_f32(0.0f);
+    float32x4_t lfo_noise_add  = vdupq_n_f32(noise_char_v * 0.35f);
     float32x4_t lfo_env_mult   = vdupq_n_f32(1.0f);
     float32x4_t lfo_metal_gate = vdupq_n_f32(1.0f);
 
@@ -530,19 +533,20 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
             break;
         case LFO_TARGET_INDEX:
             lfo_index_add = vaddq_f32(lfo_index_add,
-                                      vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(0.45f)));
+                                      vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(1.20f)));
             break;
         case LFO_TARGET_ENV:
             lfo_env_mult = vaddq_f32(lfo_env_mult,
-                                     vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(0.55f)));
+                                     vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(0.85f)));
             break;
         case LFO_TARGET_NOISE_MIX:
             lfo_noise_add = vaddq_f32(lfo_noise_add,
-                                      vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(0.30f)));
+                                      vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(0.80f)));
             break;
         case LFO_TARGET_METAL_GATE:
-            lfo_metal_gate = vaddq_f32(vdupq_n_f32(0.5f),
-                                       vmulq_f32(vmulq_f32(lfo1, d1), vdupq_n_f32(0.5f)));
+            // Full gate range: 0 (silent) when lfo=0,d=1 → 1 (open) when lfo=1 or d=0.
+            lfo_metal_gate = vaddq_f32(vsubq_f32(vdupq_n_f32(1.0f), d1),
+                                       vmulq_f32(lfo1, d1));
             lfo_metal_gate = fm_vclamp01(lfo_metal_gate);
             break;
         default:
@@ -556,19 +560,19 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
             break;
         case LFO_TARGET_INDEX:
             lfo_index_add = vaddq_f32(lfo_index_add,
-                                      vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(0.45f)));
+                                      vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(1.20f)));
             break;
         case LFO_TARGET_ENV:
             lfo_env_mult = vaddq_f32(lfo_env_mult,
-                                     vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(0.55f)));
+                                     vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(0.85f)));
             break;
         case LFO_TARGET_NOISE_MIX:
             lfo_noise_add = vaddq_f32(lfo_noise_add,
-                                      vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(0.30f)));
+                                      vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(0.80f)));
             break;
         case LFO_TARGET_METAL_GATE:
-            lfo_metal_gate = vaddq_f32(vdupq_n_f32(0.5f),
-                                       vmulq_f32(vmulq_f32(lfo2, d2), vdupq_n_f32(0.5f)));
+            lfo_metal_gate = vaddq_f32(vsubq_f32(vdupq_n_f32(1.0f), d2),
+                                       vmulq_f32(lfo2, d2));
             lfo_metal_gate = fm_vclamp01(lfo_metal_gate);
             break;
         default:
@@ -578,7 +582,7 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     lfo_pitch_mult = vaddq_f32(lfo_pitch_mult, vmulq_n_f32(onset_rand, 0.04f));
     lfo_index_add = vaddq_f32(lfo_index_add, vmulq_n_f32(onset_rand, 0.08f));
     lfo_pitch_mult = lfo_vclamp(lfo_pitch_mult, 0.60f, 1.55f);
-    envelope = vmulq_f32(envelope, fm_vclamp01(lfo_env_mult));
+    envelope = vmulq_f32(envelope, vmaxq_f32(lfo_env_mult, vdupq_n_f32(0.0f)));
 
     uint32x4_t active_mask = vmvnq_u32(vceqq_u32(synth->envelope.stage,
                                                  vdupq_n_u32(ENV_STATE_OFF)));
@@ -586,7 +590,6 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
 
     float32x4_t hit_shape = vdupq_n_f32(synth->params[PARAM_HIT_SHAPE] * 0.01f);
     float32x4_t body_tilt = vdupq_n_f32(synth->params[PARAM_BODY_TILT] * 0.01f);
-    float32x4_t drive = vdupq_n_f32(synth->params[PARAM_DRIVE] * 0.01f);
 
     float32x4_t transient_env = fm_make_transient_env(envelope, hit_shape);
     float32x4_t body_env = fm_make_body_env(envelope, body_tilt);
@@ -613,7 +616,8 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
                              lfo_pitch_mult,
                              lfo_index_add,
                              synth->metal.brightness,
-                             lfo_metal_gate),
+                             lfo_metal_gate,
+                             lfo_noise_add),
         vdupq_n_f32(synth->engine_gain[ENGINE_METAL])
     );
 
@@ -640,7 +644,6 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     mix = vaddq_f32(mix, vmulq_n_f32(metal_sep, 0.84f));
     mix = vaddq_f32(mix, vmulq_n_f32(perc_sep,  0.93f));
 
-    mix = vmulq_f32(mix, fm_make_drive_gain(drive));
     mix = fm_soft_clip(mix);
     mix = vmulq_n_f32(mix, synth->master_gain);
 
