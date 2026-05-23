@@ -310,6 +310,24 @@ fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
         if (mode >= EUCLID_MODE_COUNT) mode = 0;
         synth->euclid_offsets = vld1q_f32(EUCLID_OFFSETS[mode]);
     }
+
+    // Route LFO parameters to the smoother. Without these calls the smoother
+    // stays at target=NONE with zero depth, silencing all LFO modulation.
+    {
+        const uint32x4_t all_lanes = vdupq_n_u32(0xFFFFFFFFu);
+        lfo_smoother_set_rate(&synth->lfo_smooth, 0,
+                              p[PARAM_LFO1_RATE]  * 0.01f, all_lanes);
+        lfo_smoother_set_depth(&synth->lfo_smooth, 0,
+                               p[PARAM_LFO1_DEPTH] * 0.01f, all_lanes);
+        lfo_smoother_set_target(&synth->lfo_smooth, 0,
+                                (uint8_t)p[PARAM_LFO1_TARGET], all_lanes);
+        lfo_smoother_set_rate(&synth->lfo_smooth, 1,
+                              p[PARAM_LFO2_RATE]  * 0.01f, all_lanes);
+        lfo_smoother_set_depth(&synth->lfo_smooth, 1,
+                               p[PARAM_LFO2_DEPTH] * 0.01f, all_lanes);
+        lfo_smoother_set_target(&synth->lfo_smooth, 1,
+                                (uint8_t)p[PARAM_LFO2_TARGET], all_lanes);
+    }
 }
 
 // load_fm_preset() is provided by fm_presets.cc.
@@ -467,8 +485,18 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     synth->lfo.target2 = vgetq_lane_u32(synth->lfo_smooth.current_target2, 0);
     synth->lfo.depth1 = synth->lfo_smooth.current_depth1;
     synth->lfo.depth2 = synth->lfo_smooth.current_depth2;
-    synth->lfo.rate1 = synth->lfo_smooth.current_rate1;
-    synth->lfo.rate2 = synth->lfo_smooth.current_rate2;
+    // Smoother stores normalized 0..1; lfo.rate expects cycles/sample.
+    {
+        const float32x4_t r_min  = vdupq_n_f32(LFO_ENHANCED_RATE_MIN_HZ
+                                                / (float)LFO_ENHANCED_SAMPLE_RATE);
+        const float32x4_t r_span = vdupq_n_f32((LFO_ENHANCED_RATE_MAX_HZ
+                                                 - LFO_ENHANCED_RATE_MIN_HZ)
+                                                / (float)LFO_ENHANCED_SAMPLE_RATE);
+        synth->lfo.rate1 = vaddq_f32(r_min,
+                                     vmulq_f32(synth->lfo_smooth.current_rate1, r_span));
+        synth->lfo.rate2 = vaddq_f32(r_min,
+                                     vmulq_f32(synth->lfo_smooth.current_rate2, r_span));
+    }
 
     float32x4_t lfo1 = vdupq_n_f32(0.0f);
     float32x4_t lfo2 = vdupq_n_f32(0.0f);

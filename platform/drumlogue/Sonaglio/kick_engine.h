@@ -107,10 +107,10 @@ fast_inline void kick_engine_update(kick_engine_t* kick,
 
     // Attack gives a sharper drop. Body slightly restrains the drop so the kick
     // stays low and solid instead of becoming a tom-like chirp.
-    // Approx range: 0.45 .. 3.10 octaves.
-    kick->sweep_depth = vaddq_f32(vdupq_n_f32(0.18f),
-                                  vaddq_f32(vmulq_n_f32(kick->attack, 1.10f),
-                                             vmulq_n_f32(inv_body, 0.35f)));
+    // Widened range: 0.10 .. 2.20 octaves (was 0.45..1.63).
+    kick->sweep_depth = vaddq_f32(vdupq_n_f32(0.10f),
+                                  vaddq_f32(vmulq_n_f32(kick->attack, 1.70f),
+                                             vmulq_n_f32(inv_body, 0.40f)));
 
     // Sustained body FM remains moderate. Too much sustained FM weakens the
     // fundamental and makes the kick less useful in a mix.

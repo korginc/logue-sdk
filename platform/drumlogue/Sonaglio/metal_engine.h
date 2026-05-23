@@ -115,17 +115,18 @@ fast_inline void metal_engine_recompute(metal_engine_t* metal) {
         metal->current_ratio[i] = vaddq_f32(one, vmulq_f32(offset, ratio_scale));
     }
 
-    // Attack FM is extremely front-loaded. Ring FM remains moderate.
-    metal->strike_index = vaddq_f32(vdupq_n_f32(0.35f),
-                                    vmulq_n_f32(attack, 3.20f));
-    metal->ring_index = vaddq_f32(vdupq_n_f32(0.30f),
-                                  vaddq_f32(vmulq_n_f32(body, 0.95f),
-                                             vmulq_n_f32(attack, 0.20f)));
+    // Strike FM: strong burst at onset only (env8 decay in process).
+    metal->strike_index = vaddq_f32(vdupq_n_f32(0.5f),
+                                    vmulq_n_f32(attack, 5.0f));
+    // Ring FM: genuine DX7-style metallic indices (was 0.30..1.45, now 1.5..4.7).
+    metal->ring_index = vaddq_f32(vdupq_n_f32(1.5f),
+                                  vaddq_f32(vmulq_n_f32(body, 2.8f),
+                                             vmulq_n_f32(attack, 0.4f)));
 
     // Body keeps more of the cluster alive. Gong gets slightly more ring mass.
-    float char_body_bonus = (metal->char_select == 0) ? 0.0f : 0.12f;
-    metal->ring_gain = vaddq_f32(vdupq_n_f32(0.42f + char_body_bonus),
-                                 vmulq_n_f32(body, 0.58f));
+    float char_body_bonus = (metal->char_select == 0) ? 0.0f : 0.10f;
+    metal->ring_gain = vaddq_f32(vdupq_n_f32(0.55f + char_body_bonus),
+                                 vmulq_n_f32(body, 0.45f));
 
     // Noise should sell the strike, not dominate the tail.
     metal->noise_gain = vaddq_f32(vdupq_n_f32(0.015f),
@@ -145,9 +146,9 @@ fast_inline void metal_engine_recompute(metal_engine_t* metal) {
     metal->op4_weight = vaddq_f32(vdupq_n_f32(0.025f),
                                   vmulq_n_f32(attack, 0.14f));
 
-    // Output compensation. Metal can get loud with dense FM + noise.
-    metal->output_gain = vsubq_f32(vdupq_n_f32(0.86f),
-                                   vmulq_n_f32(attack, 0.12f));
+    // Output compensation. Higher FM indices increase loudness; scale down.
+    metal->output_gain = vsubq_f32(vdupq_n_f32(0.68f),
+                                   vmulq_n_f32(attack, 0.14f));
 }
 
 /**
@@ -280,6 +281,17 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
     // Gate the envelope so the gate target can shorten the ring.
     float32x4_t gated_env = vmulq_f32(envelope, metal_gate);
 
+    // Sqrt of envelope for slower amplitude decay — longer perceived ring.
+    // env_sqrt decays as env^0.5 which is much slower than linear at low levels.
+    float32x4_t env_sqrt;
+    {
+        const float32x4_t eps = vdupq_n_f32(1e-8f);
+        float32x4_t safe = vmaxq_f32(gated_env, eps);
+        float32x4_t r = vrsqrteq_f32(safe);
+        r = vmulq_f32(vrsqrtsq_f32(vmulq_f32(safe, r), r), r);
+        env_sqrt = vmulq_f32(safe, r);
+    }
+
     // Staggered decay domains.
     float32x4_t env2 = vmulq_f32(gated_env, gated_env);
     float32x4_t env4 = vmulq_f32(env2, env2);
@@ -321,7 +333,7 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
 
     float32x4_t phase1_mod = vaddq_f32(metal->phase[0],
                                        vmulq_f32(op2,
-                                                 vmulq_f32(ring_index, gated_env)));
+                                                 vmulq_f32(ring_index, env_sqrt)));
     float32x4_t op1 = neon_sin(phase1_mod);
 
     // Weighted additive partials. Precomputed weights are still lightly scaled
@@ -336,7 +348,7 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
     );
 
     float32x4_t fm_output = vmulq_f32(vaddq_f32(op1, harmonics),
-                                      vmulq_f32(gated_env, metal->ring_gain));
+                                      vmulq_f32(env_sqrt, metal->ring_gain));
 
     // Bright HP noise only at the strike. Using env4 instead of full envelope
     // avoids noisy tails while making the hit more audible.

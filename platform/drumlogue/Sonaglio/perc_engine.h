@@ -122,9 +122,10 @@ fast_inline void perc_engine_update(perc_engine_t* perc,
                                  vmulq_n_f32(perc->body, 0.95f));
 
     // Short strike index. This is where Attack gets most of its personality.
-    perc->strike_index = vaddq_f32(vdupq_n_f32(0.35f),
-                                   vaddq_f32(vmulq_n_f32(perc->attack, 1.35f),
-                                              vmulq_n_f32(inv_body, 0.35f)));
+    // Widened range: 0.30..3.00 (was 0.35..2.05) for more dramatic FM attack.
+    perc->strike_index = vaddq_f32(vdupq_n_f32(0.30f),
+                                   vaddq_f32(vmulq_n_f32(perc->attack, 2.20f),
+                                              vmulq_n_f32(inv_body, 0.50f)));
 
     // Body makes the hit feel present; Attack adds a little controlled push.
     perc->output_gain = vaddq_f32(vdupq_n_f32(0.55f),

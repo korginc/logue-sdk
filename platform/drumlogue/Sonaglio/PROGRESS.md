@@ -324,3 +324,125 @@ If the output/envelopes are now usable, continue with engine review in this orde
 
 Do not redesign all engines until the envelope and output-gain layer has been validated on hardware.
 
+---
+
+# Sonaglio — Engine and LFO Improvements (2026-05-23)
+
+## Summary
+
+Three categories of issues addressed in this patch:
+
+1. **LFO routing completely broken** — fixed
+2. **Metal engine not metallic / not ringing** — fixed
+3. **Body parameters too subtle** — widened ranges
+
+---
+
+## Fix 1: LFO routing
+
+### Root cause A — smoother setters never called
+
+`fm_perc_synth_update_params` never called `lfo_smoother_set_rate/depth/target` for any of the 6 LFO parameters. The smoother stayed frozen at `target=LFO_TARGET_NONE`, `depth=0`, causing zero modulation regardless of UI values.
+
+**Fix**: Added 6 `lfo_smoother_set_*` calls at the end of `fm_perc_synth_update_params`:
+```cpp
+const uint32x4_t all_lanes = vdupq_n_u32(0xFFFFFFFFu);
+lfo_smoother_set_rate(&synth->lfo_smooth, 0, p[PARAM_LFO1_RATE]   * 0.01f, all_lanes);
+lfo_smoother_set_depth(&synth->lfo_smooth, 0, p[PARAM_LFO1_DEPTH] * 0.01f, all_lanes);
+lfo_smoother_set_target(&synth->lfo_smooth, 0, (uint8_t)p[PARAM_LFO1_TARGET], all_lanes);
+// same for LFO2
+```
+
+### Root cause B — rate unit mismatch
+
+`lfo_smooth.current_rate` stores normalized 0..1 (matching UI 0-100 scaled by 0.01). But `lfo.rate1` expects cycles/sample. Direct assignment `synth->lfo.rate1 = synth->lfo_smooth.current_rate1` wrote 0.01..0.5 as Hz-equivalent, producing ~0.5–24 Hz at 48 kHz but from the wrong base — near-zero modulation rate.
+
+**Fix**: Replaced direct assignment with unit conversion in `fm_perc_synth_process`:
+```cpp
+const float32x4_t r_min  = vdupq_n_f32(LFO_ENHANCED_RATE_MIN_HZ / LFO_ENHANCED_SAMPLE_RATE);
+const float32x4_t r_span = vdupq_n_f32((LFO_ENHANCED_RATE_MAX_HZ - LFO_ENHANCED_RATE_MIN_HZ)
+                                        / LFO_ENHANCED_SAMPLE_RATE);
+synth->lfo.rate1 = vaddq_f32(r_min, vmulq_f32(synth->lfo_smooth.current_rate1, r_span));
+```
+Now rate spans 0.05 Hz..18 Hz mapped to cycles/sample correctly.
+
+---
+
+## Fix 2: Metal engine — make it ring and sound metallic
+
+### Problem
+
+The metal engine FM indices were too low for real metallic character:
+- `ring_index`: 0.30..1.45 (DX7 cymbal needs 2.0–5.0)
+- `strike_index`: 0.35..3.55 (acceptable, but could be stronger)
+- Amplitude decayed with linear envelope — very fast decay, no ring
+
+### Changes to `metal_engine_recompute`
+
+| Parameter | Old range | New range | Notes |
+|---|---|---|---|
+| `ring_index` | 0.30..1.45 | 1.5..4.7 | DX7-style metallic FM depth |
+| `strike_index` | 0.35..3.55 | 0.5..5.5 | Stronger attack burst |
+| `ring_gain` base | 0.42 | 0.55 | Higher base amplitude |
+| `output_gain` | 0.86..0.74 | 0.68..0.54 | Compensates for louder FM |
+
+### Changes to `metal_engine_process`
+
+Added **square-root envelope** (`env^0.5`) for amplitude and op1 carrier FM depth:
+```cpp
+// NEON sqrt: x * rsqrt(x) with one Newton-Raphson iteration
+float32x4_t safe = vmaxq_f32(gated_env, vdupq_n_f32(1e-8f));
+float32x4_t r = vrsqrteq_f32(safe);
+r = vmulq_f32(vrsqrtsq_f32(vmulq_f32(safe, r), r), r);
+float32x4_t env_sqrt = vmulq_f32(safe, r);
+```
+
+`env_sqrt` decays much more slowly than linear at low levels, giving:
+- Longer perceived ring on the carrier (op1 modulation uses `ring_index × env_sqrt`)
+- Longer amplitude tail (`fm_output × env_sqrt × ring_gain`)
+
+The deeper cascade operators still use `env2` / `env4` / `env8` for natural fast-decaying attack character.
+
+---
+
+## Fix 3: Body parameter ranges widened
+
+### Kick — sweep_depth
+
+| Parameter | Old range | New range |
+|---|---|---|
+| `sweep_depth` | 0.18..1.63 oct | 0.10..2.20 oct |
+
+More dramatic pitch drop when Attack and/or inv_body are high.
+
+### Perc — strike_index
+
+| Parameter | Old range | New range |
+|---|---|---|
+| `strike_index` | 0.35..2.05 | 0.30..3.00 |
+
+Stronger FM transient at high Attack settings.
+
+---
+
+## Per-engine envelope character summary
+
+Each engine now has a distinct envelope shaping philosophy:
+
+| Engine | Amp domain | Pitch domain | Index domain | Notes |
+|---|---|---|---|---|
+| Kick | `env^1` | `env^8` | `env^8` | Punchy linear body, instant pitch drop |
+| Snare | `env^1` | `env^8` | `env^8` | Noise on `env^2` for longer tail |
+| Metal | `env^0.5` (sqrt) | — | mix | Longer ring, sustained FM via sqrt |
+| Perc | `env^1` | `env^8` | `env^8` / `env^4` | Fast strike, medium body FM |
+
+---
+
+## Files modified
+
+- `fm_perc_synth_process.h` — LFO smoother setters + rate unit conversion
+- `metal_engine.h` — ring_index/strike_index ranges, sqrt envelope
+- `kick_engine.h` — wider sweep_depth range
+- `perc_engine.h` — wider strike_index range
+- `README.md`, `PROGRESS.md` — documentation updated
+
