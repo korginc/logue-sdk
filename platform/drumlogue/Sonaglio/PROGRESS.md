@@ -446,3 +446,49 @@ Each engine now has a distinct envelope shaping philosophy:
 - `perc_engine.h` — wider strike_index range
 - `README.md`, `PROGRESS.md` — documentation updated
 
+---
+
+## Fix 4: Envelope tail clamp relaxed + metal preset retuning
+
+### Envelope clamp
+
+`get_envelope()` clamped **all** decays to 480ms and releases to 320ms — a
+hardware-test-phase safety measure. This capped the metallic ROM range
+(indices 96-127, designed for 350-1850ms tails) far below its intent, so the
+metal engine's new sqrt amplitude envelope had nothing long to ring into.
+
+**Fix**: clamp raised to decay ≤ 1200ms, release ≤ 700ms. Attack stays ≤ 6ms
+(fast onsets preserved). Non-metal presets all use env_shape < 36 (decay
+< 480ms) so they are unaffected; only metallic/long ranges benefit.
+
+### Metal preset retuning (the four pure-metal presets, instrument = METAL)
+
+Predictions based on the new ring_index (1.5..4.7) and sqrt ring envelope:
+
+| Preset | env_shape | metal A/B | Intent |
+|---|---|---|---|
+| MetalClang | 8 → 99 (metallic ~515ms) | 95/65 → 88/60 | Bright cymbal clang, real ring |
+| MetalWash  | 70 → 106 (metallic ~900ms) | 80/90 | Sustained shimmering wash |
+| GongHit    | 90 → 238 (Gong char + idx110 ~1120ms) | 100/95 → 50/95 | Dark, dense, long gong |
+| BellRing   | 110 (now unclamped ~1120ms) | 100/85 → 75/85 | Bright cymbal-bell shimmer |
+
+- `GongHit` had lost its Gong character (bit 7); restored via env_shape 238
+  (`128 + 110`). The `(uint8_t)` cast in `update_params` preserves the bit even
+  though `params[]` is `int8_t`.
+- Brightness (Attack) reduced on the bright presets because the higher base FM
+  indices now make full Attack harsher than before.
+- INDEX LFO depth on MetalClang trimmed 40 → 30 since the base ring_index is
+  now much higher.
+
+Other presets left intact: combos (KM/SM/TM) share one envelope between a short
+percussive engine and metal, so a long metallic env would smear the percussive
+layer. Those stay short by design.
+
+### Note on LFO now being live
+
+Because LFO routing was previously silent, all preset LFO depths were untested
+no-ops. They are now audible. The existing depths were reviewed and judged
+musically reasonable for their intent (e.g. Shaker's fast NOISE_MIX tremolo,
+Industrial's METAL_GATE chop), so they were left as-is pending hardware
+listening. Adjust after HW feedback if any feel too strong.
+

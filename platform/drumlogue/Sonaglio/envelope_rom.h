@@ -391,9 +391,12 @@ fast_inline void get_envelope(uint8_t shape_idx,
     uint8_t a = env->attack_ms;
     uint16_t d = env->decay_ms;
     uint16_t r = env->release_ms;
+    // Keep onsets fast, but allow long metallic/experimental tails to ring.
+    // The metallic ROM range (96-127) is designed for 350-1850ms decays; the
+    // metal engine's sqrt amplitude envelope needs them to breathe.
     if (a > 6) a = 6;
-    if (d > 480) d = 480;
-    if (r > 320) r = 320;
+    if (d > 1200) d = 1200;
+    if (r > 700) r = 700;
     *attack_ms = a;
     *decay_ms = d;
     *release_ms = r;
