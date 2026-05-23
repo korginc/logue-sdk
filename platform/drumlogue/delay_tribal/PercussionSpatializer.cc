@@ -301,7 +301,7 @@ void PercussionSpatializer::rebuild_profile() {
         float hp_attn = 1.0f / (1.0f + hp_hz * 0.0012f);
 
         // Compute actual one-pole filter coefficient for this clone
-        float lp_omega = 2.0f * M_PI * lp_hz / (float)sample_rate_;
+        float lp_omega = 2.0f * M_PI * lp_hz * inverse_sample_rate_;
         clones_[i].lp_coef = lp_omega / (lp_omega + 1.0f);
 
         // Store gains without the artificial amplitude-only LPF attenuation
@@ -522,7 +522,7 @@ void PercussionSpatializer::render_block4(const float* in, float* out) {
     }
     const bool transient = (mag_max > prev_mag_ * 1.9f) && (mag_max > 0.002f);
     // Decay envelope: ~10 ms half-life mapped to block rate
-    prev_mag_ = fmaxf(mag_max, prev_mag_ * fasterexpf(-4.0f / (0.010f * (float)sample_rate_)));
+    prev_mag_ = fmaxf(mag_max, prev_mag_ * fasterexpf(-400.0f * inverse_sample_rate_));
 
     // 3. Advance smoothing + rebuild if needed; THEN randomize on transient
     //    (ensures randomize_hit uses the freshly rebuilt profile)
@@ -535,11 +535,11 @@ void PercussionSpatializer::render_block4(const float* in, float* out) {
     // Δphase = 2π * rate_hz * 4 / sample_rate.
     float wobble_sins[kMaxClones];
     {
-        const float phase_inc_base = 6.2831853f * rate_ * 4.0f / (float)sample_rate_;
-        for (int i = 0; i < clone_count_; ++i) {
-          wobble_sins[i] = fastersinfullf(clones_[i].wobble_phase);
-          clones_[i].wobble_phase += phase_inc_base * clones_[i].wobble_rate_mul;
-          if (clones_[i].wobble_phase >= 6.2831853f) clones_[i].wobble_phase -= 6.2831853f;
+      const float phase_inc_base = 6.2831853f * rate_ * 4.0f * inverse_sample_rate_;
+      for (int i = 0; i < clone_count_; ++i) {
+        wobble_sins[i] = fastersinfullf(clones_[i].wobble_phase);
+        clones_[i].wobble_phase += phase_inc_base * clones_[i].wobble_rate_mul;
+        if (clones_[i].wobble_phase >= 6.2831853f) clones_[i].wobble_phase -= 6.2831853f;
         }
     }
 
@@ -557,11 +557,11 @@ void PercussionSpatializer::render_block4(const float* in, float* out) {
 void PercussionSpatializer::render_scalar_frame(const float* in, float* out) {
     float wobble_sins[kMaxClones];
     {
-        const float phase_inc_base = 6.2831853f * rate_ * 1.0f / (float)sample_rate_;
-        for (int i = 0; i < clone_count_; ++i) {
-            wobble_sins[i] = fastersinfullf(clones_[i].wobble_phase);
-            clones_[i].wobble_phase += phase_inc_base * clones_[i].wobble_rate_mul;
-            if (clones_[i].wobble_phase >= 6.2831853f) clones_[i].wobble_phase -= 6.2831853f;
+      const float phase_inc_base = 6.2831853f * rate_ * 1.0f * inverse_sample_rate_;
+      for (int i = 0; i < clone_count_; ++i) {
+        wobble_sins[i] = fastersinfullf(clones_[i].wobble_phase);
+        clones_[i].wobble_phase += phase_inc_base * clones_[i].wobble_rate_mul;
+        if (clones_[i].wobble_phase >= 6.2831853f) clones_[i].wobble_phase -= 6.2831853f;
         }
     }
     float ol = 0.0f, orr = 0.0f;
