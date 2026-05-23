@@ -352,7 +352,7 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
 
     synth->current_env_shape = ENV_SHAPE_DEFAULT;
     synth->euclid_offsets = vdupq_n_f32(0.0f);
-    synth->master_gain = 1.05f;  // Raise post-clip output for stronger HW monitoring level.
+    synth->master_gain = 1.30f;
     one_pole_reset(&synth->kick_lp);
     one_pole_reset(&synth->snare_hp);
     one_pole_reset(&synth->perc_bp_lp);
@@ -594,37 +594,52 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     float32x4_t transient_env = fm_make_transient_env(envelope, hit_shape);
     float32x4_t body_env = fm_make_body_env(envelope, body_tilt);
 
-    float32x4_t kick_out = vmulq_f32(
-        kick_engine_process(&synth->kick, transient_env, active_mask, lfo_pitch_mult, lfo_index_add),
-        vdupq_n_f32(synth->engine_gain[ENGINE_KICK])
-    );
+    // Skip engine DSP when gain is zero (single-instrument mode = ~75% engine compute saved).
+    // Zero-gain engines still feed silence through their separation filters below,
+    // keeping filter state at zero for a clean re-entry on the next trigger.
+    float32x4_t kick_out = vdupq_n_f32(0.0f);
+    if (synth->engine_gain[ENGINE_KICK] > 0.0f) {
+        kick_out = vmulq_f32(
+            kick_engine_process(&synth->kick, transient_env, active_mask, lfo_pitch_mult, lfo_index_add),
+            vdupq_n_f32(synth->engine_gain[ENGINE_KICK])
+        );
+    }
 
-    float32x4_t snare_out = vmulq_f32(
-        snare_engine_process(&synth->snare,
-                             transient_env,
-                             active_mask,
-                             lfo_pitch_mult,
-                             vaddq_f32(lfo_index_add, lfo_noise_add),
-                             vaddq_f32(synth->snare.noise_mix, lfo_noise_add)),
-        vdupq_n_f32(synth->engine_gain[ENGINE_SNARE])
-    );
+    float32x4_t snare_out = vdupq_n_f32(0.0f);
+    if (synth->engine_gain[ENGINE_SNARE] > 0.0f) {
+        snare_out = vmulq_f32(
+            snare_engine_process(&synth->snare,
+                                 transient_env,
+                                 active_mask,
+                                 lfo_pitch_mult,
+                                 vaddq_f32(lfo_index_add, lfo_noise_add),
+                                 vaddq_f32(synth->snare.noise_mix, lfo_noise_add)),
+            vdupq_n_f32(synth->engine_gain[ENGINE_SNARE])
+        );
+    }
 
-    float32x4_t metal_out = vmulq_f32(
-        metal_engine_process(&synth->metal,
-                             body_env,
-                             active_mask,
-                             lfo_pitch_mult,
-                             lfo_index_add,
-                             synth->metal.brightness,
-                             lfo_metal_gate,
-                             lfo_noise_add),
-        vdupq_n_f32(synth->engine_gain[ENGINE_METAL])
-    );
+    float32x4_t metal_out = vdupq_n_f32(0.0f);
+    if (synth->engine_gain[ENGINE_METAL] > 0.0f) {
+        metal_out = vmulq_f32(
+            metal_engine_process(&synth->metal,
+                                 body_env,
+                                 active_mask,
+                                 lfo_pitch_mult,
+                                 lfo_index_add,
+                                 synth->metal.brightness,
+                                 lfo_metal_gate,
+                                 lfo_noise_add),
+            vdupq_n_f32(synth->engine_gain[ENGINE_METAL])
+        );
+    }
 
-    float32x4_t perc_out = vmulq_f32(
-        perc_engine_process(&synth->perc, body_env, active_mask, lfo_pitch_mult, lfo_index_add),
-        vdupq_n_f32(synth->engine_gain[ENGINE_PERC])
-    );
+    float32x4_t perc_out = vdupq_n_f32(0.0f);
+    if (synth->engine_gain[ENGINE_PERC] > 0.0f) {
+        perc_out = vmulq_f32(
+            perc_engine_process(&synth->perc, body_env, active_mask, lfo_pitch_mult, lfo_index_add),
+            vdupq_n_f32(synth->engine_gain[ENGINE_PERC])
+        );
+    }
 
     float32x4_t mix = vdupq_n_f32(0.0f);
     // Separation EQ per engine (lightweight one-pole):
@@ -632,7 +647,8 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     // metal: brighter high-pass, perc: mid-focused band-pass-ish layer.
     float32x4_t kick_sep = one_pole_lpf(&synth->kick_lp, kick_out, 190.0f);
     float32x4_t snare_sep = one_pole_hpf(&synth->snare_hp, snare_out, 420.0f);
-    float32x4_t metal_sep = one_pole_hpf(&synth->metal_hp, metal_out, 1800.0f);
+    // HPF was 1800 Hz which cut below the 500 Hz carrier fundamental — now 500 Hz.
+    float32x4_t metal_sep = one_pole_hpf(&synth->metal_hp, metal_out, 500.0f);
     float32x4_t perc_lp = one_pole_lpf(&synth->perc_bp_lp, perc_out, 1400.0f);
     float32x4_t perc_hp = one_pole_hpf(&synth->perc_bp_hp, perc_lp, 220.0f);
     float32x4_t perc_sep = perc_hp;
@@ -641,7 +657,7 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     // output trims. Keep them strong enough for direct HW monitoring.
     mix = vaddq_f32(mix, vmulq_n_f32(kick_sep,  1.00f));
     mix = vaddq_f32(mix, vmulq_n_f32(snare_sep, 0.96f));
-    mix = vaddq_f32(mix, vmulq_n_f32(metal_sep, 0.84f));
+    mix = vaddq_f32(mix, vmulq_n_f32(metal_sep, 0.92f));
     mix = vaddq_f32(mix, vmulq_n_f32(perc_sep,  0.93f));
 
     mix = fm_soft_clip(mix);
