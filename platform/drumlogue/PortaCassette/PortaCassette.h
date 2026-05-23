@@ -26,7 +26,7 @@
 // PRNG state (Xorshift128+, two 64-bit lanes each)
 struct prng_t { uint64x2_t state0, state1; };
 // decay factor (required 0.1-3ms decay time at 48 kHz)
-constexpr float pop_env_decay_ = 0.92f;
+constexpr float pop_env_decay_ = 0.96f;
 
 class alignas(16) PortaCassette {
 public:
@@ -206,13 +206,13 @@ public:
         const float makeup = 0.9f; // Tape saturation is not inverse-energy compensated.
         if (model_ == k_vinyl)
         {
-            sig_l = vmulq_n_f32(sat_neon(vmulq_n_f32(sig_l, drive)), makeup);
-            sig_r = vmulq_n_f32(sat_neon(vmulq_n_f32(sig_r, drive)), makeup);
+            sig_l = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_l, drive), false), makeup);
+            sig_r = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_r, drive), true), makeup);
         }
         else    // tape like
         {
-            sig_l = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_l, drive)), makeup);
-            sig_r = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_r, drive)), makeup);
+            sig_l = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_l, drive), false), makeup);
+            sig_r = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_r, drive), true), makeup);
         }
     }
 
@@ -291,8 +291,9 @@ public:
 
         const float wow_depth     = 5.0f + tape_age_ * 25.0f;
         const float flutter_depth = 0.8f + tape_age_ * 2.0f;
-        const float rd_off = wow_depth * (1.0f + 0.8f * lfo_val)
-                            + flutter_depth * flutter_val;
+        const float rd_off        = wow_depth * (1.0f + 0.8f * lfo_val) + flutter_depth * flutter_val;
+        const int32_t i_off       = (int32_t)rd_off;
+        const float   fr          = rd_off - (float)i_off;
 
         float l4[NEON_LANES], r4[NEON_LANES];
         vst1q_f32(l4, sig_l);
@@ -302,20 +303,11 @@ public:
             wf_delay_l_[wf_write_pos_] = l4[s];
             wf_delay_r_[wf_write_pos_] = r4[s];
 
-            // Read with linear interpolation from the past
-            float pos = (float)wf_write_pos_ - rd_off + (float)WF_BUFFER_SIZE;
-            int32_t  i0 = (int32_t)pos;
-            float    fr = pos - (float)i0;
-            uint32_t m0 = (uint32_t)i0 & WF_BUFFER_MASK;
+            uint32_t m0 = (wf_write_pos_ - i_off + WF_BUFFER_SIZE) & WF_BUFFER_MASK;
             uint32_t m1 = (m0 - 1u) & WF_BUFFER_MASK;
-            uint32_t m2 = (m0 + 1u) & WF_BUFFER_MASK;
-            uint32_t m3 = (m0 + 2u) & WF_BUFFER_MASK;
-            // cubic interpolation from 4 points: https://www.paulinternet.nl/?page=bicubic
-            l4[s] = hermite4_neon(wf_delay_l_[m0], wf_delay_l_[m1], wf_delay_l_[m2], wf_delay_l_[m3], fr);
-            r4[s] = hermite4_neon(wf_delay_r_[m0], wf_delay_r_[m1], wf_delay_r_[m2], wf_delay_r_[m3], fr);
-            // linear: a + frac*(b-a)
-            // l4[s] = wf_delay_l_[m0] + fr * (wf_delay_l_[m1] - wf_delay_l_[m0]);
-            // r4[s] = wf_delay_r_[m0] + fr * (wf_delay_r_[m1] - wf_delay_r_[m0]);
+
+            l4[s] = wf_delay_l_[m0] + fr * (wf_delay_l_[m1] - wf_delay_l_[m0]);
+            r4[s] = wf_delay_r_[m0] + fr * (wf_delay_r_[m1] - wf_delay_r_[m0]);
 
             wf_write_pos_ = (wf_write_pos_ + 1u) & WF_BUFFER_MASK;
         }
@@ -348,7 +340,7 @@ public:
         //    ~0.03% probability per sample
         // ------------------------------------------------------------------------
         uint32x4_t trigger =
-            vcgtq_f32(prng_rand_float(), vdupq_n_f32(0.9997f));
+            vcgtq_f32(prng_rand_float(), vdupq_n_f32(0.99992f));
 
         // ------------------------------------------------------------------------
         // 3. Random pop amplitude
@@ -356,9 +348,9 @@ public:
         // ------------------------------------------------------------------------
         float32x4_t rand_amp =
             vmlaq_n_f32(
-                vdupq_n_f32(0.25f),     // minimum
+                vdupq_n_f32(0.08f),     // minimum
                 prng_rand_float(),
-                0.45f);                 // random extra
+                0.12f);                 // random extra
 
         // ------------------------------------------------------------------------
         // 4. Trigger envelope
@@ -408,7 +400,7 @@ public:
         // ------------------------------------------------------------------------
         // 9. Mix quietly
         // ------------------------------------------------------------------------
-        const float dust_level = 0.12f + tape_age_ * 0.08f;
+        const float dust_level = 0.05f + tape_age_ * 0.05f;
 
         sig_l = vmlaq_n_f32(sig_l, crackle_l, dust_level);
         sig_r = vmlaq_n_f32(sig_r, crackle_r, dust_level);
@@ -469,6 +461,8 @@ public:
         const float* pIn  = in;
         float*       pOut = out;
 
+        const float32x4_t preamp_v = vdupq_n_f32(current_preamp_);
+
         for (uint32_t b = 0, blocks = frames / 4u; b < blocks; ++b, pIn += 8, pOut += 8) {
             // ------------------------------------------------------------------
             // Parameter smoothing (1-pole, one step per 4-sample block)
@@ -479,13 +473,10 @@ public:
 
             // 1. Load & de-interleave stereo
             float32x4x2_t vi = vld2q_f32(pIn);
-            const float32x4_t dry_l = vi.val[0];    // dry
+            const float32x4_t dry_l = vi.val[0];
             const float32x4_t dry_r = vi.val[1];
-            float32x4_t sig_l = dry_l;        // wet (processed) signal starts as dry and is transformed in-place through the chain; used for both encode and decode paths to maintain correct timing of the NR system's envelope followers, which track the actual signal hitting the tape nonlinearity
-            float32x4_t sig_r = dry_r;
-
-            // 2. Pre-amp
-            preamp(sig_l, sig_r);
+            float32x4_t sig_l = vmulq_f32(dry_l, preamp_v);
+            float32x4_t sig_r = vmulq_f32(dry_r, preamp_v);
 
             // 3. Parametric EQ (3-band, L and R share coefficients, independent states)
             parametric_eq(sig_l, sig_r);
@@ -523,9 +514,15 @@ public:
 
             // 8. Dry/wet mix
             const float inv_mix = 1.0f - current_mix_;
-            const float target_output_gain_ = 2.0f; // add +3dB
+            const float target_output_gain_ = 1.30f; // approx +2.3dB (safer than +6dB)
             float32x4_t out_l = vmlaq_n_f32(vmulq_n_f32(dry_l, inv_mix), sig_l, current_mix_ * target_output_gain_);
             float32x4_t out_r = vmlaq_n_f32(vmulq_n_f32(dry_r, inv_mix), sig_r, current_mix_ * target_output_gain_);
+
+            // 9. Final Hardware Safety Clip (prevents digital crackle from signal overflow)
+            const float32x4_t one_v  = vdupq_n_f32(1.0f);
+            const float32x4_t mone_v = vdupq_n_f32(-1.0f);
+            out_l = vminq_f32(one_v, vmaxq_f32(mone_v, out_l));
+            out_r = vminq_f32(one_v, vmaxq_f32(mone_v, out_r));
 
             float32x4x2_t vo = {{ out_l, out_r }};
             vst2q_f32(pOut, vo);
@@ -610,28 +607,6 @@ private:
     biquad_coeffs_t coeff_xtalk_hpf_;   // HPF ~1.5 kHz for frequency-dep crosstalk
 
     // =========================================================================
-    // Tape saturation via fastertanhf Padé polynomial — not odd-harmonic dominant,
-    // softer knee than x/(1+|x|), matches real magnetic saturation character.
-    // Clamped at ±5 where tanh(5)≈0.9999 and polynomial error < 0.5%.
-    // =========================================================================
-    static fast_inline float32x4_t sat_neon(float32x4_t x) {
-        const float32x4_t lim = vdupq_n_f32(5.0f);
-        x = vmaxq_f32(vminq_f32(x, lim), vnegq_f32(lim));
-        // Horner-form Padé rational polynomial (same coefficients as fastertanhf)
-        float32x4_t n = vmulq_n_f32(x, 0.3357335044280075e-1f);
-        n = vmulq_f32(vaddq_f32(n, vdupq_n_f32(0.583691066395175e-1f)), x);
-        n = vmulq_f32(vaddq_f32(n, vdupq_n_f32(0.2468149110712040f)),   x);
-        n = vaddq_f32(n, vdupq_n_f32(-0.67436811832e-5f));
-        float32x4_t d = vmulq_n_f32(x, 0.2874707922475963e-1f);
-        d = vmulq_f32(vaddq_f32(d, vdupq_n_f32(0.1086202599228572f)),   x);
-        d = vmulq_f32(vaddq_f32(d, vdupq_n_f32(0.609347197060491e-1f)), x);
-        d = vaddq_f32(d, vdupq_n_f32(0.2464845986383725f));
-        float32x4_t rcp = vrecpeq_f32(d);
-        rcp = vmulq_f32(vrecpsq_f32(d, rcp), rcp);
-        return vmulq_f32(n, rcp);
-    }
-
-    // =========================================================================
     // Fixed Tape saturation: Enforces odd symmetry and f(0) = 0
     // =========================================================================
     fast_inline float32x4_t sat_neon_new(float32x4_t x, bool right_channel = true) {
@@ -643,16 +618,13 @@ private:
         float32x4_t abs_x = vabsq_f32(x);
 
         // 2. Evaluate polynomial using abs_x
-        float32x4_t n = vmulq_n_f32(abs_x, 0.3357335044280075e-1f);
-        n = vmulq_f32(vaddq_f32(n, vdupq_n_f32(0.583691066395175e-1f)), abs_x);
-        n = vmulq_f32(vaddq_f32(n, vdupq_n_f32(0.2468149110712040f)),   abs_x);
-        // Changed constant to 0.0f to guarantee f(0) = 0 and stop baseline DC
-        n = vaddq_f32(n, vdupq_n_f32(0.0f));
+        float32x4_t n = vmlaq_n_f32(vdupq_n_f32(0.583691066395175e-1f), abs_x, 0.3357335044280075e-1f);
+        n = vmlaq_n_f32(vdupq_n_f32(0.2468149110712040f), abs_x, n);
+        n = vmulq_f32(n, abs_x);
 
-        float32x4_t d = vmulq_n_f32(abs_x, 0.2874707922475963e-1f);
-        d = vmulq_f32(vaddq_f32(d, vdupq_n_f32(0.1086202599228572f)),   abs_x);
-        d = vmulq_f32(vaddq_f32(d, vdupq_n_f32(0.609347197060491e-1f)), abs_x);
-        d = vaddq_f32(d, vdupq_n_f32(0.2464845986383725f));
+        float32x4_t d = vmlaq_n_f32(vdupq_n_f32(0.1086202599228572f), abs_x, 0.2874707922475963e-1f);
+        d = vmlaq_n_f32(vdupq_n_f32(0.609347197060491e-1f), abs_x, d);
+        d = vmlaq_n_f32(vdupq_n_f32(0.2464845986383725f), abs_x, d);
 
         float32x4_t rcp = vrecpeq_f32(d);
         rcp = vmulq_f32(vrecpsq_f32(d, rcp), rcp);
@@ -662,28 +634,21 @@ private:
         float32x4_t sat_x = vreinterpretq_f32_u32(vorrq_u32(vreinterpretq_u32_f32(mag), sign_mask));
 
         // 4. DC Blocker - IIR filter: y[n] = x[n] - x[n-1] + R * y[n-1]
-        float x_prev[NEON_LANES];
-        float y_prev[NEON_LANES];
-        float out[NEON_LANES];
+        float out[4];
+        float32x4_t* xp = right_channel ? &x_prev_r : &x_prev_l;
+        float32x4_t* yp = right_channel ? &y_prev_r : &y_prev_l;
 
-        // each channel must have its own independent filter state to
-        // prevent cross-channel bleeding and ensure the high-pass filter
-        // (HPF) implementation is correct.
-        if (right_channel) {
-            vst1q_f32(x_prev, x_prev_r);
-            vst1q_f32(y_prev, y_prev_r);
-        }
-        else {
-            vst1q_f32(x_prev, x_prev_l);
-            vst1q_f32(y_prev, y_prev_l);
-        }
-        for (int i = 0; i < NEON_LANES; ++i) {
-            out[i] = sat_x[i] - x_prev[i] + R * y_prev[i];
-            x_prev[i] = sat_x[i];
-            y_prev[i] = out[i];
-        }
+        const float y_last = vgetq_lane_f32(*yp, 3);
+        const float x_last = vgetq_lane_f32(*xp, 3);
 
-        return vld1q_f32(out);
+        out[0] = vgetq_lane_f32(sat_x, 0) - x_last + R * y_last;
+        out[1] = vgetq_lane_f32(sat_x, 1) - vgetq_lane_f32(sat_x, 0) + R * out[0];
+        out[2] = vgetq_lane_f32(sat_x, 2) - vgetq_lane_f32(sat_x, 1) + R * out[1];
+        out[3] = vgetq_lane_f32(sat_x, 3) - vgetq_lane_f32(sat_x, 2) + R * out[2];
+
+        *xp = sat_x;
+        *yp = vld1q_f32(out);
+        return *yp;
     }
 
 

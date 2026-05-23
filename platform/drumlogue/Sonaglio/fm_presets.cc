@@ -601,5 +601,5 @@ void load_fm_preset(uint8_t idx, int8_t *params) {
     params[PARAM_ENV_SHAPE]   = p->env_shape;
     params[PARAM_HIT_SHAPE]   = p->hit_shape;
     params[PARAM_BODY_TILT]   = p->body_tilt;
-    params[PARAM_DRIVE]       = p->drive;
+    params[PARAM_NOISE_CHAR]  = p->noise_char;
 }
