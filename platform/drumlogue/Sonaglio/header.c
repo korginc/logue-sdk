@@ -6,11 +6,12 @@
 #include "unit.h"
 
 // String tables
-const char* instruments_strings[10] = {
+const char* instruments_strings[11] = {
     "Kick",
     "Snare",
     "Tom",
     "Metal",
+    "Hat",
     "K+S",
     "K+T",
     "K+M",
@@ -56,7 +57,7 @@ const __unit_header unit_header_t unit_header = {
     .params = {
         // Page 1: Engine probabilities
         // Instrument: single engine or combo pair
-        {0,   9, 0,   0, k_unit_param_type_strings, 0, 0, 0, {"Instr"}},
+        {0,  10, 0,   0, k_unit_param_type_strings, 0, 0, 0, {"Instr"}},
         // Blend: balance between the pair; in single modes, the strength of the delayed shadow
         {0, 100, 0, 100, k_unit_param_type_percent, 0, 0, 0, {"Blend"}},
         // Gap: actual separation between primary and secondary hit

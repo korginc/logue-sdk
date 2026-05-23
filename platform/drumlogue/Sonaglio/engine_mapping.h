@@ -36,7 +36,8 @@ typedef enum {
     ENGINE_SNARE = 1,
     ENGINE_METAL = 2,
     ENGINE_PERC  = 3,
-    ENGINE_COUNT = 4
+    ENGINE_HAT   = 4,
+    ENGINE_COUNT = 5
 } engine_id_t;
 
 /* -------------------------------------------------------------------------
@@ -216,6 +217,7 @@ ENGINE_MAPPING_INLINE int fm_engine_to_euclid_lane(engine_id_t engine) {
         case ENGINE_SNARE: return 1;
         case ENGINE_METAL: return 2;
         case ENGINE_PERC:  return 3;
+        case ENGINE_HAT:   return 2;  // hat shares metal's tuning lane
         default:           return 0;
     }
 }
@@ -231,6 +233,7 @@ ENGINE_MAPPING_INLINE float fm_engine_nominal_gain(engine_id_t engine) {
         case ENGINE_SNARE: return 0.80f;
         case ENGINE_METAL: return 0.70f;
         case ENGINE_PERC:  return 0.82f;
+        case ENGINE_HAT:   return 0.75f;
         default:           return 1.0f;
     }
 }
