@@ -348,6 +348,8 @@ All DSP architecture, synthesis engines, voice allocation, and modulation matric
 // - Use reciprocal + multiply instead of vdivq_f32
 // - Pre-calculate common denominators
 // - Use Newton-Raphson refinement
+// https://github.com/microsoft/DirectXMath/blob/aug2020/Inc/DirectXMathVector.inl#L3003-L3009
+// see fast_div_neon
 
 void test_benchmark_resonant_ops() {
     // Measure cycles for vdivq_f32 vs reciprocal method

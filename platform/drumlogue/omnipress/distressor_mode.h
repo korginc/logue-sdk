@@ -89,8 +89,8 @@ fast_inline void distressor_init(distressor_t* d, float sample_rate) {
     d->detector_mode = DETECT_NONE;
     d->attack_ms = 0.5f;      // Much faster than standard (0.5ms)
     d->release_ms = 200.0f;
-    d->attack_coeff = expf(-1.0f / (d->attack_ms * 0.001f * sample_rate));
-    d->release_coeff = expf(-1.0f / (d->release_ms * 0.001f * sample_rate));
+    d->attack_coeff = e_expff(-1.0f / (d->attack_ms * 0.001f * sample_rate));
+    d->release_coeff = e_expff(-1.0f / (d->release_ms * 0.001f * sample_rate));
     d->harmonic_state = vdupq_n_f32(0.0f);
     d->last_input = vdupq_n_f32(0.0f);
     d->opto_release_mult = 1.0f;

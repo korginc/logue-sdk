@@ -128,13 +128,14 @@ typedef enum {
 // ============================================================================
 // Drive/Wavefolder Mode IDs
 // ============================================================================
-typedef enum {
-    DRIVE_MODE_SOFT_CLIP,
-    DRIVE_MODE_HARD_CLIP,
-    DRIVE_MODE_TRIANGLE,
-    DRIVE_MODE_SINE,
-    DRIVE_MODE_SUBOCTAVE,
-    DRIVE_MODE_TOTAL,
+typedef enum { // TODO - move inside distressor_mode.h when drive mode only
+               // applies to distressor. so remove DIST_MODE_WAVE and get new UI param for gain_limit_
+  DRIVE_MODE_SOFT_CLIP,
+  DRIVE_MODE_HARD_CLIP,
+  DRIVE_MODE_TRIANGLE,
+  DRIVE_MODE_SINE,
+  DRIVE_MODE_SUBOCTAVE,
+  DRIVE_MODE_TOTAL,
 } WavefolderMode;
 
 // ============================================================================

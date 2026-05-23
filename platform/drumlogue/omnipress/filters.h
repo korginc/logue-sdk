@@ -242,23 +242,9 @@ typedef struct {
  * Initialize gain computer
  */
 fast_inline void gain_computer_init(gain_computer_t* gc) {
-    gc->knee_width = 6.0f;  // 6dB soft knee
-    gc->knee_type = KNEE_MEDIUM;
-}
-
-// Convert linear to dB (approximation)
-fast_inline float32x4_t linear_to_db(float32x4_t linear) {
-    // log10(x) ≈ log2(x) * 0.30103
-    uint32x4_t u = vreinterpretq_u32_f32(linear);
-    uint32x4_t exp = vandq_u32(u, vdupq_n_u32(0x7F800000));
-    uint32x4_t mant = vandq_u32(u, vdupq_n_u32(0x007FFFFF));
-
-    float32x4_t exp_f = vcvtq_f32_u32(vshrq_n_u32(exp, 23));
-    float32x4_t mant_f = vcvtq_f32_u32(mant);
-    float32x4_t log2 = vaddq_f32(vsubq_f32(exp_f, vdupq_n_f32(127.0f)),
-                                  vmulq_f32(mant_f, vdupq_n_f32(1.0f / (1 << 23))));
-
-    return vmulq_f32(log2, vdupq_n_f32(6.0206f));  // 20 * log10(2)
+  // TODO these values are never updated - but function is now obsolete.
+  gc->knee_width = 6.0f; // 6dB soft knee
+  gc->knee_type = KNEE_MEDIUM;
 }
 
 // Compute gain reduction with knee - obsolete
@@ -336,6 +322,7 @@ fast_inline float32x4_t gain_computer_process(gain_computer_t* gc,
 /* ---------------------------------------------------------------------------
  * 4. ATTACK/RELEASE SMOOTHING - With auto time constants
  * --------------------------------------------------------------------------- */
+
 
 typedef struct {
     float32x4_t current_gain;      // Current gain reduction (dB)

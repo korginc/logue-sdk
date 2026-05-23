@@ -70,7 +70,6 @@ public:
 
     MasterFX(void) : samplerate_(48000.0f) {
         // Initialize all DSP modules
-        compressor_init(&comp_);
         sidechain_hpf_init(&sc_hpf_, 80.0f, samplerate_);
         wavefolder_init(&wavefolder_);
         distressor_init(&distressor_, samplerate_);
@@ -135,7 +134,6 @@ public:
         setParameter(k_detection_mode, 0);                           // Detection: Peak
 
         // Reset all components
-        compressor_reset(&comp_);
         sc_hpf_hz_ = 80.0f;
         sidechain_hpf_init(&sc_hpf_, sc_hpf_hz_, samplerate_);
         wavefolder_init(&wavefolder_);
@@ -281,7 +279,7 @@ private:
         }
     }
 
-    fast_inline const char* handle_get_multiband_parameter(int p_id) {
+    fast_inline const char* handle_get_multiband_parameter(int p_id) const {
         float value = 0.0f;
         static char str_buf[16];
         if (band_select_ == BAND_LOW || band_select_ == BAND_LOW_MID || band_select_ == BAND_LOW_HI || band_select_ == BAND_ALL) {
@@ -296,7 +294,7 @@ private:
         // I would have liked to has all the three values shown together, but it's not possible.
         // choose the lower one if multiple bands selected, since it's more likely to be audible and relevant for the user.
         static const char *bands[] = {"L", "M", "H", "LM", "LH", "MH", "All"};
-        if (band_select_ >= 0 && band_select_ < BAND_TOTAL) {
+        if (band_select_ < BAND_TOTAL) {
             snprintf(str_buf, 256, "%s:%.1f", bands[band_select_], value);
         } else {
             snprintf(str_buf, 256, "---");
@@ -407,6 +405,7 @@ private:
         float32x4_t target_gain_db = vmulq_f32(excess_db, vdupq_n_f32(function_slope_));
 
         // 3. Hardware Clamping: Protects against out-of-control signals during high expansion/reversal
+        // TODO - CRUCIAL!!! these two are missing from UI!!!
         target_gain_db = vmaxq_f32(target_gain_db, vdupq_n_f32(atten_limit_db_));
         target_gain_db = vminq_f32(target_gain_db, vdupq_n_f32(gain_limit_db_));
 
@@ -648,6 +647,8 @@ public:
                 distressor_set_ratio(&distressor_, value);  // this updates opto_release_mult
                 update_opto_coeff(&distressor_, release_coeff_);
                 break;
+                // TODO: move inside k_distressor_distortion_type at
+                // DIST_MODE_WAVE - whihc value will be removed
             case k_distressor_drive_wave_mode: // DSTR WAVE (0=SoftClip, 1=HardClip, 2=Tri, 3=Sine, 4=SubOct)
                 if (value < DRIVE_MODE_TOTAL)
                     wavefolder_set_drive_type(&wavefolder_, value);
@@ -757,13 +758,13 @@ public:
                 break;
             }
 
-            case k_slope: // RATIO (1.0 to 20.0) - show special cases
+            case k_slope: // SLOPE (1.0 to 20.0) - show special cases
                 {
-                    float ratio = value * 0.1f;
-                    if (fabsf(ratio - 20.0f) < 0.1f)
+                    float slope = value * 0.1f;
+                    if (fabsf(slope - 20.0f) < 0.1f)
                         return "Limit";
                     else {
-                        snprintf(str_buf, sizeof(str_buf), "%.1f:1", ratio);
+                        snprintf(str_buf, sizeof(str_buf), "%.1f:1", slope);
                         return str_buf;
                     }
                 }

@@ -25,6 +25,8 @@
 
 // PRNG state (Xorshift128+, two 64-bit lanes each)
 struct prng_t { uint64x2_t state0, state1; };
+// decay factor (required 0.1-3ms decay time at 48 kHz)
+constexpr float pop_env_decay_ = 0.92f;
 
 class alignas(16) PortaCassette {
 public:
@@ -209,8 +211,8 @@ public:
         }
         else    // tape like
         {
-            sig_l = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_l, drive)), makeup, false);
-            sig_r = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_r, drive)), makeup, true);
+            sig_l = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_l, drive)), makeup);
+            sig_r = vmulq_n_f32(sat_neon_new(vmulq_n_f32(sig_r, drive)), makeup);
         }
     }
 
@@ -693,6 +695,11 @@ private:
 
     // =========================================================================
     // Scalar path — mirrors the NEON block path for 0-3 remainder samples
+    // NOTE: not everything from the block path is duplicated here (e.g. vinyl dust, tape hiss)
+    // since these are less critical at very low levels and would require a lot of code
+    // duplication for the scalar path; the main goal is just to ensure the core saturation,
+    // wow/flutter, and dbx NR processing still happens for the last few samples with correct timing
+    // of the NR system's envelope followers.
     // =========================================================================
     inline void process_scalar(float dry_l, float dry_r, float& out_l, float& out_r) {
         float dec_gain = 1.0f;  // synchronized decode gain; set in encode block below

@@ -52,9 +52,9 @@ const __unit_header unit_header_t unit_header = {
         // Page 4: Multiband / Distressor Parameters
         // ID 12: DSTR DIST  0=None, 1=2nd harm, 2=3rd harm, 3=Both, 4=Wave
         { 0, 4, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"DstrDIST"} },    // ID 12 - Distressor distortion type
-        { 0, 7, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"DstrRATIO"} },   // ID 13 - Distressor ratio selection
+        { 0, 7, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"DstrRATIO"} },   // ID 13 - Distressor ratio selection - TODO - remove this in favoir of atten_limit_ param and either deduce from threshold, or move inside distressor params since it only applies to distressor mode, and rename to "Drive Type" or similar, since it only applies to distressor mode)
         // ID 14: DSTR WAVE  0=Soft, 1=Hard, 2=Tri, 3=Sine, 4=SubOct
-        { 0, 4, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"DstrWAVE"} },    // ID 14 - Wavefolder drive type
+        { 0, 4, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"DstrWAVE"} },    // ID 14 - Wavefolder drive type - todo remove this (use distortion type and get new gain_limit_, Still need atten_limit_ param for opto mode though, so maybe just move inside distressor params and rename to "Drive Type" or similar, since it only applies to distressor mode)
         // ID 15: BAND SEL  0=Low, 1=Mid, 2=High, 3=Low+Mid, 4=Low+High, 5=Mid+High, 6=All
         { 0, 6, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"MBand"} },       // ID 15
 

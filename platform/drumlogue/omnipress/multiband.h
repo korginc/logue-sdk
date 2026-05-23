@@ -9,6 +9,7 @@
 #include <arm_neon.h>
 #include "crossover.h"
 #include "constants.h"
+#include "float_math.h"
 
 #define BAND_LOW 0
 #define BAND_MID 1
@@ -73,8 +74,8 @@ typedef struct {
 
 
 fast_inline void multiband_update_coeff(multiband_t* mb, int band) {
-    mb->bands[band].attack_coeff  = expf(-1.0f / (mb->bands[band].attack_ms * 0.001f * mb->sample_rate));
-    mb->bands[band].release_coeff = expf(-1.0f / (mb->bands[band].release_ms * 0.001f * mb->sample_rate));
+    mb->bands[band].attack_coeff  = e_expff(-1.0f / (mb->bands[band].attack_ms * 0.001f * mb->sample_rate));
+    mb->bands[band].release_coeff = e_expff(-1.0f / (mb->bands[band].release_ms * 0.001f * mb->sample_rate));
 }
 
 // Initialize multiband compressor
@@ -89,11 +90,6 @@ fast_inline void multiband_init(multiband_t* mb, float sample_rate) {
     crossover_init(&mb->xover_low_mid, mb->xover_low_freq, sample_rate);
     crossover_init(&mb->xover_mid_high, mb->xover_high_freq, sample_rate);
 
-    // Initialize compressors
-    compressor_init(&mb->comp_low);
-    compressor_init(&mb->comp_mid);
-    compressor_init(&mb->comp_high);
-
     // Default band parameters
     for (int i = 0; i < NUM_OF_BANDS; i++) {
         mb->bands[i].thresh_db = -10.0f;
@@ -107,14 +103,7 @@ fast_inline void multiband_init(multiband_t* mb, float sample_rate) {
         multiband_update_coeff(mb, i);
     }
 
-    mb->gr_low  = vdupq_n_f32(0.0f);
-    mb->gr_mid  = vdupq_n_f32(0.0f);
-    mb->gr_high = vdupq_n_f32(0.0f);
-
-    mb->env_state_low  = vdupq_n_f32(0.0f);
-    mb->env_state_mid  = vdupq_n_f32(0.0f);
-    mb->env_state_high = vdupq_n_f32(0.0f);
-    mb->env_pre_coeff  = expf(-1.0f / (0.001f * sample_rate));  // 1ms smoothing
+    mb->env_pre_coeff  = e_expff(-1.0f / (0.001f * sample_rate));  // 1ms smoothing
 }
 
 fast_inline void multiband_reset(multiband_t* m) {
@@ -242,11 +231,13 @@ fast_inline float32x4_t process_compressor_lane(float32x4_t* gain_state, float32
 
     // 2. Prevent division traps using an expansion epsilon snap
     float32x4_t ratio_vec = vdupq_n_f32(ratio);
-    uint32x4_t near_zero = vcltq_f32(vabsq_f32(ratio_vec), vdupq_n_f32(0.01f));
+    uint32x4_t  near_zero = vcltq_f32(vabsq_f32(ratio_vec), vdupq_n_f32(0.01f));
     float32x4_t safe_ratio = vbslq_f32(near_zero, vdupq_n_f32(0.001f), ratio_vec);
 
     // Standard gain computer equation
-    float32x4_t target_gr_db = vnegq_f32(vdivq_f32(vmulq_f32(excess, vsubq_f32(ratio_vec, vdupq_n_f32(1.0f))), safe_ratio));
+    float32x4_t target_gr_db = vnegq_f32(fast_div_neon(
+        vmulq_f32(excess, vsubq_f32(ratio_vec, vdupq_n_f32(1.0f))),
+        safe_ratio));
 
     // Smoothly apply an accurate infinite hard limit mask if ratio == 0.0f
     target_gr_db = vbslq_f32(vceqq_f32(ratio_vec, vdupq_n_f32(0.0f)), vnegq_f32(excess), target_gr_db);
