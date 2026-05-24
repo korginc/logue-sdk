@@ -120,7 +120,9 @@ public:
         , noiseColour(2.0f)
         , noiseGain(0.0f)
         , noiseEnvelope(0.0f)
-        , pingMapIndex(0) {
+        , pingMapIndex(0)
+        , pingMapCounter(0)
+        , filterUpdateCounter(0) {
 
         // Initialize delay times (prime-based for smooth diffusion)
         float baseDelays[FDN_CHANNELS] = {
@@ -215,6 +217,8 @@ public:
         // Reset LFO
         randomLfoCounter = 0;
         randomLfoValue = 0.0f;
+        pingMapCounter = 0;
+        filterUpdateCounter = 0;
         pingMapIndex = 0;
 
         // Reset noise
@@ -559,7 +563,9 @@ public:
             // Blend additively: passband stays at full level + resonant colour at fc.
             // All other modes replace the signal (LPF/HPF shape the tail spectrum).
             if (filterMode == kFilterCrystal)
-                out_samps[s] = in_val + out_val * 6.0f;
+              out_samps[s] =
+                  in_val +
+                  out_val * 2.0f; // Reduced from 6.0 to prevent screeching
             else
                 out_samps[s] = out_val;
           }
@@ -663,10 +669,7 @@ public:
     void applyCrossFeedback(float32x4_t* signals) {
         float gain = crossGain[pillar_];
         if (gain < 0.001f) return;
-        // All cases must use temporaries to read original values before writing.
-        // In-place updates (a += gain*b; b += gain*a) read the modified 'a' for 'b',
-        // making the effective matrix asymmetric with max eigenvalue 1+gain+gain²
-        // (e.g. 1.162 at gain=0.15) which can exceed unifiedDecay=0.88 → instability.
+
         float32x4_t t0, t1;
         switch (pillar_) {
             case 0: { // 2 channels — simultaneous update
@@ -709,8 +712,13 @@ public:
 
     void applyRandomizedPingPongMix(const float32x4_t* mixed,
                                                         float32x4_t& left, float32x4_t& right) {
+        // Timer is handled in the main loop to keep scalar/neon in sync
+        // We expect the direction to stay stable for ~100ms
+        if (pingMapCounter <= 0) {
+             pingMapCounter = 4800;
+             pingMapIndex = (pingMapIndex + 1) & 15;
+        }
         const uint8_t* map = pingRandomMap[pingMapIndex];
-        pingMapIndex = (pingMapIndex + 1) & 15;
         float32x4_t sumL = vdupq_n_f32(0.0f);
         float32x4_t sumR = vdupq_n_f32(0.0f);
         for (int i = 0; i < 4; i++) {
@@ -1153,10 +1161,10 @@ private:
         float32x4_t max1 = vmaxq_f32(absIn, vextq_f32(absIn, absIn, 2));
         float32x4_t max2 = vmaxq_f32(max1, vextq_f32(max1, max1, 1));
 
-        if (vgetq_lane_f32(max2, 0) > 1e-5f) {
+        if (vgetq_lane_f32(max2, 0) > 1e-7f) { // Lower threshold for smoother tail
             // Signal present: reset counter to maximum reverb tail length
             // RT60 roughly corresponds to decay time + predelay
-            activeSampleCount = (int)(sampleRate * (1.0f + decay * 5.0f));
+            activeSampleCount = (int)(sampleRate * (2.0f + decay * 8.0f)); // Longer tail count
         } else if (activeSampleCount > 0) {
             // Signal absent: decrement counter
             activeSampleCount -= NEON_LANES;
@@ -1189,25 +1197,25 @@ private:
         // =================================================================
         updateModulation4();
         updateRandomLfo();
+        pingMapCounter -= 4;
 
         float modAmount = diffusion * modDepth;   // diffusion is DFSN (0..1)
         float fcMod = smoothedLfoValue * modAmount * 500.0f;  // ± up to 500 Hz
 
         // =================================================================
-        // Compute unified loop gain (needed before noise injection)
+        // Compute unified loop gain and stability safety
         // =================================================================
-        // float loopGain = 0.30f + (decay * 0.55f);    // too conservative
-        // float loopGain = 0.55f + (decay * 0.42f);    // increase RT60
-        float loopGain = 0.65f + decay * 0.32f;         // FDNs need surprisingly high loop gain.
-        // Cap at 0.88: safety net when lowDecayMult*highDecayMult > 1 can push
-        // loopGain above 1.  With the new base formula the cap only activates when
-        // both LOW and HIGH are near maximum AND TIME=100.
-        float unifiedDecay = fminf(0.88f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
+        float loopGain = 0.45f + decay * 0.45f;
+
+        // Instability Fix: crossGain adds energy (eigenvalue ≈ 1+gain).
+        // We must reduce unifiedDecay by (1-crossGain) to keep loop gain < 1.0.
+        float stabilityMargin = 1.0f - crossGain[pillar_] - 0.02f;
+        float unifiedDecay = fminf(stabilityMargin, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
         float32x4_t decayAll = vdupq_n_f32(unifiedDecay);
-        // Floor at 0.35: ensures the input signal contributes at ≥35% on every
-        // block, so the first reflection is immediately audible even at TIME=100
-        // (loopGain=0.845 → 1-0.845=0.155, floored to 0.35).
-        float input_gain = fmaxf(0.35f, 1.0f - unifiedDecay);
+
+        // Volume Fix: input_gain floor was 0.35 (35% of signal every block).
+        // In an 8-channel FDN, this is massive. Lowered to 0.12.
+        float input_gain = fmaxf(0.12f, 1.0f - unifiedDecay);
         float32x4_t feedback = vdupq_n_f32(input_gain);
 
         // =================================================================
@@ -1220,7 +1228,13 @@ private:
         applyHighFreqDamping4(mixed);
 
         // 2. Character Body Resonance (Wood, Stone, Metal)
-        applyResonantFilterModulated(mixed, FDN_CHANNELS, fcMod);
+        // Screech Fix: Only update filter coefficients every 32 samples (8 blocks)
+        if (--filterUpdateCounter <= 0) {
+            filterUpdateCounter = 8;
+            applyResonantFilterModulated(mixed, FDN_CHANNELS, fcMod);
+        } else {
+            applyResonantFilter(mixed, FDN_CHANNELS);
+        }
 
         // 2.5 add filter modes
         // Metal mode has an additional feed-forward comb resonance for extra metallic character
@@ -1240,13 +1254,13 @@ private:
         // 5. Apply decay
         for (int i = 0; i < FDN_CHANNELS; i++) mixed[i] = vmulq_f32(mixed[i], decayAll);
 
-        // 6. Add input
+        // 6. Add input - Scaled down to prevent "too high volume"
         float32x4_t inputVec = vmulq_f32(delayedMono, feedback);
         // An FDN this diffuse needs excitation into multiple channels
         mixed[0] = vaddq_f32(mixed[0], inputVec);
-        mixed[2] = vaddq_f32(mixed[2], vmulq_n_f32(inputVec, 0.7f));
-        mixed[5] = vaddq_f32(mixed[5], vmulq_n_f32(inputVec, -0.5f));
-        mixed[7] = vaddq_f32(mixed[7], vmulq_n_f32(inputVec, 0.4f));
+        mixed[2] = vaddq_f32(mixed[2], vmulq_n_f32(inputVec, 0.5f));
+        mixed[5] = vaddq_f32(mixed[5], vmulq_n_f32(inputVec, -0.3f));
+        mixed[7] = vaddq_f32(mixed[7], vmulq_n_f32(inputVec, 0.2f));
 
         // 7. Soft saturation: x/(1+|x|) keeps FDN bounded at (-1,1) without DC lockup.
         // Hard-clip was causing stellare crash: when all channels pin at +1, Hadamard
@@ -1462,9 +1476,10 @@ private:
         }
 
         float mixed[FDN_CHANNELS];
-        float loopGain = 0.30f + (decay * 0.55f);
-        float unifiedDecay = fminf(0.88f, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
-        float scalar_input_gain = fmaxf(0.35f, 1.0f - unifiedDecay);
+        float loopGain = 0.45f + decay * 0.45f;
+        float stabilityMargin = 1.0f - crossGain[pillar_] - 0.02f;
+        float unifiedDecay = fminf(stabilityMargin, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
+        float scalar_input_gain = fmaxf(0.12f, 1.0f - unifiedDecay);
 
         applyHadamardScalar(delayOut, mixed);
 
@@ -1512,10 +1527,18 @@ private:
         float leftRaw = 0.0f, rightRaw = 0.0f;
 
         if (pingPong_) {
-            // PILL=1: alternating L/R among 4 active channels
-            // ch 0, 2 → L;  ch 1, 3 → R
-            leftRaw  = (mixed[0] + mixed[2]) * 0.5f;
-            rightRaw = (mixed[1] + mixed[3]) * 0.5f;
+            // PILL=1: alternating L/R among 4 active channels with randomization timer
+            if (--pingMapCounter <= 0) {
+                pingMapCounter = 4800;
+                pingMapIndex = (pingMapIndex + 1) & 15;
+            }
+            const uint8_t* map = pingRandomMap[pingMapIndex];
+            for (int i = 0; i < 4; i++) {
+                if (map[i]) leftRaw  += mixed[i];
+                else        rightRaw += mixed[i];
+            }
+            leftRaw  *= 0.5f;
+            rightRaw *= 0.5f;
         } else {
             // Determine active channel count
             int activeCh;
@@ -1657,6 +1680,7 @@ private:
     // Randomized ping-pong map (for PILL=1)
     static const uint8_t pingRandomMap[MAX_PILLARS][NEON_LANES]; // 16 steps, 4 channels each
     int pingMapIndex;
+    int pingMapCounter;
 
     float baseFc;                   // base cutoff frequency (Hz) for current preset/damping
     float filterModRange;           // max modulation range (Hz) derived from DFSN and pillar
