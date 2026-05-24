@@ -619,12 +619,12 @@ private:
 
         // 2. Evaluate polynomial using abs_x
         float32x4_t n = vmlaq_n_f32(vdupq_n_f32(0.583691066395175e-1f), abs_x, 0.3357335044280075e-1f);
-        n = vmlaq_n_f32(vdupq_n_f32(0.2468149110712040f), abs_x, n);
+        n = vmlaq_f32(vdupq_n_f32(0.2468149110712040f), abs_x, n);
         n = vmulq_f32(n, abs_x);
 
         float32x4_t d = vmlaq_n_f32(vdupq_n_f32(0.1086202599228572f), abs_x, 0.2874707922475963e-1f);
-        d = vmlaq_n_f32(vdupq_n_f32(0.609347197060491e-1f), abs_x, d);
-        d = vmlaq_n_f32(vdupq_n_f32(0.2464845986383725f), abs_x, d);
+        d = vmlaq_f32(vdupq_n_f32(0.609347197060491e-1f), abs_x, d);
+        d = vmlaq_f32(vdupq_n_f32(0.2464845986383725f), abs_x, d);
 
         float32x4_t rcp = vrecpeq_f32(d);
         rcp = vmulq_f32(vrecpsq_f32(d, rcp), rcp);
