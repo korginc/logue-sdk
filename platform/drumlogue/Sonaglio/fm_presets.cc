@@ -379,40 +379,40 @@ const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
         "MetalClang",
         3, 50, 8, 12,
         10, 10, 20, 15,
-        88, 60, 10, 10,
+        72, 46, 10, 10,
         0, 35, LFO_TARGET_INDEX, 30,
         0, 0, LFO_TARGET_NONE, 0,
-        99, 80, 35, 45},  // env 99 = metallic tail (~515ms), cymbal char
+        99, 64, 42, 38},  // rebalanced for hotter metallic engine: less peew, tighter clang
 
     // 8: MetalWash — sustained shimmering metallic wash
     {
         "MetalWash",
         3, 75, 35, 45,
         10, 15, 25, 20,
-        80, 90, 20, 25,
+        62, 74, 20, 25,
         0, 20, LFO_TARGET_ENV, 40,
         0, 0, LFO_TARGET_NONE, 0,
-        106, 55, 40, 30},  // env 106 = metallic tail (~900ms) for long wash
+        106, 44, 48, 26},  // rebalanced for denser ring to avoid over-bright wash
 
     // 9: GongHit — dark, dense, long-ringing gong
     {
         "GongHit",
         3, 85, 28, 35,
         0, 0, 0, 0,
-        50, 95, 0, 0,
+        42, 82, 0, 0,
         3, 10, LFO_TARGET_PITCH, -20,
         0, 0, LFO_TARGET_NONE, 0,
-        238, 25, 45, 20},  // 238 = Gong char (bit7) + metallic tail 110 (~1120ms)
+        238, 22, 42, 18},  // rebalanced gong: keep long ring, reduce whistle dominance
 
     // 10: BellRing — bright cymbal-bell with shimmering long ring
     {
         "BellRing",
         3, 80, 45, 25,
         0, 0, 0, 0,
-        75, 85, 0, 0,
+        58, 70, 0, 0,
         4, 18, LFO_TARGET_INDEX, 35,
         0, 0, LFO_TARGET_NONE, 0,
-        110, 35, 55, 30  // env 110 = metallic tail (~1120ms), cymbal char
+        110, 30, 48, 26  // rebalanced bell ring for updated metal FM density
     },
 
     // 11: PercBlock
@@ -435,15 +435,15 @@ const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
         1, 0, LFO_TARGET_NONE, 0,
         22, 25, 50, 15},
 
-    // 13: PercWood
+    // 13: PercWood — short woody knock / clave-like attack
     {
         "PercWood",
-        2, 30, 5, 10,
-        35, 45, 10, 20,
-        10, 10, 85, 40,
-        1, 15, LFO_TARGET_INDEX, 10,
+        2, 28, 4, 8,
+        22, 30, 8, 16,
+        8, 8, 92, 32,
+        1, 12, LFO_TARGET_INDEX, 8,
         0, 0, LFO_TARGET_NONE, 0,
-        18, 40, 35, 10},
+        14, 42, 32, 8},
 
     // 14: DryHit
     {
