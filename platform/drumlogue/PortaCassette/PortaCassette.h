@@ -226,59 +226,12 @@ public:
         sig_r = vmulq_n_f32(sig_r, current_preamp_);
     }
 
-    // Interpolates a single point given 4 control points and a fractional offset f
-    fast_inline float hermite4_neon(float p0, float p1, float p2, float p3, float f) {
-        // 1. Load points into a NEON vector
-        float points[4] = {p0, p1, p2, p3};
-        float32x4_t P = vld1q_f32(points);
-
-        // 2. Compute powers of f: [1, f, f*f, f*f*f]
-        float t2 = f * f;
-        float t3 = t2 * f;
-        float32x4_t T = vdupq_n_f32(1.0f);
-        T = vsetq_lane_f32(f, T, 1);
-        T = vsetq_lane_f32(t2, T, 2);
-        T = vsetq_lane_f32(t3, T, 3);
-
-        // 3. Define the Hermite/Catmull-Rom matrix columns (transposed)
-        // Coeff 0: P0*0 + P1*2 + P2*0 + P3*0
-        // Coeff 1: P0*(-1) + P1*0 + P2*1 + P3*0
-        // Coeff 2: P0*2 + P1*(-5) + P2*4 + P3*(-1)
-        // Coeff 3: P0*(-1) + P1*3 + P2*(-3) + P3*1
-        float32x4_t C0 = vdupq_n_f32(0.0f);
-        C0 = vsetq_lane_f32(-1.0f, C0, 1);
-        C0 = vsetq_lane_f32(2.0f, C0, 2);
-        C0 = vsetq_lane_f32(-1.0f, C0, 3);
-        float32x4_t C1 = vdupq_n_f32(2.0f);
-        C1 = vsetq_lane_f32(0.0f, C1, 1);
-        C1 = vsetq_lane_f32(-5.0f, C1, 2);
-        C1 = vsetq_lane_f32(3.0f, C1, 3);
-        float32x4_t C2 = vdupq_n_f32(0.0f);
-        C2 = vsetq_lane_f32(1.0f, C2, 1);
-        C2 = vsetq_lane_f32(4.0f, C2, 2);
-        C2 = vsetq_lane_f32(-3.0f, C2, 3);
-        float32x4_t C3 = vdupq_n_f32(0.0f);
-        C3 = vsetq_lane_f32(0.0f, C3, 1);
-        C3 = vsetq_lane_f32(-1.0f, C3, 2);
-        C3 = vsetq_lane_f32(1.0f, C3, 3);
-
-        // 4. Dot product per channel (Polynomial evaluation)
-        float32x4_t V0 = vmulq_f32(vdupq_n_f32(vgetq_lane_f32(P, 0)), C0);
-        float32x4_t V1 = vmulq_f32(vdupq_n_f32(vgetq_lane_f32(P, 1)), C1);
-        float32x4_t V2 = vmulq_f32(vdupq_n_f32(vgetq_lane_f32(P, 2)), C2);
-        float32x4_t V3 = vmulq_f32(vdupq_n_f32(vgetq_lane_f32(P, 3)), C3);
-
-        // 5. Sum the weighted columns
-        float32x4_t sum_vec = vaddq_f32(vaddq_f32(V0, V1), vaddq_f32(V2, V3));
-
-        // 6. Multiply by T and divide by 2
-        float32x4_t final_poly = vmulq_f32(sum_vec, T);
-        float result = (vgetq_lane_f32(final_poly, 0) +
-                        vgetq_lane_f32(final_poly, 1) +
-                        vgetq_lane_f32(final_poly, 2) +
-                        vgetq_lane_f32(final_poly, 3)) * 0.5f;
-
-        return result;
+    fast_inline float hermite4_scalar(float p0, float p1, float p2, float p3, float fr) {
+    // Coefficients computed via Horner's scheme for minimal operations
+        float c1 = 0.5f * (p2 - p0);
+        float c2 = p0 - 2.5f * p1 + 2.0f * p2 - 0.5f * p3;
+        float c3 = 0.5f * (p3 - p0) + 1.5f * (p1 - p2);
+        return ((c3 * fr + c2) * fr + c1) * fr + p1;
     }
 
     fast_inline void wow_and_flutter(float32x4_t &sig_l, float32x4_t &sig_r) {
@@ -291,7 +244,8 @@ public:
 
         const float wow_depth     = 5.0f + tape_age_ * 25.0f;
         const float flutter_depth = 0.8f + tape_age_ * 2.0f;
-        const float rd_off        = wow_depth * (1.0f + 0.8f * lfo_val) + flutter_depth * flutter_val;
+        const float rd_off        = wow_depth * (1.0f + 0.8f * lfo_val)
+                                    + flutter_depth * flutter_val;
         const int32_t i_off       = (int32_t)rd_off;
         const float   fr          = rd_off - (float)i_off;
 
@@ -303,11 +257,14 @@ public:
             wf_delay_l_[wf_write_pos_] = l4[s];
             wf_delay_r_[wf_write_pos_] = r4[s];
 
-            uint32_t m0 = (wf_write_pos_ - i_off + WF_BUFFER_SIZE) & WF_BUFFER_MASK;
-            uint32_t m1 = (m0 - 1u) & WF_BUFFER_MASK;
+            // Core indices for 4-point interpolation
+            uint32_t m1 = (wf_write_pos_ - i_off + WF_BUFFER_SIZE) & WF_BUFFER_MASK; // Central point 1
+            uint32_t m2 = (m1 - 1u) & WF_BUFFER_MASK;                                // Central point 2
+            uint32_t m0 = (m1 + 1u) & WF_BUFFER_MASK;                                // Left guard point
+            uint32_t m3 = (m2 - 1u) & WF_BUFFER_MASK;                                // Right guard point
 
-            l4[s] = wf_delay_l_[m0] + fr * (wf_delay_l_[m1] - wf_delay_l_[m0]);
-            r4[s] = wf_delay_r_[m0] + fr * (wf_delay_r_[m1] - wf_delay_r_[m0]);
+            l4[s] = hermite4_scalar(wf_delay_l_[m0], wf_delay_l_[m1], wf_delay_l_[m2], wf_delay_l_[m3], fr);
+            r4[s] = hermite4_scalar(wf_delay_r_[m0], wf_delay_r_[m1], wf_delay_r_[m2], wf_delay_r_[m3], fr);
 
             wf_write_pos_ = (wf_write_pos_ + 1u) & WF_BUFFER_MASK;
         }
@@ -709,20 +666,28 @@ private:
             wf_flutter_phase_ += wf_flutter_phase_inc_;
             if (wf_lfo_phase_     >= M_TWOPI) wf_lfo_phase_     -= M_TWOPI;
             if (wf_flutter_phase_ >= M_TWOPI) wf_flutter_phase_ -= M_TWOPI;
+
             const float wow_depth     = 5.0f + tape_age_ * 25.0f;
             const float flutter_depth = 0.8f + tape_age_ * 2.0f;
-            const float rd_off = wow_depth * (1.0f + 0.8f * lfo_val)
-                               + flutter_depth * flutter_val;
+            const float rd_off        = wow_depth * (1.0f + 0.8f * lfo_val) + flutter_depth * flutter_val;
+
+            // Calculate integers and fractions exactly like the vector path
+            const int32_t i_off       = (int32_t)rd_off;
+            const float   fr          = rd_off - (float)i_off;
 
             wf_delay_l_[wf_write_pos_] = sl;
             wf_delay_r_[wf_write_pos_] = sr;
-            float    pos = (float)wf_write_pos_ - rd_off + (float)WF_BUFFER_SIZE;
-            int32_t  i0  = (int32_t)pos;
-            float    fr  = pos - (float)i0;
-            uint32_t m0  = (uint32_t)i0 & WF_BUFFER_MASK;
-            uint32_t m1  = (m0 + 1u) & WF_BUFFER_MASK;
-            sl = wf_delay_l_[m0] + fr * (wf_delay_l_[m1] - wf_delay_l_[m0]);
-            sr = wf_delay_r_[m0] + fr * (wf_delay_r_[m1] - wf_delay_r_[m0]);
+
+            // 4-point Hermite layout aligned with the vector path's time direction
+            uint32_t m1 = (wf_write_pos_ - i_off + WF_BUFFER_SIZE) & WF_BUFFER_MASK; // Central sample 1
+            uint32_t m2 = (m1 - 1u) & WF_BUFFER_MASK;                               // Central sample 2
+            uint32_t m0 = (m1 + 1u) & WF_BUFFER_MASK;                               // Left guard sample
+            uint32_t m3 = (m2 - 1u) & WF_BUFFER_MASK;                               // Right guard sample
+
+            // Call your scalar Hermite helper
+            sl = hermite4_scalar(wf_delay_l_[m0], wf_delay_l_[m1], wf_delay_l_[m2], wf_delay_l_[m3], fr);
+            sr = hermite4_scalar(wf_delay_r_[m0], wf_delay_r_[m1], wf_delay_r_[m2], wf_delay_r_[m3], fr);
+
             wf_write_pos_ = (wf_write_pos_ + 1u) & WF_BUFFER_MASK;
         }
 
