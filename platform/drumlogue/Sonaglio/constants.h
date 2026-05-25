@@ -120,7 +120,99 @@ constexpr float RES_FC_MIN = 50.0f;
 constexpr float RES_FC_MAX = 8000.0f;
 constexpr float RESONANT_DENOM_EPSILON = 1e-6f;
 
+
+// ============================================================================
+// Euclidean tuning offsets
+// ============================================================================
+// offsets[mode][engine lane] = semitones above root.
+// Engine mapping used by selector mode:
+//   lane 0 = Kick
+//   lane 1 = Snare
+//   lane 2 = Metal
+//   lane 3 = Tom/Perc
+static const float EUCLID_OFFSETS[EUCLID_MODE_COUNT][4] = {
+    { 0.f,  0.f,  0.f,  0.f},  // 0: Off
+    { 0.f,  1.f,  2.f,  3.f},  // 1: E(4,4)
+    { 0.f,  1.f,  3.f,  4.f},  // 2: E(4,6)
+    { 0.f,  1.f,  3.f,  5.f},  // 3: E(4,7)
+    { 0.f,  2.f,  4.f,  6.f},  // 4: E(4,8)
+    { 0.f,  2.f,  5.f,  7.f},  // 5: E(4,10)
+    { 0.f,  3.f,  6.f,  9.f},  // 6: E(4,12)
+    { 0.f,  4.f,  8.f, 12.f},  // 7: E(4,16)
+    { 0.f,  6.f, 12.f, 18.f},  // 8: E(4,24)
+};
+
+// ============================================================================
+// Instrument selector
+// ============================================================================
+typedef enum {
+    INST_KICK = 0,
+    INST_SNARE,
+    INST_TOM,
+    INST_METAL,
+    INST_HAT,
+    INST_KS,
+    INST_KT,
+    INST_KM,
+    INST_KH,
+    INST_ST,
+    INST_SM,
+    INST_SH,
+    INST_TM,
+    INST_TH,
+    INST_MH,
+    INST_COUNT
+} sonaglio_instrument_t;
+
+// ============================================================================
+// String tables
+// ============================================================================
+const char* instruments_strings[INST_COUNT] = {
+    "Kick",
+    "Snare",
+    "Tom",
+    "Metal",
+    "Hat",
+    "K+S",
+    "K+T",
+    "K+M",
+    "K+H",
+    "S+T",
+    "S+M",
+    "S+H",
+    "T+M",
+    "T+H",
+    "M+H",
+};
+
+const char* lfo_shape_strings[LFO_SHAPE_COMBO_COUNT] = {
+    "Tri+Tri", "Rmp+Rmp", "Chd+Chd",
+    "Tri+Rmp", "Tri+Chd", "Rmp+Tri",
+    "Rmp+Chd", "Chd+Tri", "Chd+Rmp"
+};
+
+const char* lfo_target_strings[LFO_TARGET_COUNT] = {
+    "None", "Pitch", "ModIdx", "Env",
+    "LFO2Ph", "LFO1Ph", "ResFrq", "Reson",
+    "NoizMx", "ResMrph", "MtlGate"
+};
+
+const char* euclidean_mode_strings[EUCLID_MODE_COUNT] = {
+    "Off",    // 0: disabled — all voices same pitch
+    "Clstr",  // 1: E(4,4)  = [0, 1, 2, 3]  chromatic cluster
+    "Minor",  // 2: E(4,6)  = [0, 1, 3, 4]  minor 3rd pairs
+    "Diatn",  // 3: E(4,7)  = [0, 1, 3, 5]  diatonic cluster
+    "Whole",  // 4: E(4,8)  = [0, 2, 4, 6]  whole tone
+    "Penta",  // 5: E(4,10) = [0, 2, 5, 7]  pentatonic / 5th
+    "Dim7",   // 6: E(4,12) = [0, 3, 6, 9]  diminished 7th
+    "Aug8",   // 7: E(4,16) = [0, 4, 8, 12] augmented + octave
+    "Trit"    // 8: E(4,24) = [0, 6, 12, 18] tritone spread
+};
+
+
+// ============================================================================
 // Utility helpers
+// ============================================================================
 static inline float interval_ratio(int semitones) {
     return powf(2.0f, semitones / 12.0f);
 }

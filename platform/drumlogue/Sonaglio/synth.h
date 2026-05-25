@@ -186,17 +186,17 @@ public:
     inline const char* getParameterStrValue(uint8_t index, int32_t value) const {
         switch (index) {
             case PARAM_INSTRUMENT:
-                if (value >= 0 && value <= 10) return instruments_strings[value];
+                if (value >= 0 && value < INST_COUNT) return instruments_strings[value];
                 break;
             case PARAM_LFO1_SHAPE:
-                if (value >= 0 && value <= 8) return lfo_shape_strings[value];
+                if (value >= 0 && value < LFO_SHAPE_COMBO_COUNT) return lfo_shape_strings[value];
                 break;
             case PARAM_LFO1_TARGET:
             case PARAM_LFO2_TARGET:
-                if (value >= 0 && value <= 10) return lfo_target_strings[value];
+                if (value >= 0 && value < LFO_TARGET_COUNT) return lfo_target_strings[value];
                 break;
             case PARAM_EUCL_TUN:
-                if (value >= 0 && value <= 8) return euclidean_mode_strings[value];
+                if (value >= 0 && value < EUCLID_MODE_COUNT) return euclidean_mode_strings[value];
                 break;
             default:
                 break;

@@ -33,45 +33,6 @@
 #include "midi_handler.h"
 #include "fm_presets.h"
 
-// ============================================================================
-// Euclidean tuning offsets
-// ============================================================================
-// offsets[mode][engine lane] = semitones above root.
-// Engine mapping used by selector mode:
-//   lane 0 = Kick
-//   lane 1 = Snare
-//   lane 2 = Metal
-//   lane 3 = Tom/Perc
-static const float EUCLID_OFFSETS[EUCLID_MODE_COUNT][4] = {
-    { 0.f,  0.f,  0.f,  0.f},  // 0: Off
-    { 0.f,  1.f,  2.f,  3.f},  // 1: E(4,4)
-    { 0.f,  1.f,  3.f,  4.f},  // 2: E(4,6)
-    { 0.f,  1.f,  3.f,  5.f},  // 3: E(4,7)
-    { 0.f,  2.f,  4.f,  6.f},  // 4: E(4,8)
-    { 0.f,  2.f,  5.f,  7.f},  // 5: E(4,10)
-    { 0.f,  3.f,  6.f,  9.f},  // 6: E(4,12)
-    { 0.f,  4.f,  8.f, 12.f},  // 7: E(4,16)
-    { 0.f,  6.f, 12.f, 18.f},  // 8: E(4,24)
-};
-
-// ============================================================================
-// Instrument selector
-// ============================================================================
-typedef enum {
-    INST_KICK = 0,
-    INST_SNARE,
-    INST_TOM,
-    INST_METAL,
-    INST_HAT,
-    INST_KS,
-    INST_KT,
-    INST_KM,
-    INST_ST,
-    INST_SM,
-    INST_TM,
-    INST_COUNT
-} sonaglio_instrument_t;
-
 typedef struct {
     uint8_t  active;
     uint8_t  engine;
@@ -416,13 +377,19 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
         case INST_TOM:    engine_a = ENGINE_PERC;  break;
         case INST_METAL:  engine_a = ENGINE_METAL; break;
         case INST_HAT:    engine_a = ENGINE_HAT;   break;
-
+        // combined instruments
         case INST_KS:     engine_a = ENGINE_KICK;  engine_b = ENGINE_SNARE; combo = 1; break;
         case INST_KT:     engine_a = ENGINE_KICK;  engine_b = ENGINE_PERC;  combo = 1; break;
         case INST_KM:     engine_a = ENGINE_KICK;  engine_b = ENGINE_METAL; combo = 1; break;
         case INST_ST:     engine_a = ENGINE_SNARE; engine_b = ENGINE_PERC;  combo = 1; break;
         case INST_SM:     engine_a = ENGINE_SNARE; engine_b = ENGINE_METAL; combo = 1; break;
         case INST_TM:     engine_a = ENGINE_PERC;  engine_b = ENGINE_METAL; combo = 1; break;
+        // add new combinations with hat
+        case INST_KH:     engine_a = ENGINE_KICK;  engine_b = ENGINE_HAT; combo = 1; break;
+        case INST_MH:     engine_a = ENGINE_METAL; engine_b = ENGINE_HAT; combo = 1; break;
+        case INST_SH:     engine_a = ENGINE_SNARE; engine_b = ENGINE_HAT; combo = 1; break;
+        case INST_TH:     engine_a = ENGINE_PERC;  engine_b = ENGINE_HAT; combo = 1; break;
+
         default:          engine_a = ENGINE_KICK;  break;
     }
 
