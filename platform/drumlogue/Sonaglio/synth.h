@@ -45,18 +45,6 @@
 #include "perc_engine.h"
 #include "hat_engine.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-// defined in header.c
-extern const char* const instruments_strings[11];
-extern const char* const lfo_shape_strings[9];
-extern const char* const lfo_target_strings[11];
-extern const char* const euclidean_mode_strings[9];
-#ifdef __cplusplus
-}
-#endif
-
 class Synth {
 public:
     /*===========================================================================*/

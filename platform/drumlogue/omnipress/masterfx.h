@@ -134,6 +134,7 @@ public:
 
         // Reset all components
         sc_hpf_hz_ = 80.0f;
+        gain_history_ = vdupq_n_f32(0.0f);
         sidechain_hpf_init(&sc_hpf_, sc_hpf_hz_, samplerate_);
         wavefolder_init(&wavefolder_);
         multiband_init(&multiband_, samplerate_);
@@ -391,7 +392,7 @@ private:
 
     /**
      * Standard compressor processing
-     * - Zero Zipper Noise: The gain applied to the VCA (gain_history_v_)
+     * - Zero Zipper Noise: The gain applied to the VCA (gain_history_)
      * is smoothed by a continuous single-pole IIR filter on every single sample block.
      * Even if the input audio hovers aggressively right on the threshold pivot point,
      * the filter prevents instantaneous steps.
@@ -423,7 +424,7 @@ private:
         vst1q_f32(targets, target_gain_db);
 
         // Fetch the scalar history from the last lane of the previous block
-        float state = vgetq_lane_f32(gain_history_v_, 3);
+        float state = vgetq_lane_f32(gain_history_, 3);
 
         for (int i = 0; i < 4; ++i) {
             // Evaluate ballistics based on whether audio is demanding MORE or LESS gain modification
@@ -436,10 +437,10 @@ private:
             smoothed[i] = state;
         }
         // Store history back to the class member vector
-        gain_history_v_ = vld1q_f32(smoothed);
+        gain_history_ = vld1q_f32(smoothed);
 
         // 5. Convert smoothly changing dB back to linear gain
-        float32x4_t gain_lin = neon_expq_f32(vmulq_f32(gain_history_v_, vdupq_n_f32(0.11512925f)));
+        float32x4_t gain_lin = neon_expq_f32(vmulq_f32(gain_history_, vdupq_n_f32(0.11512925f)));
 
         // 6. Apply to VCA
         *out_l = vmulq_f32(main_l, gain_lin);
@@ -470,21 +471,23 @@ private:
         float32x4_t comp_l = vmulq_f32(main_l, gain_lin);
         float32x4_t comp_r = vmulq_f32(main_r, gain_lin);
 
+        // Apply saturation to the COMPRESSED signal (not raw input).
+        // sat_drive range: 2x (DRIVE=0) to 14x (DRIV4=100) — pushes the
+        // signal into the saturator nonlinear region.
+        // makeup = 1.0 keeps output level comparable to the input so
+        // harmonic character is always audible. The output hard-clip limiter
+        // prevents clipping. Do NOT divide by sat_drive (old formula made
+        // the distorted output quieter than dry, masking the effect).
+        float sat_drive = 2.0f + drive_ * 12.0f;
+        float32x4_t drv = vdupq_n_f32(sat_drive);
+
         switch (distressor_.dist_mode) {
-            // Apply saturation to the COMPRESSED signal (not raw input).
-            // sat_drive range: 2x (DRIVE=0) to 14x (DRIV4=100) — pushes the
-            // signal into the saturator nonlinear region.
-            // makeup = 1.0 keeps output level comparable to the input so
-            // harmonic character is always audible. The output hard-clip limiter
-            // prevents clipping. Do NOT divide by sat_drive (old formula made
-            // the distorted output quieter than dry, masking the effect).
-            float sat_drive = 2.0f + drive_ * 12.0f;
-            float32x4_t drv = vdupq_n_f32(sat_drive);
             case DRIVE_MODE_SOFT_CLIP:
             case DRIVE_MODE_HARD_CLIP:
             case DRIVE_MODE_TRIANGLE:
             case DRIVE_MODE_SINE:
             case DRIVE_MODE_SUBOCTAVE: {
+                wavefolder_set_drive(&wavefolder_, sat_drive);
                 // Wavefolder operates post-compression for dynamics control
                 float32x4x2_t folded = wavefolder_process(&wavefolder_, comp_l, comp_r, drv);
                 *out_l = folded.val[0];
@@ -875,6 +878,7 @@ private:
     float drive_;
     float mix_;   // 0.0 = dry, 1.0 = wet
     float sc_hpf_hz_;
+    float32x4_t gain_history_;
 
     // DSP coefficients
     float attack_coeff_;

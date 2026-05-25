@@ -167,7 +167,7 @@ typedef enum {
 // ============================================================================
 // String tables
 // ============================================================================
-const char* instruments_strings[INST_COUNT] = {
+static const char* instruments_strings[INST_COUNT] = {
     "Kick",
     "Snare",
     "Tom",
@@ -185,19 +185,19 @@ const char* instruments_strings[INST_COUNT] = {
     "M+H",
 };
 
-const char* lfo_shape_strings[LFO_SHAPE_COMBO_COUNT] = {
+static const char* lfo_shape_strings[LFO_SHAPE_COMBO_COUNT] = {
     "Tri+Tri", "Rmp+Rmp", "Chd+Chd",
     "Tri+Rmp", "Tri+Chd", "Rmp+Tri",
     "Rmp+Chd", "Chd+Tri", "Chd+Rmp"
 };
 
-const char* lfo_target_strings[LFO_TARGET_COUNT] = {
+static const char* lfo_target_strings[LFO_TARGET_COUNT] = {
     "None", "Pitch", "ModIdx", "Env",
     "LFO2Ph", "LFO1Ph", "ResFrq", "Reson",
     "NoizMx", "ResMrph", "MtlGate"
 };
 
-const char* euclidean_mode_strings[EUCLID_MODE_COUNT] = {
+static const char* euclidean_mode_strings[EUCLID_MODE_COUNT] = {
     "Off",    // 0: disabled — all voices same pitch
     "Clstr",  // 1: E(4,4)  = [0, 1, 2, 3]  chromatic cluster
     "Minor",  // 2: E(4,6)  = [0, 1, 3, 4]  minor 3rd pairs

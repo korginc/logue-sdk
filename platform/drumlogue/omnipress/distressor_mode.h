@@ -24,17 +24,12 @@
 #define AUDIO_DIST3      (1 << 2)  // 3rd harmonic
 
 // Distressor Mode String Display
-static const char* distressor_dist_strings[5] = {
-    "Off",      // 0 - Clean
-    "Dist2",    // 1 - Tube-like 2nd harmonic
-    "Dist3",    // 2 - Tape-like 3rd harmonic
-    "Both",     // 3 - Combined harmonics
-    "Soft",
-    "Hard",
-    "Trg",
-    "Sine",
-    "SubOct"
-};
+static const char *distressor_dist_strings[DIST_MODE_TOTAL] = {
+    "Off",   // 0 - Clean
+    "Dist2", // 1 - Tube-like 2nd harmonic
+    "Dist3", // 2 - Tape-like 3rd harmonic
+    "Both",  // 3 - Combined harmonics
+    "Soft",  "Hard", "Trg", "Sine", "SubOct"};
 
 // Display strings for UI
 static const char* distressor_ratio_strings[DIST_RATIO_TOTAL] = {

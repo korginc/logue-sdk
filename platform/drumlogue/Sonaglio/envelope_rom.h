@@ -563,10 +563,10 @@ fast_inline void neon_envelope_process(neon_envelope_t* env) {
 
     float32x4_t exp_level = vbslq_f32(attack_stage, attack_exp, fall_exp);
     float32x4_t log_attack = vaddq_f32(env->level,
-                                       vmulq_f32(vsqrtq_f32(vmaxq_f32(vsubq_f32(one, env->level), zero)),
+                                       vmulq_f32(neon_sqrtq_f32(vmaxq_f32(vsubq_f32(one, env->level), zero)),
                                                  vmulq_n_f32(env->increment, 0.72f)));
     float32x4_t log_fall = vsubq_f32(env->level,
-                                     vmulq_f32(vsqrtq_f32(vmaxq_f32(env->level, zero)),
+                                     vmulq_f32(neon_sqrtq_f32(vmaxq_f32(env->level, zero)),
                                                vmulq_n_f32(env->increment, 0.72f)));
     float32x4_t log_level = vbslq_f32(attack_stage, log_attack, log_fall);
 
