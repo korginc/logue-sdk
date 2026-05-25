@@ -27,6 +27,8 @@
 struct prng_t { uint64x2_t state0, state1; };
 // decay factor (required 0.1-3ms decay time at 48 kHz)
 constexpr float pop_env_decay_ = 0.96f;
+uint32_t sample_rate_ = 48000;
+float    inverse_sample_rate_ = 1 / 48000.0f;
 
 class alignas(16) PortaCassette {
 public:
@@ -97,6 +99,7 @@ public:
         previous_noise_l_ = vdupq_n_f32(0.0f);
         previous_noise_r_ = vdupq_n_f32(0.0f);
         pop_env_          = vdupq_n_f32(0.0f);
+        vinyl_pop_threshold_ = 0.0;
 
         target_preamp_ = current_preamp_ = 1.0f + 0.20f * 2.0f; // init=20
         target_drive_  = current_drive_  = 0.40f;               // init=40
@@ -143,6 +146,18 @@ public:
                 break;
             default: break;
         }
+        set_dust_parameter(norm);
+    }
+
+    fast_inline void set_dust_parameter(float knob_value) {
+        // Map linearly to a frequency between 0.1Hz (10s) and 1.0Hz (1s)
+        float frequency = 0.1f + (knob_value * 0.9f);
+
+        // Calculate per-sample probability at 48kHz
+        float sample_probability = frequency * inverse_sample_rate_;
+
+        // Store the exact float threshold
+        vinyl_pop_threshold_ = 1.0f - sample_probability;
     }
 
     int32_t GetParameter(uint8_t id) const {
@@ -294,10 +309,10 @@ public:
 
         // ------------------------------------------------------------------------
         // 2. Sparse random trigger for dust pops
-        //    ~0.03% probability per sample
+        //    Dynamic Sparse random trigger for dust pops
         // ------------------------------------------------------------------------
         uint32x4_t trigger =
-            vcgtq_f32(prng_rand_float(), vdupq_n_f32(0.99992f));
+            vcgtq_f32(prng_rand_float(), vdupq_n_f32(vinyl_pop_threshold_));
 
         // ------------------------------------------------------------------------
         // 3. Random pop amplitude
@@ -512,6 +527,7 @@ private:
     float wf_phase_inc_;
     float wf_flutter_phase_;
     float wf_flutter_phase_inc_;  // precomputed per-sample increment for 25 Hz flutter
+    float vinyl_pop_threshold_;   // Stores the current threshold
 
     float32x4_t previous_noise_l_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
     float32x4_t previous_noise_r_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
