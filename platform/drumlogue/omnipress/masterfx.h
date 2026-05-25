@@ -43,12 +43,13 @@ enum parameters
     k_mix,
     k_sc_hpf,
     k_compressor_mode,
+    k_attenuation_limit,
+    k_gain_limit,
+    k_detection_mode,              // envelope detector type: 0=Peak, 1=RMS, 2=Blend
     k_bass,
     k_treble,
     k_presence,
-    k_distressor_distortion_type,
-    k_distressor_ratio,
-    k_distressor_drive_wave_mode,  // wavefolder character (soft/hard/tri/sine/suboctave)
+    k_distressor_distortion_type, // includes wavefolder character (soft/hard/tri/sine/suboctave)
     k_multiband_band_selection,
     k_multiband_band_threshold,
     k_multiband_band_ratio,
@@ -57,8 +58,6 @@ enum parameters
     k_multiband_band_makeup,
     k_multiband_band_mute,
     k_multiband_band_solo,
-    k_detection_mode,              // envelope detector type: 0=Peak, 1=RMS, 2=Blend
-
     k_num_params,
 };
 
@@ -117,21 +116,21 @@ public:
         setParameter(k_mix, MIX_DEFAULT);           // Mix: 100% wet
         setParameter(k_sc_hpf, SC_HPF_DEFAULT);     // SC HPF: 20 Hz
         setParameter(k_compressor_mode, COMP_MODE_STANDARD);         // COMP MODE: Standard
-        setParameter(k_bass, 50);                   // BASS: flat (matches header.c init)
-        setParameter(k_treble, 50);                 // TREBLE: flat (matches header.c init)
-        setParameter(k_presence, 50);               // PRESENCE: centre (matches header.c init)
+        setParameter(k_attenuation_limit, ATTENUATION_DEFAULT);      // Defaults to hardware -30.0 dB
+        setParameter(k_gain_limit, GAIN_DEFAULT);                    // Defaults to hardware +30.0 dB
+        setParameter(k_bass, 50);                                    // BASS: flat (matches header.c init)
+        setParameter(k_treble, 50);                                  // TREBLE: flat (matches header.c init)
+        setParameter(k_presence, 50);                                // PRESENCE: centre (matches header.c init)
         setParameter(k_distressor_distortion_type, DIST_MODE_CLEAN); // DSTR DIST: None
-        setParameter(k_distressor_ratio, DIST_RATIO_1_1);            // DSTR RATIO: Warm mode
-        setParameter(k_distressor_drive_wave_mode, DRIVE_MODE_SOFT_CLIP); // DSTR WAVE: Soft Clip
         setParameter(k_multiband_band_selection, BAND_LOW);          // BAND SEL: Low
-        setParameter(k_multiband_band_threshold, -200);              // L THRESH: -20.0 dB (BAND_THRESH_DEFAULT)
+        setParameter(k_multiband_band_threshold, BAND_THRESH_DEFAULT);  // L THRESH: -20.0 dB (BAND_THRESH_DEFAULT)
         setParameter(k_multiband_band_ratio, SLOPE_DEFAULT);         // L RATIO: 4.0
-        setParameter(k_multiband_band_attack, 5);                    // ATTACK: 0.5 ms (fast, minimal click)
-        setParameter(k_multiband_band_release, 50);                  // RELEASE: 50 ms (punchy)
+        setParameter(k_multiband_band_attack, ATTACK_DEFAULT);       // ATTACK: 5.0 ms (fast, minimal click)
+        setParameter(k_multiband_band_release, RELEASE_DEFAULT);     // RELEASE: 200 ms (punchy)
         setParameter(k_multiband_band_makeup, MAKEUP_DEFAULT);       // MAKEUP: 0 dB
         setParameter(k_multiband_band_mute, 0);                      // MUTE off
         setParameter(k_multiband_band_solo, 0);                      // SOLO off
-        setParameter(k_detection_mode, 0);                           // Detection: Peak
+        setParameter(k_detection_mode, DETECT_MODE_PEAK);            // Detection: Peak
 
         // Reset all components
         sc_hpf_hz_ = 80.0f;
@@ -393,9 +392,9 @@ private:
     /**
      * Standard compressor processing
      */
-    fast_inline void standard_process(float32x4_t main_l,
-                                      float32x4_t main_r,
-                                      float32x4_t envelope_db,
+    fast_inline void standard_process(float32x4_t  main_l,
+                                      float32x4_t  main_r,
+                                      float32x4_t  envelope_db,
                                       float32x4_t* out_l,
                                       float32x4_t* out_r) {
         // 1. Calculate bidirectional displacement from the threshold pivot point
@@ -405,15 +404,11 @@ private:
         float32x4_t target_gain_db = vmulq_f32(excess_db, vdupq_n_f32(function_slope_));
 
         // 3. Hardware Clamping: Protects against out-of-control signals during high expansion/reversal
-        // TODO - CRUCIAL!!! these two are missing from UI!!!
         target_gain_db = vmaxq_f32(target_gain_db, vdupq_n_f32(atten_limit_db_));
         target_gain_db = vminq_f32(target_gain_db, vdupq_n_f32(gain_limit_db_));
 
-        // 4. Pass the calculated target directly to your existing smoothing process
-        float32x4_t smoothed_gain_db = smoothing_process(&smoother_, target_gain_db);
-
-        // 5. Convert dB back to a linear multiplier
-        float32x4_t gain_lin = neon_expq_f32(vmulq_f32(smoothed_gain_db,
+        // 4. Convert dB back to a linear multiplier
+        float32x4_t gain_lin = neon_expq_f32(vmulq_f32(target_gain_db,
                                                         vdupq_n_f32(0.11512925f)));
 
         // 6. Apply to VCA channels
@@ -446,9 +441,22 @@ private:
         float32x4_t comp_r = vmulq_f32(main_r, gain_lin);
 
         switch (distressor_.dist_mode) {
-            case DIST_MODE_WAVE: {
+            // Apply saturation to the COMPRESSED signal (not raw input).
+            // sat_drive range: 2x (DRIVE=0) to 14x (DRIV4=100) — pushes the
+            // signal into the saturator nonlinear region.
+            // makeup = 1.0 keeps output level comparable to the input so
+            // harmonic character is always audible. The output hard-clip limiter
+            // prevents clipping. Do NOT divide by sat_drive (old formula made
+            // the distorted output quieter than dry, masking the effect).
+            float sat_drive = 2.0f + drive_ * 12.0f;
+            float32x4_t drv = vdupq_n_f32(sat_drive);
+            case DRIVE_MODE_SOFT_CLIP:
+            case DRIVE_MODE_HARD_CLIP:
+            case DRIVE_MODE_TRIANGLE:
+            case DRIVE_MODE_SINE:
+            case DRIVE_MODE_SUBOCTAVE: {
                 // Wavefolder operates post-compression for dynamics control
-                float32x4x2_t folded = wavefolder_process(&wavefolder_, comp_l, comp_r, drive_);
+                float32x4x2_t folded = wavefolder_process(&wavefolder_, comp_l, comp_r, drv);
                 *out_l = folded.val[0];
                 *out_r = folded.val[1];
                 break;
@@ -456,15 +464,6 @@ private:
             case DIST_MODE_DIST2:
             case DIST_MODE_DIST3:
             case DIST_MODE_BOTH: {
-                // Apply saturation to the COMPRESSED signal (not raw input).
-                // sat_drive range: 2x (DRIVE=0) to 14x (DRIV4=100) — pushes the
-                // signal into the saturator nonlinear region.
-                // makeup = 1.0 keeps output level comparable to the input so
-                // harmonic character is always audible. The output hard-clip limiter
-                // prevents clipping. Do NOT divide by sat_drive (old formula made
-                // the distorted output quieter than dry, masking the effect).
-                float sat_drive = 2.0f + drive_ * 12.0f;
-                float32x4_t drv = vdupq_n_f32(sat_drive);
                 *out_l = generate_harmonics(&distressor_,
                                             vmulq_f32(comp_l, drv),
                                             distressor_.dist_mode);
@@ -501,6 +500,12 @@ public:
 
             case k_slope: // RATIO: map 0 to 100 into 0.0 to 1.0 representing the physical knob turn
                 {
+                    if (comp_mode_ == COMP_MODE_DISTRESSOR) {
+                        int knob = value / 12.5f;  // Map 0-100 to 0-8 for the distressor's 8 ratio steps
+                        distressor_set_ratio(&distressor_, knob);  // this updates opto_release_mult
+                        update_opto_coeff(&distressor_, release_coeff_);
+                        break;
+                    }
                     // Map your raw value to a normalized float position (0.0 to 1.0)
                     // Adjust the math below depending on your actual minimum/maximum raw values
                     float knob = value * 0.01f;
@@ -543,6 +548,12 @@ public:
 
             case k_makeup: // MAKEUP (0.0 to 24.0 dB)
                 makeup_db_ = value * 0.1f;
+                break;
+            case k_attenuation_limit: // ATTEN LIMIT (-30.0 to 0.0 dB)
+                atten_limit_db_ = value * 0.1f;
+                break;
+            case k_gain_limit: // GAIN LIMIT (0.0 to 30.0 dB)
+                gain_limit_db_ = value * 0.1f;
                 break;
 
             case k_drive: // DRIVE (0 to 100%)
@@ -619,10 +630,10 @@ public:
                 if (value >= COMP_MODE_STANDARD && value < COMP_MODE_TOTAL) {
                     comp_mode_ = value;
                     if (comp_mode_ == COMP_MODE_DISTRESSOR) {
-                    // Distressor expects at least 0.05ms attack
-                    attack_ms_ = fmaxf(attack_ms_, 0.05f);
-                    attack_coeff_ =
-                        fasterexpf(-1.0f / (attack_ms_ * 0.001f * samplerate_));
+                        // Distressor expects at least 0.05ms attack
+                        attack_ms_ = fmaxf(attack_ms_, 0.05f);
+                        attack_coeff_ =
+                            fasterexpf(-1.0f / (attack_ms_ * 0.001f * samplerate_));
                     }
                 }
                 break;
@@ -630,28 +641,20 @@ public:
             /*===========================================================================*/
             /* Distressor Parameters */
             /*===========================================================================*/
-            case k_distressor_distortion_type: // DSTR MODE (0=None, 1=2nd harm, 2=3rd harm, 3=Both, 4=Wave)
+            case k_distressor_distortion_type:
+                // DSTR MODE (0=None, 1=2nd harm, 2=3rd harm, 3=Both, 4=SoftClip, 5=HardClip, 6=Tri, 7=Sine, 8=SubOct)
                 if (value >= 0 && value < DIST_MODE_TOTAL) {
                     distressor_.dist_mode = value;
 
                     // Enable/disable detector HPF based on mode
-                    if (value == DIST_MODE_WAVE) {
+                    if (value > DIST_MODE_BOTH) {
                         // Wavefolder removes low frequencies from the detector path
                         distressor_.detector_mode |= DETECT_HPF;
+                        wavefolder_set_drive_type(&wavefolder_, value);
                     } else {
                         distressor_.detector_mode &= ~DETECT_HPF;
                     }
                 }
-                break;
-            case k_distressor_ratio: // DSTR RATIO
-                distressor_set_ratio(&distressor_, value);  // this updates opto_release_mult
-                update_opto_coeff(&distressor_, release_coeff_);
-                break;
-                // TODO: move inside k_distressor_distortion_type at
-                // DIST_MODE_WAVE - whihc value will be removed
-            case k_distressor_drive_wave_mode: // DSTR WAVE (0=SoftClip, 1=HardClip, 2=Tri, 3=Sine, 4=SubOct)
-                if (value < DRIVE_MODE_TOTAL)
-                    wavefolder_set_drive_type(&wavefolder_, value);
                 break;
 
             /*===========================================================================*/
@@ -760,13 +763,28 @@ public:
 
             case k_slope: // SLOPE (1.0 to 20.0) - show special cases
                 {
-                    float slope = value * 0.1f;
-                    if (fabsf(slope - 20.0f) < 0.1f)
-                        return "Limit";
-                    else {
-                        snprintf(str_buf, sizeof(str_buf), "%.1f:1", slope);
-                        return str_buf;
+                    if (comp_mode_ == COMP_MODE_DISTRESSOR) {
+                        // Distressor has 8 fixed ratio steps: 1:1, 2:1, 3:1, 4:1, 6:1, 8:1, 12:1, 20:1
+                        int knob = value / 12.5f; // Map 0-100 to 0-8
+                        if (knob >= 0 && knob < DIST_RATIO_TOTAL) {
+                            return distressor_ratio_strings[value];
+                        }
+                        break;
                     }
+                    // Display the true Omnipressor state based on the internal slope
+                    if (function_slope_ > 0.05f) {
+                        snprintf(str_buf, sizeof(str_buf), "Exp %.1f", 1.0f + function_slope_);
+                    } else if (function_slope_ >= -0.95f && function_slope_ <= 0.05f) {
+                        float ratio_val = 1.0f / (1.0f + function_slope_);
+                        snprintf(str_buf, sizeof(str_buf), "%.1f:1", ratio_val);
+                    } else if (function_slope_ < -0.95f && function_slope_ >= -1.05f) {
+                        return "Limit";
+                    } else {
+                        // Negative ratio conversion
+                        float rev_val = 1.0f / (std::fabs(function_slope_) - 1.0f);
+                        snprintf(str_buf, sizeof(str_buf), "Rev %.1f", rev_val);
+                    }
+                    return str_buf;
                 }
                 break;
 
@@ -780,17 +798,6 @@ public:
                 if (value >= DIST_MODE_CLEAN && value < DIST_MODE_TOTAL) {
                     return distressor_dist_strings[value];
                 }
-                break;
-
-            case k_distressor_ratio: // DSTR RATIO
-              if (value >= DIST_RATIO_1_1 && value < DIST_RATIO_TOTAL) {
-                return distressor_ratio_strings[value];
-              }
-                break;
-
-            case k_distressor_drive_wave_mode: // DSTR WAVE
-                if (value < DRIVE_MODE_TOTAL)
-                    return distressor_wave_type[value];
                 break;
 
             case k_detection_mode:
@@ -833,6 +840,8 @@ private:
     float attack_ms_;
     float release_ms_;
     float makeup_db_;
+    float atten_limit_db_;
+    float gain_limit_db_;
     float drive_;
     float mix_;   // 0.0 = dry, 1.0 = wet
     float sc_hpf_hz_;

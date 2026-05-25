@@ -342,7 +342,7 @@ fast_inline void smoothing_init(smoothing_t* sm, float sr) {
 }
 
 /**
- * Process one sample of smoothing
+ * Process one sample of smoothing - obsolete as this is now integrated into the envelope detector, but keeping for reference.
  */
 fast_inline float32x4_t smoothing_process(smoothing_t* sm,
                                           float32x4_t target_gain) {
