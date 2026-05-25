@@ -23,6 +23,8 @@
 #include "engine_mapping.h"
 
 #define HAT_OSC_COUNT (6)
+uint32_t sample_rate_ = 48000;
+float    inverse_sample_rate_ = 1 / 48000.0f;
 
 // Base frequencies in Hz
 static const float HAT_BASE_FREQ[HAT_OSC_COUNT] = {
@@ -134,7 +136,7 @@ fast_inline float32x4_t hat_engine_process(hat_engine_t* hat,
                                            uint32x4_t active_mask,
                                            float32x4_t lfo_pitch_mult,
                                            float32x4_t lfo_noise_add) {
-    const float32x4_t inv_sr = vdupq_n_f32(1.0f / 48000.0f);
+    const float32x4_t inv_sr = vdupq_n_f32(1.0f * inverse_sample_rate_);
     const float32x4_t half   = vdupq_n_f32(0.5f);
     const float32x4_t one    = vdupq_n_f32(1.0f);
 
