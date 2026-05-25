@@ -188,6 +188,18 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
                                              float32x4_t lfo_pitch_mult,
                                              float32x4_t lfo_index_add,
                                              float32x4_t noise_add) {
+    // APC early-out: skip DSP when all lanes are inactive.
+#if defined(__aarch64__)
+    if (vmaxvq_u32(active_mask) == 0) {
+        return vdupq_n_f32(0.0f);
+    }
+#else
+    uint32x2_t max_half = vmax_u32(vget_low_u32(active_mask), vget_high_u32(active_mask));
+    if (vget_lane_u32(vpmax_u32(max_half, max_half), 0) == 0) {
+        return vdupq_n_f32(0.0f);
+    }
+#endif
+
     const float32x4_t two_pi_over_sr = vdupq_n_f32(2.0f * M_PI * INV_SAMPLE_RATE);
     const float32x4_t two_pi = vdupq_n_f32(2.0f * M_PI);
 
