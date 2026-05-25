@@ -241,8 +241,8 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
 
     float32x4_t noise = snare_generate_noise(snare);
 
-    // Tone is intentionally shorter than noise so the snare does not become a tom.
-    float32x4_t tone_gain = vmulq_f32(env4, snare->tone_gain_base);
+    // Tone is shorter than amp but not ultra-short: env2 preserves shell body.
+    float32x4_t tone_gain = vmulq_f32(env2, snare->tone_gain_base);
 
     // Noise can last with the envelope, but its level remains attack-weighted.
     float32x4_t noise_gain = vmulq_f32(noise_env,

@@ -317,9 +317,9 @@ const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
     // 1: HeavyKick
     {
         "HeavyKick",
-        0, 60, 8, 5,
-        70, 95, 10, 30,
-        15, 10, 15, 30,
+        0, 62, 8, 5,
+        68, 100, 10, 30,
+        12, 8, 12, 26,
         0, 15, LFO_TARGET_PITCH, 20,
         0, 0, LFO_TARGET_NONE, 0,
         18, 25, 45, 15},

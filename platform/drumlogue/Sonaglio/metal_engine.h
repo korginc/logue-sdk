@@ -265,12 +265,12 @@ fast_inline void metal_engine_set_note(metal_engine_t* metal,
                                          metal->carrier_freq_base);
 
     // Randomized phase + slight per-hit ratio jitter reduce tonal "peew" locking.
-    float32x4_t phase_rand = vmulq_n_f32(neon_generate_float_rand_0_1(&metal->noise_prng), 2.0f * M_PI);
     float32x4_t jitter = vaddq_f32(vdupq_n_f32(0.992f),
                                    vmulq_n_f32(neon_generate_float_rand_0_1(&metal->noise_prng), 0.016f));
     metal->note_ratio_jitter = vbslq_f32(voice_mask, jitter, metal->note_ratio_jitter);
     metal_engine_recompute(metal);
     for (int i = 0; i < NUM_OPERATORS; ++i) {
+        float32x4_t phase_rand = vmulq_n_f32(neon_generate_float_rand_0_1(&metal->noise_prng), 2.0f * M_PI);
         metal->phase[i] = vbslq_f32(voice_mask, phase_rand, metal->phase[i]);
     }
     metal->prev_op4 = vbslq_f32(voice_mask, vdupq_n_f32(0.0f), metal->prev_op4);
@@ -316,7 +316,8 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
 
     // FM indices.
     float32x4_t live_brightness = metal_clamp01(vaddq_f32(metal->brightness, brightness_add));
-    float32x4_t ring_index = vaddq_f32(metal->ring_index, lfo_index_add);
+    float32x4_t ring_index = vmaxq_f32(vdupq_n_f32(0.0f),
+                                        vaddq_f32(metal->ring_index, lfo_index_add));
     float32x4_t strike_index = vmulq_f32(metal->strike_index, env8);
 
     // Operator cascade: Op4 -> Op3 -> Op2 -> Op1.
@@ -378,7 +379,7 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
         float32x4_t noise_colored = vaddq_f32(vmulq_n_f32(noise_hp, 0.58f),
                                               vmulq_n_f32(noise_bp, 0.42f));
 
-        float32x4_t adj_noise_gain = vaddq_f32(metal->noise_gain, noise_add);
+        float32x4_t adj_noise_gain = metal_clamp01(vaddq_f32(metal->noise_gain, noise_add));
         float32x4_t noise_level = vmulq_f32(adj_noise_gain,
                                             vaddq_f32(vdupq_n_f32(0.65f),
                                                        vmulq_n_f32(live_brightness, 0.65f)));
