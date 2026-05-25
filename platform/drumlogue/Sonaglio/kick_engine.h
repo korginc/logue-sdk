@@ -161,7 +161,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
     // - amp_env: overall loudness/body
     // - pitch_env: short sweep so pitch drop is less exposed
     // - index_env: shorter FM brightness than amp
-    float32x4_t env_sqrt = vsqrtq_f32(vmaxq_f32(envelope, vdupq_n_f32(0.0f)));
+    float32x4_t env_sqrt = neon_sqrtq_f32(vmaxq_f32(envelope, vdupq_n_f32(0.0f)));
     float32x4_t amp_env = vaddq_f32(vmulq_f32(envelope, vsubq_f32(vdupq_n_f32(1.0f), vmulq_n_f32(kick->body, 0.35f))),
                                     vmulq_f32(env_sqrt, vmulq_n_f32(kick->body, 0.35f)));
     float32x4_t pitch_env = env8;

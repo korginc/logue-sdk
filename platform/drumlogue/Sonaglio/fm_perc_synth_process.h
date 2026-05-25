@@ -687,9 +687,8 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     mix = vaddq_f32(mix, vmulq_n_f32(metal_sep, 0.92f));
     mix = vaddq_f32(mix, vmulq_n_f32(perc_sep,  0.93f));
     mix = vaddq_f32(mix, vmulq_n_f32(hat_sep,   0.88f));
-
-    mix = fm_soft_clip(mix);
-    mix = vmulq_n_f32(mix, synth->master_gain);
+    // Apply the master gain before the soft clip to avoid pushing the values outside the [-1.0, 1.0]
+    mix = fm_soft_clip(vmulq_n_f32(mix, synth->master_gain));
 
     return neon_horizontal_sum_alt(mix);
 }

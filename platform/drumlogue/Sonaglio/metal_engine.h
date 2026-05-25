@@ -374,7 +374,7 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
     );
 
     // Metallic tails need slower energy loss than body drums.
-    float32x4_t env_sqrt = vsqrtq_f32(vmaxq_f32(gated_env, vdupq_n_f32(0.0f)));
+    float32x4_t env_sqrt = neon_sqrtq_f32(vmaxq_f32(gated_env, vdupq_n_f32(0.0f)));
 
     // Reduce clean fundamental dominance as body rises to avoid whistle/"peew".
     float32x4_t carrier_mix = vsubq_f32(vdupq_n_f32(0.92f), vmulq_n_f32(metal->body, 0.34f));
