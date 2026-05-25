@@ -918,8 +918,10 @@ private:
         float32x4_t u5 = vaddq_f32(t5, t7); float32x4_t u7 = vsubq_f32(t5, t7);
 
         // Pass 3: Mix adjacent channels & scale (Writes directly to 'out')
-        // float32x4_t scale = vdupq_n_f32(0.35355339f); // 1.0 / sqrt(8)
-        float32x4_t scale = vdupq_n_f32(0.5f);  // For audible musical reverb, FDNs are usually intentionally not perfectly normalized.
+        // NOTE: ). In an FDN reverb, the feedback matrix must be unitary (gain of 1.0) to ensure stability.
+        // With a gain of 1.414, the reverb loop will become unstable and explode whenever the unifiedDecay
+        // (loop gain) exceeds ~0.707.
+        float32x4_t scale = vdupq_n_f32(0.35355339f); // 1.0 / sqrt(8)
         out[0] = vmulq_f32(vaddq_f32(u0, u1), scale); out[1] = vmulq_f32(vsubq_f32(u0, u1), scale);
         out[2] = vmulq_f32(vaddq_f32(u2, u3), scale); out[3] = vmulq_f32(vsubq_f32(u2, u3), scale);
         out[4] = vmulq_f32(vaddq_f32(u4, u5), scale); out[5] = vmulq_f32(vsubq_f32(u4, u5), scale);
