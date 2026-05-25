@@ -397,12 +397,12 @@ public:
     fast_inline void dbx_nr_decode(float32x4_t &sig_l, float32x4_t &sig_r, float32x4_t dec_gain) {
         if (dbx_mode_ == k_active) {
             // Use the synchronized dec_gain = 1/enc_gain computed in step 4.
-                    // This guarantees enc_gain × dec_gain = 1.0 at every block, making the
-                    // NR system transparent (net gain = 0 dB) except for tape nonlinearity.
-                    // The old approach (independent dec_rms tracking) caused enc/dec timing
-                    // mismatch: on the first hit after silence enc_gain = 6.0× but dec_gain
-                    // was still sqrt(1e-6) ≈ 0.001, producing a near-zero decoded output
-                    // that sounded like a loud click followed by silence.
+            // This guarantees enc_gain × dec_gain = 1.0 at every block, making the
+            // NR system transparent (net gain = 0 dB) except for tape nonlinearity.
+            // The old approach (independent dec_rms tracking) caused enc/dec timing
+            // mismatch: on the first hit after silence enc_gain = 6.0× but dec_gain
+            // was still sqrt(1e-6) ≈ 0.001, producing a near-zero decoded output
+            // that sounded like a loud click followed by silence.
             sig_l = vmulq_f32(sig_l, dec_gain);
             sig_r = vmulq_f32(sig_r, dec_gain);
             sig_l = biquad_process4(&dbx_de_l_, &coeff_dbx_de_, sig_l);
