@@ -1683,6 +1683,7 @@ private:
     static const uint8_t pingRandomMap[MAX_PILLARS][NEON_LANES]; // 16 steps, 4 channels each
     int pingMapIndex;
     int pingMapCounter;
+    int filterUpdateCounter;
 
     float baseFc;                   // base cutoff frequency (Hz) for current preset/damping
     float filterModRange;           // max modulation range (Hz) derived from DFSN and pillar
