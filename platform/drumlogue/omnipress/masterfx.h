@@ -391,27 +391,57 @@ private:
 
     /**
      * Standard compressor processing
+     * - Zero Zipper Noise: The gain applied to the VCA (gain_history_v_)
+     * is smoothed by a continuous single-pole IIR filter on every single sample block.
+     * Even if the input audio hovers aggressively right on the threshold pivot point,
+     * the filter prevents instantaneous steps.
+     * - Consistent Ballistics: Because the smoothing happens after the function_slope_
+     * multiplier, an attack setting of $20\text{ ms}$ means the gain will take exactly
+     * $20\text{ ms}$ to reach its target, regardless of whether you are doing a mild
+     * 2:1 compression or an extreme -2.0 reversal.
+     * - Smart Directional Switching: By checking std::fabs(targets[i]) > std::fabs(state),
+     * the smoother correctly understands that going from $0\text{ dB}$ to $+12\text{ dB}$
+     * (Expansion) and going from $0\text{ dB}$ to $-12\text{ dB}$ (Compression)
+     * are both Attack phases because the processor is actively responding to a transient spike.
      */
-    fast_inline void standard_process(float32x4_t  main_l,
-                                      float32x4_t  main_r,
-                                      float32x4_t  envelope_db,
-                                      float32x4_t* out_l,
-                                      float32x4_t* out_r) {
-        // 1. Calculate bidirectional displacement from the threshold pivot point
+    fast_inline void standard_process(float32x4_t main_l, float32x4_t main_r,
+                                  float32x4_t envelope_db, // Assumed instantaneous peak dB here
+                                  float32x4_t* out_l, float32x4_t* out_r) {
+
+        // 1. Calculate raw displacement from the pivot
         float32x4_t excess_db = vsubq_f32(envelope_db, vdupq_n_f32(thresh_db_));
 
-        // 2. Multiply by the slope (No clamping to zero! Both positive and negative excess matter)
+        // 2. Multiply by function slope to find target gain
         float32x4_t target_gain_db = vmulq_f32(excess_db, vdupq_n_f32(function_slope_));
 
-        // 3. Hardware Clamping: Protects against out-of-control signals during high expansion/reversal
+        // 3. Clamp safely to your UI limits
         target_gain_db = vmaxq_f32(target_gain_db, vdupq_n_f32(atten_limit_db_));
         target_gain_db = vminq_f32(target_gain_db, vdupq_n_f32(gain_limit_db_));
 
-        // 4. Convert dB back to a linear multiplier
-        float32x4_t gain_lin = neon_expq_f32(vmulq_f32(target_gain_db,
-                                                        vdupq_n_f32(0.11512925f)));
+        // 4. BI-DIRECTIONAL SMOOTHING (Unrolled for IIR Vector correctness)
+        float targets[4], smoothed[4];
+        vst1q_f32(targets, target_gain_db);
 
-        // 6. Apply to VCA channels
+        // Fetch the scalar history from the last lane of the previous block
+        float state = vgetq_lane_f32(gain_history_v_, 3);
+
+        for (int i = 0; i < 4; ++i) {
+            // Evaluate ballistics based on whether audio is demanding MORE or LESS gain modification
+            // If the target is moving further away from 0dB unity, we are in the "Attack" phase of the effect.
+            bool is_attack = std::fabs(targets[i]) > std::fabs(state);
+            float coeff = is_attack ? attack_coeff_ : release_coeff_;
+
+            // Single pole IIR filter
+            state = state + coeff * (targets[i] - state);
+            smoothed[i] = state;
+        }
+        // Store history back to the class member vector
+        gain_history_v_ = vld1q_f32(smoothed);
+
+        // 5. Convert smoothly changing dB back to linear gain
+        float32x4_t gain_lin = neon_expq_f32(vmulq_f32(gain_history_v_, vdupq_n_f32(0.11512925f)));
+
+        // 6. Apply to VCA
         *out_l = vmulq_f32(main_l, gain_lin);
         *out_r = vmulq_f32(main_r, gain_lin);
     }

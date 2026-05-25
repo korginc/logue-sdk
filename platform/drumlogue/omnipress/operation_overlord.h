@@ -90,9 +90,8 @@ fast_inline float32x4_t dc_block_process(dc_blocker_state_t* state, float32x4_t 
 
 // Helper to extract the mean of a 4-sample vector for envelope sidechains
 fast_inline float vmeanq_f32(float32x4_t vec) {
-    float arr[4];
-    vst1q_f32(arr, vec);
-    return (arr[0] + arr[1] + arr[2] + arr[3]) * 0.25f;
+    float32x2_t sum2 = vadd_f32(vget_low_f32(vec), vget_high_f32(vec));
+    return (vget_lane_f32(sum2, 0) + vget_lane_f32(sum2, 1)) * 0.25f;
 }
 
 // Ultra-fast Asymmetrical Triode Shaper using hardware reciprocal square root engines
