@@ -210,7 +210,8 @@ fast_inline float32x4_t perc_engine_process(perc_engine_t* perc,
     output = vmulq_f32(output, drive_gain);
     output = fm_cubic_clip(output);
 
-    output = vmulq_f32(output, vmulq_f32(envelope, perc->output_gain));
+    // Output gain only: envelope is already applied to body/transient above.
+    output = vmulq_f32(output, perc->output_gain);
 
     return vbslq_f32(active_mask, output, vdupq_n_f32(0.0f));
 }
