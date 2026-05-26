@@ -56,24 +56,24 @@ const __unit_header unit_header_t unit_header = {
         { 0, 100, 50, 50, k_unit_param_type_percent, 0, 0, 0, {"TREBLE"} },   // ID 13 - Overlord
         { 0, 100, 50, 50, k_unit_param_type_percent, 0, 0, 0, {"PRESENCE"} }, // ID 14 - Overlord
         // ID 15: DSTR DIST  0=None, 1=2nd harm, 2=3rd harm, 3=Both, 4=soft clip, 5=hard clip, 6=triangle, 7=sine, 8=suboctave
-        { 0, 9, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"DstrDIST"} },    // ID 15 - Distressor distortion type
+        { 0, 9, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"DstrDist"} },    // ID 15 - Distressor distortion type
 
         // Page 5: Multiband per-band parameters
         // ID 17: BAND SEL  0=Low, 1=Mid, 2=High, 3=Low+Mid, 4=Low+High, 5=Mid+High, 6=All
         { 0, 6, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"MBand"} },       // ID 16
         // ID 18: BAND THRESH  -60.0..0.0 dB  (per-band threshold)
-        { -600, 0, -600, -200, k_unit_param_type_strings, 1, 1, 0, {"MBndThr"} },  // ID 17 - dB
+        { -600, 0, -600, -200, k_unit_param_type_strings, 1, 1, 0, {"MBThr"} },  // ID 17 - dB
         // ID 19: BAND RATIO   1.0..20.0:1
-        { 10, 200, 10, 40, k_unit_param_type_strings, 1, 1, 0, {"MBndRto"} },      // ID 18 - ratio (param none)
+        { 10, 200, 10, 40, k_unit_param_type_strings, 1, 1, 0, {"MBRtio"} },      // ID 18 - ratio (param none)
         // ID 20: BAND ATTACK  1..1000 ms
-        { 1, 1000, 1, 150, k_unit_param_type_strings, 1, 1, 0, {"MBndAtk"} },      // ID 19 - ms
+        { 1, 1000, 1, 150, k_unit_param_type_strings, 1, 1, 0, {"MBAtk"} },      // ID 19 - ms
 
         // Page 6:
         // ID 21: BAND RELEASE 10..2000 ms
-        { 10, 2000, 10, 200, k_unit_param_type_strings, 0, 0, 0, {"MBndRtoRel"} }, // ID 20 - ms
-        { 0, 240, 0, 0, k_unit_param_type_strings, 1, 1, 0, {"MBndMkp"} },         // ID 21 - dB
-        { 0, 1, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"MBndMut"} },           // ID 22 (param none) - Mute (0=off, 1=on)
-        { 0, 1, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"MBndSOl"} },           // ID 23 (param none) - Solo (0=off, 1=on)
+        { 10, 2000, 10, 200, k_unit_param_type_strings, 0, 0, 0, {"MBReles"} }, // ID 20 - ms
+        { 0, 240, 0, 0, k_unit_param_type_strings, 1, 1, 0, {"MBMkup"} },         // ID 21 - dB
+        { 0, 1, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"MBMute"} },           // ID 22 (param none) - Mute (0=off, 1=on)
+        { 0, 1, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"MBSolo"} },           // ID 23 (param none) - Solo (0=off, 1=on)
 
     }
 };

@@ -164,7 +164,7 @@ public:
         size_t frames_remaining = frames;
 
         // Pre-calculate makeup gain (linear)
-        float32x4_t makeup_lin = vdupq_n_f32(fasterpowf(10.0f, makeup_db_ / 20.0f));
+        float32x4_t makeup_lin = vdupq_n_f32(fasterpowf(10.0f, makeup_db_ * 0.05f));    // 1 / 20
 
         // Pre-calculate mix balance
         float32x4_t wet_gain = vdupq_n_f32(mix_);
@@ -230,7 +230,7 @@ public:
         // =================================================================
         // Process remaining samples (0-3) individually
         // =================================================================
-        float makeup_lin_scalar = fasterpowf(10.0f, makeup_db_ / 20.0f);
+        float makeup_lin_scalar = fasterpowf(10.0f, makeup_db_ * 0.05f);    // 1 /20
         while (frames_remaining > 0) {
             float main_l, main_r, sc_l, sc_r;
             if (has_sidechain_) {
@@ -534,7 +534,7 @@ public:
             case k_slope: // RATIO: map 0 to 100 into 0.0 to 1.0 representing the physical knob turn
                 {
                     if (comp_mode_ == COMP_MODE_DISTRESSOR) {
-                        int knob = value / 12.5f;  // Map 0-100 to 0-8 for the distressor's 8 ratio steps
+                        int knob = value * 0.8f;  // Map 0-100 to 0-8 for the distressor's 8 ratio steps
                         distressor_set_ratio(&distressor_, knob);  // this updates opto_release_mult
                         update_opto_coeff(&distressor_, release_coeff_);
                         break;
@@ -547,24 +547,24 @@ public:
                     if (knob < 0.333f) {
                         // 0.0 to 0.333: Expansion/Gating region
                         // Slopes from +3.0 (Max expansion) down to 0.0 (Linear pass-through)
-                        function_slope_ = 3.0f * (1.0f - (knob / 0.333f));
+                        function_slope_ = 3.0f * (1.0f - (knob * 3));
                     }
                     else if (knob < 0.666f) {
                         // 0.333 to 0.666: Compression region
                         // Slopes from 0.0 down to -1.0 (Infinite limiting)
-                        function_slope_ = -1.0f * ((knob - 0.333f) / 0.333f);
+                        function_slope_ = -1.0f * ((knob - 0.333f) * 3);
                     }
                     else {
                         // 0.666 to 1.0: Dynamic Reversal region
                         // Slopes from -1.0 down to -2.0 (Extreme reverse sucking envelope)
-                        function_slope_ = -1.0f - ((knob - 0.666f) / 0.334f);
+                        function_slope_ = -1.0f - ((knob - 0.666f) * 3);
                     }
                 }
                 break;
 
             case k_attack: // ATTACK (0.1 to 100.0 ms)
                 attack_ms_ = value * 0.1f;
-                attack_coeff_ = fasterexpf(-1.0f / (attack_ms_ * 0.001f * samplerate_));
+                attack_coeff_ = fasterexpf(-0,02083333f / attack_ms_);  // 1 / (0.001f * samplerate_)
                 envelope_set_attack_release(&envelope_, attack_ms_, release_ms_);
                 envelope_set_attack_release(&distressor_.distressor_env, attack_ms_, release_ms_);
                 smoothing_set_times(&smoother_, attack_ms_, release_ms_);
@@ -572,7 +572,7 @@ public:
 
             case k_release: // RELEASE (10 to 2000 ms)
                 release_ms_ = static_cast<float>(value);
-                release_coeff_ = fasterexpf(-1.0f / (release_ms_ * 0.001f * samplerate_));
+                release_coeff_ = fasterexpf(-0,02083333f / release_ms_);    // 1 / (0.001f * samplerate_)
                 envelope_set_attack_release(&envelope_, attack_ms_, release_ms_);
                 envelope_set_attack_release(&distressor_.distressor_env, attack_ms_, release_ms_);
                 smoothing_set_times(&smoother_, attack_ms_, release_ms_);
@@ -666,7 +666,7 @@ public:
                         // Distressor expects at least 0.05ms attack
                         attack_ms_ = fmaxf(attack_ms_, 0.05f);
                         attack_coeff_ =
-                            fasterexpf(-1.0f / (attack_ms_ * 0.001f * samplerate_));
+                            fasterexpf(-0,02083333f / (attack_ms_)); // 1 / (0.001f * samplerate_)
                     }
                 }
                 break;
@@ -745,7 +745,7 @@ public:
             case k_multiband_band_selection: // BAND SEL
                 if (value >= 0 && value < BAND_TOTAL) {
                     static const char *bands[] = {
-                        "Low", "Mid", "High", "LowMid", "LowHi", "MidHi", "All"};
+                        "Low", "Mid", "High", "LwMid", "LwHi", "MdHi", "All"};
                     return bands[value];
                 }
                 break;
@@ -798,7 +798,7 @@ public:
                 {
                     if (comp_mode_ == COMP_MODE_DISTRESSOR) {
                         // Distressor has 8 fixed ratio steps: 1:1, 2:1, 3:1, 4:1, 6:1, 8:1, 12:1, 20:1
-                        int knob = value / 12.5f; // Map 0-100 to 0-8
+                        int knob = value * 0.8f; // Map 0-100 to 0-8
                         if (knob >= 0 && knob < DIST_RATIO_TOTAL) {
                             return distressor_ratio_strings[value];
                         }
@@ -835,7 +835,7 @@ public:
 
             case k_detection_mode:
                 if (comp_mode_ == COMP_MODE_DISTRESSOR) {
-                    static const char* dst_det[] = {"Basic", "Emph", "Link", "Emph+Lnk"};
+                    static const char* dst_det[] = {"Basic", "Emph", "Link", "Emp+Lnk"};
                     if (value >= 0 && value <= 3) return dst_det[value];
                 } else {
                     static const char* std_det[] = {"Peak", "RMS", "Blend"};

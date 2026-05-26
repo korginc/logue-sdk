@@ -46,7 +46,7 @@ const __unit_header unit_header_t unit_header = {
         { 2, 40, 10, 8, k_unit_param_type_strings, 0, 0, 0, {"LowHz"} },
 
         // ID 7: Low Gain (-12dB to +12dB mapped as 0 to 240, 120 is 0dB)
-        { 0, 240, 120, 120, k_unit_param_type_strings, 0, 0, 0, {"LowGn"} },
+        { 0, 240, 120, 120, k_unit_param_type_strings, 0, 0, 0, {"LowGain"} },
 
         // ==========================================
         // PAGE 3: Parametric EQ (High) & Output
@@ -55,13 +55,13 @@ const __unit_header unit_header_t unit_header = {
         { 20, 500, 100, 100, k_unit_param_type_strings, 0, 0, 0, {"MidHz"} },
 
         // ID 9: Mid Gain (-12dB to +12dB mapped as 0 to 240, 120 is 0dB)
-        { 0, 240, 120, 120, k_unit_param_type_strings, 0, 0, 0, {"MidGn"} },
+        { 0, 240, 120, 120, k_unit_param_type_strings, 0, 0, 0, {"MidGain"} },
 
         // ID 10: High Frequency (20 = 2000Hz, 150 = 15000Hz -> x100 mapping)
-        { 20, 150, 80, 100, k_unit_param_type_strings, 0, 0, 0, {"HighHz"} },
+        { 20, 150, 80, 100, k_unit_param_type_strings, 0, 0, 0, {"HiHz"} },
 
         // ID 11: High Gain (-12dB to +12dB mapped as 0 to 240, 120 is 0dB)
-        { 0, 240, 120, 120, k_unit_param_type_strings, 0, 0, 0, {"HighGn"} },
+        { 0, 240, 120, 120, k_unit_param_type_strings, 0, 0, 0, {"HiGain"} },
 
 
         // Pages 4-6: blank

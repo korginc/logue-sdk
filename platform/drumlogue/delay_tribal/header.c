@@ -25,7 +25,7 @@ const __unit_header unit_header_t unit_header = {
         // ID 1: Mode  0=Tribal, 1=Military, 2=Angel
         { 0, 2, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"Mode"} },
         // ID 2: Depth  0-100%
-        { 0, 100, 0, 50, k_unit_param_type_percent, 0, 0, 0, {"Depth"} },
+        { 0, 100, 50, 50, k_unit_param_type_percent, 0, 0, 0, {"Depth"} },
         // ID 3: Rate  x0.1 precision (0.0..10.0 Hz)
         { 0, 100, 0, 30, k_unit_param_type_none, 1, 0, 0, {"Rate"} },
 
@@ -33,7 +33,7 @@ const __unit_header unit_header_t unit_header = {
         // ID 4: Spread  0-100%
         { 0, 100, 0, 80, k_unit_param_type_percent, 0, 0, 0, {"Spread"} },
         // ID 5: Mix  0-100%
-        { 0, 100, 0, 50, k_unit_param_type_percent, 0, 0, 0, {"Mix"} },
+        { 0, 100, 50, 50, k_unit_param_type_percent, 0, 0, 0, {"Mix"} },
         // ID 6: Wobble (Pitch Wobble Depth)  0-100%
         { 0, 100, 0, 30, k_unit_param_type_percent, 0, 0, 0, {"Wobble"} },
         // ID 7: Scatter (ensemble looseness)  0-100%
