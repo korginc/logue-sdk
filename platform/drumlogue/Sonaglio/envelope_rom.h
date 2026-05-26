@@ -563,24 +563,22 @@ fast_inline void neon_envelope_process(neon_envelope_t* env) {
 
     float32x4_t exp_level = vbslq_f32(attack_stage, attack_exp, fall_exp);
     float32x4_t log_attack = vaddq_f32(env->level,
-                                       vmulq_f32(neon_sqrtq_f32(vmaxq_f32(vsubq_f32(one, env->level), zero)),
-                                                 vmulq_n_f32(env->increment, 0.72f)));
+                                       vmulq_f32(vsubq_f32(one, env->level), vmulq_n_f32(env->increment, 0.72f)));
     float32x4_t log_fall = vsubq_f32(env->level,
-                                     vmulq_f32(neon_sqrtq_f32(vmaxq_f32(env->level, zero)),
-                                               vmulq_n_f32(env->increment, 0.72f)));
+                                     vmulq_f32(vsqrtq_f32(vmaxq_f32(env->level, zero)), vmulq_n_f32(env->increment, 0.72f)));
     float32x4_t log_level = vbslq_f32(attack_stage, log_attack, log_fall);
 
     float32x4_t sig_attack = vaddq_f32(env->level,
-                                       vmulq_f32(vmulq_f32(env->level, vsubq_f32(one, env->level)),
-                                                 vmulq_n_f32(env->increment, 3.0f)));
+                                       vmulq_f32(vsubq_f32(one, env->level), vmulq_n_f32(env->increment, 0.90f)));
     float32x4_t sig_fall = vsubq_f32(env->level,
-                                     vmulq_f32(vmulq_f32(env->level, vsubq_f32(one, env->level)),
-                                               vmulq_n_f32(env->increment, 2.6f)));
+                                     vmulq_f32(env->level, vmulq_n_f32(env->increment, 0.90f)));
     float32x4_t sigmoid_level = vbslq_f32(attack_stage, sig_attack, sig_fall);
 
+    float32x4_t punch_attack = vaddq_f32(env->level,
+                                         vmulq_f32(vsubq_f32(one, env->level), vmulq_n_f32(env->increment, 1.35f)));
     float32x4_t punch_fall = vsubq_f32(env->level,
-                                       vmulq_f32(vmulq_f32(env->level, env->level), vmulq_n_f32(env->increment, 1.25f)));
-    float32x4_t punch_level = vbslq_f32(attack_stage, attack_exp, punch_fall);
+                                       vmulq_f32(env->level, vmulq_n_f32(env->increment, 1.25f)));
+    float32x4_t punch_level = vbslq_f32(attack_stage, punch_attack, punch_fall);
 
     float32x4_t next_level = linear_level;
     next_level = vbslq_f32(exp_curve, exp_level, next_level);

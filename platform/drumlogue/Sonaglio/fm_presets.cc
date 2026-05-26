@@ -318,8 +318,8 @@ const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
     {
         "HeavyKick",
         0, 62, 8, 5,
-        68, 100, 10, 30,
-        12, 8, 12, 26,
+        55, 92, 10, 25,
+        15, 10, 15, 30,
         0, 15, LFO_TARGET_PITCH, 20,
         0, 0, LFO_TARGET_NONE, 0,
         18, 25, 45, 15},
