@@ -122,7 +122,8 @@ public:
         , noiseEnvelope(0.0f)
         , pingMapIndex(0)
         , pingMapCounter(0)
-        , filterUpdateCounter(0) {
+        , filterUpdateCounter(0)
+        , outputMakeup(1.0f) {
 
         // Initialize delay times (prime-based for smooth diffusion)
         float baseDelays[FDN_CHANNELS] = {
@@ -356,9 +357,10 @@ public:
         updateFilterCoeffs();   // recalc wood/stone/metal filters
         updateBaseFc();
         if (filterMode == kFilterNoise) {
-            // Scale by 0.05: steady-state noise level = noiseGain per channel.
-            // Without the scale factor, accumulated noise at high decay overwhelms reverb.
-            noiseGain = diffusion * dampingCoeff * 0.05f;
+            // Scale factor: steady-state noise level = noiseGain per channel.
+            // Was 0.05 which made stellare's coloured noise ~0.005 = inaudible.
+            // 0.35 makes it a usable wash; recirculation + soft-sat keep it bounded.
+            noiseGain = diffusion * dampingCoeff * 0.35f;
         }
     }
 
@@ -400,6 +402,19 @@ public:
             case k_esotico:    filterMode = kFilterCrystal; break;  // bright allpass-like shimmer
             case k_stellare:   filterMode = kFilterNoise;   break;
             default:           filterMode = kFilterWood;    break;
+        }
+        // Per-mode wet makeup. The dark LPF modes (wood/stone) and the noise mode
+        // produce far less output than the resonant metal/crystal modes, so they
+        // are leveled up here. Crystal (esotico) already sits at a good level via
+        // its additive blend, so it is left near unity. Starting points for HW
+        // calibration.
+        switch (filterMode) {
+            case kFilterWood:    outputMakeup = 1.7f; break;  // foresta
+            case kFilterStone:   outputMakeup = 2.0f; break;  // tempio (darkest)
+            case kFilterMetal:   outputMakeup = 1.6f; break;  // labirinto (tamed)
+            case kFilterCrystal: outputMakeup = 1.0f; break;  // esotico (good as-is)
+            case kFilterNoise:   outputMakeup = 1.5f; break;  // stellare
+            default:             outputMakeup = 1.0f; break;
         }
         updateBaseFc();
     }
@@ -452,18 +467,18 @@ public:
         // standard Direct Form Biquad calculates its output using this mathematical formula:
         // y[n] = (b0 * x[n]) + (b1 * x[n-1]) + (b2 * x[n-2]) - (a1 * y[n-1]) - (a2 * y[n-2])
         if (filterMode == kFilterMetal) {
-            // METAL: Bandpass resonance for Labirinto — Q=6 keeps the band wide
-            // enough to capture drum fundamentals (kick/snare) while still adding
-            // metallic ring. High-Q=8 was inaudible on broad-spectrum percussion.
+            // METAL: Bandpass resonance for Labirinto. Unity peak gain (b0=alpha,
+            // b2=-alpha). The previous form (b0 = Q*alpha*makeup, Q=6, makeup=5)
+            // had a ~30x (+29 dB) peak that self-oscillated inside the FDN feedback
+            // loop — a sustained screech with no input. Metallic character now comes
+            // from the convex output blend + the metalState comb, keeping per-pass
+            // loop gain <= 1.
             float Q = 6.0f;
             alpha = sin_w0 / (2.0f * Q);
 
-            // resonance makeup gain
-            float makeup = 5.0f;
-
-            b0 = Q * alpha * makeup;
+            b0 = alpha;
             b1 = 0.0f;
-            b2 = -Q * alpha * makeup;
+            b2 = -alpha;
 
             a0 = 1.0f + alpha;
             a1 = -2.0f * cos_w0;
@@ -566,6 +581,12 @@ public:
               out_samps[s] =
                   in_val +
                   out_val * 2.0f; // Reduced from 6.0 to prevent screeching
+            else if (filterMode == kFilterMetal)
+              // Convex blend: dry signal + unity-gain resonant ring. At the
+              // resonant frequency |0.6 + 0.4| = 1.0 (band preserved, emphasized
+              // vs neighbours); off-resonance stays <= ~0.7. Peak gain <= 1.0 so
+              // the FDN loop cannot self-oscillate.
+              out_samps[s] = in_val * 0.6f + out_val * 0.4f;
             else
                 out_samps[s] = out_val;
           }
@@ -973,8 +994,9 @@ private:
                     0.82f * metalState[ch]
                     + 0.18f * x[s];
 
-                // feed forward resonance
-                x[s] += metalState[ch] * 0.35f;
+                // feed forward resonance (0.35 -> 0.22: lower in-loop DC gain so
+                // the metal path keeps a stability margin after the bandpass fix)
+                x[s] += metalState[ch] * 0.22f;
             }
 
             signals[ch] = vld1q_f32(x);
@@ -1213,6 +1235,10 @@ private:
         // We must reduce unifiedDecay by (1-crossGain) to keep loop gain < 1.0.
         float stabilityMargin = 1.0f - crossGain[pillar_] - 0.02f;
         float unifiedDecay = fminf(stabilityMargin, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
+        // The stabilityMargin accounts for cross-feedback but not the metal comb's
+        // in-loop resonance gain (~1.2x at the resonant frequency). Trim decay in
+        // metal mode so the loop stays bounded even at maximum TIME.
+        if (filterMode == kFilterMetal) unifiedDecay *= 0.85f;
         float32x4_t decayAll = vdupq_n_f32(unifiedDecay);
 
         // Volume Fix: input_gain floor was 0.35 (35% of signal every block).
@@ -1332,6 +1358,11 @@ private:
 
         float32x4_t wetL = vaddq_f32(mid, vmulq_f32(side, width4));
         float32x4_t wetR = vsubq_f32(mid, vmulq_f32(side, width4));
+
+        // Per-mode output makeup (levels dark modes up to the resonant ones).
+        float32x4_t mk = vdupq_n_f32(outputMakeup);
+        wetL = vmulq_f32(wetL, mk);
+        wetR = vmulq_f32(wetR, mk);
 
         // Store wet signal directly (hardware handles dry+wet blend)
         vst1q_f32(outL, wetL);
@@ -1481,6 +1512,7 @@ private:
         float loopGain = 0.45f + decay * 0.45f;
         float stabilityMargin = 1.0f - crossGain[pillar_] - 0.02f;
         float unifiedDecay = fminf(stabilityMargin, loopGain * fasterSqrt_15bits(highDecayMult * lowDecayMult));
+        if (filterMode == kFilterMetal) unifiedDecay *= 0.85f;  // see process4Samples
         float scalar_input_gain = fmaxf(0.12f, 1.0f - unifiedDecay);
 
         applyHadamardScalar(delayOut, mixed);
@@ -1562,8 +1594,8 @@ private:
         // Apply stereo width
         float mid  = (leftRaw + rightRaw) * 0.5f;
         float side = (leftRaw - rightRaw) * 0.5f;
-        wetL = mid + side * width;
-        wetR = mid - side * width;
+        wetL = (mid + side * width) * outputMakeup;
+        wetR = (mid - side * width) * outputMakeup;
     }
 
     /*===========================================================================*/
@@ -1687,6 +1719,7 @@ private:
 
     float baseFc;                   // base cutoff frequency (Hz) for current preset/damping
     float filterModRange;           // max modulation range (Hz) derived from DFSN and pillar
+    float outputMakeup;             // per-mode wet level trim (levels dark vs resonant modes)
 };
 
 const float NeonAdvancedLabirinto::crossGain[5] = {0.15f, 0.10f, 0.07f, 0.04f, 0.04f};
