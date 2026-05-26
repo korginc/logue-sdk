@@ -10,6 +10,7 @@
 #include "oscillator.h"
 #include "lfo.h"
 #include "filter.h"
+#include "drone_engine.h"
 
 constexpr float Q_Limit = 0.707f;
 constexpr float Mid_Note_Freq = 69.0f;
@@ -39,6 +40,10 @@ public:
 
     inline int8_t Init(const unit_runtime_desc_t * desc) {
         if (desc->samplerate != SAMPLE_RATE) return k_unit_err_samplerate;
+        m_crystal_drone.init(false);
+        m_metal_drone.init(true);
+        m_crystal_drone.set_note(m_base_hz);
+        m_metal_drone.set_note(m_base_hz);
         Reset();
         return k_unit_err_none;
     }
@@ -56,6 +61,9 @@ public:
 
         m_srr_counter = 0.0f;
         m_srr_hold_val = 0.0f;
+
+        m_crystal_drone.clear();
+        m_metal_drone.clear();
     }
 
     inline int32_t  getParameter(uint8_t id) {
@@ -134,6 +142,8 @@ public:
             case k_paramNote:
                 m_base_hz = 440.0f * fasterpow2f(((float)value - Mid_Note_Freq) / 12.0f);
                 updateOscillators();
+                m_crystal_drone.set_note(m_base_hz);
+                m_metal_drone.set_note(m_base_hz);
                 break;
             case k_paramO2Detune:
             case k_paramO2SubOct:
@@ -226,8 +236,9 @@ public:
     inline void NoteOn(uint8_t note, uint8_t velocity) {
         // Calculate Base Frequency from MIDI Note
         m_base_hz = 440.0f * fasterpow2f(((float)note - Mid_Note_Freq) / 12.0f);
-        // Push immediate frequency updates to oscillators
         updateOscillators();
+        m_crystal_drone.set_note(m_base_hz);
+        m_metal_drone.set_note(m_base_hz);
     }
 
     inline void updateOscillators() {
@@ -328,6 +339,11 @@ public:
         // Grab Wavetables from UI
         osc1.current_table = SCRUTAASTRI_WAVETABLES[m_params[k_paramOsc1Wave]];
         osc2.current_table = SCRUTAASTRI_WAVETABLES[m_params[k_paramOsc2Wave]];
+
+        // Source selection: preset 95 = crystal drone, preset 96 = metal drone
+        const int32_t prog_preset = m_params[k_paramProgram];
+        const bool use_drone = (prog_preset == 95 || prog_preset == 96);
+        const bool use_metal_drone = (prog_preset == 96);
 
         for (size_t i = 0; i < frames; ++i) {
 
@@ -500,24 +516,30 @@ public:
                 }
             }
 
-            // 4. OSCILLATOR MIX
-            // Advance oscillators
-            float sig1 = fmaxf(0.0f, fminf(1.0f, osc1.process() * 0.5f + m_mix1_mod_offset));
+            // 4. OSCILLATOR / DRONE MIX
+            float sig1 = 0.0f; // used for Sherman asymmetry below; 0 in drone mode
+            float mixed_sig;
+            if (use_drone) {
+                mixed_sig = use_metal_drone ? m_metal_drone.process() : m_crystal_drone.process();
+            } else {
+                // Advance oscillators
+                sig1 = fmaxf(0.0f, fminf(1.0f, osc1.process() * 0.5f + m_mix1_mod_offset));
 
-            // Apply APC mixed modulation offset, constrained 0.0 to 1.0
-            float dynamic_mix = fmaxf(0.0f, fminf(1.0f, m_osc2_mix + m_mix2_mod_offset));
-            float sig2 = osc2.process() * dynamic_mix;
-            float mixed_sig = sig1 + sig2;
+                // Apply APC mixed modulation offset, constrained 0.0 to 1.0
+                float dynamic_mix = fmaxf(0.0f, fminf(1.0f, m_osc2_mix + m_mix2_mod_offset));
+                float sig2 = osc2.process() * dynamic_mix;
+                mixed_sig = sig1 + sig2;
 
-            // Bidirectional phase wrap detection
-            bool osc1_wrapped = (m_osc1_dir > 0.0f) ? (osc1.phase < pre_phase1) : (osc1.phase > pre_phase1);
-            if (osc1_wrapped) {
-                osc1.set_frequency(m_osc1_target_hz, SAMPLE_RATE_F);
-            }
+                // Bidirectional phase wrap detection
+                bool osc1_wrapped = (m_osc1_dir > 0.0f) ? (osc1.phase < pre_phase1) : (osc1.phase > pre_phase1);
+                if (osc1_wrapped) {
+                    osc1.set_frequency(m_osc1_target_hz, SAMPLE_RATE_F);
+                }
 
-            bool osc2_wrapped = (m_osc2_dir > 0.0f) ? (osc2.phase < pre_phase2) : (osc2.phase > pre_phase2);
-            if (osc2_wrapped) {
-                osc2.set_frequency(m_osc2_target_hz * m_osc2_suboct_smooth_mult * m_osc2_fm_mult, SAMPLE_RATE_F);
+                bool osc2_wrapped = (m_osc2_dir > 0.0f) ? (osc2.phase < pre_phase2) : (osc2.phase > pre_phase2);
+                if (osc2_wrapped) {
+                    osc2.set_frequency(m_osc2_target_hz * m_osc2_suboct_smooth_mult * m_osc2_fm_mult, SAMPLE_RATE_F);
+                }
             }
 
             // 5. FILTER 1
@@ -639,6 +661,8 @@ private:
     FastLFO lfo1;
     FastLFO lfo2;
     FastLFO lfo3;
+    DroneEngine m_crystal_drone;
+    DroneEngine m_metal_drone;
 
 
     // Hardware Gate Trackers
