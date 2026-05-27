@@ -424,10 +424,10 @@ public:
         float fc;
         switch (filterMode) {
             case kFilterWood:
-                fc = 200.0f + dampingCoeff * 800.0f;   // 200..1000 Hz
+                fc = 800.0f + dampingCoeff * 5700.0f;   // 1000..6500 Hz
                 break;
             case kFilterStone:
-                fc = 80.0f + dampingCoeff * 420.0f;    // 80..500 Hz
+                fc = 80.0f + dampingCoeff * 4920.0f;    // 80..5000 Hz
                 break;
             case kFilterMetal:
                 // 300..1200 Hz: covers kick body and snare fundamentals so
@@ -466,23 +466,61 @@ public:
         // Coefficients from RBJ cookbook.
         // standard Direct Form Biquad calculates its output using this mathematical formula:
         // y[n] = (b0 * x[n]) + (b1 * x[n-1]) + (b2 * x[n-2]) - (a1 * y[n-1]) - (a2 * y[n-2])
+        // if (filterMode == kFilterMetal) {
+        //     // METAL: Bandpass resonance for Labirinto. Unity peak gain (b0=alpha,
+        //     // b2=-alpha). The previous form (b0 = Q*alpha*makeup, Q=6, makeup=5)
+        //     // had a ~30x (+29 dB) peak that self-oscillated inside the FDN feedback
+        //     // loop — a sustained screech with no input. Metallic character now comes
+        //     // from the convex output blend + the metalState comb, keeping per-pass
+        //     // loop gain <= 1.
+        //     float Q = 6.0f;
+        //     alpha = sin_w0 / (2.0f * Q);
+
+        //     b0 = alpha;
+        //     b1 = 0.0f;
+        //     b2 = -alpha;
+
+        //     a0 = 1.0f + alpha;
+        //     a1 = -2.0f * cos_w0;
+        //     a2 = 1.0f - alpha;
+        // }
+        /** The Micro-Boost "Compounding" Peaking EQ (Keep Inside Loop)
+         * Instead of a bandpass filter that aggressively cuts the background,
+         * you can use a standard RBJ Peaking EQ, but configured with a microscopic
+         * boost (e.g., $+0.13\text{ dB}$) and then normalized so its peak gain is
+         *  exactly $1.0$.
+         * Because the FDN loop recirculates the signal dozens of times,
+         * you don't need a heavy filter. A tiny difference compounds over time.
+         * If the baseline gain is set to 0.985 (retaining 98.5% of tail energy per pass)
+         * and the peak is pinned at 1.0, after 50 reflections the resonant frequency
+         *  remains at $1.0^{50} = 1.0$, while the background tail drops to $0.985^{50}
+         * \approx 0.46$. This creates a massive, clear contrast between the metallic
+         * ring and the tail, without choking the reverb or self-oscillating. */
         if (filterMode == kFilterMetal) {
-            // METAL: Bandpass resonance for Labirinto. Unity peak gain (b0=alpha,
-            // b2=-alpha). The previous form (b0 = Q*alpha*makeup, Q=6, makeup=5)
-            // had a ~30x (+29 dB) peak that self-oscillated inside the FDN feedback
-            // loop — a sustained screech with no input. Metallic character now comes
-            // from the convex output blend + the metalState comb, keeping per-pass
-            // loop gain <= 1.
-            float Q = 6.0f;
+            // Pinned unity peak gain with maximum tail preservation.
+            // Baseline frequencies lose only 1.5% energy per pass, allowing a huge tail.
+            float baselineGain = 0.985f;
+            float A = 1.0f / baselineGain; // Micro-boost amount (~0.13 dB)
+            float Q = 4.0f;                // High selectivity for glassy ringing
             alpha = sin_w0 / (2.0f * Q);
 
-            b0 = alpha;
-            b1 = 0.0f;
-            b2 = -alpha;
-
-            a0 = 1.0f + alpha;
+            b0 = 1.0f + alpha * A;
+            b1 = -2.0f * cos_w0;
+            b2 = 1.0f - alpha * A;
+            a0 = 1.0f + alpha / A;
             a1 = -2.0f * cos_w0;
-            a2 = 1.0f - alpha;
+            a2 = 1.0f - alpha / A;
+
+            float invA0 = 1.0f / a0;
+            // Normalize the feed-forward coefficients by (1 / A)
+            // This scales the peak gain down from A to exactly 1.0
+            float norm = baselineGain * invA0;
+
+            biquadA0 = b0 * norm;
+            biquadA1 = b1 * norm;
+            biquadA2 = b2 * norm;
+            biquadB1 = a1 * invA0;
+            biquadB2 = a2 * invA0;
         }
         else if (filterMode == kFilterCrystal) {
             // CRYSTAL: Medium-Q Bandpass at higher frequencies — used by esotico.
@@ -578,16 +616,16 @@ public:
             // Blend additively: passband stays at full level + resonant colour at fc.
             // All other modes replace the signal (LPF/HPF shape the tail spectrum).
             if (filterMode == kFilterCrystal)
-              out_samps[s] =
-                  in_val +
-                  out_val * 2.0f; // Reduced from 6.0 to prevent screeching
-            else if (filterMode == kFilterMetal)
-              // Convex blend: dry signal + unity-gain resonant ring. At the
-              // resonant frequency |0.6 + 0.4| = 1.0 (band preserved, emphasized
-              // vs neighbours); off-resonance stays <= ~0.7. Peak gain <= 1.0 so
-              // the FDN loop cannot self-oscillate.
-              out_samps[s] = in_val * 0.6f + out_val * 0.4f;
+                out_samps[s] = in_val * 0.7f + out_val * 0.3f; // Reduced from 6.0 to prevent screeching
+            // else if (filterMode == kFilterMetal)
+                // METAL: Bandpass resonance for Labirinto
+                // Convex blend: dry signal + unity-gain resonant ring. At the
+                // resonant frequency |0.6 + 0.4| = 1.0 (band preserved, emphasized
+                // vs neighbours); off-resonance stays <= ~0.7. Peak gain <= 1.0 so
+                // the FDN loop cannot self-oscillate.
+                // out_samps[s] = in_val * 0.6f + out_val * 0.4f;
             else
+                // valid also for kFilterMetal Micro-BoostPeaking EQ
                 out_samps[s] = out_val;
           }
 
@@ -634,7 +672,7 @@ public:
                 filterState2[ch] = (in_val * biquadA2) - (out_val * biquadB2);
 
                 if (filterMode == kFilterCrystal)
-                    out_samps[s] = in_val + out_val * 6.0f;
+                    out_samps[s] = in_val * 0.7 + out_val * 0.3f; // moved from 6.0 to prevent screeching
                 else
                     out_samps[s] = out_val;
             }
