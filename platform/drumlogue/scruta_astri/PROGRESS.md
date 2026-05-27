@@ -196,30 +196,128 @@ These options are not mutually exclusive:
   done first as a low-risk experiment to test whether the captured FDN character is musically
   satisfying before committing to a real-time FDN implementation.
 
-### Decision pending
+### Decision — Option C selected: Compact self-oscillating FDN
 
-All four options have merit. Key questions to resolve:
+Design requirements resolved:
+1. Exact MIDI pitch **not required** — post-FDN filter provides perceived pitch suggestion via F1Cutoff/F1Reso.
+2. Live self-generative chaos **preferred** over static snapshots. A proper chaotic attractor evolves
+   continuously; snapshot animation (Option D) is static in both the live-FDN and snapshot cases.
+   Option D remains a future extension once Option C is working.
+3. **All 24 knobs** should remain functional — achievable by remapping the 5 wavetable-specific
+   parameters to FDN controls (see full routing table below).
+4. Option D (captured wavetables) is **dependent** on Option C being implemented first. Once Option C
+   runs on hardware the Python simulator can capture steady-state cycles via convert_wavetables.py.
 
-1. Is exact MIDI pitch required, or is "suggested pitch via filter" (Option C) acceptable?
-2. Is the offline generation step (Option D) feasible? Does the existing convert_wavetables.py
-   already simulate an FDN, or would a new simulator need to be written?
-3. How many of the 24 parameter knobs should remain functional in drone mode?
-   (Options A/C need remapping; Options B/D need none)
-4. Is the "temporal chaos" of a live FDN (Option C) essential, or is a snapshot approximation
-   (Option D) sufficient for the musical use case?
+#### Chaos mechanism
+
+The compact FDN is a nonlinear dynamical system. Depending on feedback gain `g`:
+- `g` low → decays to zero (stable)
+- `g` moderate → periodic limit cycle (repeating waveform, sounds static)
+- `g` above bifurcation threshold → **chaotic strange attractor** (trajectory never repeats, bounded
+  by saturation — genuine self-generative evolution without parameter changes)
+- `g` too high → large-amplitude saturation explosion (the reverb "screech")
+
+The Hadamard cross-coupling is what enables chaos: the 4 delay lines mutually destabilize each other,
+preventing convergence to a simple periodic orbit. The tanh saturation bounds the amplitude.
+
+`O2Detune` (remapped in drone mode) becomes the **chaos level knob**:
+- Left (-100): periodic / stable (predictable tone)
+- Centre (0): calibrated chaotic attractor (self-generative, evolving, bounded)
+- Right (+100): aggressive chaos / high-amplitude saturation (loud, dense noise)
+
+#### FDN hardware architecture
+
+```
+                    ┌──────────────────────────────────────────────┐
+noise_inject ──────►│  4×4 Hadamard mix (fast: 8 adds, 4 muls)    │
+                    │  tanh saturation (drive = O2SubOct)          │
+             ┌──────┤  4 delay lines (per-line one-pole filter)    ├──────┐
+             │      └──────────────────────────────────────────────┘      │
+             │ feedback g (controlled by O2Detune)                        │
+             └────────────────────────────────────────────────────────────┘
+                                                 │ output sum
+                                                 ▼
+                                        F1 filter (perceived pitch, MIDI Note → F1Cutoff)
+                                                 │
+                                        F2 filter, SRR, BRR, CMOS tanh VCA
+```
+
+Delay line specifications:
+- Crystal (preset 95): 4 lines at lengths {61, 79, 83, 97} samples → resonant peaks at {787, 608, 578, 495} Hz
+  Per-line one-pole LPF (smooth, diffuse character). Near-harmonic ratio set.
+- Metal (preset 96): 4 lines at lengths {29, 37, 43, 53} samples → resonant peaks at {1655, 1297, 1116, 906} Hz
+  Per-line one-pole BPF (emphasises upper mids). TR-808 metallic ratio set.
+
+Memory per drone: 4 × 128 samples × 4 bytes = 2 KB. Total for both: ~4 KB.
+
+Fast 4×4 Hadamard (no matrix multiply needed):
+```
+a = d[0]+d[1];  b = d[0]-d[1];  c = d[2]+d[3];  e = d[2]-d[3]
+h[0]=a+c; h[1]=b+e; h[2]=a-c; h[3]=b-e;   each × 0.5
+```
+
+#### Full 24-parameter routing in drone mode
+
+| # | Parameter (hardware name) | Normal wavetable use | Drone mode remapping |
+|---|--------------------------|---------------------|---------------------|
+| 0 | Prgrm | Preset / mod target | Stays (95 = crystal FDN, 96 = metal FDN) |
+| 1 | Note | MIDI pitch of oscillators | Base frequency for post-FDN F1 filter (perceived pitch) |
+| 2 | O1Wave | Wavetable index osc1 | FDN delay line base length → spectral register (dark ↔ bright) |
+| 3 | O2Wave | Wavetable index osc2 | FDN delay line ratio set index (different inharmonicity patterns) |
+| 4 | O2Dtun | Hz detune osc2 | **FDN feedback gain g** = chaos level (stable ↔ chaotic ↔ aggressive) |
+| 5 | O2Sub | Sub-octave ratio | FDN saturation hardness (0=soft tanh, 1=cubic, 2=asymm, 3=fold, 4=hard) |
+| 6 | O2Mix | Osc2 blend level | Noise injection level (0=pure self-oscillation, 100=high noise excitation) |
+| 7 | Volume | Master volume | Stays |
+| 8 | F1Cut | Filter 1 cutoff | Post-FDN spectral emphasis / perceived pitch shaping (critical in drone mode) |
+| 9 | F1Res | Filter 1 Q | Pitch selectivity (high Q = more pitched; low Q = broader, noisier) |
+| 10 | F2Cut | Filter 2 cutoff | Second spectral shaper |
+| 11 | F2Res | Filter 2 Q | Second filter Q |
+| 12 | L1Wave | LFO1 waveform | Stays (modulates drone parameters via mod_target) |
+| 13 | L1Rate | LFO1 rate | Stays |
+| 14 | L1Dpth | LFO1 depth | Stays |
+| 15 | L2Wave | LFO2 waveform | Stays |
+| 16 | L2Rate | LFO2 rate | Stays |
+| 17 | L2Dpth | LFO2 depth | Stays |
+| 18 | L3Wave | LFO3 waveform | Stays |
+| 19 | L3Rate | LFO3 rate | Stays |
+| 20 | L3Dpth | LFO3 depth | Stays |
+| 21 | SRRed | Sample rate reduction | Stays — very interesting on FDN output (lo-fi chaos) |
+| 22 | BitRed | Bit reduction | Stays — bit-crushed FDN creates very different textures |
+| 23 | CMOS | Distortion | Stays — stacks on top of FDN internal saturation |
+
+Interesting LFO modulation targets in drone mode (via mod_target = preset % 24):
+- `k_paramF1Cutoff` (8): slowly sweeps the perceived pitch → pitch-evolving drone
+- `k_paramO2Detune` (4): rhythmically modulates chaos level → stuttering / breathing chaos
+- `k_paramOsc2Mix` (6): varies noise injection → density tremolo
+- `k_paramCMOSDist` (23): distortion tremolo on FDN output → gating / pumping
+- `k_paramBitRed` (22): bit-depth variation on chaotic signal → digital granularity
+
+#### Option D as future follow-up
+
+Once Option C is working on hardware: run the FDN simulation in Python at a fixed pitch (e.g. 440 Hz,
+delay lengths scaled so D ≈ 109 samples per line at 48 kHz), let it reach the chaotic attractor,
+capture 16–32 consecutive output cycles (256 samples each). These become additional wavetable entries
+in wavetables.h. The existing LFO wavetable-sweep preset mode then animates through FDN states.
+This requires extending convert_wavetables.py to accept raw float arrays in addition to .wav files.
 
 ## Next Steps
-- [ ] **Choose and implement drone engine** (Option A or B — see section above)
-- [ ] **Hardware test drone presets 95/96** after new implementation
-- [ ] **Calibrate output gains** for drone engines to match level of wavetable presets
-- [ ] **Ingest New Wavetables:** Extract uncompressed `.wav` cycles for the target timbres (low hum of distant prop plane, AUM singing, trombone, hurdy-gurdy). For evolving sounds, slice multiple sequential cycles.
-- [ ] **Generate Headers:** Run the Python batch processor to convert the new `.wav` files into C-arrays and update `NUM_WAVETABLES` with new samples.
-- [x] **Compile and Flash:** Build the `.drumlgunit` and flash it to the Drumlogue. DONE: works almost flawlessly
-- [ ] **Calibrate the Morph Boundaries:** Test the `CLEAN_MOOG_BORDER` (33) and `MOOG_SHE_BORDER` (66) on the hardware encoders to ensure the distortion ramps musically.
-- [ ] **Verify LFO Curves:** Ensure the exponential mapping of the LFO rate knobs feels intuitive when sweeping from slow drones to audio-rate FM.
-- [ ] **Verify audio stepping:** Some parameters when change are doing a step in sound. While it's not crucial, a smooth transition would be preferable.
-- [ ] **LFO rate modulation:** Let's try the new features first and then we can create a new modulation target when LFO rate is addressed by preset choice.
-- [ ] **Check CPU Load:** Verify the Drumlogue ARM processor maintains thread execution time under the new load.
+- [ ] **Implement Option C: Compact self-oscillating FDN** — new `fdn_drone.h`, replacing
+  the current noise-driven `DroneEngine` in `drone_engine.h`. Full design spec above.
+- [ ] **Hardware test FDN drone presets 95/96** — calibrate feedback gain for chaotic regime,
+  tune delay line lengths for musical character, adjust per-line filter coefficients.
+- [ ] **Calibrate output gains** for drone engines to match level of wavetable presets.
+- [ ] **(Future) Option D: FDN wavetable capture** — extend convert_wavetables.py, capture FDN
+  steady-state cycles offline, add as new wavetable entries.
+- [ ] **Ingest New Wavetables:** Extract uncompressed `.wav` cycles for target timbres (low hum of
+  distant prop plane, AUM singing, trombone, hurdy-gurdy).
+- [ ] **Generate Headers:** Run Python batch processor, update NUM_WAVETABLES.
+- [x] **Compile and Flash:** Build `.drumlgunit` and flash to Drumlogue. DONE.
+- [ ] **Calibrate Morph Boundaries:** Test CLEAN_MOOG_BORDER (33) and MOOG_SHERMAN_BORDER (66).
+- [ ] **Verify LFO Curves:** Exponential LFO rate mapping should feel intuitive in hardware.
+- [ ] **Verify audio stepping:** Smooth parameter transitions (not critical but preferred).
+- [ ] **LFO rate modulation:** Design modulation target for LFO rate once other features are tested.
+- [ ] **Check CPU Load:** Verify ARM Cortex-A7 thread execution time under FDN load.
 
 ## Future Improvements / TODO
-* **Stereo Spreading:** The Stargazer is strictly mono. Offset the phase of LFO 2 for the Right channel to create a massive, swirling stereo drone.
+* **Stereo Spreading:** The Stargazer is strictly mono. Offset phase of LFO 2 for Right channel.
+* **Option D — FDN wavetable capture:** See Next Steps above.
