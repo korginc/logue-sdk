@@ -5,19 +5,34 @@
 
 /**
  * @file drone_engine.h
- * @brief Parallel resonator bank drone / noise synth engine.
+ * @brief Parallel resonator bank drone engine — PLACEHOLDER IMPLEMENTATION.
+ *
+ * *** DESIGN STATUS: NOT SELF-OSCILLATING — pending replacement ***
+ *
+ * Current implementation: 4 parallel biquad bandpass resonators driven by
+ * continuous LCG white noise. This produces *colored noise* (spectrally shaped
+ * near the resonant frequencies) but NOT a pitched, self-sustaining drone.
+ * The resonators filter noise; they do not sustain a tone because there is no
+ * feedback from the output back to the input.
+ *
+ * Two replacement architectures are under evaluation (see PROGRESS.md):
+ *
+ *   Option A — Biquad sinusoidal oscillator bank (true self-oscillation):
+ *     y[n] = r * (2*cos(w0)*y[n-1] - y[n-2]),  r ≈ 0.9999
+ *     Poles fractionally inside the unit circle → self-sustaining pure tones.
+ *     Memory: ~48 bytes per drone. No external input needed.
+ *     Timbral shaping comes from the downstream filter chain only.
+ *
+ *   Option B — Wavetable oscillators feeding a feedback comb/allpass:
+ *     Osc1/Osc2 excite a delay line: y[n] = x[n] + g*y[n-D], g ≈ 0.97
+ *     D = sample_rate / base_hz, tuned to the oscillator fundamental.
+ *     Wavetable timbral identity preserved. Memory: ~3 KB per drone.
  *
  * Two modes, selectable at init():
  *   Crystal (false) — esotico-inspired: smooth harmonic ratios, gentle Q=2.5.
- *                     Produces slowly evolving harmonic clouds.
  *   Metal   (true)  — labirinto-inspired: TR-808 metallic ratios, high Q=6.
- *                     Produces sharp metallic resonant buzz.
  *
- * Design: 4 parallel biquad bandpass resonators driven by continuous white
- * noise. No transcendental functions in the audio hot path — biquad
- * coefficients computed once per note change using fastersinfullf/fastercosfullf.
- *
- * Biquad form (Audio EQ Cookbook bandpass, b1=0):
+ * Current biquad form (Audio EQ Cookbook bandpass, b1=0):
  *   y[n] = g*(x[n]-x[n-2]) + c1*y[n-1] + c2*y[n-2]
  * where:
  *   g  = sin(w0)/2 / (1+alpha)
