@@ -13,6 +13,7 @@
 #include <arm_neon.h>
 #include <stdint.h>
 #include "constants.h"
+#include "float_math.h"
 
 // Envelope stages
 #define ENV_STAGE_ATTACK  0
@@ -565,7 +566,7 @@ fast_inline void neon_envelope_process(neon_envelope_t* env) {
     float32x4_t log_attack = vaddq_f32(env->level,
                                        vmulq_f32(vsubq_f32(one, env->level), vmulq_n_f32(env->increment, 0.72f)));
     float32x4_t log_fall = vsubq_f32(env->level,
-                                     vmulq_f32(vsqrtq_f32(vmaxq_f32(env->level, zero)), vmulq_n_f32(env->increment, 0.72f)));
+                                     vmulq_f32(neon_sqrtq_f32(vmaxq_f32(env->level, zero)), vmulq_n_f32(env->increment, 0.72f)));
     float32x4_t log_level = vbslq_f32(attack_stage, log_attack, log_fall);
 
     float32x4_t sig_attack = vaddq_f32(env->level,

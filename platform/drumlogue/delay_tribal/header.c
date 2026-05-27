@@ -33,7 +33,7 @@ const __unit_header unit_header_t unit_header = {
         // ID 4: Spread  0-100%
         { 0, 100, 0, 80, k_unit_param_type_percent, 0, 0, 0, {"Spread"} },
         // ID 5: Mix  0-100%
-        { 0, 100, 50, 50, k_unit_param_type_percent, 0, 0, 0, {"Mix"} },
+        { 0, 100, 90, 50, k_unit_param_type_percent, 0, 0, 0, {"Mix"} },
         // ID 6: Wobble (Pitch Wobble Depth)  0-100%
         { 0, 100, 0, 30, k_unit_param_type_percent, 0, 0, 0, {"Wobble"} },
         // ID 7: Scatter (ensemble looseness)  0-100%

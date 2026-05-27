@@ -108,10 +108,10 @@ public:
         target_mix_    = current_mix_    = 1.0f;                // init=100
 
         // set initial tape saturation
-        x_prev_l = vdupq_n_f32(0.0f);
-        y_prev_l = vdupq_n_f32(0.0f);
-        x_prev_r = vdupq_n_f32(0.0f);
-        y_prev_r = vdupq_n_f32(0.0f);
+        x_prev_l = 0.0f;
+        y_prev_l = 0.0f;
+        x_prev_r = 0.0f;
+        y_prev_r = 0.0f;
         R = 0.995f; // standard DC blocker coefficient for ~20 Hz cutoff at 44.1 kHz, also used in tape_saturation
 
         wf_phase_inc_ = M_TWOPI * 1.5f / samplerate_;
@@ -246,8 +246,8 @@ public:
         const float makeup = 0.9f; // Tape saturation is not inverse-energy compensated.
         if (model_ == k_vinyl)
         {
-            sig_l = vmulq_n_f32(vinyl_saturate_vec(sig_l, drive, vinyl_bias_));
-            sig_r = vmulq_n_f32(vinyl_saturate_vec(sig_r, drive, vinyl_bias_));
+            sig_l = vmulq_n_f32(vinyl_saturate_vec(sig_l, drive, vinyl_bias_), makeup);
+            sig_r = vmulq_n_f32(vinyl_saturate_vec(sig_r, drive, vinyl_bias_), makeup);
         }
         else    // tape like
         {
@@ -599,10 +599,10 @@ private:
     float32x4_t previous_noise_r_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
     float32x4_t pop_env_; // precomputed per-sample decay increment for the pop envelope
     // State variables for the DC blocker (assumes 4 independent channels)
-    float32x4_t x_prev_l;
-    float32x4_t x_prev_r;
-    float32x4_t y_prev_l;
-    float32x4_t y_prev_r;
+    float x_prev_l;
+    float x_prev_r;
+    float y_prev_l;
+    float y_prev_r;
 
     // R controls the cutoff frequency. 0.995 is a standard coefficient
     // for a pole very close to DC (roughly 20Hz at 44.1kHz).
@@ -676,7 +676,8 @@ private:
 
         // 4. Calculate and subtract the DC offset caused by the bias
         // Offset = bias / (1 + bias + 0.3 * bias^2)
-        float32x4_t output = vsubq_n_f32(saturated, vinyl_dc_offset_);
+        float32x4_t output =
+            vsubq_f32(saturated, vdupq_n_f32(vinyl_dc_offset_));
 
         // 5. Mechanical Tracing Distortion
         // Align time lanes to get a 1-sample delay using NEON vector extraction

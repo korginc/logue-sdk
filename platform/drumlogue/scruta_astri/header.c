@@ -22,10 +22,11 @@ const __unit_header unit_header_t unit_header = {
         // 24-47: Osc 1 Reversed
         // 48-71: Osc 2 Reversed
         // 72-94: Both Reversed
+        // 95-96: drone engine
         {0, 96, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Prgrm"}},
         {24, 126, 1, 36, k_unit_param_type_midi_note, 0, 0, 0, {"Note"}},
-        {0, 247, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O1Wave"}},    // value aligned to wavetables.h
-        {0, 247, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Wave"}},    // value aligned to wavetables.h
+        {0, 256, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O1Wave"}},    // value aligned to wavetables.h
+        {0, 256, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Wave"}},    // value aligned to wavetables.h
 
         // Page 2: Osc 2 & Mix
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Dtun"}},

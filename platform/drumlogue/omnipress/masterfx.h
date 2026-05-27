@@ -564,7 +564,7 @@ public:
 
             case k_attack: // ATTACK (0.1 to 100.0 ms)
                 attack_ms_ = value * 0.1f;
-                attack_coeff_ = fasterexpf(-0,02083333f / attack_ms_);  // 1 / (0.001f * samplerate_)
+                attack_coeff_ = fasterexpf(-0.02083333f / attack_ms_);  // 1 / (0.001f * samplerate_)
                 envelope_set_attack_release(&envelope_, attack_ms_, release_ms_);
                 envelope_set_attack_release(&distressor_.distressor_env, attack_ms_, release_ms_);
                 smoothing_set_times(&smoother_, attack_ms_, release_ms_);
@@ -572,7 +572,7 @@ public:
 
             case k_release: // RELEASE (10 to 2000 ms)
                 release_ms_ = static_cast<float>(value);
-                release_coeff_ = fasterexpf(-0,02083333f / release_ms_);    // 1 / (0.001f * samplerate_)
+                release_coeff_ = fasterexpf(-0.02083333f / release_ms_);    // 1 / (0.001f * samplerate_)
                 envelope_set_attack_release(&envelope_, attack_ms_, release_ms_);
                 envelope_set_attack_release(&distressor_.distressor_env, attack_ms_, release_ms_);
                 smoothing_set_times(&smoother_, attack_ms_, release_ms_);
@@ -666,7 +666,7 @@ public:
                         // Distressor expects at least 0.05ms attack
                         attack_ms_ = fmaxf(attack_ms_, 0.05f);
                         attack_coeff_ =
-                            fasterexpf(-0,02083333f / (attack_ms_)); // 1 / (0.001f * samplerate_)
+                            fasterexpf(-0.02083333f / (attack_ms_)); // 1 / (0.001f * samplerate_)
                     }
                 }
                 break;
