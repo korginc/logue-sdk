@@ -50,7 +50,6 @@ typedef struct {
     float32x4_t phase[NUM_OPERATORS];
     float32x4_t base_ratio[NUM_OPERATORS];
     float32x4_t current_ratio[NUM_OPERATORS];
-    float32x4_t note_ratio_jitter;
 
     // Carrier frequency
     float32x4_t carrier_freq_base;
@@ -119,8 +118,7 @@ fast_inline void metal_engine_recompute(metal_engine_t* metal) {
 
     for (int i = 0; i < NUM_OPERATORS; ++i) {
         float32x4_t offset = vsubq_f32(metal->base_ratio[i], one);
-        float32x4_t r = vaddq_f32(one, vmulq_f32(offset, ratio_scale));
-        metal->current_ratio[i] = vmulq_f32(r, metal->note_ratio_jitter);
+        metal->current_ratio[i] = vaddq_f32(one, vmulq_f32(offset, ratio_scale));
     }
 
     // Strike FM: punchy onset burst (env8-gated in process). 1.0..5.5.
@@ -182,7 +180,6 @@ fast_inline void metal_engine_init(metal_engine_t* metal) {
     }
 
     metal->carrier_freq_base = vdupq_n_f32(1000.0f);
-    metal->note_ratio_jitter = vdupq_n_f32(1.0f);
 
     metal->attack = vdupq_n_f32(0.5f);
     metal->body = vdupq_n_f32(0.5f);
@@ -264,16 +261,12 @@ fast_inline void metal_engine_set_note(metal_engine_t* metal,
                                          base_freq,
                                          metal->carrier_freq_base);
 
-    // Randomized phase + slight per-hit ratio jitter reduce tonal "peew" locking.
-    float32x4_t jitter = vaddq_f32(vdupq_n_f32(0.992f),
-                                   vmulq_n_f32(neon_generate_float_rand_0_1(&metal->noise_prng), 0.016f));
-    metal->note_ratio_jitter = vbslq_f32(voice_mask, jitter, metal->note_ratio_jitter);
-    metal_engine_recompute(metal);
+    // Reset phase and feedback state on trigger for repeatable metallic attacks.
+    const float32x4_t zero = vdupq_n_f32(0.0f);
     for (int i = 0; i < NUM_OPERATORS; ++i) {
-        float32x4_t phase_rand = vmulq_n_f32(neon_generate_float_rand_0_1(&metal->noise_prng), 2.0f * M_PI);
-        metal->phase[i] = vbslq_f32(voice_mask, phase_rand, metal->phase[i]);
+        metal->phase[i] = vbslq_f32(voice_mask, zero, metal->phase[i]);
     }
-    metal->prev_op4 = vbslq_f32(voice_mask, vdupq_n_f32(0.0f), metal->prev_op4);
+    metal->prev_op4 = vbslq_f32(voice_mask, zero, metal->prev_op4);
 }
 
 /**
@@ -287,18 +280,6 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
                                              float32x4_t brightness_add,
                                              float32x4_t metal_gate,
                                              float32x4_t noise_add) {
-    // APC early-out: skip DSP when all lanes are inactive.
-#if defined(__aarch64__)
-    if (vmaxvq_u32(active_mask) == 0) {
-        return vdupq_n_f32(0.0f);
-    }
-#else
-    uint32x2_t max_half = vmax_u32(vget_low_u32(active_mask), vget_high_u32(active_mask));
-    if (vget_lane_u32(vpmax_u32(max_half, max_half), 0) == 0) {
-        return vdupq_n_f32(0.0f);
-    }
-#endif
-
     const float32x4_t two_pi_over_sr = vdupq_n_f32(2.0f * M_PI * INV_SAMPLE_RATE);
     const float32x4_t two_pi = vdupq_n_f32(2.0f * M_PI);
 
@@ -328,8 +309,7 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
 
     // FM indices.
     float32x4_t live_brightness = metal_clamp01(vaddq_f32(metal->brightness, brightness_add));
-    float32x4_t ring_index = vmaxq_f32(vdupq_n_f32(0.0f),
-                                        vaddq_f32(metal->ring_index, lfo_index_add));
+    float32x4_t ring_index = vaddq_f32(metal->ring_index, lfo_index_add);
     float32x4_t strike_index = vmulq_f32(metal->strike_index, env8);
 
     // Operator cascade: Op4 -> Op3 -> Op2 -> Op1.
@@ -373,13 +353,10 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
         vmulq_f32(op4, vmulq_f32(metal->op4_weight, bright_scale))
     );
 
-    // Metallic tails need slower energy loss than body drums.
-    float32x4_t env_sqrt = neon_sqrtq_f32(vmaxq_f32(gated_env, vdupq_n_f32(0.0f)));
-
-    // Reduce clean fundamental dominance as body rises to avoid whistle/"peew".
-    float32x4_t carrier_mix = vsubq_f32(vdupq_n_f32(0.92f), vmulq_n_f32(metal->body, 0.34f));
-    float32x4_t fm_output = vmulq_f32(vaddq_f32(vmulq_f32(op1, carrier_mix), harmonics),
-                                      vmulq_f32(env_sqrt, metal->ring_gain));
+    // Amplitude follows gated_env (linear with envelope curve from ROM).
+    // Using linear here prevents the sustained "string" character caused by sqrt decay.
+    float32x4_t fm_output = vmulq_f32(vaddq_f32(op1, harmonics),
+                                      vmulq_f32(gated_env, metal->ring_gain));
 
     // Bright HP noise only at the strike. Using env4 instead of full envelope
     // avoids noisy tails while making the hit more audible.
@@ -391,7 +368,7 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
         float32x4_t noise_colored = vaddq_f32(vmulq_n_f32(noise_hp, 0.58f),
                                               vmulq_n_f32(noise_bp, 0.42f));
 
-        float32x4_t adj_noise_gain = metal_clamp01(vaddq_f32(metal->noise_gain, noise_add));
+        float32x4_t adj_noise_gain = vaddq_f32(metal->noise_gain, noise_add);
         float32x4_t noise_level = vmulq_f32(adj_noise_gain,
                                             vaddq_f32(vdupq_n_f32(0.65f),
                                                        vmulq_n_f32(live_brightness, 0.65f)));
@@ -401,10 +378,6 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
     }
 
     fm_output = vmulq_f32(fm_output, metal->output_gain);
-
-    // Soft air damping keeps very bright sustained whistles in check.
-    float32x4_t tail_tame = vsubq_f32(vdupq_n_f32(1.0f), vmulq_f32(env_sqrt, vmulq_n_f32(live_brightness, 0.18f)));
-    fm_output = vmulq_f32(fm_output, vaddq_f32(vdupq_n_f32(0.82f), tail_tame));
 
     return vbslq_f32(active_mask, fm_output, vdupq_n_f32(0.0f));
 }

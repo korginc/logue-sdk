@@ -94,17 +94,17 @@ fast_inline void kick_engine_update(kick_engine_t* kick,
     // stays low and solid instead of becoming a tom-like chirp.
     // Widened range: 0.10 .. 2.20 octaves (was 0.45..1.63).
     kick->sweep_depth = vaddq_f32(vdupq_n_f32(0.10f),
-                                  vaddq_f32(vmulq_n_f32(kick->attack, 1.10f),
-                                             vmulq_n_f32(inv_body, 0.28f)));
+                                  vaddq_f32(vmulq_n_f32(kick->attack, 1.70f),
+                                             vmulq_n_f32(inv_body, 0.40f)));
 
     // Sustained body FM remains moderate. Too much sustained FM weakens the
     // fundamental and makes the kick less useful in a mix.
-    kick->body_index = vaddq_f32(vdupq_n_f32(0.22f),
-                                 vmulq_n_f32(kick->body, 1.05f));
+    kick->body_index = vaddq_f32(vdupq_n_f32(0.25f),
+                                 vmulq_n_f32(kick->body, 0.90f));
 
     // Very short attack FM.
     kick->click_index = vaddq_f32(vdupq_n_f32(0.55f),
-                                  vmulq_n_f32(kick->attack, 1.75f));
+                                  vmulq_n_f32(kick->attack, 2.65f));
 
     // Body compensation and transient drive.
     kick->output_gain = vaddq_f32(vdupq_n_f32(0.58f),
@@ -139,18 +139,6 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
                                             uint32x4_t active_mask,
                                             float32x4_t lfo_pitch_mult,
                                             float32x4_t lfo_index_add) {
-    // APC early-out: skip DSP when all lanes are inactive.
-#if defined(__aarch64__)
-    if (vmaxvq_u32(active_mask) == 0) {
-        return vdupq_n_f32(0.0f);
-    }
-#else
-    uint32x2_t max_half = vmax_u32(vget_low_u32(active_mask), vget_high_u32(active_mask));
-    if (vget_lane_u32(vpmax_u32(max_half, max_half), 0) == 0) {
-        return vdupq_n_f32(0.0f);
-    }
-#endif
-
     const float32x4_t two_pi_over_sr = vdupq_n_f32(2.0f * M_PI * INV_SAMPLE_RATE);
     const float32x4_t two_pi = vdupq_n_f32(2.0f * M_PI);
 
@@ -161,9 +149,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
     // - amp_env: overall loudness/body
     // - pitch_env: short sweep so pitch drop is less exposed
     // - index_env: shorter FM brightness than amp
-    float32x4_t env_sqrt = neon_sqrtq_f32(vmaxq_f32(envelope, vdupq_n_f32(0.0f)));
-    float32x4_t amp_env = vaddq_f32(vmulq_f32(envelope, vsubq_f32(vdupq_n_f32(1.0f), vmulq_n_f32(kick->body, 0.35f))),
-                                    vmulq_f32(env_sqrt, vmulq_n_f32(kick->body, 0.35f)));
+    float32x4_t amp_env = envelope;
     float32x4_t pitch_env = env8;
     float32x4_t index_env = env8;
 
@@ -193,19 +179,17 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
                                       kick->modulator_phase);
 
     // FM index: body remains present; click is extremely front-loaded.
-    float32x4_t body_index = vmulq_f32(vaddq_f32(vmulq_f32(env4, vsubq_f32(vdupq_n_f32(1.0f), vmulq_n_f32(kick->body, 0.45f))),
-                                                  vmulq_f32(env2, vmulq_n_f32(kick->body, 0.45f))),
-                                      kick->body_index);
+    float32x4_t body_index = vmulq_f32(env4, kick->body_index);
     float32x4_t click_index = vmulq_f32(index_env, kick->click_index);
     float32x4_t index = vaddq_f32(body_index, click_index);
-    index = vmaxq_f32(vdupq_n_f32(0.0f), vaddq_f32(index, lfo_index_add));
+    index = vaddq_f32(index, lfo_index_add);
 
     float32x4_t modulator = neon_sin_fast(kick->modulator_phase);
     float32x4_t modulated_phase = vaddq_f32(kick->carrier_phase,
                                             vmulq_f32(modulator, index));
 
     float32x4_t body = neon_sin_fast(modulated_phase);
-    float32x4_t transient = vmulq_f32(modulator, vmulq_f32(env8, vdupq_n_f32(0.10f)));
+    float32x4_t transient = vmulq_f32(modulator, vmulq_f32(env8, vdupq_n_f32(0.22f)));
     float32x4_t output = vaddq_f32(vmulq_f32(body, amp_env), transient);
 
     // Transient drive: stronger only at the front of the hit.

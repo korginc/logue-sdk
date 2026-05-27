@@ -22,17 +22,14 @@
 #define ENV_STATE_OFF     3
 
 // Envelope curve types
-#define ENV_CURVE_LINEAR       0
-#define ENV_CURVE_EXPONENTIAL  1
-#define ENV_CURVE_LOG          2
-#define ENV_CURVE_SIGMOID      3
-#define ENV_CURVE_PUNCH        4
+#define ENV_CURVE_LINEAR    0
+#define ENV_CURVE_EXPONENTIAL 1
 
 typedef struct {
     uint8_t attack_ms;    // 0-50ms
     uint16_t decay_ms;    // 20-500ms
     uint16_t release_ms;  // 10-500ms
-    uint8_t curve_type;   // 0=linear, 1=exponential, 2=log, 3=sigmoid, 4=punch
+    uint8_t curve_type;   // 0=linear, 1=exponential
 } env_curve_t;
 
 /** What I did not change
@@ -78,22 +75,22 @@ static const env_curve_t ENV_ROM[128] = {
     {2, 175, 98, 1},  // 13: Tight click/body
     {2, 185, 104, 1},  // 14: Tight click/body
     {2, 195, 110, 1},  // 15: Tight click/body
-    {1, 180, 90, 4},  // 16: Punch drum
-    {1, 198, 100, 4},  // 17: Punch drum
-    {1, 216, 110, 4},  // 18: Punch drum
-    {1, 234, 120, 4},  // 19: Punch drum
-    {2, 252, 130, 4},  // 20: Punch drum
-    {2, 270, 140, 4},  // 21: Punch drum
-    {2, 288, 150, 4},  // 22: Punch drum
-    {2, 306, 160, 4},  // 23: Punch drum
-    {3, 324, 170, 4},  // 24: Punch drum
-    {3, 342, 180, 4},  // 25: Punch drum
-    {3, 360, 190, 4},  // 26: Punch drum
-    {3, 378, 200, 4},  // 27: Punch drum
-    {4, 396, 210, 4},  // 28: Punch drum
-    {4, 414, 220, 4},  // 29: Punch drum
-    {4, 432, 230, 4},  // 30: Punch drum
-    {4, 450, 240, 4},  // 31: Punch drum
+    {1, 180, 90, 1},  // 16: Punch drum
+    {1, 198, 100, 1},  // 17: Punch drum
+    {1, 216, 110, 1},  // 18: Punch drum
+    {1, 234, 120, 1},  // 19: Punch drum
+    {2, 252, 130, 1},  // 20: Punch drum
+    {2, 270, 140, 1},  // 21: Punch drum
+    {2, 288, 150, 1},  // 22: Punch drum
+    {2, 306, 160, 1},  // 23: Punch drum
+    {3, 324, 170, 1},  // 24: Punch drum
+    {3, 342, 180, 1},  // 25: Punch drum
+    {3, 360, 190, 1},  // 26: Punch drum
+    {3, 378, 200, 1},  // 27: Punch drum
+    {4, 396, 210, 1},  // 28: Punch drum
+    {4, 414, 220, 1},  // 29: Punch drum
+    {4, 432, 230, 1},  // 30: Punch drum
+    {4, 450, 240, 1},  // 31: Punch drum
     {2, 380, 180, 1},  // 32: Body drum
     {2, 405, 196, 1},  // 33: Body drum
     {2, 430, 212, 1},  // 34: Body drum
@@ -158,22 +155,22 @@ static const env_curve_t ENV_ROM[128] = {
     {8, 1085, 745, 0},  // 93: Open linear
     {8, 1130, 770, 0},  // 94: Open linear
     {9, 1175, 795, 0},  // 95: Open linear
-    {0, 350, 200, 3},  // 96: Metallic tail
-    {0, 405, 225, 3},  // 97: Metallic tail
-    {0, 460, 250, 3},  // 98: Metallic tail
-    {0, 515, 275, 3},  // 99: Metallic tail
-    {0, 570, 300, 3},  // 100: Metallic tail
-    {0, 625, 325, 3},  // 101: Metallic tail
-    {1, 680, 350, 3},  // 102: Metallic tail
-    {1, 735, 375, 3},  // 103: Metallic tail
-    {1, 790, 400, 3},  // 104: Metallic tail
-    {1, 845, 425, 3},  // 105: Metallic tail
-    {1, 900, 450, 3},  // 106: Metallic tail
-    {1, 955, 475, 3},  // 107: Metallic tail
-    {1, 1010, 500, 3},  // 108: Metallic tail
-    {1, 1065, 525, 3},  // 109: Metallic tail
-    {1, 1120, 550, 3},  // 110: Metallic tail
-    {1, 1175, 575, 3},  // 111: Metallic tail
+    {0, 350, 200, 1},  // 96: Metallic tail
+    {0, 405, 225, 1},  // 97: Metallic tail
+    {0, 460, 250, 1},  // 98: Metallic tail
+    {0, 515, 275, 1},  // 99: Metallic tail
+    {0, 570, 300, 1},  // 100: Metallic tail
+    {0, 625, 325, 1},  // 101: Metallic tail
+    {1, 680, 350, 1},  // 102: Metallic tail
+    {1, 735, 375, 1},  // 103: Metallic tail
+    {1, 790, 400, 1},  // 104: Metallic tail
+    {1, 845, 425, 1},  // 105: Metallic tail
+    {1, 900, 450, 1},  // 106: Metallic tail
+    {1, 955, 475, 1},  // 107: Metallic tail
+    {1, 1010, 500, 1},  // 108: Metallic tail
+    {1, 1065, 525, 1},  // 109: Metallic tail
+    {1, 1120, 550, 1},  // 110: Metallic tail
+    {1, 1175, 575, 1},  // 111: Metallic tail
     {2, 800, 500, 0},  // 112: Experimental long
     {2, 870, 535, 0},  // 113: Experimental long
     {2, 940, 570, 0},  // 114: Experimental long
@@ -213,22 +210,22 @@ static const env_curve_t OLD_ENV_ROM[128] = {
     {3, 170, 85, 1},  // 15
 
     // Range 16-31: Punchy (standard drums)
-    {4, 180, 90, 4},   // 16
-    {4, 190, 95, 4},   // 17
-    {5, 200, 100, 4},  // 18
-    {5, 210, 105, 4},  // 19
-    {6, 220, 110, 4},  // 20
-    {6, 230, 115, 4},  // 21
-    {7, 240, 120, 4},  // 22
-    {7, 250, 125, 4},  // 23
-    {8, 260, 130, 4},  // 24
-    {8, 270, 135, 4},  // 25
-    {9, 280, 140, 4},  // 26
-    {9, 290, 145, 4},  // 27
-    {10, 300, 150, 4}, // 28
-    {10, 310, 155, 4}, // 29
-    {11, 320, 160, 4}, // 30
-    {11, 330, 165, 4}, // 31
+    {4, 180, 90, 1},   // 16
+    {4, 190, 95, 1},   // 17
+    {5, 200, 100, 1},  // 18
+    {5, 210, 105, 1},  // 19
+    {6, 220, 110, 1},  // 20
+    {6, 230, 115, 1},  // 21
+    {7, 240, 120, 1},  // 22
+    {7, 250, 125, 1},  // 23
+    {8, 260, 130, 1},  // 24
+    {8, 270, 135, 1},  // 25
+    {9, 280, 140, 1},  // 26
+    {9, 290, 145, 1},  // 27
+    {10, 300, 150, 1}, // 28
+    {10, 310, 155, 1}, // 29
+    {11, 320, 160, 1}, // 30
+    {11, 330, 165, 1}, // 31
 
     // Range 32-47: Fat (bigger sounds)
     {12, 340, 170, 1}, // 32
@@ -439,20 +436,11 @@ fast_inline float envelope_ms_to_samples_u16(uint16_t ms) {
 fast_inline float envelope_stage_coeff(float samples, uint32_t stage, uint32_t curve) {
     if (samples < 1.0f) samples = 1.0f;
 
-    if (curve == ENV_CURVE_EXPONENTIAL || curve == ENV_CURVE_LOG ||
-        curve == ENV_CURVE_SIGMOID || curve == ENV_CURVE_PUNCH) {
-        float a = 4.0f, d = 5.0f, r = 6.0f;
-        if (curve == ENV_CURVE_LOG) {
-            a = 3.2f; d = 4.2f; r = 4.8f;
-        } else if (curve == ENV_CURVE_SIGMOID) {
-            a = 4.8f; d = 4.0f; r = 5.0f;
-        } else if (curve == ENV_CURVE_PUNCH) {
-            a = 6.2f; d = 7.2f; r = 7.0f;
-        }
+    if (curve == ENV_CURVE_EXPONENTIAL) {
         switch (stage) {
-            case ENV_STAGE_ATTACK:  return a / samples;
-            case ENV_STAGE_DECAY:   return d / samples;
-            case ENV_STAGE_RELEASE: return r / samples;
+            case ENV_STAGE_ATTACK:  return 4.0f / samples;
+            case ENV_STAGE_DECAY:   return 5.0f / samples;
+            case ENV_STAGE_RELEASE: return 6.0f / samples;
             default:                return 0.0f;
         }
     }
@@ -542,9 +530,6 @@ fast_inline void neon_envelope_process(neon_envelope_t* env) {
     uint32x4_t decay_stage   = vceqq_u32(env->stage, vdupq_n_u32(ENV_STAGE_DECAY));
     uint32x4_t release_stage = vceqq_u32(env->stage, vdupq_n_u32(ENV_STAGE_RELEASE));
     uint32x4_t exp_curve     = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_EXPONENTIAL));
-    uint32x4_t log_curve     = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_LOG));
-    uint32x4_t sigmoid_curve = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_SIGMOID));
-    uint32x4_t punch_curve   = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_PUNCH));
 
     // Stage done before decrement. Treat samples_left <= 1 as done.
     uint32x4_t done = vandq_u32(active, vcgeq_u32(one_u32, env->samples_left));
@@ -563,29 +548,7 @@ fast_inline void neon_envelope_process(neon_envelope_t* env) {
                                      vmulq_f32(env->level, env->increment));
 
     float32x4_t exp_level = vbslq_f32(attack_stage, attack_exp, fall_exp);
-    float32x4_t log_attack = vaddq_f32(env->level,
-                                       vmulq_f32(vsubq_f32(one, env->level), vmulq_n_f32(env->increment, 0.72f)));
-    float32x4_t log_fall = vsubq_f32(env->level,
-                                     vmulq_f32(neon_sqrtq_f32(vmaxq_f32(env->level, zero)), vmulq_n_f32(env->increment, 0.72f)));
-    float32x4_t log_level = vbslq_f32(attack_stage, log_attack, log_fall);
-
-    float32x4_t sig_attack = vaddq_f32(env->level,
-                                       vmulq_f32(vsubq_f32(one, env->level), vmulq_n_f32(env->increment, 0.90f)));
-    float32x4_t sig_fall = vsubq_f32(env->level,
-                                     vmulq_f32(env->level, vmulq_n_f32(env->increment, 0.90f)));
-    float32x4_t sigmoid_level = vbslq_f32(attack_stage, sig_attack, sig_fall);
-
-    float32x4_t punch_attack = vaddq_f32(env->level,
-                                         vmulq_f32(vsubq_f32(one, env->level), vmulq_n_f32(env->increment, 1.35f)));
-    float32x4_t punch_fall = vsubq_f32(env->level,
-                                       vmulq_f32(env->level, vmulq_n_f32(env->increment, 1.25f)));
-    float32x4_t punch_level = vbslq_f32(attack_stage, punch_attack, punch_fall);
-
-    float32x4_t next_level = linear_level;
-    next_level = vbslq_f32(exp_curve, exp_level, next_level);
-    next_level = vbslq_f32(log_curve, log_level, next_level);
-    next_level = vbslq_f32(sigmoid_curve, sigmoid_level, next_level);
-    next_level = vbslq_f32(punch_curve, punch_level, next_level);
+    float32x4_t next_level = vbslq_f32(exp_curve, exp_level, linear_level);
 
     env->level = vbslq_f32(active, next_level, env->level);
 

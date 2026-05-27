@@ -584,7 +584,7 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     float32x4_t kick_out = vdupq_n_f32(0.0f);
     if (synth->engine_gain[ENGINE_KICK] > 0.0f) {
         kick_out = vmulq_f32(
-            kick_engine_process(&synth->kick, body_env, active_mask, lfo_pitch_mult, lfo_index_add),
+            kick_engine_process(&synth->kick, transient_env, active_mask, lfo_pitch_mult, lfo_index_add),
             vdupq_n_f32(synth->engine_gain[ENGINE_KICK])
         );
     }
@@ -593,11 +593,11 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     if (synth->engine_gain[ENGINE_SNARE] > 0.0f) {
         snare_out = vmulq_f32(
             snare_engine_process(&synth->snare,
-                                 body_env,
+                                 transient_env,
                                  active_mask,
                                  lfo_pitch_mult,
-                                 lfo_index_add,
-                                 lfo_noise_add),
+                                 vaddq_f32(lfo_index_add, lfo_noise_add),
+                                 vaddq_f32(synth->snare.noise_mix, lfo_noise_add)),
             vdupq_n_f32(synth->engine_gain[ENGINE_SNARE])
         );
     }
