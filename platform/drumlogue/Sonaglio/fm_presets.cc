@@ -308,8 +308,8 @@ const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
     {
         "TightKick",
         0, 35, 5, 5,
-        85, 75, 10, 20,
-        20, 15, 20, 25,
+        72, 82, 8, 18,
+        8, 8, 15, 22,
         0, 10, LFO_TARGET_PITCH, 10,
         0, 0, LFO_TARGET_NONE, 0,
         12, 35, 15, 20},
@@ -338,7 +338,7 @@ const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
     {
         "CrackSnare",
         1, 45, 4, 15,
-        20, 30, 90, 75,
+        15, 22, 92, 78,
         10, 10, 20, 20,
         2, 35, LFO_TARGET_INDEX, 50,
         0, 10, LFO_TARGET_NOISE_MIX, 15,

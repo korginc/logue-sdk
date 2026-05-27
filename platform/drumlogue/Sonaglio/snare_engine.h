@@ -126,17 +126,17 @@ fast_inline void snare_engine_update(snare_engine_t* snare,
 
     // Attack adds wire/noise. Body slightly restrains noise so body-heavy snares
     // remain more shell-like.
-    snare->noise_mix = vaddq_f32(vdupq_n_f32(0.16f),
-                                 vsubq_f32(vmulq_n_f32(snare->attack, 0.76f),
-                                            vmulq_n_f32(snare->body, 0.10f)));
+    snare->noise_mix = vaddq_f32(vdupq_n_f32(0.08f),
+                                 vsubq_f32(vmulq_n_f32(snare->attack, 0.42f),
+                                            vmulq_n_f32(snare->body, 0.16f)));
     snare->noise_mix = vmaxq_f32(zero, vminq_f32(one, snare->noise_mix));
 
     // Precomputed output balances.
-    snare->tone_gain_base = vaddq_f32(vdupq_n_f32(0.28f),
-                                      vmulq_n_f32(snare->body, 0.72f));
+    snare->tone_gain_base = vaddq_f32(vdupq_n_f32(0.40f),
+                                      vmulq_n_f32(snare->body, 0.78f));
 
-    snare->noise_gain_base = vaddq_f32(vdupq_n_f32(0.22f),
-                                       vmulq_n_f32(snare->noise_mix, 0.88f));
+    snare->noise_gain_base = vaddq_f32(vdupq_n_f32(0.08f),
+                                       vmulq_n_f32(snare->noise_mix, 0.50f));
 
     snare->click_gain = vaddq_f32(vdupq_n_f32(0.55f),
                                   vmulq_n_f32(snare->attack, 1.85f));
@@ -174,9 +174,9 @@ fast_inline float32x4_t snare_generate_noise(snare_engine_t* snare) {
     float32x4_t hp_lp = one_pole_lpf(&snare->noise_hpf, white, SNARE_NOISE_HPF_CUTOFF);
     float32x4_t high = vsubq_f32(white, hp_lp);
     float32x4_t band = one_pole_lpf(&snare->noise_lpf, high, SNARE_NOISE_LPF_CUTOFF);
-    return vaddq_f32(vmulq_n_f32(low, 0.18f),
-                     vaddq_f32(vmulq_n_f32(band, 0.62f),
-                               vmulq_n_f32(high, 0.20f)));
+    return vaddq_f32(vmulq_n_f32(low, 0.44f),
+                     vaddq_f32(vmulq_n_f32(band, 0.46f),
+                               vmulq_n_f32(high, 0.10f)));
 }
 
 /**
@@ -254,13 +254,13 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
     float32x4_t noise = snare_generate_noise(snare);
 
     // Tone is shorter than amp but not ultra-short: env2 preserves shell body.
-    float32x4_t tone_gain = vmulq_f32(env2, snare->tone_gain_base);
+    float32x4_t tone_gain = vmulq_f32(envelope, snare->tone_gain_base);
 
     // Noise can last with the envelope, but its level remains attack-weighted.
     float32x4_t noise_gain = vmulq_f32(noise_env,
                                        vmulq_f32(snare->noise_gain_base,
-                                                 vaddq_f32(vdupq_n_f32(0.42f),
-                                                           vmulq_n_f32(mix, 0.58f))));
+                                                 vaddq_f32(vdupq_n_f32(0.30f),
+                                                           vmulq_n_f32(mix, 0.35f))));
 
     // Very short front click from the same bandpassed noise.
     float32x4_t click = vmulq_f32(noise,

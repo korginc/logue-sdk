@@ -94,8 +94,8 @@ fast_inline void kick_engine_update(kick_engine_t* kick,
     // stays low and solid instead of becoming a tom-like chirp.
     // Widened range: 0.10 .. 2.20 octaves (was 0.45..1.63).
     kick->sweep_depth = vaddq_f32(vdupq_n_f32(0.10f),
-                                  vaddq_f32(vmulq_n_f32(kick->attack, 1.70f),
-                                             vmulq_n_f32(inv_body, 0.40f)));
+                                  vaddq_f32(vmulq_n_f32(kick->attack, 1.10f),
+                                             vmulq_n_f32(inv_body, 0.28f)));
 
     // Sustained body FM remains moderate. Too much sustained FM weakens the
     // fundamental and makes the kick less useful in a mix.
@@ -104,7 +104,7 @@ fast_inline void kick_engine_update(kick_engine_t* kick,
 
     // Very short attack FM.
     kick->click_index = vaddq_f32(vdupq_n_f32(0.55f),
-                                  vmulq_n_f32(kick->attack, 2.65f));
+                                  vmulq_n_f32(kick->attack, 1.75f));
 
     // Body compensation and transient drive.
     kick->output_gain = vaddq_f32(vdupq_n_f32(0.58f),
@@ -205,7 +205,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
                                             vmulq_f32(modulator, index));
 
     float32x4_t body = neon_sin_fast(modulated_phase);
-    float32x4_t transient = vmulq_f32(modulator, vmulq_f32(env8, vdupq_n_f32(0.22f)));
+    float32x4_t transient = vmulq_f32(modulator, vmulq_f32(env8, vdupq_n_f32(0.10f)));
     float32x4_t output = vaddq_f32(vmulq_f32(body, amp_env), transient);
 
     // Transient drive: stronger only at the front of the hit.
