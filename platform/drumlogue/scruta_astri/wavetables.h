@@ -5,8 +5,8 @@
 
 #pragma once
 
-constexpr int NUM_WAVETABLES = 264;
-constexpr int WAVETABLE_SIZE = 256; // align this osc1/2 wave in header.c
+constexpr int NUM_WAVETABLES = 264; // align this osc1/2 wave in header.c
+constexpr int WAVETABLE_SIZE = 256;
 
 constexpr float SCRUTAASTRI_WAVETABLES[NUM_WAVETABLES][WAVETABLE_SIZE] = {
     // Wavetable 0
