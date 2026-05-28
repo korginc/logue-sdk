@@ -84,7 +84,7 @@ int main() {
     metal_engine_update(&metal, vdupq_n_f32(0.5f), vdupq_n_f32(0.5f));
     metal_engine_set_note(&metal, all, vdupq_n_f32(42.0f));
     bench("metal process", 250000, [&]() -> float {
-        return vgetq_lane_f32(metal_engine_process(&metal, env, all, pitch, idx, vdupq_n_f32(0.25f), vdupq_n_f32(1.0f)), 0);
+        return vgetq_lane_f32(metal_engine_process(&metal, env, all, pitch, idx, vdupq_n_f32(0.25f), vdupq_n_f32(1.0f), vdupq_n_f32(0.0f)), 0);
     });
 
     perc_engine_t perc;

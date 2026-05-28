@@ -127,16 +127,17 @@ fast_inline void metal_engine_recompute(metal_engine_t* metal) {
     metal->strike_index = vaddq_f32(vdupq_n_f32(1.0f),
                                     vmulq_n_f32(attack, 4.5f));
 
-    // Ring FM: DX7/MD-drum style metallic indices. Range 8..13.
+    // Ring FM: DX7/MD-drum style metallic indices. Range 10..16.5.
     // Low values (1.5..4.7) created a narrow-bandwidth sustained tone = strings.
-    // At 8-13 the FM cascade produces a dense, inharmonic metallic spectrum.
-    metal->ring_index = vaddq_f32(vdupq_n_f32(8.0f),
-                                  vaddq_f32(vmulq_n_f32(body, 4.0f),
-                                             vmulq_n_f32(attack, 1.0f)));
+    // At higher indices the FM cascade produces a dense, inharmonic metallic spectrum.
+    metal->ring_index = vaddq_f32(vdupq_n_f32(10.0f),
+                                  vaddq_f32(vmulq_n_f32(body, 5.0f),
+                                             vmulq_n_f32(attack, 1.5f)));
 
     // Op4 self-feedback: body controls how square-wave-like the top modulator gets.
     // 0 = sinusoidal, 0.45 = rich and harsh (DX7-like feedback index 5-6).
-    metal->feedback_gain = vmulq_n_f32(body, 0.45f);
+    metal->feedback_gain = vaddq_f32(vmulq_n_f32(body, 0.42f),
+                                      vmulq_n_f32(attack, 0.12f));
 
     // Ring gain scaled down for the much hotter FM indices.
     float char_body_bonus = (metal->char_select == 0) ? 0.0f : 0.08f;
@@ -144,24 +145,25 @@ fast_inline void metal_engine_recompute(metal_engine_t* metal) {
                                  vmulq_n_f32(body, 0.20f));
 
     // Noise should sell the strike, not dominate the tail.
-    metal->noise_gain = vaddq_f32(vdupq_n_f32(0.012f),
-                                  vmulq_n_f32(attack, 0.14f));
+    metal->noise_gain = vaddq_f32(vdupq_n_f32(0.025f),
+                                  vmulq_n_f32(attack, 0.22f));
 
     // Precompute harmonic/operator weights for additive mix of upper partials.
     metal->op2_weight = vaddq_f32(vdupq_n_f32(0.20f),
                                   vaddq_f32(vmulq_n_f32(attack, 0.18f),
                                              vmulq_n_f32(body, 0.10f)));
 
-    metal->op3_weight = vaddq_f32(vdupq_n_f32(0.10f),
-                                  vaddq_f32(vmulq_n_f32(attack, 0.15f),
-                                             vmulq_n_f32(body, 0.07f)));
+    metal->op3_weight = vaddq_f32(vdupq_n_f32(0.14f),
+                                  vaddq_f32(vmulq_n_f32(attack, 0.20f),
+                                             vmulq_n_f32(body, 0.10f)));
 
-    metal->op4_weight = vaddq_f32(vdupq_n_f32(0.04f),
-                                  vmulq_n_f32(attack, 0.10f));
+    metal->op4_weight = vaddq_f32(vdupq_n_f32(0.08f),
+                                  vaddq_f32(vmulq_n_f32(attack, 0.15f),
+                                             vmulq_n_f32(body, 0.05f)));
 
     // Output gain scaled down for high FM index (hot signal).
-    metal->output_gain = vsubq_f32(vdupq_n_f32(0.30f),
-                                   vmulq_n_f32(attack, 0.08f));
+    metal->output_gain = vsubq_f32(vdupq_n_f32(0.34f),
+                                   vmulq_n_f32(attack, 0.07f));
 }
 
 /**
@@ -311,9 +313,15 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
     float32x4_t env2 = vmulq_f32(gated_env, gated_env);
     float32x4_t env4 = vmulq_f32(env2, env2);
     float32x4_t env8 = vmulq_f32(env4, env4);
+    float32x4_t live_brightness = metal_clamp01(vaddq_f32(metal->brightness, brightness_add));
 
-    // Pitch modulation.
+    // Pitch modulation. A short upward strike bend makes the carrier cluster
+    // visibly move at the attack instead of ringing as a static organ/string tone.
+    float32x4_t bend_oct = vmulq_f32(env2,
+                                     vaddq_f32(vdupq_n_f32(0.05f),
+                                               vmulq_n_f32(live_brightness, 0.18f)));
     float32x4_t base_freq = vmulq_f32(metal->carrier_freq_base, lfo_pitch_mult);
+    base_freq = vmulq_f32(base_freq, exp2_neon(bend_oct));
 
     // Advance all operator phases.
     for (int i = 0; i < NUM_OPERATORS; ++i) {
@@ -327,7 +335,6 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
     }
 
     // FM indices.
-    float32x4_t live_brightness = metal_clamp01(vaddq_f32(metal->brightness, brightness_add));
     float32x4_t ring_index = vmaxq_f32(vdupq_n_f32(0.0f),
                                         vaddq_f32(metal->ring_index, lfo_index_add));
     float32x4_t strike_index = vmulq_f32(metal->strike_index, env8);
@@ -342,10 +349,12 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
     float32x4_t op4 = neon_sin_fast(phase4_fb);
     metal->prev_op4 = op4;
 
-    // Op4 -> Op3: strike burst fades as env4 (fast); ring sustains via env4 envelope.
+    // Op4 -> Op3: use env2 for the ring component so upper inharmonic sidebands
+    // remain audible through the tail; only the extra strike burst is env8-fast.
     float32x4_t phase3_mod = vaddq_f32(metal->phase[2],
                                        vmulq_f32(op4,
-                                                 vmulq_f32(vaddq_f32(ring_index, strike_index), env4)));
+                                                 vaddq_f32(vmulq_f32(ring_index, env2),
+                                                           strike_index)));
     float32x4_t op3 = neon_sin_fast(phase3_mod);
 
     // Op3 -> Op2: intermediate FM decay (env2).
@@ -397,7 +406,7 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
                                                        vmulq_n_f32(live_brightness, 0.65f)));
 
         fm_output = vaddq_f32(fm_output,
-                              vmulq_f32(noise_colored, vmulq_f32(noise_level, env4)));
+                              vmulq_f32(noise_colored, vmulq_f32(noise_level, env2)));
     }
 
     fm_output = vmulq_f32(fm_output, metal->output_gain);

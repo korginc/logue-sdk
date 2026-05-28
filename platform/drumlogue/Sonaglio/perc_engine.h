@@ -104,8 +104,8 @@ fast_inline void perc_engine_update(perc_engine_t* perc,
                                             vmulq_n_f32(inv_body, 0.10f)));
 
     // Stable body index. Kept moderate so it does not become a melodic FM tone.
-    perc->body_index = vaddq_f32(vdupq_n_f32(0.22f),
-                                 vmulq_n_f32(perc->body, 0.95f));
+    perc->body_index = vaddq_f32(vdupq_n_f32(0.34f),
+                                 vmulq_n_f32(perc->body, 1.25f));
 
     // Short strike index. This is where Attack gets most of its personality.
     // Widened range: 0.30..3.00 (was 0.35..2.05) for more dramatic FM attack.
@@ -202,7 +202,7 @@ fast_inline float32x4_t perc_engine_process(perc_engine_t* perc,
     float32x4_t mod2 = neon_sin_fast(perc->phase[2]);
 
     float32x4_t body_part = vmulq_f32(mod1,
-                                      vmulq_f32(env4, perc->body_index));
+                                      vmulq_f32(env2, perc->body_index));
     float32x4_t strike_part = vmulq_f32(mod2,
                                         vmulq_f32(env8, perc->strike_index));
 
@@ -212,9 +212,12 @@ fast_inline float32x4_t perc_engine_process(perc_engine_t* perc,
     float32x4_t modulated_phase = vaddq_f32(perc->phase[0],
                                             vmulq_n_f32(modulation, 1.85f));
 
-    float32x4_t body = neon_sin_fast(modulated_phase);
-    float32x4_t transient = vmulq_f32(mod2, vmulq_f32(env8, vdupq_n_f32(0.18f)));
-    float32x4_t output = vaddq_f32(vmulq_f32(body, envelope), transient);
+    float32x4_t fm_body = neon_sin_fast(modulated_phase);
+    float32x4_t clean_body = neon_sin_fast(perc->phase[0]);
+    float32x4_t body_mix = vaddq_f32(vmulq_n_f32(clean_body, 0.32f),
+                                     vmulq_n_f32(fm_body, 0.68f));
+    float32x4_t transient = vmulq_f32(mod2, vmulq_f32(env8, vdupq_n_f32(0.28f)));
+    float32x4_t output = vaddq_f32(vmulq_f32(body_mix, envelope), transient);
 
     // Short attack saturation for more "hit" without making the tail harsh.
     float32x4_t drive_gain = vaddq_f32(vdupq_n_f32(1.0f),
