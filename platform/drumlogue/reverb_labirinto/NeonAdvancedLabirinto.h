@@ -66,18 +66,18 @@ static const char *k_preset_names[k_preset_number] =
 // ============================================================================
 // Factory Presets
 // ============================================================================
-// Each preset: {PRESET, TIME, LOW, HIGH, DAMP, WIDE, DFSN, PILL, SHMR, PDLY, VIBR}
+//    {PRESET,  TIME, LOW, HIGH, DAMP, WIDE, DFSN, PILL, SHMR, PDLY, VIBR}
 static const int32_t k_presets[k_preset_number][k_total] = {
     // 0: foresta - mellow, sparse, "wood" (warm lows, short, moderate decay)
-    {k_foresta, 40, 60, 40, 200, 80, 60, 3, 0, 0, 10},
+    {k_foresta,   40,  60,   40,  220,   90,   60,    3,    0,    0,  15},
     // 1: tempio  - sombre, "stone" (heavy lows, long, dark, 6-ch)
-    {k_tempio, 70, 80, 25, 130, 130, 80, 2, 0, 0, 10},
+    {k_tempio,    70,  80,   25,  150,  150,   80,    2,   10,   10,  10},
     // 2: labirinto - center values with random ping-pong stereo bouncing
-    {k_labirinto, 60, 50, 50, 510, 100, 50, 1, 0, 10, 10},
+    {k_labirinto, 60,  50,   50,  510,  100,   50,    1,    0,   10,  25},
     // 3: esotico - microtonal echoes on non-Western scale
-    {k_esotico, 40, 60, 80, 800, 100, 50, 4, 5, 5, 20},
+    {k_esotico,   40,  30,   80,  800,  80,    50,    4,    5,    0,  20},
     // 4: stellare - long, subtle, "spacey" shimmer (8-ch + shimmer)
-    {k_stellare, 90, 50, 80, 800, 180, 30, 4, 35, 20, 10},
+    {k_stellare,  90,  70,   80,  800,  190,   30,    4,   35,   20,   5},
 };
 
 // ============================================================================
@@ -409,12 +409,12 @@ public:
         // its additive blend, so it is left near unity. Starting points for HW
         // calibration.
         switch (filterMode) {
-            case kFilterWood:    outputMakeup = 1.7f; break;  // foresta
-            case kFilterStone:   outputMakeup = 2.0f; break;  // tempio (darkest)
-            case kFilterMetal:   outputMakeup = 1.6f; break;  // labirinto (tamed)
-            case kFilterCrystal: outputMakeup = 1.0f; break;  // esotico (good as-is)
-            case kFilterNoise:   outputMakeup = 1.5f; break;  // stellare
-            default:             outputMakeup = 1.0f; break;
+            case kFilterWood:    outputMakeup = 2.7f; break;  // foresta
+            case kFilterStone:   outputMakeup = 2.5f; break;  // tempio (darkest)
+            case kFilterMetal:   outputMakeup = 2.4f; break;  // labirinto (tamed)
+            case kFilterCrystal: outputMakeup = 3.0f; break;  // esotico (good as-is)
+            case kFilterNoise:   outputMakeup = 2.1f; break;  // stellare
+            default:             outputMakeup = 2.0f; break;
         }
         updateBaseFc();
     }
@@ -424,20 +424,23 @@ public:
         float fc;
         switch (filterMode) {
             case kFilterWood:
-                fc = 800.0f + dampingCoeff * 5700.0f;   // 1000..6500 Hz
+                fc = 1000.0f + dampingCoeff * 6000.0f;   // 1000..7000 Hz
                 break;
             case kFilterStone:
                 fc = 80.0f + dampingCoeff * 4920.0f;    // 80..5000 Hz
                 break;
             case kFilterMetal:
-                // 300..1200 Hz: covers kick body and snare fundamentals so
+                // 300..1300 Hz: covers kick body and snare fundamentals so
                 // drums with energy in this range trigger the metallic resonance.
-                fc = 300.0f + dampingCoeff * 900.0f;
+                fc = 300.0f + dampingCoeff * 1000.0f;
                 break;
             case kFilterCrystal:
-                // 1000..3000 Hz: snare crack / hi-hat body. Stays below DAMP LPF
+                // 1000..3500 Hz: snare crack / hi-hat body. Stays below DAMP LPF
                 // even at moderate DAMP settings so the crystal character survives.
-                fc = 1000.0f + dampingCoeff * 2000.0f;
+                fc = 1000.0f + dampingCoeff * 2500.0f;
+                break;
+            case kFilterNoise:
+                fc = 5000.0f + dampingCoeff * 10000.0f;
                 break;
             default:
                 fc = 1000.0f;
@@ -1164,7 +1167,7 @@ private:
         if (signal_active_4)
             noiseEnvelope += 0.001f * (1.0f - noiseEnvelope);
         else
-            noiseEnvelope -= 0.0000417f * noiseEnvelope;
+            noiseEnvelope -= 0.0000487f * noiseEnvelope;
 
         if (activeSampleCount <= 0) {
             float32x4_t zero = vdupq_n_f32(0.0f);
