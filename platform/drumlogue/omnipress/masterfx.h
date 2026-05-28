@@ -201,16 +201,16 @@ public:
             // Process 4 samples
             float32x4x2_t processed = process_block(main_l, main_r, sc_l, sc_r);
 
+            // Apply makeup gain (avoid making up the dry signal)
+            mixed.val[0] = vmulq_f32(processed.val[0], makeup_lin);
+            mixed.val[1] = vmulq_f32(processed.val[1], makeup_lin);
+
             // Mix stage
             float32x4x2_t mixed;
             mixed.val[0] = vaddq_f32(vmulq_f32(dry_l, dry_gain),
                                      vmulq_f32(processed.val[0], wet_gain));
             mixed.val[1] = vaddq_f32(vmulq_f32(dry_r, dry_gain),
                                      vmulq_f32(processed.val[1], wet_gain));
-
-            // Apply makeup gain
-            mixed.val[0] = vmulq_f32(mixed.val[0], makeup_lin);
-            mixed.val[1] = vmulq_f32(mixed.val[1], makeup_lin);
 
             // Output limiter: hard clip to [-1, 1] — transparent below clipping level.
             {
@@ -472,14 +472,6 @@ private:
         float32x4_t comp_r = vmulq_f32(main_r, gain_lin);
 
         // Apply saturation to the COMPRESSED signal (not raw input).
-        // sat_drive range: 2x (DRIVE=0) to 14x (DRIV4=100) — pushes the
-        // signal into the saturator nonlinear region.
-        // makeup = 1.0 keeps output level comparable to the input so
-        // harmonic character is always audible. The output hard-clip limiter
-        // prevents clipping. Do NOT divide by sat_drive (old formula made
-        // the distorted output quieter than dry, masking the effect).
-        float sat_drive = 2.0f + drive_ * 12.0f;
-        float32x4_t drv = vdupq_n_f32(sat_drive);
 
         switch (distressor_.dist_mode) {
             case DRIVE_MODE_SOFT_CLIP:
@@ -487,6 +479,9 @@ private:
             case DRIVE_MODE_TRIANGLE:
             case DRIVE_MODE_SINE:
             case DRIVE_MODE_SUBOCTAVE: {
+                // wavefolder_set_drive needs 1-100%
+                float sat_drive = drive_ * 100.0f;
+                float32x4_t drv = vdupq_n_f32(sat_drive);
                 wavefolder_set_drive(&wavefolder_, sat_drive);
                 // Wavefolder operates post-compression for dynamics control
                 float32x4x2_t folded = wavefolder_process(&wavefolder_, comp_l, comp_r, drv);
@@ -497,6 +492,14 @@ private:
             case DIST_MODE_DIST2:
             case DIST_MODE_DIST3:
             case DIST_MODE_BOTH: {
+                // sat_drive range: 2x (DRIVE=0) to 14x (DRIV4=100) — pushes the
+                // signal into the saturator nonlinear region.
+                // makeup = 1.0 keeps output level comparable to the input so
+                // harmonic character is always audible. The output hard-clip limiter
+                // prevents clipping. Do NOT divide by sat_drive (old formula made
+                // the distorted output quieter than dry, masking the effect).
+                float sat_drive = 2.0f + drive_ * 12.0f;
+                float32x4_t drv = vdupq_n_f32(sat_drive);
                 *out_l = generate_harmonics(&distressor_,
                                             vmulq_f32(comp_l, drv),
                                             distressor_.dist_mode);
@@ -534,7 +537,7 @@ public:
             case k_slope: // RATIO: map 0 to 100 into 0.0 to 1.0 representing the physical knob turn
                 {
                     if (comp_mode_ == COMP_MODE_DISTRESSOR) {
-                        int knob = value * 0.8f;  // Map 0-100 to 0-8 for the distressor's 8 ratio steps
+                        int knob = value * 0.0799f;  // Map 0-100 to 0-7 for the distressor's 8 ratio steps
                         distressor_set_ratio(&distressor_, knob);  // this updates opto_release_mult
                         update_opto_coeff(&distressor_, release_coeff_);
                         break;
@@ -798,7 +801,7 @@ public:
                 {
                     if (comp_mode_ == COMP_MODE_DISTRESSOR) {
                         // Distressor has 8 fixed ratio steps: 1:1, 2:1, 3:1, 4:1, 6:1, 8:1, 12:1, 20:1
-                        int knob = value * 0.8f; // Map 0-100 to 0-8
+                        int knob = value * 0.0799f; // Map 0-100 to 0-7 and never goes to 8 which is invalid
                         if (knob >= 0 && knob < DIST_RATIO_TOTAL) {
                             return distressor_ratio_strings[value];
                         }
