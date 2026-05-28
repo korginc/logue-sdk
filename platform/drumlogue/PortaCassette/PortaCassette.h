@@ -100,7 +100,7 @@ public:
         hiss_amount_      = 0.003f; // init=15 → norm=0.15 * 0.02
         previous_noise_l_ = vdupq_n_f32(0.0f);
         previous_noise_r_ = vdupq_n_f32(0.0f);
-        pop_env_          = vdupq_n_f32(0.0f);
+        pop_env_scalar_   = 0.0f;
         vinyl_pop_threshold_ = 0.0;
 
         target_preamp_ = current_preamp_ = 1.0f + 0.20f * 2.0f; // init=20
@@ -152,9 +152,19 @@ public:
         set_dust_parameter(norm);
     }
 
+    /**
+     * @brief Set the dust parameter object.
+     * Since pop envelope decays incredibly fast, a single pop is not
+     * really audible. With pop_env_decay_ = 0.96f, a pop takes only
+     * about 100 samples to decay into complete silence.
+     * At 48 kHz, 100 samples is roughly 2 milliseconds.
+     *
+     * @param knob_value
+     * @return fast_inline
+     */
     fast_inline void set_dust_parameter(float knob_value) {
-        // Map linearly to a frequency between 0.1Hz (10s) and 1.0Hz (1s)
-        float frequency = 0.1f + (knob_value * 0.9f);
+        // Map to a realistic density: 2.0Hz to 50.0Hz (max 2 to 50 pops per second)
+        float frequency = 2.0f + (knob_value * 48.0f);
 
         // Calculate per-sample probability at 48kHz
         float sample_probability = frequency * inverse_sample_rate_;
@@ -321,83 +331,57 @@ public:
     }
 
     fast_inline void vinyl_dust(float32x4_t &sig_l, float32x4_t &sig_r) {
-        // ------------------------------------------------------------------------
-        // 1. Generate independent white noise sources
-        // ------------------------------------------------------------------------
-        float32x4_t white_l = vsubq_f32(
-            vmulq_n_f32(prng_rand_float(), 2.0f),
-            vdupq_n_f32(1.0f));
+        // 1. Generate independent white noise sources (Vectorized, fast)
+        float32x4_t white_l = vsubq_f32(vmulq_n_f32(prng_rand_float(), 2.0f),
+                                        vdupq_n_f32(1.0f));
+        float32x4_t white_r = vsubq_f32(vmulq_n_f32(prng_rand_float(), 2.0f),
+                                        vdupq_n_f32(1.0f));
 
-        float32x4_t white_r = vsubq_f32(
-            vmulq_n_f32(prng_rand_float(), 2.0f),
-            vdupq_n_f32(1.0f));
+        // 2. Generate random values for triggers and amplitudes
+        float32x4_t rand_trigger = prng_rand_float();
+        float32x4_t rand_amp_pool = prng_rand_float();
 
-        // ------------------------------------------------------------------------
-        // 2. Sparse random trigger for dust pops
-        //    Dynamic Sparse random trigger for dust pops
-        // ------------------------------------------------------------------------
-        uint32x4_t trigger =
-            vcgtq_f32(prng_rand_float(), vdupq_n_f32(vinyl_pop_threshold_));
+        float r_trig[NEON_LANES], r_amp[NEON_LANES];
+        vst1q_f32(r_trig, rand_trigger);
+        vst1q_f32(r_amp, rand_amp_pool);
 
-        // ------------------------------------------------------------------------
-        // 3. Random pop amplitude
-        //    softer and more realistic than huge spikes
-        // ------------------------------------------------------------------------
-        float32x4_t rand_amp =
-            vmlaq_n_f32(
-                vdupq_n_f32(0.08f),     // minimum
-                prng_rand_float(),
-                0.12f);                 // random extra
+        float env_array[NEON_LANES];
 
-        // ------------------------------------------------------------------------
-        // 4. Trigger envelope
-        //    if trigger occurs:
-        //        pop_env_ = rand_amp
-        // ------------------------------------------------------------------------
-        pop_env_ = vbslq_f32(trigger, rand_amp, pop_env_);
+        // Run a short 4-step sequential loop so the envelope decays sample-by-sample,
+        // letting a pop smoothly coat all subsequent time lanes!
+        for (int i = 0; i < NEON_LANES; ++i) {
+            if (r_trig[i] > vinyl_pop_threshold_) {
+                // Slightly boosted amplitude range (0.15f to 0.45f) for beautiful analog presence
+                float amplitude = 0.15f + r_amp[i] * 0.30f;
+                if (amplitude > pop_env_scalar_) {
+                    pop_env_scalar_ = amplitude;
+                }
+            }
+            env_array[i] = pop_env_scalar_;
+            pop_env_scalar_ *= pop_env_decay_; // Natural sequential sample-rate decay
+        }
 
-        // ------------------------------------------------------------------------
-        // 5. Exponential decay
-        // ------------------------------------------------------------------------
-        pop_env_ = vmulq_n_f32(pop_env_, pop_env_decay_);
+        // Load back into a vector for parallel processing
+        float32x4_t v_pop_env = vld1q_f32(env_array);
 
-        // ------------------------------------------------------------------------
-        // 6. Shape transient
-        //    Adds temporal continuity instead of single-sample spikes
-        // ------------------------------------------------------------------------
-        float32x4_t crackle_l =
-            vaddq_f32(
-                vmulq_n_f32(white_l, 0.82f),
-                vmulq_n_f32(previous_noise_l_, 0.18f));
-
-        float32x4_t crackle_r =
-            vaddq_f32(
-                vmulq_n_f32(white_r, 0.82f),
-                vmulq_n_f32(previous_noise_r_, 0.18f));
+        // 3. Shape transient & Apply envelope
+        float32x4_t crackle_l = vaddq_f32(vmulq_n_f32(white_l, 0.82f),
+                                          vmulq_n_f32(previous_noise_l_, 0.18f));
+        float32x4_t crackle_r = vaddq_f32(vmulq_n_f32(white_r, 0.82f),
+                                          vmulq_n_f32(previous_noise_r_, 0.18f));
 
         previous_noise_l_ = white_l;
         previous_noise_r_ = white_r;
 
-        // ------------------------------------------------------------------------
-        // 7. Apply envelope
-        // ------------------------------------------------------------------------
-        crackle_l = vmulq_f32(crackle_l, pop_env_);
-        crackle_r = vmulq_f32(crackle_r, pop_env_);
+        crackle_l = vmulq_f32(crackle_l, v_pop_env);
+        crackle_r = vmulq_f32(crackle_r, v_pop_env);
 
-        // ------------------------------------------------------------------------
-        // 8. Band-limit the crackle
-        //    Real vinyl dust is mid/high focused, not full-band impulses
-        // ------------------------------------------------------------------------
-        crackle_l =
-            biquad_process4(&hiss_hpf_l_, &coeff_hiss_hpf_, crackle_l);
+        // 4. Band-limit the crackle (Pops are mid-focused, not wideband clicks)
+        crackle_l = biquad_process4(&hiss_hpf_l_, &coeff_hiss_hpf_, crackle_l);
+        crackle_r = biquad_process4(&hiss_hpf_r_, &coeff_hiss_hpf_, crackle_r);
 
-        crackle_r =
-            biquad_process4(&hiss_hpf_r_, &coeff_hiss_hpf_, crackle_r);
-
-        // ------------------------------------------------------------------------
-        // 9. Mix quietly
-        // ------------------------------------------------------------------------
-        const float dust_level = 0.05f + tape_age_ * 0.05f;
+        // 5. Mix into output path
+        const float dust_level = 0.06f + tape_age_ * 0.08f;
 
         sig_l = vmlaq_n_f32(sig_l, crackle_l, dust_level);
         sig_r = vmlaq_n_f32(sig_r, crackle_r, dust_level);
@@ -594,10 +578,10 @@ private:
     float wf_flutter_phase_;
     float wf_flutter_phase_inc_;  // precomputed per-sample increment for 25 Hz flutter
     float vinyl_pop_threshold_;   // Stores the current threshold
+    float pop_env_scalar_;        // precomputed per-sample decay increment for the pop envelope
 
     float32x4_t previous_noise_l_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
     float32x4_t previous_noise_r_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
-    float32x4_t pop_env_; // precomputed per-sample decay increment for the pop envelope
     // State variables for the DC blocker (assumes 4 independent channels)
     float x_prev_l;
     float x_prev_r;
