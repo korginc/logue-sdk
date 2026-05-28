@@ -23,7 +23,7 @@ static inline float xorshift_f32(uint32_t& s) {
 PercussionSpatializer::PercussionSpatializer() {
     memset(params_, 0, sizeof(params_));
     clone_set_index_ = CLONE_SET_4;
-    clone_count_     = 4;
+    clone_count_     = kCloneValues[clone_set_index_];
 }
 
 int8_t PercussionSpatializer::Init(const unit_runtime_desc_t* desc) {
@@ -49,6 +49,7 @@ void PercussionSpatializer::Reset() {
     for (int i = 0; i < kMaxClones; ++i) {
         clones_[i].lp_state_l = 0.0f;
         clones_[i].lp_state_r = 0.0f;
+        clones_[i].hit_accent = 1.0f; // Initialize baseline
     }
 
     rebuild_profile();
@@ -168,10 +169,12 @@ void PercussionSpatializer::update_clone_dynamics() {
 
     for (int i = 0; i < clone_count_; ++i) {
         const float t        = (float)i * inv_cnt1;
-        const float soft_fac = (i == 0) ? 1.0f : (0.82f + 0.18f * (1.0f - soft_atk_));  // increased effect, s drumlogue can select how much delay can be applied. For softer effect, just add less.
+        const float soft_fac = (i == 0) ? 1.0f : (0.82f + 0.18f * (1.0f - soft_atk_));
         clones_[i].wobble_depth_samples = wobble_ms * (0.20f + 0.30f * t) * ms_to_smp;
-        clones_[i].net_gain_l = clones_[i].base_gain * soft_fac * clones_[i].pan_gain_l;
-        clones_[i].net_gain_r = clones_[i].base_gain * soft_fac * clones_[i].pan_gain_r;
+
+        // Multiply by hit_accent at the very end of gain assembly
+        clones_[i].net_gain_l = clones_[i].base_gain * soft_fac * clones_[i].pan_gain_l * clones_[i].hit_accent;
+        clones_[i].net_gain_r = clones_[i].base_gain * soft_fac * clones_[i].pan_gain_r * clones_[i].hit_accent;
     }
 }
 
@@ -332,12 +335,45 @@ void PercussionSpatializer::randomize_hit() {
     const float global_jit = (xorshift_f32(rng_state_) * 2.0f - 1.0f) * profile_.jitter_ms;
     const float gap_detach = 1.0f + gap_ * 1.7f;
 
+    // Reset all clones to standard baseline accentuation first
     for (int i = 0; i < clone_count_; ++i) {
+        clones_[i].hit_accent = 1.0f;
+
         const float follower  = (float)i * inv_cnt1;
         const float max_sct   = profile_.scatter_amount * 2.4f * (0.25f + 0.75f * follower) * gap_detach;
         const float clone_jit = (xorshift_f32(rng_state_) * 2.0f - 1.0f) * max_sct;
         clones_[i].scatter_samples = (global_jit + clone_jit) * ms_to_smp * gap_detach;
         clones_[i].wobble_phase    = xorshift_f32(rng_state_) * 2.0f * M_PI;
+    }
+
+    // Humanize: Pick 1 or 2 random secondary clones to accent or damp
+    if (clone_count_ > 2) {
+        // Pick a random clone index excluding the first master clone (i=0)
+        int random_clone_1 = 1 + (int)(xorshift_f32(rng_state_) * (clone_count_ - 1));
+        // Give it a variance of +/- 3dB (~0.7 to ~1.4 amplitude)
+        clones_[random_clone_1].hit_accent = 0.7f + (xorshift_f32(rng_state_) * 0.7f);
+
+        if (clone_count_ > 4) {
+            int random_clone_2 = 1 + (int)(xorshift_f32(rng_state_) * (clone_count_ - 1));
+            if (random_clone_2 != random_clone_1) {
+                // Make the second one a localized damping/ghost hit drop
+                clones_[random_clone_2].hit_accent = 0.4f + (xorshift_f32(rng_state_) * 0.5f);
+            }
+            if ((mode_ == MODE_TRIBAL) || (mode_ == MODE_ANGEL)) {
+                int random_clone_3 = 1 + (int)(xorshift_f32(rng_state_) * (clone_count_ - 1));
+                if (random_clone_3 != random_clone_1) {
+                    // Make the third one a localized damping/ghost hit drop
+                    clones_[random_clone_3].hit_accent = 0.4f + (xorshift_f32(rng_state_) * 0.5f);
+                }
+            }
+            if ((mode_ == MODE_TRIBAL) && (clone_count_ > 6)) {
+                int random_clone_4 = 1 + (int)(xorshift_f32(rng_state_) * (clone_count_ - 1));
+                if (random_clone_4 != random_clone_1) {
+                    // Make the second one a localized damping/ghost hit drop
+                    clones_[random_clone_4].hit_accent = 0.4f + (xorshift_f32(rng_state_) * 0.5f);
+                }
+            }
+        }
     }
 }
 
@@ -528,7 +564,10 @@ void PercussionSpatializer::render_block4(const float* in, float* out) {
     //    (ensures randomize_hit uses the freshly rebuilt profile)
     advance_smoothing();
     if (pending_profile_rebuild_) rebuild_profile();
-    if (transient) randomize_hit();
+    if (transient) {
+        randomize_hit();
+        update_clone_dynamics(); // Forces instant re-calculation for the current block!
+    }
 
     // 4. Advance wobble LFO phase for each clone.
     // rate_ ∈ [0.05, 10.0] maps directly to LFO Hz. Per 4-sample block:

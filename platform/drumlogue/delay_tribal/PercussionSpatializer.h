@@ -75,10 +75,13 @@ typedef struct {
     float wobble_phase;
     float wobble_rate_mul;
 
-    // Add these for real one-pole IIR low-pass filtering
+    // one-pole IIR low-pass filtering
     float lp_coef;
     float lp_state_l;
     float lp_state_r;
+
+    // dynamic humanization
+    float hit_accent;
 } clone_t;
 
 enum params {
@@ -173,7 +176,7 @@ private:
 
     spatial_mode_t mode_ = MODE_TRIBAL;
     int clone_set_index_ = CLONE_SET_4;
-    int clone_count_ = 4;
+    int clone_count_ = kCloneValues[clone_set_index_];
 
     int8_t params_[k_total] = {};
 
