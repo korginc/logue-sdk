@@ -5,127 +5,147 @@
 
 /**
  * @file drone_engine.h
- * @brief Parallel resonator bank drone engine — PLACEHOLDER IMPLEMENTATION.
+ * @brief Compact self-oscillating Feedback Delay Network — ScrutaAstri presets 95/96.
  *
- * *** DESIGN STATUS: NOT SELF-OSCILLATING — pending replacement ***
+ * Architecture: 4 short delay lines + 4x4 Hadamard mixing + tanh saturation in the
+ * feedback path. The Hadamard cross-coupling combined with the nonlinear saturation
+ * creates a chaotic strange attractor: the output evolves continuously and never
+ * exactly repeats — genuine self-generative behaviour without external input.
  *
- * Current implementation: 4 parallel biquad bandpass resonators driven by
- * continuous LCG white noise. This produces *colored noise* (spectrally shaped
- * near the resonant frequencies) but NOT a pitched, self-sustaining drone.
- * The resonators filter noise; they do not sustain a tone because there is no
- * feedback from the output back to the input.
+ * Chaos regime control (O2Detune knob, remapped in drone mode):
+ *   g low  (left)  → periodic limit cycle (stable, repeating tone)
+ *   g mid  (centre) → chaotic attractor   (self-generative, bounded by saturation)
+ *   g high (right) → aggressive chaos     (loud, dense, still bounded by tanh)
  *
- * Two replacement architectures are under evaluation (see PROGRESS.md):
+ * Effective loop gain = g × 0.5 (Hadamard scale) × drive.
+ * At default (g=1.85, drive=1.2): loop gain ≈ 1.11 → chaotic attractor.
  *
- *   Option A — Biquad sinusoidal oscillator bank (true self-oscillation):
- *     y[n] = r * (2*cos(w0)*y[n-1] - y[n-2]),  r ≈ 0.9999
- *     Poles fractionally inside the unit circle → self-sustaining pure tones.
- *     Memory: ~48 bytes per drone. No external input needed.
- *     Timbral shaping comes from the downstream filter chain only.
+ * Parameter routing in drone mode (see PROGRESS.md):
+ *   O2Detune (-100..100) → feedback gain g     (chaos level)
+ *   O2SubOct (0..4)      → saturation drive    (harmonic density)
+ *   O2Mix    (0..100)    → noise injection amp  (excitation amount)
+ *   Note / F1Cut / F1Res → perceived pitch via post-FDN filter (downstream, unchanged)
+ *   F2, CMOS, SRR, BRR  → post-FDN processing (unchanged, very interesting on FDN output)
  *
- *   Option B — Wavetable oscillators feeding a feedback comb/allpass:
- *     Osc1/Osc2 excite a delay line: y[n] = x[n] + g*y[n-D], g ≈ 0.97
- *     D = sample_rate / base_hz, tuned to the oscillator fundamental.
- *     Wavetable timbral identity preserved. Memory: ~3 KB per drone.
+ * Crystal (preset 95): delay lines {61,79,83,97} samples → resonant peaks ~500-800 Hz.
+ *   One-pole LPF in loop (alpha=0.35) — smooth, diffuse, dark harmonic cloud.
+ * Metal   (preset 96): delay lines {29,37,43,53} samples → resonant peaks ~900-1650 Hz.
+ *   One-pole LPF in loop (alpha=0.65) — brighter, more metallic, harsher texture.
  *
- * Two modes, selectable at init():
- *   Crystal (false) — esotico-inspired: smooth harmonic ratios, gentle Q=2.5.
- *   Metal   (true)  — labirinto-inspired: TR-808 metallic ratios, high Q=6.
+ * Fast 4x4 Hadamard (8 adds + 4 muls, no matrix multiply):
+ *   a=d0+d1; b=d0-d1; c=d2+d3; e=d2-d3
+ *   h = {a+c, b+e, a-c, b-e} × 0.5
  *
- * Current biquad form (Audio EQ Cookbook bandpass, b1=0):
- *   y[n] = g*(x[n]-x[n-2]) + c1*y[n-1] + c2*y[n-2]
- * where:
- *   g  = sin(w0)/2 / (1+alpha)
- *   c1 = 2*cos(w0)  / (1+alpha)
- *   c2 = -(1-alpha) / (1+alpha)
- *   alpha = sin(w0)/(2Q)
+ * Memory: 4 lines × 128 samples × 4 bytes = 2 KB per drone instance.
  */
 
-static constexpr int DRONE_RESONATORS = 4;
-static constexpr float DRONE_SAMPLE_RATE = 48000.0f;
+static constexpr int FDN_LINES   = 4;
+static constexpr int FDN_BUF_LEN = 128;   // power of 2, must exceed max delay (97)
 
-// Crystal ratios: smooth near-harmonic intervals for diffuse shimmer
-static constexpr float CRYSTAL_RATIOS[DRONE_RESONATORS] = { 1.0f, 1.5f, 2.0f, 3.15f };
-// Metal ratios: TR-808 metallic partial intervals
-static constexpr float METAL_RATIOS[DRONE_RESONATORS] = { 1.0f, 1.6732f, 2.4281f, 3.5f };
+// Crystal: near-harmonic, longer delays → lower resonant frequencies
+static constexpr int CRYSTAL_DELAYS[FDN_LINES] = { 61, 79, 83, 97 };
+// Metal: TR-808-ratio-inspired, shorter delays → higher, brighter frequencies
+static constexpr int METAL_DELAYS[FDN_LINES]   = { 29, 37, 43, 53 };
 
 struct DroneEngine {
-    float y1[DRONE_RESONATORS];
-    float y2[DRONE_RESONATORS];
-    float g[DRONE_RESONATORS];    // b0/a0
-    float c1[DRONE_RESONATORS];   // 2*cos(w0)/a0  (applied to y[n-1])
-    float c2[DRONE_RESONATORS];   // -(1-alpha)/a0  (applied to y[n-2], stored negative)
-    float x1, x2;                 // shared input delay (same noise feeds all resonators)
-
-    float noise_amp;
-    float output_gain;
-    float q;
-    const float* ratios;
+    float buf[FDN_LINES][FDN_BUF_LEN];  // delay line ring buffers
+    int   write_pos;                     // shared write pointer (all lines advance together)
+    int   dlen[FDN_LINES];              // delay lengths in samples
+    float fz[FDN_LINES];               // one-pole LPF state per line
+    float falpha;                        // one-pole coefficient (crystal=0.35, metal=0.65)
+    float g;                             // feedback gain      (O2Detune → chaos level)
+    float drive;                         // saturation drive   (O2SubOct → harmonic density)
+    float noise_amp;                     // noise injection    (O2Mix)
+    float out_scale;                     // output normalisation (mode-dependent)
     uint32_t prng;
 
     inline void init(bool metal) {
-        memset(y1, 0, sizeof(y1));
-        memset(y2, 0, sizeof(y2));
-        memset(g,  0, sizeof(g));
-        memset(c1, 0, sizeof(c1));
-        memset(c2, 0, sizeof(c2));
-        x1 = 0.0f;
-        x2 = 0.0f;
+        memset(buf, 0, sizeof(buf));
+        memset(fz,  0, sizeof(fz));
+        write_pos = 0;
+        prng      = metal ? 0xDEADBEEFu : 0xCAFEBABEu;
 
-        if (metal) {
-            q           = 6.0f;
-            noise_amp   = 0.04f;
-            output_gain = 0.14f;
-            ratios      = METAL_RATIOS;
-            prng        = 0xDEADBEEFu;
-        } else {
-            q           = 2.5f;
-            noise_amp   = 0.10f;
-            output_gain = 0.18f;
-            ratios      = CRYSTAL_RATIOS;
-            prng        = 0xCAFEBABEu;
-        }
+        const int* src = metal ? METAL_DELAYS : CRYSTAL_DELAYS;
+        for (int i = 0; i < FDN_LINES; i++) dlen[i] = src[i];
+
+        falpha    = metal ? 0.65f : 0.35f;
+        g         = 1.85f;   // default: chaotic attractor regime
+        drive     = 1.20f;
+        noise_amp = 0.0008f; // tiny — just enough to prevent silence when in stable regime
+        out_scale = metal ? 0.40f : 0.50f;
     }
 
     inline void clear() {
-        memset(y1, 0, sizeof(y1));
-        memset(y2, 0, sizeof(y2));
-        x1 = 0.0f;
-        x2 = 0.0f;
+        memset(buf, 0, sizeof(buf));
+        memset(fz,  0, sizeof(fz));
+        write_pos = 0;
     }
 
-    inline void set_note(float base_hz) {
-        const float inv_sr = 1.0f / DRONE_SAMPLE_RATE;
-        for (int i = 0; i < DRONE_RESONATORS; i++) {
-            float freq = base_hz * ratios[i];
-            if (freq > DRONE_SAMPLE_RATE * 0.45f) freq = DRONE_SAMPLE_RATE * 0.45f;
-            const float omega = M_TWOPI * freq * inv_sr;
-            const float sin_w = fastersinfullf(omega);
-            const float cos_w = fastercosfullf(omega);
-            const float alpha = sin_w / (2.0f * q);
-            const float a0inv = 1.0f / (1.0f + alpha);
-            g[i]  = sin_w * 0.5f * a0inv;
-            c1[i] = 2.0f * cos_w * a0inv;
-            c2[i] = -(1.0f - alpha) * a0inv;
-        }
+    // set_note: pitch is perceived via F1Cutoff downstream — no delay retune needed.
+    // Reseed PRNG on note-on so each hit starts from a slightly different attractor position.
+    inline void set_note(float) {
+        prng ^= 0x5A5A5A5Au;
+    }
+
+    // O2Detune (-100..100) → g in [1.20, 2.50]
+    // Centre (0) = 1.85 = calibrated chaotic attractor at default drive.
+    inline void set_feedback(int32_t v) {
+        g = 1.85f + (float)v * 0.0065f;
+        g = g < 1.0f ? 1.0f : g > 2.8f ? 2.8f : g;
+    }
+
+    // O2SubOct (0..4) → drive in [0.80, 2.00]
+    // Lower = softer saturation (smoother), higher = harder clipping (more harmonics).
+    inline void set_drive(int32_t v) {
+        drive = 0.80f + (float)v * 0.30f;
+    }
+
+    // O2Mix (0..100) → noise_amp in [0.0005, 0.0200]
+    // Low = pure self-oscillation, high = heavy noise excitation (denser, noisier texture).
+    inline void set_noise(int32_t v) {
+        noise_amp = 0.0005f + (float)v * 0.000195f;
     }
 
     inline __attribute__((optimize("Ofast"), always_inline))
     float process() {
-        // LCG white noise
-        prng = prng * 1664525u + 1013904223u;
-        const float x0 = (float)(int32_t)prng * (1.0f / 2147483648.0f) * noise_amp;
-        const float dx = x0 - x2;
-
-        float out = 0.0f;
-        for (int i = 0; i < DRONE_RESONATORS; i++) {
-            const float y0 = g[i] * dx + c1[i] * y1[i] + c2[i] * y2[i];
-            y2[i] = y1[i];
-            y1[i] = y0;
-            out += y0;
+        // 1. Read delay line outputs + apply per-line one-pole LPF
+        //    LPF in feedback path: crystal=dark/smooth, metal=bright/metallic
+        float d[FDN_LINES];
+        for (int i = 0; i < FDN_LINES; i++) {
+            const int rp = (write_pos - dlen[i]) & (FDN_BUF_LEN - 1);
+            fz[i] += falpha * (buf[i][rp] - fz[i]);
+            d[i] = fz[i];
         }
-        x2 = x1;
-        x1 = x0;
-        return out * output_gain;
+
+        // 2. Output = average of delay line reads (pre-Hadamard, before cross-mixing)
+        const float out = (d[0] + d[1] + d[2] + d[3]) * 0.25f * out_scale;
+
+        // 3. Fast 4×4 Hadamard cross-mix (8 adds + 4 muls)
+        //    This coupling is what enables chaos: each line now feeds all others.
+        const float a = d[0] + d[1], b = d[0] - d[1];
+        const float c = d[2] + d[3], e = d[2] - d[3];
+        d[0] = (a + c) * 0.5f;
+        d[1] = (b + e) * 0.5f;
+        d[2] = (a - c) * 0.5f;
+        d[3] = (b - e) * 0.5f;
+
+        // 4. Noise injection (tiny — keeps attractor alive, prevents silence)
+        prng = prng * 1664525u + 1013904223u;
+        const float noise = (float)(int32_t)prng * (1.0f / 2147483648.0f) * noise_amp;
+
+        // 5. Apply gain + saturation + write back to delay lines
+        //    Padé [3,3] tanh approximant, clamped to [-3, 3] for stability.
+        //    Inside the loop: effective gain = g × 0.5 × drive.
+        //    At default (1.85 × 0.5 × 1.2 ≈ 1.11): above unit gain → chaotic attractor.
+        const float gd = g * drive;
+        for (int i = 0; i < FDN_LINES; i++) {
+            float x = (d[i] + noise) * gd;
+            x = x >  3.0f ?  3.0f : x < -3.0f ? -3.0f : x;
+            const float x2  = x * x;
+            buf[i][write_pos] = x * (27.0f + x2) / (27.0f + 9.0f * x2);
+        }
+
+        write_pos = (write_pos + 1) & (FDN_BUF_LEN - 1);
+        return out;
     }
 };

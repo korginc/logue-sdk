@@ -137,6 +137,21 @@ public:
 
                 // Force frequency target updates
                 updateOscillators();
+
+                // Entering drone preset: re-init FDN state and sync all drone controls
+                // from current knob positions so the FDN starts fresh on every entry.
+                if (value >= 95) {
+                    m_crystal_drone.init(false);
+                    m_metal_drone.init(true);
+                    m_crystal_drone.set_note(m_base_hz);
+                    m_metal_drone.set_note(m_base_hz);
+                    m_crystal_drone.set_feedback(m_params[k_paramO2Detune]);
+                    m_metal_drone.set_feedback(m_params[k_paramO2Detune]);
+                    m_crystal_drone.set_drive(m_params[k_paramO2SubOct]);
+                    m_metal_drone.set_drive(m_params[k_paramO2SubOct]);
+                    m_crystal_drone.set_noise(m_params[k_paramOsc2Mix]);
+                    m_metal_drone.set_noise(m_params[k_paramOsc2Mix]);
+                }
                 break;
             }
             case k_paramNote:
@@ -146,8 +161,16 @@ public:
                 m_metal_drone.set_note(m_base_hz);
                 break;
             case k_paramO2Detune:
+                updateOscillators();
+                // Drone mode: O2Detune → FDN feedback gain (chaos level)
+                m_crystal_drone.set_feedback(value);
+                m_metal_drone.set_feedback(value);
+                break;
             case k_paramO2SubOct:
                 updateOscillators();
+                // Drone mode: O2SubOct → FDN saturation drive (harmonic density)
+                m_crystal_drone.set_drive(value);
+                m_metal_drone.set_drive(value);
                 break;
             // -- LFO Rates: Exponential mapping from 0.01Hz to 1000Hz
             // A value of 0 = 0.01Hz (100 seconds per cycle for ADSR sweeps)
@@ -209,7 +232,12 @@ public:
             }
 
             // -- Mixer
-            case k_paramOsc2Mix: m_osc2_mix = (float)value / percent_normalizer; break;
+            case k_paramOsc2Mix:
+                m_osc2_mix = (float)value / percent_normalizer;
+                // Drone mode: O2Mix → FDN noise injection level
+                m_crystal_drone.set_noise(value);
+                m_metal_drone.set_noise(value);
+                break;
             // FIX: 300% Volume Headroom!
             case k_paramMastrVol: m_master_vol_base = ((float)value / percent_normalizer) * 3.0f; break;
             // FIX: Cutoff 10x Trick
