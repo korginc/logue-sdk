@@ -68,11 +68,11 @@ struct DroneEngine {
         const int* src = metal ? METAL_DELAYS : CRYSTAL_DELAYS;
         for (int i = 0; i < FDN_LINES; i++) dlen[i] = src[i];
 
-        falpha    = metal ? 0.65f : 0.35f;
-        g         = 1.85f;   // default: chaotic attractor regime
+        falpha    = metal ? 0.72f : 0.45f; // Relaxed LPF for more high-end energy
+        g         = 2.10f;   // default: stronger chaotic attractor regime
         drive     = 1.20f;
-        noise_amp = 0.0008f; // tiny — just enough to prevent silence when in stable regime
-        out_scale = metal ? 0.40f : 0.50f;
+        noise_amp = 0.0040f; // Boosted noise floor for reliable self-starting
+        out_scale = metal ? 0.35f : 0.45f; // Adjusted for hotter internal gain
     }
 
     inline void clear() {
@@ -87,10 +87,10 @@ struct DroneEngine {
         prng ^= 0x5A5A5A5Au;
     }
 
-    // O2Detune (-100..100) → g in [1.20, 2.50]
-    // Centre (0) = 1.85 = calibrated chaotic attractor at default drive.
+    // O2Detune (-100..100) → g in [1.00, 3.20]
+    // Centre (0) = 2.10 = firm chaotic attractor.
     inline void set_feedback(int32_t v) {
-        g = 1.85f + (float)v * 0.0065f;
+        g = 2.10f + (float)v * 0.011f;
         g = g < 1.0f ? 1.0f : g > 2.8f ? 2.8f : g;
     }
 
@@ -100,10 +100,10 @@ struct DroneEngine {
         drive = 0.80f + (float)v * 0.30f;
     }
 
-    // O2Mix (0..100) → noise_amp in [0.0005, 0.0200]
+    // O2Mix (0..100) → noise_amp in [0.0010, 0.0400]
     // Low = pure self-oscillation, high = heavy noise excitation (denser, noisier texture).
     inline void set_noise(int32_t v) {
-        noise_amp = 0.0005f + (float)v * 0.000195f;
+        noise_amp = 0.0010f + (float)v * 0.00039f;
     }
 
     inline __attribute__((optimize("Ofast"), always_inline))
