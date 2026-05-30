@@ -163,12 +163,13 @@ public:
         float* __restrict out_p = out;
         size_t frames_remaining = frames;
 
-        // Pre-calculate makeup gain (linear)
-        float32x4_t makeup_lin = vdupq_n_f32(fasterpowf(10.0f, makeup_db_ * 0.05f));    // 1 / 20
-
-        // Pre-calculate mix balance
+        // Pre-calculate mix and makeup balance
         float32x4_t wet_gain = vdupq_n_f32(mix_);
         float32x4_t dry_gain = vdupq_n_f32(1.0f - mix_);
+        float32x4_t makeup_lin = vdupq_n_f32(makeup_lin_scalar);
+        float32x4_t combined_wet_gain = vmulq_f32(wet_gain, makeup_lin);
+        float combined_wet_gain_s = mix_ * makeup_lin_scalar;
+        float dry_gain_s = 1.0f - mix_;
 
         // =================================================================
         // Process complete blocks of 4 samples
@@ -201,16 +202,12 @@ public:
             // Process 4 samples
             float32x4x2_t processed = process_block(main_l, main_r, sc_l, sc_r);
 
-            // Apply makeup gain (avoid making up the dry signal)
-            mixed.val[0] = vmulq_f32(processed.val[0], makeup_lin);
-            mixed.val[1] = vmulq_f32(processed.val[1], makeup_lin);
-
-            // Mix stage
+            // Mix stage: Apply makeup gain to processed (wet) signal only
             float32x4x2_t mixed;
             mixed.val[0] = vaddq_f32(vmulq_f32(dry_l, dry_gain),
-                                     vmulq_f32(processed.val[0], wet_gain));
+                                     vmulq_f32(processed.val[0], combined_wet_gain));
             mixed.val[1] = vaddq_f32(vmulq_f32(dry_r, dry_gain),
-                                     vmulq_f32(processed.val[1], wet_gain));
+                                     vmulq_f32(processed.val[1], combined_wet_gain));
 
             // Output limiter: hard clip to [-1, 1] — transparent below clipping level.
             {
@@ -230,7 +227,6 @@ public:
         // =================================================================
         // Process remaining samples (0-3) individually
         // =================================================================
-        float makeup_lin_scalar = fasterpowf(10.0f, makeup_db_ * 0.05f);    // 1 /20
         while (frames_remaining > 0) {
             float main_l, main_r, sc_l, sc_r;
             if (has_sidechain_) {
@@ -250,10 +246,9 @@ public:
                 vdupq_n_f32(main_l), vdupq_n_f32(main_r),
                 vdupq_n_f32(sc_l),   vdupq_n_f32(sc_r));
 
-            float out_l_s = (dry_l * (1.0f - mix_) + vgetq_lane_f32(processed.val[0], 0) * mix_)
-                            * makeup_lin_scalar;
-            float out_r_s = (dry_r * (1.0f - mix_) + vgetq_lane_f32(processed.val[1], 0) * mix_)
-                            * makeup_lin_scalar;
+            float out_l_s = dry_l * dry_gain_s + vgetq_lane_f32(processed.val[0], 0) * combined_wet_gain_s;
+            float out_r_s = dry_r * dry_gain_s + vgetq_lane_f32(processed.val[1], 0) * combined_wet_gain_s;
+
             // Output limiter (scalar path)
             out_p[0] = fmaxf(-1.0f, fminf(1.0f, out_l_s));
             out_p[1] = fmaxf(-1.0f, fminf(1.0f, out_r_s));
@@ -326,41 +321,33 @@ private:
         sidechain = sidechain_hpf_process(&sc_hpf_, sidechain);
 
         // =================================================================
-        // 3. ENVELOPE DETECTION (mode-specific)
-        // =================================================================
-        float32x4_t envelope_db;
-        if (comp_mode_ == COMP_MODE_DISTRESSOR) {
-            float32x4_t envelope;
-            if (distressor_.detector_mode & DETECT_LINK) {
-                // Stereo link: detect L and R independently, gain follows the louder channel.
-                // Bypass sc_hpf_ (mono filter) and let distressor_detect_stereo apply its own HPF.
-                float32x4_t raw_l = (has_sidechain_ && use_external_sc_) ? sc_l : main_l;
-                float32x4_t raw_r = (has_sidechain_ && use_external_sc_) ? sc_r : main_r;
-                envelope = distressor_detect_stereo(&distressor_, raw_l, raw_r, samplerate_);
-            } else {
-                envelope = distressor_detect(&distressor_, sidechain, samplerate_);
-            }
-            envelope_db = linear_to_db(envelope);
-        } else {
-            float32x4_t envelope = envelope_detect(&envelope_, sidechain);
-            envelope_db = linear_to_db(envelope);
-        }
-
-        // =================================================================
-        // 4. MODE-SPECIFIC PROCESSING
+        // 3 & 4. ENVELOPE DETECTION & MODE-SPECIFIC PROCESSING
         // =================================================================
         float32x4_t processed_l, processed_r;
 
         switch (comp_mode_) {
-            case COMP_MODE_STANDARD:
-                standard_process(main_l, main_r, envelope_db, &processed_l, &processed_r);
+            case COMP_MODE_STANDARD: {
+                float32x4_t env = envelope_detect(&envelope_, sidechain);
+                float32x4_t env_db = linear_to_db(env);
+                standard_process(main_l, main_r, env_db, &processed_l, &processed_r);
                 break;
-
-            case COMP_MODE_DISTRESSOR:
-                distressor_process(main_l, main_r, envelope_db, &processed_l, &processed_r);
+            }
+            case COMP_MODE_DISTRESSOR: {
+                float32x4_t env;
+                if (distressor_.detector_mode & DETECT_LINK) {
+                    float32x4_t raw_l = (has_sidechain_ && use_external_sc_) ? sc_l : main_l;
+                    float32x4_t raw_r = (has_sidechain_ && use_external_sc_) ? sc_r : main_r;
+                    env = distressor_detect_stereo(&distressor_, raw_l, raw_r, samplerate_);
+                } else {
+                    env = distressor_detect(&distressor_, sidechain, samplerate_);
+                }
+                float32x4_t env_db = linear_to_db(env);
+                distressor_process(main_l, main_r, env_db, &processed_l, &processed_r);
                 break;
-
+            }
             case COMP_MODE_MULTIBAND:
+                // Detectors are inside multiband_process.
+                // Redundant envelope detection is now skipped to save CPU.
                 multiband_process(&multiband_, main_l, main_r, &processed_l, &processed_r);
                 break;
 
@@ -492,13 +479,13 @@ private:
             case DIST_MODE_DIST2:
             case DIST_MODE_DIST3:
             case DIST_MODE_BOTH: {
-                // sat_drive range: 2x (DRIVE=0) to 14x (DRIV4=100) — pushes the
+                // sat_drive range: 1x (DRIVE=0) to 40x (DRIV4=100) — pushes the
                 // signal into the saturator nonlinear region.
                 // makeup = 1.0 keeps output level comparable to the input so
                 // harmonic character is always audible. The output hard-clip limiter
                 // prevents clipping. Do NOT divide by sat_drive (old formula made
                 // the distorted output quieter than dry, masking the effect).
-                float sat_drive = 2.0f + drive_ * 12.0f;
+                float sat_drive = 1.0f + drive_ * 39.0f; // Wider range for more bite
                 float32x4_t drv = vdupq_n_f32(sat_drive);
                 *out_l = generate_harmonics(&distressor_,
                                             vmulq_f32(comp_l, drv),
@@ -584,6 +571,7 @@ public:
 
             case k_makeup: // MAKEUP (0.0 to 24.0 dB)
                 makeup_db_ = value * 0.1f;
+                makeup_lin_scalar = fasterpowf(10.0f, makeup_db_ * 0.05f);
                 break;
             case k_attenuation_limit: // ATTEN LIMIT (-30.0 to 0.0 dB)
                 atten_limit_db_ = value * 0.1f;
@@ -803,7 +791,7 @@ public:
                         // Distressor has 8 fixed ratio steps: 1:1, 2:1, 3:1, 4:1, 6:1, 8:1, 12:1, 20:1
                         int knob = value * 0.0799f; // Map 0-100 to 0-7 and never goes to 8 which is invalid
                         if (knob >= 0 && knob < DIST_RATIO_TOTAL) {
-                            return distressor_ratio_strings[value];
+                            return distressor_ratio_strings[knob];
                         }
                         break;
                     }
@@ -876,6 +864,7 @@ private:
     float attack_ms_;
     float release_ms_;
     float makeup_db_;
+    float makeup_lin_scalar;
     float atten_limit_db_;
     float gain_limit_db_;
     float drive_;
