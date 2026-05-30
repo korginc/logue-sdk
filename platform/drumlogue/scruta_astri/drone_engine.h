@@ -18,7 +18,7 @@
  *   g high (right) → aggressive chaos     (loud, dense, still bounded by tanh)
  *
  * Effective loop gain = g × 0.5 (Hadamard scale) × drive.
- * At default (g=1.85, drive=1.2): loop gain ≈ 1.11 → chaotic attractor.
+ * At default (g=2.10, drive=1.2): loop gain ≈ 1.26 → chaotic attractor.
  *
  * Parameter routing in drone mode (see PROGRESS.md):
  *   O2Detune (-100..100) → feedback gain g     (chaos level)
@@ -69,7 +69,7 @@ struct DroneEngine {
         for (int i = 0; i < FDN_LINES; i++) dlen[i] = src[i];
 
         falpha    = metal ? 0.65f : 0.35f;
-        g         = 1.85f;   // default: chaotic attractor regime
+        g         = 2.10f;   // hardware-calibrated default: clear chaotic attractor
         drive     = 1.20f;
         noise_amp = 0.0008f; // tiny — just enough to prevent silence when in stable regime
         out_scale = metal ? 0.40f : 0.50f;
@@ -87,17 +87,19 @@ struct DroneEngine {
         prng ^= 0x5A5A5A5Au;
     }
 
-    // O2Detune (-100..100) → g in [1.20, 2.50]
-    // Centre (0) = 1.85 = calibrated chaotic attractor at default drive.
+    // O2Detune (-100..100) → g in [1.60, 2.60], clamped to minimum 1.70
+    // Centre (0) = 2.10 = hardware-calibrated chaotic attractor.
+    // Floor of 1.70 ensures loop gain (g×0.5×1.2) never drops below 1.02 → no silence.
     inline void set_feedback(int32_t v) {
-        g = 1.85f + (float)v * 0.0065f;
-        g = g < 1.0f ? 1.0f : g > 2.8f ? 2.8f : g;
+        g = 2.10f + (float)v * 0.005f;
+        g = g < 1.70f ? 1.70f : g > 2.80f ? 2.80f : g;
     }
 
-    // O2SubOct (0..4) → drive in [0.80, 2.00]
-    // Lower = softer saturation (smoother), higher = harder clipping (more harmonics).
+    // O2SubOct (0..4) → drive in [1.20, 2.00]
+    // Minimum 1.20 guarantees effective loop gain (g×0.5×drive) > 1 at any valid g.
+    // Higher values push tanh harder → denser harmonics / more aggressive saturation.
     inline void set_drive(int32_t v) {
-        drive = 0.80f + (float)v * 0.30f;
+        drive = 1.20f + (float)v * 0.20f;
     }
 
     // O2Mix (0..100) → noise_amp in [0.0005, 0.0200]
@@ -136,7 +138,7 @@ struct DroneEngine {
         // 5. Apply gain + saturation + write back to delay lines
         //    Padé [3,3] tanh approximant, clamped to [-3, 3] for stability.
         //    Inside the loop: effective gain = g × 0.5 × drive.
-        //    At default (1.85 × 0.5 × 1.2 ≈ 1.11): above unit gain → chaotic attractor.
+        //    At default (2.10 × 0.5 × 1.2 ≈ 1.26): above unit gain → chaotic attractor.
         const float gd = g * drive;
         for (int i = 0; i < FDN_LINES; i++) {
             float x = (d[i] + noise) * gd;
