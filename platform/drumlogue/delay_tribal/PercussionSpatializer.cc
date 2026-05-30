@@ -173,8 +173,8 @@ void PercussionSpatializer::update_clone_dynamics() {
         clones_[i].wobble_depth_samples = wobble_ms * (0.20f + 0.30f * t) * ms_to_smp;
 
         // Multiply by hit_accent at the very end of gain assembly
-        clones_[i].net_gain_l = clones_[i].base_gain * soft_fac * clones_[i].pan_gain_l * clones_[i].hit_accent;
-        clones_[i].net_gain_r = clones_[i].base_gain * soft_fac * clones_[i].pan_gain_r * clones_[i].hit_accent;
+        clones_[i].net_gain_l = clones_[i].base_gain * soft_fac * clones_[i].pan_gain_l * clones_[i].hit_accent * clones_[i].dynamic_gain_factor;
+        clones_[i].net_gain_r = clones_[i].base_gain * soft_fac * clones_[i].pan_gain_r * clones_[i].hit_accent * clones_[i].dynamic_gain_factor;
     }
 }
 
@@ -308,8 +308,8 @@ void PercussionSpatializer::rebuild_profile() {
         clones_[i].lp_coef = lp_omega / (lp_omega + 1.0f);
 
         // Store gains without the artificial amplitude-only LPF attenuation
-        clones_[i].pan_gain_l = pan_l * hp_attn;
-        clones_[i].pan_gain_r = pan_r * hp_attn;
+        clones_[i].pan_gain_l = pan_l * hp_attn; // HPF attenuation baked in
+        clones_[i].pan_gain_r = pan_r * hp_attn; // HPF attenuation baked in
 
         // Base gain: exponential rolloff × scatter detachment
         float raw_gain       = fasterpowf(gain_step, (float)i);
@@ -317,9 +317,11 @@ void PercussionSpatializer::rebuild_profile() {
         clones_[i].base_gain = raw_gain * detachment;
 
         // net_gain: apply current soft_atk (will be refreshed each block by update_clone_dynamics)
+        // lp_coef_base: store for per-hit randomization
+        clones_[i].lp_coef_base = clones_[i].lp_coef;
         float soft_fac        = (i == 0) ? 1.0f : (0.82f + 0.18f * (1.0f - soft_atk_));
-        clones_[i].net_gain_l = clones_[i].base_gain * soft_fac * clones_[i].pan_gain_l;
-        clones_[i].net_gain_r = clones_[i].base_gain * soft_fac * clones_[i].pan_gain_r;
+        clones_[i].net_gain_l = clones_[i].base_gain * soft_fac * clones_[i].pan_gain_l; // dynamic_gain_factor applied in update_clone_dynamics
+        clones_[i].net_gain_r = clones_[i].base_gain * soft_fac * clones_[i].pan_gain_r; // dynamic_gain_factor applied in update_clone_dynamics
     }
 
     pending_profile_rebuild_ = false;
@@ -344,6 +346,10 @@ void PercussionSpatializer::randomize_hit() {
         const float clone_jit = (xorshift_f32(rng_state_) * 2.0f - 1.0f) * max_sct;
         clones_[i].scatter_samples = (global_jit + clone_jit) * ms_to_smp * gap_detach;
         clones_[i].wobble_phase    = xorshift_f32(rng_state_) * 2.0f * M_PI;
+        // Randomize LPF cutoff factor per hit (e.g., 0.7 to 1.3)
+        clones_[i].lp_cutoff_rand_factor = 0.7f + xorshift_f32(rng_state_) * 0.6f; // Range 0.7 to 1.3
+        clones_[i].lp_coef = clampf(clones_[i].lp_coef_base * clones_[i].lp_cutoff_rand_factor, 0.01f, 0.99f);
+        clones_[i].dynamic_gain_factor = 0.7f + xorshift_f32(rng_state_) * 0.6f; // Range 0.7 to 1.3
     }
 
     // Humanize: Pick 1 or 2 random secondary clones to accent or damp

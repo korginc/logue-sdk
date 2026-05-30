@@ -66,22 +66,24 @@ struct delay_line_t {
 typedef struct {
     float delay_samples;
     float wobble_depth_samples;
-    float scatter_samples;
-    float pan_gain_l;
-    float pan_gain_r;
-    float base_gain;
+    float scatter_samples;  // Per-hit random delay offset
+    float pan_gain_l;       // Panning gain (left)
+    float pan_gain_r;  // Panning gain (right)
+    float base_gain;   // Base gain before accentuation and softening
     float net_gain_l;
-    float net_gain_r;
+    float net_gain_r;  // Net gain (right) after all modifiers
     float wobble_phase;
     float wobble_rate_mul;
 
-    // one-pole IIR low-pass filtering
-    float lp_coef;
-    float lp_state_l;
-    float lp_state_r;
+    float lp_coef;                // One-pole LPF coefficient
+    float lp_state_l;             // One-pole LPF state (left)
+    float lp_state_r;             // One-pole LPF state (right)
+    float lp_coef_base;           // Base LPF coefficient, calculated in rebuild_profile
+    float lp_cutoff_rand_factor;  // Random factor applied per hit to lp_coef
 
     // dynamic humanization
-    float hit_accent;
+    float hit_accent;  // Per-hit random accentuation/damping
+    float dynamic_gain_factor;  // Per-hit random dynamic gain factor
 } clone_t;
 
 enum params {
