@@ -106,22 +106,22 @@ fast_inline void snare_engine_update(snare_engine_t* snare,
     // Slightly inharmonic shell ratio.
     // Attack makes it more dissonant/cracky; Body stabilizes it toward shell support.
     // Approx range: 1.38 .. 2.25.
-    snare->mod_ratio = vaddq_f32(vdupq_n_f32(1.38f),
+    snare->mod_ratio = vaddq_f32(vdupq_n_f32(1.42f),
                                  vaddq_f32(vmulq_n_f32(snare->body, 0.45f),
-                                            vmulq_n_f32(snare->attack, 0.42f)));
+                                            vmulq_n_f32(snare->attack, 0.55f)));
 
     // Very short pitch lift for the shell/crack.
-    snare->pitch_lift = vaddq_f32(vdupq_n_f32(0.06f),
-                                  vaddq_f32(vmulq_n_f32(snare->attack, 0.30f),
-                                             vmulq_n_f32(inv_body, 0.08f)));
+    snare->pitch_lift = vaddq_f32(vdupq_n_f32(0.12f),
+                                  vaddq_f32(vmulq_n_f32(snare->attack, 0.65f),
+                                             vmulq_n_f32(inv_body, 0.15f)));
 
     // Sustained shell FM. Kept moderate so the snare does not become a pitched tom.
     snare->body_index = vaddq_f32(vdupq_n_f32(0.55f),
-                                  vmulq_n_f32(snare->body, 1.35f));
+                                  vmulq_n_f32(snare->body, 1.85f));
 
     // Short front-edge crack FM.
-    snare->crack_index = vaddq_f32(vdupq_n_f32(0.95f),
-                                   vaddq_f32(vmulq_n_f32(snare->attack, 2.90f),
+    snare->crack_index = vaddq_f32(vdupq_n_f32(1.25f),
+                                   vaddq_f32(vmulq_n_f32(snare->attack, 4.20f),
                                               vmulq_n_f32(inv_body, 0.35f)));
 
     // Attack adds wire/noise. Body slightly restrains noise so body-heavy snares
@@ -132,10 +132,10 @@ fast_inline void snare_engine_update(snare_engine_t* snare,
     snare->noise_mix = vmaxq_f32(zero, vminq_f32(one, snare->noise_mix));
 
     // Precomputed output balances.
-    snare->tone_gain_base = vaddq_f32(vdupq_n_f32(0.70f),
+    snare->tone_gain_base = vaddq_f32(vdupq_n_f32(0.85f),
                                       vmulq_n_f32(snare->body, 1.05f));
 
-    snare->noise_gain_base = vaddq_f32(vdupq_n_f32(0.035f),
+    snare->noise_gain_base = vaddq_f32(vdupq_n_f32(0.025f),
                                        vmulq_n_f32(snare->noise_mix, 0.34f));
 
     snare->click_gain = vaddq_f32(vdupq_n_f32(0.85f),
@@ -195,10 +195,10 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
     float32x4_t env4 = vmulq_f32(env2, env2);
     float32x4_t env8 = vmulq_f32(env4, env4);
     // Explicit domains per synthesis block.
-    float32x4_t amp_env = envelope;
+    float32x4_t amp_env = vmulq_f32(envelope, envelope); // Snappier shell decay
     float32x4_t pitch_env = env8;        // keep pitch transient short
     float32x4_t index_env = env8;        // FM brightness dies quickly
-    float32x4_t noise_env = env2;        // longer than index, shorter than amp
+    float32x4_t noise_env = env4;        // Tighten the noise burst
 
     // Very short pitch lift for a sharper crack.
     float32x4_t pitch_mult = exp2_neon(vmulq_f32(pitch_env, snare->pitch_lift));

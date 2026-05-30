@@ -22,8 +22,11 @@
 #define ENV_STATE_OFF     3
 
 // Envelope curve types
-#define ENV_CURVE_LINEAR    0
-#define ENV_CURVE_EXPONENTIAL 1
+#define ENV_CURVE_LINEAR       0
+#define ENV_CURVE_EXPONENTIAL  1
+#define ENV_CURVE_LOG          2
+#define ENV_CURVE_SIGMOID      3
+#define ENV_CURVE_PUNCH        4
 
 typedef struct {
     uint8_t attack_ms;    // 0-50ms
@@ -530,6 +533,9 @@ fast_inline void neon_envelope_process(neon_envelope_t* env) {
     uint32x4_t decay_stage   = vceqq_u32(env->stage, vdupq_n_u32(ENV_STAGE_DECAY));
     uint32x4_t release_stage = vceqq_u32(env->stage, vdupq_n_u32(ENV_STAGE_RELEASE));
     uint32x4_t exp_curve     = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_EXPONENTIAL));
+    uint32x4_t log_curve     = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_LOG));
+    uint32x4_t sigmoid_curve = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_SIGMOID));
+    uint32x4_t punch_curve   = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_PUNCH));
 
     // Stage done before decrement. Treat samples_left <= 1 as done.
     uint32x4_t done = vandq_u32(active, vcgeq_u32(one_u32, env->samples_left));

@@ -113,8 +113,8 @@ fast_inline void metal_engine_recompute(metal_engine_t* metal) {
     // Ratio scale:
     // body=0 -> slightly tighter than the selected character
     // body=1 -> slightly wider than the selected character, but not double.
-    float32x4_t ratio_scale = vaddq_f32(vdupq_n_f32(0.82f),
-                                        vmulq_n_f32(body, 0.38f));
+    float32x4_t ratio_scale = vaddq_f32(vdupq_n_f32(0.85f),
+                                        vmulq_n_f32(body, 0.65f));
 
     for (int i = 0; i < NUM_OPERATORS; ++i) {
         float32x4_t offset = vsubq_f32(metal->base_ratio[i], one);
@@ -134,8 +134,8 @@ fast_inline void metal_engine_recompute(metal_engine_t* metal) {
 
     // Op4 self-feedback: body controls how square-wave-like the top modulator gets.
     // 0 = sinusoidal, 0.45 = rich and harsh (DX7-like feedback index 5-6).
-    metal->feedback_gain = vaddq_f32(vmulq_n_f32(body, 0.42f),
-                                      vmulq_n_f32(attack, 0.12f));
+    metal->feedback_gain = vaddq_f32(vmulq_n_f32(body, 0.65f),
+                                      vmulq_n_f32(attack, 0.25f));
 
     // Ring gain scaled down for the much hotter FM indices.
     float char_body_bonus = (metal->char_select == 0) ? 0.0f : 0.08f;
@@ -363,10 +363,11 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
         vmulq_f32(op4, vmulq_f32(metal->op4_weight, bright_scale))
     );
 
-    // Amplitude follows gated_env (linear with envelope curve from ROM).
-    // Using linear here prevents the sustained "string" character caused by sqrt decay.
+    // Metallic tails need slower energy loss than body drums to "ring."
+    float32x4_t env_sqrt = neon_sqrtq_f32(vmaxq_f32(gated_env, vdupq_n_f32(1e-8f)));
+
     float32x4_t fm_output = vmulq_f32(vaddq_f32(op1, harmonics),
-                                      vmulq_f32(gated_env, metal->ring_gain));
+                                      vmulq_f32(env_sqrt, metal->ring_gain));
 
     // Bright HP noise only at the strike. Using env4 instead of full envelope
     // avoids noisy tails while making the hit more audible.

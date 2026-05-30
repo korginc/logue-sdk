@@ -149,7 +149,8 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
     // - amp_env: overall loudness/body
     // - pitch_env: short sweep so pitch drop is less exposed
     // - index_env: shorter FM brightness than amp
-    float32x4_t amp_env = envelope;
+    float32x4_t env_sqrt = neon_sqrtq_f32(vmaxq_f32(envelope, vdupq_n_f32(0.0f)));
+    float32x4_t amp_env = vmulq_f32(envelope, envelope); // Squaring for exponential decay
     float32x4_t pitch_env = env8;
     float32x4_t index_env = env8;
 
@@ -194,7 +195,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
     float32x4_t body = vaddq_f32(vmulq_f32(clean_body, clean_mix),
                                  vmulq_f32(fm_body, vsubq_f32(vdupq_n_f32(1.0f), clean_mix)));
     float32x4_t sub = vmulq_f32(clean_body, vmulq_f32(env_sqrt, vmulq_n_f32(kick->body, 0.16f)));
-    float32x4_t transient = vmulq_f32(modulator, vmulq_f32(env8, vdupq_n_f32(0.16f)));
+    float32x4_t transient = vmulq_f32(modulator, vmulq_f32(env8, vdupq_n_f32(0.35f))); // Louder transient click
     float32x4_t output = vaddq_f32(vaddq_f32(vmulq_f32(body, amp_env), sub), transient);
 
     // Transient drive: stronger only at the front of the hit.
