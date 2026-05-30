@@ -26,7 +26,7 @@
 // PRNG state (Xorshift128+, two 64-bit lanes each)
 struct prng_t { uint64x2_t state0, state1; };
 // decay factor (required 0.1-3ms decay time at 48 kHz)
-constexpr float pop_env_decay_ = 0.96f;
+constexpr float pop_env_decay_ = 0.98f; // Increased from 0.96f for slightly longer, more audible pops.
 uint32_t sample_rate_ = 48000;
 float    inverse_sample_rate_ = 1 / 48000.0f;
 
