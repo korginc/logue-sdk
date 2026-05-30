@@ -85,26 +85,26 @@ fast_inline void kick_engine_update(kick_engine_t* kick,
 
     // More attack and less body increases ratio complexity.
     // High body moves the tone toward a cleaner / heavier fundamental.
-    // Approx range: 1.05 .. 3.10
-    kick->mod_ratio = vaddq_f32(vdupq_n_f32(1.05f),
-                                vaddq_f32(vmulq_n_f32(kick->attack, 0.95f),
-                                           vmulq_n_f32(inv_body, 1.10f)));
+    // Approx range: 0.72 .. 1.80; keep this below string-like sidebands.
+    kick->mod_ratio = vaddq_f32(vdupq_n_f32(0.72f),
+                                vaddq_f32(vmulq_n_f32(kick->attack, 0.62f),
+                                           vmulq_n_f32(inv_body, 0.46f)));
 
     // Attack gives a sharper drop. Body slightly restrains the drop so the kick
     // stays low and solid instead of becoming a tom-like chirp.
-    // Widened range: 0.10 .. 2.20 octaves (was 0.45..1.63).
-    kick->sweep_depth = vaddq_f32(vdupq_n_f32(0.10f),
-                                  vaddq_f32(vmulq_n_f32(kick->attack, 1.70f),
-                                             vmulq_n_f32(inv_body, 0.40f)));
+    // Range: 0.24 .. 2.11 octaves, concentrated in the first samples.
+    kick->sweep_depth = vaddq_f32(vdupq_n_f32(0.24f),
+                                  vaddq_f32(vmulq_n_f32(kick->attack, 1.45f),
+                                             vmulq_n_f32(inv_body, 0.42f)));
 
     // Sustained body FM remains moderate. Too much sustained FM weakens the
     // fundamental and makes the kick less useful in a mix.
-    kick->body_index = vaddq_f32(vdupq_n_f32(0.25f),
-                                 vmulq_n_f32(kick->body, 0.90f));
+    kick->body_index = vaddq_f32(vdupq_n_f32(0.08f),
+                                 vmulq_n_f32(kick->body, 0.34f));
 
     // Very short attack FM.
-    kick->click_index = vaddq_f32(vdupq_n_f32(0.55f),
-                                  vmulq_n_f32(kick->attack, 2.65f));
+    kick->click_index = vaddq_f32(vdupq_n_f32(0.75f),
+                                  vmulq_n_f32(kick->attack, 2.60f));
 
     // Body compensation and transient drive.
     kick->output_gain = vaddq_f32(vdupq_n_f32(0.58f),
@@ -188,9 +188,14 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
     float32x4_t modulated_phase = vaddq_f32(kick->carrier_phase,
                                             vmulq_f32(modulator, index));
 
-    float32x4_t body = neon_sin_fast(modulated_phase);
-    float32x4_t transient = vmulq_f32(modulator, vmulq_f32(env8, vdupq_n_f32(0.22f)));
-    float32x4_t output = vaddq_f32(vmulq_f32(body, amp_env), transient);
+    float32x4_t fm_body = neon_sin_fast(modulated_phase);
+    float32x4_t clean_body = neon_sin_fast(kick->carrier_phase);
+    float32x4_t clean_mix = vaddq_f32(vdupq_n_f32(0.70f), vmulq_n_f32(kick->body, 0.22f));
+    float32x4_t body = vaddq_f32(vmulq_f32(clean_body, clean_mix),
+                                 vmulq_f32(fm_body, vsubq_f32(vdupq_n_f32(1.0f), clean_mix)));
+    float32x4_t sub = vmulq_f32(clean_body, vmulq_f32(env_sqrt, vmulq_n_f32(kick->body, 0.16f)));
+    float32x4_t transient = vmulq_f32(modulator, vmulq_f32(env8, vdupq_n_f32(0.16f)));
+    float32x4_t output = vaddq_f32(vaddq_f32(vmulq_f32(body, amp_env), sub), transient);
 
     // Transient drive: stronger only at the front of the hit.
     float32x4_t drive_gain = vaddq_f32(vdupq_n_f32(1.0f),

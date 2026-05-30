@@ -190,6 +190,42 @@ static void test_envelope_smoke() {
     report_pass(name);
 }
 
+static void test_nonlinear_envelope_decays() {
+    const char* name = "nonlinear envelope decays";
+
+    neon_envelope_t env;
+    neon_envelope_init(&env);
+
+    uint32x4_t lane0 = vsetq_lane_u32(0xFFFFFFFFu, vdupq_n_u32(0), 0);
+    neon_envelope_trigger(&env, lane0, 20);  // punch curve
+
+    bool reached_decay = false;
+    float first_decay = 0.0f;
+    float later_decay = 0.0f;
+
+    for (int i = 0; i < 9000; ++i) {
+        neon_envelope_process(&env);
+        if (vgetq_lane_u32(env.stage, 0) == ENV_STAGE_DECAY) {
+            float level = neon_envelope_get_voice(&env, 0);
+            if (!reached_decay) {
+                reached_decay = true;
+                first_decay = level;
+            }
+            later_decay = level;
+            if (first_decay - later_decay > 0.05f) break;
+        }
+    }
+
+    if (!reached_decay) {
+        return report_fail(name, "punch envelope never reached decay");
+    }
+    if (!(later_decay < first_decay - 0.05f)) {
+        return report_fail(name, "punch/log/sigmoid decay coefficients must be positive");
+    }
+
+    report_pass(name);
+}
+
 static void test_engine_smoke() {
     const char* name = "engine smoke";
     const uint32x4_t all = vdupq_n_u32(0xFFFFFFFFu);
@@ -217,9 +253,13 @@ static void test_engine_smoke() {
     metal_engine_init(&metal);
     metal_engine_set_note(&metal, all, vdupq_n_f32(42.0f));
     metal_engine_update(&metal, vdupq_n_f32(0.1f), vdupq_n_f32(0.1f));
-    float32x4_t m0 = metal_engine_process(&metal, env, all, pitch, idx, vdupq_n_f32(0.0f), vdupq_n_f32(1.0f));
+    float32x4_t m0 = metal_engine_process(&metal, env, all, pitch, idx,
+                                           vdupq_n_f32(0.0f), vdupq_n_f32(1.0f),
+                                           vdupq_n_f32(0.0f));
     metal_engine_update(&metal, vdupq_n_f32(0.9f), vdupq_n_f32(0.9f));
-    float32x4_t m1 = metal_engine_process(&metal, env, all, pitch, idx, vdupq_n_f32(0.5f), vdupq_n_f32(1.0f));
+    float32x4_t m1 = metal_engine_process(&metal, env, all, pitch, idx,
+                                           vdupq_n_f32(0.5f), vdupq_n_f32(1.0f),
+                                           vdupq_n_f32(0.0f));
 
     perc_engine_t perc;
     perc_engine_init(&perc);
@@ -247,7 +287,6 @@ static void test_note_routing() {
 
     fm_perc_synth_t synth;
     fm_perc_synth_init(&synth);
-    for (int i = 0; i < ENGINE_COUNT; ++i) synth.voice_probs[i] = 100;
 
     fm_perc_synth_note_on(&synth, synth.midi.kick_note, 100);
     // if (!vgetq_lane_u32(synth.voice_triggered, 0) ||
@@ -311,11 +350,6 @@ static void test_drive_effect() {
     fm_perc_synth_update_params(&a);
     fm_perc_synth_update_params(&b);
 
-    for (int i = 0; i < ENGINE_COUNT; ++i) {
-        a.voice_probs[i] = 100;
-        b.voice_probs[i] = 100;
-    }
-
     fm_perc_synth_note_on(&a, 60, 100);
     fm_perc_synth_note_on(&b, 60, 100);
 
@@ -339,6 +373,7 @@ int main() {
     test_probability_gate();
     test_preset_loading();
     test_envelope_smoke();
+    test_nonlinear_envelope_decays();
     test_engine_smoke();
     test_note_routing();
     test_synth_smoke();

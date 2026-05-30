@@ -66,18 +66,18 @@ static const char *k_preset_names[k_preset_number] =
 // ============================================================================
 // Factory Presets
 // ============================================================================
-// Each preset: {PRESET, TIME, LOW, HIGH, DAMP, WIDE, DFSN, PILL, SHMR, PDLY, VIBR}
+//    {PRESET,  TIME, LOW, HIGH, DAMP, WIDE, DFSN, PILL, SHMR, PDLY, VIBR}
 static const int32_t k_presets[k_preset_number][k_total] = {
     // 0: foresta - mellow, sparse, "wood" (warm lows, short, moderate decay)
-    {k_foresta, 40, 60, 40, 200, 80, 60, 3, 0, 0, 10},
+    {k_foresta,   40,  60,   40,  220,   90,   60,    3,    0,    0,  15},
     // 1: tempio  - sombre, "stone" (heavy lows, long, dark, 6-ch)
-    {k_tempio, 70, 80, 25, 130, 130, 80, 2, 0, 0, 10},
+    {k_tempio,    70,  80,   25,  150,  150,   80,    2,   10,   10,  10},
     // 2: labirinto - center values with random ping-pong stereo bouncing
-    {k_labirinto, 60, 50, 50, 510, 100, 50, 1, 0, 10, 10},
+    {k_labirinto, 60,  50,   50,  510,  100,   50,    1,    0,   10,  25},
     // 3: esotico - microtonal echoes on non-Western scale
-    {k_esotico, 40, 60, 80, 800, 100, 50, 4, 5, 5, 20},
+    {k_esotico,   40,  30,   80,  800,  80,    50,    4,    5,    0,  20},
     // 4: stellare - long, subtle, "spacey" shimmer (8-ch + shimmer)
-    {k_stellare, 90, 50, 80, 800, 180, 30, 4, 35, 20, 10},
+    {k_stellare,  90,  70,   80,  800,  190,   30,    4,   35,   20,   5},
 };
 
 // ============================================================================
@@ -409,12 +409,12 @@ public:
         // its additive blend, so it is left near unity. Starting points for HW
         // calibration.
         switch (filterMode) {
-            case kFilterWood:    outputMakeup = 1.7f; break;  // foresta
-            case kFilterStone:   outputMakeup = 2.0f; break;  // tempio (darkest)
-            case kFilterMetal:   outputMakeup = 1.6f; break;  // labirinto (tamed)
-            case kFilterCrystal: outputMakeup = 1.0f; break;  // esotico (good as-is)
-            case kFilterNoise:   outputMakeup = 1.5f; break;  // stellare
-            default:             outputMakeup = 1.0f; break;
+            case kFilterWood:    outputMakeup = 2.7f; break;  // foresta
+            case kFilterStone:   outputMakeup = 2.5f; break;  // tempio (darkest)
+            case kFilterMetal:   outputMakeup = 2.4f; break;  // labirinto (tamed)
+            case kFilterCrystal: outputMakeup = 3.0f; break;  // esotico (good as-is)
+            case kFilterNoise:   outputMakeup = 2.1f; break;  // stellare
+            default:             outputMakeup = 2.0f; break;
         }
         updateBaseFc();
     }
@@ -424,20 +424,23 @@ public:
         float fc;
         switch (filterMode) {
             case kFilterWood:
-                fc = 800.0f + dampingCoeff * 5700.0f;   // 1000..6500 Hz
+                fc = 1000.0f + dampingCoeff * 6000.0f;   // 1000..7000 Hz
                 break;
             case kFilterStone:
                 fc = 80.0f + dampingCoeff * 4920.0f;    // 80..5000 Hz
                 break;
             case kFilterMetal:
-                // 300..1200 Hz: covers kick body and snare fundamentals so
+                // 300..1300 Hz: covers kick body and snare fundamentals so
                 // drums with energy in this range trigger the metallic resonance.
-                fc = 300.0f + dampingCoeff * 900.0f;
+                fc = 300.0f + dampingCoeff * 1000.0f;
                 break;
             case kFilterCrystal:
-                // 1000..3000 Hz: snare crack / hi-hat body. Stays below DAMP LPF
+                // 1000..3500 Hz: snare crack / hi-hat body. Stays below DAMP LPF
                 // even at moderate DAMP settings so the crystal character survives.
-                fc = 1000.0f + dampingCoeff * 2000.0f;
+                fc = 1000.0f + dampingCoeff * 2500.0f;
+                break;
+            case kFilterNoise:
+                fc = 5000.0f + dampingCoeff * 10000.0f;
                 break;
             default:
                 fc = 1000.0f;
@@ -617,13 +620,13 @@ public:
             // All other modes replace the signal (LPF/HPF shape the tail spectrum).
             if (filterMode == kFilterCrystal)
                 out_samps[s] = in_val * 0.7f + out_val * 0.3f; // Reduced from 6.0 to prevent screeching
-            // else if (filterMode == kFilterMetal)
+            else if (filterMode == kFilterMetal)
                 // METAL: Bandpass resonance for Labirinto
                 // Convex blend: dry signal + unity-gain resonant ring. At the
-                // resonant frequency |0.6 + 0.4| = 1.0 (band preserved, emphasized
+                // resonant frequency |0.82 + 0.18| = 1.0 (band preserved, emphasized
                 // vs neighbours); off-resonance stays <= ~0.7. Peak gain <= 1.0 so
                 // the FDN loop cannot self-oscillate.
-                // out_samps[s] = in_val * 0.6f + out_val * 0.4f;
+                out_samps[s] = in_val * 0.82f + out_val * 0.18f;
             else
                 // valid also for kFilterMetal Micro-BoostPeaking EQ
                 out_samps[s] = out_val;
@@ -1017,24 +1020,23 @@ private:
 
     inline void applyMetalResonance(float32x4_t* signals)
     {
-        if (filterMode != kFilterMetal)
-            return;
+        if (filterMode != kFilterMetal) return;
 
         for (int ch = 0; ch < FDN_CHANNELS; ch++) {
-
             float x[4];
             vst1q_f32(x, signals[ch]);
-
             for (int s = 0; s < 4; s++) {
-
-                // short metallic memory
-                metalState[ch] =
-                    0.82f * metalState[ch]
-                    + 0.18f * x[s];
-
-                // feed forward resonance (0.35 -> 0.22: lower in-loop DC gain so
-                // the metal path keeps a stability margin after the bandpass fix)
-                x[s] += metalState[ch] * 0.22f;
+                // // short metallic memory
+                // metalState[ch] =
+                //     0.82f * metalState[ch]
+                //     + 0.18f * x[s];
+                // // feed forward resonance (0.35 -> 0.22: lower in-loop DC gain so
+                // // the metal path keeps a stability margin after the bandpass fix)
+                // x[s] += metalState[ch] * 0.22f;
+                // metallic comb
+                float delayed = metalState[ch];
+                metalState[ch] = x[s];
+                x[s] += delayed * 0.18f;
             }
 
             signals[ch] = vld1q_f32(x);
@@ -1046,7 +1048,7 @@ private:
         if (filterMode != kFilterCrystal)
             return;
 
-        const float g = 0.55f;
+        const float g = 0.35f;  // less aggressive than 0.55f
 
         for (int ch = 0; ch < FDN_CHANNELS; ch++) {
 
@@ -1164,7 +1166,7 @@ private:
         if (signal_active_4)
             noiseEnvelope += 0.001f * (1.0f - noiseEnvelope);
         else
-            noiseEnvelope -= 0.0000417f * noiseEnvelope;
+            noiseEnvelope -= 0.0000487f * noiseEnvelope;
 
         if (activeSampleCount <= 0) {
             float32x4_t zero = vdupq_n_f32(0.0f);
@@ -1216,14 +1218,31 @@ private:
         float32x4_t delayedMono = vld1q_f32(delayedLanes);
 
         // =================================================================
-        // 3. Active Partial Counting (CPU Optimization)
+        // 3. Read from all 8 delay lines for 4 samples using current phases
         // =================================================================
-        // Check if the current delayed input block contains active audio
-        float32x4_t absIn = vabsq_f32(delayedMono);
-        float32x4_t max1 = vmaxq_f32(absIn, vextq_f32(absIn, absIn, 2));
-        float32x4_t max2 = vmaxq_f32(max1, vextq_f32(max1, max1, 1));
+        float32x4_t delayOut[FDN_CHANNELS];
+        readDelayLines4(delayOut);
 
-        if (vgetq_lane_f32(max2, 0) > 1e-7f) { // Lower threshold for smoother tail
+
+        // =================================================================
+        // 4. Active Partial Counting (CPU Optimization)
+        // =================================================================
+        float32x4_t energy = vdupq_n_f32(0.0f);
+
+        for (int ch = 0; ch < FDN_CHANNELS; ch++) {
+            energy = vmlaq_f32(
+                energy,
+                delayOut[ch],
+                delayOut[ch]
+            );
+        }
+        // accross vector sum is not availabe in NEON v7
+        float e[4];
+        vst1q_f32(e, energy);
+        float totalEnergy =
+            e[0] + e[1] + e[2] + e[3];
+
+        if (totalEnergy > 1e-8f) { // Lower threshold for smoother tail
             // Signal present: reset counter to maximum reverb tail length
             // RT60 roughly corresponds to decay time + predelay
             activeSampleCount = (int)(sampleRate * (2.0f + decay * 8.0f)); // Longer tail count
@@ -1249,13 +1268,7 @@ private:
         }
 
         // =================================================================
-        // Read from all 8 delay lines for 4 samples using current phases
-        // =================================================================
-        float32x4_t delayOut[FDN_CHANNELS];
-        readDelayLines4(delayOut);
-
-        // =================================================================
-        // Advance modulation phases for the next block (after read so phases aren't clobbered)
+        // 5. Advance modulation phases for the next block (after read so phases aren't clobbered)
         // =================================================================
         updateModulation4();
         updateRandomLfo();
@@ -1265,7 +1278,7 @@ private:
         float fcMod = smoothedLfoValue * modAmount * 500.0f;  // ± up to 500 Hz
 
         // =================================================================
-        // Compute unified loop gain and stability safety
+        // 6. Compute unified loop gain and stability safety
         // =================================================================
         float loopGain = 0.45f + decay * 0.45f;
 
@@ -1324,9 +1337,9 @@ private:
         float32x4_t inputVec = vmulq_f32(delayedMono, feedback);
         // An FDN this diffuse needs excitation into multiple channels
         mixed[0] = vaddq_f32(mixed[0], inputVec);
-        mixed[2] = vaddq_f32(mixed[2], vmulq_n_f32(inputVec, 0.5f));
-        mixed[5] = vaddq_f32(mixed[5], vmulq_n_f32(inputVec, -0.3f));
-        mixed[7] = vaddq_f32(mixed[7], vmulq_n_f32(inputVec, 0.2f));
+        mixed[2] = vaddq_f32(mixed[2], vmulq_n_f32(inputVec, 0.7f));    // was 0.5f
+        mixed[5] = vaddq_f32(mixed[5], vmulq_n_f32(inputVec, -0.5f));   // was -0.3f
+        mixed[7] = vaddq_f32(mixed[7], vmulq_n_f32(inputVec, 0.35f));   // was 0.2f
 
         // 7. Soft saturation: x/(1+|x|) keeps FDN bounded at (-1,1) without DC lockup.
         // Hard-clip was causing stellare crash: when all channels pin at +1, Hadamard
