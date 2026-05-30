@@ -73,11 +73,11 @@ static const int32_t k_presets[k_preset_number][k_total] = {
     // 1: tempio  - sombre, "stone" (heavy lows, long, dark, 6-ch)
     {k_tempio,    70,  80,   25,  150,  150,   80,    2,   10,   10,  10},
     // 2: labirinto - center values with random ping-pong stereo bouncing
-    {k_labirinto, 60,  50,   50,  510,  100,   50,    1,    0,   10,  25},
+    {k_labirinto, 60,  50,   50,  510,  100,   50,    1,    0,   10,  45},
     // 3: esotico - microtonal echoes on non-Western scale
-    {k_esotico,   40,  30,   80,  800,  80,    50,    4,    5,    0,  20},
+    {k_esotico,   40,  30,   80,  800,  80,    50,    4,    45,    0,  30},
     // 4: stellare - long, subtle, "spacey" shimmer (8-ch + shimmer)
-    {k_stellare,  90,  70,   80,  800,  190,   30,    4,   35,   20,   5},
+    {k_stellare,  90,  70,   80,  520,  190,   8,    4,   35,   20,   5},
 };
 
 // ============================================================================
@@ -1162,11 +1162,11 @@ private:
             if (mx > 1e-5f)
                 activeSampleCount = (int)(sampleRate * (1.0f + decay * 5.0f));
         }
-        // Noise envelope: fast attack (~83ms), slow release (~2s) for smooth stellare onset/offset.
+        // Noise envelope: fast attack (~83ms), slow release for smooth stellare onset/offset.
         if (signal_active_4)
             noiseEnvelope += 0.001f * (1.0f - noiseEnvelope);
         else
-            noiseEnvelope -= 0.0000487f * noiseEnvelope;
+            noiseEnvelope -= 0.0005f * noiseEnvelope;
 
         if (activeSampleCount <= 0) {
             float32x4_t zero = vdupq_n_f32(0.0f);
