@@ -202,18 +202,16 @@ fast_inline float32x4_t pirkle_triode_engine(float32x4_t in, float drive, float*
     float32x4_t v_gk = vaddq_f32(vmulq_f32(in, v_drive), vaddq_f32(vdupq_n_f32(-0.15f), vdupq_n_f32(*bias_state)));
 
     // Extract dynamic grid rectification current (Pirkle Addendum A19)
-    float arr_gk[4];
-    vst1q_f32(arr_gk, vmaxq_f32(v_gk, v_zero));
-    float mean_grid_current = (arr_gk[0] + arr_gk[1] + arr_gk[2] + arr_gk[3]) * 0.25f;
+    float32x4_t v_gk_pos = vmaxq_f32(v_gk, v_zero);
+    float32x2_t v_gk_sum_2 = vadd_f32(vget_low_f32(v_gk_pos), vget_high_f32(v_gk_pos));
+    float mean_grid_current = (vget_lane_f32(v_gk_sum_2, 0) + vget_lane_f32(v_gk_sum_2, 1)) * 0.25f;
     *bias_state += 0.003f * (mean_grid_current * -1.8f - *bias_state); // Updates bias drift integration
 
     // Perform continuous sigmoidal non-linear wrapping
-    float32x4_t v_pos = vmaxq_f32(v_gk, v_zero);
-    float32x4_t v_neg = vminq_f32(v_gk, v_zero);
-    float32x4_t denom = vaddq_f32(v_one, vaddq_f32(
-        vmulq_f32(vmulq_f32(v_pos, v_pos), vdupq_n_f32(shape_pos)),
-        vmulq_f32(vmulq_f32(v_neg, v_neg), vdupq_n_f32(shape_neg))
-    ));
+    // Optimized denominator calculation using vector bit-selection
+    float32x4_t v_gk2 = vmulq_f32(v_gk, v_gk);
+    float32x4_t v_shape = vbslq_f32(vcgtq_f32(v_gk, v_zero), vdupq_n_f32(shape_pos), vdupq_n_f32(shape_neg));
+    float32x4_t denom = vmlaq_f32(v_one, v_gk2, v_shape);
 
     // Fast Hardware Reciprocal Square-Root Pipeline
     float32x4_t rsq_est = vrsqrteq_f32(denom);
@@ -343,18 +341,10 @@ fast_inline void multiband_process(multiband_t* mb,
     float32x4_t sat_l_mid  = pirkle_triode_engine(mid_l,  mb->bands[BAND_MID].drive,  &mb->tube_bias_l[BAND_MID], 5.5f, 1.8f);
     float32x4_t sat_l_high = pirkle_triode_engine(high_l, mb->bands[BAND_HIGH].drive, &mb->tube_bias_l[BAND_HIGH], 6.0f, 2.5f);
 
-    sat_l_low  = dc_block_lane(&mb->dc_blockers_l[BAND_LOW],  sat_l_low,  0.995f);
-    sat_l_mid  = dc_block_lane(&mb->dc_blockers_l[BAND_MID],  sat_l_mid,  0.995f);
-    sat_l_high = dc_block_lane(&mb->dc_blockers_l[BAND_HIGH], sat_l_high, 0.995f);
-
     // Right Channel Processing - TODO use different values? set values to constant array?
     float32x4_t sat_r_low  = pirkle_triode_engine(low_r,  mb->bands[BAND_LOW].drive,  &mb->tube_bias_r[BAND_LOW], 3.2f, 1.1f);
     float32x4_t sat_r_mid  = pirkle_triode_engine(mid_r,  mb->bands[BAND_MID].drive,  &mb->tube_bias_r[BAND_MID], 5.5f, 1.8f);
     float32x4_t sat_r_high = pirkle_triode_engine(high_r, mb->bands[BAND_HIGH].drive, &mb->tube_bias_r[BAND_HIGH], 6.0f, 2.5f);
-
-    sat_r_low  = dc_block_lane(&mb->dc_blockers_r[BAND_LOW],  sat_r_low,  0.995f);
-    sat_r_mid  = dc_block_lane(&mb->dc_blockers_r[BAND_MID],  sat_r_mid,  0.995f);
-    sat_r_high = dc_block_lane(&mb->dc_blockers_r[BAND_HIGH], sat_r_high, 0.995f);
 
     // Correct the common-cathode native inversion signature
     sat_l_low  = vnegq_f32(sat_l_low);  sat_r_low  = vnegq_f32(sat_r_low);
@@ -373,7 +363,12 @@ fast_inline void multiband_process(multiband_t* mb,
     float mid_act  = (mb->bands[BAND_MID].solo  > 0.0f || (!any_solo && mb->bands[BAND_MID].mute  == 0.0f)) ? mb->bands[BAND_MID].makeup_gain_linear  : 0.0f;
     float high_act = (mb->bands[BAND_HIGH].solo > 0.0f || (!any_solo && mb->bands[BAND_HIGH].mute == 0.0f)) ? mb->bands[BAND_HIGH].makeup_gain_linear : 0.0f;
 
-    // Direct structural summation
-    *out_l = vaddq_f32(vaddq_f32(vmulq_n_f32(sat_l_low, low_act), vmulq_n_f32(sat_l_mid, mid_act)), vmulq_n_f32(sat_l_high, high_act));
-    *out_r = vaddq_f32(vaddq_f32(vmulq_n_f32(sat_r_low, low_act), vmulq_n_f32(sat_r_mid, mid_act)), vmulq_n_f32(sat_r_high, high_act));
+    // Structural summation with master headroom scaling (0.65x) to prevent clipping across summed bands.
+    const float MASTER_SUM_SCALING = 0.65f;
+    *out_l = vmulq_n_f32(vaddq_f32(vaddq_f32(vmulq_n_f32(sat_l_low, low_act), vmulq_n_f32(sat_l_mid, mid_act)), vmulq_n_f32(sat_l_high, high_act)), MASTER_SUM_SCALING);
+    *out_r = vmulq_n_f32(vaddq_f32(vaddq_f32(vmulq_n_f32(sat_r_low, low_act), vmulq_n_f32(sat_r_mid, mid_act)), vmulq_n_f32(sat_r_high, high_act)), MASTER_SUM_SCALING);
+
+    // Apply master DC blocking once at the end of the chain to save significant CPU cycles.
+    *out_l = dc_block_lane(&mb->dc_blockers_l[0], *out_l, 0.995f);
+    *out_r = dc_block_lane(&mb->dc_blockers_r[0], *out_r, 0.995f);
 }

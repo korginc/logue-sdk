@@ -238,8 +238,12 @@ fast_inline float32x4x2_t wavefolder_process(wavefolder_t *wf,
     // image is preserved by amplitude-modulating each channel independently.
     float32x4_t mono = vmulq_n_f32(vaddq_f32(driven_l, driven_r), 0.5f);
     float32x4_t sub = suboctave_process(wf, mono);
-    out.val[0] = vmulq_f32(sub, vabsq_f32(in_l));
-    out.val[1] = vmulq_f32(sub, vabsq_f32(in_r));
+    // Use driven signals instead of raw input to prevent volume drop as drive increases.
+    // Mix the sub-octave with the soft-clipped signal to ensure distortion is audible.
+    float32x4_t sub_l = vmulq_f32(sub, vabsq_f32(driven_l));
+    float32x4_t sub_r = vmulq_f32(sub, vabsq_f32(driven_r));
+    out.val[0] = vmulq_n_f32(vaddq_f32(soft_clip(driven_l), sub_l), 0.5f);
+    out.val[1] = vmulq_n_f32(vaddq_f32(soft_clip(driven_r), sub_r), 0.5f);
     break;
   }
 
