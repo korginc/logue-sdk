@@ -125,17 +125,23 @@ fast_inline void metal_engine_recompute(metal_engine_t* metal) {
     metal->strike_index = vaddq_f32(vdupq_n_f32(1.0f),
                                     vmulq_n_f32(attack, 4.5f));
 
-    // Ring FM: DX7/MD-drum style metallic indices. Range 10..16.5.
-    // Low values (1.5..4.7) created a narrow-bandwidth sustained tone = strings.
-    // At higher indices the FM cascade produces a dense, inharmonic metallic spectrum.
-    metal->ring_index = vaddq_f32(vdupq_n_f32(10.0f),
-                                  vaddq_f32(vmulq_n_f32(body, 5.0f),
+    // Ring FM indices. Range 7..13.
+    // The previous 10..16.5 range on a serial 4-op cascade created extreme
+    // spectral density at all stages simultaneously — more like broadband hash
+    // than metallic ring. 7..13 keeps the FM firmly metallic while preserving
+    // enough spectral headroom for the carrier to maintain a recognisable ring.
+    // Note: Op2->Op1 (carrier stage) further uses 50% of this value so the
+    // fundamental stays cleaner underneath the complex upper partials.
+    metal->ring_index = vaddq_f32(vdupq_n_f32(7.0f),
+                                  vaddq_f32(vmulq_n_f32(body, 4.5f),
                                              vmulq_n_f32(attack, 1.5f)));
 
-    // Op4 self-feedback: body controls how square-wave-like the top modulator gets.
-    // 0 = sinusoidal, 0.45 = rich and harsh (DX7-like feedback index 5-6).
-    metal->feedback_gain = vaddq_f32(vmulq_n_f32(body, 0.65f),
-                                      vmulq_n_f32(attack, 0.25f));
+    // Op4 self-feedback: body controls metallic spectral richness.
+    // Capped at 0.60 — beyond that the operator distorts toward a square wave
+    // (buzzy electronics) rather than adding metallic inharmonic partials.
+    metal->feedback_gain = vminq_f32(vdupq_n_f32(0.60f),
+                                      vaddq_f32(vmulq_n_f32(body, 0.42f),
+                                                vmulq_n_f32(attack, 0.18f)));
 
     // Ring gain scaled down for the much hotter FM indices.
     float char_body_bonus = (metal->char_select == 0) ? 0.0f : 0.08f;
@@ -159,8 +165,9 @@ fast_inline void metal_engine_recompute(metal_engine_t* metal) {
                                   vaddq_f32(vmulq_n_f32(attack, 0.15f),
                                              vmulq_n_f32(body, 0.05f)));
 
-    // Output gain scaled down for high FM index (hot signal).
-    metal->output_gain = vsubq_f32(vdupq_n_f32(0.34f),
+    // Output gain: increased slightly to compensate for the reduced FM density
+    // (lower ring_index means a cooler signal that needs a bit more headroom).
+    metal->output_gain = vsubq_f32(vdupq_n_f32(0.40f),
                                    vmulq_n_f32(attack, 0.07f));
 }
 
@@ -344,12 +351,14 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
                                                  vmulq_f32(ring_index, env2)));
     float32x4_t op2 = neon_sin_fast(phase2_mod);
 
-    // Op2 -> Op1 carrier: FM index follows linear gated_env.
-    // Linear decay means FM complexity fades at the same rate as amplitude:
-    // attack → complex metallic splash, tail → cleaner ring → silence.
+    // Op2 -> Op1 carrier: 50% of ring_index so the fundamental partial retains
+    // a cleaner ring underneath the dense upper-operator modulation. The outer
+    // operators (Op4, Op3) carry the inharmonic complexity; the carrier provides
+    // the pitched "body" of the metallic tone that sustains into the tail.
     float32x4_t phase1_mod = vaddq_f32(metal->phase[0],
                                        vmulq_f32(op2,
-                                                 vmulq_f32(ring_index, gated_env)));
+                                                 vmulq_f32(vmulq_n_f32(ring_index, 0.50f),
+                                                           gated_env)));
     float32x4_t op1 = neon_sin_fast(phase1_mod);
 
     // Weighted additive partials. Precomputed weights are still lightly scaled
@@ -375,7 +384,9 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
         float32x4_t white = white_noise(&metal->noise_prng);
         float32x4_t lp = one_pole_lpf_a(&metal->noise_hpf, white, METAL_NOISE_HP_A);
         float32x4_t noise_hp = vsubq_f32(white, lp);
-        float32x4_t noise_bp = one_pole_lpf(&metal->noise_bpf, noise_hp, 7600.0f);
+        // BPF at 4200 Hz instead of 7600 Hz: emphasises the 2500–4200 Hz
+        // range where metallic "clang" lives, less pure sibilance.
+        float32x4_t noise_bp = one_pole_lpf(&metal->noise_bpf, noise_hp, 4200.0f);
         float32x4_t noise_colored = vaddq_f32(vmulq_n_f32(noise_hp, 0.58f),
                                               vmulq_n_f32(noise_bp, 0.42f));
 

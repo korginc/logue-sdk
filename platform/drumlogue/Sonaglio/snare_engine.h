@@ -124,22 +124,27 @@ fast_inline void snare_engine_update(snare_engine_t* snare,
                                    vaddq_f32(vmulq_n_f32(snare->attack, 4.20f),
                                               vmulq_n_f32(inv_body, 0.35f)));
 
-    // Attack adds wire/noise. Body slightly restrains noise so body-heavy snares
-    // remain more shell-like.
-    snare->noise_mix = vaddq_f32(vdupq_n_f32(0.04f),
-                                 vsubq_f32(vmulq_n_f32(snare->attack, 0.30f),
-                                            vmulq_n_f32(snare->body, 0.20f)));
+    // Attack adds wire buzz; body slightly restrains it for a shell-heavy sound.
+    // Range: 0..0.50 (clamped). Higher base and wider range than before so the
+    // wire character is audible even at moderate attack settings.
+    snare->noise_mix = vaddq_f32(vdupq_n_f32(0.10f),
+                                 vsubq_f32(vmulq_n_f32(snare->attack, 0.40f),
+                                            vmulq_n_f32(snare->body, 0.15f)));
     snare->noise_mix = vmaxq_f32(zero, vminq_f32(one, snare->noise_mix));
 
     // Precomputed output balances.
-    snare->tone_gain_base = vaddq_f32(vdupq_n_f32(0.85f),
-                                      vmulq_n_f32(snare->body, 1.05f));
+    // tone_gain_base reduced slightly: amp_env is now linear so total tone
+    // level is comparable but decays more gradually (better body).
+    snare->tone_gain_base = vaddq_f32(vdupq_n_f32(0.65f),
+                                      vmulq_n_f32(snare->body, 0.85f));
 
-    snare->noise_gain_base = vaddq_f32(vdupq_n_f32(0.025f),
-                                       vmulq_n_f32(snare->noise_mix, 0.34f));
+    // noise_gain_base increased: wire buzz is the defining snare character.
+    snare->noise_gain_base = vaddq_f32(vdupq_n_f32(0.030f),
+                                       vmulq_n_f32(snare->noise_mix, 0.50f));
 
-    snare->click_gain = vaddq_f32(vdupq_n_f32(0.85f),
-                                  vmulq_n_f32(snare->attack, 2.45f));
+    // click_gain reduced: the front-edge click should accent, not dominate.
+    snare->click_gain = vaddq_f32(vdupq_n_f32(0.40f),
+                                  vmulq_n_f32(snare->attack, 1.30f));
 
     snare->drive = vaddq_f32(vdupq_n_f32(0.08f),
                              vmulq_n_f32(snare->attack, 0.58f));
@@ -195,10 +200,14 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
     float32x4_t env4 = vmulq_f32(env2, env2);
     float32x4_t env8 = vmulq_f32(env4, env4);
     // Explicit domains per synthesis block.
-    float32x4_t amp_env = vmulq_f32(envelope, envelope); // Snappier shell decay
-    float32x4_t pitch_env = env8;        // keep pitch transient short
-    float32x4_t index_env = env8;        // FM brightness dies quickly
-    float32x4_t noise_env = env4;        // Tighten the noise burst
+    // amp_env: linear — gives the shell proper body decay instead of snapping
+    // off early. The transient_env fed in is already shaped by HitShape.
+    float32x4_t amp_env = envelope;
+    float32x4_t pitch_env = env8;   // very short pitch crack — intentionally fast
+    float32x4_t index_env = env8;   // crack FM brightness — intentionally fast
+    // noise_env: env^2 instead of env^4 — wire buzz sustains long enough to
+    // actually define the snare character.
+    float32x4_t noise_env = env2;
 
     // Very short pitch lift for a sharper crack.
     float32x4_t pitch_mult = exp2_neon(vmulq_f32(pitch_env, snare->pitch_lift));
@@ -223,9 +232,10 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
                                        snare->modulator_phase);
 
     // FM index:
-    // - body_index gives a short shell/body tone
-    // - crack_index is very transient
-    float32x4_t index = vaddq_f32(vmulq_f32(env2, snare->body_index),
+    // - body_index follows the amplitude envelope (linear) so the shell tone
+    //   has FM complexity throughout its body, not just at the instant of impact
+    // - crack_index is still env^8 — very transient front-edge snap
+    float32x4_t index = vaddq_f32(vmulq_f32(amp_env, snare->body_index),
                                   vmulq_f32(index_env, snare->crack_index));
     index = vaddq_f32(index, lfo_index_add);
 
@@ -241,25 +251,27 @@ fast_inline float32x4_t snare_engine_process(snare_engine_t* snare,
 
     float32x4_t noise = snare_generate_noise(snare);
 
-    // Tone carries the shell whack; keep it present longer than the noise burst.
+    // Tone carries the shell; follows the linear amplitude envelope.
     float32x4_t tone_gain = vmulq_f32(amp_env, snare->tone_gain_base);
 
-    // Noise can last with the envelope, but its level remains attack-weighted.
-    float32x4_t noise_gain = vmulq_f32(noise_env,
-                                       vmulq_f32(snare->noise_gain_base,
-                                                 vaddq_f32(vdupq_n_f32(0.42f),
-                                                           vmulq_n_f32(mix, 0.58f))));
+    // Wire buzz: the defining snare character. env^2 so it sustains through
+    // the body of the hit before fading. Scaled by noise_mix and noise_gain_base.
+    float32x4_t wire_gain = vmulq_f32(noise_env,
+                                      vmulq_f32(snare->noise_gain_base,
+                                                vaddq_f32(vdupq_n_f32(0.45f),
+                                                          vmulq_n_f32(mix, 0.55f))));
 
-    // Very short front click from the same bandpassed noise.
-    float32x4_t click = vmulq_f32(noise,
-                                  vmulq_f32(env8, snare->click_gain));
+    // Sharp front-edge click: env^8, gone almost immediately.
+    float32x4_t click = vmulq_f32(noise, vmulq_f32(env8, snare->click_gain));
 
+    // Low-shell carrier reinforcement follows linear amp_env (same as tone).
     float32x4_t low_shell = vmulq_f32(neon_sin_fast(snare->carrier_phase),
-                                      vmulq_f32(env2, vmulq_n_f32(snare->body, 0.38f)));
-    float32x4_t body = vaddq_f32(vmulq_f32(tone, tone_gain), low_shell);
-    float32x4_t transient = vaddq_f32(vmulq_f32(noise, vmulq_n_f32(noise_gain, 0.38f)), click);
-    float32x4_t noise_tail = vmulq_f32(noise, vmulq_f32(noise_gain, amp_env));
-    float32x4_t output = vaddq_f32(body, vaddq_f32(transient, noise_tail));
+                                      vmulq_f32(amp_env, vmulq_n_f32(snare->body, 0.32f)));
+
+    float32x4_t tone_out = vaddq_f32(vmulq_f32(tone, tone_gain), low_shell);
+    // Wire buzz + click: two distinct noise contributions — no double-adding.
+    float32x4_t wire_out = vaddq_f32(vmulq_f32(noise, wire_gain), click);
+    float32x4_t output = vaddq_f32(tone_out, wire_out);
 
     // Short transient saturation, not a long tail distortion.
     float32x4_t drive_gain = vaddq_f32(vdupq_n_f32(1.0f),
