@@ -1,246 +1,291 @@
 # Sonaglio — FM Percussion Synth for Korg Drumlogue
 
-Sonaglio is a fixed-voice percussion synth for the Korg Drumlogue SDK. It is designed as a **4-voice, probability-triggered, NEON-accelerated FM percussion instrument** with a strong focus on:
+Sonaglio is a **5-engine, ARM NEON-accelerated FM percussion instrument** for the Korg Drumlogue SDK.
+It is built around a fixed-voice model with perceptual parameter control, a shared ADR envelope ROM,
+dual LFO modulation, and combo instrument routing.
 
-- **Punch**: clear transient impact and fast attack definition
-- **Body**: low-mid weight, perceived mass, and decay shape
-- **Aggression**: controlled brightness, drive, and digital edge
-- **Playability**: a small number of musically meaningful controls
-
-The current design intentionally prioritizes **performative control over synthesis complexity**.
-
----
-
-## Core architecture
-
-The instrument uses four fixed engines:
-
-- Kick
-- Snare
-- Metal
-- Perc
-
-Each engine is assigned a stable role in the instrument. Voice allocation is removed from the active control surface so the design remains predictable and easier to tune.
-
-The resonant engine is still kept in the codebase for now, but it is not part of the active instrument path. It belongs to a possible future derivative project.
+Design priorities (in order):
+1. **Punch** — clear transient impact, fast attack definition
+2. **Body** — low-mid weight, perceived mass, decay shape
+3. **Playability** — small number of musically meaningful controls per engine
+4. **Efficiency** — ARM NEON parallelism, static allocation, no heap
 
 ---
 
-## Parameter model
+## Architecture overview
 
-The current UI model is built around **24 parameters**:
+### Engines (5 total)
 
-### Per-voice probability
-- Kick probability
-- Snare probability
-- Metal probability
-- Perc probability
+| Engine | Role | Synthesis method |
+|--------|------|-----------------|
+| **Kick** | Low-end strike | 2-op FM + pitch sweep |
+| **Snare** | Crack + wire + shell | 2-op FM + 3-band bandpass noise |
+| **Metal** | Inharmonic ring | 4-op FM cascade + feedback + HP noise |
+| **Perc** | Block / wood / tom | 2-op FM, configurable body |
+| **Hat** | Hi-hat / cymbal | 6× detuned square oscillators + noise |
 
-### Per-engine controls
-Each engine has two controls:
-- **Attack / Energy / Brightness**
-- **Body / Decay / Stability**
+All engines process 4 parallel voices via NEON `float32x4_t`. Only lane 0 is active in the
+current selector model; the remaining lanes are reserved for future probability-triggered modes.
 
-### Global shaping controls
-- **HitShape**: transient hardness / front-edge emphasis
-- **BodyTilt**: low-mid weight / body support
-- **Drive**: global saturation / grit / bus push
+### Shared infrastructure
 
-### Remaining modulation and structure controls
-- LFO1 block
-- Euclidean tuning block
-- LFO2 block
-- Envelope shape selection
-
-This model deliberately avoids exposing low-level FM details directly to the user.
-
----
-
-## Design philosophy
-
-The instrument is not trying to be a general synth. It is trying to be a **percussion instrument with a clear sound-design language**.
-
-The parameter philosophy is:
-
-> Parameters should describe musical behavior first, and synthesis math second.
-
-This means the mapping layer must translate user controls into perceptual targets such as:
-
-- transient energy
-- spectral brightness
-- pitch-drop depth
-- shell or body weight
-- ring length
-- noise amount
-- drive amount
-- stability / instability
+- **Envelope ROM** — 128 curated ADR shapes (exponential curve, `attack_ms 0–9`, `decay_ms 45–1850`,
+  `release_ms 20–1025`). Sections: tight (0–15), punch (16–31), body (32–47), long body (48–63),
+  gated/flam (64–79), open linear (80–95), metallic tail (96–111), experimental (112–127).
+- **LFO system** — two audio-rate LFOs (triangle / ramp / chord steps) routed through `lfo_smoother_t`
+  for zipper-free transitions. Targets: pitch, FM index, envelope, noise mix, metal gate, cross-phase.
+- **MIDI handler** — note-on/off → instrument selector routing; per-note bitmask for combo hits.
+- **Euclidean tuning** — 9 modes spread across 4 engines (off, chromatic, minor, diatonic, whole-tone,
+  pentatonic, dim7, aug8, tritone).
+- **Combo routing** — 15 instrument slots (5 solo + 10 pairs). Pairs use `gap`, `blend`, `scatter`
+  to schedule and de-tune the secondary engine.
 
 ---
 
-## Why this design is different
+## Parameter model (24 parameters)
 
-A drum/percussion synth can easily become too technical if the user is forced to think in terms of ratios, modulation indices, and operator structure. Sonaglio instead uses a **macro-control model**:
+### Page 1 — Instrument + macros
 
-- `Attack` makes the hit harder or brighter
-- `Body` makes the sound fuller or longer
-- `HitShape` changes the transient profile globally
-- `BodyTilt` biases the instrument toward weight or leanness
-- `Drive` pushes the sound into stronger saturation and density
+| # | Name | Range | Description |
+|---|------|-------|-------------|
+| 0 | Instrument | 0–14 | Solo or combo instrument selector |
+| 1 | Blend | 0–100 | Level balance in combo mode |
+| 2 | Gap | 0–100 | Delay between primary and secondary hit |
+| 3 | Scatter | 0–100 | Pitch/timing jitter on secondary hit |
 
-This is intended to make presets easier to author, easier to compare, and easier to judge musically.
+### Page 2 — Kick + Snare
+
+| # | Name | Range | Description |
+|---|------|-------|-------------|
+| 4 | Kick Atk | 0–100 | Kick click hardness and pitch-drop depth |
+| 5 | Kick Body | 0–100 | Kick low-end weight and sweep length |
+| 6 | Snare Atk | 0–100 | Snare crack, wire energy, top-end brightness |
+| 7 | Snare Body | 0–100 | Snare shell weight and tone sustain |
+
+### Page 3 — Metal + Perc
+
+| # | Name | Range | Description |
+|---|------|-------|-------------|
+| 8 | Metal Atk | 0–100 | Strike brightness, inharmonic spread, bite |
+| 9 | Metal Body | 0–100 | Ring density and FM depth |
+| 10 | Perc Atk | 0–100 | Transient hardness and edge |
+| 11 | Perc Body | 0–100 | Body FM depth and decay weight |
+
+### Page 4 — LFO 1
+
+| # | Name | Range | Description |
+|---|------|-------|-------------|
+| 12 | LFO1 Shape | 0–8 | Shape combo (Tri+Tri, Rmp+Rmp, Chd+Chd, …) |
+| 13 | LFO1 Rate | 0–100 | Rate (maps to 0.05–18 Hz) |
+| 14 | LFO1 Target | 0–10 | None, Pitch, ModIdx, Env, LFO2Ph, LFO1Ph, ResFrq, Reson, NoizMx, ResMrph, MtlGate |
+| 15 | LFO1 Depth | 0–100 | Modulation depth |
+
+### Page 5 — Euclidean tuning + LFO 2
+
+| # | Name | Range | Description |
+|---|------|-------|-------------|
+| 16 | EuclTun | 0–8 | Pitch spread across engines (Off … Tritone) |
+| 17 | LFO2 Rate | 0–100 | Rate (maps to 0.05–18 Hz) |
+| 18 | LFO2 Target | 0–10 | Same target set as LFO1 |
+| 19 | LFO2 Depth | 0–100 | Modulation depth |
+
+### Page 6 — Envelope + global shaping
+
+| # | Name | Range | Description |
+|---|------|-------|-------------|
+| 20 | Env Shape | 0–127 | Envelope ROM index (bit 7 selects Gong character for Metal) |
+| 21 | HitShape | 0–100 | Transient hardness: low=round, high=hard front edge |
+| 22 | BodyTilt | 0–100 | Low-mid weight: low=lean/short, high=heavy/full |
+| 23 | Noise Char | 0–100 | Noise-to-FM blend; adds noise floor to all engines |
+
+**Design rule**: every engine interprets its two controls with the same semantic contract —
+`Atk` = attack energy / brightness / crack; `Body` = weight / decay / stability.
 
 ---
 
-## Engine-specific intent and envelope character
-
-Each engine has its own envelope shaping philosophy, giving distinct timbral characters without user-editable per-engine parameters. These are assigned by design and tuned per instrument type.
+## Engine details
 
 ### Kick
-- **Amp envelope**: linear (`env^1`) — full-body presence from attack to tail
-- **Pitch sweep**: very fast (`env^8`) — brief drop concentrated at onset
-- **FM index**: very fast (`env^8`) — click complexity dies immediately
-- **Sweep depth range**: 0.10..2.20 octaves — dramatic pitch drop at high Attack/Body settings
-- Focus: low-end strike, FM pitch sweep, body weight
+
+- Carrier frequency range: 30–200 Hz (MIDI-mapped)
+- FM topology: single modulator → carrier (2-op)
+- **Amp envelope**: linear (`env`) — full-body presence
+- **Pitch sweep**: `env^8` — very short, concentrated at onset
+- **FM index**: `env^8` — click complexity dies immediately
+- Sweep depth: 0.10–2.20 octaves (Attack × Body)
+- Sub sine reinforcement gated by amp_env
 
 ### Snare
-- **Amp envelope**: linear (`env^1`) — full tail presence
-- **Pitch**: very fast (`env^8`) — crack pitch transient only
-- **FM index**: very fast (`env^8`) — brightness at onset
-- **Noise**: squared (`env^2`) — noise longer than FM but shorter than amp
-- Focus: crack, noise wire, shell/body balance
+
+- Carrier frequency range: 90–650 Hz (MIDI-mapped)
+- FM topology: single modulator → carrier (2-op), inharmonic ratio 1.38–2.25
+- **Amp envelope**: `envelope` (linear) — full shell body through decay
+- **FM body index**: linear — FM complexity tracks amplitude throughout hit
+- **FM crack index**: `env^8` — very transient front-edge snap
+- **Wire buzz noise**: `env^2` — sustains through the body of the hit
+- **Click transient**: `env^8` noise burst — sharp onset accent
+- Noise generation: 3-band blended HPF/BPF/high-shelf (900, 2200, 6200 Hz)
+- Noise mix range: 0..0.50 (Attack-weighted, Body-subtracted)
+- Wire buzz gain: 0.030 + 0.50 × noise_mix × envelope weighting
 
 ### Metal
-- **Amp envelope**: **square-root** (`env^0.5`) — slower than linear, long perceived ring
-- **Ring FM depth (op1 carrier)**: sqrt decay — FM modulation stays alive longer
-- **Mid cascade (op2→op3)**: squared (`env^2`) — mid-decay FM cluster
-- **Attack FM (op4→op3)**: fourth-power + eighth-power (`env^4`, `env^8`) — bright strike burst only
-- **Ring index range**: 1.5..4.7 (was 0.30..1.45) — genuine DX7-style FM indices for metallic character
-- **Strike index range**: 0.5..5.5 (was 0.35..3.55) — stronger attack burst
-- **Character 0**: DX7 cymbal ratios (1.0, 1.483, 1.932, 2.546)
-- **Character 1**: Gong ratios (1.0, 2.756, 3.752, 5.404) — selected via bit 7 of `ENV_SHAPE`
-- Focus: inharmonic FM ring, metallic density, long tail
+
+- Carrier frequency range: 500–8000 Hz (MIDI-mapped)
+- FM topology: Op4 (self-feedback) → Op3 → Op2 → Op1 carrier (4-op serial cascade)
+- Two characters: **Cymbal** (ratios 1.0 / 1.483 / 1.932 / 2.546) and **Gong** (1.0 / 2.756 / 3.752 / 5.404)
+  — selected via bit 7 of `ENV_SHAPE`
+- **Amp envelope**: `sqrt(gated_env)` — slow amplitude decay for long metallic ring
+- **Op4 feedback gain**: 0..0.60 (capped — above 0.60 creates square-wave buzz, not metallic ring)
+- **Ring index**: 7..13 (Op4→Op3 and Op3→Op2); Op2→Op1 carrier uses 50% (3.5..6.5) for a cleaner fundamental
+- **Strike index**: 1..5.5, `env^8`-gated — bright punchy onset burst
+- Inharmonic spread: ratio scale 0.85–1.50 (Body-controlled)
+- Noise: HP above ~2520 Hz + BPF at 4200 Hz, `env^2`-gated strike noise
 
 ### Perc
-- **Amp**: linear (`env^1`) — full decay body
-- **Strike FM**: eighth-power (`env^8`) — short thwack only
-- **Body FM**: fourth-power (`env^4`) — medium sustain cluster
-- **Strike index range**: 0.30..3.00 (was 0.35..2.05) — more dramatic FM transient
-- Focus: block, wood, tom, and digital FM percussion behavior
 
-The four engines should cover the primary needs of the instrument without needing a larger engine count.
+- Carrier frequency range: 100–1200 Hz (MIDI-mapped)
+- FM topology: single modulator → carrier (2-op)
+- **Amp**: linear (`env`)
+- **Strike FM**: `env^8` — short thwack
+- **Body FM**: `env^4` — medium sustain cluster
+- Strike index range: 0.30–3.00
 
----
+### Hat
 
-## Why the resonant engine is not part of the active path
-
-The resonant engine is conceptually useful, but it does not fit the current project identity as well as the four FM engines. Keeping it active would dilute the parameter budget and weaken the 4-engine performative model.
-
-It is retained as a candidate for a separate future instrument that can share the same 4-voice probability framework but explore a different sonic identity.
-
----
-
-## Control-path strategy
-
-The codebase is organized so that:
-
-- `header.c` defines the user-facing parameters
-- `synth.h` receives and stores parameter changes
-- `engine_mapping.h` translates parameters into musical control targets
-- the engine files implement the actual DSP behavior
-
-This separation is deliberate and should remain stable.
+- Six detuned square-wave oscillators at TR-808/909 metallic intervals
+  (306, 512, 551, 743, 826, 900 Hz), MIDI-shifted as a group
+- Body controls tone/noise ratio; Attack controls click transient
+- No FM computation — cheapest synthesis path in the instrument
+- Noise: HPF at 3000 Hz + LPF at 10000 Hz, `env^2`-gated
 
 ---
 
-## Why velocity is still undecided
+## Envelope shaping
 
-Velocity exists as a possible engine/runtime concept, but it is not yet a core control surface. It should only remain if it is proven to affect the sound in a meaningful way, such as:
+The shared envelope feeds two pre-processed streams to the engines:
 
-- stronger transient drive
-- brighter attack at high velocity
-- stronger body at high velocity
+- `transient_env = lerp(env, env^4, HitShape) × (1 + 0.18 × HitShape)` — used by Kick, Snare, Hat
+- `body_env = lerp(env^2, env, BodyTilt) × (0.82 + 0.28 × BodyTilt)` — used by Metal, Perc
 
-If it does not clearly improve the instrument, it should be removed to keep the design clean.
-
----
-
-## Parameter ranges
-
-Most controls are currently unipolar (`0..100`) because the instrument is still being stabilized.
-
-Bipolar controls (`-100..100`) may be useful later for specific cases such as:
-
-- modulation polarity
-- spectral skew
-- detune/spread direction
-- transient emphasis vs suppression
-- body bias toward thinner or heavier response
-
-These are intentionally deferred until the current design is stable and validated.
+Engines then derive further domain envelopes (`env^2`, `env^8`, `sqrt`) internally. The key design
+principle is that **amplitude envelopes use mild or linear powers** while **transient accents
+(pitch drop, FM crack, click)** use high powers (`env^8`). This prevents compounding envelope
+non-linearities that would make parameter shaping ineffective.
 
 ---
 
-## Presets
+## Signal path
 
-Preset content is currently being rebuilt around the new parameter language.
-
-The presets should eventually form curated families such as:
-
-- tight and punchy
-- heavy and low
-- bright and cracky
-- metallic and dense
-- dry and minimal
-- aggressive / driven
-- experimental
-
-Preset values should not be interpreted as raw technical numbers; they should be treated as authoring choices for distinct sound identities.
-
----
-
-## Future project direction
-
-A future derivative project could reuse the same 4-voice probability framework but move into a different synthesis family:
-
-- resonant percussion
-- modal percussion
-- tonal impact synthesis
-- hybrid struck objects
-
-That project would keep the same platform philosophy but use a different engine family.
+```
+MIDI note-on
+    ↓
+fm_perc_synth_note_on() → instrument selector → queue pending triggers
+    ↓
+fm_perc_synth_process() (per sample):
+    ├─ pending trigger dispatch (fire_engine, neon_envelope_trigger)
+    ├─ LFO smoother → LFO enhanced → lfo1/lfo2 bipolar
+    ├─ neon_envelope_process → envelope.level
+    ├─ fm_make_transient_env / fm_make_body_env
+    ├─ kick_engine_process  (transient_env)
+    ├─ snare_engine_process (transient_env + noise_add)
+    ├─ metal_engine_process (body_env + gate)
+    ├─ perc_engine_process  (body_env)
+    ├─ hat_engine_process   (transient_env + noise_add)
+    ├─ separation EQ (one-pole per engine: kick LP 190Hz, snare HP 420Hz,
+    │                  metal HP 500Hz, perc BP 220–1400Hz, hat HP 800Hz)
+    ├─ weighted mix
+    └─ fm_soft_clip(mix × master_gain)  →  scalar output
+```
 
 ---
 
-## LFO routing
+## Comparison with reference projects
 
-LFO1 and LFO2 are fully functional modulation sources. They are routed through `lfo_smoother_t` for zipper-free parameter transitions, then converted to the `lfo_enhanced_t` audio path.
+### ctag-fh-kiel/md-drum-synth
 
-**Rate conversion**: the smoother stores normalized 0..1 (matching the 0-100 UI range). Before reaching the audio oscillator the value is converted to cycles/sample: `rate_cps = min_hz/sr + norm × (max_hz − min_hz)/sr`.
+The ctag md-drum-synth provides scalar C++ models used in the Machinedrum/Elektron-inspired
+desktop synth. Key FM snare and cymbal models:
 
-**Available targets**: pitch, FM index, amplitude envelope, noise mix, metal gate, LFO2 phase (from LFO1), LFO1 phase (from LFO2).
+| Feature | ctag md-drum-synth | Sonaglio |
+|---------|-------------------|----------|
+| FM topology | 2-op (snare), 4-pair independent (cymbal) | 2-op (snare), 4-op serial cascade (metal) |
+| Envelope | True per-component first-order IIR (`1 - dt/decay`) | Shared ADR ROM + power-law domains |
+| Noise | White + HP filter | 3-band blended (snare), HP+BPF (metal) |
+| Parallelism | Scalar | ARM NEON 4-wide |
+| MIDI pitch | Fixed frequency | MIDI-mapped carrier range |
+| Parameter abstraction | Raw synthesis values (f_b, I, d_m…) | Musical macro controls (Atk, Body) |
 
-**Shapes**: triangle, ramp, chord steps (selected by LFO1_SHAPE param via `shape_combo`).
+**Sonaglio advantages**: NEON efficiency for embedded ARM, richer noise processing, LFO modulation,
+combo instruments, Euclidean tuning, MIDI pitch tracking.
+
+**ctag advantage**: true independent per-component decay constants (amplitude, FM index, and noise
+each decay at their own rate independently — more natural than power-law domains on a shared envelope).
+
+The ctag cymbal uses 4 independent carrier/modulator pairs (each pair rings at its own inharmonic
+frequency) which produces cleaner separation between partials than a serial FM cascade. This could
+be a useful "Character 2" variation for the Sonaglio Metal engine in a future revision.
+
+**License**: No explicit OSI license found in the ctag repo. Assume All Rights Reserved unless
+confirmed otherwise — do not copy code without written permission.
+
+### copych/ESP32-S3_FM_Drum_Synth
+
+6-operator FM synthesis with 17 routing algorithms on ESP32-S3. Not directly applicable to
+Drumlogue due to the different hardware architecture and licensing ambiguity, but the algorithm
+variety and waveform blending (sine, triangle, square, saw, noise) are interesting references for
+future engine expansion.
+
+**License**: No license file visible in the repository — treat as All Rights Reserved.
 
 ---
 
-## Current priorities
+## File structure
 
-1. Hardware listening test for metal engine improvements (ring_index boost, sqrt envelope)
-2. Preset rebuild around new sound families and improved parameter ranges
-3. Test suite for monotonic parameter behavior
-4. Tune instrument against reference material
-5. Decide whether velocity becomes a real control source
+| File | Purpose |
+|------|---------|
+| `unit.cc` | Drumlogue entry point and hardware interface |
+| `header.c` | User-facing 24-parameter definitions |
+| `fm_perc_synth_process.h` | Main render loop, voice dispatch, LFO integration |
+| `engine_mapping.h` | Global envelope projections, NEON helpers |
+| `kick_engine.h` | Kick FM engine |
+| `snare_engine.h` | Snare FM + noise engine |
+| `metal_engine.h` | 4-op cascade FM metal engine |
+| `perc_engine.h` | Perc FM engine |
+| `hat_engine.h` | Square-wave hi-hat engine |
+| `envelope_rom.h` | 128-entry ADR envelope table |
+| `lfo_enhanced.h` | Audio-rate LFO (triangle / ramp / chord) |
+| `lfo_smoothing.h` | Zipper-free parameter smoother for LFO |
+| `midi_handler.h` | MIDI note routing and classification |
+| `fm_voices.h` | NEON FM primitives, one-pole filters, MIDI→freq |
+| `sine_neon.h` | Fast NEON sine approximation |
+| `float_math.h` | Fast exp2, log2, sqrt, cubic clip (NEON) |
+| `prng.h` | NEON parallel PRNG + probability gate |
+| `constants.h` | Global constants, enums, tuning tables |
+| `fm_presets.cc/.h` | Factory preset bank |
+| `synth.h` | Legacy parameter storage (retained for compatibility) |
+
+---
+
+## Build
+
+```bash
+# Drumlogue SDK (ARM cross-compile)
+cd platform/drumlogue/Sonaglio
+make
+
+# Unit tests (ARM cross-compile + qemu)
+CXX=arm-linux-gnueabihf-g++ RUNNER=qemu-arm-static ./run_sonaglio_tests.sh
+```
 
 ---
 
 ## Non-goals
 
-- physical modeling
-- deep parameter explosion
-- engine allocation controls
-- heap allocation
-- dynamic graphs
-- generic synth behavior
+- Physical modeling
+- Heap allocation or dynamic voice graphs
+- Engine allocation controls in the UI
+- General-purpose synth behavior
+- Per-engine envelope shape parameters
 
-Sonaglio is meant to be narrow, fast, and playable.
-
+Sonaglio is intentionally narrow: a percussion instrument with a clear sonic identity and a small,
+musical parameter surface.
