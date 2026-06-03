@@ -74,7 +74,7 @@ __unit_callback const char * unit_get_param_str_value(uint8_t id, int32_t value)
 
         case PortaCassette::k_param_eq_high_hz:
             // Multiply by 100 for high frequencies (e.g., 20 = 2000Hz)
-            snprintf(buf, sizeof(buf), "%d.0k", (int)(value / 10));
+            snprintf(buf, sizeof(buf), "%.1f kHz", (float)(value * 0.1));
             return buf;
 
         // EQ Gains (-12dB to +12dB)

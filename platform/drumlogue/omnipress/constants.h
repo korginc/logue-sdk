@@ -39,11 +39,11 @@ constexpr int THRESH_DEFAULT = -100;   // -10.0 dB
 
 constexpr int RATIO_MIN = 10;          // 1.0:1
 constexpr int RATIO_MAX = 200;         // 20.0:1
-constexpr int RATIO_DEFAULT = 40;      // 4.0:1
+constexpr int SLOPE_DEFAULT = 40;      // 4.0:1
 
 constexpr int ATTACK_MIN = 1;           // 0.1 ms
 constexpr int ATTACK_MAX = 1000;        // 100.0 ms
-constexpr int ATTACK_DEFAULT = 150;     // 15.0 ms
+constexpr int ATTACK_DEFAULT = 50;      // 5.0 ms
 
 constexpr int RELEASE_MIN = 10;         // 10 ms
 constexpr int RELEASE_MAX = 2000;       // 2000 ms
@@ -70,6 +70,14 @@ constexpr int SC_HPF_DEFAULT = 20;      // 20 Hz
 constexpr int COMP_MODE_MIN = 0;
 constexpr int COMP_MODE_MAX = 2;
 constexpr int COMP_MODE_DEFAULT = 0;    // Standard mode
+
+constexpr int ATTENUATION_MIN = -300;
+constexpr int ATTENUATION_MAX = 0;
+constexpr int ATTENUATION_DEFAULT = ATTENUATION_MIN;    // Standard mode
+
+constexpr int GAIN_MIN = 0;
+constexpr int GAIN_MAX = 300;
+constexpr int GAIN_DEFAULT = GAIN_MAX;    // Standard mode
 
 constexpr int BAND_SEL_MIN = 0;
 constexpr int BAND_SEL_MAX = 6;
@@ -122,20 +130,13 @@ typedef enum {
     DIST_MODE_DIST2,
     DIST_MODE_DIST3,
     DIST_MODE_BOTH ,
-    DIST_MODE_WAVE ,
-    DIST_MODE_TOTAL,
-}   DistressorMode;
-// ============================================================================
-// Drive/Wavefolder Mode IDs
-// ============================================================================
-typedef enum {
     DRIVE_MODE_SOFT_CLIP,
     DRIVE_MODE_HARD_CLIP,
     DRIVE_MODE_TRIANGLE,
     DRIVE_MODE_SINE,
     DRIVE_MODE_SUBOCTAVE,
-    DRIVE_MODE_TOTAL,
-} WavefolderMode;
+    DIST_MODE_TOTAL,
+}   DistressorMode;
 
 // ============================================================================
 // Detection Mode IDs
@@ -224,5 +225,5 @@ constexpr int VECTOR_ALIGN = 16;                    // 16-byte alignment
 // ============================================================================
 
 constexpr float EPSILON = 1e-12f;                   // Prevent denormals
-constexpr float DB_COEFF = 8.65617f;                 // 20 / ln(10)
-constexpr float INV_DB_COEFF = 0.115129f;            // ln(10) / 20
+constexpr float DB_COEFF = 8.65617f;                // 20 / ln(10)
+constexpr float INV_DB_COEFF = 0.115129f;           // ln(10) / 20

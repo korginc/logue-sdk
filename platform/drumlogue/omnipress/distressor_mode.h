@@ -24,24 +24,17 @@
 #define AUDIO_DIST3      (1 << 2)  // 3rd harmonic
 
 // Distressor Mode String Display
-static const char* distressor_dist_strings[5] = {
-    "Off",      // 0 - Clean
-    "Dist2",    // 1 - Tube-like 2nd harmonic
-    "Dist3",    // 2 - Tape-like 3rd harmonic
-    "Both",     // 3 - Combined harmonics
-    "Wave",     // 4 - Wavefolder (new)
-};
+static const char *distressor_dist_strings[DIST_MODE_TOTAL] = {
+    "Off",   // 0 - Clean
+    "Dist2", // 1 - Tube-like 2nd harmonic
+    "Dist3", // 2 - Tape-like 3rd harmonic
+    "Both",  // 3 - Combined harmonics
+    "Soft",  "Hard", "Trg", "Sine", "SubOct"};
 
 // Display strings for UI
-static const char* distressor_ratio_strings[8] = {
+static const char* distressor_ratio_strings[DIST_RATIO_TOTAL] = {
     "1:1", "2:1", "3:1", "4:1", "6:1", "Opto", "20:1", "NUKE"
 };
-
-// Display strings for UI
-static const char* distressor_wave_type[5] = {
-    "Soft", "Hard", "Trg", "Sine", "SubOct"
-};
-
 
 // Distressor state structure
 typedef struct {
@@ -89,8 +82,8 @@ fast_inline void distressor_init(distressor_t* d, float sample_rate) {
     d->detector_mode = DETECT_NONE;
     d->attack_ms = 0.5f;      // Much faster than standard (0.5ms)
     d->release_ms = 200.0f;
-    d->attack_coeff = expf(-1.0f / (d->attack_ms * 0.001f * sample_rate));
-    d->release_coeff = expf(-1.0f / (d->release_ms * 0.001f * sample_rate));
+    d->attack_coeff = e_expff(-1.0f / (d->attack_ms * 0.001f * sample_rate));
+    d->release_coeff = e_expff(-1.0f / (d->release_ms * 0.001f * sample_rate));
     d->harmonic_state = vdupq_n_f32(0.0f);
     d->last_input = vdupq_n_f32(0.0f);
     d->opto_release_mult = 1.0f;
@@ -196,6 +189,7 @@ fast_inline void distressor_set_ratio(distressor_t* d, uint8_t mode) {
 // Old polynomial (x + 0.5*x^2, x - x^3/3) diverged for |x|>1 and was
 // inaudible at typical post-compression levels.  These use NEON fast_div_neon
 // to produce clean harmonic content bounded within ±1 (DIST3) / ~±1.5 (DIST2).
+// TODO evalute is DIST2 ±1.5 is too much due the hard clipper at end of processing
 fast_inline float32x4_t generate_harmonics(distressor_t* d,
                                            float32x4_t in,
                                            uint8_t mode) {
@@ -210,9 +204,11 @@ fast_inline float32x4_t generate_harmonics(distressor_t* d,
             pos = vmaxq_f32(in, vdupq_n_f32(0.0f));
             neg = vminq_f32(in, vdupq_n_f32(0.0f));
             sat_pos = fast_div_neon(pos,
-                          vaddq_f32(vdupq_n_f32(1.0f), vmulq_f32(pos, vdupq_n_f32(0.5f))));
+                          vaddq_f32(vdupq_n_f32(1.0f),
+                                         vmulq_f32(pos, vdupq_n_f32(0.5f))));
             sat_neg = fast_div_neon(neg,
-                          vaddq_f32(vdupq_n_f32(1.0f), vmulq_f32(vabsq_f32(neg), vdupq_n_f32(2.0f))));
+                          vaddq_f32(vdupq_n_f32(1.0f),
+                                         vmulq_f32(vabsq_f32(neg), vdupq_n_f32(2.0f))));
             return vaddq_f32(sat_pos, sat_neg);
         }
 

@@ -13,14 +13,20 @@ const __unit_header unit_header_t unit_header = {
     .unit_id = 0x53637275U,      // 'Scru'
     .version = 0x00010000U,
     .name = "ScrtAstr",          // Max 8 chars on OLED
-    .num_presets = 95,
+    .num_presets = 97,
     .num_params = 24,
     .params = {
         // Page 1: Base
-        {0, 95, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Prgrm"}},
+        // Decode program ranges:
+        // 0-23: Normal
+        // 24-47: Osc 1 Reversed
+        // 48-71: Osc 2 Reversed
+        // 72-94: Both Reversed
+        // 95-96: drone engine
+        {0, 96, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Prgrm"}},
         {24, 126, 1, 36, k_unit_param_type_midi_note, 0, 0, 0, {"Note"}},
-        {0, 239, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O1Wave"}},
-        {0, 239, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Wave"}},
+        {0, 256, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O1Wave"}},    // value aligned to wavetables.h
+        {0, 256, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Wave"}},    // value aligned to wavetables.h
 
         // Page 2: Osc 2 & Mix
         {-100, 100, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Dtun"}},

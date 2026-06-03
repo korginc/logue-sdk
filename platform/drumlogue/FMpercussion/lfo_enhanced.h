@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include "constants.h"  // Contains LFO_TARGET_* constants
 
+uint32_t sample_rate_ = 48000;
+float    inverse_sample_rate_ = 1.0f / 48000.0f;
 
 /**
  * Enhanced LFO state
@@ -123,8 +125,8 @@ fast_inline void lfo_enhanced_update(lfo_enhanced_t* lfo,
     // rate_hz / sample_rate gives the fraction of the cycle advanced per sample
     float rate1_hz = 0.1f + (rate1_percent * 0.01f) * 19.9f;
     float rate2_hz = 0.1f + (rate2_percent * 0.01f) * 19.9f;
-    float rate1 = rate1_hz / 48000.0f;
-    float rate2 = rate2_hz / 48000.0f;
+    float rate1 = rate1_hz * inverse_sample_rate_;
+    float rate2 = rate2_hz * inverse_sample_rate_;
 
     lfo->rate1 = vdupq_n_f32(rate1);
     lfo->rate2 = vdupq_n_f32(rate2);

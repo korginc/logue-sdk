@@ -62,17 +62,28 @@ struct delay_line_t {
     }
 };
 
+// Update the clone_t struct to include filter parameters
 typedef struct {
     float delay_samples;
     float wobble_depth_samples;
-    float scatter_samples;
-    float pan_gain_l;
-    float pan_gain_r;
-    float base_gain;
+    float scatter_samples;  // Per-hit random delay offset
+    float pan_gain_l;       // Panning gain (left)
+    float pan_gain_r;  // Panning gain (right)
+    float base_gain;   // Base gain before accentuation and softening
     float net_gain_l;
-    float net_gain_r;
+    float net_gain_r;  // Net gain (right) after all modifiers
     float wobble_phase;
     float wobble_rate_mul;
+
+    float lp_coef;                // One-pole LPF coefficient
+    float lp_state_l;             // One-pole LPF state (left)
+    float lp_state_r;             // One-pole LPF state (right)
+    float lp_coef_base;           // Base LPF coefficient, calculated in rebuild_profile
+    float lp_cutoff_rand_factor;  // Random factor applied per hit to lp_coef
+
+    // dynamic humanization
+    float hit_accent;  // Per-hit random accentuation/damping
+    float dynamic_gain_factor;  // Per-hit random dynamic gain factor
 } clone_t;
 
 enum params {
@@ -162,11 +173,12 @@ public:
 private:
     delay_line_t delay_;
     uint32_t sample_rate_ = 48000;
+    float    inverse_sample_rate_ = 1.0f / 48000.0f;
     bool initialized_ = false;
 
     spatial_mode_t mode_ = MODE_TRIBAL;
     int clone_set_index_ = CLONE_SET_4;
-    int clone_count_ = 4;
+    int clone_count_ = kCloneValues[clone_set_index_];
 
     int8_t params_[k_total] = {};
 

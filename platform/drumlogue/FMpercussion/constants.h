@@ -287,3 +287,4 @@ static inline float db_to_linear(float db) {
 static inline float linear_to_db(float linear) {
     return 20.0f * log10f(linear);
 }
+

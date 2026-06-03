@@ -91,19 +91,41 @@ This is intended to make presets easier to author, easier to compare, and easier
 
 ---
 
-## Engine-specific intent
+## Engine-specific intent and envelope character
+
+Each engine has its own envelope shaping philosophy, giving distinct timbral characters without user-editable per-engine parameters. These are assigned by design and tuned per instrument type.
 
 ### Kick
-Focused on low-end strike, pitch sweep, and body weight.
+- **Amp envelope**: linear (`env^1`) — full-body presence from attack to tail
+- **Pitch sweep**: very fast (`env^8`) — brief drop concentrated at onset
+- **FM index**: very fast (`env^8`) — click complexity dies immediately
+- **Sweep depth range**: 0.10..2.20 octaves — dramatic pitch drop at high Attack/Body settings
+- Focus: low-end strike, FM pitch sweep, body weight
 
 ### Snare
-Focused on crack, noise presence, and shell/body balance.
+- **Amp envelope**: linear (`env^1`) — full tail presence
+- **Pitch**: very fast (`env^8`) — crack pitch transient only
+- **FM index**: very fast (`env^8`) — brightness at onset
+- **Noise**: squared (`env^2`) — noise longer than FM but shorter than amp
+- Focus: crack, noise wire, shell/body balance
 
 ### Metal
-Focused on inharmonic brightness, ring density, and metallic instability.
+- **Amp envelope**: **square-root** (`env^0.5`) — slower than linear, long perceived ring
+- **Ring FM depth (op1 carrier)**: sqrt decay — FM modulation stays alive longer
+- **Mid cascade (op2→op3)**: squared (`env^2`) — mid-decay FM cluster
+- **Attack FM (op4→op3)**: fourth-power + eighth-power (`env^4`, `env^8`) — bright strike burst only
+- **Ring index range**: 1.5..4.7 (was 0.30..1.45) — genuine DX7-style FM indices for metallic character
+- **Strike index range**: 0.5..5.5 (was 0.35..3.55) — stronger attack burst
+- **Character 0**: DX7 cymbal ratios (1.0, 1.483, 1.932, 2.546)
+- **Character 1**: Gong ratios (1.0, 2.756, 3.752, 5.404) — selected via bit 7 of `ENV_SHAPE`
+- Focus: inharmonic FM ring, metallic density, long tail
 
 ### Perc
-Focused on flexible FM percussion: wood, block, tom-like, and digital percussion behavior.
+- **Amp**: linear (`env^1`) — full decay body
+- **Strike FM**: eighth-power (`env^8`) — short thwack only
+- **Body FM**: fourth-power (`env^4`) — medium sustain cluster
+- **Strike index range**: 0.30..3.00 (was 0.35..2.05) — more dramatic FM transient
+- Focus: block, wood, tom, and digital FM percussion behavior
 
 The four engines should cover the primary needs of the instrument without needing a larger engine count.
 
@@ -189,13 +211,25 @@ That project would keep the same platform philosophy but use a different engine 
 
 ---
 
+## LFO routing
+
+LFO1 and LFO2 are fully functional modulation sources. They are routed through `lfo_smoother_t` for zipper-free parameter transitions, then converted to the `lfo_enhanced_t` audio path.
+
+**Rate conversion**: the smoother stores normalized 0..1 (matching the 0-100 UI range). Before reaching the audio oscillator the value is converted to cycles/sample: `rate_cps = min_hz/sr + norm × (max_hz − min_hz)/sr`.
+
+**Available targets**: pitch, FM index, amplitude envelope, noise mix, metal gate, LFO2 phase (from LFO1), LFO1 phase (from LFO2).
+
+**Shapes**: triangle, ramp, chord steps (selected by LFO1_SHAPE param via `shape_combo`).
+
+---
+
 ## Current priorities
 
-1. Finalize the live control wiring
-2. Stabilize the engine behavior
-3. Rebuild presets around the new sound families
-4. Add tests for monotonic behavior and output safety
-5. Tune the instrument against reference material
+1. Hardware listening test for metal engine improvements (ring_index boost, sqrt envelope)
+2. Preset rebuild around new sound families and improved parameter ranges
+3. Test suite for monotonic parameter behavior
+4. Tune instrument against reference material
+5. Decide whether velocity becomes a real control source
 
 ---
 

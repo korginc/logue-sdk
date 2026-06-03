@@ -1305,6 +1305,15 @@ v4sf exp_ps(v4sf x) {
   return y;
 }
 
+/** the most instruction-efficient approach uses the identity:$$x^y = e^{y \cdot \ln(x)}$$ */
+static inline __attribute__((optimize("Ofast"), always_inline))
+float32x4_t pow_neon(float32x4_t x, float32x4_t y) {
+    // Identity: x^y = exp(y * log(x))
+    float32x4_t log_x = log_ps(x);             // Compute natural log ln(x)
+    float32x4_t y_log_x = vmulq_f32(y, log_x); // Multiply exponent y by ln(x)
+    return exp_ps(y_log_x);                   // Compute e^(y * ln(x))
+}
+
 #define c_minus_cephes_DP1 -0.78515625
 #define c_minus_cephes_DP2 -2.4187564849853515625e-4
 #define c_minus_cephes_DP3 -3.77489497744594108e-8
@@ -1331,7 +1340,8 @@ v4sf exp_ps(v4sf x) {
    almost no extra price so both sin_ps and cos_ps make use of
    sincos_ps..
   */
-static inline __attribute__((optimize("Ofast"), always_inline)) void sincos_ps(v4sf x, v4sf * ysin, v4sf * ycos) {  // any x
+static inline __attribute__((optimize("Ofast"), always_inline))
+void sincos_ps(v4sf x, v4sf * ysin, v4sf * ycos) {  // any x
   v4sf xmm1, xmm2, xmm3, y;
 
   v4su emm2;

@@ -82,7 +82,7 @@ fast_inline void wavefolder_init(wavefolder_t* wf) {
  * Set drive type
  */
 fast_inline void wavefolder_set_drive_type(wavefolder_t* wf, int mode) {
-  if (mode < DRIVE_MODE_TOTAL)
+  if ((mode > DIST_MODE_BOTH) && (mode < DIST_MODE_TOTAL))
     wf->mode = mode;
 }
 /**
@@ -92,11 +92,11 @@ fast_inline void wavefolder_set_drive(wavefolder_t* wf, float drive_percent) {
     float drive = drive_percent * 0.01f;
     wf->drive = vdupq_n_f32(drive);
 
-    // Makeup gain compensates for the pre-gain (1 + drive*2) applied in
+    // Makeup gain compensates for the pre-gain (1 + drive*39) applied in
     // wavefolder_process. At drive=0 this is 1.0 (passthrough, matches CLEAN
-    // mode level). At drive=1.0 it is 0.33 which cancels the 3x pre-gain for
+    // mode level). At drive=1.0 it is 0.25 which cancels the 4x pre-gain for
     // signals still in the linear range of the waveshaper.
-    float makeup = 1.0f / (1.0f + drive * 2.0f);
+    float makeup = 1.0f / (1.0f + drive * 39.0f);
     wf->output_gain = vdupq_n_f32(makeup);
 }
 
@@ -133,7 +133,7 @@ fast_inline float32x4_t triangle_folder(float32x4_t x) {
     // y = |(x + 1) % 4 - 2| - 1
     float32x4_t shifted = vaddq_f32(x, one);
     float32x4_t div = vmulq_f32(shifted, vdupq_n_f32(0.25f));
-    int32x4_t floor_div = vcvtq_s32_f32(div);
+    int32x4_t   floor_div = vcvtq_s32_f32(div);
     float32x4_t mod = vsubq_f32(shifted,
                                 vmulq_f32(vcvtq_f32_s32(floor_div), four));
 
@@ -190,64 +190,71 @@ fast_inline float32x4_t suboctave_process(wavefolder_t* wf, float32x4_t in_v) {
 /**
  * Main wavefolder processing with drive and blend
  */
-fast_inline float32x4x2_t wavefolder_process(wavefolder_t* wf,
-                                              float32x4_t in_l,
-                                              float32x4_t in_r,
-                                              float drive) {
-    (void)drive; // drive is stored in wf->drive
+fast_inline float32x4x2_t wavefolder_process(wavefolder_t *wf,
+                                             float32x4_t in_l,
+                                             float32x4_t in_r,
+                                             float32x4_t drive) {
+  (void)drive; // drive is stored in wf->drive
 
-    float32x4x2_t out;
+  float32x4x2_t out;
 
-    // Apply drive gain: 1+drive*2 gives 1x at drive=0 (passthrough) to 3x at drive=100%.
-    // Matches the makeup formula in wavefolder_set_drive so level is consistent.
-    float32x4_t driven_l = vmulq_f32(in_l, vaddq_f32(vdupq_n_f32(1.0f),
-                                                      vmulq_f32(wf->drive, vdupq_n_f32(2.0f))));
-    float32x4_t driven_r = vmulq_f32(in_r, vaddq_f32(vdupq_n_f32(1.0f),
-                                                      vmulq_f32(wf->drive, vdupq_n_f32(2.0f))));
+  // Apply drive gain: 1+drive*39 gives 1x at drive=0 (passthrough) to 40x at
+  // drive=100%. Matches the makeup formula in wavefolder_set_drive so level is
+  // consistent.
+  float32x4_t driven_l =
+      vmulq_f32(in_l, vaddq_f32(vdupq_n_f32(1.0f),
+                                vmulq_f32(wf->drive, vdupq_n_f32(39.0f))));
+  float32x4_t driven_r =
+      vmulq_f32(in_r, vaddq_f32(vdupq_n_f32(1.0f),
+                                vmulq_f32(wf->drive, vdupq_n_f32(39.0f))));
 
-    // Apply selected waveshaping
-    switch (wf->mode) {
-        case DRIVE_MODE_SOFT_CLIP:
-            out.val[0] = soft_clip(driven_l);
-            out.val[1] = soft_clip(driven_r);
-            break;
+  // Apply selected waveshaping
+  switch (wf->mode) {
+  case DRIVE_MODE_SOFT_CLIP:
+    out.val[0] = soft_clip(driven_l);
+    out.val[1] = soft_clip(driven_r);
+    break;
 
-        case DRIVE_MODE_HARD_CLIP:
-            out.val[0] = hard_clip(driven_l);
-            out.val[1] = hard_clip(driven_r);
-            break;
+  case DRIVE_MODE_HARD_CLIP:
+    out.val[0] = hard_clip(driven_l);
+    out.val[1] = hard_clip(driven_r);
+    break;
 
-        case DRIVE_MODE_TRIANGLE:
-            out.val[0] = triangle_folder(driven_l);
-            out.val[1] = triangle_folder(driven_r);
-            break;
+  case DRIVE_MODE_TRIANGLE:
+    out.val[0] = triangle_folder(driven_l);
+    out.val[1] = triangle_folder(driven_r);
+    break;
 
-        case DRIVE_MODE_SINE:
-            out.val[0] = sine_folder(driven_l);
-            out.val[1] = sine_folder(driven_r);
-            break;
+  case DRIVE_MODE_SINE:
+    out.val[0] = sine_folder(driven_l);
+    out.val[1] = sine_folder(driven_r);
+    break;
 
-        case DRIVE_MODE_SUBOCTAVE: {
-            // Use a mono mix for zero-crossing detection. Processing L and R as
-            // separate detectors causes independent sub-octave phases that drift
-            // apart, creating stereo incoherence heard as fuzziness/noise.
-            // A single detector gives a phase-coherent ±1 square wave; the stereo
-            // image is preserved by amplitude-modulating each channel independently.
-            float32x4_t mono = vmulq_n_f32(vaddq_f32(driven_l, driven_r), 0.5f);
-            float32x4_t sub  = suboctave_process(wf, mono);
-            out.val[0] = vmulq_f32(sub, vabsq_f32(in_l));
-            out.val[1] = vmulq_f32(sub, vabsq_f32(in_r));
-            break;
-        }
+  case DRIVE_MODE_SUBOCTAVE: {
+    // Use a mono mix for zero-crossing detection. Processing L and R as
+    // separate detectors causes independent sub-octave phases that drift
+    // apart, creating stereo incoherence heard as fuzziness/noise.
+    // A single detector gives a phase-coherent ±1 square wave; the stereo
+    // image is preserved by amplitude-modulating each channel independently.
+    float32x4_t mono = vmulq_n_f32(vaddq_f32(driven_l, driven_r), 0.5f);
+    float32x4_t sub = suboctave_process(wf, mono);
+    // Use driven signals instead of raw input to prevent volume drop as drive increases.
+    // Mix the sub-octave with the soft-clipped signal to ensure distortion is audible.
+    float32x4_t sub_l = vmulq_f32(sub, vabsq_f32(driven_l));
+    float32x4_t sub_r = vmulq_f32(sub, vabsq_f32(driven_r));
+    out.val[0] = vmulq_n_f32(vaddq_f32(soft_clip(driven_l), sub_l), 0.5f);
+    out.val[1] = vmulq_n_f32(vaddq_f32(soft_clip(driven_r), sub_r), 0.5f);
+    break;
+  }
 
-        default:
-            out.val[0] = driven_l;
-            out.val[1] = driven_r;
-    }
+  default:
+    out.val[0] = driven_l;
+    out.val[1] = driven_r;
+  }
 
-    // Apply output makeup gain
-    out.val[0] = vmulq_f32(out.val[0], wf->output_gain);
-    out.val[1] = vmulq_f32(out.val[1], wf->output_gain);
+  // Apply output makeup gain
+  out.val[0] = vmulq_f32(out.val[0], wf->output_gain);
+  out.val[1] = vmulq_f32(out.val[1], wf->output_gain);
 
-    return out;
+  return out;
 }

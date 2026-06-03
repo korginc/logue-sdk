@@ -13,6 +13,7 @@
 #include <arm_neon.h>
 #include <stdint.h>
 #include "constants.h"
+#include "float_math.h"
 
 // Envelope stages
 #define ENV_STAGE_ATTACK  0
@@ -21,8 +22,11 @@
 #define ENV_STATE_OFF     3
 
 // Envelope curve types
-#define ENV_CURVE_LINEAR    0
-#define ENV_CURVE_EXPONENTIAL 1
+#define ENV_CURVE_LINEAR       0
+#define ENV_CURVE_EXPONENTIAL  1
+#define ENV_CURVE_LOG          2
+#define ENV_CURVE_SIGMOID      3
+#define ENV_CURVE_PUNCH        4
 
 typedef struct {
     uint8_t attack_ms;    // 0-50ms
@@ -386,9 +390,20 @@ fast_inline void get_envelope(uint8_t shape_idx,
                               uint8_t* curve_type) {
     shape_idx &= 0x7F;
     const env_curve_t* env = &ENV_ROM[shape_idx];
-    *attack_ms = env->attack_ms;
-    *decay_ms = env->decay_ms;
-    *release_ms = env->release_ms;
+    // Runtime curation for Sonaglio percussion: keep onsets fast and tails
+    // controlled even when ROM entries are broad/experimental.
+    uint8_t a = env->attack_ms;
+    uint16_t d = env->decay_ms;
+    uint16_t r = env->release_ms;
+    // Keep onsets fast, but allow long metallic/experimental tails to ring.
+    // The metallic ROM range (96-127) is designed for 350-1850ms decays; the
+    // metal engine's sqrt amplitude envelope needs them to breathe.
+    if (a > 6) a = 6;
+    if (d > 1200) d = 1200;
+    if (r > 700) r = 700;
+    *attack_ms = a;
+    *decay_ms = d;
+    *release_ms = r;
     *curve_type = env->curve_type;
 }
 
@@ -518,6 +533,9 @@ fast_inline void neon_envelope_process(neon_envelope_t* env) {
     uint32x4_t decay_stage   = vceqq_u32(env->stage, vdupq_n_u32(ENV_STAGE_DECAY));
     uint32x4_t release_stage = vceqq_u32(env->stage, vdupq_n_u32(ENV_STAGE_RELEASE));
     uint32x4_t exp_curve     = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_EXPONENTIAL));
+    uint32x4_t log_curve     = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_LOG));
+    uint32x4_t sigmoid_curve = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_SIGMOID));
+    uint32x4_t punch_curve   = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_PUNCH));
 
     // Stage done before decrement. Treat samples_left <= 1 as done.
     uint32x4_t done = vandq_u32(active, vcgeq_u32(one_u32, env->samples_left));
@@ -565,14 +583,19 @@ fast_inline void neon_envelope_process(neon_envelope_t* env) {
 
     // Decay coefficient/increment.
     // For linear: -1/decay_samples.
-    // For exp   : +5/decay_samples coefficient.
+    // For nonlinear curves: positive one-pole coefficients per curve family.
     float32x4_t rec_decay = vrecpeq_f32(env->decay_samples);
     rec_decay = vmulq_f32(rec_decay, vrecpsq_f32(env->decay_samples, rec_decay));
 
     float32x4_t linear_decay_inc = vnegq_f32(rec_decay);
-    float32x4_t exp_decay_coeff  = vmulq_n_f32(rec_decay, 5.0f);
-    float32x4_t decay_inc = vbslq_f32(exp_curve,
-                                      exp_decay_coeff,
+    float32x4_t decay_coeff = vmulq_n_f32(rec_decay, 5.0f);
+    decay_coeff = vbslq_f32(log_curve, vmulq_n_f32(rec_decay, 4.2f), decay_coeff);
+    decay_coeff = vbslq_f32(sigmoid_curve, vmulq_n_f32(rec_decay, 4.0f), decay_coeff);
+    decay_coeff = vbslq_f32(punch_curve, vmulq_n_f32(rec_decay, 7.2f), decay_coeff);
+    uint32x4_t nonlinear_curve = vorrq_u32(vorrq_u32(exp_curve, log_curve),
+                                           vorrq_u32(sigmoid_curve, punch_curve));
+    float32x4_t decay_inc = vbslq_f32(nonlinear_curve,
+                                      decay_coeff,
                                       linear_decay_inc);
 
     env->increment = vbslq_f32(attack_done, decay_inc, env->increment);
@@ -593,9 +616,12 @@ fast_inline void neon_envelope_process(neon_envelope_t* env) {
     rec_release = vmulq_f32(rec_release, vrecpsq_f32(env->release_samples, rec_release));
 
     float32x4_t linear_release_inc = vnegq_f32(vmulq_f32(env->level, rec_release));
-    float32x4_t exp_release_coeff  = vmulq_n_f32(rec_release, 6.0f);
-    float32x4_t release_inc = vbslq_f32(exp_curve,
-                                        exp_release_coeff,
+    float32x4_t release_coeff = vmulq_n_f32(rec_release, 6.0f);
+    release_coeff = vbslq_f32(log_curve, vmulq_n_f32(rec_release, 4.8f), release_coeff);
+    release_coeff = vbslq_f32(sigmoid_curve, vmulq_n_f32(rec_release, 5.0f), release_coeff);
+    release_coeff = vbslq_f32(punch_curve, vmulq_n_f32(rec_release, 7.0f), release_coeff);
+    float32x4_t release_inc = vbslq_f32(nonlinear_curve,
+                                        release_coeff,
                                         linear_release_inc);
 
     env->increment = vbslq_f32(decay_done, release_inc, env->increment);
@@ -635,15 +661,23 @@ fast_inline void neon_envelope_release(neon_envelope_t* env,
                                   vcvtq_u32_f32(env->release_samples),
                                   env->samples_left);
 
-    uint32x4_t exp_curve = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_EXPONENTIAL));
+    uint32x4_t exp_curve     = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_EXPONENTIAL));
+    uint32x4_t log_curve     = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_LOG));
+    uint32x4_t sigmoid_curve = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_SIGMOID));
+    uint32x4_t punch_curve   = vceqq_u32(env->curve_type, vdupq_n_u32(ENV_CURVE_PUNCH));
+    uint32x4_t nonlinear_curve = vorrq_u32(vorrq_u32(exp_curve, log_curve),
+                                           vorrq_u32(sigmoid_curve, punch_curve));
 
     float32x4_t rec = vrecpeq_f32(env->release_samples);
     rec = vmulq_f32(rec, vrecpsq_f32(env->release_samples, rec));
 
     float32x4_t linear_release_inc = vnegq_f32(vmulq_f32(env->level, rec));
-    float32x4_t exp_release_coeff  = vmulq_n_f32(rec, 6.0f);
-    float32x4_t release_inc = vbslq_f32(exp_curve,
-                                        exp_release_coeff,
+    float32x4_t release_coeff = vmulq_n_f32(rec, 6.0f);
+    release_coeff = vbslq_f32(log_curve, vmulq_n_f32(rec, 4.8f), release_coeff);
+    release_coeff = vbslq_f32(sigmoid_curve, vmulq_n_f32(rec, 5.0f), release_coeff);
+    release_coeff = vbslq_f32(punch_curve, vmulq_n_f32(rec, 7.0f), release_coeff);
+    float32x4_t release_inc = vbslq_f32(nonlinear_curve,
+                                        release_coeff,
                                         linear_release_inc);
 
     env->increment = vbslq_f32(trigger, release_inc, env->increment);

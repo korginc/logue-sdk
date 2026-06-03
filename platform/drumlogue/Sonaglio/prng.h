@@ -209,6 +209,65 @@ fast_inline uint32x4_t neon_prng_rand(neon_prng_t* rng) {
     return neon_prng_rand_u32(rng);
 }
 
+/**
+ * Correctly generate a random float in [0, 1) range using bit manipulation
+ */
+fast_inline float32x4_t neon_generate_float_rand_0_1(neon_prng_t * rng) {
+  uint32x4_t r = neon_prng_rand_u32(rng);
+  uint32x4_t masked = vandq_u32(r, vdupq_n_u32(0x7FFFFF));
+  uint32x4_t float_bits = vorrq_u32(masked, vdupq_n_u32(0x3F800000));
+  return vsubq_f32(vreinterpretq_f32_u32(float_bits), vdupq_n_f32(1.0f));
+}
+
+/**
+ * Generate a tiny random float in [0, 0.0009765625) range (roughly 0.1%).
+ * Useful for subtle jitter/instability without requiring an explicit multiplication.
+ * Range is [2^-10, 2^-9) before subtracting the 2^-10 offset.
+ */
+fast_inline float32x4_t neon_generate_float_rand_tiny(neon_prng_t * rng) {
+  uint32x4_t r = neon_prng_rand_u32(rng);
+  uint32x4_t masked = vandq_u32(r, vdupq_n_u32(0x7FFFFF));
+  uint32x4_t float_bits = vorrq_u32(masked, vdupq_n_u32(0x3A800000));
+  return vsubq_f32(vreinterpretq_f32_u32(float_bits), vdupq_n_f32(0.0009765625f));
+}
+
+/**
+ * Generate a white noise float
+ */
+fast_inline float32x4_t neon_generate_float_white_noise(neon_prng_t * rng) {
+  uint32x4_t rand = neon_prng_rand_u32(rng);
+  // Float conversion: mask to 23-bit mantissa, add 1.0 bias, subtract 1.0 → [0,1)
+  uint32x4_t masked = vandq_u32(rand, vdupq_n_u32(0x7FFFFF));
+  uint32x4_t float_bits = vorrq_u32(masked, vdupq_n_u32(0x3F800000));
+  float32x4_t white = vsubq_f32(vreinterpretq_f32_u32(float_bits), vdupq_n_f32(1.0f));
+  return vsubq_f32(vmulq_f32(white, vdupq_n_f32(2.0f)), vdupq_n_f32(1.0f));  // [0,1)→[-1,1)
+}
+
+// Compute fractional part for each element in a float32x4_t vector
+static inline float32x4_t vfractq_f32(float32x4_t v) {
+  // Convert to int32 (truncates toward zero)
+  int32x4_t v_int = vcvtq_s32_f32(v);
+  // Convert back to float
+  float32x4_t v_trunc = vcvtq_f32_s32(v_int);
+  // Subtract integer part from original
+  return vsubq_f32(v, v_trunc);
+}
+
+/**
+ * @brief very cheap NEON noise
+ *
+ * @param state
+ * @return fast_inline
+ */
+fast_inline float32x4_t noise4(float32x4_t * state) {
+  // Xorshift-like (fast, good enough for audio)
+  *state = vaddq_f32(*state, vdupq_n_f32(1.61803398875f));
+  float32x4_t s = *state;
+
+  return vsubq_f32(vmulq_f32(vfractq_f32(vmulq_n_f32(s, 12.9898f)),
+                             vdupq_n_f32(2.0f)),
+                   vdupq_n_f32(1.0f));
+}
 
 /**
  * @brief generate white noise for different sources

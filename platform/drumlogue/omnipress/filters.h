@@ -113,7 +113,7 @@ fast_inline void sidechain_hpf_set_cutoff(sidechain_hpf_t* f, float cutoff) {
 #define DETECT_MODE_BLEND 2
 
 typedef struct {
-    float32x4_t rms_accum;      // Running sum for RMS
+    float32x4_t rms_accum;       // Running sum for RMS
     float32x4_t peak_hold;       // Peak hold value
     uint32x4_t hold_counter;     // Hold time counter
     float32x4_t last_envelope;   // Previous envelope value
@@ -242,26 +242,12 @@ typedef struct {
  * Initialize gain computer
  */
 fast_inline void gain_computer_init(gain_computer_t* gc) {
-    gc->knee_width = 6.0f;  // 6dB soft knee
-    gc->knee_type = KNEE_MEDIUM;
+  // TODO these values are never updated - but function is now obsolete.
+  gc->knee_width = 6.0f; // 6dB soft knee
+  gc->knee_type = KNEE_MEDIUM;
 }
 
-// Convert linear to dB (approximation)
-fast_inline float32x4_t linear_to_db(float32x4_t linear) {
-    // log10(x) ≈ log2(x) * 0.30103
-    uint32x4_t u = vreinterpretq_u32_f32(linear);
-    uint32x4_t exp = vandq_u32(u, vdupq_n_u32(0x7F800000));
-    uint32x4_t mant = vandq_u32(u, vdupq_n_u32(0x007FFFFF));
-
-    float32x4_t exp_f = vcvtq_f32_u32(vshrq_n_u32(exp, 23));
-    float32x4_t mant_f = vcvtq_f32_u32(mant);
-    float32x4_t log2 = vaddq_f32(vsubq_f32(exp_f, vdupq_n_f32(127.0f)),
-                                  vmulq_f32(mant_f, vdupq_n_f32(1.0f / (1 << 23))));
-
-    return vmulq_f32(log2, vdupq_n_f32(6.0206f));  // 20 * log10(2)
-}
-
-// Compute gain reduction with knee
+// Compute gain reduction with knee - obsolete
 fast_inline float32x4_t gain_computer_process(gain_computer_t* gc,
                                               float32x4_t envelope_db,
                                               float thresh_db,
@@ -337,6 +323,7 @@ fast_inline float32x4_t gain_computer_process(gain_computer_t* gc,
  * 4. ATTACK/RELEASE SMOOTHING - With auto time constants
  * --------------------------------------------------------------------------- */
 
+
 typedef struct {
     float32x4_t current_gain;      // Current gain reduction (dB)
     float attack_coeff;             // Attack smoothing coefficient
@@ -355,7 +342,7 @@ fast_inline void smoothing_init(smoothing_t* sm, float sr) {
 }
 
 /**
- * Process one sample of smoothing
+ * Process one sample of smoothing - obsolete as this is now integrated into the envelope detector, but keeping for reference.
  */
 fast_inline float32x4_t smoothing_process(smoothing_t* sm,
                                           float32x4_t target_gain) {
@@ -495,4 +482,20 @@ fast_inline float32x4_t low_shelf_filter(float32x4_t in,
                                          float sr) {
     (void)q;
     return shelving_filter(in, state, freq, gain_db, 1, sr);
+}
+
+// Convert linear to dB (approximation)
+fast_inline float32x4_t linear_to_db(float32x4_t linear) {
+  // log10(x) ≈ log2(x) * 0.30103
+  uint32x4_t u = vreinterpretq_u32_f32(linear);
+  uint32x4_t exp = vandq_u32(u, vdupq_n_u32(0x7F800000));
+  uint32x4_t mant = vandq_u32(u, vdupq_n_u32(0x007FFFFF));
+
+  float32x4_t exp_f = vcvtq_f32_u32(vshrq_n_u32(exp, 23));
+  float32x4_t mant_f = vcvtq_f32_u32(mant);
+  float32x4_t log2 =
+      vaddq_f32(vsubq_f32(exp_f, vdupq_n_f32(127.0f)),
+                vmulq_f32(mant_f, vdupq_n_f32(1.0f / (1 << 23))));
+
+  return vmulq_f32(log2, vdupq_n_f32(6.0206f)); // 20 * log10(2)
 }

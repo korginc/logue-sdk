@@ -16,12 +16,14 @@
 #include <filters.h>
 #include <cmath>
 
+// 1-pole IIR DC Blocker State Tracker
 typedef struct {
-    // Tube emulation stages
-    float32x4_t tube_state;      // First tube stage
-    float32x4_t tube_state2;     // Second tube stage
+    float x_prev;
+    float y_prev;
+} dc_blocker_state_t;
 
-    // EQ filter states — separate per channel (L/R biquad histories must not be shared)
+typedef struct {
+    // EQ Filter States (Separate per channel to eliminate crosstalk)
     biquad_state_t bass_boost_l;
     biquad_state_t treble_boost_l;
     biquad_state_t presence_l;
@@ -29,18 +31,25 @@ typedef struct {
     biquad_state_t treble_boost_r;
     biquad_state_t presence_r;
 
-    // Blend
-    float32x4_t dry_wet;
+    // Vectorized DC Blocker States
+    dc_blocker_state_t dc_l;
+    dc_blocker_state_t dc_r;
+
+    // Pirkle Triode State Variables (Dynamic Bias Excursion Capacitors)
+    float dyn_bias_l1; // Stage 1 Dynamic Bias Tracking (Left)
+    float dyn_bias_r1; // Stage 1 Dynamic Bias Tracking (Right)
+    float dyn_bias_l2; // Stage 2 Dynamic Bias Tracking (Left)
+    float dyn_bias_r2; // Stage 2 Dynamic Bias Tracking (Right)
 
     // Parameters
-    float drive;          // 0-100%
-    float bass;           // 0-100% (-12 to +12 dB)
-    float treble;         // 0-100% (-12 to +12 dB)
-    float blend;          // 0-100% (dry/wet)
-    float presence;       // 0-100% (high-end sparkle)
+    float drive;          // 0.0 to 1.0
+    float bass;           // 0.0 to 1.0
+    float treble;         // 0.0 to 1.0
+    float blend;          // 0.0 to 1.0
+    float presence;       // 0.0 to 1.0
 } overlord_t;
 
-// Initialize Operation Overlord emulation
+// Initialize state-space coefficients
 fast_inline void overlord_init(overlord_t* ov, float sample_rate) {
     ov->drive = 0.0f;
     ov->bass = 0.5f;
@@ -48,16 +57,72 @@ fast_inline void overlord_init(overlord_t* ov, float sample_rate) {
     ov->blend = 1.0f;
     ov->presence = 0.5f;
 
-    ov->tube_state = vdupq_n_f32(0.0f);
-    ov->tube_state2 = vdupq_n_f32(0.0f);
-
-    // Initialize EQ filter states (separate for L and R channels)
     biquad_init_state(&ov->bass_boost_l);
     biquad_init_state(&ov->treble_boost_l);
     biquad_init_state(&ov->presence_l);
     biquad_init_state(&ov->bass_boost_r);
     biquad_init_state(&ov->treble_boost_r);
     biquad_init_state(&ov->presence_r);
+
+    ov->dc_l.x_prev = 0.0f; ov->dc_l.y_prev = 0.0f;
+    ov->dc_r.x_prev = 0.0f; ov->dc_r.y_prev = 0.0f;
+
+    // Initialize tubes at quiescent state (no dynamic bias shift)
+    ov->dyn_bias_l1 = 0.0f; ov->dyn_bias_r1 = 0.0f;
+    ov->dyn_bias_l2 = 0.0f; ov->dyn_bias_r2 = 0.0f;
+}
+
+// Unrolled 4-lane IIR DC Blocker (Restores dynamic symmetry downstream)
+fast_inline float32x4_t dc_block_process(dc_blocker_state_t* state, float32x4_t in, float R) {
+    float x[4], y[4];
+    vst1q_f32(x, in);
+
+    y[0] = x[0] - state->x_prev + R * state->y_prev;
+    y[1] = x[1] - x[0] + R * y[0];
+    y[2] = x[2] - x[1] + R * y[1];
+    y[3] = x[3] - x[2] + R * y[2];
+
+    state->x_prev = x[3];
+    state->y_prev = y[3];
+
+    return vld1q_f32(y);
+}
+
+// Helper to extract the mean of a 4-sample vector for envelope sidechains
+fast_inline float vmeanq_f32(float32x4_t vec) {
+    float32x2_t sum2 = vadd_f32(vget_low_f32(vec), vget_high_f32(vec));
+    return (vget_lane_f32(sum2, 0) + vget_lane_f32(sum2, 1)) * 0.25f;
+}
+
+// Ultra-fast Asymmetrical Triode Shaper using hardware reciprocal square root engines
+fast_inline float32x4_t pirkle_triode_shaper(float32x4_t v_gk, float shape_pos, float shape_neg) {
+    float32x4_t v_zero = vdupq_n_f32(0.0f);
+    float32x4_t v_one  = vdupq_n_f32(1.0f);
+
+    // Isolate positive and negative grid excursions
+    float32x4_t v_pos = vmaxq_f32(v_gk, v_zero);
+    float32x4_t v_neg = vminq_f32(v_gk, v_zero);
+
+    // Polynomial squaring for non-linear coefficients
+    float32x4_t v_pos2 = vmulq_f32(v_pos, v_pos);
+    float32x4_t v_neg2 = vmulq_f32(v_neg, v_neg);
+
+    float32x4_t v_shp_pos = vmulq_f32(v_pos2, vdupq_n_f32(shape_pos));
+    float32x4_t v_shp_neg = vmulq_f32(v_neg2, vdupq_n_f32(shape_neg));
+
+    // Combine paths into a joint denominator: 1 + (Bp * pos^2) + (Bn * neg^2)
+    float32x4_t denom = vaddq_f32(v_one, vaddq_f32(v_shp_pos, v_shp_neg));
+
+    // ARM NEON pipeline optimization: Hardware reciprocal square root approximation
+    float32x4_t rsq_est  = vrsqrteq_f32(denom);
+    float32x4_t rsq_step = vrsqrtsq_f32(vmulq_f32(rsq_est, rsq_est), denom); // Newton-Raphson precision iteration
+    float32x4_t rec_sqrt = vmulq_f32(rsq_est, rsq_step);
+
+    // Scale output by reciprocal square root
+    float32x4_t out = vmulq_f32(v_gk, rec_sqrt);
+
+    // CRITICAL: A true common-cathode valve inverts signal phase natively
+    return vnegq_f32(out);
 }
 
 /**
@@ -68,43 +133,6 @@ fast_inline void overlord_set_drive(overlord_t* ov, float drive_percent) {
     ov->drive = drive;
 }
 
-// Tube saturation stage (asymmetric clipping)
-fast_inline float32x4_t tube_saturate(float32x4_t in, float drive) {
-    // Asymmetric clipping: positive side clips later than negative
-    // Simulates 12AX7 tube characteristics
-
-    float32x4_t pos_clip = vdupq_n_f32(0.8f);
-    float32x4_t neg_clip = vdupq_n_f32(0.6f);
-    float32x4_t one = vdupq_n_f32(1.0f);
-
-    // Apply drive gain
-    float32x4_t driven = vmulq_f32(in, vaddq_f32(one, vmulq_f32(vdupq_n_f32(drive), vdupq_n_f32(3.0f))));
-
-    // Asymmetric clipping
-    uint32x4_t pos = vcgtq_f32(driven, pos_clip);
-    uint32x4_t neg = vcltq_f32(driven, vnegq_f32(neg_clip));
-
-    float32x4_t clipped = driven;
-    clipped = vbslq_f32(pos, pos_clip, clipped);
-    clipped = vbslq_f32(neg, vnegq_f32(neg_clip), clipped);
-
-    // Soft knee: quadratic roll-off from 0.9*pos_clip to pos_clip.
-    // t=0 at knee start (0.72), t=1 at clip level (0.80).
-    // output = knee_start + knee_width * t*(2-t)  → smooth S from 0.72 to 0.80.
-    // The old 10:1 linear slope amplified in the knee region instead of compressing.
-    uint32x4_t knee_region = vandq_u32(
-        vcgtq_f32(driven, vmulq_f32(pos_clip, vdupq_n_f32(0.9f))),
-        vcltq_f32(driven, pos_clip)
-    );
-    float32x4_t knee_start = vmulq_f32(pos_clip, vdupq_n_f32(0.9f));
-    float32x4_t knee_width = vsubq_f32(pos_clip, knee_start);
-    float32x4_t t = fast_div_neon(vsubq_f32(driven, knee_start), knee_width);
-    float32x4_t knee_out = vaddq_f32(knee_start,
-        vmulq_f32(knee_width, vmulq_f32(t, vsubq_f32(vdupq_n_f32(2.0f), t))));
-    clipped = vbslq_f32(knee_region, knee_out, clipped);
-
-    return clipped;
-}
 
 // Baxandall bass/treble EQ: low shelf into high shelf in series
 fast_inline float32x4_t baxandall_eq(float32x4_t in,
@@ -157,56 +185,146 @@ fast_inline float32x4x2_t overlord_apply_eq(overlord_t* ov,
     return out;
 }
 
-// Main Overlord processing
-fast_inline float32x4x2_t overlord_process(overlord_t* ov,
-                                           float32x4_t in_l,
-                                           float32x4_t in_r,
-                                           float sample_rate) {
-    float active_threshold = 0.01f;
-    if (ov->drive < active_threshold &&
-        fabsf(ov->bass - 0.5f) < active_threshold &&  // 0.5 = flat
-        fabsf(ov->treble - 0.5f) < active_threshold &&
-        fabsf(ov->presence - 0.5f) < active_threshold) {
-        // Bypass - return dry signal
-        float32x4x2_t bypass;
-        bypass.val[0] = in_l;
-        bypass.val[1] = in_r;
+// ============================================================================
+// HYBRID ARCHITECTURE: FIXED CONTINUOUS PRE-AMP CASCADED INTO DYNAMIC TRIODE
+// ============================================================================
+// Optimized continuous asymmetric tube saturation stage
+// Stage 1: Continuous Rational Shaper (Fixed Bias, High Headroom)
+fast_inline float32x4_t stage1_continuous_preamp(float32x4_t in, float32x4_t v_drive, float bias) {
+    float32x4_t v_bias = vdupq_n_f32(bias);
+    float32x4_t v_one  = vdupq_n_f32(1.0f);
+
+    float32x4_t biased = vaddq_f32(vmulq_f32(in, v_drive), v_bias);
+    float32x4_t abs_biased = vabsq_f32(biased);
+    float32x4_t denom = vaddq_f32(v_one, abs_biased);
+
+    // NEON Newton-Raphson Reciprocal Approximation
+    float32x4_t rec_est  = vrecpeq_f32(denom);
+    float32x4_t rec_step = vrecpsq_f32(denom, rec_est);
+    float32x4_t rec      = vmulq_f32(rec_est, rec_step);
+
+    float32x4_t saturated = vmulq_f32(biased, rec);
+    float32x4_t v_offset  = vdupq_n_f32(bias / (1.0f + fabsf(bias)));
+
+    // Returns a native phase (+) saturated signal
+    return vsubq_f32(saturated, v_offset);
+}
+
+// Stage 2: Pirkle Triode Shaper (Dynamic Bias, Phase Inverting)
+fast_inline float32x4_t stage2_pirkle_triode(float32x4_t v_gk, float shape_pos, float shape_neg) {
+    float32x4_t v_zero = vdupq_n_f32(0.0f);
+    float32x4_t v_one  = vdupq_n_f32(1.0f);
+
+    float32x4_t v_pos = vmaxq_f32(v_gk, v_zero);
+    float32x4_t v_neg = vminq_f32(v_gk, v_zero);
+
+    float32x4_t v_shp_pos = vmulq_f32(vmulq_f32(v_pos, v_pos), vdupq_n_f32(shape_pos));
+    float32x4_t v_shp_neg = vmulq_f32(vmulq_f32(v_neg, v_neg), vdupq_n_f32(shape_neg));
+    float32x4_t denom = vaddq_f32(v_one, vaddq_f32(v_shp_pos, v_shp_neg));
+
+    // NEON Reciprocal Square Root Engine
+    float32x4_t rsq_est  = vrsqrteq_f32(denom);
+    float32x4_t rsq_step = vrsqrtsq_f32(vmulq_f32(rsq_est, rsq_est), denom);
+    float32x4_t rec_sqrt = vmulq_f32(rsq_est, rsq_step);
+
+    float32x4_t out = vmulq_f32(v_gk, rec_sqrt);
+
+    // CRITICAL: Mimics common-cathode inversion (-)
+    return vnegq_f32(out);
+}
+
+/**
+ * @brief models into a Cascaded Dual-Stage Hybrid Architecture, you gain the best of both worlds
+ * (a clean, high-headroom JFET booster feeding into a saggy, high-gain 12AX7 vacuum tube stage):
+ * Stage 1 (Continuous Rational Shaper): Acts as a warm, fixed-bias input amplifier.
+ * It softly rounds off sharp drum transients (like the initial transient spike of a snare or kick)
+ * and adds a consistent baseline of low-order even harmonics without choking.
+ * Stage 2 (Pirkle Dynamic Triode): Receives the pre-compressed, harmonically dense signal from Stage 1.
+ * Because the signal is already dense, it drives Pirkle's grid-current envelope tracker harder and more uniformly,
+ * yielding a highly reactive, breathing "blocking distortion" that thickens the sustain of the drums.
+ *
+ * @param ov
+ * @param in_l
+ * @param in_r
+ * @param sample_rate
+ * @return float32x4x2_t
+ */
+
+// Main Processing Entry Point
+fast_inline float32x4x2_t overlord_process(overlord_t* ov, float32x4_t in_l, float32x4_t in_r, float sample_rate) {
+    // Standard bypass safety evaluation
+    if (ov->drive < 0.005f && fabsf(ov->bass - 0.5f) < 0.005f && fabsf(ov->treble - 0.5f) < 0.005f) {
+        float32x4x2_t bypass = { {in_l, in_r} };
         return bypass;
     }
 
-    // Save dry signal for blend
     float32x4_t dry_l = in_l;
     float32x4_t dry_r = in_r;
 
-    // 1. Tube saturation (dual stage)
-    float32x4_t tube1_l = tube_saturate(dry_l, ov->drive);
-    float32x4_t tube1_r = tube_saturate(dry_r, ov->drive);
+    // Macro Gain Staging
+    float drive_sq = ov->drive * ov->drive;
+    float32x4_t v_drive_stage1 = vdupq_n_f32(1.0f + (drive_sq * 35.0f)); // Warm preamp push
+    float32x4_t v_drive_stage2 = vdupq_n_f32(1.0f + (ov->drive * 4.5f)); // Harder triode slam
 
-    float32x4_t tube2_l = tube_saturate(tube1_l, ov->drive * 0.7f);
-    float32x4_t tube2_r = tube_saturate(tube1_r, ov->drive * 0.7f);
+    float32x4_t v_static_bias2 = vdupq_n_f32(-0.18f); // Triode operating cutoff point
+    const float alpha_bias = 0.0025f;                 // Capacitor discharge tracker
 
-    // 2. Post-drive EQ (bass/treble boost/cut) - after distortion to avoid boost going to consume all the saturation headroom
-    float32x4_t eq_l =
-        baxandall_eq(tube2_l, &ov->bass_boost_l, &ov->treble_boost_l, ov->bass,
-                     ov->treble, sample_rate);
-    float32x4_t eq_r =
-        baxandall_eq(tube2_r, &ov->bass_boost_r, &ov->treble_boost_r, ov->bass,
-                     ov->treble, sample_rate);
+    // ==========================================
+    // CHANNEL LEFT HYBRID LAYER
+    // ==========================================
 
-    // 3. Presence control (high shelf ±12 dB, flat at presence=0.5)
+    // 1. Run through smooth, non-inverting rational preamp stage
+    float32x4_t pre_l = stage1_continuous_preamp(dry_l, v_drive_stage1, 0.12f); // Mild asymmetric warming
+
+    // 2. Cascade into the dynamic-bias Pirkle triode stage
+    float32x4_t v_gk_l = vaddq_f32(vmulq_f32(pre_l, v_drive_stage2), vaddq_f32(v_static_bias2, vdupq_n_f32(ov->dyn_bias_l1)));
+    float32x4_t wet_l  = stage2_pirkle_triode(v_gk_l, 4.8f, 1.5f);
+
+    // Track grid current envelope from Stage 2 input
+    float grid_curr_l = vmeanq_f32(vmaxq_f32(v_gk_l, vdupq_n_f32(0.0f)));
+    ov->dyn_bias_l1 += alpha_bias * (grid_curr_l * -1.7f - ov->dyn_bias_l1);
+
+    // 3. PHASE ALIGNMENT CORRECTION
+    // Stage 2 inverted the phase. We must multiply by -1 to bring it back in-phase with dry_l
+    wet_l = vnegq_f32(wet_l);
+
+    // 4. Clear accumulated offset shifts via IIR DC Blocker
+    wet_l = dc_block_process(&ov->dc_l, wet_l, 0.996f);
+
+    // ==========================================
+    // CHANNEL RIGHT HYBRID LAYER
+    // ==========================================
+
+    float32x4_t pre_r = stage1_continuous_preamp(dry_r, v_drive_stage1, 0.12f);
+
+    float32x4_t v_gk_r = vaddq_f32(vmulq_f32(pre_r, v_drive_stage2), vaddq_f32(v_static_bias2, vdupq_n_f32(ov->dyn_bias_r1)));
+    float32x4_t wet_r  = stage2_pirkle_triode(v_gk_r, 4.8f, 1.5f);
+
+    float grid_curr_r = vmeanq_f32(vmaxq_f32(v_gk_r, vdupq_n_f32(0.0f)));
+    ov->dyn_bias_r1 += alpha_bias * (grid_curr_r * -1.7f - ov->dyn_bias_r1);
+
+    wet_r = vnegq_f32(wet_r); // Phase correction step
+    wet_r = dc_block_process(&ov->dc_r, wet_r, 0.996f);
+
+    // ==========================================
+    // POST FILTERS & LINEAR PARALLEL BLEND
+    // ==========================================
+
+    // Run the hybrid saturation into your tone stack filters
+    float32x4_t eq_l = baxandall_eq(wet_l, &ov->bass_boost_l, &ov->treble_boost_l, ov->bass, ov->treble, sample_rate);
+    float32x4_t eq_r = baxandall_eq(wet_r, &ov->bass_boost_r, &ov->treble_boost_r, ov->bass, ov->treble, sample_rate);
+
     float presence_gain = (ov->presence - 0.5f) * 24.0f;
-    float32x4_t presence_l = high_shelf_filter(
-        eq_l, &ov->presence_l, 5000.0f, presence_gain, 1.0f, sample_rate);
-    float32x4_t presence_r = high_shelf_filter(
-        eq_r, &ov->presence_r, 5000.0f, presence_gain, 1.0f, sample_rate);
+    wet_l = high_shelf_filter(eq_l, &ov->presence_l, 5500.0f, presence_gain, 1.0f, sample_rate);
+    wet_r = high_shelf_filter(eq_r, &ov->presence_r, 5500.0f, presence_gain, 1.0f, sample_rate);
 
-    // 4. Blend (parallel processing)
+    // Blend safely knowing phase vectors match perfectly
     float32x4_t wet_gain = vdupq_n_f32(ov->blend);
     float32x4_t dry_gain = vdupq_n_f32(1.0f - ov->blend);
 
     float32x4x2_t out;
-    out.val[0] = vaddq_f32(vmulq_f32(dry_l, dry_gain), vmulq_f32(presence_l, wet_gain));
-    out.val[1] = vaddq_f32(vmulq_f32(dry_r, dry_gain), vmulq_f32(presence_r, wet_gain));
+    out.val[0] = vaddq_f32(vmulq_f32(dry_l, dry_gain), vmulq_f32(wet_l, wet_gain));
+    out.val[1] = vaddq_f32(vmulq_f32(dry_r, dry_gain), vmulq_f32(wet_r, wet_gain));
 
     return out;
 }

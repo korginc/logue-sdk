@@ -25,50 +25,13 @@
 #include "snare_engine.h"
 #include "metal_engine.h"
 #include "perc_engine.h"
+#include "hat_engine.h"
 #include "lfo_enhanced.h"
 #include "lfo_smoothing.h"
 #include "envelope_rom.h"
 #include "prng.h"
 #include "midi_handler.h"
 #include "fm_presets.h"
-
-// ============================================================================
-// Euclidean tuning offsets
-// ============================================================================
-// offsets[mode][engine lane] = semitones above root.
-// Engine mapping used by selector mode:
-//   lane 0 = Kick
-//   lane 1 = Snare
-//   lane 2 = Metal
-//   lane 3 = Tom/Perc
-static const float EUCLID_OFFSETS[EUCLID_MODE_COUNT][4] = {
-    { 0.f,  0.f,  0.f,  0.f},  // 0: Off
-    { 0.f,  1.f,  2.f,  3.f},  // 1: E(4,4)
-    { 0.f,  1.f,  3.f,  4.f},  // 2: E(4,6)
-    { 0.f,  1.f,  3.f,  5.f},  // 3: E(4,7)
-    { 0.f,  2.f,  4.f,  6.f},  // 4: E(4,8)
-    { 0.f,  2.f,  5.f,  7.f},  // 5: E(4,10)
-    { 0.f,  3.f,  6.f,  9.f},  // 6: E(4,12)
-    { 0.f,  4.f,  8.f, 12.f},  // 7: E(4,16)
-    { 0.f,  6.f, 12.f, 18.f},  // 8: E(4,24)
-};
-
-// ============================================================================
-// Instrument selector
-// ============================================================================
-typedef enum {
-    INST_KICK = 0,
-    INST_SNARE,
-    INST_TOM,
-    INST_METAL,
-    INST_KS,
-    INST_KT,
-    INST_KM,
-    INST_ST,
-    INST_SM,
-    INST_TM,
-    INST_COUNT
-} sonaglio_instrument_t;
 
 typedef struct {
     uint8_t  active;
@@ -91,6 +54,7 @@ typedef struct {
     snare_engine_t snare;
     metal_engine_t metal;
     perc_engine_t  perc;
+    hat_engine_t   hat;
 
     // LFO system
     lfo_enhanced_t lfo;
@@ -126,6 +90,13 @@ typedef struct {
 
     // Output gain
     float master_gain;
+    // Post-engine separation filters (lane0 active in selector model).
+    one_pole_t kick_lp;
+    one_pole_t snare_hp;
+    one_pole_t perc_bp_lp;
+    one_pole_t perc_bp_hp;
+    one_pole_t metal_hp;
+    one_pole_t hat_hp;
 } fm_perc_synth_t;
 
 // ============================================================================
@@ -170,6 +141,7 @@ static fast_inline float sonaglio_euclid_offset_for_engine(const fm_perc_synth_t
         case ENGINE_SNARE: return vgetq_lane_f32(synth->euclid_offsets, 1);
         case ENGINE_METAL: return vgetq_lane_f32(synth->euclid_offsets, 2);
         case ENGINE_PERC:  return vgetq_lane_f32(synth->euclid_offsets, 3);
+        case ENGINE_HAT:   return vgetq_lane_f32(synth->euclid_offsets, 2);
         default:           return 0.0f;
     }
 }
@@ -180,6 +152,7 @@ static fast_inline uint8_t engine_to_note_mask_bit(uint8_t engine) {
         case ENGINE_SNARE: return (uint8_t)(1u << 1);
         case ENGINE_METAL: return (uint8_t)(1u << 2);
         case ENGINE_PERC:  return (uint8_t)(1u << 3);
+        case ENGINE_HAT:   return (uint8_t)(1u << 4);
         default:           return 0u;
     }
 }
@@ -229,6 +202,9 @@ static fast_inline void fire_engine(fm_perc_synth_t* synth,
             break;
         case ENGINE_PERC:
             perc_engine_set_note(&synth->perc, lane, note_vec);
+            break;
+        case ENGINE_HAT:
+            hat_engine_set_note(&synth->hat, lane, note_vec);
             break;
         default:
             break;
@@ -295,6 +271,11 @@ fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
                        vdupq_n_f32(p[PARAM_PERC_ATK]  * 0.01f),
                        vdupq_n_f32(p[PARAM_PERC_BODY] * 0.01f));
 
+    // Hat shares metal params (same page, metal engine idles when hat is active)
+    hat_engine_update(&synth->hat,
+                      vdupq_n_f32(p[PARAM_METAL_ATK]  * 0.01f),
+                      vdupq_n_f32(p[PARAM_METAL_BODY] * 0.01f));
+
     synth->current_env_shape = (uint8_t)p[PARAM_ENV_SHAPE];
     metal_engine_set_character(&synth->metal,
                                (uint32_t)(synth->current_env_shape >> 7));
@@ -303,6 +284,24 @@ fast_inline void fm_perc_synth_update_params(fm_perc_synth_t* synth) {
         uint8_t mode = (uint8_t)p[PARAM_EUCL_TUN];
         if (mode >= EUCLID_MODE_COUNT) mode = 0;
         synth->euclid_offsets = vld1q_f32(EUCLID_OFFSETS[mode]);
+    }
+
+    // Route LFO parameters to the smoother. Without these calls the smoother
+    // stays at target=NONE with zero depth, silencing all LFO modulation.
+    {
+        const uint32x4_t all_lanes = vdupq_n_u32(0xFFFFFFFFu);
+        lfo_smoother_set_rate(&synth->lfo_smooth, 0,
+                              p[PARAM_LFO1_RATE]  * 0.01f, all_lanes);
+        lfo_smoother_set_depth(&synth->lfo_smooth, 0,
+                               p[PARAM_LFO1_DEPTH] * 0.01f, all_lanes);
+        lfo_smoother_set_target(&synth->lfo_smooth, 0,
+                                (uint8_t)p[PARAM_LFO1_TARGET], all_lanes);
+        lfo_smoother_set_rate(&synth->lfo_smooth, 1,
+                              p[PARAM_LFO2_RATE]  * 0.01f, all_lanes);
+        lfo_smoother_set_depth(&synth->lfo_smooth, 1,
+                               p[PARAM_LFO2_DEPTH] * 0.01f, all_lanes);
+        lfo_smoother_set_target(&synth->lfo_smooth, 1,
+                                (uint8_t)p[PARAM_LFO2_TARGET], all_lanes);
     }
 }
 
@@ -318,6 +317,7 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
     snare_engine_init(&synth->snare);
     metal_engine_init(&synth->metal);
     perc_engine_init(&synth->perc);
+    hat_engine_init(&synth->hat);
 
     lfo_enhanced_init(&synth->lfo);
     lfo_smoother_init(&synth->lfo_smooth);
@@ -328,7 +328,13 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
 
     synth->current_env_shape = ENV_SHAPE_DEFAULT;
     synth->euclid_offsets = vdupq_n_f32(0.0f);
-    synth->master_gain = 0.85f;  // Selector model uses only lane 0; previous 0.25 was too quiet on HW.
+    synth->master_gain = 1.30f;
+    one_pole_reset(&synth->kick_lp);
+    one_pole_reset(&synth->snare_hp);
+    one_pole_reset(&synth->perc_bp_lp);
+    one_pole_reset(&synth->perc_bp_hp);
+    one_pole_reset(&synth->metal_hp);
+    one_pole_reset(&synth->hat_hp);
 
     synth->instrument_sel = INST_KICK;
     synth->blend = 0.5f;
@@ -370,13 +376,20 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
         case INST_SNARE:  engine_a = ENGINE_SNARE; break;
         case INST_TOM:    engine_a = ENGINE_PERC;  break;
         case INST_METAL:  engine_a = ENGINE_METAL; break;
-
+        case INST_HAT:    engine_a = ENGINE_HAT;   break;
+        // combined instruments
         case INST_KS:     engine_a = ENGINE_KICK;  engine_b = ENGINE_SNARE; combo = 1; break;
         case INST_KT:     engine_a = ENGINE_KICK;  engine_b = ENGINE_PERC;  combo = 1; break;
         case INST_KM:     engine_a = ENGINE_KICK;  engine_b = ENGINE_METAL; combo = 1; break;
         case INST_ST:     engine_a = ENGINE_SNARE; engine_b = ENGINE_PERC;  combo = 1; break;
         case INST_SM:     engine_a = ENGINE_SNARE; engine_b = ENGINE_METAL; combo = 1; break;
         case INST_TM:     engine_a = ENGINE_PERC;  engine_b = ENGINE_METAL; combo = 1; break;
+        // add new combinations with hat
+        case INST_KH:     engine_a = ENGINE_KICK;  engine_b = ENGINE_HAT; combo = 1; break;
+        case INST_MH:     engine_a = ENGINE_METAL; engine_b = ENGINE_HAT; combo = 1; break;
+        case INST_SH:     engine_a = ENGINE_SNARE; engine_b = ENGINE_HAT; combo = 1; break;
+        case INST_TH:     engine_a = ENGINE_PERC;  engine_b = ENGINE_HAT; combo = 1; break;
+
         default:          engine_a = ENGINE_KICK;  break;
     }
 
@@ -456,19 +469,36 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     synth->lfo.target2 = vgetq_lane_u32(synth->lfo_smooth.current_target2, 0);
     synth->lfo.depth1 = synth->lfo_smooth.current_depth1;
     synth->lfo.depth2 = synth->lfo_smooth.current_depth2;
-    synth->lfo.rate1 = synth->lfo_smooth.current_rate1;
-    synth->lfo.rate2 = synth->lfo_smooth.current_rate2;
+    // Smoother stores normalized 0..1; lfo.rate expects cycles/sample.
+    {
+        const float32x4_t r_min  = vdupq_n_f32(LFO_ENHANCED_RATE_MIN_HZ
+                                                / (float)LFO_ENHANCED_SAMPLE_RATE);
+        const float32x4_t r_span = vdupq_n_f32((LFO_ENHANCED_RATE_MAX_HZ
+                                                 - LFO_ENHANCED_RATE_MIN_HZ)
+                                                / (float)LFO_ENHANCED_SAMPLE_RATE);
+        synth->lfo.rate1 = vaddq_f32(r_min,
+                                     vmulq_f32(synth->lfo_smooth.current_rate1, r_span));
+        synth->lfo.rate2 = vaddq_f32(r_min,
+                                     vmulq_f32(synth->lfo_smooth.current_rate2, r_span));
+    }
 
     float32x4_t lfo1 = vdupq_n_f32(0.0f);
     float32x4_t lfo2 = vdupq_n_f32(0.0f);
     lfo_enhanced_process(&synth->lfo, &lfo1, &lfo2);
+    // Most macro targets expect bipolar modulation around zero. Convert once
+    // here so target handlers below can apply stronger, symmetric movement.
+    float32x4_t lfo1_bipolar = lfo_unipolar_to_bipolar(lfo1);
+    float32x4_t lfo2_bipolar = lfo_unipolar_to_bipolar(lfo2);
 
     neon_envelope_process(&synth->envelope);
     float32x4_t envelope = synth->envelope.level;
 
+    // PARAM_NOISE_CHAR baseline: directly sets the noise floor for all engines.
+    const float noise_char_v = fm_clampf01(synth->params[PARAM_NOISE_CHAR] * 0.01f);
+
     float32x4_t lfo_pitch_mult = vdupq_n_f32(1.0f);
     float32x4_t lfo_index_add  = vdupq_n_f32(0.0f);
-    float32x4_t lfo_noise_add  = vdupq_n_f32(0.0f);
+    float32x4_t lfo_noise_add  = vdupq_n_f32(noise_char_v * 0.35f);
     float32x4_t lfo_env_mult   = vdupq_n_f32(1.0f);
     float32x4_t lfo_metal_gate = vdupq_n_f32(1.0f);
 
@@ -476,25 +506,31 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     const uint32_t t2 = synth->lfo.target2;
     const float32x4_t d1 = synth->lfo.depth1;
     const float32x4_t d2 = synth->lfo.depth2;
+    // Onset randomization derived from dual-LFO decorrelation. This creates
+    // tiny per-hit instability (detune/jitter) without adding extra RNG in DSP.
+    float32x4_t onset_rand = vsubq_f32(lfo1_bipolar, lfo2_bipolar);
 
     switch (t1) {
         case LFO_TARGET_PITCH:
-            lfo_pitch_mult = vaddq_f32(lfo_pitch_mult, vmulq_f32(lfo1, d1));
+            lfo_pitch_mult = vaddq_f32(lfo_pitch_mult,
+                                       vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(0.65f)));
             break;
         case LFO_TARGET_INDEX:
             lfo_index_add = vaddq_f32(lfo_index_add,
-                                      vmulq_f32(vmulq_f32(lfo1, d1), vdupq_n_f32(0.25f)));
+                                      vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(1.20f)));
             break;
         case LFO_TARGET_ENV:
-            lfo_env_mult = vaddq_f32(lfo_env_mult, vmulq_f32(lfo1, d1));
+            lfo_env_mult = vaddq_f32(lfo_env_mult,
+                                     vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(0.85f)));
             break;
         case LFO_TARGET_NOISE_MIX:
             lfo_noise_add = vaddq_f32(lfo_noise_add,
-                                      vmulq_f32(vmulq_f32(lfo1, d1), vdupq_n_f32(0.15f)));
+                                      vmulq_f32(vmulq_f32(lfo1_bipolar, d1), vdupq_n_f32(0.80f)));
             break;
         case LFO_TARGET_METAL_GATE:
-            lfo_metal_gate = vaddq_f32(vdupq_n_f32(0.5f),
-                                       vmulq_f32(vmulq_f32(lfo1, d1), vdupq_n_f32(0.5f)));
+            // Full gate range: 0 (silent) when lfo=0,d=1 → 1 (open) when lfo=1 or d=0.
+            lfo_metal_gate = vaddq_f32(vsubq_f32(vdupq_n_f32(1.0f), d1),
+                                       vmulq_f32(lfo1, d1));
             lfo_metal_gate = fm_vclamp01(lfo_metal_gate);
             break;
         default:
@@ -503,30 +539,34 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
 
     switch (t2) {
         case LFO_TARGET_PITCH:
-            lfo_pitch_mult = vaddq_f32(lfo_pitch_mult, vmulq_f32(lfo2, d2));
+            lfo_pitch_mult = vaddq_f32(lfo_pitch_mult,
+                                       vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(0.65f)));
             break;
         case LFO_TARGET_INDEX:
             lfo_index_add = vaddq_f32(lfo_index_add,
-                                      vmulq_f32(vmulq_f32(lfo2, d2), vdupq_n_f32(0.25f)));
+                                      vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(1.20f)));
             break;
         case LFO_TARGET_ENV:
-            lfo_env_mult = vaddq_f32(lfo_env_mult, vmulq_f32(lfo2, d2));
+            lfo_env_mult = vaddq_f32(lfo_env_mult,
+                                     vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(0.85f)));
             break;
         case LFO_TARGET_NOISE_MIX:
             lfo_noise_add = vaddq_f32(lfo_noise_add,
-                                      vmulq_f32(vmulq_f32(lfo2, d2), vdupq_n_f32(0.15f)));
+                                      vmulq_f32(vmulq_f32(lfo2_bipolar, d2), vdupq_n_f32(0.80f)));
             break;
         case LFO_TARGET_METAL_GATE:
-            lfo_metal_gate = vaddq_f32(vdupq_n_f32(0.5f),
-                                       vmulq_f32(vmulq_f32(lfo2, d2), vdupq_n_f32(0.5f)));
+            lfo_metal_gate = vaddq_f32(vsubq_f32(vdupq_n_f32(1.0f), d2),
+                                       vmulq_f32(lfo2, d2));
             lfo_metal_gate = fm_vclamp01(lfo_metal_gate);
             break;
         default:
             break;
     }
 
-    lfo_pitch_mult = vmaxq_f32(lfo_pitch_mult, vdupq_n_f32(0.125f));
-    envelope = vmulq_f32(envelope, fm_vclamp01(lfo_env_mult));
+    lfo_pitch_mult = vaddq_f32(lfo_pitch_mult, vmulq_n_f32(onset_rand, 0.04f));
+    lfo_index_add = vaddq_f32(lfo_index_add, vmulq_n_f32(onset_rand, 0.08f));
+    lfo_pitch_mult = lfo_vclamp(lfo_pitch_mult, 0.60f, 1.55f);
+    envelope = vmulq_f32(envelope, vmaxq_f32(lfo_env_mult, vdupq_n_f32(0.0f)));
 
     uint32x4_t active_mask = vmvnq_u32(vceqq_u32(synth->envelope.stage,
                                                  vdupq_n_u32(ENV_STATE_OFF)));
@@ -534,54 +574,88 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
 
     float32x4_t hit_shape = vdupq_n_f32(synth->params[PARAM_HIT_SHAPE] * 0.01f);
     float32x4_t body_tilt = vdupq_n_f32(synth->params[PARAM_BODY_TILT] * 0.01f);
-    float32x4_t drive = vdupq_n_f32(synth->params[PARAM_DRIVE] * 0.01f);
 
     float32x4_t transient_env = fm_make_transient_env(envelope, hit_shape);
     float32x4_t body_env = fm_make_body_env(envelope, body_tilt);
 
-    float32x4_t kick_out = vmulq_f32(
-        kick_engine_process(&synth->kick, transient_env, active_mask, lfo_pitch_mult, lfo_index_add),
-        vdupq_n_f32(synth->engine_gain[ENGINE_KICK])
-    );
+    // Skip engine DSP when gain is zero (single-instrument mode = ~75% engine compute saved).
+    // Zero-gain engines still feed silence through their separation filters below,
+    // keeping filter state at zero for a clean re-entry on the next trigger.
+    float32x4_t kick_out = vdupq_n_f32(0.0f);
+    if (synth->engine_gain[ENGINE_KICK] > 0.0f) {
+        kick_out = vmulq_f32(
+            kick_engine_process(&synth->kick, transient_env, active_mask, lfo_pitch_mult, lfo_index_add),
+            vdupq_n_f32(synth->engine_gain[ENGINE_KICK])
+        );
+    }
 
-    float32x4_t snare_out = vmulq_f32(
-        snare_engine_process(&synth->snare,
-                             transient_env,
-                             active_mask,
-                             lfo_pitch_mult,
-                             vaddq_f32(lfo_index_add, lfo_noise_add),
-                             vaddq_f32(synth->snare.noise_mix, lfo_noise_add)),
-        vdupq_n_f32(synth->engine_gain[ENGINE_SNARE])
-    );
+    float32x4_t snare_out = vdupq_n_f32(0.0f);
+    if (synth->engine_gain[ENGINE_SNARE] > 0.0f) {
+        snare_out = vmulq_f32(
+            snare_engine_process(&synth->snare,
+                                 transient_env,
+                                 active_mask,
+                                 lfo_pitch_mult,
+                                 vaddq_f32(lfo_index_add, lfo_noise_add),
+                                 vaddq_f32(synth->snare.noise_mix, lfo_noise_add)),
+            vdupq_n_f32(synth->engine_gain[ENGINE_SNARE])
+        );
+    }
 
-    float32x4_t metal_out = vmulq_f32(
-        metal_engine_process(&synth->metal,
-                             body_env,
-                             active_mask,
-                             lfo_pitch_mult,
-                             lfo_index_add,
-                             synth->metal.brightness,
-                             lfo_metal_gate),
-        vdupq_n_f32(synth->engine_gain[ENGINE_METAL])
-    );
+    float32x4_t metal_out = vdupq_n_f32(0.0f);
+    if (synth->engine_gain[ENGINE_METAL] > 0.0f) {
+        metal_out = vmulq_f32(
+            metal_engine_process(&synth->metal,
+                                 body_env,
+                                 active_mask,
+                                 lfo_pitch_mult,
+                                 lfo_index_add,
+                                 synth->metal.brightness,
+                                 lfo_metal_gate,
+                                 lfo_noise_add),
+            vdupq_n_f32(synth->engine_gain[ENGINE_METAL])
+        );
+    }
 
-    float32x4_t perc_out = vmulq_f32(
-        perc_engine_process(&synth->perc, body_env, active_mask, lfo_pitch_mult, lfo_index_add),
-        vdupq_n_f32(synth->engine_gain[ENGINE_PERC])
-    );
+    float32x4_t perc_out = vdupq_n_f32(0.0f);
+    if (synth->engine_gain[ENGINE_PERC] > 0.0f) {
+        perc_out = vmulq_f32(
+            perc_engine_process(&synth->perc, body_env, active_mask, lfo_pitch_mult, lfo_index_add),
+            vdupq_n_f32(synth->engine_gain[ENGINE_PERC])
+        );
+    }
+
+    float32x4_t hat_out = vdupq_n_f32(0.0f);
+    if (synth->engine_gain[ENGINE_HAT] > 0.0f) {
+        hat_out = vmulq_f32(
+            hat_engine_process(&synth->hat, transient_env, active_mask, lfo_pitch_mult, lfo_noise_add),
+            vdupq_n_f32(synth->engine_gain[ENGINE_HAT])
+        );
+    }
 
     float32x4_t mix = vdupq_n_f32(0.0f);
+    // Separation EQ per engine (lightweight one-pole):
+    // kick: low-passed body support, snare: high-passed crack/noise,
+    // metal: brighter high-pass, perc: mid-focused band-pass-ish layer.
+    float32x4_t kick_sep = one_pole_lpf(&synth->kick_lp, kick_out, 190.0f);
+    float32x4_t snare_sep = one_pole_hpf(&synth->snare_hp, snare_out, 420.0f);
+    // HPF was 1800 Hz which cut below the 500 Hz carrier fundamental — now 500 Hz.
+    float32x4_t metal_sep = one_pole_hpf(&synth->metal_hp, metal_out, 500.0f);
+    float32x4_t perc_lp = one_pole_lpf(&synth->perc_bp_lp, perc_out, 1400.0f);
+    float32x4_t perc_hp = one_pole_hpf(&synth->perc_bp_hp, perc_lp, 220.0f);
+    float32x4_t perc_sep = perc_hp;
+    // Hat: high-pass only — squares are already mid/high, remove any sub content.
+    float32x4_t hat_sep = one_pole_hpf(&synth->hat_hp, hat_out, 800.0f);
     // Selector model: only one lane and usually one/two engines are active.
     // These are no longer four-voice summing weights; they are nominal engine
     // output trims. Keep them strong enough for direct HW monitoring.
-    mix = vaddq_f32(mix, vmulq_n_f32(kick_out,  0.95f));
-    mix = vaddq_f32(mix, vmulq_n_f32(snare_out, 0.90f));
-    mix = vaddq_f32(mix, vmulq_n_f32(metal_out, 0.78f));
-    mix = vaddq_f32(mix, vmulq_n_f32(perc_out,  0.88f));
-
-    mix = vmulq_f32(mix, fm_make_drive_gain(drive));
-    mix = fm_soft_clip(mix);
-    mix = vmulq_n_f32(mix, synth->master_gain);
+    mix = vaddq_f32(mix, vmulq_n_f32(kick_sep,  1.00f));
+    mix = vaddq_f32(mix, vmulq_n_f32(snare_sep, 0.96f));
+    mix = vaddq_f32(mix, vmulq_n_f32(metal_sep, 0.92f));
+    mix = vaddq_f32(mix, vmulq_n_f32(perc_sep,  0.93f));
+    mix = vaddq_f32(mix, vmulq_n_f32(hat_sep,   0.88f));
+    // Apply the master gain before the soft clip to avoid pushing the values outside the [-1.0, 1.0]
+    mix = fm_soft_clip(vmulq_n_f32(mix, synth->master_gain));
 
     return neon_horizontal_sum_alt(mix);
 }

@@ -26,7 +26,6 @@
 
 #include "unit.h"
 #include "constants.h"
-#include "compressor_core.h"
 #include "filters.h"
 #include "wavefolder.h"
 #include "operation_overlord.h"
@@ -36,7 +35,7 @@
 enum parameters
 {
     k_threhold,
-    k_ratio,
+    k_slope,
     k_attack,
     k_release,
     k_makeup,
@@ -44,12 +43,13 @@ enum parameters
     k_mix,
     k_sc_hpf,
     k_compressor_mode,
+    k_attenuation_limit,
+    k_gain_limit,
+    k_detection_mode,              // envelope detector type: 0=Peak, 1=RMS, 2=Blend
     k_bass,
     k_treble,
     k_presence,
-    k_distressor_distortion_type,
-    k_distressor_ratio,
-    k_distressor_drive_wave_mode,  // wavefolder character (soft/hard/tri/sine/suboctave)
+    k_distressor_distortion_type, // includes wavefolder character (soft/hard/tri/sine/suboctave)
     k_multiband_band_selection,
     k_multiband_band_threshold,
     k_multiband_band_ratio,
@@ -58,8 +58,6 @@ enum parameters
     k_multiband_band_makeup,
     k_multiband_band_mute,
     k_multiband_band_solo,
-    k_detection_mode,              // envelope detector type: 0=Peak, 1=RMS, 2=Blend
-
     k_num_params,
 };
 
@@ -71,7 +69,6 @@ public:
 
     MasterFX(void) : samplerate_(48000.0f) {
         // Initialize all DSP modules
-        compressor_init(&comp_);
         sidechain_hpf_init(&sc_hpf_, 80.0f, samplerate_);
         wavefolder_init(&wavefolder_);
         distressor_init(&distressor_, samplerate_);
@@ -111,7 +108,7 @@ public:
     inline void Reset() {
         // Set default parameters
         setParameter(k_threhold, THRESH_DEFAULT);   // Thresh: -10.0 dB
-        setParameter(k_ratio, RATIO_DEFAULT);       // Ratio: 4.0
+        setParameter(k_slope, SLOPE_DEFAULT);       // Slope: 0.4 (4.0:1)
         setParameter(k_attack, ATTACK_DEFAULT);     // Attack: 15.0 ms
         setParameter(k_release, RELEASE_DEFAULT);   // Release: 200 ms
         setParameter(k_makeup, MAKEUP_DEFAULT);     // Makeup: 0 dB
@@ -119,25 +116,25 @@ public:
         setParameter(k_mix, MIX_DEFAULT);           // Mix: 100% wet
         setParameter(k_sc_hpf, SC_HPF_DEFAULT);     // SC HPF: 20 Hz
         setParameter(k_compressor_mode, COMP_MODE_STANDARD);         // COMP MODE: Standard
-        setParameter(k_bass, 50);       // BASS: flat (matches header.c init)
-        setParameter(k_treble, 50);     // TREBLE: flat (matches header.c init)
-        setParameter(k_presence, 50);   // PRESENCE: centre (matches header.c init)
+        setParameter(k_attenuation_limit, ATTENUATION_DEFAULT);      // Defaults to hardware -30.0 dB
+        setParameter(k_gain_limit, GAIN_DEFAULT);                    // Defaults to hardware +30.0 dB
+        setParameter(k_bass, 50);                                    // BASS: flat (matches header.c init)
+        setParameter(k_treble, 50);                                  // TREBLE: flat (matches header.c init)
+        setParameter(k_presence, 50);                                // PRESENCE: centre (matches header.c init)
         setParameter(k_distressor_distortion_type, DIST_MODE_CLEAN); // DSTR DIST: None
-        setParameter(k_distressor_ratio, DIST_RATIO_1_1);            // DSTR RATIO: Warm mode
-        setParameter(k_distressor_drive_wave_mode, DRIVE_MODE_SOFT_CLIP); // DSTR WAVE: Soft Clip
         setParameter(k_multiband_band_selection, BAND_LOW);          // BAND SEL: Low
-        setParameter(k_multiband_band_threshold, -200);               // L THRESH: -20.0 dB (BAND_THRESH_DEFAULT)
-        setParameter(k_multiband_band_ratio, RATIO_DEFAULT);         // L RATIO: 4.0
-        setParameter(k_multiband_band_attack, 5);                    // ATTACK: 0.5 ms (fast, minimal click)
-        setParameter(k_multiband_band_release, 50);                  // RELEASE: 50 ms (punchy)
+        setParameter(k_multiband_band_threshold, BAND_THRESH_DEFAULT);  // L THRESH: -20.0 dB (BAND_THRESH_DEFAULT)
+        setParameter(k_multiband_band_ratio, SLOPE_DEFAULT);         // L RATIO: 4.0
+        setParameter(k_multiband_band_attack, ATTACK_DEFAULT);       // ATTACK: 5.0 ms (fast, minimal click)
+        setParameter(k_multiband_band_release, RELEASE_DEFAULT);     // RELEASE: 200 ms (punchy)
         setParameter(k_multiband_band_makeup, MAKEUP_DEFAULT);       // MAKEUP: 0 dB
         setParameter(k_multiband_band_mute, 0);                      // MUTE off
         setParameter(k_multiband_band_solo, 0);                      // SOLO off
-        setParameter(k_detection_mode, 0);                           // Detection: Peak
+        setParameter(k_detection_mode, DETECT_MODE_PEAK);            // Detection: Peak
 
         // Reset all components
-        compressor_reset(&comp_);
         sc_hpf_hz_ = 80.0f;
+        gain_history_ = vdupq_n_f32(0.0f);
         sidechain_hpf_init(&sc_hpf_, sc_hpf_hz_, samplerate_);
         wavefolder_init(&wavefolder_);
         multiband_init(&multiband_, samplerate_);
@@ -166,12 +163,13 @@ public:
         float* __restrict out_p = out;
         size_t frames_remaining = frames;
 
-        // Pre-calculate makeup gain (linear)
-        float32x4_t makeup_lin = vdupq_n_f32(fasterpowf(10.0f, makeup_db_ / 20.0f));
-
-        // Pre-calculate mix balance
+        // Pre-calculate mix and makeup balance
         float32x4_t wet_gain = vdupq_n_f32(mix_);
         float32x4_t dry_gain = vdupq_n_f32(1.0f - mix_);
+        float32x4_t makeup_lin = vdupq_n_f32(makeup_lin_scalar);
+        float32x4_t combined_wet_gain = vmulq_f32(wet_gain, makeup_lin);
+        float combined_wet_gain_s = mix_ * makeup_lin_scalar;
+        float dry_gain_s = 1.0f - mix_;
 
         // =================================================================
         // Process complete blocks of 4 samples
@@ -204,16 +202,12 @@ public:
             // Process 4 samples
             float32x4x2_t processed = process_block(main_l, main_r, sc_l, sc_r);
 
-            // Mix stage
+            // Mix stage: Apply makeup gain to processed (wet) signal only
             float32x4x2_t mixed;
             mixed.val[0] = vaddq_f32(vmulq_f32(dry_l, dry_gain),
-                                      vmulq_f32(processed.val[0], wet_gain));
+                                     vmulq_f32(processed.val[0], combined_wet_gain));
             mixed.val[1] = vaddq_f32(vmulq_f32(dry_r, dry_gain),
-                                      vmulq_f32(processed.val[1], wet_gain));
-
-            // Apply makeup gain
-            mixed.val[0] = vmulq_f32(mixed.val[0], makeup_lin);
-            mixed.val[1] = vmulq_f32(mixed.val[1], makeup_lin);
+                                     vmulq_f32(processed.val[1], combined_wet_gain));
 
             // Output limiter: hard clip to [-1, 1] — transparent below clipping level.
             {
@@ -233,7 +227,6 @@ public:
         // =================================================================
         // Process remaining samples (0-3) individually
         // =================================================================
-        float makeup_lin_scalar = fasterpowf(10.0f, makeup_db_ / 20.0f);
         while (frames_remaining > 0) {
             float main_l, main_r, sc_l, sc_r;
             if (has_sidechain_) {
@@ -242,7 +235,7 @@ public:
                 in_p += 4;
             } else {
                 main_l = in_p[0]; main_r = in_p[1];
-                sc_l = main_l;    sc_r = main_r;
+                sc_l   = main_l;  sc_r   = main_r;
                 in_p += 2;
             }
 
@@ -253,10 +246,9 @@ public:
                 vdupq_n_f32(main_l), vdupq_n_f32(main_r),
                 vdupq_n_f32(sc_l),   vdupq_n_f32(sc_r));
 
-            float out_l_s = (dry_l * (1.0f - mix_) + vgetq_lane_f32(processed.val[0], 0) * mix_)
-                            * makeup_lin_scalar;
-            float out_r_s = (dry_r * (1.0f - mix_) + vgetq_lane_f32(processed.val[1], 0) * mix_)
-                            * makeup_lin_scalar;
+            float out_l_s = dry_l * dry_gain_s + vgetq_lane_f32(processed.val[0], 0) * combined_wet_gain_s;
+            float out_r_s = dry_r * dry_gain_s + vgetq_lane_f32(processed.val[1], 0) * combined_wet_gain_s;
+
             // Output limiter (scalar path)
             out_p[0] = fmaxf(-1.0f, fminf(1.0f, out_l_s));
             out_p[1] = fmaxf(-1.0f, fminf(1.0f, out_r_s));
@@ -280,6 +272,29 @@ private:
         if (band_select_ == BAND_HIGH || band_select_ == BAND_LOW_HI || band_select_ == BAND_MID_HI || band_select_ == BAND_ALL) {
             multiband_set_param(&multiband_, BAND_HIGH, p_id, val);
         }
+    }
+
+    fast_inline const char* handle_get_multiband_parameter(int p_id) const {
+        float value = 0.0f;
+        static char str_buf[16];
+        if (band_select_ == BAND_LOW || band_select_ == BAND_LOW_MID || band_select_ == BAND_LOW_HI || band_select_ == BAND_ALL) {
+            value = multiband_get_param(&multiband_, BAND_LOW, p_id);
+        }
+        if (band_select_ == BAND_MID || band_select_ == BAND_MID_HI) {
+            value = multiband_get_param(&multiband_, BAND_MID, p_id);
+        }
+        if (band_select_ == BAND_HIGH) {
+            value = multiband_get_param(&multiband_, BAND_HIGH, p_id);
+        }
+        // I would have liked to has all the three values shown together, but it's not possible.
+        // choose the lower one if multiple bands selected, since it's more likely to be audible and relevant for the user.
+        static const char *bands[] = {"L", "M", "H", "LM", "LH", "MH", "All"};
+        if (band_select_ < BAND_TOTAL) {
+            snprintf(str_buf, sizeof(str_buf), "%s:%.1f", bands[band_select_], value);
+        } else {
+            snprintf(str_buf, sizeof(str_buf), "---");
+        }
+        return str_buf;
     }
 
     /**
@@ -306,41 +321,33 @@ private:
         sidechain = sidechain_hpf_process(&sc_hpf_, sidechain);
 
         // =================================================================
-        // 3. ENVELOPE DETECTION (mode-specific)
-        // =================================================================
-        float32x4_t envelope_db;
-        if (comp_mode_ == COMP_MODE_DISTRESSOR) {
-            float32x4_t envelope;
-            if (distressor_.detector_mode & DETECT_LINK) {
-                // Stereo link: detect L and R independently, gain follows the louder channel.
-                // Bypass sc_hpf_ (mono filter) and let distressor_detect_stereo apply its own HPF.
-                float32x4_t raw_l = (has_sidechain_ && use_external_sc_) ? sc_l : main_l;
-                float32x4_t raw_r = (has_sidechain_ && use_external_sc_) ? sc_r : main_r;
-                envelope = distressor_detect_stereo(&distressor_, raw_l, raw_r, samplerate_);
-            } else {
-                envelope = distressor_detect(&distressor_, sidechain, samplerate_);
-            }
-            envelope_db = linear_to_db(envelope);
-        } else {
-            float32x4_t envelope = envelope_detect(&envelope_, sidechain);
-            envelope_db = linear_to_db(envelope);
-        }
-
-        // =================================================================
-        // 4. MODE-SPECIFIC PROCESSING
+        // 3 & 4. ENVELOPE DETECTION & MODE-SPECIFIC PROCESSING
         // =================================================================
         float32x4_t processed_l, processed_r;
 
         switch (comp_mode_) {
-            case COMP_MODE_STANDARD:
-                standard_process(main_l, main_r, envelope_db, &processed_l, &processed_r);
+            case COMP_MODE_STANDARD: {
+                float32x4_t env = envelope_detect(&envelope_, sidechain);
+                float32x4_t env_db = linear_to_db(env);
+                standard_process(main_l, main_r, env_db, &processed_l, &processed_r);
                 break;
-
-            case COMP_MODE_DISTRESSOR:
-                distressor_process(main_l, main_r, envelope_db, &processed_l, &processed_r);
+            }
+            case COMP_MODE_DISTRESSOR: {
+                float32x4_t env;
+                if (distressor_.detector_mode & DETECT_LINK) {
+                    float32x4_t raw_l = (has_sidechain_ && use_external_sc_) ? sc_l : main_l;
+                    float32x4_t raw_r = (has_sidechain_ && use_external_sc_) ? sc_r : main_r;
+                    env = distressor_detect_stereo(&distressor_, raw_l, raw_r, samplerate_);
+                } else {
+                    env = distressor_detect(&distressor_, sidechain, samplerate_);
+                }
+                float32x4_t env_db = linear_to_db(env);
+                distressor_process(main_l, main_r, env_db, &processed_l, &processed_r);
                 break;
-
+            }
             case COMP_MODE_MULTIBAND:
+                // Detectors are inside multiband_process.
+                // Redundant envelope detection is now skipped to save CPU.
                 multiband_process(&multiband_, main_l, main_r, &processed_l, &processed_r);
                 break;
 
@@ -372,26 +379,57 @@ private:
 
     /**
      * Standard compressor processing
+     * - Zero Zipper Noise: The gain applied to the VCA (gain_history_)
+     * is smoothed by a continuous single-pole IIR filter on every single sample block.
+     * Even if the input audio hovers aggressively right on the threshold pivot point,
+     * the filter prevents instantaneous steps.
+     * - Consistent Ballistics: Because the smoothing happens after the function_slope_
+     * multiplier, an attack setting of $20\text{ ms}$ means the gain will take exactly
+     * $20\text{ ms}$ to reach its target, regardless of whether you are doing a mild
+     * 2:1 compression or an extreme -2.0 reversal.
+     * - Smart Directional Switching: By checking std::fabs(targets[i]) > std::fabs(state),
+     * the smoother correctly understands that going from $0\text{ dB}$ to $+12\text{ dB}$
+     * (Expansion) and going from $0\text{ dB}$ to $-12\text{ dB}$ (Compression)
+     * are both Attack phases because the processor is actively responding to a transient spike.
      */
-    fast_inline void standard_process(float32x4_t main_l,
-                                      float32x4_t main_r,
-                                      float32x4_t envelope_db,
-                                      float32x4_t* out_l,
-                                      float32x4_t* out_r) {
-        // Gain computer with knee
-        float32x4_t target_gain_db = gain_computer_process(&gain_comp_,
-                                                           envelope_db,
-                                                           thresh_db_,
-                                                           ratio_);
+    fast_inline void standard_process(float32x4_t main_l, float32x4_t main_r,
+                                  float32x4_t envelope_db, // Assumed instantaneous peak dB here
+                                  float32x4_t* out_l, float32x4_t* out_r) {
 
-        // Attack/release smoothing
-        float32x4_t smoothed_gain_db = smoothing_process(&smoother_, target_gain_db);
+        // 1. Calculate raw displacement from the pivot
+        float32x4_t excess_db = vsubq_f32(envelope_db, vdupq_n_f32(thresh_db_));
 
-        // Convert to linear gain (ARMv7-compatible)
-        float32x4_t gain_lin = neon_expq_f32(vmulq_f32(smoothed_gain_db,
-                                                        vdupq_n_f32(0.115129f)));
+        // 2. Multiply by function slope to find target gain
+        float32x4_t target_gain_db = vmulq_f32(excess_db, vdupq_n_f32(function_slope_));
 
-        // Apply gain reduction
+        // 3. Clamp safely to your UI limits
+        target_gain_db = vmaxq_f32(target_gain_db, vdupq_n_f32(atten_limit_db_));
+        target_gain_db = vminq_f32(target_gain_db, vdupq_n_f32(gain_limit_db_));
+
+        // 4. BI-DIRECTIONAL SMOOTHING (Unrolled for IIR Vector correctness)
+        float targets[4], smoothed[4];
+        vst1q_f32(targets, target_gain_db);
+
+        // Fetch the scalar history from the last lane of the previous block
+        float state = vgetq_lane_f32(gain_history_, 3);
+
+        for (int i = 0; i < 4; ++i) {
+            // Evaluate ballistics based on whether audio is demanding MORE or LESS gain modification
+            // If the target is moving further away from 0dB unity, we are in the "Attack" phase of the effect.
+            bool is_attack = std::fabs(targets[i]) > std::fabs(state);
+            float coeff = is_attack ? attack_coeff_ : release_coeff_;
+
+            // Single pole IIR filter
+            state = state + coeff * (targets[i] - state);
+            smoothed[i] = state;
+        }
+        // Store history back to the class member vector
+        gain_history_ = vld1q_f32(smoothed);
+
+        // 5. Convert smoothly changing dB back to linear gain
+        float32x4_t gain_lin = neon_expq_f32(vmulq_f32(gain_history_, vdupq_n_f32(0.11512925f)));
+
+        // 6. Apply to VCA
         *out_l = vmulq_f32(main_l, gain_lin);
         *out_r = vmulq_f32(main_r, gain_lin);
     }
@@ -420,10 +458,20 @@ private:
         float32x4_t comp_l = vmulq_f32(main_l, gain_lin);
         float32x4_t comp_r = vmulq_f32(main_r, gain_lin);
 
+        // Apply saturation to the COMPRESSED signal (not raw input).
+
         switch (distressor_.dist_mode) {
-            case DIST_MODE_WAVE: {
+            case DRIVE_MODE_SOFT_CLIP:
+            case DRIVE_MODE_HARD_CLIP:
+            case DRIVE_MODE_TRIANGLE:
+            case DRIVE_MODE_SINE:
+            case DRIVE_MODE_SUBOCTAVE: {
+                // wavefolder_set_drive needs 1-100%
+                float sat_drive = drive_ * 100.0f;
+                float32x4_t drv = vdupq_n_f32(sat_drive);
+                wavefolder_set_drive(&wavefolder_, sat_drive);
                 // Wavefolder operates post-compression for dynamics control
-                float32x4x2_t folded = wavefolder_process(&wavefolder_, comp_l, comp_r, drive_);
+                float32x4x2_t folded = wavefolder_process(&wavefolder_, comp_l, comp_r, drv);
                 *out_l = folded.val[0];
                 *out_r = folded.val[1];
                 break;
@@ -431,14 +479,13 @@ private:
             case DIST_MODE_DIST2:
             case DIST_MODE_DIST3:
             case DIST_MODE_BOTH: {
-                // Apply saturation to the COMPRESSED signal (not raw input).
-                // sat_drive range: 2x (DRIVE=0) to 12x (DRIVE=100) — pushes the
+                // sat_drive range: 1x (DRIVE=0) to 40x (DRIV4=100) — pushes the
                 // signal into the saturator nonlinear region.
                 // makeup = 1.0 keeps output level comparable to the input so
                 // harmonic character is always audible. The output hard-clip limiter
                 // prevents clipping. Do NOT divide by sat_drive (old formula made
                 // the distorted output quieter than dry, masking the effect).
-                float sat_drive = 2.0f + drive_ * 10.0f;
+                float sat_drive = 1.0f + drive_ * 39.0f; // Wider range for more bite
                 float32x4_t drv = vdupq_n_f32(sat_drive);
                 *out_l = generate_harmonics(&distressor_,
                                             vmulq_f32(comp_l, drv),
@@ -474,13 +521,40 @@ public:
                 thresh_db_ = value * 0.1f;
                 break;
 
-            case k_ratio: // RATIO (10..200, x0.1 → 1.0..20.0)
-                ratio_ = value * 0.1f;
+            case k_slope: // RATIO: map 0 to 100 into 0.0 to 1.0 representing the physical knob turn
+                {
+                    if (comp_mode_ == COMP_MODE_DISTRESSOR) {
+                        int knob = value * 0.0799f;  // Map 0-100 to 0-7 for the distressor's 8 ratio steps
+                        distressor_set_ratio(&distressor_, knob);  // this updates opto_release_mult
+                        update_opto_coeff(&distressor_, release_coeff_);
+                        break;
+                    }
+                    // Map your raw value to a normalized float position (0.0 to 1.0)
+                    // Adjust the math below depending on your actual minimum/maximum raw values
+                    float knob = value * 0.01f;
+
+                    // Map the normalized knob position across the 3 hardware regions:
+                    if (knob < 0.333f) {
+                        // 0.0 to 0.333: Expansion/Gating region
+                        // Slopes from +3.0 (Max expansion) down to 0.0 (Linear pass-through)
+                        function_slope_ = 3.0f * (1.0f - (knob * 3));
+                    }
+                    else if (knob < 0.666f) {
+                        // 0.333 to 0.666: Compression region
+                        // Slopes from 0.0 down to -1.0 (Infinite limiting)
+                        function_slope_ = -1.0f * ((knob - 0.333f) * 3);
+                    }
+                    else {
+                        // 0.666 to 1.0: Dynamic Reversal region
+                        // Slopes from -1.0 down to -2.0 (Extreme reverse sucking envelope)
+                        function_slope_ = -1.0f - ((knob - 0.666f) * 3);
+                    }
+                }
                 break;
 
             case k_attack: // ATTACK (0.1 to 100.0 ms)
                 attack_ms_ = value * 0.1f;
-                attack_coeff_ = fasterexpf(-1.0f / (attack_ms_ * 0.001f * samplerate_));
+                attack_coeff_ = fasterexpf(-0.02083333f / attack_ms_);  // 1 / (0.001f * samplerate_)
                 envelope_set_attack_release(&envelope_, attack_ms_, release_ms_);
                 envelope_set_attack_release(&distressor_.distressor_env, attack_ms_, release_ms_);
                 smoothing_set_times(&smoother_, attack_ms_, release_ms_);
@@ -488,7 +562,7 @@ public:
 
             case k_release: // RELEASE (10 to 2000 ms)
                 release_ms_ = static_cast<float>(value);
-                release_coeff_ = fasterexpf(-1.0f / (release_ms_ * 0.001f * samplerate_));
+                release_coeff_ = fasterexpf(-0.02083333f / release_ms_);    // 1 / (0.001f * samplerate_)
                 envelope_set_attack_release(&envelope_, attack_ms_, release_ms_);
                 envelope_set_attack_release(&distressor_.distressor_env, attack_ms_, release_ms_);
                 smoothing_set_times(&smoother_, attack_ms_, release_ms_);
@@ -497,6 +571,13 @@ public:
 
             case k_makeup: // MAKEUP (0.0 to 24.0 dB)
                 makeup_db_ = value * 0.1f;
+                makeup_lin_scalar = fasterpowf(10.0f, makeup_db_ * 0.05f);
+                break;
+            case k_attenuation_limit: // ATTEN LIMIT (-30.0 to 0.0 dB)
+                atten_limit_db_ = value * 0.1f;
+                break;
+            case k_gain_limit: // GAIN LIMIT (0.0 to 30.0 dB)
+                gain_limit_db_ = value * 0.1f;
                 break;
 
             case k_drive: // DRIVE (0 to 100%)
@@ -570,40 +651,34 @@ public:
                 break;
             }
             case k_compressor_mode: // COMP MODE (0=Standard, 1=Distressor, 2=Multiband)
-              if (value >= COMP_MODE_STANDARD && value < COMP_MODE_TOTAL) {
-                comp_mode_ = value;
-                if (comp_mode_ == COMP_MODE_DISTRESSOR) {
-                  // Distressor expects at least 0.05ms attack
-                  attack_ms_ = fmaxf(attack_ms_, 0.05f);
-                  attack_coeff_ =
-                      fasterexpf(-1.0f / (attack_ms_ * 0.001f * samplerate_));
+                if (value >= COMP_MODE_STANDARD && value < COMP_MODE_TOTAL) {
+                    comp_mode_ = value;
+                    if (comp_mode_ == COMP_MODE_DISTRESSOR) {
+                        // Distressor expects at least 0.05ms attack
+                        attack_ms_ = fmaxf(attack_ms_, 0.05f);
+                        attack_coeff_ =
+                            fasterexpf(-0.02083333f / (attack_ms_)); // 1 / (0.001f * samplerate_)
+                    }
                 }
-              }
                 break;
 
             /*===========================================================================*/
             /* Distressor Parameters */
             /*===========================================================================*/
-            case k_distressor_distortion_type: // DSTR MODE (0=None, 1=2nd harm, 2=3rd harm, 3=Both, 4=Wave)
+            case k_distressor_distortion_type:
+                // DSTR MODE (0=None, 1=2nd harm, 2=3rd harm, 3=Both, 4=SoftClip, 5=HardClip, 6=Tri, 7=Sine, 8=SubOct)
                 if (value >= 0 && value < DIST_MODE_TOTAL) {
                     distressor_.dist_mode = value;
 
                     // Enable/disable detector HPF based on mode
-                    if (value == DIST_MODE_WAVE) {
+                    if (value > DIST_MODE_BOTH) {
                         // Wavefolder removes low frequencies from the detector path
                         distressor_.detector_mode |= DETECT_HPF;
+                        wavefolder_set_drive_type(&wavefolder_, value);
                     } else {
                         distressor_.detector_mode &= ~DETECT_HPF;
                     }
                 }
-                break;
-            case k_distressor_ratio: // DSTR RATIO
-                distressor_set_ratio(&distressor_, value);  // this updates opto_release_mult
-                update_opto_coeff(&distressor_, release_coeff_);
-                break;
-            case k_distressor_drive_wave_mode: // DSTR WAVE (0=SoftClip, 1=HardClip, 2=Tri, 3=Sine, 4=SubOct)
-                if (value < DRIVE_MODE_TOTAL)
-                    wavefolder_set_drive_type(&wavefolder_, value);
                 break;
 
             /*===========================================================================*/
@@ -659,22 +734,81 @@ public:
                 break;
 
             case k_multiband_band_selection: // BAND SEL
-              if (value >= 0 && value < BAND_TOTAL) {
-                static const char *bands[] = {
-                    "Low", "Mid", "High", "LowMid", "LowHi", "MidHi", "All"};
-                return bands[value];
-              }
+                if (value >= 0 && value < BAND_TOTAL) {
+                    static const char *bands[] = {
+                        "Low", "Mid", "High", "LwMid", "LwHi", "MdHi", "All"};
+                    return bands[value];
+                }
                 break;
 
-            case k_ratio: // RATIO (1.0 to 20.0) - show special cases
+
+            case k_multiband_band_threshold: // L THRESH (multiband low threshold) - param_id=0
+            {
+                const int p_id = 0;
+                return handle_get_multiband_parameter(p_id);
+                break;
+            }
+            case k_multiband_band_ratio: // L RATIO (multiband low ratio) - param_id=1
+            {
+                const int p_id = 1;
+                return handle_get_multiband_parameter(p_id);
+                break;
+            }
+            case k_multiband_band_attack:  // BAND ATTACK
+            {
+                const int p_id = 3;         // param_id 3 = attack_ms in multiband_set_param
+                return handle_get_multiband_parameter(p_id);
+                break;
+            }
+            case k_multiband_band_release:  // BAND RELEASE
+            {
+                const int p_id = 4;         // param_id 4 = release_ms
+                return handle_get_multiband_parameter(p_id);
+                break;
+            }
+            case k_multiband_band_makeup:   // BAND MAKEUP
+            {
+                const int p_id = 2;         // param_id 2 = makeup_db
+                return handle_get_multiband_parameter(p_id);
+                break;
+            }
+            case k_multiband_band_mute:     // BAND MUTE
+            {
+                const int p_id = 5;         // param_id 5 = mute
+                return handle_get_multiband_parameter(p_id);
+                break;
+            }
+            case k_multiband_band_solo:     // BAND SOLO
+            {
+                const int p_id = 6;         // param_id 6 = solo
+                return handle_get_multiband_parameter(p_id);
+                break;
+            }
+
+            case k_slope: // SLOPE (1.0 to 20.0) - show special cases
                 {
-                    float ratio = value * 0.1f;
-                    if (fabsf(ratio - 20.0f) < 0.1f)
-                        return "Limit";
-                    else {
-                        snprintf(str_buf, sizeof(str_buf), "%.1f:1", ratio);
-                        return str_buf;
+                    if (comp_mode_ == COMP_MODE_DISTRESSOR) {
+                        // Distressor has 8 fixed ratio steps: 1:1, 2:1, 3:1, 4:1, 6:1, 8:1, 12:1, 20:1
+                        int knob = value * 0.0799f; // Map 0-100 to 0-7 and never goes to 8 which is invalid
+                        if (knob >= 0 && knob < DIST_RATIO_TOTAL) {
+                            return distressor_ratio_strings[knob];
+                        }
+                        break;
                     }
+                    // Display the true Omnipressor state based on the internal slope
+                    if (function_slope_ > 0.05f) {
+                        snprintf(str_buf, sizeof(str_buf), "Exp %.1f", 1.0f + function_slope_);
+                    } else if (function_slope_ >= -0.95f && function_slope_ <= 0.05f) {
+                        float ratio_val = 1.0f / (1.0f + function_slope_);
+                        snprintf(str_buf, sizeof(str_buf), "%.1f:1", ratio_val);
+                    } else if (function_slope_ < -0.95f && function_slope_ >= -1.05f) {
+                        return "Limit";
+                    } else {
+                        // Negative ratio conversion
+                        float rev_val = 1.0f / (std::fabs(function_slope_) - 1.0f);
+                        snprintf(str_buf, sizeof(str_buf), "Rev %.1f", rev_val);
+                    }
+                    return str_buf;
                 }
                 break;
 
@@ -690,20 +824,9 @@ public:
                 }
                 break;
 
-            case k_distressor_ratio: // DSTR RATIO
-              if (value >= DIST_RATIO_1_1 && value < DIST_RATIO_TOTAL) {
-                return distressor_ratio_strings[value];
-              }
-                break;
-
-            case k_distressor_drive_wave_mode: // DSTR WAVE
-                if (value < DRIVE_MODE_TOTAL)
-                    return distressor_wave_type[value];
-                break;
-
             case k_detection_mode:
                 if (comp_mode_ == COMP_MODE_DISTRESSOR) {
-                    static const char* dst_det[] = {"Basic", "Emph", "Link", "Emph+Lnk"};
+                    static const char* dst_det[] = {"Basic", "Emph", "Link", "Emp+Lnk"};
                     if (value >= 0 && value <= 3) return dst_det[value];
                 } else {
                     static const char* std_det[] = {"Peak", "RMS", "Blend"};
@@ -737,13 +860,17 @@ private:
 
     // Floating-point parameters
     float thresh_db_;
-    float ratio_;
+    float function_slope_;
     float attack_ms_;
     float release_ms_;
     float makeup_db_;
+    float makeup_lin_scalar;
+    float atten_limit_db_;
+    float gain_limit_db_;
     float drive_;
     float mix_;   // 0.0 = dry, 1.0 = wet
     float sc_hpf_hz_;
+    float32x4_t gain_history_;
 
     // DSP coefficients
     float attack_coeff_;
@@ -756,7 +883,6 @@ private:
     uint8_t detection_mode_;     // 0=peak, 1=RMS, 2=blend
 
     // DSP Modules
-    compressor_t comp_;
     sidechain_hpf_t sc_hpf_;
     wavefolder_t wavefolder_;
     distressor_t distressor_;
