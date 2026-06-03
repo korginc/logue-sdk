@@ -237,28 +237,83 @@ Not a priority for redesign.
 
 ---
 
+## GM drum note coverage analysis
+
+The copych project targets all 47 GM drum notes (MIDI ch10, notes 35–81). Sonaglio
+currently has 5 engines and 26 named-but-unnamed hardware evaluation presets.
+
+### Engine-to-GM mapping
+
+| GM notes | Sound | Coverage with existing engines |
+|----------|-------|-------------------------------|
+| 35, 36 | Bass Drum | INST_KICK ✓ |
+| 37 | Side Stick | INST_SNARE preset (low body, short decay) — approximation |
+| 38, 40 | Snare | INST_SNARE ✓ |
+| 39 | Hand Clap | **No engine** — multi-strike sequencer required (see below) |
+| 41, 43, 45, 47, 48, 50 | Toms (6 pitches) | INST_TOM at different note pitches — preset per pitch |
+| 42, 44 | Closed / Pedal Hi-Hat | INST_HAT, short decay preset |
+| 46 | Open Hi-Hat | INST_HAT, long decay preset |
+| 49, 55, 57 | Crash / Splash Cymbal | INST_METAL Cymbal char, medium decay |
+| 51, 53, 59 | Ride Cymbal / Ride Bell | INST_METAL Cymbal char, long / very-short decay |
+| 52 | Chinese Cymbal | INST_METAL Gong char |
+| 54, 69, 70 | Tambourine / Cabasa / Maracas | INST_HAT noise-dominant preset (short, HPF-heavy) |
+| 56 | Cowbell | INST_METAL — cymbal carrier ratios ≈ 1.0/1.483 match 540/800 Hz interval; short decay |
+| 58 | Vibraslap | INST_SNARE or INST_TOM approximation |
+| 60, 61 | Hi/Lo Bongo | INST_TOM high-frequency presets |
+| 62, 63, 64 | Conga (mute/open/low) | INST_TOM mid-frequency presets |
+| 65, 66 | Hi/Lo Timbale | INST_TOM mid-frequency, brighter attack |
+| 67, 68 | Agogo | INST_METAL short decay, high note |
+| 71, 72 | Whistle | INST_TOM high freq, low body (pure tone) |
+| 73, 74 | Guiro | INST_HAT with long envelope and low noise mix — approximate |
+| 75, 76, 77 | Claves / Woodblock | INST_TOM very short decay, specific freq preset |
+| 78, 79 | Cuica | No close equivalent; INST_TOM modulated approximation only |
+| 80, 81 | Triangle (mute/open) | INST_METAL long decay (open) / gated (mute) |
+
+**Result: ~38–40 of 47 GM notes are coverable with preset tuning of the 5 existing engines.**
+The remaining 7–9 are approximations of varying quality; only one requires a new engine.
+
+### One new engine needed: Clap
+
+The **Hand Clap** (GM 39) and the ctag `FmClapModel` both require a multi-strike envelope:
+3 discrete hits spaced ~12 ms apart, each decaying before the next. This is a timing /
+envelope-sequencing feature — not a different synthesis algorithm. It cannot be emulated
+with a single continuous envelope over any parameter combination.
+
+**Implementation plan (independent of copych/ctag, implemented from first principles):**
+- Add `clap_engine_t` using the existing `fm_op_t` from `fm_operator.h` (MIT-attributed)
+- Multi-strike: 3 pre-accumulated envelope peaks at t=0, t+12ms, t+24ms (simple additive
+  approach: sum of 3 short exponential decays offset by sample count)
+- FM core: 2-op model same as Snare/Kick; noise HPF layer same as Hat
+- New `INST_CLAP` instrument selector constant in constants.h
+- One new case in `fm_perc_synth_process.h` dispatch
+
+This is the only addition that requires new code beyond presets.
+
+---
+
 ## Remaining known issues
 
 1. **No per-component independent decay** — shared envelope affects all components
-   simultaneously. Implementing true independent decay (like ctag snare) would require
-   per-engine per-component envelope state — larger struct, more CPU, but much more
-   natural sounding.
+   simultaneously. True independent decay (like ctag snare) would require per-engine
+   per-component envelope state — larger struct, more CPU, but more natural sound.
 
-2. **PARAM_DRIVE not wired** — `fm_make_drive_gain` exists in engine_mapping.h but
-   there is no UI parameter for it. The global "drive" role is currently filled by
-   `PARAM_NOISE_CHAR` (noise-to-FM blend) which is different in character. A true
-   pre-clip amplitude multiplier could be wired to an unused or repurposed slot.
+2. **PARAM_DRIVE not wired** — `fm_make_drive_gain` exists in engine_mapping.h but has
+   no UI parameter. Currently `PARAM_NOISE_CHAR` fills the "drive" role (noise-to-FM
+   blend), which is a different character. A true pre-clip amplitude multiplier could be
+   wired to an unused or repurposed slot.
 
-3. **Hat engine is minimal** — no FM computation; square oscillators only. At high
-   frequency settings can sound harsh. A 4-pair inharmonic model (from DX cymbal
-   literature) would give it more ring and partial definition.
+3. **Hat engine is minimal** — 6 detuned square oscs + HPF noise; no FM. At high
+   frequency can sound harsh. A 4-pair inharmonic FM model (DX cymbal literature)
+   would add ring and partial definition.
 
-4. ~~**Metal at high Body approaching noise**~~ — **resolved**: algo11 parallel pairs
-   eliminate the serial-cascade hash. High Body now spreads inharmonic ratios (denser
-   partials) rather than degrading to noise.
+4. ~~**Metal at high Body → noise**~~ **resolved** — algo11 parallel pairs fix this.
 
-5. **No velocity scaling** — current instrument ignores MIDI velocity. Simple 0..1
-   gain scaling on velocity would improve playability significantly.
+5. **No velocity scaling** — instrument ignores MIDI velocity. Simple 0..1 gain on
+   velocity would improve playability significantly.
+
+6. **Presets are HW evaluation stubs** — all 26 presets are named test1..test26 and
+   tuned for parameter range verification, not musical use. A full musical preset bank
+   is needed before the unit is usable as an instrument.
 
 ---
 
@@ -278,18 +333,36 @@ Not a priority for redesign.
 
 ---
 
-## Next steps
+## TODO
 
-### Short term (before next HW test)
-- HW test snare: verify wire buzz is now audible at moderate Attack settings
-- HW test metal: verify clean ringing character with algo11; cymbal vs. gong distinction
-- HW test global HitShape/BodyTilt: confirm they feel like distinct controls
+### Before next HW test
+- HW test snare: verify wire buzz is audible at moderate Attack settings
+- HW test metal: verify clean ring with algo11; confirm cymbal vs. gong distinction
+- HW test HitShape/BodyTilt as distinct controls
 
-### Medium term
-- Add per-component decay constants to snare (separate noise decay from shell decay)
-- Add a parallel 4-pair cymbal character mode to Metal engine
-- Wire velocity to output gain (simple, high impact)
+### Preset bank expansion (no new engines needed)
+Replace the 26 test stubs with a named musical preset bank covering the GM drum set.
+The mapping table above is the guide. Target ~40 presets:
+- 2 × Kick (standard, punchy)
+- 3 × Snare (standard, tight, rimshot-approximate)
+- 6 × Tom (floor low/high, mid low/high, hi low/high)
+- 3 × Hi-hat (closed, pedal, open)
+- 5 × Cymbal (crash, ride, ride bell, splash, chinese)
+- Cowbell, Triangle (open/mute), Claves, Woodblock (×2), Agogo (×2)
+- Bongo ×2, Conga ×3, Timbale ×2
+- Noise perc: Tambourine, Cabasa, Maracas
+- Misc approximations: Vibraslap, Guiro, Cuica, Whistle
+
+### New engine: Clap
+Add `clap_engine.h` with multi-strike envelope (3 peaks at 0 / 12 ms / 24 ms).
+FM core from `fm_operator.h`; noise HPF layer. New `INST_CLAP` in constants.h.
+Add dispatch case in `fm_perc_synth_process.h`.
+
+### Medium term engine improvements
+- Per-component decay for snare (separate noise decay from shell decay)
+- Wire velocity to output gain
+- Hat engine: replace square oscs with 4-pair inharmonic FM (DX cymbal literature)
 
 ### Long term
-- Investigate Hat engine FM upgrade (inharmonic pairs, independent Copyright-free design)
-- Consider adding a 6th engine (resonant/modal) using the existing NEON framework
+- Investigate Hat engine FM upgrade (copyright-free, from DX7 / Roads literature)
+- Consider modal/resonator engine for metalophone-type sounds (bars, bells)
