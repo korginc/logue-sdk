@@ -24,7 +24,7 @@
 
 #define HAT_OSC_COUNT (6)
 uint32_t sample_rate_ = 48000;
-float    inverse_sample_rate_ = 1 / 48000.0f;
+float    inverse_sample_rate_ = 1.0f / 48000.0f;
 
 // Base frequencies in Hz
 static const float HAT_BASE_FREQ[HAT_OSC_COUNT] = {

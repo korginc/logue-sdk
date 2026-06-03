@@ -675,7 +675,7 @@ public:
                 filterState2[ch] = (in_val * biquadA2) - (out_val * biquadB2);
 
                 if (filterMode == kFilterCrystal)
-                    out_samps[s] = in_val * 0.7 + out_val * 0.3f; // moved from 6.0 to prevent screeching
+                    out_samps[s] = in_val * 0.7f + out_val * 0.3f; // moved from 6.0 to prevent screeching
                 else
                     out_samps[s] = out_val;
             }

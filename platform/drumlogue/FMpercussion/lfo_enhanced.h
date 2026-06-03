@@ -13,7 +13,7 @@
 #include "constants.h"  // Contains LFO_TARGET_* constants
 
 uint32_t sample_rate_ = 48000;
-float    inverse_sample_rate_ = 1 / 48000.0f;
+float    inverse_sample_rate_ = 1.0f / 48000.0f;
 
 /**
  * Enhanced LFO state

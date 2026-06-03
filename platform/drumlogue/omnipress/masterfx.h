@@ -290,9 +290,9 @@ private:
         // choose the lower one if multiple bands selected, since it's more likely to be audible and relevant for the user.
         static const char *bands[] = {"L", "M", "H", "LM", "LH", "MH", "All"};
         if (band_select_ < BAND_TOTAL) {
-            snprintf(str_buf, 256, "%s:%.1f", bands[band_select_], value);
+            snprintf(str_buf, sizeof(str_buf), "%s:%.1f", bands[band_select_], value);
         } else {
-            snprintf(str_buf, 256, "---");
+            snprintf(str_buf, sizeof(str_buf), "---");
         }
         return str_buf;
     }

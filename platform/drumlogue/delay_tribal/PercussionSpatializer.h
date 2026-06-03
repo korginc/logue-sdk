@@ -173,7 +173,7 @@ public:
 private:
     delay_line_t delay_;
     uint32_t sample_rate_ = 48000;
-    float    inverse_sample_rate_ = 1 / 48000.0f;
+    float    inverse_sample_rate_ = 1.0f / 48000.0f;
     bool initialized_ = false;
 
     spatial_mode_t mode_ = MODE_TRIBAL;

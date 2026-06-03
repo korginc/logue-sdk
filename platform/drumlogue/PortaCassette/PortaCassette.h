@@ -28,7 +28,7 @@ struct prng_t { uint64x2_t state0, state1; };
 // decay factor (required 0.1-3ms decay time at 48 kHz)
 constexpr float pop_env_decay_ = 0.98f; // Increased from 0.96f for slightly longer, more audible pops.
 uint32_t sample_rate_ = 48000;
-float    inverse_sample_rate_ = 1 / 48000.0f;
+float    inverse_sample_rate_ = 1.0f / 48000.0f;
 
 class alignas(16) PortaCassette {
 public:
@@ -221,11 +221,11 @@ public:
             float32x4_t hf_l = biquad_process4(&dbx_hf_l_, &coeff_dbx_hf_, sig_l);
             float32x4_t hf_r = biquad_process4(&dbx_hf_r_, &coeff_dbx_hf_, sig_r);
             float32x4_t hf_sq = vaddq_f32(vmulq_f32(hf_l, hf_l), vmulq_f32(hf_r, hf_r));
-            dbx_hf_enc_rms_ = vmlaq_n_f32(vmulq_n_f32(dbx_hf_enc_rms_, attack), hf_sq, release);
+            dbx_hf_enc_rms_ = vmlaq_n_f32(vmulq_n_f32(dbx_hf_enc_rms_, 1.0f - release), hf_sq, release);
 
             // Wideband envelope + NR-refined rsqrt for accurate 2:1 compression
             float32x4_t wb_sq = vaddq_f32(vmulq_f32(sig_l, sig_l), vmulq_f32(sig_r, sig_r));
-            dbx_enc_rms_ = vmlaq_n_f32(vmulq_n_f32(dbx_enc_rms_, attack), wb_sq, release);
+            dbx_enc_rms_ = vmlaq_n_f32(vmulq_n_f32(dbx_enc_rms_, 1.0f - release), wb_sq, release);
             float32x4_t env = vmaxq_f32(
                 vmlaq_n_f32(vmulq_n_f32(dbx_enc_rms_, 0.7f), dbx_hf_enc_rms_, 0.3f),
                 vdupq_n_f32(1e-6f));
