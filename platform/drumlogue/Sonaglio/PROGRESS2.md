@@ -330,6 +330,72 @@ This is the only addition that requires new code beyond presets.
 | `test_sonaglio.cpp` | Updated `test_metal_parameter_bounds` for new `fm_op_t` struct; 16/16 passing |
 | `README.md` | Complete rewrite — accurate architecture, parameter tables, engine details |
 | `PARAMETER_MODEL.md` | Removed — content merged into README.md |
+| `kick_engine.h` | `pitch_env`/`index_env`: env⁸→env⁴; `body_index`: env⁴→env² (HitShape compounding fix) |
+| `perc_engine.h` | Remove double-envelope amplitude; body FM: env²→linear; output_gain rescaled |
+| `fm_perc_synth_process.h` | Wire velocity: `velocity_gain = 0.3 + 0.7×(vel/127)`, applied to master output |
+
+---
+
+## Kick and Perc engine review (2026-06)
+
+### Kick — envelope domain fixes
+
+**Problem:** Kick receives `transient_env` which is already pre-shaped up to `e⁴` by
+HitShape. Inside the engine, pitch and FM index used `env⁸` (= `transient_env⁸`), which
+at HitShape=0.5 compressed the pitch sweep to a near-invisible delta function (only the
+absolute first sample). `body_index` used `env⁴` for similar compound effect.
+
+**Fixes applied (kick_engine.h):**
+- `pitch_env`: `env⁸` → `env⁴` — pitch sweep still fast; audible across HitShape range
+- `index_env` (click FM): `env⁸` → `env⁴` — same
+- `body_index`: `env⁴` → `env²` — body FM sustains longer, more audible kick character
+
+### Perc/Tom — critical envelope bug + body FM fix
+
+**Problem 1 (critical):** `perc_engine_process` applied `body_env` to amplitude TWICE:
+```
+output = body_mix × body_env + transient   // once
+output = output × body_env × output_gain  // twice — gives body_mix × body_env² amplitude
+```
+At body_tilt=0, env=0.5: effective amplitude was `(0.205)² ≈ 0.042` — nearly inaudible.
+Body and Decay parameters were effectively deaf at mid-decay. Same compounding root cause
+as the previously-fixed snare and metal engines.
+
+**Problem 2:** Body FM used `env²` domain → `body_part = mod1 × env² × body_index`.
+Combined with the body_env² amplitude, FM body was dead before any character developed.
+
+**Fixes applied (perc_engine.h):**
+- Body FM: `mod1 × env² × body_index` → `mod1 × envelope × body_index` (linear, sustains)
+- Output: `output × envelope × output_gain` → `output × output_gain` (single envelope)
+- `output_gain` range reduced from `0.55..1.02` to `0.45..0.83` to compensate for
+  removed second-envelope multiplication at peak
+
+### Velocity wiring
+
+**Done (fm_perc_synth_process.h):**
+- Added `float velocity_gain` to `fm_perc_synth_t`
+- `note_on`: `velocity_gain = 0.3 + 0.7 × (vel/127)` — linear with 0.30 floor
+- Applied at output: `master_gain × velocity_gain` — full velocity response, ppp stays audible
+
+### Remaining kick/perc improvements (TODO)
+
+- **Kick self-feedback**: ctag FmKickModel has optional modulator self-feedback for richer
+  click transient. Would require migrating kick to use `fm_operator.h` scalar model (losing
+  4-voice NEON parallelism per voice) or adding feedback state to kick_engine_t directly.
+  Lower priority since kick already "sounds good."
+
+- **Perc sub component**: No sub-octave reinforcement for low-tom / floor-tom range
+  (kick has `env_sqrt × body × 0.16`). Adding a half-frequency sub carrier to perc_engine
+  would improve low-end presence for floor tom presets.
+
+- **Per-component independent decay (kick + perc)**: Each component (amplitude, FM index,
+  pitch sweep) should have its own decay constant rather than sharing the global envelope.
+  ctag FmKickModel and FmTomModel both do this. Large struct change but most natural sound.
+
+- **Envelope clamping before power-law**: Both kick and perc receive envelopes that can
+  slightly exceed 1.0 (transient/body gain boosts up to 1.18). `env^n` of 1.1 = 1.1^8 = 2.14,
+  which inflates the transient click. Add `env = clamp(env, 0, 1)` before `env2/env4/env8`.
+  Low priority (cubic_clip handles it), but would make power-law domains predictable.
 
 ---
 
@@ -338,6 +404,8 @@ This is the only addition that requires new code beyond presets.
 ### Before next HW test
 - HW test snare: verify wire buzz is audible at moderate Attack settings
 - HW test metal: verify clean ring with algo11; confirm cymbal vs. gong distinction
+- HW test kick: verify pitch sweep is now audible at non-zero HitShape
+- HW test perc/tom: verify body character is now audible through decay; verify velocity
 - HW test HitShape/BodyTilt as distinct controls
 
 ### Preset bank expansion (no new engines needed)
@@ -359,8 +427,11 @@ FM core from `fm_operator.h`; noise HPF layer. New `INST_CLAP` in constants.h.
 Add dispatch case in `fm_perc_synth_process.h`.
 
 ### Medium term engine improvements
+- Perc sub component for low-tom range (half-frequency carrier + `env_sqrt`)
+- Kick self-feedback option for richer click transient (ctag-inspired)
+- Per-component independent decay for kick and perc (amplitude / FM / pitch each separate)
+- Envelope clamping before power-law (kick + perc) to make env^n domains predictable
 - Per-component decay for snare (separate noise decay from shell decay)
-- Wire velocity to output gain
 - Hat engine: replace square oscs with 4-pair inharmonic FM (DX cymbal literature)
 
 ### Long term

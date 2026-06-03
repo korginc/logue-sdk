@@ -90,6 +90,7 @@ typedef struct {
 
     // Output gain
     float master_gain;
+    float velocity_gain; // 0.3..1.0, set per note_on
     // Post-engine separation filters (lane0 active in selector model).
     one_pole_t kick_lp;
     one_pole_t snare_hp;
@@ -328,7 +329,8 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
 
     synth->current_env_shape = ENV_SHAPE_DEFAULT;
     synth->euclid_offsets = vdupq_n_f32(0.0f);
-    synth->master_gain = 1.30f;
+    synth->master_gain   = 1.30f;
+    synth->velocity_gain = 1.0f;
     one_pole_reset(&synth->kick_lp);
     one_pole_reset(&synth->snare_hp);
     one_pole_reset(&synth->perc_bp_lp);
@@ -359,7 +361,8 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
 fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
                                        uint8_t note,
                                        uint8_t velocity) {
-    (void)velocity; // Velocity intentionally excluded from current model.
+    /* Linear with floor: 0.3 at vel=0, 1.0 at vel=127. Ensures ppp is still audible. */
+    synth->velocity_gain = 0.3f + 0.7f * (velocity / 127.0f);
 
     for (int i = 0; i < ENGINE_COUNT; ++i) {
         synth->engine_gain[i] = 0.0f;
@@ -655,7 +658,7 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
     mix = vaddq_f32(mix, vmulq_n_f32(perc_sep,  0.93f));
     mix = vaddq_f32(mix, vmulq_n_f32(hat_sep,   0.88f));
     // Apply the master gain before the soft clip to avoid pushing the values outside the [-1.0, 1.0]
-    mix = fm_soft_clip(vmulq_n_f32(mix, synth->master_gain));
+    mix = fm_soft_clip(vmulq_n_f32(mix, synth->master_gain * synth->velocity_gain));
 
     return neon_horizontal_sum_alt(mix);
 }
