@@ -43,3 +43,6 @@ _Note: The delay effect section can contain effects that perform other functions
 | [Isomer](https://www.sinevibes.com/korgisomer/ ) | Sinevibes | Tempo synced ensemble delay | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [Rerun](https://www.sinevibes.com/korgrerun/) | Sinevibes | Self-randomizing audio repeater | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [Integer](https://www.sinevibes.com/korginteger/) | Sinevibes | Digital-analog buffer delay | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [TapeFX Collection](https://www.jabunaudio.com/news/introducing-the-tapefx-collection-6-live-tape-slowstop-effects-for-the-korg-nutekt-nts-1-digital-synth-kit-free-download-or-donation) | JabunAudio | 6 LIVE Tape Slow/Stop Effects with various options
+ | nts-1 | Free/donation |
+ 
