@@ -610,7 +610,7 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
                                  active_mask,
                                  lfo_pitch_mult,
                                  lfo_index_add,
-                                 synth->metal.brightness,
+                                 vdupq_n_f32(0.0f), /* brightness_add: LFO target unused */
                                  lfo_metal_gate,
                                  lfo_noise_add),
             vdupq_n_f32(synth->engine_gain[ENGINE_METAL])

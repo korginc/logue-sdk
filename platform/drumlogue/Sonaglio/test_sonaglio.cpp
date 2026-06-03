@@ -438,22 +438,32 @@ static void test_metal_parameter_bounds() {
         for (float b : params) {
             metal_engine_update(&metal, vdupq_n_f32(a), vdupq_n_f32(b));
 
-            // feedback_gain must be capped at 0.60 to prevent square-wave saturation
-            float fb = vec_lane0(metal.feedback_gain);
-            if (fb < 0.0f || fb > 0.61f) {  // 0.01 tolerance for float rounding
-                return report_fail(name, "feedback_gain out of [0, 0.60] range");
+            // Modulator DX7 feedback parameter: attack * 2.5, range [0, 2.5]
+            for (int i = 1; i < 6; i += 2) {
+                float fb = metal.ops[i].fb;
+                if (fb < 0.0f || fb > 2.51f) {
+                    return report_fail(name, "modulator DX7 fb out of [0, 2.5]");
+                }
+                // fm_level must be finite and nonnegative
+                if (metal.ops[i].fm_level < 0.0f || !std::isfinite(metal.ops[i].fm_level)) {
+                    return report_fail(name, "modulator fm_level invalid");
+                }
             }
 
-            // ring_index must stay in [7, 13] (was 10..16.5 before fix)
-            float ri = vec_lane0(metal.ring_index);
-            if (ri < 6.9f || ri > 13.1f) {
-                return report_fail(name, "ring_index out of [7, 13] range");
+            // Carrier out_level must be in (0, 1]
+            for (int i = 0; i < 6; i += 2) {
+                if (metal.ops[i].out_level <= 0.0f || metal.ops[i].out_level > 1.01f) {
+                    return report_fail(name, "carrier out_level out of (0, 1]");
+                }
             }
 
-            // output_gain must be positive
-            float og = vec_lane0(metal.output_gain);
-            if (og <= 0.0f) {
-                return report_fail(name, "output_gain must be positive");
+            // Ring and output gains must be positive
+            if (metal.ring_gain   <= 0.0f) return report_fail(name, "ring_gain must be positive");
+            if (metal.output_gain <= 0.0f) return report_fail(name, "output_gain must be positive");
+
+            // strike_weight and ring_weight must be nonnegative
+            if (metal.strike_weight < 0.0f || metal.ring_weight < 0.0f) {
+                return report_fail(name, "envelope weights must be nonnegative");
             }
         }
     }

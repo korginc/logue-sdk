@@ -158,25 +158,35 @@ Do not copy code without written permission from ctag-fh-kiel.
 
 ### copych/ESP32-S3_FM_Drum_Synth
 
-6-operator FM synthesis with 17 routing algorithms (DX-style) on ESP32-S3.
+6-operator FM synthesis with 18 routing algorithms (DX-style) on ESP32-S3.
+Each instrument is a `FmDrumPatch` (6 operators + algorithm select); patches defined in
+`FmPatch.cpp` map GM drum notes to complete operator configurations.
 
-Interesting techniques: waveform blending (sine, triangle, square, saw, noise per operator).
-Not directly applicable due to different hardware architecture (ESP32-S3 vs ARM Cortex-A7).
+Architecture highlights:
+- `FmOperator` class: normalized [0,1) phase, `fm_level = 0.1 × 161^v − 0.1` (DX7-style
+  exponential depth), self-feedback via `feedback_ = 1/2^(7-fb)`, 5 waveforms
+- `MOD_RANGE = 16.0f`: modulator output scaled into phase, matching DX7 FM depth convention
+- Algo 11 (3 independent carrier+modulator pairs) used for cymbal/metallic tones
+- Patch-based design: all 6 operators configured per-instrument
 
-**License**: No license file visible. Must be treated as All Rights Reserved.
-Do not copy code without written permission from copych.
+**License**: **MIT License** (Copyright 2025 copych) — confirmed from `LICENSE` file at repo root.
+Code may be incorporated with attribution. _(Earlier assessment of "All Rights Reserved" was wrong.)_
+
+**Ported to Sonaglio**: `fm_operator.h` is a clean C-struct port of `FmOperator` class,
+stripped of ESP32/Arduino/STL dependencies, using Sonaglio's `float_math.h` helpers.
+`metal_engine.h` was rewritten using algo11 from this codebase. Attribution is preserved in
+the `fm_operator.h` file header.
 
 ### Summary: can code be reused?
 
-Both reference repositories lack explicit OSI-compatible licenses. Neither ctag nor
-copych code may be incorporated without written permission from the respective authors.
+- **copych**: MIT License confirmed — code incorporated with attribution ✓
+- **ctag-fh-kiel/md-drum-synth**: No explicit OSI license — treated as All Rights Reserved;
+  techniques may be independently implemented from DSP first principles only.
 
-However, **ideas** and **techniques** described in publications, academic papers, or
-general DSP references are not subject to copyright. The following improvements are
-independently implementable from first principles:
-- Per-component independent decay (general FM synthesis design)
-- Multi-pair inharmonic oscillators for cymbal (documented in DX7 literature, Roads, etc.)
-- Self-feedback FM operator (standard Yamaha DX algorithm)
+Improvements implemented from copych (MIT, with attribution):
+- `fm_operator.h`: full port of copych `FmOperator` (normalized phase, DX7 fm_level, feedback,
+  5 waveforms, `FMO_MOD_RANGE = 16.0f`)
+- `metal_engine.h`: algo11 (3×2-op parallel pairs) eliminating the serial-cascade hash problem
 
 ---
 
@@ -195,19 +205,22 @@ Remaining limitation:
 - The wire buzz cannot decay independently from the FM shell
 - At very long envelope ROM shapes, the tone and noise taper together (less natural)
 
-### Metal — improved
+### Metal — rewritten (algo11 parallel pairs)
 
-After the cascade and feedback fixes:
-- ring_index 7..13 gives richly metallic FM without broadband hash
-- feedback_gain capped at 0.60 — ring character without square-wave saturation
-- Op2→Op1 at 50% ring_index gives a cleaner carrier fundamental
-- Cymbal (ratios 1.0/1.483/1.932/2.546) and Gong (1.0/2.756/3.752/5.404) characters
-  are now meaningfully different via bit 7 of ENV_SHAPE
+Complete rewrite of `metal_engine.h` using copych algo11 (3 independent carrier+modulator
+pairs) via the new `fm_operator.h`:
+- Serial cascade eliminated — each carrier ring is clean with its own modulator only
+- DX7-style fm_level and feedback via `fm_operator.h` (MIT-attributed copych port)
+- Cymbal (DX7 inharmonic ratios) and Gong (tam-tam ratios) characters via `char_select`
+- Body parameter spreads inharmonic ratios (ratio_scale 0.82..1.50)
+- sqrt(env) carrier envelope for long metallic ring tail
+- env8 + linear modulator envelope for fast transient burst + sustained ring FM
+- Strike noise: HP + BPF blend gated by env2 (dies with transient)
+- Output: 1/√3 normalised sum of 3 carriers
 
 Remaining limitation:
-- Serial cascade still mixes partials at the phase level — vs. 4-pair parallel cymbal
-  which allows independent partial decay
-- At high Body (dense FM), the serial cascade can still shade toward noise-like
+- Still one shared env decay — each partial's modulator depth cannot decay independently
+- Carriers at fixed ratios; no pitch glide between pairs
 
 ### Kick — not modified (good)
 
@@ -240,9 +253,9 @@ Not a priority for redesign.
    frequency settings can sound harsh. A 4-pair inharmonic model (from DX cymbal
    literature) would give it more ring and partial definition.
 
-4. **Metal at high Body approaching noise** — serial 4-op cascade at ring_index=13
-   with dense ratios creates near-noise texture. Consider a second character mode
-   using parallel pairs instead of serial cascade.
+4. ~~**Metal at high Body approaching noise**~~ — **resolved**: algo11 parallel pairs
+   eliminate the serial-cascade hash. High Body now spreads inharmonic ratios (denser
+   partials) rather than degrading to noise.
 
 5. **No velocity scaling** — current instrument ignores MIDI velocity. Simple 0..1
    gain scaling on velocity would improve playability significantly.
@@ -254,9 +267,12 @@ Not a priority for redesign.
 | File | Change |
 |------|--------|
 | `snare_engine.h` | Linear amp_env, env² wire buzz, restructured output |
-| `metal_engine.h` | ring_index 7..13, feedback cap 0.60, 50% Op2→Op1, BPF 4200 Hz |
+| `metal_engine.h` | **Complete rewrite** — algo11 3×2-op parallel pairs via fm_operator.h |
+| `fm_operator.h` | **New** — C-struct port of copych FmOperator (MIT), normalized phase, DX7 fm_level/feedback |
+| `hat_engine.h` | Removed duplicate global `sample_rate_`/`inverse_sample_rate_`; use `INV_SAMPLE_RATE` |
+| `fm_perc_synth_process.h` | Fixed `metal.brightness` field ref (field removed in rewrite) |
 | `engine_mapping.h` | Added `fm_make_drive_gain` utility |
-| `test_sonaglio.cpp` | Complete rewrite — 16 tests, 16/16 passing |
+| `test_sonaglio.cpp` | Updated `test_metal_parameter_bounds` for new `fm_op_t` struct; 16/16 passing |
 | `README.md` | Complete rewrite — accurate architecture, parameter tables, engine details |
 | `PARAMETER_MODEL.md` | Removed — content merged into README.md |
 
@@ -266,7 +282,7 @@ Not a priority for redesign.
 
 ### Short term (before next HW test)
 - HW test snare: verify wire buzz is now audible at moderate Attack settings
-- HW test metal: verify ringing character with cymbal vs. gong distinction
+- HW test metal: verify clean ringing character with algo11; cymbal vs. gong distinction
 - HW test global HitShape/BodyTilt: confirm they feel like distinct controls
 
 ### Medium term
