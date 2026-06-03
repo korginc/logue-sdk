@@ -37,7 +37,13 @@
 | **CMOS knob dead zone 73–90%** | APC block overwrote `filter1.drive` every 4 samples with a resonance-derived value, discarding the CMOS parameter | Added `m_cmos_filter_drive` persistent member; APC now sums `m_cmos_filter_drive + m_f1_drive_base + m_drv1_mod_multiplier×5` |
 | **LFO always sweeping filter** | `fasterpow2f(l1_val * 3.0f)` applied unconditionally to filter cutoff regardless of preset's LFO target | Replaced with gated `m_f1_lfo_mult` / `m_f2_lfo_mult` (default 1.0); only set ≠1.0 when the active preset targets F1/F2 cutoff |
 
-## Phase 4: Drone / Noise Synth Engines (presets 95–96) [IN PROGRESS]
+## Phase 4: Drone / Noise Synth Engines (presets 95–96) [EXPERIMENTAL — NOT PRODUCTION READY]
+
+> **Status:** The compact FDN engine is implemented and partially functional, but self-oscillation
+> is **not reliably guaranteed** in all configurations. The root cause is an architectural conflict
+> with the existing APC modulation system (see Known Issues below). Leaving as experimental until
+> a dedicated drone APC mode is designed. Presets 95/96 are usable but behaviour is unpredictable
+> depending on LFO settings.
 
 Two new engine types are reserved at the top of the preset range (95 = crystal drone, 96 = metal drone).
 The character of each is inspired by the two reverb modes from the companion `reverb_labirinto` project:
@@ -292,6 +298,24 @@ Interesting LFO modulation targets in drone mode (via mod_target = preset % 24):
 - `k_paramCMOSDist` (23): distortion tremolo on FDN output → gating / pumping
 - `k_paramBitRed` (22): bit-depth variation on chaotic signal → digital granularity
 
+#### Known Issues (why this is experimental)
+
+1. **APC mod_target conflict** — `mod_target = preset % 24` maps drone presets to APC slots
+   designed for wavetable use:
+   - Crystal (95 % 24 = 23 = `k_paramBitRed`): the APC block dynamically modulates the bit
+     crusher depth via LFO2. This creates audible digital artifacts unrelated to the FDN.
+   - Metal (96 % 24 = 0 = `k_paramProgram`): the APC block applies `m_volume_mod_multiplier =
+     l3_val * 0.1f`, meaning **LFO3 directly amplitude-modulates the drone output**. Whether
+     the drone is audible at all depends on LFO3's current phase and depth settings.
+
+2. **Self-oscillation depends on LFO3 depth** — for preset 96, if LFO3 is active and at depth > 0,
+   the volume can be periodically cut. This makes self-oscillation appear unreliable even though
+   the FDN is internally oscillating.
+
+3. **Fix required** — the processBlock APC switch needs a dedicated drone branch that bypasses
+   the wavetable-oriented mod_target logic when `use_drone == true`. Until then, drone presets
+   are sensitive to LFO configuration and behave unpredictably.
+
 #### Option D as future follow-up
 
 Once Option C is working on hardware: run the FDN simulation in Python at a fixed pitch (e.g. 440 Hz,
@@ -301,10 +325,12 @@ in wavetables.h. The existing LFO wavetable-sweep preset mode then animates thro
 This requires extending convert_wavetables.py to accept raw float arrays in addition to .wav files.
 
 ## Next Steps
-- [ ] **Implement Option C: Compact self-oscillating FDN** — new `fdn_drone.h`, replacing
-  the current noise-driven `DroneEngine` in `drone_engine.h`. Full design spec above.
-- [ ] **Hardware test FDN drone presets 95/96** — calibrate feedback gain for chaotic regime,
-  tune delay line lengths for musical character, adjust per-line filter coefficients.
+- [x] **Implement Option C: Compact self-oscillating FDN** — implemented in `drone_engine.h`.
+  Hardware-calibrated: g=2.10, drive floor=1.20, noise_amp=0.0040. Self-oscillates reliably
+  in isolation but behaviour is currently coupled to LFO3 via APC (see Known Issues).
+- [ ] **Fix APC conflict for drone mode** — add `if (use_drone) { /* drone-specific APC */ }`
+  branch in processBlock to decouple drone output from wavetable mod_target logic. Until then
+  presets 95/96 are experimental.
 - [ ] **Calibrate output gains** for drone engines to match level of wavetable presets.
 - [ ] **(Future) Option D: FDN wavetable capture** — extend convert_wavetables.py, capture FDN
   steady-state cycles offline, add as new wavetable entries.
