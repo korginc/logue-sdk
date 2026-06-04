@@ -209,7 +209,7 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
     const float env8 = env4 * env4;
 
     /* Sqrt envelope for long metallic ring tail */
-    const float env_sqrt = (gated > 1e-8f) ? sqrtf(gated) : 0.0f;
+    const float env_sqrt = (gated > 1e-8f) ? fasterSqrt(gated) : 0.0f;
 
     /* Combined modulator envelope: fast burst (env8) + slow ring (linear).
      * LFO index modulation scales the ring component. */
