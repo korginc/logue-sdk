@@ -59,6 +59,7 @@ typedef struct {
     float32x4_t last_input;
     uint32x4_t zero_cross;
 
+    float32x4_t sub_lp_state; // New: Low-pass filter state for sub-octave smoothing
     // FIXED: PRNG for sub-octave mode (instead of rand())
     prng_simple_t prng;
 } wavefolder_t;
@@ -72,6 +73,7 @@ fast_inline void wavefolder_init(wavefolder_t* wf) {
     wf->output_gain = vdupq_n_f32(1.0f);
     wf->sub_phase = vdupq_n_f32(0.0f);
     wf->last_input = vdupq_n_f32(0.0f);
+    wf->sub_lp_state = vdupq_n_f32(0.0f); // Initialize sub-octave LP filter state
     wf->zero_cross = vdupq_n_u32(0);
 
     // Initialize PRNG with fixed seed
@@ -94,8 +96,8 @@ fast_inline void wavefolder_set_drive(wavefolder_t* wf, float drive_percent) {
 
     // Makeup gain now scales positively with drive to compensate for perceived
     // loudness reduction due to saturation and to ensure a healthy output level.
-    // Scales from 1.0x (drive=0) to 3.0x (drive=1).
-    float makeup = 1.0f + drive * 2.0f;
+    // Scales from 1.0x (drive=0) to 5.0x (drive=1).
+    float makeup = 1.0f + drive * 4.0f; // Increased scaling for better audibility
     wf->output_gain = vdupq_n_f32(makeup);
 }
 
@@ -168,6 +170,7 @@ fast_inline float32x4_t suboctave_process(wavefolder_t* wf, float32x4_t in_v) {
     float last  = vgetq_lane_f32(wf->last_input, 0);
     float phase = vgetq_lane_f32(wf->sub_phase,  0);
 
+    float lp_state = vgetq_lane_f32(wf->sub_lp_state, 0); // Get LP filter state
     for (int i = 0; i < 4; ++i) {
         const float x = buf_in[i];
         if (last < 0.0f && x >= 0.0f) {
@@ -176,11 +179,16 @@ fast_inline float32x4_t suboctave_process(wavefolder_t* wf, float32x4_t in_v) {
             if (phase >= 1.0f) phase -= 1.0f;
         }
         buf_out[i] = (phase < 0.5f) ? 1.0f : -1.0f;
+        // Apply one-pole low-pass filter to smooth the sub-octave square wave
+        const float lp_coeff = 0.7f; // This coefficient can be tuned for desired smoothness
+        lp_state = lp_coeff * lp_state + (1.0f - lp_coeff) * buf_out[i];
+        buf_out[i] = lp_state;
         last = x;
     }
 
     wf->last_input = vdupq_n_f32(last);
     wf->sub_phase  = vdupq_n_f32(phase);
+    wf->sub_lp_state = vdupq_n_f32(lp_state); // Store LP filter state
     return vld1q_f32(buf_out);
 }
 
