@@ -53,11 +53,15 @@ public:
     enum DbxMode { k_active = 0, k_encode_only, k_off };
     enum k7Mode  { k_244    = 0, k_424, k_488, k_vinyl };
 
-    PortaCassette() : samplerate_(48000.0f), b_update_filters_(false) { Reset(); }
+    PortaCassette() : samplerate_(48000.0f), b_update_filters_(false) {
+      inverse_samplerate_ = 1.0f / samplerate_;
+      Reset();
+    }
     ~PortaCassette() {}
 
     int8_t Init(const unit_runtime_desc_t* desc) {
         samplerate_ = desc->samplerate;
+        inverse_samplerate_ = 1.0f / samplerate_;
         Reset();
         return k_unit_err_none;
     }
@@ -79,7 +83,7 @@ public:
         wf_write_pos_        = 0;
         wf_lfo_phase_        = 0.0f;
         wf_flutter_phase_    = 0.0f;
-        wf_flutter_phase_inc_ = M_TWOPI * 25.0f / samplerate_;
+        wf_flutter_phase_inc_ = M_TWOPI * 25.0f * inverse_samplerate_;
 
         // Small positive seed prevents 1/sqrt(0) divergence on first block
         dbx_enc_rms_    = vdupq_n_f32(1e-6f);
@@ -114,7 +118,7 @@ public:
         y_prev_r = 0.0f;
         R = 0.995f; // standard DC blocker coefficient for ~20 Hz cutoff at 44.1 kHz, also used in tape_saturation
 
-        wf_phase_inc_ = M_TWOPI * 1.5f / samplerate_;
+        wf_phase_inc_ = M_TWOPI * 1.5f * inverse_samplerate_;
 
         memset(raw_params_, 0, sizeof(raw_params_));
     }
@@ -128,7 +132,7 @@ public:
         switch (id) {
             case k_param_model:
                 model_ = (uint8_t)value;
-                wf_phase_inc_ = M_TWOPI * ((model_ == k_vinyl) ? 0.55f : 1.5f) / samplerate_;
+                wf_phase_inc_ = M_TWOPI * ((model_ == k_vinyl) ? 0.55f : 1.5f) * inverse_samplerate_;
                 b_update_filters_.store(true);  // tape model affects LPF/head coeffs
                 break;
             case k_param_preamp: target_preamp_ = 1.0f + norm * 2.0f; break;
@@ -560,6 +564,7 @@ private:
     // =========================================================================
     int32_t raw_params_[k_num_params] __attribute__((aligned(16)));
     float   samplerate_;
+    float   inverse_samplerate_;
     bool    b_bypass_;
     std::atomic<bool> b_update_filters_;
 
@@ -742,7 +747,7 @@ private:
             (void)biquad_process1(&dbx_hf_r_, &coeff_dbx_hf_, sr);
             float wb_env = fmaxf(vgetq_lane_f32(dbx_enc_rms_,    0), 1e-6f);
             float hf_env = fmaxf(vgetq_lane_f32(dbx_hf_enc_rms_, 0), 1e-6f);
-            float gain = fminf(1.0f / sqrtf(wb_env * 0.7f + hf_env * 0.3f), 6.0f);
+            float gain = fminf(1.0f / fasterSqrt(wb_env * 0.7f + hf_env * 0.3f), 6.0f);
             dec_gain   = 1.0f / gain;  // synchronized decode gain
             sl *= gain; sr *= gain;
         }
@@ -845,7 +850,7 @@ private:
 
         switch (model_) {
             case k_424:  lpf_hz = 11000.0f; head_hz = 55.0f;  break;
-            case k_488:  lpf_hz =  9500.0f; head_hz = 50.0f;  break;
+            case k_488:  lpf_hz =  9500.0f; head_hz = 45.0f;  break;
             case k_vinyl: lpf_hz = 12000.0f; head_hz = 150.0f; hiss_cut = 400.0f; break;
             default: break;  // k_244: defaults above
         }
@@ -862,10 +867,10 @@ private:
 
     void calc_peaking(biquad_coeffs_t* c, float hz, float db, float q) {
         const float A    = powf(10.0f, db / 40.0f);
-        const float w0   = 2.0f * M_PI * hz / samplerate_;
+        const float w0   = 2.0f * M_PI * hz * inverse_samplerate_;
         const float cosw = cosf(w0);
         const float alpha = sinf(w0) / (2.0f * q);
-        const float inv_a0 = 1.0f / (1.0f + alpha / A);
+        const float inv_a0 = A / (A + alpha);   // was 1.0f / (1.0f + alpha / A);
         c->b0 =  (1.0f + alpha * A) * inv_a0;
         c->b1 = (-2.0f * cosw)      * inv_a0;
         c->b2 =  (1.0f - alpha * A) * inv_a0;
@@ -875,12 +880,15 @@ private:
 
     void calc_high_shelf(biquad_coeffs_t* c, float hz, float db) {
         const float A    = powf(10.0f, db / 40.0f);
-        const float w0   = 2.0f * M_PI * hz / samplerate_;
+        const float w0   = 2.0f * M_PI * hz * inverse_samplerate_;
         const float cosw = cosf(w0), sinw = sinf(w0);
-        const float alpha = (sinw / 2.0f) *
-                            sqrtf((A + 1.0f/A) * (1.0f/0.707f - 1.0f) + 2.0f);
-        const float sqA2   = 2.0f * sqrtf(A) * alpha;
-        const float inv_a0 = 1.0f / ((A+1.0f) - (A-1.0f)*cosw + sqA2);
+        const float alpha =
+            (sinw * 0.5f) *
+            fasterSqrt((A + 1.0f / A) *
+                  (1.4144271570014 - 1.0f) + // approx of 1.0f / 0.707f
+                  2.0f);
+        const float sqA2   = 2.0f * fasterSqrt(A) * alpha;
+        const float inv_a0 = 1.0f / ((A+1.0f) - (A-1.0f) * cosw + sqA2);
         c->b0 =  A * ((A+1.0f) + (A-1.0f)*cosw + sqA2)   * inv_a0;
         c->b1 = -2.0f*A * ((A-1.0f) + (A+1.0f)*cosw)     * inv_a0;
         c->b2 =  A * ((A+1.0f) + (A-1.0f)*cosw - sqA2)   * inv_a0;
@@ -889,7 +897,7 @@ private:
     }
 
     void calc_low_pass(biquad_coeffs_t* c, float hz, float q) {
-        const float w0   = 2.0f * M_PI * hz / samplerate_;
+        const float w0   = 2.0f * M_PI * hz * inverse_samplerate_;
         const float cosw = cosf(w0), sinw = sinf(w0);
         const float alpha  = sinw / (2.0f * q);
         const float inv_a0 = 1.0f / (1.0f + alpha);
@@ -901,7 +909,7 @@ private:
     }
 
     void calc_high_pass(biquad_coeffs_t* c, float hz, float q) {
-        const float w0   = 2.0f * M_PI * hz / samplerate_;
+        const float w0   = 2.0f * M_PI * hz * inverse_samplerate_;
         const float cosw = cosf(w0), sinw = sinf(w0);
         const float alpha  = sinw / (2.0f * q);
         const float inv_a0 = 1.0f / (1.0f + alpha);
