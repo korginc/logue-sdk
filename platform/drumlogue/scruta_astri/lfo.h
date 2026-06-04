@@ -11,7 +11,8 @@ enum LFOWaveform {
     LFO_EXP_DECAY, // ADSR-like percussive strike
     LFO_SINE,
     LFO_PULSE_25,
-    LFO_SMOOTH_RANDOM
+    LFO_SMOOTH_RANDOM,
+    LFO_WAVE_COUNT
 };
 
 struct FastLFO {

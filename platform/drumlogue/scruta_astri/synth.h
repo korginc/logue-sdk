@@ -1,5 +1,15 @@
-#ifndef A083A381_F7BC_4612_A4CB_962E406CD1FC
-#define A083A381_F7BC_4612_A4CB_962E406CD1FC
+/**
+ * @file synth.h
+ * @brief stargazer drone synth supercharged
+ *
+ * Features:
+ * - 3 distortion modes including SubOctave
+ * - 3 LFOs, preset is LFO target
+ * - new wavetables
+ * - NEON-optimized for ARMv7
+ *
+ */
+
 #include <cstdint>
 #include <arm_neon.h>
 #include "float_math.h"
@@ -17,8 +27,6 @@ constexpr float Mid_Note_Freq = 69.0f;
 constexpr float Audio_Rate_Freq = 100000.0f;
 constexpr float percent_normalizer = 100.0f;
 constexpr int neon_lanes = 4;
-
-
 
 class alignas(16) ScrutaAstri {
 public:
@@ -61,6 +69,22 @@ public:
 
         m_srr_counter = 0.0f;
         m_srr_hold_val = 0.0f;
+
+        // Reset morphing states
+        m_osc1_morph_phase = 1.0f;
+        m_osc1_morph_active = false;
+        m_osc1_current_wave_idx = 0; // Assuming default k_paramOsc1Wave is 0
+        m_osc1_target_wave_idx = 0;
+        m_osc1_prev_wave_idx = 0;
+
+        m_osc2_morph_phase = 1.0f;
+        m_osc2_morph_active = false;
+        m_osc2_current_wave_idx = 0; // Assuming default k_paramOsc2Wave is 0
+        m_osc2_target_wave_idx = 0;
+        m_osc2_prev_wave_idx = 0;
+
+        // Reset suboctave smoothing
+        m_osc2_suboct_smooth_mult = 1.0f;
 
         m_crystal_drone.clear();
         m_metal_drone.clear();
@@ -152,6 +176,34 @@ public:
                     m_crystal_drone.set_noise(m_params[k_paramOsc2Mix]);
                     m_metal_drone.set_noise(m_params[k_paramOsc2Mix]);
                 }
+                // Initialize current wave indices to match the program's default
+                // This is important for morphing logic to start from a known state.
+                m_osc1_current_wave_idx = m_params[k_paramOsc1Wave];
+                m_osc1_target_wave_idx = m_params[k_paramOsc1Wave];
+                m_osc1_morph_phase = 1.0f; // Morph is not active initially
+                m_osc2_current_wave_idx = m_params[k_paramOsc2Wave];
+                m_osc2_target_wave_idx = m_params[k_paramOsc2Wave];
+                m_osc2_morph_phase = 1.0f; // Morph is not active initially
+                break;
+            }
+            case k_paramOsc1Wave: {
+                if (value != m_osc1_target_wave_idx) {
+                    m_osc1_prev_wave_idx = m_osc1_current_wave_idx;
+                    m_osc1_target_wave_idx = value;
+                    m_osc1_morph_phase = 0.0f;
+                    m_osc1_morph_active = true;
+                    m_osc1_morph_speed = 1.0f / (SAMPLE_RATE_F * 0.05f); // 50ms morph duration
+                }
+                break;
+            }
+            case k_paramOsc2Wave: {
+                if (value != m_osc2_target_wave_idx) {
+                    m_osc2_prev_wave_idx = m_osc2_current_wave_idx;
+                    m_osc2_target_wave_idx = value;
+                    m_osc2_morph_phase = 0.0f;
+                    m_osc2_morph_active = true;
+                    m_osc2_morph_speed = 1.0f / (SAMPLE_RATE_F * 0.05f); // 50ms morph duration
+                }
                 break;
             }
             case k_paramNote:
@@ -194,9 +246,9 @@ public:
             }
 
             // -- LFO Waves (Updated UI maximum to 8 in header.c)
-            case k_paramL1Wave: lfo1.wave_type = value % 9; break;
-            case k_paramL2Wave: lfo2.wave_type = value % 9; break;
-            case k_paramL3Wave: lfo3.wave_type = value % 9; break;
+            case k_paramL1Wave: lfo1.wave_type = value % LFO_WAVE_COUNT; break;
+            case k_paramL2Wave: lfo2.wave_type = value % LFO_WAVE_COUNT; break;
+            case k_paramL3Wave: lfo3.wave_type = value % LFO_WAVE_COUNT; break;
 
             // -- LFO Depths (0.0 to 1.0)
             case k_paramL1Depth: m_lfo1_depth = (float)value / percent_normalizer; break;
@@ -281,7 +333,7 @@ public:
         // Immediately set oscillator frequencies so sound starts on the first sample.
         // Zero-crossing updates in the audio loop handle live pitch changes without clicks.
         osc1.set_frequency(m_osc1_target_hz, SAMPLE_RATE_F);
-        m_osc2_suboct_smooth_mult = m_osc2_suboct_target_mult;
+        // m_osc2_suboct_smooth_mult will be smoothed in processBlock
         osc2.set_frequency(m_osc2_target_hz * m_osc2_suboct_smooth_mult, SAMPLE_RATE_F);
     }
 
@@ -364,10 +416,6 @@ public:
         uint8_t out_idx_buffer[neon_lanes];
         const float dc_bias = 0.005f; // adjust to taste (0.001-0.01 works)
 
-        // Grab Wavetables from UI
-        osc1.current_table = SCRUTAASTRI_WAVETABLES[m_params[k_paramOsc1Wave]];
-        osc2.current_table = SCRUTAASTRI_WAVETABLES[m_params[k_paramOsc2Wave]];
-
         // Source selection: preset 95 = crystal drone, preset 96 = metal drone
         const int32_t prog_preset = m_params[k_paramProgram];
         const bool use_drone = (prog_preset == 95 || prog_preset == 96);
@@ -380,22 +428,27 @@ public:
             float l2_val;
             float l3_val;
             ring_modulation(l1_val, l2_val, l3_val);
-            // 2 ZERO-CROSSING FREQUENCY UPDATES
+            // 2 FREQUENCY UPDATES
             // Store previous phase states
             float pre_phase1 = osc1.phase;
             float pre_phase2 = osc2.phase;
 
-            // Zero-crossing frequency updates happen after oscillator processing (see below)
-
-            // Apply smooth APC pitch modulation continuously
-            if (m_pitch_mod_multiplier != 1.0f) {
+            // Update frequency every sample if pitch mod is active OR we are slewing the suboctave.
+            // This eliminates stepping sounds during sub-octave transitions.
+            bool is_suboct_slewing = std::fabs(m_osc2_suboct_smooth_mult - m_osc2_suboct_target_mult) > 0.0001f;
+            if (m_pitch_mod_multiplier != 1.0f || is_suboct_slewing) {
                 osc1.set_frequency(m_osc1_target_hz * m_pitch_mod_multiplier, SAMPLE_RATE_F);
                 osc2.set_frequency(m_osc2_target_hz * m_osc2_suboct_smooth_mult * m_pitch_mod_multiplier, SAMPLE_RATE_F);
             }
-            m_osc2_suboct_smooth_mult += (m_osc2_suboct_target_mult - m_osc2_suboct_smooth_mult) * m_osc2_suboct_slew;
+
+            if (is_suboct_slewing) {
+                m_osc2_suboct_smooth_mult += (m_osc2_suboct_target_mult - m_osc2_suboct_smooth_mult) * m_osc2_suboct_slew;
+            } else {
+                m_osc2_suboct_smooth_mult = m_osc2_suboct_target_mult;
+            }
 
             // 3 ACTIVE PARTIAL COUNTING (APC) BLOCK
-            // Evaluate complex modulation targets only every 4 samples to save CPU cycles
+            // Evaluate complex modulation targets and LFO-driven morphing only every 4 samples to save CPU cycles
             if (++m_apc_counter >= APC_FACTOR) {
                 m_apc_counter = 0;
 
@@ -403,7 +456,7 @@ public:
                 m_pitch_mod_multiplier = 1.0f;
                 m_f1_mod_multiplier = 1.0f;
                 m_f2_mod_multiplier = 1.0f;
-                m_f1_lfo_mult = 1.0f;   // Reset: no filter LFO unless preset targets it
+                m_f1_lfo_mult = 1.0f; // Reset: no filter LFO unless preset targets it
                 m_f2_lfo_mult = 1.0f;
                 m_cmos_mod_multiplier = 1.0f;
                 m_srr_mod_offset = 0.0f;
@@ -411,21 +464,18 @@ public:
                 m_osc2_fm_mult = 1.0f;
                 // NOTE: m_osc2_target_hz is NOT reset here — it is set once by
                 // setParameter(k_paramOsc2Pitch) and must persist across APC cycles.
-                m_volume_mod_multiplier = 0.0f;
+                m_volume_mod_multiplier = 0.0f; // Reset to 0, will be added to base
                 m_drv1_mod_multiplier = 0.0f;
                 m_drv2_mod_multiplier = 0.0f;
                 m_mix1_mod_offset = 0.0f;
 
                 int32_t mod_target = m_params[k_paramProgram] % k_paramLast;
-                // note some missing modes are addressed directly in setParameters()
-                // are they are used in above ring_modulation(), so cannot be placed
-                // right here
                 switch (mod_target) {
                     case k_paramProgram:
                         // Macro target: subtle movement across multiple destinations.
                         m_pitch_mod_multiplier = fasterpow2f((l1_val + l2_val) * 0.25f);
                         m_mix2_mod_offset = l3_val * 0.2f;
-                        m_volume_mod_multiplier = l3_val * 0.1f;
+                        m_volume_mod_multiplier = l3_val * 0.1f; // Add to base volume
                         break;
                     case k_paramNote:
                         // Modulate global pitch by +/- 12 semitones using LFO 1
@@ -463,7 +513,13 @@ public:
                             int wave1_offset = (int)(l1_val * 20.0f);
                             int final_wave1 = ((base_wave1 + wave1_offset) % NUM_WAVETABLES + NUM_WAVETABLES) % NUM_WAVETABLES;
 
-                            osc1.current_table = SCRUTAASTRI_WAVETABLES[final_wave1];
+                            if (final_wave1 != m_osc1_target_wave_idx) {
+                                m_osc1_prev_wave_idx = m_osc1_current_wave_idx;
+                                m_osc1_target_wave_idx = final_wave1;
+                                m_osc1_morph_phase = 0.0f;
+                                m_osc1_morph_active = true;
+                                m_osc1_morph_speed = 1.0f / (SAMPLE_RATE_F * 0.05f); // 50ms morph
+                            }
                         }
                         break;
                     case k_paramOsc2Wave: {
@@ -472,7 +528,13 @@ public:
                             int wave1_offset = (int)(l2_val * 20.0f);
                             int final_wave2 = ((base_wave2 + wave1_offset) % NUM_WAVETABLES + NUM_WAVETABLES) % NUM_WAVETABLES;
 
-                            osc2.current_table = SCRUTAASTRI_WAVETABLES[final_wave2];
+                            if (final_wave2 != m_osc2_target_wave_idx) {
+                                m_osc2_prev_wave_idx = m_osc2_current_wave_idx;
+                                m_osc2_target_wave_idx = final_wave2;
+                                m_osc2_morph_phase = 0.0f;
+                                m_osc2_morph_active = true;
+                                m_osc2_morph_speed = 1.0f / (SAMPLE_RATE_F * 0.05f); // 50ms morph
+                            }
                         }
                         break;
                     // -----------------------------------------------------
@@ -513,7 +575,7 @@ public:
                         break;
                     case k_paramL3Wave:
                         // Continuously scan LFO3 waveform for evolving motion.
-                        lfo3.wave_type = ((int)m_params[k_paramL3Wave] + (int)(l3_val * 3.0f) + 9) % 9;
+                        lfo3.wave_type = ((int)m_params[k_paramL3Wave] + (int)(l3_val * 3.0f) + LFO_WAVE_COUNT) % LFO_WAVE_COUNT;
                         break;
                     case k_paramBitRed:
                         // Dynamic bit depth variation around user value.
@@ -544,18 +606,57 @@ public:
                 }
             }
 
-            // 4. OSCILLATOR / DRONE MIX
+            // 4. OSCILLATOR / DRONE MIX + WAVETABLE MORPHING
             float sig1 = 0.0f; // used for Sherman asymmetry below; 0 in drone mode
             float mixed_sig;
             if (use_drone) {
                 mixed_sig = use_metal_drone ? m_metal_drone.process() : m_crystal_drone.process();
             } else {
-                // Advance oscillators
-                sig1 = fmaxf(0.0f, fminf(1.0f, osc1.process() * 0.5f + m_mix1_mod_offset));
+                // Oscillator 1 Morphing (Crossfading output values between old and new tables)
+                float o1_val;
+                if (m_osc1_morph_active) {
+                    float p = osc1.phase;
+                    osc1.current_table = SCRUTAASTRI_WAVETABLES[m_osc1_prev_wave_idx];
+                    float s1 = osc1.process();
+                    osc1.phase = p; // process the target table at the exact same sample point
+                    osc1.current_table = SCRUTAASTRI_WAVETABLES[m_osc1_target_wave_idx];
+                    float s2 = osc1.process();
 
-                // Apply APC mixed modulation offset, constrained 0.0 to 1.0
+                    o1_val = s1 + (s2 - s1) * m_osc1_morph_phase;
+                    m_osc1_morph_phase += m_osc1_morph_speed;
+                    if (m_osc1_morph_phase >= 1.0f) {
+                        m_osc1_morph_active = false;
+                        m_osc1_current_wave_idx = m_osc1_target_wave_idx;
+                    }
+                } else {
+                    osc1.current_table = SCRUTAASTRI_WAVETABLES[m_osc1_current_wave_idx];
+                    o1_val = osc1.process();
+                }
+                sig1 = fmaxf(0.0f, fminf(1.0f, o1_val * 0.5f + m_mix1_mod_offset));
+
+                // Oscillator 2 Morphing
+                float o2_val;
+                if (m_osc2_morph_active) {
+                    float p = osc2.phase;
+                    osc2.current_table = SCRUTAASTRI_WAVETABLES[m_osc2_prev_wave_idx];
+                    float s1 = osc2.process();
+                    osc2.phase = p;
+                    osc2.current_table = SCRUTAASTRI_WAVETABLES[m_osc2_target_wave_idx];
+                    float s2 = osc2.process();
+
+                    o2_val = s1 + (s2 - s1) * m_osc2_morph_phase;
+                    m_osc2_morph_phase += m_osc2_morph_speed;
+                    if (m_osc2_morph_phase >= 1.0f) {
+                        m_osc2_morph_active = false;
+                        m_osc2_current_wave_idx = m_osc2_target_wave_idx;
+                    }
+                } else {
+                    osc2.current_table = SCRUTAASTRI_WAVETABLES[m_osc2_current_wave_idx];
+                    o2_val = osc2.process();
+                }
+
                 float dynamic_mix = fmaxf(0.0f, fminf(1.0f, m_osc2_mix + m_mix2_mod_offset));
-                float sig2 = osc2.process() * dynamic_mix;
+                float sig2 = o2_val * dynamic_mix;
                 mixed_sig = sig1 + sig2;
 
                 // Bidirectional phase wrap detection
@@ -759,10 +860,23 @@ private:
     float m_lfo2_mod_val = 0.0f;
     float m_lfo3_mod_val = 0.0f;
 
+    // Wave Morphing
+    float m_osc1_morph_phase = 1.0f; // 0.0 to 1.0, 1.0 means morph complete
+    float m_osc1_morph_speed = 0.0f; // Increment per sample
+    bool m_osc1_morph_active = false;
+    uint16_t m_osc1_current_wave_idx = 0; // The wave index currently being played (or morphed from)
+    uint16_t m_osc1_target_wave_idx = 0; // The wave index we are morphing to (from knob or LFO)
+    uint16_t m_osc1_prev_wave_idx = 0; // Index of the waveform before the change
+
+    float m_osc2_morph_phase = 1.0f;
+    float m_osc2_morph_speed = 0.0f;
+    bool m_osc2_morph_active = false;
+    uint16_t m_osc2_current_wave_idx = 0;
+    uint16_t m_osc2_target_wave_idx = 0;
+    uint16_t m_osc2_prev_wave_idx = 0;
     // Playback Direction Multipliers
     float m_osc1_dir = 1.0f;
     float m_osc2_dir = 1.0f;
 };
 
 
-#endif /* A083A381_F7BC_4612_A4CB_962E406CD1FC */
