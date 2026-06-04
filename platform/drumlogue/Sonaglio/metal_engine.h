@@ -87,8 +87,8 @@ static inline void metal_apply_ratios(metal_engine_t* metal, float ratio_scale) 
 fast_inline void metal_engine_recompute(metal_engine_t* metal) {
     float atk = metal->attack;
     float bdy = metal->body;
-    if (atk < 0.0f) atk = 0.0f; if (atk > 1.0f) atk = 1.0f;
-    if (bdy < 0.0f) bdy = 0.0f; if (bdy > 1.0f) bdy = 1.0f;
+    atk = (atk < 0.0f) ? 0.0f : (atk > 1.0f ? 1.0f : atk);
+    bdy = (bdy < 0.0f) ? 0.0f : (bdy > 1.0f ? 1.0f : bdy);
     metal->attack = atk;
     metal->body   = bdy;
 
