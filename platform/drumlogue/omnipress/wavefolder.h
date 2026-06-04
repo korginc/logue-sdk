@@ -172,9 +172,7 @@ fast_inline float32x4_t suboctave_process(wavefolder_t* wf, float32x4_t in_v) {
         const float x = buf_in[i];
         if (last < 0.0f && x >= 0.0f) {
             // Positive zero crossing: advance sub-octave by a half cycle.
-            // 3% jitter gives organic feel without audible pitch noise.
-            float rnd = (float)(prng_simple_next(&wf->prng) & 0x3FFF) / 16384.0f;
-            phase += 0.5f + rnd * 0.03f;
+            phase += 0.5f;
             if (phase >= 1.0f) phase -= 1.0f;
         }
         buf_out[i] = (phase < 0.5f) ? 1.0f : -1.0f;
@@ -238,9 +236,9 @@ fast_inline float32x4x2_t wavefolder_process(wavefolder_t *wf,
     float32x4_t mono = vmulq_n_f32(vaddq_f32(driven_l, driven_r), 0.5f);
     float32x4_t sub = suboctave_process(wf, mono);
     // Use driven signals instead of raw input to prevent volume drop as drive increases.
-    // Mix the sub-octave with the soft-clipped signal to ensure distortion is audible.
-    float32x4_t sub_l = vmulq_f32(sub, vabsq_f32(driven_l));
-    float32x4_t sub_r = vmulq_f32(sub, vabsq_f32(driven_r));
+    // Both components are now soft-clipped to prevent the sum from exceeding headroom at high drive.
+    float32x4_t sub_l = vmulq_f32(sub, soft_clip(vabsq_f32(driven_l)));
+    float32x4_t sub_r = vmulq_f32(sub, soft_clip(vabsq_f32(driven_r)));
     out.val[0] = vmulq_n_f32(vaddq_f32(soft_clip(driven_l), sub_l), 0.5f);
     out.val[1] = vmulq_n_f32(vaddq_f32(soft_clip(driven_r), sub_r), 0.5f);
     break;
