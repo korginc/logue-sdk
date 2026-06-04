@@ -30,7 +30,7 @@
 #include "float_math.h"
 
 #ifndef fast_inline
-#define fast_inline inline __attribute__((always_inline))
+#define fast_inline inline __attribute__((always_inline, optimize("Ofast")))
 #endif
 
 struct delay_line_t {
