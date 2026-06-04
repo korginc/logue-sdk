@@ -15,6 +15,7 @@
 #define BAND_MID 1
 #define BAND_HIGH 2
 #define NUM_OF_BANDS (3)
+const float MASTER_SUM_SCALING = 0.45f;
 
 // State structures for IIR components
 // State tracker for phase compensation biquads
@@ -54,6 +55,7 @@ typedef struct {
     struct {
         float thresh_db;
         float ratio;
+        float gr_slope;            // Pre-calculated gain reduction slope: (1.0 - 1.0/ratio)
         float makeup_db;
         float makeup_gain_linear;
         float attack_ms;
@@ -94,6 +96,7 @@ fast_inline void multiband_init(multiband_t* mb, float sample_rate) {
     for (int i = 0; i < NUM_OF_BANDS; i++) {
         mb->bands[i].thresh_db = -10.0f;
         mb->bands[i].ratio = 4.0f;
+        mb->bands[i].gr_slope = 0.75f;
         mb->bands[i].makeup_db = 0.0f;
         mb->bands[i].makeup_gain_linear = 1.0f;   // 0 dB
         mb->bands[i].attack_ms = 10.0f;
@@ -132,7 +135,10 @@ fast_inline void multiband_set_param(multiband_t* mb,
 
     switch (param_id) {
         case 0: mb->bands[band].thresh_db = value; break;
-        case 1: mb->bands[band].ratio = value; break;
+        case 1:
+            mb->bands[band].ratio = value;
+            mb->bands[band].gr_slope = (value <= 0.05f) ? 1.0f : (1.0f - 1.0f / value);
+            break;
         case 2:
             mb->bands[band].makeup_db = value;
             mb->bands[band].makeup_gain_linear = fasterpowf(10.0f, value / 20.0f);
@@ -193,7 +199,8 @@ fast_inline float32x4_t dc_block_lane(dc_filter_state_t* state, float32x4_t in, 
 }
 
 // Pirkle Asymmetric Dynamic Triode Core
-fast_inline float32x4_t pirkle_triode_engine(float32x4_t in, float drive, float* bias_state, float shape_pos, float shape_neg) {
+fast_inline float32x4_t pirkle_triode_engine(float32x4_t in, float drive, float* bias_state,
+                                             float shape_pos, float shape_neg, bool update_bias) {
     float32x4_t v_zero = vdupq_n_f32(0.0f);
     float32x4_t v_one  = vdupq_n_f32(1.0f);
 
@@ -204,8 +211,10 @@ fast_inline float32x4_t pirkle_triode_engine(float32x4_t in, float drive, float*
     // Extract dynamic grid rectification current (Pirkle Addendum A19)
     float32x4_t v_gk_pos = vmaxq_f32(v_gk, v_zero);
     float32x2_t v_gk_sum_2 = vadd_f32(vget_low_f32(v_gk_pos), vget_high_f32(v_gk_pos));
-    float mean_grid_current = (vget_lane_f32(v_gk_sum_2, 0) + vget_lane_f32(v_gk_sum_2, 1)) * 0.25f;
-    *bias_state += 0.003f * (mean_grid_current * -1.8f - *bias_state); // Updates bias drift integration
+    if (update_bias) {
+        float mean_grid_current = (vget_lane_f32(v_gk_sum_2, 0) + vget_lane_f32(v_gk_sum_2, 1)) * 0.25f;
+        *bias_state += 0.003f * (mean_grid_current * -1.8f - *bias_state); // Updates bias drift integration
+    }
 
     // Perform continuous sigmoidal non-linear wrapping
     // Optimized denominator calculation using vector bit-selection
@@ -221,24 +230,14 @@ fast_inline float32x4_t pirkle_triode_engine(float32x4_t in, float drive, float*
 
 // Fused branchless compressor node pulling straight from parameter cache
 fast_inline float32x4_t process_compressor_lane(float32x4_t* gain_state, float32x4_t env_linear,
-                                                float thresh_db, float ratio,
+                                                float thresh_db, float gr_slope,
                                                 float att_coeff, float rel_coeff) {
     // 1. Convert smoothed envelope to clean dB values
     float32x4_t db_env = vmulq_f32(precision_log2_neon(vmaxq_f32(env_linear, vdupq_n_f32(1e-5f))), vdupq_n_f32(6.0206f));
     float32x4_t excess = vmaxq_f32(vsubq_f32(db_env, vdupq_n_f32(thresh_db)), vdupq_n_f32(0.0f));
 
-    // 2. Prevent division traps using an expansion epsilon snap
-    float32x4_t ratio_vec = vdupq_n_f32(ratio);
-    uint32x4_t  near_zero = vcltq_f32(vabsq_f32(ratio_vec), vdupq_n_f32(0.01f));
-    float32x4_t safe_ratio = vbslq_f32(near_zero, vdupq_n_f32(0.001f), ratio_vec);
-
-    // Standard gain computer equation
-    float32x4_t target_gr_db = vnegq_f32(fast_div_neon(
-        vmulq_f32(excess, vsubq_f32(ratio_vec, vdupq_n_f32(1.0f))),
-        safe_ratio));
-
-    // Smoothly apply an accurate infinite hard limit mask if ratio == 0.0f
-    target_gr_db = vbslq_f32(vceqq_f32(ratio_vec, vdupq_n_f32(0.0f)), vnegq_f32(excess), target_gr_db);
+    // 2. Standard gain computer equation using pre-calculated slope
+    float32x4_t target_gr_db = vmulq_n_f32(vnegq_f32(excess), gr_slope);
 
     // 3. Sequential vector tracking for ballistics
     float targets[4], out[4];
@@ -317,15 +316,15 @@ fast_inline void multiband_process(multiband_t* mb,
     // ------------------------------------------------------------
     // Dynamic values of ratio, threshold, and coefficients are explicitly utilized here
     float32x4_t gain_low = process_compressor_lane(&mb->comp_gain_state[BAND_LOW], mb->comp_env_state[BAND_LOW],
-                                                   mb->bands[BAND_LOW].thresh_db, mb->bands[BAND_LOW].ratio,
+                                                   mb->bands[BAND_LOW].thresh_db, mb->bands[BAND_LOW].gr_slope,
                                                    mb->bands[BAND_LOW].attack_coeff, mb->bands[BAND_LOW].release_coeff);
 
     float32x4_t gain_mid = process_compressor_lane(&mb->comp_gain_state[BAND_MID], mb->comp_env_state[BAND_MID],
-                                                   mb->bands[BAND_MID].thresh_db, mb->bands[BAND_MID].ratio,
+                                                   mb->bands[BAND_MID].thresh_db, mb->bands[BAND_MID].gr_slope,
                                                    mb->bands[BAND_MID].attack_coeff, mb->bands[BAND_MID].release_coeff);
 
     float32x4_t gain_high = process_compressor_lane(&mb->comp_gain_state[BAND_HIGH], mb->comp_env_state[BAND_HIGH],
-                                                    mb->bands[BAND_HIGH].thresh_db, mb->bands[BAND_HIGH].ratio,
+                                                    mb->bands[BAND_HIGH].thresh_db, mb->bands[BAND_HIGH].gr_slope,
                                                     mb->bands[BAND_HIGH].attack_coeff, mb->bands[BAND_HIGH].release_coeff);
 
     // Apply calculated compressor gain reductions
@@ -336,16 +335,46 @@ fast_inline void multiband_process(multiband_t* mb,
     // ------------------------------------------------------------
     // Stage 4: Integrated Pirkle Waveshaping & Offset Sanitization
     // ------------------------------------------------------------
-    // Left Channel Processing
-    float32x4_t sat_l_low  = pirkle_triode_engine(low_l,  mb->bands[BAND_LOW].drive,  &mb->tube_bias_l[BAND_LOW], 3.2f, 1.1f);
-    float32x4_t sat_l_mid  = pirkle_triode_engine(mid_l,  mb->bands[BAND_MID].drive,  &mb->tube_bias_l[BAND_MID], 5.5f, 1.8f);
-    float32x4_t sat_l_high = pirkle_triode_engine(high_l, mb->bands[BAND_HIGH].drive, &mb->tube_bias_l[BAND_HIGH], 6.0f, 2.5f);
+    // Optimization: Only run expensive triode simulation if drive is non-zero.
+    // Mono-linking bias states per band to reduce CPU cycles.
+    float32x4_t sat_l_low, sat_l_mid, sat_l_high;
+    float32x4_t sat_r_low, sat_r_mid, sat_r_high;
 
-    // Right Channel Processing - TODO use different values? set values to constant array?
-    float32x4_t sat_r_low  = pirkle_triode_engine(low_r,  mb->bands[BAND_LOW].drive,  &mb->tube_bias_r[BAND_LOW], 3.2f, 1.1f);
-    float32x4_t sat_r_mid  = pirkle_triode_engine(mid_r,  mb->bands[BAND_MID].drive,  &mb->tube_bias_r[BAND_MID], 5.5f, 1.8f);
-    float32x4_t sat_r_high = pirkle_triode_engine(high_r, mb->bands[BAND_HIGH].drive, &mb->tube_bias_r[BAND_HIGH], 6.0f, 2.5f);
+    if (mb->bands[BAND_LOW].drive > 0.01f) {
+      sat_l_low = vnegq_f32(
+          pirkle_triode_engine(low_l, mb->bands[BAND_LOW].drive,
+                               &mb->tube_bias_l[BAND_LOW], 3.2f, 1.1f, true));
+      sat_r_low = vnegq_f32(
+          pirkle_triode_engine(low_r, mb->bands[BAND_LOW].drive,
+                               &mb->tube_bias_l[BAND_LOW], 3.2f, 1.1f, false));
+    } else {
+      sat_l_low = low_l;
+      sat_r_low = low_r;
+    }
 
+    if (mb->bands[BAND_MID].drive > 0.01f) {
+      sat_l_mid = vnegq_f32(
+          pirkle_triode_engine(mid_l, mb->bands[BAND_MID].drive,
+                               &mb->tube_bias_l[BAND_MID], 5.5f, 1.8f, true));
+      sat_r_mid = vnegq_f32(
+          pirkle_triode_engine(mid_r, mb->bands[BAND_MID].drive,
+                               &mb->tube_bias_l[BAND_MID], 5.5f, 1.8f, false));
+    } else {
+      sat_l_mid = mid_l;
+      sat_r_mid = mid_r;
+    }
+
+    if (mb->bands[BAND_HIGH].drive > 0.01f) {
+      sat_l_high = vnegq_f32(
+          pirkle_triode_engine(high_l, mb->bands[BAND_HIGH].drive,
+                               &mb->tube_bias_l[BAND_HIGH], 6.0f, 2.5f, true));
+      sat_r_high = vnegq_f32(
+          pirkle_triode_engine(high_r, mb->bands[BAND_HIGH].drive,
+                               &mb->tube_bias_l[BAND_HIGH], 6.0f, 2.5f, false));
+    } else {
+      sat_l_high = high_l;
+      sat_r_high = high_r;
+    }
     // Correct the common-cathode native inversion signature
     sat_l_low  = vnegq_f32(sat_l_low);  sat_r_low  = vnegq_f32(sat_r_low);
     sat_l_mid  = vnegq_f32(sat_l_mid);  sat_r_mid  = vnegq_f32(sat_r_mid);
@@ -363,8 +392,7 @@ fast_inline void multiband_process(multiband_t* mb,
     float mid_act  = (mb->bands[BAND_MID].solo  > 0.0f || (!any_solo && mb->bands[BAND_MID].mute  == 0.0f)) ? mb->bands[BAND_MID].makeup_gain_linear  : 0.0f;
     float high_act = (mb->bands[BAND_HIGH].solo > 0.0f || (!any_solo && mb->bands[BAND_HIGH].mute == 0.0f)) ? mb->bands[BAND_HIGH].makeup_gain_linear : 0.0f;
 
-    // Structural summation with master headroom scaling (0.65x) to prevent clipping across summed bands.
-    const float MASTER_SUM_SCALING = 0.65f;
+    // Structural summation with master headroom scaling (0.45x) to prevent clipping across summed bands.
     *out_l = vmulq_n_f32(vaddq_f32(vaddq_f32(vmulq_n_f32(sat_l_low, low_act), vmulq_n_f32(sat_l_mid, mid_act)), vmulq_n_f32(sat_l_high, high_act)), MASTER_SUM_SCALING);
     *out_r = vmulq_n_f32(vaddq_f32(vaddq_f32(vmulq_n_f32(sat_r_low, low_act), vmulq_n_f32(sat_r_mid, mid_act)), vmulq_n_f32(sat_r_high, high_act)), MASTER_SUM_SCALING);
 

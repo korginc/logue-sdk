@@ -92,11 +92,10 @@ fast_inline void wavefolder_set_drive(wavefolder_t* wf, float drive_percent) {
     float drive = drive_percent * 0.01f;
     wf->drive = vdupq_n_f32(drive);
 
-    // Makeup gain compensates for the pre-gain (1 + drive*39) applied in
-    // wavefolder_process. At drive=0 this is 1.0 (passthrough, matches CLEAN
-    // mode level). At drive=1.0 it is 0.25 which cancels the 4x pre-gain for
-    // signals still in the linear range of the waveshaper.
-    float makeup = 1.0f / (1.0f + drive * 39.0f);
+    // Makeup gain now scales positively with drive to compensate for perceived
+    // loudness reduction due to saturation and to ensure a healthy output level.
+    // Scales from 1.0x (drive=0) to 3.0x (drive=1).
+    float makeup = 1.0f + drive * 2.0f;
     wf->output_gain = vdupq_n_f32(makeup);
 }
 
