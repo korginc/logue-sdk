@@ -134,11 +134,7 @@ fast_inline void metal_engine_init(metal_engine_t* metal) {
     metal->attack            = 0.5f;
     metal->body              = 0.5f;
 
-    /* Modulator waveform: sine (default); can be changed per character if desired */
-    for (int i = 1; i < 6; i += 2)
-        metal->ops[i].waveform = WF_SINE;
-    for (int i = 0; i < 6; i += 2)
-        metal->ops[i].waveform = WF_SINE;
+    /* fmo_init() already sets WF_SINE on every operator. */
 
     {
         uint64_t s0[2] = { 0xCAFEBABE12345678ULL, 0xFEDCBA0987654321ULL };
@@ -219,6 +215,7 @@ fast_inline float32x4_t metal_engine_process(metal_engine_t* metal,
      * LFO index modulation scales the ring component. */
     float ring_scale = 1.0f + idx_add;
     if (ring_scale < 0.0f) ring_scale = 0.0f;
+    if (ring_scale > 2.0f) ring_scale = 2.0f;  /* cap LFO-driven ring density */
     const float mod_env = env8 * metal->strike_weight
                         + gated * metal->ring_weight * ring_scale;
 
