@@ -107,48 +107,51 @@ current selector model; the remaining lanes are reserved for future probability-
 
 ### Kick
 
-- Carrier frequency range: 30–200 Hz (MIDI-mapped)
+- Carrier frequency range: 20–420 Hz (MIDI-mapped)
 - FM topology: single modulator → carrier (2-op)
-- **Amp envelope**: linear (`env`) — full-body presence
-- **Pitch sweep**: `env^8` — very short, concentrated at onset
-- **FM index**: `env^8` — click complexity dies immediately
-- Sweep depth: 0.10–2.20 octaves (Attack × Body)
-- Sub sine reinforcement gated by amp_env
+- **Amp envelope**: `env^2` — exponential body decay
+- **Pitch sweep**: `env^4` — short, concentrated at onset (was `env^8`, which
+  compressed to a delta function under HitShape)
+- **FM click index**: `env^4`; **FM body index**: `env^2`
+- Sweep depth: 0.24–2.11 octaves (Attack × Body)
+- Sub sine reinforcement gated by `sqrt(env)`
 
-### Snare
+### Snare — per-component independent decay (ctag-inspired)
 
 - Carrier frequency range: 90–650 Hz (MIDI-mapped)
-- FM topology: single modulator → carrier (2-op), inharmonic ratio 1.38–2.25
-- **Amp envelope**: `envelope` (linear) — full shell body through decay
-- **FM body index**: linear — FM complexity tracks amplitude throughout hit
-- **FM crack index**: `env^8` — very transient front-edge snap
-- **Wire buzz noise**: `env^2` — sustains through the body of the hit
-- **Click transient**: `env^8` noise burst — sharp onset accent
+- FM topology: single modulator → carrier (2-op), inharmonic ratio 1.42–2.42
+- Each component has its own one-pole exponential decay with an **absolute** 1/e
+  time constant, independent of the shared envelope shape:
+  - **Crack FM index**: 7–23 ms (Attack) — instantaneous front-edge snap
+  - **Tonal shell + sustained FM**: 35–120 ms (Body) — tonal ring
+  - **Wire buzz noise**: 50–150 ms (Attack + Body) — sustains longest; the snare signature
+- The shared ROM envelope is applied only as a linear master VCA (onset attack +
+  ENV_SHAPE length + note-off). No power-law compounding.
 - Noise generation: 3-band blended HPF/BPF/high-shelf (900, 2200, 6200 Hz)
-- Noise mix range: 0..0.50 (Attack-weighted, Body-subtracted)
-- Wire buzz gain: 0.030 + 0.50 × noise_mix × envelope weighting
+- Click transient driven by `index_level²` (a faster clean exponential)
 
-### Metal
+### Metal — algo11 parallel pairs (copych-derived, MIT)
 
 - Carrier frequency range: 500–8000 Hz (MIDI-mapped)
-- FM topology: Op4 (self-feedback) → Op3 → Op2 → Op1 carrier (4-op serial cascade)
-- Two characters: **Cymbal** (ratios 1.0 / 1.483 / 1.932 / 2.546) and **Gong** (1.0 / 2.756 / 3.752 / 5.404)
-  — selected via bit 7 of `ENV_SHAPE`
-- **Amp envelope**: `sqrt(gated_env)` — slow amplitude decay for long metallic ring
-- **Op4 feedback gain**: 0..0.60 (capped — above 0.60 creates square-wave buzz, not metallic ring)
-- **Ring index**: 7..13 (Op4→Op3 and Op3→Op2); Op2→Op1 carrier uses 50% (3.5..6.5) for a cleaner fundamental
-- **Strike index**: 1..5.5, `env^8`-gated — bright punchy onset burst
-- Inharmonic spread: ratio scale 0.85–1.50 (Body-controlled)
-- Noise: HP above ~2520 Hz + BPF at 4200 Hz, `env^2`-gated strike noise
+- FM topology: **3 independent carrier+modulator pairs** (DX7 algo 11) via
+  `fm_operator.h` — no serial cascade, so each partial rings cleanly
+- Two characters: **Cymbal** (ratios 1.0 / 1.483 / 1.932 / 2.546) and **Gong**
+  (1.0 / 2.756 / 3.752 / 5.404) — selected via bit 7 of `ENV_SHAPE`
+- DX7-style exponential `fm_level` (`0.1 × 161^v − 0.1`) and feedback (`1/2^(7−fb)`)
+- **Carrier envelope**: `sqrt(gated_env)` — slow amplitude decay for long metallic ring
+- **Modulator envelope**: `env^8` burst + linear ring (LFO-scalable, capped)
+- Inharmonic spread: ratio scale 0.82–1.50 (Body-controlled); pair-A carrier is the
+  fixed fundamental anchor at ratio 1.0
+- Noise: HP above ~2500 Hz + BPF at 4200 Hz, `env^2`-gated strike noise
 
 ### Perc
 
-- Carrier frequency range: 100–1200 Hz (MIDI-mapped)
-- FM topology: single modulator → carrier (2-op)
+- Carrier frequency range: 45–1200 Hz (MIDI-mapped)
+- FM topology: 3-op (carrier + 2 modulators)
 - **Amp**: linear (`env`)
 - **Strike FM**: `env^8` — short thwack
-- **Body FM**: `env^4` — medium sustain cluster
-- Strike index range: 0.30–3.00
+- **Body FM**: linear (`env`) — sustains through the body (was `env^2`)
+- Strike index range: 0.30–3.00; single envelope application (no double-VCA)
 
 ### Hat
 
@@ -196,6 +199,36 @@ fm_perc_synth_process() (per sample):
     ├─ weighted mix
     └─ fm_soft_clip(mix × master_gain)  →  scalar output
 ```
+
+Velocity is latched into each trigger's gain at note-on (so delayed shadow/combo
+hits keep the velocity of the note that spawned them). MIDI note-on with velocity 0
+is treated as a note-off.
+
+---
+
+## Preset bank (64 presets)
+
+`fm_presets.cc` ships a two-part bank:
+
+- **0–46 — General-MIDI kit** matching the `GmDrumNote` list of
+  copych/ESP32-S3_FM_Drum_Synth (notes 35–81). Each preset is a drum-voice
+  *timbre*; pitch comes from the played MIDI note. Coverage:
+
+  | GM range | Sonaglio engine |
+  |----------|-----------------|
+  | Bass drums (35–36) | Kick |
+  | Snares / side stick / clap (37–40) | Snare (clap uses Gap multi-strike) |
+  | Toms / bongos / congas / timbales / woodblocks / cuica (41–66, 75–79) | Tom→Perc |
+  | Hi-hats / tambourine / cabasa / maracas / guiro (42–46, 54, 69–70, 73–74) | Hat |
+  | Cymbals / cowbell / agogo / triangle (49–57, 67–68, 80–81) | Metal (Cymbal/Gong) |
+  | Whistles (71–72) | Tom→Perc + pitch LFO |
+
+- **47–63 — Sonaglio experimental & combos**: layered K+S/K+M/K+H/T+M/etc.,
+  Euclidean-tuned metal, Gong drone, metal wash, glitch perc, flam snare,
+  dual-LFO chaos, pitch-drop kick.
+
+Every preset is rendered through the full synth in `test_all_presets_render`
+(finite, bounded, audible).
 
 ---
 
@@ -248,8 +281,9 @@ future engine expansion.
 | `fm_perc_synth_process.h` | Main render loop, voice dispatch, LFO integration |
 | `engine_mapping.h` | Global envelope projections, NEON helpers |
 | `kick_engine.h` | Kick FM engine |
-| `snare_engine.h` | Snare FM + noise engine |
-| `metal_engine.h` | 4-op cascade FM metal engine |
+| `snare_engine.h` | Snare FM + noise engine (per-component independent decay) |
+| `metal_engine.h` | Metal/cymbal engine — algo11 3×2-op parallel pairs |
+| `fm_operator.h` | Portable scalar FM operator (copych-derived, MIT) |
 | `perc_engine.h` | Perc FM engine |
 | `hat_engine.h` | Square-wave hi-hat engine |
 | `envelope_rom.h` | 128-entry ADR envelope table |

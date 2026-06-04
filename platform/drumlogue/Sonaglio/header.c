@@ -13,7 +13,7 @@ const __unit_header unit_header_t unit_header = {
     .unit_id = 0x03U,        // 0x02 is FMpercussion; Sonaglio must have a unique unit_id
     .version = 0x00010000U,  // v1.0.0 — required; version=0 causes load rejection on drumlogue
     .name = "Sonaglio",
-    .num_presets = 26,
+    .num_presets = 64,
     .num_params = 24,
     .params = {
         // Page 1: Engine probabilities

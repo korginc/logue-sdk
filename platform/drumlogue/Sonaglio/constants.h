@@ -101,7 +101,7 @@ constexpr int ENV_CURVE_EXPONENTIAL = 1;
 // ============================================================================
 constexpr uint32_t PRNG_DEFAULT_SEED = 0x9E3779B9u;
 constexpr uint32_t RAND_DEFAULT_SEED = 0x12345678u;
-constexpr int NUM_OF_PRESETS = 26;
+constexpr int NUM_OF_PRESETS = 64;
 constexpr int NAME_LENGTH    = 12;
 constexpr int SMOOTH_FRAMES  = 48;
 

@@ -192,18 +192,32 @@ Improvements implemented from copych (MIT, with attribution):
 
 ## Current engine quality assessment
 
-### Snare — improved
+### Snare — rewritten (per-component independent decay, ctag-inspired)
 
-After the envelope fixes:
-- Wire buzz now sustains through the hit body (env² domain)
-- Shell FM tracks amplitude linearly — body parameter is audible
-- Click is an accent (env⁸) not the dominant element
-- Attack and Body sweeps produce clearly different timbres
+The earlier power-law approach (env², env⁸ of the shared ROM envelope) still
+compounded unpredictably and the wire could not outlast the shell. Rewritten
+`snare_engine.h` using the ctag technique: each component has its own one-pole
+exponential decay with an ABSOLUTE time constant, independent of the shared
+envelope shape:
+
+| Component | Decay (1/e) | Driven by | Role |
+|-----------|-------------|-----------|------|
+| `index_level` (crack FM) | 7..23 ms | Attack | instantaneous front-edge snap |
+| `tone_level` (shell + sustained FM) | 35..120 ms | Body | tonal ring |
+| `noise_level` (wire buzz) | 50..150 ms | Attack + Body | sustains longest — the snare's signature |
+
+The shared ROM `envelope` is applied only as a linear master VCA (onset attack +
+ENV_SHAPE length + note-off release). The decay CHARACTER — what makes it read as
+a snare — is owned by the per-component decays. This is a clean product of two
+well-behaved envelopes; no power-law compounding.
+
+Verified by `test_snare_independent_decay`: after 40 ms the crack is nearly gone
+(< 0.20) while the wire buzz is still strong (> 0.30), and the ordering
+`crack < tone < wire` holds.
 
 Remaining limitation:
-- Still a single shared envelope, not independent per-component decay
-- The wire buzz cannot decay independently from the FM shell
-- At very long envelope ROM shapes, the tone and noise taper together (less natural)
+- The internal decays are exponential only; no per-component attack shaping
+- Noise spectrum is fixed (no tom-tom sympathetic resonance modelling)
 
 ### Metal — rewritten (algo11 parallel pairs)
 
@@ -293,9 +307,9 @@ This is the only addition that requires new code beyond presets.
 
 ## Remaining known issues
 
-1. **No per-component independent decay** — shared envelope affects all components
-   simultaneously. True independent decay (like ctag snare) would require per-engine
-   per-component envelope state — larger struct, more CPU, but more natural sound.
+1. **Per-component independent decay** — DONE for snare (per-component one-pole decays,
+   ctag-style). Kick and Perc still use shared-envelope power-law domains (acceptable —
+   they sound good). Could be extended to kick/perc later for even more natural decay.
 
 2. **PARAM_DRIVE not wired** — `fm_make_drive_gain` exists in engine_mapping.h but has
    no UI parameter. Currently `PARAM_NOISE_CHAR` fills the "drive" role (noise-to-FM
@@ -308,12 +322,13 @@ This is the only addition that requires new code beyond presets.
 
 4. ~~**Metal at high Body → noise**~~ **resolved** — algo11 parallel pairs fix this.
 
-5. **No velocity scaling** — instrument ignores MIDI velocity. Simple 0..1 gain on
-   velocity would improve playability significantly.
+5. ~~**No velocity scaling**~~ **resolved** — velocity is latched per-trigger into
+   each hit's gain (combo blend ratios preserved; delayed shadow hits keep their origin
+   velocity). MIDI note-on velocity 0 is treated as note-off.
 
-6. **Presets are HW evaluation stubs** — all 26 presets are named test1..test26 and
-   tuned for parameter range verification, not musical use. A full musical preset bank
-   is needed before the unit is usable as an instrument.
+6. ~~**Presets are HW evaluation stubs**~~ **resolved** — replaced with a 64-preset
+   bank: GM kit (notes 35–81, matching copych) + 17 experimental/combo presets.
+   All 64 verified by `test_all_presets_render`.
 
 ---
 
@@ -332,7 +347,14 @@ This is the only addition that requires new code beyond presets.
 | `PARAMETER_MODEL.md` | Removed — content merged into README.md |
 | `kick_engine.h` | `pitch_env`/`index_env`: env⁸→env⁴; `body_index`: env⁴→env² (HitShape compounding fix) |
 | `perc_engine.h` | Remove double-envelope amplitude; body FM: env²→linear; output_gain rescaled |
-| `fm_perc_synth_process.h` | Wire velocity: `velocity_gain = 0.3 + 0.7×(vel/127)`, applied to master output |
+| `snare_engine.h` | **Rewrite** — per-component independent decay (crack/tone/wire each own 1/e tau) |
+| `synth.h` | `NoteOn` velocity 0 → note-off (MIDI convention) |
+| `fm_perc_synth_process.h` | Latch velocity into per-trigger gains (not a global master multiply) |
+| `metal_engine.h` | Cap LFO `ring_scale` at 2.0; drop redundant waveform-init loops |
+| `fm_presets.cc` | **64-preset bank** — GM kit (35–81) + 17 experimental; removed test stubs |
+| `constants.h` / `fm_presets.h` / `header.c` | `NUM_OF_PRESETS` 26 → 64 |
+| `README.md` | Updated snare/metal/perc/kick details; added preset-bank section |
+| `test_sonaglio.cpp` | Add `test_snare_independent_decay` + `test_all_presets_render`; 18/18 passing |
 
 ---
 
@@ -408,20 +430,18 @@ Combined with the body_env² amplitude, FM body was dead before any character de
 - HW test perc/tom: verify body character is now audible through decay; verify velocity
 - HW test HitShape/BodyTilt as distinct controls
 
-### Preset bank expansion (no new engines needed)
-Replace the 26 test stubs with a named musical preset bank covering the GM drum set.
-The mapping table above is the guide. Target ~40 presets:
-- 2 × Kick (standard, punchy)
-- 3 × Snare (standard, tight, rimshot-approximate)
-- 6 × Tom (floor low/high, mid low/high, hi low/high)
-- 3 × Hi-hat (closed, pedal, open)
-- 5 × Cymbal (crash, ride, ride bell, splash, chinese)
-- Cowbell, Triangle (open/mute), Claves, Woodblock (×2), Agogo (×2)
-- Bongo ×2, Conga ×3, Timbale ×2
-- Noise perc: Tambourine, Cabasa, Maracas
-- Misc approximations: Vibraslap, Guiro, Cuica, Whistle
+### Preset bank expansion — DONE
+Replaced the 26 test stubs with a **64-preset bank** (`fm_presets.cc`):
+- **0–46**: full General-MIDI kit matching copych's `GmDrumNote` list (notes 35–81).
+  Each preset is a drum-voice timbre; pitch comes from the played note.
+- **47–63**: 17 Sonaglio experimental/combo presets (layered engines, Euclidean
+  metal, Gong drone, glitch perc, flam snare, dual-LFO chaos, pitch-drop kick).
+- `NUM_OF_PRESETS` raised to 64 in `constants.h`, `fm_presets.h`, `header.c`.
+- Removed the unused `FM_PRESETS_TEST` array.
+- `test_all_presets_render` renders all 64 through the full synth (finite, bounded,
+  audible). 18/18 tests pass.
 
-### New engine: Clap
+### New engine: Clap (still TODO)
 Add `clap_engine.h` with multi-strike envelope (3 peaks at 0 / 12 ms / 24 ms).
 FM core from `fm_operator.h`; noise HPF layer. New `INST_CLAP` in constants.h.
 Add dispatch case in `fm_perc_synth_process.h`.
@@ -431,7 +451,7 @@ Add dispatch case in `fm_perc_synth_process.h`.
 - Kick self-feedback option for richer click transient (ctag-inspired)
 - Per-component independent decay for kick and perc (amplitude / FM / pitch each separate)
 - Envelope clamping before power-law (kick + perc) to make env^n domains predictable
-- Per-component decay for snare (separate noise decay from shell decay)
+- ~~Per-component decay for snare~~ DONE
 - Hat engine: replace square oscs with 4-pair inharmonic FM (DX cymbal literature)
 
 ### Long term

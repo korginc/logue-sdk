@@ -423,6 +423,52 @@ static void test_snare_attack_sensitivity() {
     report_pass(name);
 }
 
+// Core ctag property: the snare's components decay at INDEPENDENT rates.
+// The transient FM crack (index_level) must die fastest, while the wire buzz
+// (noise_level) sustains the longest. This is what makes it read as a snare.
+static void test_snare_independent_decay() {
+    const char* name = "snare per-component independent decay";
+
+    const uint32x4_t all   = vdupq_n_u32(0xFFFFFFFFu);
+    const float32x4_t env   = vdupq_n_f32(1.0f);
+    const float32x4_t pitch = vdupq_n_f32(1.0f);
+    const float32x4_t zero  = vdupq_n_f32(0.0f);
+
+    snare_engine_t snare;
+    snare_engine_init(&snare);
+    // Moderate attack and body so all three taus are well separated.
+    snare_engine_update(&snare, vdupq_n_f32(0.6f), vdupq_n_f32(0.6f));
+    snare_engine_set_note(&snare, all, vdupq_n_f32(38.0f));
+
+    // Advance ~40 ms (1920 samples). By now the fast crack should be far more
+    // decayed than the wire buzz.
+    for (int i = 0; i < 1920; ++i) {
+        float32x4_t out = snare_engine_process(&snare, env, all, pitch, zero, zero);
+        if (!vec_finite(out)) return report_fail(name, "non-finite during decay");
+    }
+
+    const float crack = vec_lane0(snare.index_level);
+    const float tone  = vec_lane0(snare.tone_level);
+    const float wire  = vec_lane0(snare.noise_level);
+
+    // Crack decays fastest, wire slowest: crack < tone < wire.
+    if (!(crack < tone)) {
+        return report_fail(name, "crack FM should decay faster than tonal shell");
+    }
+    if (!(tone < wire)) {
+        return report_fail(name, "tonal shell should decay faster than wire buzz");
+    }
+    // The crack should be nearly gone while the wire is still clearly present.
+    if (crack > 0.20f) {
+        return report_fail(name, "crack FM should be nearly gone by 40 ms");
+    }
+    if (wire < 0.30f) {
+        return report_fail(name, "wire buzz should still be present at 40 ms");
+    }
+
+    report_pass(name);
+}
+
 // ============================================================================
 // Metal behavioral tests
 // ============================================================================
@@ -628,6 +674,49 @@ static void test_synth_smoke() {
     report_pass(name);
 }
 
+// Render every factory preset through the full synth and confirm each one
+// triggers, stays finite, stays bounded, and is not completely silent.
+static void test_all_presets_render() {
+    const char* name = "all presets render finite and audible";
+
+    for (uint8_t idx = 0; idx < NUM_OF_PRESETS; ++idx) {
+        fm_perc_synth_t synth;
+        fm_perc_synth_init(&synth);
+        load_fm_preset(idx, synth.params);
+        fm_perc_synth_update_params(&synth);
+
+        fm_perc_synth_note_on(&synth, 60, 110);
+
+        float peak = 0.0f;
+        // ~0.2 s is enough to pass the onset/decay of even the tight presets.
+        for (int i = 0; i < 9600; ++i) {
+            float s = fm_perc_synth_process(&synth);
+            if (!std::isfinite(s)) {
+                std::printf("[FAIL] %s: preset %u produced non-finite output\n", name, idx);
+                ++g_failures;
+                return;
+            }
+            float a = std::fabs(s);
+            if (a > peak) peak = a;
+        }
+
+        // Output bus is soft-clipped to <1.0; anything above ~1.2 is a bug.
+        if (peak > 1.2f) {
+            std::printf("[FAIL] %s: preset %u peak %.3f exceeds bound\n", name, idx, peak);
+            ++g_failures;
+            return;
+        }
+        // Every preset must make some sound at velocity 110.
+        if (peak < 1e-4f) {
+            std::printf("[FAIL] %s: preset %u silent\n", name, idx);
+            ++g_failures;
+            return;
+        }
+    }
+
+    report_pass(name);
+}
+
 // ============================================================================
 // Noise character effect test (replaces the stale PARAM_DRIVE test)
 // ============================================================================
@@ -690,12 +779,14 @@ int main() {
     test_engine_output_bounds();
     test_snare_noise_sustain();
     test_snare_attack_sensitivity();
+    test_snare_independent_decay();
     test_metal_parameter_bounds();
     test_metal_ring_sustains();
     test_metal_body_increases_ring();
     test_metal_gong_character();
     test_note_routing();
     test_synth_smoke();
+    test_all_presets_render();
     test_noise_char_effect();
 
     if (g_failures == 0) {
