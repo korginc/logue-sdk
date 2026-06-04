@@ -674,6 +674,49 @@ static void test_synth_smoke() {
     report_pass(name);
 }
 
+// Render every factory preset through the full synth and confirm each one
+// triggers, stays finite, stays bounded, and is not completely silent.
+static void test_all_presets_render() {
+    const char* name = "all presets render finite and audible";
+
+    for (uint8_t idx = 0; idx < NUM_OF_PRESETS; ++idx) {
+        fm_perc_synth_t synth;
+        fm_perc_synth_init(&synth);
+        load_fm_preset(idx, synth.params);
+        fm_perc_synth_update_params(&synth);
+
+        fm_perc_synth_note_on(&synth, 60, 110);
+
+        float peak = 0.0f;
+        // ~0.2 s is enough to pass the onset/decay of even the tight presets.
+        for (int i = 0; i < 9600; ++i) {
+            float s = fm_perc_synth_process(&synth);
+            if (!std::isfinite(s)) {
+                std::printf("[FAIL] %s: preset %u produced non-finite output\n", name, idx);
+                ++g_failures;
+                return;
+            }
+            float a = std::fabs(s);
+            if (a > peak) peak = a;
+        }
+
+        // Output bus is soft-clipped to <1.0; anything above ~1.2 is a bug.
+        if (peak > 1.2f) {
+            std::printf("[FAIL] %s: preset %u peak %.3f exceeds bound\n", name, idx, peak);
+            ++g_failures;
+            return;
+        }
+        // Every preset must make some sound at velocity 110.
+        if (peak < 1e-4f) {
+            std::printf("[FAIL] %s: preset %u silent\n", name, idx);
+            ++g_failures;
+            return;
+        }
+    }
+
+    report_pass(name);
+}
+
 // ============================================================================
 // Noise character effect test (replaces the stale PARAM_DRIVE test)
 // ============================================================================
@@ -743,6 +786,7 @@ int main() {
     test_metal_gong_character();
     test_note_routing();
     test_synth_smoke();
+    test_all_presets_render();
     test_noise_char_effect();
 
     if (g_failures == 0) {
