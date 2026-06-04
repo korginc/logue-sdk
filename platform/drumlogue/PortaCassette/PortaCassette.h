@@ -27,6 +27,7 @@
 struct prng_t { uint64x2_t state0, state1; };
 // decay factor (required 0.1-3ms decay time at 48 kHz)
 constexpr float pop_env_decay_ = 0.98f; // Increased from 0.96f for slightly longer, more audible pops.
+constexpr float big_pop_env_decay_ = 0.9992f; // Much slower decay for low-end thumps
 uint32_t sample_rate_ = 48000;
 float    inverse_sample_rate_ = 1.0f / 48000.0f;
 
@@ -105,7 +106,9 @@ public:
         previous_noise_l_ = vdupq_n_f32(0.0f);
         previous_noise_r_ = vdupq_n_f32(0.0f);
         pop_env_scalar_   = 0.0f;
+        big_pop_env_scalar_ = 0.0f;
         vinyl_pop_threshold_ = 0.0;
+        vinyl_big_pop_threshold_ = 0.0;
 
         target_preamp_ = current_preamp_ = 1.0f + 0.20f * 2.0f; // init=20
         target_drive_  = current_drive_  = 0.40f;               // init=40
@@ -175,6 +178,11 @@ public:
 
         // Store the exact float threshold
         vinyl_pop_threshold_ = 1.0f - sample_probability;
+
+        // Occasional Big Pops: 0.05Hz to 1.5Hz range
+        float big_freq = 0.05f + (knob_value * 1.45f);
+        float big_prob = big_freq * inverse_sample_rate_;
+        vinyl_big_pop_threshold_ = 1.0f - big_prob;
     }
 
     /**
@@ -349,11 +357,17 @@ public:
         vst1q_f32(r_trig, rand_trigger);
         vst1q_f32(r_amp, rand_amp_pool);
 
+        // Random pool for big pops
+        float r_big_trig[NEON_LANES];
+        vst1q_f32(r_big_trig, prng_rand_float());
+
         float env_array[NEON_LANES];
+        float big_env_array[NEON_LANES];
 
         // Run a short 4-step sequential loop so the envelope decays sample-by-sample,
         // letting a pop smoothly coat all subsequent time lanes!
         for (int i = 0; i < NEON_LANES; ++i) {
+            // Small Crackle
             if (r_trig[i] > vinyl_pop_threshold_) {
                 // Slightly boosted amplitude range (0.15f to 0.45f) for beautiful analog presence
                 float amplitude = 0.15f + r_amp[i] * 0.30f;
@@ -361,12 +375,23 @@ public:
                     pop_env_scalar_ = amplitude;
                 }
             }
+            // Big Occasional Pop
+            if (r_big_trig[i] > vinyl_big_pop_threshold_) {
+              float big_amp = 0.4f + r_amp[i] * 0.5f;
+              if (big_amp > big_pop_env_scalar_)
+                big_pop_env_scalar_ = big_amp;
+            }
+
             env_array[i] = pop_env_scalar_;
-            pop_env_scalar_ *= pop_env_decay_; // Natural sequential sample-rate decay
+            big_env_array[i] = big_pop_env_scalar_;
+            // Natural sequential sample-rate decay
+            pop_env_scalar_ *= pop_env_decay_;
+            big_pop_env_scalar_ *= big_pop_env_decay_;
         }
 
         // Load back into a vector for parallel processing
         float32x4_t v_pop_env = vld1q_f32(env_array);
+        float32x4_t v_big_pop_env = vld1q_f32(big_env_array);
 
         // 3. Shape transient & Apply envelope
         float32x4_t crackle_l = vaddq_f32(vmulq_n_f32(white_l, 0.82f),
@@ -377,12 +402,17 @@ public:
         previous_noise_l_ = white_l;
         previous_noise_r_ = white_r;
 
-        crackle_l = vmulq_f32(crackle_l, v_pop_env);
-        crackle_r = vmulq_f32(crackle_r, v_pop_env);
+        // Crackle is HPF'd for that "dusty" sound
+        float32x4_t crack_l = biquad_process4(&hiss_hpf_l_, &coeff_hiss_hpf_, vmulq_f32(crackle_l, v_pop_env));
+        float32x4_t crack_r = biquad_process4(&hiss_hpf_r_, &coeff_hiss_hpf_, vmulq_f32(crackle_r, v_pop_env));
 
-        // 4. Band-limit the crackle (Pops are mid-focused, not wideband clicks)
-        crackle_l = biquad_process4(&hiss_hpf_l_, &coeff_hiss_hpf_, crackle_l);
-        crackle_r = biquad_process4(&hiss_hpf_r_, &coeff_hiss_hpf_, crackle_r);
+        // Big Pops bypass the HPF to keep their low-end "thump"
+        // We also add a small DC offset transient to simulate stylus displacement
+        float32x4_t thump_l = vmulq_f32(white_l, v_big_pop_env);
+        float32x4_t thump_r = vmulq_f32(white_r, v_big_pop_env);
+
+        crackle_l = vaddq_f32(crack_l, thump_l);
+        crackle_r = vaddq_f32(crack_r, thump_r);
 
         // 5. Mix into output path
         const float dust_level = 0.06f + tape_age_ * 0.08f;
