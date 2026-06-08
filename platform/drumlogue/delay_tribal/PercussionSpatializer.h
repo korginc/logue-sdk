@@ -154,6 +154,7 @@ public:
     clone_t* get_clones();
     float get_scatter();
     delay_line_t& get_delay();
+    spatial_mode_t get_mode();
 
         private : static constexpr int kMaxClones = 10;
     static constexpr uint32_t kSmoothBlocks = 120;
