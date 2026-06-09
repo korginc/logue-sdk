@@ -249,7 +249,7 @@ fast_inline float32x4_t process_compressor_lane(float32x4_t* gain_state, float32
 
     for(int i = 0; i < NEON_LANES; ++i) {
         float diff = state - targets[i];
-        state = targets[i] + (coeff_avg * diff) + (coeff_diff * std::fabs(diff));
+        state = targets[i] + (coeff_avg * diff) + (coeff_diff * fabsf(diff));
         out[i] = state;
     }
     *gain_state = vld1q_f32(out);

@@ -9,8 +9,10 @@
  * - NEON-optimized for ARMv7
  *
  */
+#pragma once
 
 #include <cstdint>
+#include <cmath>
 #include <arm_neon.h>
 #include "float_math.h"
 #include "unit.h"
@@ -435,7 +437,7 @@ public:
 
             // Update frequency every sample if pitch mod is active OR we are slewing the suboctave.
             // This eliminates stepping sounds during sub-octave transitions.
-            bool is_suboct_slewing = std::fabs(m_osc2_suboct_smooth_mult - m_osc2_suboct_target_mult) > 0.0001f;
+            bool is_suboct_slewing = fabsf(m_osc2_suboct_smooth_mult - m_osc2_suboct_target_mult) > 0.0001f;
             if (m_pitch_mod_multiplier != 1.0f || is_suboct_slewing) {
                 osc1.set_frequency(m_osc1_target_hz * m_pitch_mod_multiplier, SAMPLE_RATE_F);
                 osc2.set_frequency(m_osc2_target_hz * m_osc2_suboct_smooth_mult * m_pitch_mod_multiplier, SAMPLE_RATE_F);
@@ -878,5 +880,3 @@ private:
     float m_osc1_dir = 1.0f;
     float m_osc2_dir = 1.0f;
 };
-
-
