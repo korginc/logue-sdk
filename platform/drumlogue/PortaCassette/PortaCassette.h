@@ -171,7 +171,7 @@ public:
      */
     fast_inline void set_dust_parameter(float knob_value) {
         // Map to a realistic density: 2.0Hz to 50.0Hz (max 2 to 50 pops per second)
-        float frequency = 2.0f + (knob_value * 48.0f);
+        float frequency = 2.0f + (knob_value * 48.0f) + tape_age_ * 10.0f; // tape age adds up to 10 Hz of extra pop frequency at max
 
         // Calculate per-sample probability at 48kHz
         float sample_probability = frequency * inverse_sample_rate_;
@@ -613,7 +613,10 @@ private:
     float wf_flutter_phase_;
     float wf_flutter_phase_inc_;  // precomputed per-sample increment for 25 Hz flutter
     float vinyl_pop_threshold_;   // Stores the current threshold
-    float pop_env_scalar_;        // precomputed per-sample decay increment for the pop envelope
+    float vinyl_big_pop_threshold_; // Stores the current threshold
+    float pop_env_scalar_;          // precomputed per-sample decay increment for the pop envelope
+    float big_pop_env_scalar_; // precomputed per-sample decay increment for the
+                               // pop envelope
 
     float32x4_t previous_noise_l_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
     float32x4_t previous_noise_r_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
