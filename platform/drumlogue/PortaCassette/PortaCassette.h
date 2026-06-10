@@ -112,8 +112,8 @@ public:
         big_pop_env_scalar_ = 0.0f;
         vinyl_pop_threshold_ = 0.0;
         vinyl_big_pop_threshold_ = 0.0;
-        attack            = 0.08f;
-        release           = 0.0005f;
+        attack_            = 0.08f;
+        release_           = 0.0005f;
 
         target_preamp_ = current_preamp_ = 1.0f + 0.20f * 2.0f; // init=20
         target_drive_  = current_drive_  = 0.40f;               // init=40
@@ -159,6 +159,8 @@ public:
             case k_param_eq_high_hz:  case k_param_eq_high_gain:
                 b_update_filters_.store(true);
                 break;
+            case k_attack:  attack_  = norm;         break;
+            case k_release: release_ = norm * 0.01f; break;
             default: break;
         }
         set_dust_parameter(norm);
@@ -255,8 +257,8 @@ public:
 
         float32x4_t hf_coeff =
             vbslq_f32(hf_rising,
-                    vdupq_n_f32(attack),
-                    vdupq_n_f32(release));
+                    vdupq_n_f32(attack_),
+                    vdupq_n_f32(release_));
 
         dbx_hf_enc_rms_ = vmlaq_f32(dbx_hf_enc_rms_, vsubq_f32(hf_sq, dbx_hf_enc_rms_), hf_coeff);
 
@@ -270,8 +272,8 @@ public:
 
         float32x4_t wb_coeff =
             vbslq_f32(wb_rising,
-                    vdupq_n_f32(attack),
-                    vdupq_n_f32(release));
+                    vdupq_n_f32(attack_),
+                    vdupq_n_f32(release_));
 
         dbx_enc_rms_ = vmlaq_f32(dbx_enc_rms_, vsubq_f32(wb_sq, dbx_enc_rms_), wb_coeff);
 
@@ -675,8 +677,8 @@ private:
     float pop_env_scalar_;          // precomputed per-sample decay increment for the pop envelope
     float big_pop_env_scalar_; // precomputed per-sample decay increment for the
                                // pop envelope
-    float attack;
-    float release;
+    float attack_;
+    float release_;
     float32x4_t previous_noise_l_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
     float32x4_t previous_noise_r_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
     // State variables for the DC blocker (assumes 4 independent channels)
