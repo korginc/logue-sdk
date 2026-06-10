@@ -69,8 +69,8 @@ const __unit_header unit_header_t unit_header = {
         { 0, 10, 0, 5, k_unit_param_type_none, 0, 0, 0, {"X-talk"} },
         // ID 13: Tape Bias Hiss (0 to 100%)
         { 0, 100, 0, 15, k_unit_param_type_percent, 0, 0, 0, {"Hiss"} },
-        { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
-        { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
+        { 1, 20, 8, 10, k_unit_param_type_none, 2, 1, 0, {"Attack"} },
+        { 1, 100, 5, 50, k_unit_param_type_none, 4, 1, 0, {"Release"} },
 
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },

@@ -48,6 +48,8 @@ public:
         k_param_eq_high_gain,
         k_crosstalk,
         k_hiss,
+        k_attack,
+        k_release,
         k_num_params
     };
 
@@ -90,8 +92,9 @@ public:
         dbx_enc_rms_    = vdupq_n_f32(1e-6f);
         dbx_hf_enc_rms_ = vdupq_n_f32(1e-6f);
         vinyl_sat_hist_ = vdupq_n_f32(0.0f);
-        b_bypass_ = false;
+        b_bypass_       = false;
         b_update_filters_.store(true);
+
 
         prng_init(1337u);
 
@@ -109,6 +112,8 @@ public:
         big_pop_env_scalar_ = 0.0f;
         vinyl_pop_threshold_ = 0.0;
         vinyl_big_pop_threshold_ = 0.0;
+        attack            = 0.08f;
+        release           = 0.0005f;
 
         target_preamp_ = current_preamp_ = 1.0f + 0.20f * 2.0f; // init=20
         target_drive_  = current_drive_  = 0.40f;               // init=40
@@ -222,39 +227,92 @@ public:
 
     fast_inline float32x4_t dbx_nr_encode(float32x4_t &sig_l, float32x4_t &sig_r) {
         float32x4_t dec_gain = vdupq_n_f32(1.0f);  // set inside encode block when active
-        if (dbx_mode_ != k_off) {
-            sig_l = biquad_process4(&dbx_pre_l_, &coeff_dbx_pre_, sig_l);
-            sig_r = biquad_process4(&dbx_pre_r_, &coeff_dbx_pre_, sig_r);
+        if (dbx_mode_ == k_off)
+            return dec_gain;
 
-            float attack  = 0.0050f;    // slower attach
-            float release = 0.0002f;    // much slower release
+        // --------------------------------------------------------------------
+        // dbx pre-emphasis
+        // --------------------------------------------------------------------
+        sig_l = biquad_process4(&dbx_pre_l_, &coeff_dbx_pre_, sig_l);
+        sig_r = biquad_process4(&dbx_pre_r_, &coeff_dbx_pre_, sig_r);
 
-            // HF spectral envelope (HPF'd signal above ~2 kHz)
-            float32x4_t hf_l = biquad_process4(&dbx_hf_l_, &coeff_dbx_hf_, sig_l);
-            float32x4_t hf_r = biquad_process4(&dbx_hf_r_, &coeff_dbx_hf_, sig_r);
-            float32x4_t hf_sq = vaddq_f32(vmulq_f32(hf_l, hf_l), vmulq_f32(hf_r, hf_r));
-            dbx_hf_enc_rms_ = vmlaq_n_f32(vmulq_n_f32(dbx_hf_enc_rms_, 1.0f - release), hf_sq, release);
+        // --------------------------------------------------------------------
+        // HF detector: HF spectral envelope (HPF'd signal above ~2 kHz)
+        // --------------------------------------------------------------------
+        float32x4_t hf_l =
+            biquad_process4(&dbx_hf_l_, &coeff_dbx_hf_, sig_l);
 
-            // Wideband envelope + NR-refined rsqrt for accurate 2:1 compression
-            float32x4_t wb_sq = vaddq_f32(vmulq_f32(sig_l, sig_l), vmulq_f32(sig_r, sig_r));
-            dbx_enc_rms_ = vmlaq_n_f32(vmulq_n_f32(dbx_enc_rms_, 1.0f - release), wb_sq, release);
-            float32x4_t env = vmaxq_f32(
-                vmlaq_n_f32(vmulq_n_f32(dbx_enc_rms_, 0.7f), dbx_hf_enc_rms_, 0.3f),
-                vdupq_n_f32(1e-6f));
-            float32x4_t enc_gain = pow_neon(env, vdupq_n_f32(-0.25));   // smoother than vrsqrteq_f32(env)
-            enc_gain = vmulq_f32(vrsqrtsq_f32(vmulq_f32(env, enc_gain), enc_gain), enc_gain);
-            // Clamp encode gain: prevents 1000x boost during silence → loud transient onset.
-            // 3.0x ≈ +9.5 dB max NR action; less than typical dbx Type II spec.
-            enc_gain = vminq_f32(enc_gain, vdupq_n_f32(3.0f));
-            // Synchronized decode gain = 1/enc_gain.  Computing it here (from the
-            // same enc_gain used to boost the signal) guarantees enc × dec = 1.0
-            // at all times, eliminating the timing mismatch between independent
-            // encode/decode RMS followers that caused rhythm-matched clicks.
-            dec_gain = vrecpeq_f32(enc_gain);
-            dec_gain = vmulq_f32(vrecpsq_f32(enc_gain, dec_gain), dec_gain);
-            sig_l = vmulq_f32(sig_l, enc_gain);
-            sig_r = vmulq_f32(sig_r, enc_gain);
-        }
+        float32x4_t hf_r =
+            biquad_process4(&dbx_hf_r_, &coeff_dbx_hf_, sig_r);
+
+        float32x4_t hf_sq =
+            vaddq_f32(vmulq_f32(hf_l, hf_l),
+                    vmulq_f32(hf_r, hf_r));
+
+        // attack when signal rises
+        uint32x4_t hf_rising =
+            vcgtq_f32(hf_sq, dbx_hf_enc_rms_);
+
+        float32x4_t hf_coeff =
+            vbslq_f32(hf_rising,
+                    vdupq_n_f32(attack),
+                    vdupq_n_f32(release));
+
+        dbx_hf_enc_rms_ = vmlaq_f32(dbx_hf_enc_rms_, vsubq_f32(hf_sq, dbx_hf_enc_rms_), hf_coeff);
+
+        // --------------------------------------------------------------------
+        // Wideband detector: Wideband envelope + NR-refined rsqrt for accurate 2:1 compression
+        // --------------------------------------------------------------------
+        float32x4_t wb_sq = vaddq_f32(vmulq_f32(sig_l, sig_l), vmulq_f32(sig_r, sig_r));
+
+        uint32x4_t wb_rising =
+            vcgtq_f32(wb_sq, dbx_enc_rms_);
+
+        float32x4_t wb_coeff =
+            vbslq_f32(wb_rising,
+                    vdupq_n_f32(attack),
+                    vdupq_n_f32(release));
+
+        dbx_enc_rms_ = vmlaq_f32(dbx_enc_rms_, vsubq_f32(wb_sq, dbx_enc_rms_), wb_coeff);
+
+        // --------------------------------------------------------------------
+        // Combined detector
+        // --------------------------------------------------------------------
+        float32x4_t env =
+            vaddq_f32(
+                vmulq_n_f32(dbx_enc_rms_, 0.7f),
+                vmulq_n_f32(dbx_hf_enc_rms_, 0.3f));
+
+        env = vmaxq_f32(env, vdupq_n_f32(1e-8f));
+
+        // --------------------------------------------------------------------
+        // 2:1 dbx compression
+        //
+        // gain = env^(-0.25)
+        //
+        // env is power (x²), therefore:
+        // sqrt(env) = amplitude
+        // amplitude^(-0.5) = 2:1 compression
+        // => env^(-0.25)
+        // --------------------------------------------------------------------
+        float32x4_t enc_gain = pow_neon(env, vdupq_n_f32(-0.25f));   // smoother than vrsqrteq_f32(env)
+        enc_gain = vmulq_f32(vrsqrtsq_f32(vmulq_f32(env, enc_gain), enc_gain), enc_gain);
+        // Clamp encode gain: prevents 1000x boost during silence → loud transient onset.
+        // 3.0x ≈ +9.5 dB max NR action; less than typical dbx Type II spec.
+        enc_gain = vminq_f32(enc_gain, vdupq_n_f32((dbx_mode_ == k_encode_only) ? 1.5f : 3.0f));
+        // Synchronized decode gain = 1/enc_gain.  Computing it here (from the
+        // same enc_gain used to boost the signal) guarantees enc × dec = 1.0
+        // at all times, eliminating the timing mismatch between independent
+        // encode/decode RMS followers that caused rhythm-matched clicks.
+        dec_gain = vrecpeq_f32(enc_gain);
+        dec_gain = vmulq_f32(dec_gain, vrecpsq_f32(enc_gain, dec_gain));
+
+        // --------------------------------------------------------------------
+        // Apply encode gain
+        // --------------------------------------------------------------------
+        sig_l = vmulq_f32(sig_l, enc_gain);
+        sig_r = vmulq_f32(sig_r, enc_gain);
+
         return dec_gain;
     }
 
@@ -422,7 +480,7 @@ public:
     }
 
     fast_inline void tape_hiss(float32x4_t &sig_l, float32x4_t &sig_r) {
-        if (hiss_amount_ > 0.0f && dbx_mode_ != k_active) {
+        if (hiss_amount_ > 0.0f && dbx_mode_ == k_off) {
             // 4 white-noise samples at once: [0,1) → [-1,1)
             float32x4_t noise = vsubq_f32(
                 vmulq_n_f32(prng_rand_float(), 2.0f), vdupq_n_f32(1.0f));
@@ -617,7 +675,8 @@ private:
     float pop_env_scalar_;          // precomputed per-sample decay increment for the pop envelope
     float big_pop_env_scalar_; // precomputed per-sample decay increment for the
                                // pop envelope
-
+    float attack;
+    float release;
     float32x4_t previous_noise_l_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
     float32x4_t previous_noise_r_; // for noise shaping the tape hiss (stores the previous output sample to create a 1st-order noise shaping filter)
     // State variables for the DC blocker (assumes 4 independent channels)
@@ -874,8 +933,8 @@ private:
         calc_peaking(&coeff_eq_mid_,  mid_hz,  mid_db,  1.5f);
         calc_peaking(&coeff_eq_high_, high_hz, high_db, 1.0f);
 
-        calc_high_shelf(&coeff_dbx_pre_, 4000.0f, +12.0f);
-        calc_high_shelf(&coeff_dbx_de_,  4000.0f, -12.0f);
+        calc_high_shelf(&coeff_dbx_pre_, 4000.0f, +6.0f);
+        calc_high_shelf(&coeff_dbx_de_,  4000.0f, -6.0f);
 
         float lpf_hz   = 14000.0f;
         float head_hz  = 65.0f;
