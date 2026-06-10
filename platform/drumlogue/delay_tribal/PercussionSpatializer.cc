@@ -366,20 +366,20 @@ void PercussionSpatializer::randomize_hit() {
             int random_clone_2 = 1 + (int)(xorshift_f32(rng_state_) * (clone_count_ - 1));
             if (random_clone_2 != random_clone_1) {
                 // Make the second one a localized damping/ghost hit drop
-                clones_[random_clone_2].hit_accent = 0.4f + (xorshift_f32(rng_state_) * 0.4f);
+                clones_[random_clone_2].hit_accent = 0.4f + (xorshift_f32(rng_state_) * 0.5f);
             }
             if ((mode_ == MODE_TRIBAL) || (mode_ == MODE_ANGEL)) {
                 int random_clone_3 = 1 + (int)(xorshift_f32(rng_state_) * (clone_count_ - 1));
                 if (random_clone_3 != random_clone_1) {
                     // Make the third one a localized damping/ghost hit drop
-                    clones_[random_clone_3].hit_accent = 0.4f + (xorshift_f32(rng_state_) * 0.6f);
+                    clones_[random_clone_3].hit_accent = 0.4f + (xorshift_f32(rng_state_) * 0.55f);
                 }
             }
             if ((mode_ == MODE_TRIBAL) && (clone_count_ > 6)) {
                 int random_clone_4 = 1 + (int)(xorshift_f32(rng_state_) * (clone_count_ - 1));
                 if (random_clone_4 != random_clone_1) {
                     // Make the fourth one a localized damping/ghost hit drop
-                    clones_[random_clone_4].hit_accent = 0.4f + (xorshift_f32(rng_state_) * 0.8f);
+                    clones_[random_clone_4].hit_accent = 0.4f + (xorshift_f32(rng_state_) * 0.65f);
                 }
             }
         }
