@@ -1,11 +1,13 @@
 #pragma once
 #include <cstdint>
 #include <cstring>
+#include <cmath>
 #include "float_math.h"
 
 /**
  * @file drone_engine.h
  * @brief Compact self-oscillating Feedback Delay Network — ScrutaAstri presets 95/96.
+ *        Upgraded with LFO-modulated chaos.
  *
  * Architecture: 4 short delay lines + 4x4 Hadamard mixing + tanh saturation in the
  * feedback path. The Hadamard cross-coupling combined with the nonlinear saturation
@@ -39,45 +41,60 @@
  * Memory: 4 lines × 128 samples × 4 bytes = 2 KB per drone instance.
  */
 
-static constexpr int FDN_LINES   = 4;
-static constexpr int FDN_BUF_LEN = 128;   // power of 2, must exceed max delay (97)
+static constexpr int FDN_LINES   = 8;
+static constexpr int FDN_BUF_LEN = 2048; // power of 2, must exceed max delay (97) Expanded to support deep sub-bass wavelengths
 
-// Crystal: near-harmonic, longer delays → lower resonant frequencies
-static constexpr int CRYSTAL_DELAYS[FDN_LINES] = { 61, 79, 83, 97 };
-// Metal: TR-808-ratio-inspired, shorter delays → higher, brighter frequencies
-static constexpr int METAL_DELAYS[FDN_LINES]   = { 29, 37, 43, 53 };
+// --- DUAL-BANK DELAY TIMES ---
+// Crystal: Sub-bass to low-mid prime delay lengths (resonant peaks ~25Hz - 55Hz)
+// Crystal Bank A (Deepest Sub) & Bank B (Low-Mid Cluster)
+static constexpr int CRYSTAL_DELAYS_A[FDN_LINES] = { 811, 997, 1153, 1223, 1381, 1453, 1601, 1733 };
+static constexpr int CRYSTAL_DELAYS_B[FDN_LINES] = { 541, 647,  751,  857,  967, 1069, 1171, 1277 };
+
+// Metal: Shorter, tightly spaced primes for rich, harsh, metallic textures
+// Metal Bank A (Tight/Bright) & Bank B (Aggressive/Dissonant)
+static constexpr int METAL_DELAYS_A[FDN_LINES]   = {  41,  53,   67,   79,   97,  113,  131,  151 };
+static constexpr int METAL_DELAYS_B[FDN_LINES]   = {  31,  47,   61,   73,   89,  103,  127,  139 };
+
 
 struct DroneEngine {
-    float buf[FDN_LINES][FDN_BUF_LEN];  // delay line ring buffers
-    int   write_pos;                     // shared write pointer (all lines advance together)
-    int   dlen[FDN_LINES];              // delay lengths in samples
-    float fz[FDN_LINES];               // one-pole LPF state per line
-    float falpha;                        // one-pole coefficient (crystal=0.35, metal=0.65)
-    float g;                             // feedback gain      (O2Detune → chaos level)
-    float drive;                         // saturation drive   (O2SubOct → harmonic density)
-    float noise_amp;                     // noise injection    (O2Mix)
-    float out_scale;                     // output normalisation (mode-dependent)
+    float buf[FDN_LINES][FDN_BUF_LEN];   // Delay line ring buffers
+    int   write_pos;                     // Shared write pointer
+    int   dlen[FDN_LINES];               // Base delay lengths in samples
+    float fz[FDN_LINES];                 // One-pole LPF state per line
+    float hpx[FDN_LINES];                // DC Blocker HPF input state
+    float hpy[FDN_LINES];                // DC Blocker HPF output state
+    float falpha;                        // LPF coefficient
+    float g;                             // Feedback gain             (O2Detune → Chaos level)
+    float drive;                         // Saturation drive          (O2SubOct → Harmonic density)
+    float noise_amp;                     // Noise floor excitation    (O2Mix)
+    float out_scale;                     // Output normalization (mode-dependent)
     uint32_t prng;
+    bool  is_metal;      // Stored to track mode configuration
 
     inline void init(bool metal) {
         memset(buf, 0, sizeof(buf));
         memset(fz,  0, sizeof(fz));
+        memset(hpx, 0, sizeof(hpx));
+        memset(hpy, 0, sizeof(hpy));
         write_pos = 0;
+        is_metal  = metal;
         prng      = metal ? 0xDEADBEEFu : 0xCAFEBABEu;
 
         const int* src = metal ? METAL_DELAYS : CRYSTAL_DELAYS;
         for (int i = 0; i < FDN_LINES; i++) dlen[i] = src[i];
 
-        falpha    = metal ? 0.65f : 0.35f;
-        g         = 2.10f;   // hardware-calibrated default: clear chaotic attractor
-        drive     = 1.20f;
-        noise_amp = 0.0040f; // Boosted noise floor for reliable self-starting
-        out_scale = metal ? 0.35f : 0.45f; // Adjusted for hotter internal gain
+        falpha    = metal ? 0.65f : 0.25f; // Darkened Crystal mode for deeper sub weight
+        g         = 2.10f;    // hardware-calibrated default: clear chaotic attractor
+        drive     = 1.30f;    // Boosted baseline drive to energize 8 lines
+        noise_amp = 0.0050f;  // Boosted noise floor for reliable self-starting
+        out_scale = metal ? 0.28f : 0.38f;
     }
 
     inline void clear() {
         memset(buf, 0, sizeof(buf));
         memset(fz,  0, sizeof(fz));
+        memset(hpx, 0, sizeof(hpx));
+        memset(hpy, 0, sizeof(hpy));
         write_pos = 0;
     }
 
@@ -108,43 +125,84 @@ struct DroneEngine {
         noise_amp = 0.0010f + (float)v * 0.00039f;
     }
 
+    // Branchless fractional delay reader using linear interpolation
+    inline float read_delay_frac(int line, float delay_samples) {
+        float rp = (float)write_pos - delay_samples;
+        // Float offset trick to keep index safely positive before wrapping
+        float rp_pos = rp + 4096.0f;
+        int idx1 = static_cast<int>(rp_pos) & (FDN_BUF_LEN - 1);
+        int idx2 = (idx1 + 1) & (FDN_BUF_LEN - 1);
+        float frac = rp_pos - static_cast<float>(static_cast<int>(rp_pos));
+        return buf[line][idx1] + frac * (buf[line][idx2] - buf[line][idx1]);
+    }
+
     inline __attribute__((optimize("Ofast"), always_inline))
-    float process() {
-        // 1. Read delay line outputs + apply per-line one-pole LPF
-        //    LPF in feedback path: crystal=dark/smooth, metal=bright/metallic
+    float process(float lfo_presence) {
+        // Map an assumed bipolar LFO [-1.0, 1.0] to a clean unipolar morph coefficient [0.0, 1.0]
+        float morph = lfo_presence * 0.5f + 0.5f;
+        morph = morph < 0.0f ? 0.0f : (morph > 1.0f ? 1.0f : morph);
+
         float d[FDN_LINES];
+
+        // 1. Smoothly Morph Delay Lengths between Bank A and Bank B
+        const int* bankA = is_metal ? METAL_DELAYS_A : CRYSTAL_DELAYS_A;
+        const int* bankB = is_metal ? METAL_DELAYS_B : CRYSTAL_DELAYS_B;
+
         for (int i = 0; i < FDN_LINES; i++) {
-            const int rp = (write_pos - dlen[i]) & (FDN_BUF_LEN - 1);
-            fz[i] += falpha * (buf[i][rp] - fz[i]);
+            // Smoothly morph between the two distinct prime sets
+            float base_delay = (float)bankA[i] + morph * (float)(bankB[i] - bankA[i]);
+
+            float raw_sample = read_delay_frac(i, base_delay);
+            fz[i] += falpha * (raw_sample - fz[i]);
             d[i] = fz[i];
         }
 
-        // 2. Output = average of delay line reads (pre-Hadamard, before cross-mixing)
-        const float out = (d[0] + d[1] + d[2] + d[3]) * 0.25f * out_scale;
+        // 2. Mix output from all 8 lines
+        float out = 0.0f;
+        for (int i = 0; i < FDN_LINES; i++) out += d[i];
+        out *= (1.0f / (float)FDN_LINES) * out_scale;
 
-        // 3. Fast 4×4 Hadamard cross-mix (8 adds + 4 muls)
-        //    This coupling is what enables chaos: each line now feeds all others.
-        const float a = d[0] + d[1], b = d[0] - d[1];
-        const float c = d[2] + d[3], e = d[2] - d[3];
-        d[0] = (a + c) * 0.5f;
-        d[1] = (b + e) * 0.5f;
-        d[2] = (a - c) * 0.5f;
-        d[3] = (b - e) * 0.5f;
+        // 3. Fast 8x8 In-Place Walsh-Hadamard Transform (3-stage butterfly)
+        // Stage 1
+        float s0 = d[0] + d[1], d0 = d[0] - d[1];
+        float s1 = d[2] + d[3], d1 = d[2] - d[3];
+        float s2 = d[4] + d[5], d2 = d[4] - d[5];
+        float s3 = d[6] + d[7], d3 = d[6] - d[7];
+        // Stage 2
+        float t0 = s0 + s1, t1 = s0 - s1;
+        float t2 = d0 + d1, t3 = d0 - d1;
+        float t4 = s2 + s3, t5 = s2 - s3;
+        float t6 = d2 + d3, t7 = d2 - d3;
+        // Stage 3 + Orthogonal Matrix Scaling (1 / sqrt(8) ≈ 0.35355339f)
+        static constexpr float H_SCALE = 0.35355339f;
+        d[0] = (t0 + t4) * H_SCALE; d[1] = (t1 + t5) * H_SCALE;
+        d[2] = (t2 + t6) * H_SCALE; d[3] = (t3 + t7) * H_SCALE;
+        d[4] = (t0 - t4) * H_SCALE; d[5] = (t1 - t5) * H_SCALE;
+        d[6] = (t2 - t6) * H_SCALE; d[7] = (t3 - t7) * H_SCALE;
 
-        // 4. Noise injection (tiny — keeps attractor alive, prevents silence)
+        // 4. White Noise injection to ensure a persistent chaotic seed
         prng = prng * 1664525u + 1013904223u;
-        const float noise = (float)(int32_t)prng * (1.0f / 2147483648.0f) * noise_amp;
+        float noise = (float)(int32_t)prng * (1.0f / 2147483648.0f) * noise_amp;
 
-        // 5. Apply gain + saturation + write back to delay lines
+        // 5. Gain, DC Blocker, Tanh Saturation, and Write Back
         //    Padé [3,3] tanh approximant, clamped to [-3, 3] for stability.
         //    Inside the loop: effective gain = g × 0.5 × drive.
         //    At default (2.10 × 0.5 × 1.2 ≈ 1.26): above unit gain → chaotic attractor.
-        const float gd = g * drive;
+        float dynamic_noise = noise * (noise_amp * (1.0f + morph * 2.0f));
+        float dynamic_gd = (g + (morph * 0.15f)) * drive;
+
         for (int i = 0; i < FDN_LINES; i++) {
-            float x = (d[i] + noise) * gd;
-            x = x >  3.0f ?  3.0f : x < -3.0f ? -3.0f : x;
-            const float x2  = x * x;
-            buf[i][write_pos] = x * (27.0f + x2) / (27.0f + 9.0f * x2);
+            float x = d[i] * dynamic_gd + dynamic_noise;
+
+            // In-loop DC Blocker (High-Pass Filter with pole at 0.996) to prevent latch-up
+            float hp_out = x - hpx[i] + 0.996f * hpy[i];
+            hpx[i] = x;
+            hpy[i] = hp_out;
+
+            // Padé [3,3] tanh approximation bounded to [-3, 3]
+            float sat_in = hp_out > 3.0f ? 3.0f : (hp_out < -3.0f ? -3.0f : hp_out);
+            float x2 = sat_in * sat_in;
+            buf[i][write_pos] = sat_in * (27.0f + x2) / (27.0f + 9.0f * x2);
         }
 
         write_pos = (write_pos + 1) & (FDN_BUF_LEN - 1);

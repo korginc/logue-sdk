@@ -472,12 +472,15 @@ public:
                 m_mix1_mod_offset = 0.0f;
 
                 int32_t mod_target = m_params[k_paramProgram] % k_paramLast;
+                float lfo_presence = (l1_val * m_lfo1_depth) +
+                                     (l2_val * m_lfo2_depth) +
+                                     (l3_val * m_lfo3_depth);
                 switch (mod_target) {
                     case k_paramProgram:
                         // Macro target: subtle movement across multiple destinations.
                         m_pitch_mod_multiplier = fasterpow2f((l1_val + l2_val) * 0.25f);
                         m_mix2_mod_offset = l3_val * 0.2f;
-                        m_volume_mod_multiplier = l3_val * 0.1f; // Add to base volume
+                        m_volume_mod_multiplier = lfo_presence * 0.1f; // Add to base volume
                         break;
                     case k_paramNote:
                         // Modulate global pitch by +/- 12 semitones using LFO 1
@@ -492,10 +495,10 @@ public:
                         m_f2_mod_multiplier = fasterpow2f(l1_val * 4.0f);
                         break;
                     case k_paramCMOSDist:
-                        m_cmos_mod_multiplier = 1.0f + (l3_val * 0.5f);
+                        m_cmos_mod_multiplier = 1.0f + (lfo_presence * 0.5f);
                         break;
                     case k_paramSampRed:
-                        m_srr_mod_offset = l3_val * 0.5f; // Modulate Sample Rate Reduction
+                        m_srr_mod_offset = lfo_presence * 0.5f; // Modulate Sample Rate Reduction
                         break;
                     case k_paramOsc2Mix:
                         m_mix2_mod_offset = l2_val; // Crossfade modulation
@@ -503,7 +506,7 @@ public:
                     case k_paramO2Detune:
                         // FM modulation: compute multiplier from LFO; applied at zero-crossing.
                         // Do NOT accumulate into m_osc2_target_hz — it would grow to Inf.
-                        m_osc2_fm_mult = fasterpow2f(l2_val * 2.0f);
+                        m_osc2_fm_mult = fasterpow2f(lfo_presence * 2.0f);
                         break;
                     case k_paramL1Wave: filter1.mode = (filter_mode)(m_params[k_paramL1Wave] % mode_last);
                         break;
@@ -543,25 +546,23 @@ public:
                     // 1. MASTER VOLUME (Tremolo / AM)
                     // -----------------------------------------------------
                     case k_paramMastrVol:
-                        m_volume_mod_multiplier = (l1_val * m_lfo1_depth) +
-                                                  (l2_val * m_lfo2_depth) +
-                                                  (l3_val * m_lfo3_depth);
+                        m_volume_mod_multiplier = lfo_presence;
                         break;
 
                     case k_paramL1Rate: {
-                        float rate_mix = (l1_val * m_lfo1_depth) + (l2_val * m_lfo2_depth) + (l3_val * m_lfo3_depth);
+                        float rate_mix = lfo_presence;
                         float mod_param = fmaxf(0.0f, fminf(100.0f, (float)m_params[k_paramL1Rate] + (rate_mix * 25.0f)));
                         lfo1.set_rate(lfo_rate_from_param(mod_param), SAMPLE_RATE_F);
                         break;
                     }
                     case k_paramL2Rate: {
-                        float rate_mix = (l1_val * m_lfo1_depth) + (l2_val * m_lfo2_depth) + (l3_val * m_lfo3_depth);
+                        float rate_mix = lfo_presence;
                         float mod_param = fmaxf(0.0f, fminf(100.0f, (float)m_params[k_paramL2Rate] + (rate_mix * 25.0f)));
                         lfo2.set_rate(lfo_rate_from_param(mod_param), SAMPLE_RATE_F);
                         break;
                     }
                     case k_paramL3Rate: {
-                        float rate_mix = (l1_val * m_lfo1_depth) + (l2_val * m_lfo2_depth) + (l3_val * m_lfo3_depth);
+                        float rate_mix = lfo_presence;
                         float mod_param = fmaxf(0.0f, fminf(100.0f, (float)m_params[k_paramL3Rate] + (rate_mix * 25.0f)));
                         lfo3.set_rate(lfo_rate_from_param(mod_param), SAMPLE_RATE_F);
                         break;
@@ -581,7 +582,7 @@ public:
                         break;
                     case k_paramBitRed:
                         // Dynamic bit depth variation around user value.
-                        m_brr_steps = 1.0f + fasterpowf(2.0f, (float)m_params[k_paramBitRed] * 0.08f + (l2_val * 2.0f));
+                        m_brr_steps = 1.0f + fasterpowf(2.0f, (float)m_params[k_paramBitRed] * 0.08f + (lfo_presence * 2.0f));
                         if (m_brr_steps > 65536.0f) m_brr_steps = 65536.0f;
                         break;
 
@@ -589,19 +590,13 @@ public:
                     // 3. THE "FAKE RESONANCE" (CPU-Safe Filter Drive)
                     // -----------------------------------------------------
                     case k_paramF1Reso:
-                        m_drv1_mod_multiplier = (l1_val * m_lfo1_depth) +
-                                                (l2_val * m_lfo2_depth) +
-                                                (l3_val * m_lfo3_depth);
+                        m_drv1_mod_multiplier = lfo_presence;
                         break;
                     case k_paramF2Reso:
-                        m_drv2_mod_multiplier = (l1_val * m_lfo1_depth) +
-                                                (l2_val * m_lfo2_depth) +
-                                                (l3_val * m_lfo3_depth);
+                        m_drv2_mod_multiplier = lfo_presence;
                         break;
                     case k_paramO2SubOct:
-                        m_mix1_mod_offset += (l1_val * m_lfo1_depth) +
-                                             (l2_val * m_lfo2_depth) +
-                                             (l3_val * m_lfo3_depth);
+                        m_mix1_mod_offset += lfo_presence;
                         break;
                     default:
                         break;
@@ -612,7 +607,8 @@ public:
             float sig1 = 0.0f; // used for Sherman asymmetry below; 0 in drone mode
             float mixed_sig;
             if (use_drone) {
-                mixed_sig = use_metal_drone ? m_metal_drone.process() : m_crystal_drone.process();
+                mixed_sig = use_metal_drone ? m_metal_drone.process(lfo_presence) :
+                    m_crystal_drone.process(lfo_presence);
             } else {
                 // Oscillator 1 Morphing (Crossfading output values between old and new tables)
                 float o1_val;
