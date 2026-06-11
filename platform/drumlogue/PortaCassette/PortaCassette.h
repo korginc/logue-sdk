@@ -27,7 +27,7 @@
 struct prng_t { uint64x2_t state0, state1; };
 // decay factor (required 0.1-3ms decay time at 48 kHz)
 constexpr float pop_env_decay_ = 0.98f; // Increased from 0.96f for slightly longer, more audible pops.
-constexpr float big_pop_env_decay_ = 0.9992f; // Much slower decay for low-end thumps
+constexpr float big_pop_env_decay_ = 0.97f; // Sharper decay for clicks rather than drum-like bursts
 uint32_t sample_rate_ = 48000;
 float    inverse_sample_rate_ = 1.0f / 48000.0f;
 
@@ -498,7 +498,7 @@ public:
     }
 
     fast_inline void dbx_nr_decode(float32x4_t &sig_l, float32x4_t &sig_r, float32x4_t dec_gain) {
-        if (dbx_mode_ == k_active) {
+        if (dbx_mode_ != k_off) { // Ensure decode is always active if encode was used, removing the hiss-only mode
             // Use the synchronized dec_gain = 1/enc_gain computed in step 4.
             // This guarantees enc_gain × dec_gain = 1.0 at every block, making the
             // NR system transparent (net gain = 0 dB) except for tape nonlinearity.
@@ -563,10 +563,6 @@ public:
             //    into the total envelope so loud transients with HF get more reduction.
             float32x4_t dec_gain = dbx_nr_encode(sig_l, sig_r);
 
-            // 4.5 Tape bias hiss / vinyl dust pops: moved before saturation to get hiss naturally softened.
-            //     Added in k_encode_only and k_off modes (dbx active suppresses it naturally)
-            if (model_ == k_vinyl) vinyl_dust(sig_l, sig_r); else tape_hiss(sig_l, sig_r);
-
             // 5. Tape Magnetic Saturation
             //    a) Head bump (low-mid resonance)
             head_bump(sig_l, sig_r);
@@ -576,6 +572,9 @@ public:
 
             //    c) Tape age → HF roll-off
             tape_age(sig_l, sig_r);
+
+            // 5.5 Tape bias hiss / vinyl dust pops: moved after saturation so drive doesn't boost them
+            if (model_ == k_vinyl) vinyl_dust(sig_l, sig_r); else tape_hiss(sig_l, sig_r);
 
             // 6. Wow & Flutter — both LFOs computed once per block
             //    Wow (~1.5 Hz): slow capstan irregularities (5-30 samples depth)

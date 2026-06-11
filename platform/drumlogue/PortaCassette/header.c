@@ -15,7 +15,7 @@ const __unit_header unit_header_t unit_header = {
     .version     = 0x00010000U,   // v1.0.0
     .name        = "PortaK7",     // 8 chars max for OLED
     .num_presets = 0,             // Can add presets later
-    .num_params  = 14,            // 3 full pages
+    .num_params  = 16,            // 3 full pages
 
     .params = {
         // ==========================================
