@@ -2,15 +2,19 @@
 
 
 void TRXHiHat::Init() {
-    rng.seed(std::random_device{}());
+    drum_rng_seed(&rng_, 0x44000001u);
     env = 0.0f;
     t = 0.0f;
     lp_y = hp_y = hp_x = 0.0f;
+    for (int i = 0; i < 6; ++i) phase_[i] = 0.0f;
 }
 
 void TRXHiHat::Trigger() {
     env = 1.0f;
     t = 0.0f;
+    env_mul   = expf(-INV_SAMPLE_RATE / decay);
+    lpf_alpha = expf(-2.0f * M_PI * lpfFreq * INV_SAMPLE_RATE);
+    hpf_alpha = expf(-2.0f * M_PI * hpfFreq * INV_SAMPLE_RATE);
 }
 
 float TRXHiHat::get_value(const float fadeTime){
@@ -27,17 +31,15 @@ float TRXHiHat::Process() {
     float n = generateMetallicNoise();
 
     // Apply low-pass filter
-    float lpfAlpha = e_expff(-2.0f * M_PI * lpfFreq * INV_SAMPLE_RATE);
-    lp_y = (1.0f - lpfAlpha) * n + lpfAlpha * lp_y;
+    lp_y = (1.0f - lpf_alpha) * n + lpf_alpha * lp_y;
 
     // Apply high-pass filter
-    float hpfAlpha = e_expff(-2.0f * M_PI * hpfFreq * INV_SAMPLE_RATE);
-    float hp = hpfAlpha * (hp_y + lp_y - hp_x);
+    float hp = hpf_alpha * (hp_y + lp_y - hp_x);
     hp_y = lp_y;
     hp_x = hp;
 
     // Envelope decay
-    env *= e_expff(-INV_SAMPLE_RATE / (decay));
+    env *= env_mul;
 
     // GAP crossfade
     if (t > gap) {
@@ -67,16 +69,15 @@ float TRXHiHat::Process() {
 float TRXHiHat::generateMetallicNoise() {
     // Square wave harmonic mix — crude but efficient
     float result = 0.0f;
-    static float phase[6] = { 0 };
     static const float freqs[6] = { 306.0f, 512.0f, 551.0f, 743.0f, 826.0f, 900.0f };
 
     for (int i = 0; i < 6; ++i) {
-        phase[i] += freqs[i] * INV_SAMPLE_RATE;
-        if (phase[i] >= 1.0f) phase[i] -= 1.0f;
-        result += (phase[i] < 0.5f ? 1.0f : -1.0f);
+        phase_[i] += freqs[i] * pitch_ratio_ * INV_SAMPLE_RATE;
+        if (phase_[i] >= 1.0f) phase_[i] -= 1.0f;
+        result += (phase_[i] < 0.5f ? 1.0f : -1.0f);
     }
 
-    float white = noiseDist(rng);
+    float white = drum_rng_bipolar(&rng_);
     return metal * (result / 6.0f) + (1.0f - metal) * white;
 }
 

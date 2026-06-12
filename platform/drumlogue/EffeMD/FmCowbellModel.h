@@ -1,7 +1,6 @@
 // FmCowbellModel.h
 #pragma once
 #include "DrumModel.h"
-#include "midi_handler.h"
 
 class FmCowbellModel : public DrumModel {
 public:

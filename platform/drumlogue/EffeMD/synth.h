@@ -2,45 +2,37 @@
 
 /**
  * @file synth.h
- * @brief Top-level Drumlogue FM percussion synth controller.
+ * @brief Top-level Drumlogue EffeMD synth controller.
  *
  * This file is intentionally structured as the control and routing layer:
  * - user parameter entry point (setParameter)
  * - preset loading
- * - voice/engine selection
+ * - instrument selection
  * - note handling
- * - per-sample process orchestration
+ * - block render orchestration (with NEON stereo store and idle skipping)
  *
  * DSP details live in:
- * - engine_mapping.h (parameter semantics / macro targets)
- * - kick_engine.h / snare_engine.h / metal_engine.h / perc_engine.h
- * - future optional resonant project (kept out of the active path)
+ * - fm_perc_synth_process.h (state, note routing, per-sample process)
+ * - the individual drum models (FmKickModel.cc ... TRXHiHat.cc)
  *
  * Design rules:
  * - no heap allocation
- * - fixed 4-voice SIMD layout
- * - ARM NEON preferred
  * - deterministic real-time safe behavior
+ * - ARM NEON used where it pays off; scalar model code stays host-testable
  */
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
+
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
 #include <arm_neon.h>
-#include <stdint.h>
+#endif
 
 #include "unit.h"
 #include "constants.h"
-#include "prng.h"
-#include "midi_handler.h"
-#include "envelope_rom.h"
-#include "lfo_enhanced.h"
-#include "lfo_smoothing.h"
-#include "fm_presets.h"
-#include "engine_mapping.h"
 #include "fm_perc_synth_process.h"
-
-
 
 class Synth {
 public:
@@ -81,30 +73,46 @@ public:
     /*===========================================================================*/
 
     fast_inline void Render(float* out, size_t frames) {
-        // Idle gate: if all 4 voice envelopes are in ENV_STATE_OFF, every call to
-        // fm_perc_synth_process() returns exactly 0.0, so skip the entire block.
-        // Horizontal AND of all 4 stage lanes (ARMv7-compatible):
-        uint32x4_t off_check = vceqq_u32(synth_.envelope.stage,
-                                         vdupq_n_u32(ENV_STATE_OFF));
-        uint32x2_t lo_hi = vand_u32(vget_low_u32(off_check),
-                                    vget_high_u32(off_check));
-        lo_hi = vpmin_u32(lo_hi, lo_hi);
-
-        if (vget_lane_u32(lo_hi, 0) == 0xFFFFFFFFu &&
-            !fm_perc_synth_has_pending(&synth_)) {
+        // Idle gate: the active model decayed to silence, so the whole block
+        // is exactly zero. Skip all DSP.
+        if (fm_perc_synth_is_idle(&synth_)) {
             memset(out, 0, frames * 2 * sizeof(float));
             return;
         }
 
         float* __restrict out_p = out;
-        const float* out_e = out_p + (frames << 1);  // Stereo output
 
-        while (out_p < out_e) {
-            float sample = fm_perc_synth_process(&synth_);
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
+        // NEON v7: generate 4 mono samples, then interleave to stereo with a
+        // single vst2q (L R L R ...). Scalar tail for frames % 4.
+        size_t blocks = frames >> 2;
+        while (blocks--) {
+            float buf[4];
+            buf[0] = fm_perc_synth_process(&synth_);
+            buf[1] = fm_perc_synth_process(&synth_);
+            buf[2] = fm_perc_synth_process(&synth_);
+            buf[3] = fm_perc_synth_process(&synth_);
+            float32x4_t v = vld1q_f32(buf);
+            float32x4x2_t lr = { { v, v } };
+            vst2q_f32(out_p, lr);
+            out_p += 8;
+        }
+        size_t tail = frames & 3;
+        while (tail--) {
+            const float sample = fm_perc_synth_process(&synth_);
             out_p[0] = sample;
             out_p[1] = sample;
             out_p += 2;
         }
+#else
+        const float* out_e = out_p + (frames << 1);  // Stereo output
+        while (out_p < out_e) {
+            const float sample = fm_perc_synth_process(&synth_);
+            out_p[0] = sample;
+            out_p[1] = sample;
+            out_p += 2;
+        }
+#endif
     }
 
     /*===========================================================================*/
@@ -124,10 +132,10 @@ public:
         fm_perc_synth_note_off(&synth_, note);
     }
 
-    // Default gate uses a percussion root note.
-    // The active instrument selector decides what gets triggered.
+    // Default gate uses the percussion root note. The active instrument
+    // selector decides what gets triggered.
     inline void GateOn(uint8_t velocity) {
-        NoteOn(36, velocity);   // default percussion root
+        NoteOn(EFFEMD_ROOT_NOTE, velocity);
     }
 
     inline void GateOff() {
@@ -142,7 +150,6 @@ public:
 
     inline void PitchBend(uint16_t bend) {
         (void)bend;  // Not implemented in basic FM percussion
-        // Could be used to modulate all voices' pitch
     }
 
     inline void ChannelPressure(uint8_t pressure) {
@@ -161,42 +168,39 @@ public:
     inline void setParameter(uint8_t index, int32_t value) {
         if (index >= PARAM_TOTAL) return;
 
-        // Store parameter value
+        // Store the raw UI value, then route to the DSP layer
         synth_.params[index] = static_cast<int16_t>(value);
-
-        // Update synth with new parameters
         fm_perc_synth_update_params(&synth_, index, value);
     }
 
-    inline float getParameterValue(uint8_t index) const {
+    inline int32_t getParameterValue(uint8_t index) const {
+        // The runtime expects the raw UI value back, not the derived DSP value.
         if (index >= PARAM_TOTAL) return 0;
-        uint8_t instrument_id = synth_.params[K_Instrument];
-        return synth_.models[instrument_id]->getParameter(index);
+        return synth_.params[index];
     }
 
     inline const char* getParameterStrValue(uint8_t index, int32_t value) const {
+        // Parameters valid for the active instrument are displayed as
+        // "O:<dsp value>"; unused ones display as "x" (model returns 255).
         switch (index) {
-            // will be displayed a O:.%f if parameter is valid for instrument, X otherwise. Disabled value shall be 255, not assignable by user.
-            // each instrument will be stored in a local array of 24 parameters, and only valid ones will be updated by the UI and processed by the DSP.
-            // This allows for a flexible design where different instruments can have different sets of parameters while sharing the same underlying structure.
-
-            case PARAM_INSTRUMENT:
+            case K_Instrument:
                 if (value >= 0 && value < INST_COUNT) return instruments_strings[value];
                 break;
 
-            case PARAM_EUCL_TUN:
+            case K_Euclidean_Tuning:
                 if (value >= 0 && value < EUCLID_MODE_COUNT) return euclidean_mode_strings[value];
                 break;
 
-            default:
-                uint8_t instrument_id = synth_.params[K_Instrument];
-                float actual_value = synth_.models[instrument_id]->getParameter(index);
-                if (actual_value == 255)
-                    return "x"; // NOTE first page will be not refreshed until another page is selected!!
-                char buf[8];
-                snprintf(buf, sizeof(buf), "O:%.4f", actual_value);
-                return buf;
-                break;
+            default: {
+                (void)value;
+                const uint8_t instrument_id = synth_.instrument;
+                const float actual_value =
+                    synth_.models[instrument_id]->getParameter((fm_param_index_t)index);
+                if (actual_value == 255.0f)
+                    return "x"; // NOTE first page will not refresh until another page is selected!!
+                snprintf(strbuf_, sizeof(strbuf_), "O:%.3f", actual_value);
+                return strbuf_;
+            }
         }
         return nullptr;
     }
@@ -221,7 +225,7 @@ public:
 
     static inline const char* getPresetName(uint8_t idx) {
         if (idx < NUM_OF_PRESETS) {
-            return FM_PRESETS[idx].name;
+            return FM_PRESET_NAMES[idx];
         }
         return nullptr;
     }
@@ -232,9 +236,7 @@ private:
     /*===========================================================================*/
 
     inline void load_preset(uint8_t idx) {
-        load_fm_preset(synth_, idx);
-        // Update synth with new parameters
-        // fm_perc_synth_update_params(&synth_);
+        load_fm_preset(&synth_, idx);
         current_preset_ = idx;
     }
 
@@ -245,4 +247,5 @@ private:
     fm_perc_synth_t synth_;
     uint32_t sample_rate_;
     uint8_t current_preset_;
+    mutable char strbuf_[16];
 };

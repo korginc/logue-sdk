@@ -24,14 +24,14 @@ float FmCowbellModel::Process() {
 
     float mod_env = ExpDecay(t, dm);
     float mod_feedback = bm * prev_mod;
-    mod_phase = WrapPhase(mod_phase + TWO_PI * fm * dt + mod_feedback);
+    mod_phase = WrapPhase(mod_phase + TWO_PI * (fm * pitch_ratio_) * dt + mod_feedback);
     float mod_out = fastersinfullf(mod_phase);
     prev_mod = mod_out;
 
     float mod_signal = I * mod_env * mod_out;
 
-    carA_phase = WrapPhase(carA_phase + TWO_PI * fbA * dt + mod_signal);
-    carB_phase = WrapPhase(carB_phase + TWO_PI * fbB * dt + mod_signal);
+    carA_phase = WrapPhase(carA_phase + TWO_PI * (fbA * pitch_ratio_) * dt + mod_signal);
+    carB_phase = WrapPhase(carB_phase + TWO_PI * (fbB * pitch_ratio_) * dt + mod_signal);
 
     float outA = fastersinfullf(carA_phase);
     float outB = fastersinfullf(carB_phase);

@@ -18,12 +18,12 @@ float FmTomModel::Process() {
     float freq_env = A_f * ExpDecay(t, d_f);
 
     float mod_feedback = 1.0f * prev_mod;
-    mod_phase = WrapPhase(mod_phase + TWO_PI * f_m * dt + mod_feedback);
-    float mod_out = fasterfullsinf(mod_phase);
+    mod_phase = WrapPhase(mod_phase + TWO_PI * (f_m * pitch_ratio_) * dt + mod_feedback);
+    float mod_out = fastersinfullf(mod_phase);
     prev_mod = mod_out;
 
-    car_phase = WrapPhase(car_phase + TWO_PI * (f_b + freq_env) * dt + I * mod_env * mod_out);
-    float out = fasterfullsinf(car_phase) * amp_env;
+    car_phase = WrapPhase(car_phase + TWO_PI * ((f_b + freq_env) * pitch_ratio_) * dt + I * mod_env * mod_out);
+    float out = fastersinfullf(car_phase) * amp_env;
 
     t += dt;
     return out;

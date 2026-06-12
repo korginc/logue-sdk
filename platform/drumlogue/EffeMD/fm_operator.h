@@ -94,16 +94,16 @@ static inline float fmo_wf_render(fmo_waveform_t wf, float t) {
 }
 
 /* -------------------------------------------------------------------------
- * Basic functions
+ * Basic helpers shared by the md-drum-synth models
  * ------------------------------------------------------------------------- */
 
-static float WrapPhase(float phase) {
+static inline float WrapPhase(float phase) {
   while (phase >= TWO_PI) phase -= TWO_PI;
   while (phase < 0.0f) phase += TWO_PI;
   return phase;
 }
 
-static float ExpDecay(float t, float decay_time) {
+static inline float ExpDecay(float t, float decay_time) {
   return e_expff(-t / decay_time);
 }
 
@@ -202,4 +202,18 @@ static inline float fmo_out(fm_op_t* op, float mod_in, float env, float pitch) {
     float s = fmo_wf_render(op->waveform, t);
     op->last_out = s;
     return op->out_level * s * env;
+}
+
+/* Raw operator: advances phase (with modulation and DX7 feedback) and
+ * returns the plain waveform sample without any level scaling.
+ *
+ * Used by the md-drum-synth models, which keep the original EFM convention
+ * of applying modulation index and amplitude envelopes externally:
+ *   phase_mod = I * mod_env * mod_raw   (normalized-phase units)
+ * Pass mod_in = phase_mod / FMO_MOD_RANGE to preserve that convention. */
+static inline float fmo_render_raw(fm_op_t* op, float mod_in, float pitch) {
+    float t = fmo_advance(op, mod_in, pitch);
+    float s = fmo_wf_render(op->waveform, t);
+    op->last_out = s;
+    return s;
 }

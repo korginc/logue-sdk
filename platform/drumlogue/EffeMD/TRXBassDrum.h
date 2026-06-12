@@ -39,6 +39,14 @@ private:
     float rampEnv;
     float prevSample;
 
+    // Per-sample decay multipliers, computed at Trigger with accurate expf.
+    // (e_expff(-x) rounds to exactly 1.0 for x < ~6e-8*1024, freezing decay.)
+    float env_mul;
+    float ramp_mul;
+
+    // Noise source (deterministic, RT-safe)
+    drum_rng_t rng_;
+
     // Helpers
     float sine(float x);
 };

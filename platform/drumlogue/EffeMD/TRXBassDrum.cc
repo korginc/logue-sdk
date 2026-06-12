@@ -3,6 +3,7 @@
 void TRXBassDrum::Init() {
     phase = t = env = rampEnv = 0.0f;
     prevSample = 0.0f;
+    drum_rng_seed(&rng_, 0xBD000001u);
 }
 
 void TRXBassDrum::Trigger() {
@@ -10,6 +11,8 @@ void TRXBassDrum::Trigger() {
     env = 1.0f;
     rampEnv = 1.0f;
     phase = 0.0f;
+    env_mul  = expf(-INV_SAMPLE_RATE / decay);
+    ramp_mul = expf(-INV_SAMPLE_RATE / rampDecay);
 }
 
 float TRXBassDrum::Process() {
@@ -18,15 +21,15 @@ float TRXBassDrum::Process() {
     t += 1.0f * INV_SAMPLE_RATE;
 
     // Envelope decay
-    env *= e_expff(-INV_SAMPLE_RATE / (decay));
-    rampEnv *= e_expff(-INV_SAMPLE_RATE / (rampDecay));
+    env *= env_mul;
+    rampEnv *= ramp_mul;
 
     // Frequency modulation
-    float freq = pitch + ramp * rampEnv * 1000.0f;
+    float freq = (pitch + ramp * rampEnv * 1000.0f) * pitch_ratio_;
     phase += freq * INV_SAMPLE_RATE;
     if (phase > 1.0f) phase -= 1.0f;
 
-    float sineOut = fasterfullsinf(phase * 2.0f * M_PI);
+    float sineOut = fastersinfullf(phase * 2.0f * M_PI);
     float value = sineOut * env * start;
 
     // Add harmonic distortion
@@ -36,7 +39,7 @@ float TRXBassDrum::Process() {
 
     // Add noise burst
     if (noise > 0.0f && t < 0.01f) {
-        value += noise * ((rand() / (float)RAND_MAX) * 2.0f - 1.0f) * env;  // TODO use prng.h
+        value += noise * drum_rng_bipolar(&rng_) * env;
     }
 
     // Soft clip

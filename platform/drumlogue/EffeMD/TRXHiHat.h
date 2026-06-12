@@ -39,9 +39,16 @@ private:
     float hp_y;
     float hp_x;
 
-    // Noise source - TODO use prng.h
-    std::default_random_engine rng;
-    std::uniform_real_distribution<float> noiseDist{-1.0f, 1.0f};
+    // Per-sample coefficients, computed at Trigger with accurate expf
+    float env_mul;
+    float lpf_alpha;
+    float hpf_alpha;
+
+    // Metallic square-stack oscillator phases (per instance)
+    float phase_[6];
+
+    // Noise source (deterministic, RT-safe)
+    drum_rng_t rng_;
 
     float generateMetallicNoise();
 };

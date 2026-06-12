@@ -42,5 +42,5 @@ public:
 
     float mod_phase, car_phase, prev_mod, t;
     float y_prev, x_prev;
-    bool active
+    bool active;
 };

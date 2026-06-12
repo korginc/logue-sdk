@@ -55,7 +55,7 @@ const __unit_header unit_header_t unit_header = {
 
         // Page 6:
         {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"Gap"}},
-        {1, 6, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"Count"}},
+        {1, 6, 0, 1, k_unit_param_type_strings, 0, 0, 0, {"Count"}},
         {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"-"}},  // TODO reserved for future use
         // EuclTun: Euclidean per-voice pitch spread. Assigns voice i a semitone
         //   offset = floor(i * n / 4) so the 4 voices are maximally spread across

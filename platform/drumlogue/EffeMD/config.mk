@@ -12,19 +12,19 @@ PROJECT_TYPE := synth
 # C sources
 CSRC = header.c
 
-# C++ sources
+# C++ sources (the SDK Makefile only builds .cc files)
 CXXSRC = unit.cc \
-		 FmClapModel.cpp \
-		 FmCowbellModel.cpp \
-		 FmCymbalModel.cpp \
-		 FmKickModel.cpp \
-		 FmRimshotModel.cpp \
-		 FmSnareModel.cpp \
-		 FmTomModel.cpp \
-		 TRXBassDrum.cpp \
-		 TRXClaves.cpp
-		 TRXHiHat.cpp \
-		 TRXSnareDrum.cpp \
+		 FmClapModel.cc \
+		 FmCowbellModel.cc \
+		 FmCymbalModel.cc \
+		 FmKickModel.cc \
+		 FmRimshotModel.cc \
+		 FmSnareModel.cc \
+		 FmTomModel.cc \
+		 TRXBassDrum.cc \
+		 TRXClaves.cc \
+		 TRXHiHat.cc \
+		 TRXSnareDrum.cc
 
 # List ASM source files here
 ASMSRC =

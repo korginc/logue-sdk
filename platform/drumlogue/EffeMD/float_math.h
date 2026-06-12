@@ -813,17 +813,17 @@ static inline __attribute__((optimize("Ofast"), always_inline)) float fasteratan
 }
 
 /** Hyperbolic tangent approximation
- * @note Adapted from http://math.stackexchange.com/questions/107292/rapid-approximation-of-tanhx
+ * @note Odd-symmetric Pade 3/2 approximant, clamped to [-1, 1].
+ *       The previous rational approximation was only valid for x >= 0 and
+ *       diverged for negative inputs (e.g. -1.6 at x = -2), which made
+ *       soft-clip stages amplify instead of saturate.
  */
 static inline __attribute__((optimize("Ofast"), always_inline)) float fastertanhf(float x) {
-  return (-0.67436811832e-5f +
-          (0.2468149110712040f +
-           (0.583691066395175e-1f + 0.3357335044280075e-1f * x) * x) *
-              x) /
-         (0.2464845986383725f +
-          (0.609347197060491e-1f +
-           (0.1086202599228572f + 0.2874707922475963e-1f * x) * x) *
-              x);
+  const float x2 = x * x;
+  float y = x * (27.0f + x2) / (27.0f + 9.0f * x2);
+  if (y > 1.0f) y = 1.0f;
+  else if (y < -1.0f) y = -1.0f;
+  return y;
 }
 
 /** @} */
@@ -1027,6 +1027,7 @@ static inline __attribute__((optimize("Ofast"), always_inline)) float eucDist2Be
   return sqrtsum2bett(dx, dy);
 }
 
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
 /**
  * Fast NEON division: num / den
  * Uses reciprocal estimate + 1 Newton-Raphson refinement step.
@@ -1064,6 +1065,7 @@ static inline float32x4_t neon_sqrtq_f32(float32x4_t x) {
   inv_sqrt = vmulq_f32(vrsqrtsq_f32(vmulq_f32(safe_x, inv_sqrt), inv_sqrt), inv_sqrt);
   return vmulq_f32(safe_x, inv_sqrt);
 }
+#endif  // __ARM_NEON
 
 /** @} */
 

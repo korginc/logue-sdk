@@ -6,3 +6,4 @@ test_voice_allocation
 test_benchmark_resonant
 test_envelope_gating
 test_runner
+build/

@@ -37,12 +37,19 @@ private:
     float ampEnv;
     float snapEnv;
 
+    // Per-sample decay multipliers, computed at Trigger with accurate expf
+    float amp_mul;
+    float snap_mul;
+
     // Oscillator phase
     float phase1;
     float phase2;
 
     // Filter state for noise
     float hp_x, hp_y;
+
+    // Noise source (deterministic, RT-safe)
+    drum_rng_t rng_;
 
     float sine(float x);
 };

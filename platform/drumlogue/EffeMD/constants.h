@@ -146,8 +146,8 @@ typedef enum {
   // page 6
   K_Gap,                    // clap_interval - start - interval - gap - tune - mod_env_sync
   K_Count,                  // clap_count - peak - clip
-  reserved,               // new, to be decided - LFO?
-  K_Euclidean_Tuning,       // new, to be decided
+  K_Reserved,               // reserved for future use (LFO?)
+  K_Euclidean_Tuning,       // per-engine-class Euclidean pitch offset mode
 
   PARAM_TOTAL = 24        // fixed see header.c, list must match!!
 } fm_param_index_t;
@@ -212,6 +212,34 @@ static const char* euclidean_mode_strings[EUCLID_MODE_COUNT] = {
     "Trit"    // 8: E(4,24) = [0, 6, 12, 18] tritone spread
 };
 
+
+// ============================================================================
+// Euclidean tuning lane assignment
+// ============================================================================
+// Maps an instrument to a column of EUCLID_OFFSETS, grouping the 11 models
+// into the four Sonaglio engine classes:
+//   lane 0 = Kick, lane 1 = Snare, lane 2 = Metal, lane 3 = Tom/Perc
+static inline int fm_engine_to_euclid_lane(engine_id_t engine) {
+    switch (engine) {
+        case ID_FmKickModel:
+        case ID_TRXBassDrum:
+            return 0;
+        case ID_FmSnareModel:
+        case ID_TRXSnareDrum:
+        case ID_FmClapModel:
+            return 1;
+        case ID_FmCowbellModel:
+        case ID_FmCymbalModel:
+        case ID_TRXHiHat:
+            return 2;
+        case ID_FmTomModel:
+        case ID_FmRimshotModel:
+        case ID_TRXClaves:
+            return 3;
+        default:
+            return 0;
+    }
+}
 
 // ============================================================================
 // Utility helpers

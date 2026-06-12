@@ -1,5 +1,10 @@
-// FmCymbalModel.cpp
+// FmCymbalModel.cc
 #include "FmCymbalModel.h"
+
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
+#include <arm_neon.h>
+#include "sine_neon.h"
+#endif
 
 void FmCymbalModel::Init() {
     t = 0.0f;
@@ -19,19 +24,57 @@ float FmCymbalModel::Process() {
     float amp_env = sustain + ExpDecay(t, d_b);
     float mod_env = ExpDecay(t, d_m);
 
-    float ratios[NUM_PAIRS] = {1.0f, 1.411f, 1.8f, 2.7f};
+    static const float ratios[NUM_PAIRS] = {1.0f, 1.411f, 1.8f, 2.7f};
     float sample = 0.0f;
 
+#if defined(__ARM_NEON) || defined(__ARM_NEON__)
+    // NEON v7: process the 4 modulator/carrier pairs in parallel lanes.
+    const float32x4_t ratio_v = vld1q_f32(ratios);
+    const float32x4_t two_pi_dt = vdupq_n_f32(TWO_PI * dt);
+
+    float32x4_t mod_p  = vld1q_f32(mod_phase);
+    float32x4_t car_p  = vld1q_f32(car_phase);
+    float32x4_t prev_m = vld1q_f32(prev_mod);
+
+    // mod_phase += 2*pi*(fm*ratio)*dt + bb*prev_mod
+    float32x4_t mod_inc = vmulq_f32(vmulq_n_f32(ratio_v, fm * pitch_ratio_), two_pi_dt);
+    mod_p = vaddq_f32(mod_p, vaddq_f32(mod_inc, vmulq_n_f32(prev_m, bb)));
+    // Keep phases bounded: subtract 2*pi*round(phase/2*pi)
+    {
+        int32x4_t n = round_to_nearest_int(vmulq_n_f32(mod_p, kInvTwoPi));
+        mod_p = vmlsq_f32(mod_p, vcvtq_f32_s32(n), vdupq_n_f32(kTwoPi));
+    }
+    float32x4_t mod_out = neon_sin(mod_p);
+
+    // car_phase += 2*pi*(fb*ratio)*dt + I*mod_env*mod_out
+    float32x4_t car_inc = vmulq_f32(vmulq_n_f32(ratio_v, fb * pitch_ratio_), two_pi_dt);
+    car_p = vaddq_f32(car_p, vaddq_f32(car_inc, vmulq_n_f32(mod_out, I * mod_env)));
+    {
+        int32x4_t n = round_to_nearest_int(vmulq_n_f32(car_p, kInvTwoPi));
+        car_p = vmlsq_f32(car_p, vcvtq_f32_s32(n), vdupq_n_f32(kTwoPi));
+    }
+    float32x4_t car_out = neon_sin(car_p);
+
+    vst1q_f32(mod_phase, mod_p);
+    vst1q_f32(car_phase, car_p);
+    vst1q_f32(prev_mod, mod_out);
+
+    // Horizontal sum (ARMv7-compatible)
+    float32x2_t s2 = vpadd_f32(vget_low_f32(car_out), vget_high_f32(car_out));
+    s2 = vpadd_f32(s2, s2);
+    sample = vget_lane_f32(s2, 0);
+#else
     for (int i = 0; i < NUM_PAIRS; ++i) {
-        mod_phase[i] = WrapPhase(mod_phase[i] + TWO_PI * (fm * ratios[i]) * dt + bb * prev_mod[i]);
-        float mod_out = fasterfullsinf(mod_phase[i]);
+        mod_phase[i] = WrapPhase(mod_phase[i] + TWO_PI * (fm * pitch_ratio_ * ratios[i]) * dt + bb * prev_mod[i]);
+        float mod_out = fastersinfullf(mod_phase[i]);
         prev_mod[i] = mod_out;
 
-        car_phase[i] = WrapPhase(car_phase[i] + TWO_PI * (fb * ratios[i]) * dt + I * mod_env * mod_out);
-        float car_out = fasterfullsinf(car_phase[i]);
+        car_phase[i] = WrapPhase(car_phase[i] + TWO_PI * (fb * pitch_ratio_ * ratios[i]) * dt + I * mod_env * mod_out);
+        float car_out = fastersinfullf(car_phase[i]);
 
         sample += car_out;
     }
+#endif
 
     float mixed = sample * 0.25f * amp_env;
 

@@ -10,16 +10,17 @@ void TRXClaves::Trigger() {
     env = 1.0f;
     t = 0.0f;
     phase1 = phase2 = 0.0f;
+    env_mul = expf(-INV_SAMPLE_RATE / decay);
 }
 
 float TRXClaves::Process() {
     if (env < 0.0001f) return 0.0f;
 
     t += INV_SAMPLE_RATE;
-    env *= e_expff(-INV_SAMPLE_RATE / (decay));
+    env *= env_mul;
 
-    phase1 += pitch * INV_SAMPLE_RATE;
-    phase2 += (pitch + interval) * INV_SAMPLE_RATE;
+    phase1 += pitch * pitch_ratio_ * INV_SAMPLE_RATE;
+    phase2 += (pitch + interval) * pitch_ratio_ * INV_SAMPLE_RATE;
     if (phase1 > 1.0f) phase1 -= 1.0f;
     if (phase2 > 1.0f) phase2 -= 1.0f;
 
@@ -102,5 +103,5 @@ float TRXClaves::getParameter(fm_param_index_t param_index) {
 // }
 
 float TRXClaves::sine(float x) {
-    return fasterfullsinf(x);
+    return fastersinfullf(x);
 }

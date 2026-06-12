@@ -97,12 +97,12 @@ ifneq ($(DEBUG),)
 else
   # Non-debug
   USE_COPT += -fomit-frame-pointer
-  USE_COPT += -finline-limit=9999999999
-  USE_COPT += --param max-inline-insns-single=9999999999
+  USE_COPT += -finline-limit=99999999
+  USE_COPT += --param max-inline-insns-single=99999999
 
   USE_CXXOPT += -fomit-frame-pointer
-  USE_CXXOPT += -finline-limit=9999999999
-  USE_CXXOPT += --param max-inline-insns-single=9999999999
+  USE_CXXOPT += -finline-limit=99999999
+  USE_CXXOPT += --param max-inline-insns-single=99999999
   USE_CXXOPT += -fno-threadsafe-statics
 
   ifeq ($(OPTIM),)

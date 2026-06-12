@@ -25,11 +25,11 @@ float FmClapModel::Process() {
 
     // FM synthesis
     float mod_feedback = bm * prev_mod;
-    mod_phase = WrapPhase(mod_phase + TWO_PI * f_m * dt + mod_feedback);
+    mod_phase = WrapPhase(mod_phase + TWO_PI * (f_m * pitch_ratio_) * dt + mod_feedback);
     float mod_out = fastersinfullf(mod_phase);
     prev_mod = mod_out;
 
-    car_phase = WrapPhase(car_phase + TWO_PI * f_b * dt + I * mod_env * mod_out);
+    car_phase = WrapPhase(car_phase + TWO_PI * (f_b * pitch_ratio_) * dt + I * mod_env * mod_out);
     float tone = fastersinfullf(car_phase);
     float x = tone * amp_env;
 

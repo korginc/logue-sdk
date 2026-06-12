@@ -16,17 +16,17 @@ float FmRimshotModel::Process() {
     float dt = 1.0f / SAMPLE_RATE;
 
     float mod_env = ExpDecay(t, d_m);
-    float mod_out = fasterfullsinf(mod_phase);
-    mod_phase = WrapPhase(mod_phase + TWO_PI * 1000.0f * dt);  // fixed mod freq
+    float mod_out = fastersinfullf(mod_phase);
+    mod_phase = WrapPhase(mod_phase + TWO_PI * (1000.0f * pitch_ratio_) * dt);  // fixed mod freq
     prev_mod = mod_out;
 
     float envB = ExpDecay(t, d_bB);
-    float carB = fasterfullsinf(WrapPhase(carB_phase + I_B * mod_env * mod_out));
-    carB_phase = WrapPhase(carB_phase + TWO_PI * f_bB * dt);
+    float carB = fastersinfullf(WrapPhase(carB_phase + I_B * mod_env * mod_out));
+    carB_phase = WrapPhase(carB_phase + TWO_PI * (f_bB * pitch_ratio_) * dt);
 
     float envA = ExpDecay(t, d_bA);
-    float carA = fasterfullsinf(WrapPhase(carA_phase + I_A * mod_env * mod_out));
-    carA_phase = WrapPhase(carA_phase + TWO_PI * f_bA * dt);
+    float carA = fastersinfullf(WrapPhase(carA_phase + I_A * mod_env * mod_out));
+    carA_phase = WrapPhase(carA_phase + TWO_PI * (f_bA * pitch_ratio_) * dt);
 
     float mixed = (1.0f - A_A) * (carB * envB) + A_A * (carA * envA);
 
@@ -76,7 +76,7 @@ void FmRimshotModel::setParameter(fm_param_index_t param_index, float value) {
             I_B = value * 0.5f;
             break;
         case K_Mix:
-            A_A = value * 0.1f;
+            A_A = value * 0.01f;
             break;
         case K_HPF:
             f_hp = 100.0f + value * 19.0f;

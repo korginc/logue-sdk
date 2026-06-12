@@ -20,7 +20,7 @@ public:
     float getParameter(fm_param_index_t param_index) override;
 private:
     float f_b, d_b, f_m, I, d_m;
-    float A_f, d_f, start_phase / 2.0f;
+    float A_f, d_f, start_phase;
     float mod_phase, car_phase, prev_mod, t;
     /**
     f_b (Base Frequency)",

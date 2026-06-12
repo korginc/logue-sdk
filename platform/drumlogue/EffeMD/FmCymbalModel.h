@@ -12,7 +12,7 @@ public:
     //     is >> fb >> fm >> d_b >> I >> d_m >> bb >> sustain >> f_hp;
     // }
     FmCymbalModel(void) : fb(400.0f), fm(800.0f), d_b(1.0f), I(10.0f), d_m(0.2f),
-                            bb(0.5f), sustain(0.3f), f_hp(300.0f), t(0.0f), y_prev(0.0f), x_prev(0.0f)
+                            bb(0.5f), sustain(0.3f), f_hp(300.0f), t(0.0f), x_prev(0.0f), y_prev(0.0f)
                             {};
     ~FmCymbalModel (void) override {};
 
