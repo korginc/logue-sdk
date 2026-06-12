@@ -68,18 +68,23 @@ typedef struct {
     float wobble_depth_samples;
     float scatter_samples;  // Per-hit random delay offset
     float pan_gain_l;       // Panning gain (left)
-    float pan_gain_r;  // Panning gain (right)
-    float base_gain;   // Base gain before accentuation and softening
+    float pan_gain_r;       // Panning gain (right)
+    float base_gain;        // Base gain before accentuation and softening
     float net_gain_l;
-    float net_gain_r;  // Net gain (right) after all modifiers
+    float net_gain_r;       // Net gain (right) after all modifiers
+
     float wobble_phase;
     float wobble_rate_mul;
+    float wobble_sine_start;      // Start sine value for linear interpolation within a block
+    float wobble_sine_delta;      // Delta per sample for linear interpolation within a block
+    float precalculated_delay_base; // delay_samples + scatter_samples
 
     float lp_coef;                // One-pole LPF coefficient
     float lp_state_l;             // One-pole LPF state (left)
     float lp_state_r;             // One-pole LPF state (right)
     float lp_coef_base;           // Base LPF coefficient, calculated in rebuild_profile
     float lp_cutoff_rand_factor;  // Random factor applied per hit to lp_coef
+
 
     // dynamic humanization
     float hit_accent;  // Per-hit random accentuation/damping
@@ -155,6 +160,12 @@ public:
     float get_scatter();
     delay_line_t& get_delay();
     spatial_mode_t get_mode();
+    float* get_net_gains_l();
+    float* get_net_gains_r();
+    float* get_lp_coefs();
+    float* get_lp_states_l();
+    float* get_lp_states_r();
+    
 
         private : static constexpr int kMaxClones = 10;
     static constexpr uint32_t kSmoothBlocks = 120;
@@ -195,6 +206,13 @@ private:
 
     clone_t clones_[kMaxClones]{};
     spatial_profile_t profile_{};
+
+    // Contiguous "Hot" data for SIMD optimization
+    alignas(16) float net_gains_l_[kMaxClones];
+    alignas(16) float net_gains_r_[kMaxClones];
+    alignas(16) float lp_states_l_[kMaxClones];
+    alignas(16) float lp_states_r_[kMaxClones];
+    alignas(16) float lp_coefs_[kMaxClones];
 
     uint32_t smoothing_remaining_ = 0;
     uint32_t rng_state_ = 0x9E3779B9u;
