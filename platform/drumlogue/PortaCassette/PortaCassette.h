@@ -357,25 +357,26 @@ public:
     }
 
     fast_inline void wow_and_flutter(float32x4_t &sig_l, float32x4_t &sig_r) {
-        const float lfo_val     = fastersinfullf(wf_lfo_phase_);
-        const float flutter_val = fastersinfullf(wf_flutter_phase_);
-        wf_lfo_phase_         += wf_phase_inc_               * 4.0f;
-        wf_flutter_phase_     += wf_flutter_phase_inc_       * 4.0f;
-        if (wf_lfo_phase_     >= M_TWOPI) wf_lfo_phase_     -= M_TWOPI;
-        if (wf_flutter_phase_ >= M_TWOPI) wf_flutter_phase_ -= M_TWOPI;
-
-        const float wow_depth     = 5.0f + tape_age_ * 25.0f;
-        const float flutter_depth = 0.8f + tape_age_ * 2.0f;
-        const float rd_off        = wow_depth * (1.0f + 0.8f * lfo_val)
-                                    + flutter_depth * flutter_val;
-        const int32_t i_off       = (int32_t)rd_off;
-        const float   fr          = rd_off - (float)i_off;
+        const float wow_depth_base     = 5.0f + tape_age_ * 25.0f;
+        const float flutter_depth_base = 0.8f + tape_age_ * 2.0f;
 
         float l4[NEON_LANES], r4[NEON_LANES];
         vst1q_f32(l4, sig_l);
         vst1q_f32(r4, sig_r);
 
         for (int s = 0; s < NEON_LANES; ++s) {
+            const float lfo_val     = fastersinfullf(wf_lfo_phase_);
+            const float flutter_val = fastersinfullf(wf_flutter_phase_);
+            wf_lfo_phase_         += wf_phase_inc_;
+            wf_flutter_phase_     += wf_flutter_phase_inc_;
+            if (wf_lfo_phase_     >= M_TWOPI) wf_lfo_phase_     -= M_TWOPI;
+            if (wf_flutter_phase_ >= M_TWOPI) wf_flutter_phase_ -= M_TWOPI;
+
+            const float rd_off        = wow_depth_base * (1.0f + 0.8f * lfo_val)
+                                        + flutter_depth_base * flutter_val;
+            const int32_t i_off       = (int32_t)rd_off;
+            const float   fr          = rd_off - (float)i_off;
+
             wf_delay_l_[wf_write_pos_] = l4[s];
             wf_delay_r_[wf_write_pos_] = r4[s];
 
