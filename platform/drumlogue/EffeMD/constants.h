@@ -41,6 +41,13 @@ constexpr float LFO_PHASE_OFFSET = 0.25f;
 
 
 // ============================================================================
+// various constants
+// ============================================================================
+constexpr float DEFAULT_VELOCITY_GAIN = 1.0f;
+constexpr float DEFAULT_MASTER_GAIN   = 2.30f;
+
+
+// ============================================================================
 // LFO targets
 // ============================================================================
 enum lfo_target : uint8_t  {
@@ -82,6 +89,7 @@ enum euclidean_mode : int {
     EUCLID_MODE_COUNT = 9
 };
 
+constexpr int EUCLIDEAN_LANES = 4;
 
 // ============================================================================
 // PRNG / presets / smoothing
@@ -97,12 +105,7 @@ constexpr int SMOOTH_FRAMES  = 48;
 // Euclidean tuning offsets
 // ============================================================================
 // offsets[mode][engine lane] = semitones above root.
-// Engine mapping used by selector mode:
-//   lane 0 = Kick
-//   lane 1 = Snare
-//   lane 2 = Metal
-//   lane 3 = Tom/Perc
-static const float EUCLID_OFFSETS[EUCLID_MODE_COUNT][4] = {
+static const float EUCLID_OFFSETS[EUCLID_MODE_COUNT][EUCLIDEAN_LANES] = {
     { 0.f,  0.f,  0.f,  0.f},  // 0: Off
     { 0.f,  1.f,  2.f,  3.f},  // 1: E(4,4)
     { 0.f,  1.f,  3.f,  4.f},  // 2: E(4,6)

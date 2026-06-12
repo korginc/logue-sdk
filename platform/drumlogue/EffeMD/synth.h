@@ -187,6 +187,10 @@ public:
                 if (value >= 0 && value < INST_COUNT) return instruments_strings[value];
                 break;
 
+            case K_UseRatio:
+                return value == 1 ?  "Ratio" : "ModIdx";
+                break;
+
             case K_Euclidean_Tuning:
                 if (value >= 0 && value < EUCLID_MODE_COUNT) return euclidean_mode_strings[value];
                 break;
@@ -198,7 +202,7 @@ public:
                     synth_.models[instrument_id]->getParameter((fm_param_index_t)index);
                 if (actual_value == 255.0f)
                     return "x"; // NOTE first page will not refresh until another page is selected!!
-                snprintf(strbuf_, sizeof(strbuf_), "O:%.3f", actual_value);
+                snprintf(strbuf_, sizeof(strbuf_), ":%.f", actual_value);
                 return strbuf_;
             }
         }

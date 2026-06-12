@@ -85,7 +85,7 @@ void FmKickModel::setParameter(fm_param_index_t param_index, float value) {
     // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
-            f_b = 20.0f + value * 0.8f;
+            f_b = 20.0f + value * 0.4f; //0..200
             break;
         case K_Modulation_Frequency:
             f_m = 50.0f + value * 19.5f;
@@ -95,8 +95,8 @@ void FmKickModel::setParameter(fm_param_index_t param_index, float value) {
             fmo_set_feedback(&mod_op_, b_m);
             break;
         case K_Modulation_Index:
-            I = value * 0.1f;
-            ratio_index = (int)(value * 0.639f); // index 0..63
+            I = value * 0.05f;  // 0..200
+            ratio_index = (int)(value * 0.3195f); // index 0..63
             break;
         case K_Modulation_Decay:
             d_m = 0.001f + value * 0.01999f;
@@ -136,3 +136,43 @@ float FmKickModel::getParameter(fm_param_index_t param_index) {
         default:                    return 255.0f;  // invalid
     }
 }
+
+
+    // // Carrier frequency (pitch of the drum)
+    // CustomControls::ParameterSlider("f_b (Base Frequency)", &f_b, 20.0f, 100.0f);
+
+    // // UI: Ratio mode toggle
+    // ImGui::Checkbox("Lock Modulator to Ratio", &use_ratio_mode);
+    // if (use_ratio_mode) {
+    //     ImGui::SliderInt("Modulator Ratio Index", &ratio_index, 0, num_ratios - 1);
+    //     if (ImGui::IsItemHovered()) {
+    //         float num = ratios[ratio_index][0];
+    //         float den = ratios[ratio_index][1];
+    //         char buf[32];
+    //         snprintf(buf, sizeof(buf), "Current Ratio: %.0f:%.0f (%.3fx)", num, den, num/den);
+    //         ImGui::SetTooltip("%s", buf);
+    //     }
+    // } else {
+    //     // Modulator frequency (determines harmonic complexity)
+    //     CustomControls::ParameterSlider("f_m (Modulator Freq)", &f_m, 50.0f, 2000.0f);
+    // }
+    // // New: Sync modulator freq envelope to carrier
+    // ImGui::Checkbox("Sync Modulator Freq Envelope to Carrier", &mod_env_sync);
+
+    // // Volume envelope decay (controls how long the drum rings out)
+    // CustomControls::ParameterSlider("d_b (Amp Decay)", &d_b, 0.01f, 2.0f);
+
+    // // Modulation index (depth of FM, sharpness of attack)
+    // CustomControls::ParameterSlider("I (Mod Index)", &I, 0.0f, 10.0f, 0.001f, 0.01f);
+
+    // // Modulator envelope decay (shorter = clickier attack)
+    // CustomControls::ParameterSlider("d_m (Mod Decay)", &d_m, 0.001f, 2.0f, 0.001f, 0.01f);
+
+    // // Feedback on the modulator (adds noise/grit to tone)
+    // CustomControls::ParameterSlider("b_m (Mod Feedback)", &b_m, .0f, 16.0f, 1, 2);
+
+    // // Frequency sweep amount (in Hz)
+    // CustomControls::ParameterSlider("A_f (Freq Sweep Amt)", &A_f, 0.0f, 1000.0f);
+
+    // // Frequency envelope decay (how fast pitch sweep drops)
+    // CustomControls::ParameterSlider("d_f (Freq Sweep Decay)", &d_f, 0.001f, 2.0f, 0.001f, 0.01f  );

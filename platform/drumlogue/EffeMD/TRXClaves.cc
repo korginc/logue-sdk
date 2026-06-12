@@ -49,25 +49,30 @@ void TRXClaves::loadPreset(uint8_t idx) {
     }
 };
 void TRXClaves::setParameter(fm_param_index_t param_index, float value) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
-            pitch = 200.0f + value * 38.0f;
+        // SliderFloat("Pitch", &pitch, 200.0f, 4000.0f);
+            pitch = 100.0f + value * 19.5f; //0..200
             break;
         case K_Decay_A:
             // Claves are a short click. The original 0.01..5 s range turned the
             // two beating sines into a gong at the default value; clamp to a
             // clave-length range (~5..100 ms). The long-decay voice lives on as
             // the separate "TRX Gong" instrument.
-            decay = 0.005f + value * 0.00095f;
-            break;
+        // SliderFloat("Decay", &decay, 0.01f, 0.5f);
+        decay = 0.005f + value * 0.00095f;
+        break;
         case K_Mix:
-            balance = value * 0.01f;
-            break;
+        // SliderFloat("Balance", &balance, 0.0f, 1.0f);
+        balance = value * 0.01f;
+        break;
         case K_Gap:
+        // SliderFloat("Interval", &interval, 0.0f, 400.0f);
             interval = value * 4.0f;
             break;
         case K_Count:
+        // SliderFloat("Clip", &clip, 0.0f, 1.0f);
             clip = value * 0.01f;
             break;
         default:
@@ -75,7 +80,7 @@ void TRXClaves::setParameter(fm_param_index_t param_index, float value) {
     }
 };
 float TRXClaves::getParameter(fm_param_index_t param_index) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
             return pitch;

@@ -111,30 +111,38 @@ void FmCymbalModel::loadPreset(uint8_t idx) {
     }
 };
 void FmCymbalModel::setParameter(fm_param_index_t param_index, float value) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
-            fb = 100.0f + value * 9.9f;
+        // ParameterSlider("fb (Base Carrier)", &fb, 100.0f, 1000.0f);
+            fb = 100.0f + value * 4.5f; //0..200
             break;
         case K_Modulation_Frequency:
+        // ParameterSlider("fm (Base Mod)", &fm, 200.0f, 2000.0f);
             fm = 200.0f + value * 18.0f;
             break;
         case K_Modulation_Feedback:
-            bb = 0.01f + value * 0.0099f;
-            break;
+        // ParameterSlider("bb (Mod Feedback)", &bb, 0.0f, 1.0f);
+        bb = 0.01f + value * 0.0099f;
+        break;
         case K_Modulation_Index:
-            I = value * 0.3f;
-            break;
+        // ParameterSlider("I (FM Index)", &I, 0.0f, 30.0f);
+        I = value * 0.15f;   //0..200
+        break;
         case K_Modulation_Decay:
-            d_m = 0.01f + value * 0.0099f;
-            break;
+        // ParameterSlider("d_m (Mod Decay)", &d_m, 0.05f, 2.0f);
+        d_m = 0.01f + value * 0.0099f;
+        break;
         case K_Decay_A:
+        // ParameterSlider("d_b (Amp Decay)", &d_b, 0.05f, 4.0f);
             d_b = 0.05f + value * 0.0495f;
             break;
         case K_Sustain:
+        // ParameterSlider("sustain", &sustain, 0.0f, 1.0f);
             sustain = value * 0.01f;
             break;
         case K_HPF:
+        // ParameterSlider("f_hp (HPF Cutoff)", &f_hp, 100.0f, 2000.0f);
             f_hp = 100.0f + value * 19.9f;
             break;
         default:
@@ -142,7 +150,7 @@ void FmCymbalModel::setParameter(fm_param_index_t param_index, float value) {
     }
 };
 float FmCymbalModel::getParameter(fm_param_index_t param_index) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
             return fb;

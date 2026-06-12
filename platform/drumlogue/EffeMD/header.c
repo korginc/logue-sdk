@@ -23,40 +23,40 @@ const __unit_header unit_header_t unit_header = {
         // Instrument
         {0, 12, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"Instr"}},  // 0..INST_COUNT-1
         // Base Frequency: fundamental frequency of the FM
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"BasFrq"}},
+        {0, 200, 100, 100, k_unit_param_type_strings, 0, 0, 0, {"BasFrq"}},
         // Modulation Frequency: rate of modulation for the FM
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"ModFrq"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"ModFrq"}},
         // Modulation Index: depth of modulation for the FM
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"ModIdx"}},  // can be ratio index or absolute modulation index depending on UseRatio
+        {0, 200, 100, 100, k_unit_param_type_strings, 0, 0, 0, {"ModIdx"}},  // can be ratio index or absolute modulation index depending on UseRatio
 
         // Page 2:
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"ModDk"}},
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"ModFdk"}},
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"DkA"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"ModDk"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"ModFdk"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"DkA"}},
         {0, 1, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"UseRatio"}},
 
         // Page 3:
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"Mix"}},
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"HPF"}},
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"LPF"}},
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"Sustain"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"Mix"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"HPF"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"LPF"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"Sustain"}},
 
         // Page 4:
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"FrqSwp"}},
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"SwpDk"}},
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"NzLvl"}},
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"NzDk"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"FrqSwp"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"SwpDk"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"NzLvl"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"NzDk"}},
 
         // Page 5:
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"MdFrqB"}},
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"DkB"}},
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"MdIdxB"}},
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"Phase"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"MdFrqB"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"DkB"}},
+        {0, 200, 100, 100, k_unit_param_type_strings, 0, 0, 0, {"MdIdxB"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"Phase"}},
 
         // Page 6:
         {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"Gap"}},
-        {1, 6, 0, 1, k_unit_param_type_strings, 0, 0, 0, {"Count"}},
-        {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"-"}},  // TODO reserved for future use
+        {1, 6, 0, 3, k_unit_param_type_strings, 0, 0, 0, {"Count"}},
+        {0, 100, 50, 50, k_unit_param_type_strings, 0, 0, 0, {"-"}},  // TODO reserved for future use
         // EuclTun: Euclidean per-voice pitch spread. Assigns voice i a semitone
         //   offset = floor(i * n / 4) so the 4 voices are maximally spread across
         //   n chromatic steps. Mode 0 = off (all voices same pitch).

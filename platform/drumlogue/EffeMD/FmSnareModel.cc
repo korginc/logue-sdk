@@ -65,27 +65,35 @@ void FmSnareModel::setParameter(fm_param_index_t param_index, float value) {
     // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
-            f_b = 100.0f + value * 3.0f;
+        // ParameterSlider("f_b (Tone Freq)", &f_b, 100.0f, 400.0f);
+            f_b = 50.0f + value * 1.75f;    //0..200
             break;
         case K_Modulation_Frequency:
+        // ParameterSlider("f_m (Mod Freq)", &f_m, 500.0f, 3000.0f);
             f_m = 500.0f + value * 25.0f;
             break;
         case K_Modulation_Index:
-            I = value * 0.5f;
+        // ParameterSlider("I (Mod Index)", &I, 0.0f, 50.0f);
+            I = value * 0.25f;    //0..200
             break;
         case K_Modulation_Decay:
+        // ParameterSlider("d_m (Mod Decay)", &d_m, 0.01f, 1.0f);
             d_m = 0.01f + value * 0.0099f;
             break;
         case K_Decay_A:
+        // ParameterSlider("d_b (Tone Decay)", &d_b, 0.01f, 1.0f);
             d_b = 0.01f + value * 0.0099f;
             break;
         case K_Noise_Level:
+        // ParameterSlider("Abrus (Noise Level)", &Abrus, 0.0f, 1.0f);
             Abrus = value * 0.01f;
             break;
         case K_Noise_Decay:
+        // ParameterSlider("dbrus (Noise Decay)", &dbrus, 0.01f, 1.0f);
             dbrus = value * 0.01f;
             break;
         case K_HPF:
+        // ParameterSlider("fhp (HPF Cutoff)", &fhp, 20.0f, 2000.0f);
             fhp = 20.0f + value * 19.80f;
             break;
         default:
@@ -106,3 +114,14 @@ float FmSnareModel::getParameter(fm_param_index_t param_index) {
         default:                     return 255.0f;  // invalid
     }
 }
+
+// void FmSnareModel::RenderControls() {
+//     CustomControls::ParameterSlider("f_b (Tone Freq)", &f_b, 100.0f, 400.0f);
+//     CustomControls::ParameterSlider("d_b (Tone Decay)", &d_b, 0.01f, 1.0f);
+//     CustomControls::ParameterSlider("f_m (Mod Freq)", &f_m, 500.0f, 3000.0f);
+//     CustomControls::ParameterSlider("I (Mod Index)", &I, 0.0f, 50.0f);
+//     CustomControls::ParameterSlider("d_m (Mod Decay)", &d_m, 0.01f, 1.0f);
+//     CustomControls::ParameterSlider("Abrus (Noise Level)", &Abrus, 0.0f, 1.0f);
+//     CustomControls::ParameterSlider("dbrus (Noise Decay)", &dbrus, 0.01f, 1.0f);
+//     CustomControls::ParameterSlider("fhp (HPF Cutoff)", &fhp, 20.0f, 2000.0f);
+// }

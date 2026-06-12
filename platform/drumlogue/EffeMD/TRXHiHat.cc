@@ -1,4 +1,5 @@
 #include "TRXHiHat.h"
+#include "constants.h"
 
 #if defined(__ARM_NEON) || defined(__ARM_NEON__)
 #include <arm_neon.h>
@@ -71,39 +72,14 @@ float TRXHiHat::Process() {
 
 float TRXHiHat::generateMetallicNoise() {
     // Square wave harmonic mix — crude but efficient
-    static const float freqs[6] = { 306.0f, 512.0f, 551.0f, 743.0f, 826.0f, 900.0f };
-    const float k = pitch_ratio_ * INV_SAMPLE_RATE;
     float result = 0.0f;
+    static const float freqs[6] = { 306.0f, 512.0f, 551.0f, 743.0f, 826.0f, 900.0f };
 
-#if defined(__ARM_NEON) || defined(__ARM_NEON__)
-    // NEON v7: advance the first 4 square oscillators in parallel lanes,
-    // the remaining 2 scalar. Increments are < 1, so a single masked subtract
-    // wraps the phase.
-    float32x4_t ph = vld1q_f32(phase_);
-    const float32x4_t inc = vmulq_n_f32(vld1q_f32(freqs), k);
-    ph = vaddq_f32(ph, inc);
-    uint32x4_t ge1 = vcgeq_f32(ph, vdupq_n_f32(1.0f));
-    ph = vsubq_f32(ph, vbslq_f32(ge1, vdupq_n_f32(1.0f), vdupq_n_f32(0.0f)));
-    // square: phase < 0.5 ? +1 : -1
-    uint32x4_t lt = vcltq_f32(ph, vdupq_n_f32(0.5f));
-    float32x4_t sq = vbslq_f32(lt, vdupq_n_f32(1.0f), vdupq_n_f32(-1.0f));
-    vst1q_f32(phase_, ph);
-    float32x2_t s2 = vpadd_f32(vget_low_f32(sq), vget_high_f32(sq));
-    s2 = vpadd_f32(s2, s2);
-    result = vget_lane_f32(s2, 0);
-
-    for (int i = 4; i < 6; ++i) {
-        phase_[i] += freqs[i] * k;
-        if (phase_[i] >= 1.0f) phase_[i] -= 1.0f;
-        result += (phase_[i] < 0.5f ? 1.0f : -1.0f);
-    }
-#else
     for (int i = 0; i < 6; ++i) {
-        phase_[i] += freqs[i] * k;
+        phase_[i] += freqs[i] * pitch_ratio_ * INV_SAMPLE_RATE;
         if (phase_[i] >= 1.0f) phase_[i] -= 1.0f;
         result += (phase_[i] < 0.5f ? 1.0f : -1.0f);
     }
-#endif
 
     float white = drum_rng_bipolar(&rng_);
     return metal * (result / 6.0f) + (1.0f - metal) * white;
@@ -122,29 +98,38 @@ void TRXHiHat::loadPreset(uint8_t idx) {
     }
 };
 void TRXHiHat::setParameter(fm_param_index_t param_index, float value) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
-        case K_Decay_A:
-            decay = 0.01f + value * 0.0099f;
-            break;
         case K_Gap:
+        // SliderFloat("Gap", &gap, 0.0f, 1.0f);
             gap = value * 0.01f;
             break;
-        case K_Count:
-            peak = value * 0.01f;
+        case K_Decay_A:
+        // SliderFloat("Decay", &decay, 0.01f, 1.0f);
+            decay = 0.01f + value * 0.0099f;
             break;
         case K_HPF:
+        // SliderFloat("LPF Freq", &lpfFreq, 1000.0f, 12000.0f);
             hpfFreq = 100.0f + value * 99.0f;
             break;
         case K_LPF:
+        // SliderFloat("HPF Freq", &hpfFreq, 100.0f, 10000.0f);
             lpfFreq = 1000.0f + value * 110.0f;
+            break;
+        case K_Count:
+        // SliderFloat("Peak", &peak, 0.0f, 1.0f);
+            peak = value * 0.01f;
+            break;
+        case K_Noise_Level:
+        // SliderFloat("Metal", &metal, 0.0f, 1.0f);
+            metal = value * 0.01f;
             break;
         default:
             break;
     }
 };
 float TRXHiHat::getParameter(fm_param_index_t param_index) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Decay_A:
             return decay;
@@ -165,3 +150,12 @@ float TRXHiHat::getParameter(fm_param_index_t param_index) {
             break;
     }
 };
+
+// void TRXHiHat::RenderControls() {
+//     ImGui::SliderFloat("Gap", &gap, 0.0f, 1.0f);
+//     ImGui::SliderFloat("Decay", &decay, 0.01f, 1.0f);
+//     ImGui::SliderFloat("LPF Freq", &lpfFreq, 1000.0f, 12000.0f);
+//     ImGui::SliderFloat("HPF Freq", &hpfFreq, 100.0f, 10000.0f);
+//     ImGui::SliderFloat("Peak", &peak, 0.0f, 1.0f);
+//     ImGui::SliderFloat("Metal", &metal, 0.0f, 1.0f);
+// }

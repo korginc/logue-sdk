@@ -63,30 +63,38 @@ void TRXBassDrum::loadPreset(uint8_t idx) {
     }
 };
 void TRXBassDrum::setParameter(fm_param_index_t param_index, float value) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
-            pitch = 20.0f + value;
+        // SliderFloat("Pitch", &pitch, 20.0f, 120.0f);
+            pitch = 20.0f + value * 0.5;    //0..200
             break;
         case K_Modulation_Feedback:
-            ramp = value * 0.01f;
-            break;
+        // SliderFloat("Ramp", &ramp, 0.0f, 1.0f);
+        ramp = value * 0.01f;
+        break;
         case K_Modulation_Index:
-            harmonics = value * 0.01f;
-            break;
+        // SliderFloat("Harmonics", &harmonics, 0.0f, 1.0f);
+        harmonics = value * 0.005f; //0..200
+        break;
         case K_Modulation_Decay:
-            rampDecay = value * 0.01f;
-            break;
+        // SliderFloat("Ramp Decay", &rampDecay, 0.01f, 1.0f);
+        rampDecay = value * 0.01f;
+        break;
         case K_Decay_A:
-            decay = 0.01f + value * 0.0199f;
-            break;
+        // SliderFloat("Decay", &decay, 0.01f, 2.0f);
+        decay = 0.01f + value * 0.0199f;
+        break;
         case K_Noise_Level:
-            noise = value * 0.01f;
-            break;
+        // SliderFloat("Noise", &noise, 0.0f, 1.0f);
+        noise = value * 0.01f;
+        break;
         case K_Gap:
+        // SliderFloat("Start", &start, 0.0f, 2.0f);
             start = value * 0.0199f;
             break;
         case K_Count:
+        // SliderFloat("Clip", &clip, 0.0f, 1.0f);
             clip = value * 0.01f;
             break;
         default:
@@ -94,7 +102,7 @@ void TRXBassDrum::setParameter(fm_param_index_t param_index, float value) {
     }
 };
 float TRXBassDrum::getParameter(fm_param_index_t param_index) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
             return pitch;

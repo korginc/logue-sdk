@@ -212,7 +212,7 @@ Defects found and fixed:
       `header.c` must match `NUM_OF_PRESETS`.
 - [ ] **K_Reserved parameter** (page 6 slot 3): candidate uses — LFO,
       drive amount, or per-hit scatter.
-- [ ] **neon_sin accuracy**: cymbal/hihat NEON paths use polynomial sine
+- [X] **neon_sin accuracy**: cymbal/hihat NEON paths use polynomial sine
       (~1e-3 error) vs `fastersinfullf` scalar; A/B on hardware would be good.
 - [ ] **Backport fixes to Sonaglio**: `fastertanhf` negative-input bug and
       the unguarded NEON block live in Sonaglio's `float_math.h` too.

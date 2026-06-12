@@ -76,30 +76,38 @@ void TRXSnareDrum::loadPreset(uint8_t idx) {
 };
 
 void TRXSnareDrum::setParameter(fm_param_index_t param_index, float value) {
-    // user editable parameters are in range 1..100 - TODO 1..1000
+    // user editable parameters are in range 0..100 - TODO 1..1000
     switch (param_index) {
         case K_Base_Frequency:
-            pitch = 60.0f + value * 3.4f;
+        // SliderFloat("Pitch", &pitch, 60.0f, 400.0f);
+            pitch = 60.0f + value * 1.7f;   //0..200
             break;
         case K_Frequency_Sweep:
+        // SliderFloat("Snap", &snap, 0.0f, 1.0f);
             snap = value * 0.01f;
             break;
         case K_Noise_Level:
+        // SliderFloat("Noise", &noise, 0.0f, 1.0f);
             noise = value * 0.01f;
             break;
         case K_Mix:
+        // SliderFloat("Tone Balance", &tone, 0.0f, 1.0f);
             tone = value * 0.01f;
             break;
         case K_Sweep_Decay:
+        // SliderFloat("Bump", &bump, 0.0f, 1.0f);
             bump = value * 0.01f;
             break;
         case K_Decay_A:
+        // SliderFloat("Decay", &decay, 0.05f, 1.0f);
             decay = 0.05f + value * 0.0095f;
             break;
         case K_Gap:
+        // SliderFloat("Tune Interval", &tune, 0.0f, 400.0f);
             tune = value * 4.0f;
             break;
         case K_Count:
+        // SliderFloat("Clip", &clip, 0.0f, 1.0f);
             clip = value * 0.01f;
             break;
         default:
@@ -107,7 +115,7 @@ void TRXSnareDrum::setParameter(fm_param_index_t param_index, float value) {
     }
 };
 float TRXSnareDrum::getParameter(fm_param_index_t param_index) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
             return pitch;

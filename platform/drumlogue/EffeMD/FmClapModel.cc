@@ -73,39 +73,49 @@ void FmClapModel::loadPreset(uint8_t idx) {
     }
 };
 void FmClapModel::setParameter(fm_param_index_t param_index, float value) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
-            f_b = 100.0f + value * 11.0f;
+        // ParameterSlider("f_b (Base Freq)", &f_b, 100.0f, 1200.0f);
+            f_b = 100.0f + value * 5.5f;    //0..200
             break;
         case K_Modulation_Frequency:
+        // ParameterSlider("f_m (Mod Freq)", &f_m, 100.0f, 3000.0f);
             f_m = 100.0f + value * 29.0f;
             break;
         case K_Modulation_Feedback:
+        // ParameterSlider("bm (Mod Feedback)", &bm, 0.0f, 1.0f);
             bm = 0.01f + value * 0.0099f;
             break;
         case K_Modulation_Index:
-            I = value;
+        // ParameterSlider("I (Mod Index)", &I, 0.0f, 100.0f);
+            I = value * 0.5f;   //0..200
             break;
         case K_Modulation_Decay:
+        // ParameterSlider("d_m (Mod Decay)", &d_m, 0.01f, 1.0f);
             d_m = 0.01f + value * 0.0099f;
             break;
         case K_Decay_A:
+        // ParameterSlider("d1 (Pre-Clap Decay)", &d1, 0.005f, 0.6f);
             d1 = 0.005f + value * 0.00595f;
             break;
         case K_Decay_B:
+        // ParameterSlider("d2 (Final Clap Decay)", &d2, 0.01f, 0.9f);
             d2 = 0.01f + value * 0.0099f;
             break;
         case K_Gap:
+        // ParameterSliderInt("clap_count", &clap_count, 1, 6);
             clap_interval = 0.005f + value * 0.00045f;
             break;
         case K_Count:
+        // ParameterSlider("clap_interval (s)", &clap_interval, 0.005f, 0.05f);
             clap_count = value;
             break;
         case K_Noise_Level:
             noise = value * 0.01f;
             break;
         case K_HPF:
+        // ParameterSlider("fhp (HPF Cutoff)", &fhp, 20.0f, 2000.0f);
             fhp = 20.0f + value * 19.80f;
             break;
         default:
@@ -113,7 +123,7 @@ void FmClapModel::setParameter(fm_param_index_t param_index, float value) {
     }
 };
 float FmClapModel::getParameter(fm_param_index_t param_index) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
             return f_b;

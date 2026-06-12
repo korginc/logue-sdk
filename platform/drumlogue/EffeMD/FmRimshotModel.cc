@@ -52,33 +52,42 @@ void FmRimshotModel::loadPreset(uint8_t idx) {
     }
 };
 void FmRimshotModel::setParameter(fm_param_index_t param_index, float value) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
-            f_bA = 80.0f + value * 3.2f;
+        // ParameterSlider("f_bA (body freq)", &f_bA, 80.0f, 400.0f);
+            f_bA = 80.0f + value * 1.6f;    //0..200
             break;
         case K_Modulation_Frequency_B:
+        // ParameterSlider("f_bB (rim freq)", &f_bB, 200.0f, 1000.0f);
             f_bB = 200.0f + value * 8.0f;
             break;
         case K_Modulation_Index:
-            I_A = value * 0.5f;
+        // ParameterSlider("I_A (body mod index)", &I_A, 0.0f, 50.0f);
+            I_A = value * 0.25f;    //0..200
             break;
         case K_Modulation_Decay:
+        // ParameterSlider("d_m (mod env decay)", &d_m, 0.01f, 0.5f);
             d_m = 0.01f + value * 0.0049f;
             break;
         case K_Decay_A:
+        // ParameterSlider("d_bA (body decay)", &d_bA, 0.05f, 1.0f);
             d_bA = 0.05f + value * 0.0095f;
             break;
         case K_Decay_B:
+        // ParameterSlider("d_bB (rim decay)", &d_bB, 0.01f, 0.5f);
             d_bB = 0.01f + value * 0.0049f;
             break;
-        case K_Modulation_Index_B:
-            I_B = value * 0.5f;
+            case K_Modulation_Index_B:
+        // ParameterSlider("I_B (rim mod index)", &I_B, 0.0f, 50.0f);
+            I_B = value * 0.25f;
             break;
         case K_Mix:
+        // ParameterSlider("A_A (body mix)", &A_A, 0.0f, 1.0f);
             A_A = value * 0.01f;
             break;
         case K_HPF:
+        // ParameterSlider("f_hp (HPF cutoff)", &f_hp, 100.0f, 2000.0f);
             f_hp = 100.0f + value * 19.0f;
             break;
         default:
@@ -86,7 +95,7 @@ void FmRimshotModel::setParameter(fm_param_index_t param_index, float value) {
     }
 };
 float FmRimshotModel::getParameter(fm_param_index_t param_index) {
-    // user editable parameters are in range 1..100
+    // user editable parameters are in range 0..100
     switch (param_index) {
         case K_Base_Frequency:
             return f_bA;
@@ -107,7 +116,7 @@ float FmRimshotModel::getParameter(fm_param_index_t param_index) {
             return d_bB;
             break;
         case K_Modulation_Index_B:
-            return I_B;  // seconds
+            return I_B;  //
             break;
         case K_Mix:
             return A_A;
