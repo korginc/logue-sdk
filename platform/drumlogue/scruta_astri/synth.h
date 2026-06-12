@@ -74,6 +74,14 @@ public:
         lfo2.phase = 0.0f;
         lfo3.phase = 0.0f;
 
+        m_lfo1_p = 0.0f;
+        m_lfo2_p = 0.0f;
+        m_lfo3_p = 0.0f;
+
+        m_pitch_mod_multiplier = 1.0f;
+        m_f1_mod_multiplier = 1.0f;
+        m_f2_mod_multiplier = 1.0f;
+
         filter1.mode = mode_low; // Lowpass
         filter2.mode = mode_low; // Lowpass
 
@@ -431,7 +439,6 @@ public:
         float neon_buffer[neon_lanes];
         uint8_t out_idx_buffer[neon_lanes];
         float lfo_presence = 0.0f;
-        float lfo1_p = 0.0f, lfo2_p = 0.0f, lfo3_p = 0.0f; // Persistent values for drone modulation
         const float dc_bias = 0.005f; // adjust to taste (0.001-0.01 works)
 
         // Source selection: preset 95 = crystal drone, preset 96 = metal drone
@@ -499,9 +506,9 @@ public:
                 // We use a weighted sum to give more "morphing power" to LFO1 and LFO2.
                 lfo_presence = lfo1_presence * 0.5f + lfo2_presence * 0.4f + lfo3_presence * 0.1f;
 
-                lfo1_p = lfo1_presence;
-                lfo2_p = (l2_val * lfo2_p); // Use local persistent storage
-                lfo3_p = (l3_val * lfo3_p)
+                m_lfo1_p = lfo1_presence;
+                m_lfo2_p = (l2_val * m_lfo2_p); // Use local persistent storage
+                m_lfo3_p = (l3_val * m_lfo3_p);
                 switch (mod_target) {
                     case k_paramProgram:
                         // Macro target: subtle movement across multiple destinations.
@@ -515,7 +522,8 @@ public:
                         break;
                     case k_paramF1Cutoff:
                         // Mapping: Osc 1 -> Filter 1, Osc 2 -> Bypass
-                        m_osc1_filter_target = (fabsf(lfo1_presence) > fabsf(lfo2_presence)) : k_filter1, k_filter2;
+                        m_osc1_filter_target = (fabsf(lfo1_presence) > fabsf(lfo2_presence)) ?
+                                                k_filter1 : k_filter2;
                         m_osc2_filter_target = k_bypass;
                         m_f1_lfo_mult = fasterpow2f(l1_val * 3.0f);
                         m_f1_mod_multiplier = fasterpow2f(l2_val * 4.0f);
@@ -523,7 +531,8 @@ public:
                     case k_paramF2Cutoff:
                         // Mapping: Osc 1 -> Bypass, Osc 2 -> Filter 2
                         m_osc1_filter_target = k_bypass;
-                        m_osc2_filter_target = (fabsf(lfo1_presence) > fabsf(lfo2_presence)) : k_filter1, k_filter2;
+                        m_osc2_filter_target = (fabsf(lfo1_presence) > fabsf(lfo2_presence)) ?
+                                                k_filter1 : k_filter2;
                         m_f2_lfo_mult = fasterpow2f(l2_val * 3.0f);
                         m_f2_mod_multiplier = fasterpow2f(l1_val * 4.0f);
                         break;
@@ -660,8 +669,8 @@ public:
 
             if (use_drone) {
                 float drone_sig = use_metal_drone ?
-                    m_metal_drone.process(lfo1_p, lfo2_p, lfo3_p) :
-                    m_crystal_drone.process(lfo1_p, lfo2_p, lfo3_p);
+                    m_metal_drone.process(m_lfo1_p, m_lfo2_p, m_lfo3_p) :
+                    m_crystal_drone.process(m_lfo1_p, m_lfo2_p, m_lfo3_p);
                 f1_in = drone_sig; // Drones always run through the full chain
             } else {
                 // Oscillator 1 Morphing (Crossfading output values between old and new tables)
@@ -874,6 +883,8 @@ private:
     float m_lfo1_depth = 0.0f;
     float m_lfo2_depth = 0.0f;
     float m_lfo3_depth = 0.0f;
+    // Persistent values for drone modulation
+    float m_lfo1_p = 0.0f, m_lfo2_p = 0.0f, m_lfo3_p = 0.0f;
 
     float m_osc2_mix = 0.5f;
     float m_master_vol = 0.5f;

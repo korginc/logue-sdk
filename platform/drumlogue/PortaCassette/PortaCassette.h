@@ -29,7 +29,6 @@ struct prng_t { uint64x2_t state0, state1; };
 constexpr float pop_env_decay_ = 0.98f; // Increased from 0.96f for slightly longer, more audible pops.
 constexpr float big_pop_env_decay_ = 0.97f; // Sharper decay for clicks rather than drum-like bursts
 uint32_t sample_rate_ = 48000;
-float    inverse_sample_rate_ = 1.0f / 48000.0f;
 
 class alignas(16) PortaCassette {
 public:
@@ -181,14 +180,14 @@ public:
         float frequency = 2.0f + (knob_value * 48.0f) + tape_age_ * 10.0f; // tape age adds up to 10 Hz of extra pop frequency at max
 
         // Calculate per-sample probability at 48kHz
-        float sample_probability = frequency * inverse_sample_rate_;
+        float sample_probability = frequency * inverse_samplerate_;
 
         // Store the exact float threshold
         vinyl_pop_threshold_ = 1.0f - sample_probability;
 
         // Occasional Big Pops: 0.05Hz to 1.5Hz range
         float big_freq = 0.05f + (knob_value * 1.45f);
-        float big_prob = big_freq * inverse_sample_rate_;
+        float big_prob = big_freq * inverse_samplerate_;
         vinyl_big_pop_threshold_ = 1.0f - big_prob;
     }
 

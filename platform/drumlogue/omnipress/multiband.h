@@ -341,39 +341,33 @@ fast_inline void multiband_process(multiband_t* mb,
     float32x4_t sat_r_low, sat_r_mid, sat_r_high;
 
     if (mb->bands[BAND_LOW].drive > 0.01f) {
-      sat_l_low = vnegq_f32(
-          pirkle_triode_engine(low_l, mb->bands[BAND_LOW].drive,
-                               &mb->tube_bias_l[BAND_LOW], 3.2f, 1.1f, true));
-      sat_r_low = vnegq_f32(
-          pirkle_triode_engine(low_r, mb->bands[BAND_LOW].drive,
-                               &mb->tube_bias_l[BAND_LOW], 3.2f, 1.1f, false));
+      sat_l_low = pirkle_triode_engine(low_l, mb->bands[BAND_LOW].drive,
+                                       &mb->tube_bias_l[BAND_LOW], 3.2f, 1.1f, true);
+      sat_r_low = pirkle_triode_engine(low_r, mb->bands[BAND_LOW].drive,
+                                       &mb->tube_bias_l[BAND_LOW], 3.2f, 1.1f, false);
     } else {
-      sat_l_low = low_l;
-      sat_r_low = low_r;
+      sat_l_low = vnegq_f32(low_l);
+      sat_r_low = vnegq_f32(low_r);
     }
 
     if (mb->bands[BAND_MID].drive > 0.01f) {
-      sat_l_mid = vnegq_f32(
-          pirkle_triode_engine(mid_l, mb->bands[BAND_MID].drive,
-                               &mb->tube_bias_l[BAND_MID], 5.5f, 1.8f, true));
-      sat_r_mid = vnegq_f32(
-          pirkle_triode_engine(mid_r, mb->bands[BAND_MID].drive,
-                               &mb->tube_bias_l[BAND_MID], 5.5f, 1.8f, false));
+      sat_l_mid = pirkle_triode_engine(mid_l, mb->bands[BAND_MID].drive,
+                                       &mb->tube_bias_l[BAND_MID], 5.5f, 1.8f, true);
+      sat_r_mid = pirkle_triode_engine(mid_r, mb->bands[BAND_MID].drive,
+                                       &mb->tube_bias_l[BAND_MID], 5.5f, 1.8f, false);
     } else {
-      sat_l_mid = mid_l;
-      sat_r_mid = mid_r;
+      sat_l_mid = vnegq_f32(mid_l);
+      sat_r_mid = vnegq_f32(mid_r);
     }
 
     if (mb->bands[BAND_HIGH].drive > 0.01f) {
-      sat_l_high = vnegq_f32(
-          pirkle_triode_engine(high_l, mb->bands[BAND_HIGH].drive,
-                               &mb->tube_bias_l[BAND_HIGH], 6.0f, 2.5f, true));
-      sat_r_high = vnegq_f32(
-          pirkle_triode_engine(high_r, mb->bands[BAND_HIGH].drive,
-                               &mb->tube_bias_l[BAND_HIGH], 6.0f, 2.5f, false));
+      sat_l_high = pirkle_triode_engine(high_l, mb->bands[BAND_HIGH].drive,
+                                        &mb->tube_bias_l[BAND_HIGH], 6.0f, 2.5f, true);
+      sat_r_high = pirkle_triode_engine(high_r, mb->bands[BAND_HIGH].drive,
+                                        &mb->tube_bias_l[BAND_HIGH], 6.0f, 2.5f, false);
     } else {
-      sat_l_high = high_l;
-      sat_r_high = high_r;
+      sat_l_high = vnegq_f32(high_l);
+      sat_r_high = vnegq_f32(high_r);
     }
     // Correct the common-cathode native inversion signature
     sat_l_low  = vnegq_f32(sat_l_low);  sat_r_low  = vnegq_f32(sat_r_low);

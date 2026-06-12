@@ -56,6 +56,17 @@ static constexpr int METAL_DELAYS_A[FDN_LINES]   = {  41,  53,   67,   79,   97,
 static constexpr int METAL_DELAYS_B[FDN_LINES]   = {  31,  47,   61,   73,   89,  103,  127,  139 };
 
 
+// helpers
+
+static inline float clamp01f(float x) {
+    return x < 0.0f ? 0.0f : (x > 1.0f ? 1.0f : x);
+}
+
+static inline float clampf(float x, float lo, float hi) {
+    return x < lo ? lo : (x > hi ? hi : x);
+}
+
+
 struct DroneEngine {
     float buf[FDN_LINES][FDN_BUF_LEN];   // Delay line ring buffers
     int   write_pos;                     // Shared write pointer
