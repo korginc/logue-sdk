@@ -8,7 +8,7 @@
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
+constexpr float twopi = 6.2831853f;
 static inline float xorshift_f32(uint32_t& s) {
     s ^= s << 13;
     s ^= s >> 17;
@@ -392,20 +392,19 @@ void PercussionSpatializer::randomize_hit() {
 static fast_inline void mix_clone_batch4(clone_t* clones,
                                          int base,
                                          const delay_line_t& delay,
-                                         float rate,
                                          bool is_angel,
                                          float gap_boost,
-                                         const float* wobble_sins,
                                          float& wet_l,
                                          float& wet_r) {
-    (void)rate;  // wobble_phase now accumulates in render_block4; rate no longer used here
     alignas(16) float s0l[4], s1l[4], s0r[4], s1r[4], frs[4], lpc[4], lpsl[4], lpsr[4], gl[4], gr[4];
 
     for (int lane = 0; lane < 4; ++lane) {
         clone_t& c = clones[base + lane];
         float total_d = c.delay_samples + c.scatter_samples;
         if (total_d < 2.0f) total_d = 2.0f;
-        total_d += wobble_sins[base + lane] * c.wobble_depth_samples;
+
+        // Smooth LFO calculation
+        total_d += fastersinfullf(c.wobble_phase) * c.wobble_depth_samples;
 
         float raw_pos = (float)(delay.write - 1) - total_d;
         float safe_pos = raw_pos + (float)(delay_line_t::kLen * 8);
@@ -422,6 +421,8 @@ static fast_inline void mix_clone_batch4(clone_t* clones,
         lpc[lane]  = c.lp_coef;
         lpsl[lane] = c.lp_state_l;
         lpsr[lane] = c.lp_state_r;
+
+        // Simple 1-pole gain smoothing to stop clicking on randomization
         gl[lane]   = c.net_gain_l * gap_boost;
         gr[lane]   = c.net_gain_r * gap_boost;
     }
@@ -461,20 +462,17 @@ static fast_inline void mix_clone_batch4(clone_t* clones,
 static fast_inline void mix_clone_batch2(clone_t* clones,
                                          int base,
                                          const delay_line_t& delay,
-                                         float rate,
                                          bool is_angel,
                                          float gap_boost,
-                                         const float* wobble_sins,
                                          float& wet_l,
                                          float& wet_r) {
-    (void)rate;
     alignas(16) float dl[2], dr[2], gainL[2], gainR[2];
 
     for (int lane = 0; lane < 2; ++lane) {
         clone_t& c = clones[base + lane];
         float total_d = c.delay_samples + c.scatter_samples;
         if (total_d < 2.0f) total_d = 2.0f;
-        total_d += wobble_sins[base + lane] * c.wobble_depth_samples;
+        total_d += fastersinfullf(c.wobble_phase) * c.wobble_depth_samples;
 
         float raw_pos = (float)(delay.write - 1) - total_d;
         float safe_pos = raw_pos + (float)(delay_line_t::kLen * 8);
@@ -507,16 +505,14 @@ static fast_inline void mix_clone_batch2(clone_t* clones,
 static fast_inline void mix_clone_scalar(clone_t& c,
                                          int idx,
                                          const delay_line_t& delay,
-                                         float rate,
                                          bool is_angel,
                                          float gap_boost,
-                                         const float* wobble_sins,
                                          float& wet_l,
                                          float& wet_r) {
-    (void)rate;
+    (void)idx;
     float total_d = c.delay_samples + c.scatter_samples;
     if (total_d < 2.0f) total_d = 2.0f;
-    total_d += wobble_sins[idx] * c.wobble_depth_samples;
+    total_d += fastersinfullf(c.wobble_phase) * c.wobble_depth_samples;
 
     float raw_pos = (float)(delay.write - 1) - total_d;
     float safe_pos = raw_pos + (float)(delay_line_t::kLen * 8);
@@ -539,7 +535,7 @@ static fast_inline void mix_clone_scalar(clone_t& c,
 
 static fast_inline void render_one_frame(PercussionSpatializer* self,
                                          float in_l, float in_r,
-                                         const float* wobble_sins,
+                                         float phase_inc,
                                          float& out_l, float& out_r) {
     self->set_delay(in_l, in_r);
 
@@ -549,13 +545,20 @@ static fast_inline void render_one_frame(PercussionSpatializer* self,
 
     int i = 0;
     for (; i + 3 < self->get_clone_count(); i += 4) {
-        mix_clone_batch4(self->get_clones(), i, self->get_delay(), self->get_rate(), self->get_mode(), gap_boost, wobble_sins, wet_l, wet_r);
+        mix_clone_batch4(self->get_clones(), i, self->get_delay(), self->get_mode(), gap_boost, wet_l, wet_r);
     }
     for (; i + 1 < self->get_clone_count(); i += 2) {
-      mix_clone_batch2(self->get_clones(), i, self->get_delay(), self->get_rate(), self->get_mode(), gap_boost, wobble_sins, wet_l, wet_r);
+      mix_clone_batch2(self->get_clones(), i, self->get_delay(), self->get_mode(), gap_boost, wet_l, wet_r);
     }
     for (; i < self->get_clone_count(); ++i) {
-        mix_clone_scalar(self->get_clones()[i], i, self->get_delay(), self->get_rate(), self->get_mode(), gap_boost, wobble_sins, wet_l, wet_r);
+        mix_clone_scalar(self->get_clones()[i], i, self->get_delay(), self->get_mode(), gap_boost, wet_l, wet_r);
+    }
+
+    // Advance LFO phases per-sample
+    for (int j = 0; j < self->get_clone_count(); ++j) {
+        clone_t& c = self->get_clones()[j];
+        c.wobble_phase += phase_inc * c.wobble_rate_mul;
+        if (c.wobble_phase >= twopi) c.wobble_phase -= twopi;
     }
 
     const float wet_drive = 1.0f + 0.18f * self->get_gap() + 0.12f * self->get_scatter();
@@ -588,22 +591,12 @@ void PercussionSpatializer::render_block4(const float* in, float* out) {
         update_clone_dynamics(); // Forces instant re-calculation for the current block!
     }
 
-    // 4. Advance wobble LFO phase for each clone.
-    // rate_ ∈ [0.05, 10.0] maps directly to LFO Hz. Per 4-sample block:
-    // Δphase = 2π * rate_hz * 4 / sample_rate.
-    float wobble_sins[kMaxClones];
-    {
-      const float phase_inc_base = 6.2831853f * rate_ * 4.0f * inverse_sample_rate_;
-      for (int i = 0; i < clone_count_; ++i) {
-        wobble_sins[i] = fastersinfullf(clones_[i].wobble_phase);
-        clones_[i].wobble_phase += phase_inc_base * clones_[i].wobble_rate_mul;
-        if (clones_[i].wobble_phase >= 6.2831853f) clones_[i].wobble_phase -= 6.2831853f;
-        }
-    }
+    // Calculate phase increment per sample
+    const float phase_inc = twopi * rate_ * inverse_sample_rate_;
 
     for (int s = 0; s < 4; ++s) {
         float ol = 0.0f, orr = 0.0f;
-        render_one_frame(this, in[s * 2], in[s * 2 + 1], wobble_sins, ol, orr);
+        render_one_frame(this, in[s * 2], in[s * 2 + 1], phase_inc, ol, orr);
         out[s * 2]     = ol;
         out[s * 2 + 1] = orr;
     }
@@ -613,17 +606,10 @@ void PercussionSpatializer::render_block4(const float* in, float* out) {
 // render_scalar_frame — scalar fallback for the tail (0-3 frames)
 // ---------------------------------------------------------------------------
 void PercussionSpatializer::render_scalar_frame(const float* in, float* out) {
-    float wobble_sins[kMaxClones];
-    {
-      const float phase_inc_base = 6.2831853f * rate_ * 1.0f * inverse_sample_rate_;
-      for (int i = 0; i < clone_count_; ++i) {
-        wobble_sins[i] = fastersinfullf(clones_[i].wobble_phase);
-        clones_[i].wobble_phase += phase_inc_base * clones_[i].wobble_rate_mul;
-        if (clones_[i].wobble_phase >= 6.2831853f) clones_[i].wobble_phase -= 6.2831853f;
-        }
-    }
+    const float phase_inc = twopi * rate_ * inverse_sample_rate_;
+
     float ol = 0.0f, orr = 0.0f;
-    render_one_frame(this, in[0], in[1], wobble_sins, ol, orr);
+    render_one_frame(this, in[0], in[1], phase_inc, ol, orr);
     out[0] = ol;
     out[1] = orr;
 }
