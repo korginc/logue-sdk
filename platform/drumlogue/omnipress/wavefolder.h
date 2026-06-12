@@ -59,6 +59,8 @@ typedef struct {
     float32x4_t last_input;
     uint32x4_t zero_cross;
 
+    float32x4_t sub_lp_state1; // First Low-pass filter state for sub-octave smoothing
+    float32x4_t sub_lp_state2; // Second Low-pass filter state for sub-octave smoothing
     // FIXED: PRNG for sub-octave mode (instead of rand())
     prng_simple_t prng;
 } wavefolder_t;
@@ -72,6 +74,8 @@ fast_inline void wavefolder_init(wavefolder_t* wf) {
     wf->output_gain = vdupq_n_f32(1.0f);
     wf->sub_phase = vdupq_n_f32(0.0f);
     wf->last_input = vdupq_n_f32(0.0f);
+    wf->sub_lp_state1 = vdupq_n_f32(0.0f); // Initialize sub-octave LP filter state 1
+    wf->sub_lp_state2 = vdupq_n_f32(0.0f); // Initialize sub-octave LP filter state 2
     wf->zero_cross = vdupq_n_u32(0);
 
     // Initialize PRNG with fixed seed
@@ -92,11 +96,10 @@ fast_inline void wavefolder_set_drive(wavefolder_t* wf, float drive_percent) {
     float drive = drive_percent * 0.01f;
     wf->drive = vdupq_n_f32(drive);
 
-    // Makeup gain compensates for the pre-gain (1 + drive*39) applied in
-    // wavefolder_process. At drive=0 this is 1.0 (passthrough, matches CLEAN
-    // mode level). At drive=1.0 it is 0.25 which cancels the 4x pre-gain for
-    // signals still in the linear range of the waveshaper.
-    float makeup = 1.0f / (1.0f + drive * 39.0f);
+    // Makeup gain now scales positively with drive to compensate for perceived
+    // loudness reduction due to saturation and to ensure a healthy output level.
+    // Scales from 1.0x (drive=0) to 5.0x (drive=1).
+    float makeup = 1.0f + drive * 4.0f; // Increased scaling for better audibility
     wf->output_gain = vdupq_n_f32(makeup);
 }
 
@@ -169,21 +172,28 @@ fast_inline float32x4_t suboctave_process(wavefolder_t* wf, float32x4_t in_v) {
     float last  = vgetq_lane_f32(wf->last_input, 0);
     float phase = vgetq_lane_f32(wf->sub_phase,  0);
 
+    float lp_state1 = vgetq_lane_f32(wf->sub_lp_state1, 0); // Get LP filter state 1
+    float lp_state2 = vgetq_lane_f32(wf->sub_lp_state2, 0); // Get LP filter state 2
+    const float lp_coeff = 0.85f; // This coefficient can be tuned for desired smoothness
     for (int i = 0; i < 4; ++i) {
         const float x = buf_in[i];
         if (last < 0.0f && x >= 0.0f) {
             // Positive zero crossing: advance sub-octave by a half cycle.
-            // 3% jitter gives organic feel without audible pitch noise.
-            float rnd = (float)(prng_simple_next(&wf->prng) & 0x3FFF) / 16384.0f;
-            phase += 0.5f + rnd * 0.03f;
+            phase += 0.5f;
             if (phase >= 1.0f) phase -= 1.0f;
         }
-        buf_out[i] = (phase < 0.5f) ? 1.0f : -1.0f;
+        float square_wave = (phase < 0.5f) ? 1.0f : -1.0f;
+        // Apply two-pole low-pass filter to smooth the sub-octave square wave
+        lp_state1 = lp_coeff * lp_state1 + (1.0f - lp_coeff) * square_wave;
+        lp_state2 = lp_coeff * lp_state2 + (1.0f - lp_coeff) * lp_state1; // Cascade
+        buf_out[i] = lp_state2;
         last = x;
     }
 
     wf->last_input = vdupq_n_f32(last);
     wf->sub_phase  = vdupq_n_f32(phase);
+    wf->sub_lp_state1 = vdupq_n_f32(lp_state1); // Store LP filter state 1
+    wf->sub_lp_state2 = vdupq_n_f32(lp_state2); // Store LP filter state 2
     return vld1q_f32(buf_out);
 }
 
@@ -239,9 +249,9 @@ fast_inline float32x4x2_t wavefolder_process(wavefolder_t *wf,
     float32x4_t mono = vmulq_n_f32(vaddq_f32(driven_l, driven_r), 0.5f);
     float32x4_t sub = suboctave_process(wf, mono);
     // Use driven signals instead of raw input to prevent volume drop as drive increases.
-    // Mix the sub-octave with the soft-clipped signal to ensure distortion is audible.
-    float32x4_t sub_l = vmulq_f32(sub, vabsq_f32(driven_l));
-    float32x4_t sub_r = vmulq_f32(sub, vabsq_f32(driven_r));
+    // Both components are now soft-clipped to prevent the sum from exceeding headroom at high drive.
+    float32x4_t sub_l = vmulq_f32(sub, soft_clip(vabsq_f32(driven_l)));
+    float32x4_t sub_r = vmulq_f32(sub, soft_clip(vabsq_f32(driven_r)));
     out.val[0] = vmulq_n_f32(vaddq_f32(soft_clip(driven_l), sub_l), 0.5f);
     out.val[1] = vmulq_n_f32(vaddq_f32(soft_clip(driven_r), sub_r), 0.5f);
     break;

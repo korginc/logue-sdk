@@ -9,7 +9,9 @@
 
 #include <cstdint>
 #include "arm_neon.h"
-
+#ifndef fast_inline
+#define fast_inline inline __attribute__((always_inline, optimize("Ofast")))
+#endif
 // ============================================================================
 // DSP Constants
 // ============================================================================

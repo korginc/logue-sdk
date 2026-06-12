@@ -69,13 +69,13 @@ static const char *k_preset_names[k_preset_number] =
 //    {PRESET,  TIME, LOW, HIGH, DAMP, WIDE, DFSN, PILL, SHMR, PDLY, VIBR}
 static const int32_t k_presets[k_preset_number][k_total] = {
     // 0: foresta - mellow, sparse, "wood" (warm lows, short, moderate decay)
-    {k_foresta,   40,  60,   40,  220,   90,   60,    3,    0,    0,  15},
+    {k_foresta,   50,  60,   40,  220,   90,   50,    3,    0,    40,  15},
     // 1: tempio  - sombre, "stone" (heavy lows, long, dark, 6-ch)
     {k_tempio,    70,  80,   25,  150,  150,   80,    2,   10,   10,  10},
     // 2: labirinto - center values with random ping-pong stereo bouncing
     {k_labirinto, 60,  50,   50,  510,  100,   50,    1,    0,   10,  45},
     // 3: esotico - microtonal echoes on non-Western scale
-    {k_esotico,   40,  30,   80,  800,  80,    50,    4,    45,    0,  30},
+    {k_esotico,   50,  30,   80,  800,  80,    50,    4,    45,    0,  30},
     // 4: stellare - long, subtle, "spacey" shimmer (8-ch + shimmer)
     {k_stellare,  90,  70,   80,  520,  190,   8,    4,   35,   20,   5},
 };
@@ -424,7 +424,7 @@ public:
         float fc;
         switch (filterMode) {
             case kFilterWood:
-                fc = 1000.0f + dampingCoeff * 6000.0f;   // 1000..7000 Hz
+                fc = 1000.0f + dampingCoeff * 7000.0f;   // 1000..8000 Hz
                 break;
             case kFilterStone:
                 fc = 80.0f + dampingCoeff * 4920.0f;    // 80..5000 Hz

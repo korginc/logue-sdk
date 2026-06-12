@@ -115,7 +115,12 @@ public:
     /*===========================================================================*/
 
     inline void NoteOn(uint8_t note, uint8_t velocity) {
-    fm_perc_synth_note_on(&synth_, note, velocity);
+        // MIDI: note-on with velocity 0 is a note-off.
+        if (velocity == 0) {
+            fm_perc_synth_note_off(&synth_, note);
+            return;
+        }
+        fm_perc_synth_note_on(&synth_, note, velocity);
     }
 
     inline void NoteOff(uint8_t note) {

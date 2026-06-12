@@ -114,9 +114,10 @@ fast_inline void perc_engine_update(perc_engine_t* perc,
                                               vmulq_n_f32(inv_body, 0.50f)));
 
     // Body makes the hit feel present; Attack adds a little controlled push.
-    perc->output_gain = vaddq_f32(vdupq_n_f32(0.55f),
-                                  vaddq_f32(vmulq_n_f32(perc->body, 0.35f),
-                                             vmulq_n_f32(perc->attack, 0.12f)));
+    // Range reduced vs pre-fix to compensate for removing the double-envelope multiply.
+    perc->output_gain = vaddq_f32(vdupq_n_f32(0.45f),
+                                  vaddq_f32(vmulq_n_f32(perc->body, 0.28f),
+                                             vmulq_n_f32(perc->attack, 0.10f)));
 
     // Drive is short and attack-weighted.
     perc->drive = vaddq_f32(vdupq_n_f32(0.08f),
@@ -189,8 +190,10 @@ fast_inline float32x4_t perc_engine_process(perc_engine_t* perc,
     float32x4_t mod1 = neon_sin_fast(perc->phase[1]);
     float32x4_t mod2 = neon_sin_fast(perc->phase[2]);
 
+    /* Body FM tracks the same linear envelope domain as amplitude so it sustains
+     * audibly through the body of the hit (was env2, which killed it too fast). */
     float32x4_t body_part = vmulq_f32(mod1,
-                                      vmulq_f32(env2, perc->body_index));
+                                      vmulq_f32(envelope, perc->body_index));
     float32x4_t strike_part = vmulq_f32(mod2,
                                         vmulq_f32(env8, perc->strike_index));
 
@@ -213,7 +216,9 @@ fast_inline float32x4_t perc_engine_process(perc_engine_t* perc,
     output = vmulq_f32(output, drive_gain);
     output = fm_cubic_clip(output);
 
-    output = vmulq_f32(output, vmulq_f32(envelope, perc->output_gain));
+    /* Single envelope application: body_mix was already multiplied by envelope above.
+     * The previous code multiplied by envelope a second time, giving body_env^2 amplitude. */
+    output = vmulq_f32(output, perc->output_gain);
 
     return vbslq_f32(active_mask, output, vdupq_n_f32(0.0f));
 }

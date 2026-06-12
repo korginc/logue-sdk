@@ -15,7 +15,7 @@ const __unit_header unit_header_t unit_header = {
     .version     = 0x00010000U,   // v1.0.0
     .name        = "PortaK7",     // 8 chars max for OLED
     .num_presets = 0,             // Can add presets later
-    .num_params  = 14,            // 3 full pages
+    .num_params  = 16,            // 3 full pages
 
     .params = {
         // ==========================================
@@ -69,8 +69,8 @@ const __unit_header unit_header_t unit_header = {
         { 0, 10, 0, 5, k_unit_param_type_none, 0, 0, 0, {"X-talk"} },
         // ID 13: Tape Bias Hiss (0 to 100%)
         { 0, 100, 0, 15, k_unit_param_type_percent, 0, 0, 0, {"Hiss"} },
-        { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
-        { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
+        { 1, 20, 8, 10, k_unit_param_type_none, 2, 1, 0, {"Attack"} },
+        { 1, 100, 5, 50, k_unit_param_type_none, 4, 1, 0, {"Release"} },
 
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },
         { 0, 0, 0, 0, k_unit_param_type_none, 0, 0, 0, {""} },

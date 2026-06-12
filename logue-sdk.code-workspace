@@ -4,5 +4,8 @@
 			"path": "."
 		}
     ],
-    "settings": {}
+	"settings": {
+		"editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+		"editor.tabCompletion": "on"
+	}
 }

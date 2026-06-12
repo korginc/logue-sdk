@@ -1,569 +1,237 @@
 /**
  * @file fm_presets.cc
- * @brief Factory preset data for Sonaglio FM percussion synth.
+ * @brief Factory preset bank for Sonaglio FM percussion synth.
  *
- * HW test preset bank.
+ * Bank layout (64 presets):
+ *   0..46   General-MIDI drum kit, matching the GmDrumNote list of
+ *           copych/ESP32-S3_FM_Drum_Synth (notes 35..81). Each preset is a
+ *           drum-voice TIMBRE; pitch is taken from the played MIDI note.
+ *   47..63  Sonaglio-specific experimental and combo presets.
  *
- * The first four values after each preset name are:
+ * Field order (after name) — 24 values in 6 rows of 4:
  *   instrument, blend, gap, scatter
+ *   kick_atk,  kick_body,  snare_atk, snare_body
+ *   metal_atk, metal_body, perc_atk,  perc_body
+ *   lfo1_shape, lfo1_rate, lfo1_target, lfo1_depth
+ *   eucl_tun,  lfo2_rate, lfo2_target, lfo2_depth
+ *   env_shape, hit_shape, body_tilt, noise_char
  *
- * Presets are deliberately named test1..test26 for the current hardware
- * evaluation phase. Once envelopes/output gain/engine balance are confirmed,
- * these can be replaced by musical factory presets.
+ * Notes:
+ *   - The Hat engine is driven by metal_atk / metal_body (shared page).
+ *   - The Tom instrument routes to the Perc engine (perc_atk / perc_body).
+ *   - env_shape: bits[6:0] index the envelope ROM; bit7 selects the Metal
+ *     character (0 = Cymbal, 1 = Gong). Values >127 set the Gong character.
+ *   - Only the selected instrument's engine(s) produce sound; inactive engine
+ *     params are left at neutral values.
  */
 
 #include "fm_presets.h"
 #include <stddef.h>
 
-const fm_preset_t FM_PRESETS_TEST[NUM_OF_PRESETS] = {
-    // test1
-    {
-        "test1",
-        0, 50, 0, 0,
-        80, 88, 20, 30,
-        20, 25, 35, 45,
-        0, 0, LFO_TARGET_NONE, 0,
-        0, 0, LFO_TARGET_NONE, 0,
-        80, 45, 65, 35
-    },
-
-    // test2
-    {
-        "test2",
-        0, 55, 4, 8,
-        90, 78, 20, 30,
-        20, 25, 35, 45,
-        0, 8, LFO_TARGET_PITCH, 8,
-        0, 0, LFO_TARGET_NONE, 0,
-        88, 60, 55, 45
-    },
-
-    // test3
-    {
-        "test3",
-        1, 50, 0, 0,
-        20, 40, 88, 72,
-        20, 25, 35, 45,
-        0, 0, LFO_TARGET_NONE, 0,
-        0, 0, LFO_TARGET_NONE, 0,
-        82, 65, 45, 35
-    },
-
-    // test4
-    {
-        "test4",
-        1, 60, 8, 12,
-        20, 40, 70, 90,
-        20, 25, 35, 45,
-        2, 20, LFO_TARGET_NOISE_MIX, 20,
-        0, 0, LFO_TARGET_NONE, 0,
-        92, 45, 60, 30
-    },
-
-    // test5
-    {
-        "test5",
-        2, 50, 0, 0,
-        20, 30, 20, 30,
-        20, 25, 80, 88,
-        0, 0, LFO_TARGET_NONE, 0,
-        0, 0, LFO_TARGET_NONE, 0,
-        86, 35, 75, 30
-    },
-
-    // test6
-    {
-        "test6",
-        2, 45, 5, 8,
-        20, 30, 20, 30,
-        20, 25, 92, 55,
-        1, 15, LFO_TARGET_INDEX, 15,
-        0, 0, LFO_TARGET_NONE, 0,
-        78, 60, 45, 40
-    },
-
-    // test7
-    {
-        "test7",
-        3, 50, 0, 0,
-        20, 30, 20, 30,
-        85, 75, 20, 30,
-        0, 0, LFO_TARGET_NONE, 0,
-        0, 0, LFO_TARGET_NONE, 0,
-        98, 45, 60, 35
-    },
-
-    // test8
-    {
-        "test8",
-        3, 65, 15, 18,
-        20, 30, 20, 30,
-        70, 95, 20, 30,
-        3, 15, LFO_TARGET_INDEX, 25,
-        0, 0, LFO_TARGET_NONE, 0,
-        104, 35, 70, 45
-    },
-
-    // test9
-    {
-        "test9",
-        4, 50, 6, 8,
-        80, 82, 78, 70,
-        20, 25, 20, 30,
-        0, 0, LFO_TARGET_NONE, 0,
-        0, 0, LFO_TARGET_NONE, 0,
-        84, 55, 60, 35
-    },
-
-    // test10
-    {
-        "test10",
-        5, 45, 10, 10,
-        82, 88, 20, 30,
-        20, 25, 72, 85,
-        0, 0, LFO_TARGET_NONE, 0,
-        1, 0, LFO_TARGET_NONE, 0,
-        88, 45, 70, 30
-    },
-
-    // test11
-    {
-        "test11",
-        6, 40, 8, 12,
-        85, 80, 20, 30,
-        78, 78, 20, 30,
-        1, 15, LFO_TARGET_INDEX, 15,
-        0, 0, LFO_TARGET_NONE, 0,
-        96, 50, 62, 38
-    },
-
-    // test12
-    {
-        "test12",
-        7, 55, 8, 12,
-        20, 30, 78, 75,
-        20, 25, 72, 78,
-        0, 0, LFO_TARGET_NONE, 0,
-        2, 0, LFO_TARGET_NONE, 0,
-        90, 55, 62, 32
-    },
-
-    // test13
-    {
-        "test13",
-        8, 55, 10, 18,
-        20, 30, 76, 70,
-        78, 72, 20, 30,
-        2, 18, LFO_TARGET_NOISE_MIX, 22,
-        0, 0, LFO_TARGET_NONE, 0,
-        100, 55, 55, 42
-    },
-
-    // test14
-    {
-        "test14",
-        9, 55, 12, 20,
-        20, 30, 20, 30,
-        80, 82, 78, 70,
-        1, 18, LFO_TARGET_INDEX, 18,
-        3, 0, LFO_TARGET_NONE, 0,
-        102, 50, 68, 40
-    },
-
-    // test15
-    {
-        "test15",
-        4, 70, 22, 25,
-        75, 80, 78, 75,
-        20, 25, 20, 30,
-        0, 10, LFO_TARGET_ENV, 10,
-        0, 0, LFO_TARGET_NONE, 0,
-        72, 50, 50, 25
-    },
-
-    // test16
-    {
-        "test16",
-        5, 35, 25, 25,
-        78, 90, 20, 30,
-        20, 25, 70, 85,
-        0, 12, LFO_TARGET_PITCH, 12,
-        4, 0, LFO_TARGET_NONE, 0,
-        74, 40, 75, 30
-    },
-
-    // test17
-    {
-        "test17",
-        0, 70, 18, 20,
-        65, 98, 20, 30,
-        20, 25, 20, 30,
-        0, 0, LFO_TARGET_NONE, 0,
-        0, 0, LFO_TARGET_NONE, 0,
-        48, 30, 85, 20
-    },
-
-    // test18
-    {
-        "test18",
-        1, 35, 18, 25,
-        20, 30, 95, 50,
-        20, 25, 20, 30,
-        0, 20, LFO_TARGET_NOISE_MIX, 35,
-        0, 0, LFO_TARGET_NONE, 0,
-        66, 75, 30, 55
-    },
-
-    // test19
-    {
-        "test19",
-        3, 50, 25, 35,
-        20, 30, 20, 30,
-        95, 90, 20, 30,
-        4, 25, LFO_TARGET_METAL_GATE, 40,
-        0, 0, LFO_TARGET_NONE, 0,
-        110, 30, 80, 50
-    },
-
-    // test20
-    {
-        "test20",
-        2, 50, 20, 25,
-        20, 30, 20, 30,
-        20, 25, 65, 95,
-        2, 10, LFO_TARGET_PITCH, 10,
-        5, 0, LFO_TARGET_NONE, 0,
-        54, 35, 90, 20
-    },
-
-    // test21
-    {
-        "test21",
-        6, 65, 30, 40,
-        70, 85, 20, 30,
-        80, 90, 20, 30,
-        0, 0, LFO_TARGET_NONE, 0,
-        6, 10, LFO_TARGET_INDEX, 10,
-        112, 40, 75, 35
-    },
-
-    // test22
-    {
-        "test22",
-        9, 55, 35, 45,
-        20, 30, 20, 30,
-        75, 95, 80, 70,
-        4, 20, LFO_TARGET_LFO2_PHASE, 20,
-        7, 15, LFO_TARGET_PITCH, 10,
-        118, 35, 80, 30
-    },
-
-    // test23
-    {
-        "test23",
-        8, 50, 15, 35,
-        20, 30, 80, 75,
-        82, 88, 20, 30,
-        0, 30, LFO_TARGET_NOISE_MIX, 45,
-        0, 10, LFO_TARGET_INDEX, 15,
-        106, 55, 58, 55
-    },
-
-    // test24
-    {
-        "test24",
-        4, 50, 4, 0,
-        90, 90, 80, 80,
-        20, 20, 20, 20,
-        0, 0, LFO_TARGET_NONE, 0,
-        0, 0, LFO_TARGET_NONE, 0,
-        28, 45, 60, 30
-    },
-
-    // test25
-    {
-        "test25",
-        5, 50, 0, 0,
-        80, 85, 20, 20,
-        20, 20, 80, 85,
-        0, 0, LFO_TARGET_NONE, 0,
-        0, 0, LFO_TARGET_NONE, 0,
-        95, 35, 70, 20
-    },
-
-    // test26
-    {
-        "test26",
-        9, 50, 12, 30,
-        20, 20, 20, 20,
-        85, 85, 85, 85,
-        3, 20, LFO_TARGET_INDEX, 25,
-        8, 20, LFO_TARGET_METAL_GATE, 20,
-        127, 45, 75, 45
-    }
-};
-
 const fm_preset_t FM_PRESETS[NUM_OF_PRESETS] = {
-    // 0: TightKick
-    {
-        "TightKick",
-        0, 35, 5, 5,
-        85, 75, 10, 20,
-        20, 15, 20, 25,
-        0, 10, LFO_TARGET_PITCH, 10,
-        0, 0, LFO_TARGET_NONE, 0,
-        12, 35, 15, 20},
 
-    // 1: HeavyKick
-    {
-        "HeavyKick",
-        0, 60, 8, 5,
-        70, 95, 10, 30,
-        15, 10, 15, 30,
-        0, 15, LFO_TARGET_PITCH, 20,
-        0, 0, LFO_TARGET_NONE, 0,
-        18, 25, 45, 15},
+    // =====================================================================
+    // General-MIDI kit (GmDrumNote 35..81)
+    // =====================================================================
 
-    // 2: ClickKick
-    {
-        "ClickKick",
-        0, 20, 3, 15,
-        90, 55, 5, 15,
-        25, 10, 35, 20,
-        1, 18, LFO_TARGET_INDEX, 20,
-        1, 0, LFO_TARGET_NONE, 0,
-        8, 55, 10, 35},
+    // 35 Acoustic Bass Drum — deep, boomy kick
+    {"AcBassDrum", 0, 50, 0, 0,  35, 85, 40, 50,  50, 60, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  24, 35, 72, 5},
+    // 36 Bass Drum 1 — punchy kick
+    {"BassDrum1", 0, 50, 0, 0,  60, 68, 40, 50,  50, 60, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  20, 52, 58, 8},
+    // 37 Side Stick — tight rim click
+    {"SideStick", 1, 50, 0, 0,  50, 55, 72, 15,  50, 60, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  4, 70, 30, 25},
+    // 38 Acoustic Snare
+    {"AcSnare", 1, 50, 0, 0,  50, 55, 55, 55,  50, 60, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  22, 50, 50, 48},
+    // 39 Hand Clap — multi-strike approximation via Gap + scatter + noise
+    {"HandClap", 1, 40, 22, 55,  50, 55, 78, 28,  50, 60, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  68, 60, 35, 72},
+    // 40 Electric Snare — tighter, brighter
+    {"ElSnare", 1, 50, 0, 0,  50, 55, 78, 42,  50, 60, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  18, 58, 45, 55},
+    // 41 Low Floor Tom
+    {"LowFloorTm", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 30, 85,
+     0, 0, 0, 0,  0, 0, 0, 0,  42, 35, 72, 8},
+    // 42 Closed Hi-Hat
+    {"ClosedHat", 4, 50, 0, 0,  50, 55, 40, 50,  72, 20, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  2, 60, 25, 42},
+    // 43 High Floor Tom
+    {"HiFloorTom", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 35, 80,
+     0, 0, 0, 0,  0, 0, 0, 0,  38, 38, 68, 8},
+    // 44 Pedal Hi-Hat
+    {"PedalHat", 4, 50, 0, 0,  50, 55, 40, 50,  62, 26, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  6, 55, 28, 38},
+    // 45 Low Tom
+    {"LowTom", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 42, 72,
+     0, 0, 0, 0,  0, 0, 0, 0,  34, 42, 62, 8},
+    // 46 Open Hi-Hat
+    {"OpenHat", 4, 50, 0, 0,  50, 55, 40, 50,  66, 42, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  40, 50, 42, 48},
+    // 47 Low-Mid Tom
+    {"LowMidTom", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 46, 64,
+     0, 0, 0, 0,  0, 0, 0, 0,  30, 45, 58, 8},
+    // 48 Hi-Mid Tom
+    {"HiMidTom", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 50, 56,
+     0, 0, 0, 0,  0, 0, 0, 0,  28, 48, 52, 8},
+    // 49 Crash Cymbal 1 — long metallic ring
+    {"Crash1", 3, 50, 0, 0,  50, 55, 40, 50,  70, 75, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  104, 40, 60, 20},
+    // 50 High Tom
+    {"HighTom", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 56, 48,
+     0, 0, 0, 0,  0, 0, 0, 0,  26, 52, 48, 8},
+    // 51 Ride Cymbal 1 — pingy, sustained
+    {"Ride1", 3, 50, 0, 0,  50, 55, 40, 50,  46, 66, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  100, 35, 62, 12},
+    // 52 Chinese Cymbal — Gong character (env bit7=1)
+    {"ChinaCym", 3, 50, 0, 0,  50, 55, 40, 50,  76, 70, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  228, 45, 58, 22},
+    // 53 Ride Bell — short, bell-like ping
+    {"RideBell", 3, 50, 0, 0,  50, 55, 40, 50,  80, 86, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  12, 42, 78, 8},
+    // 54 Tambourine — noisy, short
+    {"Tambourin", 4, 50, 0, 0,  50, 55, 40, 50,  58, 30, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  10, 58, 30, 72},
+    // 55 Splash Cymbal — short crash
+    {"SplashCym", 3, 50, 0, 0,  50, 55, 40, 50,  72, 54, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  98, 44, 52, 18},
+    // 56 Cowbell — cymbal ratios give the cowbell interval, short decay
+    {"Cowbell", 3, 50, 0, 0,  50, 55, 40, 50,  60, 45, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  10, 50, 50, 8},
+    // 57 Crash Cymbal 2 — brighter long crash
+    {"Crash2", 3, 50, 0, 0,  50, 55, 40, 50,  76, 78, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  108, 46, 62, 22},
+    // 58 Vibraslap — rattly snare+metal layer
+    {"Vibraslap", 10, 55, 10, 65,  50, 55, 70, 30,  60, 50, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  70, 55, 45, 55},
+    // 59 Ride Cymbal 2 — sustained ride
+    {"Ride2", 3, 50, 0, 0,  50, 55, 40, 50,  50, 68, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  102, 36, 64, 12},
+    // 60 Hi Bongo
+    {"HiBongo", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 56, 44,
+     0, 0, 0, 0,  0, 0, 0, 0,  14, 55, 42, 10},
+    // 61 Low Bongo
+    {"LowBongo", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 50, 50,
+     0, 0, 0, 0,  0, 0, 0, 0,  16, 52, 46, 10},
+    // 62 Mute Hi Conga — very short
+    {"MuteHiCng", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 62, 35,
+     0, 0, 0, 0,  0, 0, 0, 0,  8, 58, 38, 10},
+    // 63 Open Hi Conga
+    {"OpenHiCng", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 50, 55,
+     0, 0, 0, 0,  0, 0, 0, 0,  20, 48, 52, 10},
+    // 64 Low Conga
+    {"LowConga", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 44, 62,
+     0, 0, 0, 0,  0, 0, 0, 0,  24, 44, 58, 10},
+    // 65 High Timbale — bright
+    {"HiTimbale", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 62, 50,
+     0, 0, 0, 0,  0, 0, 0, 0,  18, 56, 48, 14},
+    // 66 Low Timbale
+    {"LowTimbale", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 56, 58,
+     0, 0, 0, 0,  0, 0, 0, 0,  22, 50, 54, 14},
+    // 67 High Agogo — short metallic
+    {"HiAgogo", 3, 50, 0, 0,  50, 55, 40, 50,  66, 50, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  10, 54, 50, 8},
+    // 68 Low Agogo
+    {"LowAgogo", 3, 50, 0, 0,  50, 55, 40, 50,  60, 55, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  14, 50, 54, 8},
+    // 69 Cabasa — bright noise, very short
+    {"Cabasa", 4, 50, 0, 0,  50, 55, 40, 50,  56, 15, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  2, 58, 20, 75},
+    // 70 Maracas — brighter noise shake
+    {"Maracas", 4, 50, 0, 0,  50, 55, 40, 50,  66, 12, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  2, 62, 18, 80},
+    // 71 Short Whistle — pure tone + vibrato
+    {"ShWhistle", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 20, 10,
+     0, 45, 1, 15,  0, 0, 0, 0,  14, 40, 20, 5},
+    // 72 Long Whistle — sustained tone + vibrato
+    {"LnWhistle", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 18, 12,
+     0, 35, 1, 18,  0, 0, 0, 0,  24, 38, 25, 5},
+    // 73 Short Guiro — scrape (noise + amplitude rasp LFO)
+    {"ShGuiro", 4, 50, 0, 0,  50, 55, 40, 50,  50, 20, 50, 40,
+     1, 60, 8, 40,  0, 0, 0, 0,  14, 52, 22, 65},
+    // 74 Long Guiro — longer scrape
+    {"LnGuiro", 4, 50, 0, 0,  50, 55, 40, 50,  48, 22, 50, 40,
+     1, 45, 8, 45,  0, 0, 0, 0,  24, 50, 24, 68},
+    // 75 Claves — woody, tightest
+    {"Claves", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 48, 18,
+     0, 0, 0, 0,  0, 0, 0, 0,  2, 58, 22, 5},
+    // 76 Hi Wood Block
+    {"HiWoodBlk", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 52, 18,
+     0, 0, 0, 0,  0, 0, 0, 0,  2, 60, 20, 5},
+    // 77 Low Wood Block
+    {"LowWoodBlk", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 46, 26,
+     0, 0, 0, 0,  0, 0, 0, 0,  4, 55, 28, 5},
+    // 78 Mute Cuica — pitched friction, fast pitch LFO
+    {"MuteCuica", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 40, 40,
+     0, 50, 1, 30,  0, 0, 0, 0,  12, 48, 42, 10},
+    // 79 Open Cuica — slower, deeper pitch sweep
+    {"OpenCuica", 2, 50, 0, 0,  50, 55, 40, 50,  50, 60, 35, 50,
+     0, 35, 1, 42,  0, 0, 0, 0,  24, 44, 50, 10},
+    // 80 Mute Triangle — short metallic ping
+    {"MuteTrigl", 3, 50, 0, 0,  50, 55, 40, 50,  50, 68, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  0, 52, 62, 5},
+    // 81 Open Triangle — long metallic ring
+    {"OpenTrigl", 3, 50, 0, 0,  50, 55, 40, 50,  55, 82, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  106, 48, 70, 5},
 
-    // 3: CrackSnare
-    {
-        "CrackSnare",
-        1, 45, 4, 15,
-        20, 30, 90, 75,
-        10, 10, 20, 20,
-        2, 35, LFO_TARGET_INDEX, 50,
-        0, 10, LFO_TARGET_NOISE_MIX, 15,
-        20, 55, 20, 20},
+    // =====================================================================
+    // Sonaglio experimental & combo presets
+    // =====================================================================
 
-    // 4: BodySnare
-    {
-        "BodySnare",
-        1, 65, 6, 10,
-        25, 20, 65, 95,
-        15, 10, 10, 10,
-        0, 20, LFO_TARGET_PITCH, 15,
-        0, 0, LFO_TARGET_NONE, 0,
-        25, 30, 55, 10},
-
-    // 5: GhostSnare
-    {
-        "GhostSnare",
-        1, 30, 22, 35,
-        15, 20, 60, 45,
-        5, 10, 5, 5,
-        0, 8, LFO_TARGET_ENV, 20,
-        0, 0, LFO_TARGET_NONE, 0,
-        16, 25, 10, 5},
-
-    // 6: RimSnare
-    {
-        "RimSnare",
-        1, 25, 6, 20,
-        15, 10, 85, 45,
-        10, 10, 20, 10,
-        1, 28, LFO_TARGET_PITCH, -35,
-        0, 15, LFO_TARGET_INDEX, 10,
-        30, 45, 15, 20},
-
-    // 7: MetalClang — bright cymbal clang with a real ring tail
-    {
-        "MetalClang",
-        3, 50, 8, 12,
-        10, 10, 20, 15,
-        88, 60, 10, 10,
-        0, 35, LFO_TARGET_INDEX, 30,
-        0, 0, LFO_TARGET_NONE, 0,
-        99, 80, 35, 45},  // env 99 = metallic tail (~515ms), cymbal char
-
-    // 8: MetalWash — sustained shimmering metallic wash
-    {
-        "MetalWash",
-        3, 75, 35, 45,
-        10, 15, 25, 20,
-        80, 90, 20, 25,
-        0, 20, LFO_TARGET_ENV, 40,
-        0, 0, LFO_TARGET_NONE, 0,
-        106, 55, 40, 30},  // env 106 = metallic tail (~900ms) for long wash
-
-    // 9: GongHit — dark, dense, long-ringing gong
-    {
-        "GongHit",
-        3, 85, 28, 35,
-        0, 0, 0, 0,
-        50, 95, 0, 0,
-        3, 10, LFO_TARGET_PITCH, -20,
-        0, 0, LFO_TARGET_NONE, 0,
-        238, 25, 45, 20},  // 238 = Gong char (bit7) + metallic tail 110 (~1120ms)
-
-    // 10: BellRing — bright cymbal-bell with shimmering long ring
-    {
-        "BellRing",
-        3, 80, 45, 25,
-        0, 0, 0, 0,
-        75, 85, 0, 0,
-        4, 18, LFO_TARGET_INDEX, 35,
-        0, 0, LFO_TARGET_NONE, 0,
-        110, 35, 55, 30  // env 110 = metallic tail (~1120ms), cymbal char
-    },
-
-    // 11: PercBlock
-    {
-        "PercBlock",
-        2, 35, 6, 8,
-        20, 20, 10, 20,
-        10, 15, 95, 65,
-        0, 20, LFO_TARGET_PITCH, 15,
-        0, 0, LFO_TARGET_NONE, 0,
-        14, 55, 20, 20},
-
-    // 12: PercTom
-    {
-        "PercTom",
-        2, 70, 12, 10,
-        15, 60, 10, 20,
-        10, 10, 75, 90,
-        0, 12, LFO_TARGET_ENV, 20,
-        1, 0, LFO_TARGET_NONE, 0,
-        22, 25, 50, 15},
-
-    // 13: PercWood
-    {
-        "PercWood",
-        2, 30, 5, 10,
-        35, 45, 10, 20,
-        10, 10, 85, 40,
-        1, 15, LFO_TARGET_INDEX, 10,
-        0, 0, LFO_TARGET_NONE, 0,
-        18, 40, 35, 10},
-
-    // 14: DryHit
-    {
-        "DryHit",
-        4, 50, 0, 0,
-        60, 40, 55, 35,
-        50, 35, 55, 35,
-        0, 0, LFO_TARGET_NONE, 0,
-        0, 0, LFO_TARGET_NONE, 0,
-        4, 20, 20, 5},
-
-    // 15: DriveKit
-    {
-        "DriveKit",
-        4, 45, 4, 10,
-        85, 65, 10, 15,
-        15, 20, 20, 25,
-        1, 22, LFO_TARGET_INDEX, 20,
-        0, 0, LFO_TARGET_NONE, 0,
-        10, 45, 25, 80},
-
-    // 16: DarkPulse
-    {
-        "DarkPulse",
-        5, 55, 18, 20,
-        55, 45, 35, 45,
-        35, 40, 35, 45,
-        0, 8, LFO_TARGET_ENV, 10,
-        0, 0, LFO_TARGET_NONE, 0,
-        16, 20, 30, 20},
-
-    // 17: BrightPulse
-    {
-        "BrightPulse",
-        6, 55, 8, 20,
-        70, 40, 60, 35,
-        70, 55, 50, 35,
-        1, 25, LFO_TARGET_INDEX, 25,
-        0, 0, LFO_TARGET_NONE, 0,
-        8, 55, 25, 15},
-
-    // 18: Industrial
-    {
-        "Industrial",
-        8, 65, 15, 35,
-        30, 25, 65, 45,
-        85, 70, 55, 40,
-        0, 32, LFO_TARGET_METAL_GATE, 55,
-        0, 20, LFO_TARGET_INDEX, 20,
-        70, 65, 55, 75},  // env_shape was 128 + 70
-
-    // 19: Shaker
-    {
-        "Shaker",
-        9, 55, 10, 45,
-        10, 10, 20, 20,
-        75, 80, 85, 70,
-        0, 55, LFO_TARGET_NOISE_MIX, 70,
-        0, 30, LFO_TARGET_ENV, 20,
-        12, 40, 45, 25},
-
-    // 20: EuclidKit
-    {
-        "EuclidKit",
-        5, 50, 20, 30,
-        60, 55, 55, 55,
-        50, 50, 50, 50,
-        2, 20, LFO_TARGET_PITCH, 20,
-        6, 15, LFO_TARGET_INDEX, 10,
-        18, 45, 35, 20},
-
-    // 21: WidePerc
-    {
-        "WidePerc",
-        9, 45, 35, 50,
-        25, 55, 20, 55,
-        20, 40, 70, 80,
-        1, 15, LFO_TARGET_LFO2_PHASE, 35,
-        4, 20, LFO_TARGET_PITCH, 25,
-        20, 35, 45, 15},
-
-    // 22: LowBody
-    {
-        "LowBody",
-        5, 45, 8, 10,
-        65, 90, 20, 75,
-        20, 25, 25, 65,
-        0, 12, LFO_TARGET_PITCH, 10,
-        0, 0, LFO_TARGET_NONE, 0,
-        14, 20, 70, 10},
-
-    // 23: HardDrive
-    {
-        "HardDrive",
-        6, 55, 6, 25,
-        90, 70, 70, 55,
-        65, 55, 65, 55,
-        1, 30, LFO_TARGET_INDEX, 30,
-        0, 0, LFO_TARGET_NONE, 0,
-        8, 60, 45, 95},
-
-    // 24: SoftHit
-    {
-        "SoftHit",
-        5, 45, 22, 20,
-        30, 50, 30, 45,
-        25, 35, 25, 45,
-        0, 10, LFO_TARGET_ENV, 15,
-        0, 0, LFO_TARGET_NONE, 0,
-        4, 20, 35, 10},
-
-    // 25: Experimental
-    {
-        "ExpTrack",
-        9, 50, 45, 70,
-        55, 55, 55, 55,
-        55, 55, 55, 55,
-        4, 40, LFO_TARGET_LFO2_PHASE, 50,
-        8, 30, LFO_TARGET_METAL_GATE, 40,
-        40, 50, 50, 50}};  // env_shape was 128 + 40
+    // Kick+Snare layered clap-ish hit
+    {"KS Clap", 5, 50, 8, 15,  60, 65, 70, 35,  50, 60, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  20, 55, 55, 40},
+    // Trap-style long sub kick
+    {"TrapKick", 0, 50, 0, 0,  45, 92, 40, 50,  50, 60, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  50, 30, 80, 3},
+    // 808-style long noisy snare
+    {"808 Snare", 1, 50, 0, 0,  50, 55, 60, 65,  50, 60, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  34, 45, 58, 60},
+    // Kick + Hat tight combo
+    {"K+Hat", 8, 45, 6, 10,  58, 62, 40, 50,  68, 25, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  18, 52, 55, 35},
+    // Kick + Tom layered
+    {"K+Tom", 6, 50, 8, 12,  55, 68, 40, 50,  50, 60, 45, 60,
+     0, 0, 0, 0,  0, 0, 0, 0,  24, 48, 58, 10},
+    // Kick + Metal industrial
+    {"K+Metal", 7, 45, 5, 10,  60, 65, 40, 50,  70, 70, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  96, 45, 58, 18},
+    // Snare + Hat
+    {"S+Hat", 11, 50, 6, 15,  50, 55, 68, 40,  66, 28, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  20, 55, 48, 50},
+    // Tom + Metal
+    {"T+Metal", 12, 50, 10, 20,  50, 55, 40, 50,  65, 68, 48, 58,
+     0, 0, 0, 0,  0, 0, 0, 0,  98, 48, 55, 15},
+    // Tom + Hat
+    {"T+Hat", 13, 45, 8, 18,  50, 55, 40, 50,  64, 30, 50, 55,
+     0, 0, 0, 0,  0, 0, 0, 0,  22, 50, 52, 30},
+    // Metal + Hat shimmer
+    {"M+Hat", 14, 50, 6, 12,  50, 55, 40, 50,  70, 60, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  100, 46, 55, 35},
+    // Euclidean-tuned metallic cluster
+    {"EuclMetal", 3, 50, 0, 0,  50, 55, 40, 50,  68, 72, 50, 40,
+     0, 0, 0, 0,  5, 0, 0, 0,  104, 42, 60, 18},
+    // Gong drone — very long, slow FM swell (Gong character)
+    {"GongDrone", 3, 50, 0, 0,  50, 55, 40, 50,  72, 85, 50, 40,
+     2, 20, 2, 35,  0, 0, 0, 0,  248, 40, 72, 20},
+    // Metal wash — slow index LFO
+    {"MetalWash", 3, 50, 0, 0,  50, 55, 40, 50,  70, 75, 50, 40,
+     0, 25, 2, 40,  0, 0, 0, 0,  110, 44, 62, 20},
+    // Glitch perc — fast index LFO + scatter
+    {"GlitchPrc", 2, 50, 0, 70,  50, 55, 40, 50,  50, 60, 60, 45,
+     1, 75, 2, 55,  0, 0, 0, 0,  16, 58, 45, 20},
+    // Flam snare — Gap-driven double hit
+    {"FlamSnare", 1, 55, 28, 30,  50, 55, 65, 45,  50, 60, 50, 40,
+     0, 0, 0, 0,  0, 0, 0, 0,  22, 52, 50, 50},
+    // Chaos hit — dual LFO, high scatter
+    {"ChaosHit", 12, 50, 14, 75,  50, 55, 40, 50,  66, 62, 58, 50,
+     3, 55, 2, 50,  0, 40, 10, 45,  100, 50, 52, 22},
+    // Pitch-drop kick — downward pitch LFO
+    {"PitchDrop", 0, 50, 0, 0,  70, 55, 40, 50,  50, 60, 50, 40,
+     0, 20, 1, -40,  0, 0, 0, 0,  22, 55, 55, 8},
+};
 
 
 void load_fm_preset(uint8_t idx, int8_t *params) {

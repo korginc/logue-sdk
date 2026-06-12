@@ -191,6 +191,18 @@ ENGINE_MAPPING_INLINE float32x4_t fm_midi_to_freq(float32x4_t midi_notes,
                      vminq_f32(vdupq_n_f32(freq_max), base_freq));
 }
 
+/**
+ * Global drive gain utility.
+ *
+ * Maps a normalised 0..1 drive value to a pre-clip amplitude multiplier.
+ * 0 → 1.0 (clean), 1 → 3.5 (heavily saturated into fm_soft_clip).
+ * Not currently wired to a UI parameter; available for preset-time use
+ * or future parameter wiring.
+ */
+ENGINE_MAPPING_INLINE float32x4_t fm_make_drive_gain(float32x4_t drive) {
+    return vaddq_f32(vdupq_n_f32(1.0f), vmulq_n_f32(fm_vclamp01(drive), 2.5f));
+}
+
 ENGINE_MAPPING_INLINE float32x4_t fm_cubic_clip(float32x4_t x) {
     x = vmaxq_f32(vdupq_n_f32(-1.0f), vminq_f32(vdupq_n_f32(1.0f), x));
     const float32x4_t x2 = vmulq_f32(x, x);

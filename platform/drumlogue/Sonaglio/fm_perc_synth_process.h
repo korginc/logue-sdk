@@ -328,7 +328,7 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
 
     synth->current_env_shape = ENV_SHAPE_DEFAULT;
     synth->euclid_offsets = vdupq_n_f32(0.0f);
-    synth->master_gain = 1.30f;
+    synth->master_gain   = 1.30f;
     one_pole_reset(&synth->kick_lp);
     one_pole_reset(&synth->snare_hp);
     one_pole_reset(&synth->perc_bp_lp);
@@ -359,7 +359,11 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
 fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
                                        uint8_t note,
                                        uint8_t velocity) {
-    (void)velocity; // Velocity intentionally excluded from current model.
+    /* Velocity is latched into each trigger's gain here (not a global master
+     * multiply), so delayed shadow/combo hits keep the velocity of the note
+     * that spawned them even if a new note arrives before they fire.
+     * Linear with a 0.3 floor so soft hits stay audible. */
+    const float vel_gain = 0.3f + 0.7f * ((float)velocity / 127.0f);
 
     for (int i = 0; i < ENGINE_COUNT; ++i) {
         synth->engine_gain[i] = 0.0f;
@@ -415,9 +419,10 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
 
 
     if (combo) {
-        // Secondary engine delayed
-        const float gain_a = 1.0f - synth->blend;
-        const float gain_b = synth->blend;
+        // Secondary engine delayed. Both layers scaled by the same velocity so
+        // the blend ratio is preserved.
+        const float gain_a = (1.0f - synth->blend) * vel_gain;
+        const float gain_b = synth->blend * vel_gain;
 
         synth->engine_gain[engine_a] = gain_a;
         synth->engine_gain[engine_b] = gain_b;
@@ -430,12 +435,12 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
         queue_trigger(synth, engine_b, note, note_b, gain_b, gap_samples);
     } else {
         // Single instrument: add a quieter delayed shadow hit on the same engine
-        const float shadow_gain = 0.12f + synth->blend * 0.55f;
+        const float shadow_gain = (0.12f + synth->blend * 0.55f) * vel_gain;
         const float note_shadow = note_a + rand_bipolar_from_prng(synth) * synth->scatter * 0.25f;
 
-        queue_trigger(synth, engine_a, note, note_a, 1.0f, 0);
+        queue_trigger(synth, engine_a, note, note_a, vel_gain, 0);
         queue_trigger(synth, engine_a, note, note_shadow, shadow_gain, gap_samples);
-        synth->engine_gain[engine_a] = 1.0f;
+        synth->engine_gain[engine_a] = vel_gain;
     }
 
     // Keep current envelope behavior
@@ -610,7 +615,7 @@ fast_inline float fm_perc_synth_process(fm_perc_synth_t* synth) {
                                  active_mask,
                                  lfo_pitch_mult,
                                  lfo_index_add,
-                                 synth->metal.brightness,
+                                 vdupq_n_f32(0.0f), /* brightness_add: LFO target unused */
                                  lfo_metal_gate,
                                  lfo_noise_add),
             vdupq_n_f32(synth->engine_gain[ENGINE_METAL])

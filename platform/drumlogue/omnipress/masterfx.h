@@ -387,7 +387,7 @@ private:
      * multiplier, an attack setting of $20\text{ ms}$ means the gain will take exactly
      * $20\text{ ms}$ to reach its target, regardless of whether you are doing a mild
      * 2:1 compression or an extreme -2.0 reversal.
-     * - Smart Directional Switching: By checking std::fabs(targets[i]) > std::fabs(state),
+     * - Smart Directional Switching: By checking fabsf(targets[i]) > fabsf(state),
      * the smoother correctly understands that going from $0\text{ dB}$ to $+12\text{ dB}$
      * (Expansion) and going from $0\text{ dB}$ to $-12\text{ dB}$ (Compression)
      * are both Attack phases because the processor is actively responding to a transient spike.
@@ -416,7 +416,7 @@ private:
         for (int i = 0; i < 4; ++i) {
             // Evaluate ballistics based on whether audio is demanding MORE or LESS gain modification
             // If the target is moving further away from 0dB unity, we are in the "Attack" phase of the effect.
-            bool is_attack = std::fabs(targets[i]) > std::fabs(state);
+            bool is_attack = fabsf(targets[i]) > fabsf(state);
             float coeff = is_attack ? attack_coeff_ : release_coeff_;
 
             // Single pole IIR filter
@@ -805,7 +805,7 @@ public:
                         return "Limit";
                     } else {
                         // Negative ratio conversion
-                        float rev_val = 1.0f / (std::fabs(function_slope_) - 1.0f);
+                        float rev_val = 1.0f / (fabsf(function_slope_) - 1.0f);
                         snprintf(str_buf, sizeof(str_buf), "Rev %.1f", rev_val);
                     }
                     return str_buf;

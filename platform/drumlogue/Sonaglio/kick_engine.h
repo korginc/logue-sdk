@@ -150,9 +150,12 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
     // - pitch_env: short sweep so pitch drop is less exposed
     // - index_env: shorter FM brightness than amp
     float32x4_t env_sqrt = neon_sqrtq_f32(vmaxq_f32(envelope, vdupq_n_f32(0.0f)));
-    float32x4_t amp_env = vmulq_f32(envelope, envelope); // Squaring for exponential decay
-    float32x4_t pitch_env = env8;
-    float32x4_t index_env = env8;
+    float32x4_t amp_env = vmulq_f32(envelope, envelope); // env^2 amplitude: fast kick decay
+    /* transient_env input is already pre-shaped by HitShape (up to env^4).
+     * Using env^4 here instead of env^8 prevents the pitch sweep and click from
+     * compressing into a near-invisible delta function at moderate HitShape values. */
+    float32x4_t pitch_env = env4;
+    float32x4_t index_env = env4;
 
     // Pitch sweep. exp2_neon remains the main expensive operation, but the
     // sweep depth is now precomputed in update().
@@ -180,7 +183,7 @@ fast_inline float32x4_t kick_engine_process(kick_engine_t* kick,
                                       kick->modulator_phase);
 
     // FM index: body remains present; click is extremely front-loaded.
-    float32x4_t body_index = vmulq_f32(env4, kick->body_index);
+    float32x4_t body_index = vmulq_f32(env2, kick->body_index);
     float32x4_t click_index = vmulq_f32(index_env, kick->click_index);
     float32x4_t index = vaddq_f32(body_index, click_index);
     index = vaddq_f32(index, lfo_index_add);

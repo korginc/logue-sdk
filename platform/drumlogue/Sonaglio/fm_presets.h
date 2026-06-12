@@ -22,7 +22,7 @@
 #include <stdint.h>
 #include "constants.h"
 
-#define NUM_OF_PRESETS (26)
+#define NUM_OF_PRESETS (64)
 #define NAME_LENGTH    (12)
 
 
