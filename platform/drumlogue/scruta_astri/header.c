@@ -13,7 +13,7 @@ const __unit_header unit_header_t unit_header = {
     .unit_id = 0x53637275U,      // 'Scru'
     .version = 0x00010000U,
     .name = "ScrtAstr",          // Max 8 chars on OLED
-    .num_presets = 95,
+    .num_presets = 97,           // NOTE aligned to first param
     .num_params = 24,
     .params = {
         // Page 1: Base
@@ -22,8 +22,8 @@ const __unit_header unit_header_t unit_header = {
         // 24-47: Osc 1 Reversed
         // 48-71: Osc 2 Reversed
         // 72-94: Both Reversed
-        // 95-96: drone engine - not working properly yet, will be fixed in a future update
-        {0, 94, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Prgrm"}},
+        // 95-96: drone engine
+        {0, 96, 0, 0, k_unit_param_type_none, 0, 0, 0, {"Prgrm"}},
         {24, 126, 1, 36, k_unit_param_type_midi_note, 0, 0, 0, {"Note"}},
         {0, 256, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O1Wave"}},    // value aligned to wavetables.h
         {0, 256, 0, 0, k_unit_param_type_none, 0, 0, 0, {"O2Wave"}},    // value aligned to wavetables.h
@@ -34,10 +34,10 @@ const __unit_header unit_header_t unit_header = {
         {0, 100, 50, 50, k_unit_param_type_percent, 0, 0, 0, {"O2Mix"}},
         {0, 100, 50, 80, k_unit_param_type_percent, 0, 0, 0, {"Volume"}},
 
-        // Page 3: Filters (2 to 1500 -> will be *10 for 20Hz-15000Hz)
-        {2, 1500, 290, 80, k_unit_param_type_strings, 0, 0, 0, {"F1Cut"}},
+        // Page 3: Filters (2 to 1500 -> will be *10 for 20Hz-17000Hz)
+        {2, 1700, 490, 80, k_unit_param_type_strings, 0, 0, 0, {"F1Cut"}},
         {0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"F1Res"}},
-        {2, 1500, 310, 80, k_unit_param_type_strings, 0, 0, 0, {"F2Cut"}},
+        {2, 1700, 610, 80, k_unit_param_type_strings, 0, 0, 0, {"F2Cut"}},
         {0, 100, 0, 0, k_unit_param_type_percent, 0, 0, 0, {"F2Res"}},
 
         // Page 4: LFO 1 & 2

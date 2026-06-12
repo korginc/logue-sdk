@@ -59,7 +59,6 @@ static constexpr int METAL_DELAYS_B[FDN_LINES]   = {  31,  47,   61,   73,   89,
 struct DroneEngine {
     float buf[FDN_LINES][FDN_BUF_LEN];   // Delay line ring buffers
     int   write_pos;                     // Shared write pointer
-    int   dlen[FDN_LINES];               // Base delay lengths in samples
     float fz[FDN_LINES];                 // One-pole LPF state per line
     float hpx[FDN_LINES];                // DC Blocker HPF input state
     float hpy[FDN_LINES];                // DC Blocker HPF output state
@@ -79,10 +78,6 @@ struct DroneEngine {
         write_pos = 0;
         is_metal  = metal;
         prng      = metal ? 0xDEADBEEFu : 0xCAFEBABEu;
-
-        const int* src = metal ? METAL_DELAYS : CRYSTAL_DELAYS;
-        for (int i = 0; i < FDN_LINES; i++) dlen[i] = src[i];
-
         falpha    = metal ? 0.65f : 0.25f; // Darkened Crystal mode for deeper sub weight
         g         = 2.10f;    // hardware-calibrated default: clear chaotic attractor
         drive     = 1.30f;    // Boosted baseline drive to energize 8 lines
@@ -137,28 +132,33 @@ struct DroneEngine {
     }
 
     inline __attribute__((optimize("Ofast"), always_inline))
-    float process(float lfo_presence) {
-        // Map an assumed bipolar LFO [-1.0, 1.0] to a clean unipolar morph coefficient [0.0, 1.0]
-        float morph = lfo_presence * 0.5f + 0.5f;
-        morph = morph < 0.0f ? 0.0f : (morph > 1.0f ? 1.0f : morph);
+    float process(float lfo1_presence, float lfo2_presence, float lfo3_presence) {
+        // 1. HARMONIC MORPHING (LFO 1)
+        // Map bipolar LFO 1 to [0.0, 1.0] to crossfade between Bank A and Bank B delay lengths
+        float morph = clampf(lfo1_presence * 0.5f + 0.5f, 0.0f, 1.0f);
 
         float d[FDN_LINES];
-
-        // 1. Smoothly Morph Delay Lengths between Bank A and Bank B
         const int* bankA = is_metal ? METAL_DELAYS_A : CRYSTAL_DELAYS_A;
         const int* bankB = is_metal ? METAL_DELAYS_B : CRYSTAL_DELAYS_B;
 
+        // 2. SPECTRAL SHIMMER (LFO 3)
+        // Modulate internal one-pole damping. Higher LFO 3 opens the filter for more "air".
+        float dynamic_falpha = clampf(falpha * (1.0f + lfo3_presence * 0.8f), 0.01f, 0.99f);
+
         for (int i = 0; i < FDN_LINES; i++) {
-            // Smoothly morph between the two distinct prime sets
-            float base_delay = (float)bankA[i] + morph * (float)(bankB[i] - bankA[i]);
+            // Inharmonic Jitter: Add tiny random fluctuations (±0.2 samples) to delay lengths.
+            // This prevents "locking" and creates the sensation of an evolving environment.
+            float jitter = ((float)(int32_t)(prng >> 16) * (1.0f / 32768.0f)) * 0.2f;
+            float base_delay = (float)bankA[i] + morph * (float)(bankB[i] - bankA[i]) + jitter;
 
             float raw_sample = read_delay_frac(i, base_delay);
-            fz[i] += falpha * (raw_sample - fz[i]);
+            fz[i] += dynamic_falpha * (raw_sample - fz[i]);
             d[i] = fz[i];
         }
 
-        // 2. Mix output from all 8 lines
-        float out = 0.0f;
+        // 2. Mix output from all 8 lines with a subtle DC offset to keep the attractor off-center
+        // (Genuine chaotic systems evolve better when biased slightly away from zero)
+        float out = 0.001f;
         for (int i = 0; i < FDN_LINES; i++) out += d[i];
         out *= (1.0f / (float)FDN_LINES) * out_scale;
 
@@ -180,19 +180,20 @@ struct DroneEngine {
         d[4] = (t0 - t4) * H_SCALE; d[5] = (t1 - t5) * H_SCALE;
         d[6] = (t2 - t6) * H_SCALE; d[7] = (t3 - t7) * H_SCALE;
 
-        // 4. White Noise injection to ensure a persistent chaotic seed
-        prng = prng * 1664525u + 1013904223u;
-        float noise = (float)(int32_t)prng * (1.0f / 2147483648.0f) * noise_amp;
+        // 4. EVOLVING CHAOS (LFO 2)
+        // Modulate feedback gain and noise injection with LFO 2.
+        // This causes the drone to pulsate between resonant purity and chaotic energy.
+        float dynamic_g = clampf(g + lfo2_presence * 0.4f, 1.70f, 2.80f);
+        float dynamic_noise_amp = clampf(noise_amp * (1.0f + lfo2_presence), 0.0005f, 0.1f);
 
-        // 5. Gain, DC Blocker, Tanh Saturation, and Write Back
-        //    Padé [3,3] tanh approximant, clamped to [-3, 3] for stability.
-        //    Inside the loop: effective gain = g × 0.5 × drive.
-        //    At default (2.10 × 0.5 × 1.2 ≈ 1.26): above unit gain → chaotic attractor.
-        float dynamic_noise = noise * (noise_amp * (1.0f + morph * 2.0f));
-        float dynamic_gd = (g + (morph * 0.15f)) * drive;
+        prng = prng * 1664525u + 1013904223u;
+        float noise_val = (float)(int32_t)prng * (1.0f / 2147483648.0f) * dynamic_noise_amp;
+
+        // 5. GAIN AND SATURATION
+        float loop_gain = dynamic_g * drive;
 
         for (int i = 0; i < FDN_LINES; i++) {
-            float x = d[i] * dynamic_gd + dynamic_noise;
+            float x = d[i] * loop_gain + noise_val;
 
             // In-loop DC Blocker (High-Pass Filter with pole at 0.996) to prevent latch-up
             float hp_out = x - hpx[i] + 0.996f * hpy[i];
