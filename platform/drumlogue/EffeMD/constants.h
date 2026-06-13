@@ -168,6 +168,8 @@ typedef enum {
     ID_TRXSnareDrum,
     ID_TRXClaves,
     ID_TRXHiHat,
+    ID_FmWhistle,   // tonal voice cloned from the original (noise-free) FM Clap
+    ID_TRXGong,     // long-decay voice cloned from the original TRX Claves
     INST_COUNT,
 } engine_id_t;
 
@@ -186,6 +188,8 @@ static const char* instruments_strings[INST_COUNT] = {
 "TRXSnareDrum",
 "TRXClaves",
 "TRXHiHat",
+"FmWhistle",
+"TRXGong",
 };
 
 static const char* lfo_shape_strings[LFO_SHAPE_COMBO_COUNT] = {
@@ -231,10 +235,12 @@ static inline int fm_engine_to_euclid_lane(engine_id_t engine) {
         case ID_FmCowbellModel:
         case ID_FmCymbalModel:
         case ID_TRXHiHat:
+        case ID_TRXGong:
             return 2;
         case ID_FmTomModel:
         case ID_FmRimshotModel:
         case ID_TRXClaves:
+        case ID_FmWhistle:
             return 3;
         default:
             return 0;

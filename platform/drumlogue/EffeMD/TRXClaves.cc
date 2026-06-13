@@ -55,7 +55,11 @@ void TRXClaves::setParameter(fm_param_index_t param_index, float value) {
             pitch = 200.0f + value * 38.0f;
             break;
         case K_Decay_A:
-            decay = 0.01f + value * 0.0499f;
+            // Claves are a short click. The original 0.01..5 s range turned the
+            // two beating sines into a gong at the default value; clamp to a
+            // clave-length range (~5..100 ms). The long-decay voice lives on as
+            // the separate "TRX Gong" instrument.
+            decay = 0.005f + value * 0.00095f;
             break;
         case K_Mix:
             balance = value * 0.01f;

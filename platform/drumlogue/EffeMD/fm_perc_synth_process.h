@@ -35,6 +35,8 @@
 #include "TRXSnareDrum.h"
 #include "TRXClaves.h"
 #include "TRXHiHat.h"
+#include "FmWhistleModel.h"
+#include "TRXGongModel.h"
 
 // ------------------------
 // MACROS
@@ -90,6 +92,8 @@ typedef struct fm_perc_synth {
     TRXSnareDrum    snare_drum;
     TRXClaves       claves;
     TRXHiHat        hi_hat;
+    FmWhistleModel  whistle;
+    TRXGongModel    gong;
 
     // Array of instruments through the virtual common base class
     DrumModel* models[INST_COUNT];
@@ -137,6 +141,8 @@ fast_inline void fm_perc_synth_init(fm_perc_synth_t* synth) {
     synth->models[ID_TRXSnareDrum]   = &synth->snare_drum;
     synth->models[ID_TRXClaves]      = &synth->claves;
     synth->models[ID_TRXHiHat]       = &synth->hi_hat;
+    synth->models[ID_FmWhistle]      = &synth->whistle;
+    synth->models[ID_TRXGong]        = &synth->gong;
 
     for (int i = 0; i < INST_COUNT; ++i) {
         synth->models[i]->Init();

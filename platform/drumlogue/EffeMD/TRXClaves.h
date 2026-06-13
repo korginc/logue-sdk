@@ -10,8 +10,8 @@ public:
     // void loadParameters(std::istream& is) override {
     //     is >> pitch >> interval >> decay >> balance >> clip;
     // }
-    TRXClaves(void) : pitch(600.0f), interval(200.0f), decay(0.1f), balance(0.5f), clip(0.2f),
-                       phase1(0.0f), phase2(0.0f), env(0.0f), t(0.0f) {};
+    TRXClaves(void) : pitch(600.0f), interval(200.0f), decay(0.04f), balance(0.5f), clip(0.2f),
+                       phase1(0.0f), phase2(0.0f), env(0.0f), t(0.0f), env_mul(0.0f) {};
     ~TRXClaves(void) override {};
 
     void loadPreset(uint8_t idx) override;

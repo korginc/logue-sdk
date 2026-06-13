@@ -58,7 +58,22 @@ static RenderStats render_model(DrumModel* m, float* buf, int len) {
  * Per-model tests
  * ------------------------------------------------------------------------- */
 
-static void test_model_render(const char* name, DrumModel* m) {
+// Streams `secs` of audio (no full buffer) and returns the peak magnitude in
+// the final 100 ms. Used to verify long-decay instruments still reach silence.
+static float streamed_tail_peak(DrumModel* m, float secs) {
+    const int total = (int)(secs * 48000.0f);
+    float tail = 0.0f;
+    for (int i = 0; i < total; ++i) {
+        const float s = m->Process();
+        if (i >= total - kTailLen) {
+            const float a = std::fabs(s);
+            if (a > tail) tail = a;
+        }
+    }
+    return tail;
+}
+
+static void test_model_render(const char* name, DrumModel* m, bool long_decay) {
     char tname[96];
     char detail[128];
 
@@ -86,11 +101,27 @@ static void test_model_render(const char* name, DrumModel* m) {
         report_fail(tname, detail);
     }
 
-    std::snprintf(tname, sizeof(tname), "%s decays within 1s", name);
-    if (st.tail_peak < 0.02f) report_pass(tname);
-    else {
-        std::snprintf(detail, sizeof(detail), "tail peak=%.4f", st.tail_peak);
-        report_fail(tname, detail);
+    if (long_decay) {
+        // Intentionally long-ringing voice (e.g. TRX Gong): just confirm it
+        // eventually reaches silence rather than ringing forever.
+        m->Init();
+        m->loadPreset(0);
+        m->setPitchRatio(1.0f);
+        m->Trigger();
+        const float tail = streamed_tail_peak(m, 6.0f);
+        std::snprintf(tname, sizeof(tname), "%s decays within 6s", name);
+        if (tail < 0.02f) report_pass(tname);
+        else {
+            std::snprintf(detail, sizeof(detail), "tail peak=%.4f", tail);
+            report_fail(tname, detail);
+        }
+    } else {
+        std::snprintf(tname, sizeof(tname), "%s decays within 1s", name);
+        if (st.tail_peak < 0.02f) report_pass(tname);
+        else {
+            std::snprintf(detail, sizeof(detail), "tail peak=%.4f", st.tail_peak);
+            report_fail(tname, detail);
+        }
     }
 }
 
@@ -348,22 +379,24 @@ int main() {
     test_synth_euclid_modes();
 
     fm_perc_synth_init(&g_synth);
-    struct { const char* name; DrumModel* m; } models[] = {
-        {"FmKick",       &g_synth.kick},
-        {"FmSnare",      &g_synth.snare},
-        {"FmTom",        &g_synth.tom},
-        {"FmClap",       &g_synth.clap},
-        {"FmRimshot",    &g_synth.rimshot},
-        {"FmCowbell",    &g_synth.cowbell},
-        {"FmCymbal",     &g_synth.cymbal},
-        {"TRXBassDrum",  &g_synth.bass},
-        {"TRXSnareDrum", &g_synth.snare_drum},
-        {"TRXClaves",    &g_synth.claves},
-        {"TRXHiHat",     &g_synth.hi_hat},
+    struct { const char* name; DrumModel* m; bool long_decay; } models[] = {
+        {"FmKick",       &g_synth.kick,       false},
+        {"FmSnare",      &g_synth.snare,      false},
+        {"FmTom",        &g_synth.tom,        false},
+        {"FmClap",       &g_synth.clap,       false},
+        {"FmRimshot",    &g_synth.rimshot,    false},
+        {"FmCowbell",    &g_synth.cowbell,    false},
+        {"FmCymbal",     &g_synth.cymbal,     false},
+        {"TRXBassDrum",  &g_synth.bass,       false},
+        {"TRXSnareDrum", &g_synth.snare_drum, false},
+        {"TRXClaves",    &g_synth.claves,     false},
+        {"TRXHiHat",     &g_synth.hi_hat,     false},
+        {"FmWhistle",    &g_synth.whistle,    false},
+        {"TRXGong",      &g_synth.gong,       true},
     };
 
     for (auto& e : models) {
-        test_model_render(e.name, e.m);
+        test_model_render(e.name, e.m, e.long_decay);
         test_model_determinism(e.name, e.m);
         test_model_pitch_ratio(e.name, e.m);
         test_model_parameters(e.name, e.m);

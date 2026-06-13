@@ -21,7 +21,7 @@ const __unit_header unit_header_t unit_header = {
         // each instrument will be stored in a local array of 24 parameters, and only valid ones will be updated by the UI and processed by the DSP. This allows for a flexible design where different instruments can have different sets of parameters while sharing the same underlying structure.
         // Page 1:
         // Instrument
-        {0, 10, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"Instr"}},  // aligned to INST_COUNT
+        {0, 12, 0, 0, k_unit_param_type_strings, 0, 0, 0, {"Instr"}},  // 0..INST_COUNT-1
         // Base Frequency: fundamental frequency of the FM
         {0, 100, 0, 50, k_unit_param_type_strings, 0, 0, 0, {"BasFrq"}},
         // Modulation Frequency: rate of modulation for the FM

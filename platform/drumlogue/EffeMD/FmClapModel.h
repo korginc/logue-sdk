@@ -13,8 +13,10 @@ public:
     // }
     FmClapModel(void) : f_b(800.0f), f_m(800.0f), I(40.0f), d_m(0.05f),
                         d1(0.02f), d2(0.3f), clap_count(3), clap_interval(0.012f),
-                        fhp(400.0f), bm(0.9f), mod_phase(0.0f), car_phase(0.0f),
-                        prev_mod(0.0f), t(0.0f), y_prev(0.0f), x_prev(0.0f), active(false){};
+                        fhp(400.0f), bm(0.9f), noise(0.6f), mod_phase(0.0f), car_phase(0.0f),
+                        prev_mod(0.0f), t(0.0f), y_prev(0.0f), x_prev(0.0f), active(false) {
+        drum_rng_seed(&rng_, 0xC1A90001u);
+    };
     ~FmClapModel (void) override {};
 
     void loadPreset(uint8_t idx) override;
@@ -38,9 +40,12 @@ public:
     float clap_interval;  // seconds between claps
     float clap_timer;
     float fhp;
-    float bm;  // now user-controllable mod feedback
+    float bm;     // user-controllable mod feedback
+    float noise;  // 0..1 blend of noise burst into the FM tone (clap character)
 
     float mod_phase, car_phase, prev_mod, t;
     float y_prev, x_prev;
     bool active;
+
+    drum_rng_t rng_;  // deterministic noise source for the clap burst
 };

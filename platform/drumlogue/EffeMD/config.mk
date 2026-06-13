@@ -24,7 +24,9 @@ CXXSRC = unit.cc \
 		 TRXBassDrum.cc \
 		 TRXClaves.cc \
 		 TRXHiHat.cc \
-		 TRXSnareDrum.cc
+		 TRXSnareDrum.cc \
+		 FmWhistleModel.cc \
+		 TRXGongModel.cc
 
 # List ASM source files here
 ASMSRC =

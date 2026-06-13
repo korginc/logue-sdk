@@ -9,6 +9,7 @@ void FmClapModel::Init() {
     prev_mod = 0.0f;
     x_prev = y_prev = 0.0f;
     active = true;
+    drum_rng_seed(&rng_, 0xC1A90001u);
 }
 
 void FmClapModel::Trigger() {
@@ -31,7 +32,14 @@ float FmClapModel::Process() {
 
     car_phase = WrapPhase(car_phase + TWO_PI * (f_b * pitch_ratio_) * dt + I * mod_env * mod_out);
     float tone = fastersinfullf(car_phase);
-    float x = tone * amp_env;
+
+    // A real clap is a burst of noise, not a pure tone. Blend white noise into
+    // the FM carrier so the multi-burst amplitude envelope reads as hand claps
+    // rather than a whistle. noise=0 reproduces the original pure-FM voice
+    // (also available as the separate "FM Whistle" instrument).
+    float white = drum_rng_bipolar(&rng_);
+    float src = tone * (1.0f - 0.55f * noise) + white * noise * 1.4f;
+    float x = src * amp_env;
 
     // High-pass filter
     float alpha = 1.0f / (1.0f + 2.0f * PI * fhp * dt);
@@ -56,10 +64,10 @@ float FmClapModel::Process() {
 void FmClapModel::loadPreset(uint8_t idx) {
     switch (idx) {
         case 0:
-          f_b = 234.804f;  f_m = 1066.67f;  I = 3.431f;  d_m = 0.17f;  d1 = 0.023f;  d2 = 0.3f;  clap_count = 2.0f;  clap_interval = 0.028f;  fhp = 786.765f;  bm = 1.0f;
+          f_b = 234.804f;  f_m = 1066.67f;  I = 3.431f;  d_m = 0.17f;  d1 = 0.023f;  d2 = 0.3f;  clap_count = 2;  clap_interval = 0.028f;  fhp = 786.765f;  bm = 1.0f;  noise = 0.6f;
           break;
         case 1:
-          f_b = 176.64f; f_m = 1585.66f; I = 15.164f; d_m = 0.095f; d1 = 0.01f; d2 = 0.09f; clap_count = 30.0f; clap_interval = 0.034f; fhp = 953.197f; bm = 0.018f;
+          f_b = 176.64f; f_m = 1585.66f; I = 15.164f; d_m = 0.095f; d1 = 0.01f; d2 = 0.09f; clap_count = 30; clap_interval = 0.034f; fhp = 953.197f; bm = 0.018f;  noise = 0.7f;
           break;
         // case 2: - maybe in the future
     }
@@ -93,6 +101,9 @@ void FmClapModel::setParameter(fm_param_index_t param_index, float value) {
             break;
         case K_Count:
             clap_count = value;
+            break;
+        case K_Noise_Level:
+            noise = value * 0.01f;
             break;
         case K_HPF:
             fhp = 20.0f + value * 19.80f;
@@ -130,6 +141,9 @@ float FmClapModel::getParameter(fm_param_index_t param_index) {
             break;
         case K_Count:
             return clap_count;
+            break;
+        case K_Noise_Level:
+            return noise;
             break;
         case K_HPF:
             return fhp; // Hz
