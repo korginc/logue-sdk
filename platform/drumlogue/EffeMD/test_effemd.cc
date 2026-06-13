@@ -206,6 +206,38 @@ static void test_model_parameters(const char* name, DrumModel* m) {
     }
 }
 
+static void test_cymbal_choke() {
+    // With sustain > 0 the cymbal floors at `sustain` and rings indefinitely.
+    // Without a Release() it must still be audible after 2 s; after Release()
+    // it must fall silent within ~0.5 s.
+    FmCymbalModel cym;
+    cym.Init();
+    cym.loadPreset(0);
+    cym.setParameter(K_Sustain, 60.0f);  // sustain = 0.6
+    cym.setPitchRatio(1.0f);
+
+    cym.Trigger();
+    float held = streamed_tail_peak(&cym, 2.0f);  // tail over 2 s, still held
+
+    cym.Trigger();
+    streamed_tail_peak(&cym, 0.5f);  // let it ring half a second
+    cym.Release();
+    float released = streamed_tail_peak(&cym, 0.5f);  // 0.5 s after release
+
+    if (held > 0.02f)
+        report_pass("cymbal sustains while held");
+    else
+        report_fail("cymbal sustains while held", "no sustained tail with sustain>0");
+
+    if (released < 0.01f)
+        report_pass("cymbal choke silences sustained tail on note-off");
+    else {
+        char d[64];
+        std::snprintf(d, sizeof(d), "tail after release=%.4f", released);
+        report_fail("cymbal choke silences sustained tail on note-off", d);
+    }
+}
+
 /* ---------------------------------------------------------------------------
  * Euclidean tuning table tests
  * ------------------------------------------------------------------------- */
@@ -372,6 +404,7 @@ int main() {
     std::printf("EffeMD unit tests\n=================\n");
 
     test_euclid_table();
+    test_cymbal_choke();
     test_presets();
     test_synth_basics();
     test_synth_velocity();

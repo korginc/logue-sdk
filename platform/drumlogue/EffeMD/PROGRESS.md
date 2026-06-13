@@ -4,12 +4,64 @@ Status snapshot for the next agent/developer. Read `README.md` first for the
 architecture; this file tracks what was done, what is verified, and what is
 still open.
 
-**Status: builds and passes all unit tests.**
+**Status: builds, runs on hardware, passes all unit tests.**
 - `make CROSS_COMPILE=arm-linux-gnueabihf-` → `build/effemd.drmlgunit`
-  (ARMv7 NEON shared object, all `unit_*` entry points exported). Verified
-  with binutils; **not yet tested on drumlogue hardware.**
+  (ARMv7 NEON shared object, all `unit_*` entry points exported).
 - `./run_effemd_tests.sh` → all tests pass natively (x86) and cross-compiled
-  for ARMv7+NEON under `qemu-arm` (which exercises the NEON cymbal path).
+  for ARMv7+NEON under `qemu-arm` (exercises the NEON cymbal and hihat paths).
+- **Tested on drumlogue hardware:** all engines OK except two timbre issues,
+  now fixed (see §8). 13 instruments.
+
+---
+
+## Round 2 (hardware feedback)
+
+### 8. Engine fixes from the first hardware test
+
+- **FM Clap sounded like a whistle.** Root cause: pure two-operator FM with a
+  sine carrier — once the modulator envelope decays you hear a clean tone.
+  Fix: blend a white-noise burst into the carrier, shaped by the existing
+  multi-burst amplitude envelope, controlled by the previously-unused
+  `K_Noise_Level` (NzLvl) param (default ~0.6). Now reads as a hand clap.
+- **TRX Claves sounded like a gong.** Root cause: `K_Decay_A` mapped to
+  0.01..5 s (the original desktop slider maxed at 0.5 s); at the runtime's
+  default value (50) that gave a 2.5 s decay on two beating high sines.
+  Fix: tightened the mapping to ~5..100 ms (clave length).
+- **Both original sounds preserved as new instruments** (user request), 11→13:
+  - **FmWhistle** (`FmWhistleModel`) — exact clone of the noise-free FM Clap.
+  - **TRXGong** (`TRXGongModel`) — exact clone of the wide-decay TRX Claves.
+  - Wired through `engine_id_t`, `instruments_strings`,
+    `fm_engine_to_euclid_lane`, the model registry, `header.c` Instr range
+    (now 0..12), `config.mk`, and the test suite.
+- ⚠ Note: the drumlogue runtime pushes every parameter's *default* value at
+  load, so the power-on sound of each instrument is governed by the
+  `setParameter` mappings (value 50), not by `loadPreset`. The two bugs above
+  were both in those default mappings. Worth auditing the other instruments'
+  default-value sounds on hardware.
+
+### 9. FmCymbal note-off choke
+
+- Added `DrumModel::Release()` (default no-op). `fm_perc_synth_note_off` now
+  calls `Release()` on the active model.
+- `FmCymbalModel::Release()` starts a ~60 ms fade (`choke_`). With `sustain > 0`
+  the amp envelope floors at `sustain` and would otherwise ring until the next
+  trigger; the choke lets it fall silent (and then the synth idle-gate engages).
+  Tested: sustains while held, silent within ~0.5 s after note-off.
+
+### 10. ARM NEON round 2
+
+Done (concrete wins, scalar fallback + tests, verified on qemu):
+- **TRXHiHat 6-square stack**: the 4 lowest oscillators advance/wrap/square in
+  parallel NEON lanes, 2 scalar; identical math to the scalar path.
+- (FmCymbal 4-pair vectorization was already done in round 1.)
+
+Deferred pending on-hardware profiling (the task said "measure first"):
+- **FmCowbell / FmRimshot dual carriers** — only 2 carriers, so a NEON path is
+  half-width; likely below the noise floor of the win. Measure before doing.
+- **Block-level `Process(float* buf, n)` interface** — would amortize the
+  per-sample virtual dispatch, but that cost is only a few cycles/sample and
+  the change touches all 13 models + the render loop. Measure the actual
+  dispatch overhead on a Cortex-A7 before committing to the refactor.
 
 ---
 
@@ -141,26 +193,29 @@ Defects found and fixed:
 
 ## TODO / roadmap
 
-- [ ] **Hardware test on a real drumlogue** (load `effemd.drmlgunit`, check
-      CPU headroom, UI strings, preset switching, parameter feel). The
-      `O:%.3f`/`x` parameter display refresh quirk noted in `synth.h` needs
-      on-device verification.
+- [x] **Hardware test on a real drumlogue** — done; two engines fixed (§8).
+- [x] **FmCymbal note-off choke** (§9).
+- [x] **NEON round 2 — TRXHiHat square stack** (§10).
+- [ ] **Verify the §8 fixes on hardware** (clap now claps, claves now click,
+      FmWhistle/TRXGong reproduce the old voices).
+- [ ] **Audit default-value sounds on hardware** for the other 9 instruments:
+      the runtime applies the value-50 `setParameter` mappings at load, not
+      the presets, so the parameter ranges (not the presets) define power-on
+      timbre. The two bugs were both wrong default mappings.
+- [ ] **NEON round 2, deferred items** (measure first on hardware): FmCowbell /
+      FmRimshot dual carriers (half-width, marginal), block-level
+      `Process(float* buf, n)` to amortize virtual dispatch (few cycles/sample;
+      touches all 13 models — profile the dispatch cost first).
 - [ ] **Per-model UI ranges**: all 24 params share generic 0..100 ranges;
       consider per-instrument `k_unit_param_type_*` tuning and better names.
-- [ ] **More presets**: only 2 (`MD Init`, `MD Alt`, from md-drum-synth's
-      defaults); `num_presets` in `header.c` must match `NUM_OF_PRESETS`.
-- [ ] **K_Reserved parameter** (page 6 slot 3): candidate uses — LFO from
-      Sonaglio's `lfo_enhanced.h`, drive amount, or per-hit scatter.
-- [ ] **NEON round 2** (measure first on hardware): TRXHiHat 6-square stack,
-      FmCowbell/FmRimshot dual carriers, block-level model processing
-      (Process(float* buf, n) interface) to amortize virtual dispatch.
-- [ ] **neon_sin accuracy**: cymbal NEON path uses a 2-term polynomial sine
-      (~1e-3 error) vs `fastersinfullf` scalar; sounds fine for inharmonic
-      content but A/B on hardware would be good.
+- [ ] **More presets**: only 2 (`MD Init`, `MD Alt`); `num_presets` in
+      `header.c` must match `NUM_OF_PRESETS`.
+- [ ] **K_Reserved parameter** (page 6 slot 3): candidate uses — LFO,
+      drive amount, or per-hit scatter.
+- [ ] **neon_sin accuracy**: cymbal/hihat NEON paths use polynomial sine
+      (~1e-3 error) vs `fastersinfullf` scalar; A/B on hardware would be good.
 - [ ] **Backport fixes to Sonaglio**: `fastertanhf` negative-input bug and
       the unguarded NEON block live in Sonaglio's `float_math.h` too.
-- [ ] Consider note-off choke for `FmCymbal` with sustain > 0 (currently
-      rings until the next trigger, as in md-drum-synth).
 
 ## Instructions for the next agent
 
@@ -177,4 +232,7 @@ Defects found and fixed:
    `constants.h`) is fixed; if you change one side, change the other.
 5. When adding a model: derive from `DrumModel`, add to `engine_id_t`,
    `instruments_strings`, the registry in `fm_perc_synth_init()`, a lane in
-   `fm_engine_to_euclid_lane()`, and the model list in `test_effemd.cc`.
+   `fm_engine_to_euclid_lane()`, the `Instr` param max in `header.c`,
+   `config.mk`, and the model list in `test_effemd.cc`.
+6. Remember the runtime pushes value-50 parameter defaults at load: tune the
+   `setParameter` ranges so value 50 sounds right, not just the presets.

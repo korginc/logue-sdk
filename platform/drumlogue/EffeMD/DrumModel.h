@@ -64,6 +64,11 @@ public:
     virtual void Trigger() = 0;
     virtual float Process() = 0;
 
+    /* Note-off / gate-off. One-shot models decay on their own and ignore this;
+     * models with a sustaining tail (e.g. FmCymbal with sustain > 0) override
+     * it to start a fast release so the voice can fall silent. */
+    virtual void Release() {}
+
     virtual void  loadPreset(uint8_t idx) = 0;
     virtual void  setParameter(fm_param_index_t param_index, float value) = 0;
     /* Returns the model's DSP value for a parameter, or 255.0f when the

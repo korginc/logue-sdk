@@ -216,9 +216,11 @@ fast_inline void fm_perc_synth_note_on(fm_perc_synth_t* synth,
 }
 
 fast_inline void fm_perc_synth_note_off(fm_perc_synth_t* synth, uint8_t note) {
-    // Drum models are one-shot: they decay on their own. Nothing to do here.
-    (void)synth;
+    // Most models are one-shot and ignore Release(); sustaining voices (the
+    // cymbal with sustain > 0) use it to start a fast fade so they go silent
+    // instead of ringing until the next trigger.
     (void)note;
+    synth->models[synth->instrument]->Release();
 }
 
 // ============================================================================

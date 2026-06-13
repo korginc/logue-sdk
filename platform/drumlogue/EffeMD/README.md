@@ -41,7 +41,7 @@ unit.cc            drumlogue SDK callbacks (entry points)
         └── fm_perc_synth_process.h
                    integration layer: instrument selector, velocity,
                    Euclidean tuning, soft clip, idle detection (scalar)
-              └── DrumModel.h + 11 models (scalar, host-testable)
+              └── DrumModel.h + 13 models (scalar, host-testable)
                     └── fm_operator.h  (Sonaglio scalar FM operator)
                     └── float_math.h   (fast scalar math approximations)
                     └── sine_neon.h    (NEON sine, used by FmCymbalModel)
@@ -53,24 +53,33 @@ Design rules (inherited from Sonaglio):
 - the whole DSP layer below `synth.h` is free of NEON intrinsics (or guards
   them behind `__ARM_NEON`) so it compiles and unit-tests natively on a host
 
-### Instruments (11 total)
+### Instruments (13 total)
 
 | # | Model | Synthesis method |
 |---|-------|------------------|
 | 0 | **FmKick** | 2-op FM, DX7-style modulator feedback, pitch sweep, ratio mode |
 | 1 | **FmSnare** | 2-op FM + white noise + one-pole HPF |
 | 2 | **FmTom** | 2-op FM with fixed modulator feedback + pitch sweep |
-| 3 | **FmClap** | 2-op FM retriggered N times (clap_count/interval) + HPF |
+| 3 | **FmClap** | 2-op FM retriggered N times + noise burst (NzLvl) + HPF |
 | 4 | **FmRimshot** | 1 modulator driving 2 carriers (body + rim), mix + HPF |
 | 5 | **FmCowbell** | 1 modulator driving 2 carriers at the classic 1:1.48 ratio |
-| 6 | **FmCymbal** | 4 modulator/carrier pairs at inharmonic ratios (NEON-vectorized) |
+| 6 | **FmCymbal** | 4 modulator/carrier pairs at inharmonic ratios (NEON-vectorized); note-off choke |
 | 7 | **TRXBassDrum** | Sine + pitch ramp + harmonics (tanh) + noise burst + clip |
 | 8 | **TRXSnareDrum** | 2 detuned sines + snap noise + filtered noise + clip |
-| 9 | **TRXClaves** | 2 detuned sines, exponential decay + clip |
-| 10 | **TRXHiHat** | 6 detuned squares + white noise, LPF/HPF, gap crossfade |
+| 9 | **TRXClaves** | 2 detuned sines, short click decay + clip |
+| 10 | **TRXHiHat** | 6 detuned squares (NEON) + white noise, LPF/HPF, gap crossfade |
+| 11 | **FmWhistle** | The pure-FM voice of FmClap without the noise layer (tonal) |
+| 12 | **TRXGong** | TRXClaves DSP with a long decay → beating, gong-like ring |
 
-Every model derives from `DrumModel` (Init / Trigger / Process /
+Instruments 11–12 are clones that preserve earlier voices: **FmClap** gained a
+noise burst so it sounds like a hand clap (the original pure-FM "whistle" lives
+on as **FmWhistle**), and **TRXClaves** was tightened to a short click (the
+original long-decay "gong" lives on as **TRXGong**).
+
+Every model derives from `DrumModel` (Init / Trigger / Process / Release /
 loadPreset / setParameter / getParameter) and owns its DSP parameters.
+`Release()` is a note-off hook; only FmCymbal uses it (to choke a sustained
+tail), all other one-shot models ignore it.
 
 ### FM operator
 
@@ -155,10 +164,11 @@ CXX=arm-linux-gnueabihf-g++ RUNNER=qemu-arm \
   ./run_effemd_tests.sh
 ```
 
-Tests cover: render sanity (finite/audible/bounded/decaying) for all 11
+Tests cover: render sanity (finite/audible/bounded/decaying) for all 13
 models, retrigger determinism, pitch-ratio response, parameter set/get,
-Euclidean table properties, instrument switching, velocity scaling, preset
-loading and idle detection. See `PROGRESS.md` for status and roadmap.
+Euclidean table properties, instrument switching, velocity scaling, the
+FmCymbal note-off choke, preset loading and idle detection. See `PROGRESS.md`
+for status and roadmap.
 
 ---
 

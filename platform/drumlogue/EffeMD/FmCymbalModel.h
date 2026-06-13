@@ -7,12 +7,14 @@ public:
     void Init() override;
     void Trigger() override;
     float Process() override;
+    void Release() override;
 
     // void loadParameters(std::istream& is) override {
     //     is >> fb >> fm >> d_b >> I >> d_m >> bb >> sustain >> f_hp;
     // }
     FmCymbalModel(void) : fb(400.0f), fm(800.0f), d_b(1.0f), I(10.0f), d_m(0.2f),
-                            bb(0.5f), sustain(0.3f), f_hp(300.0f), t(0.0f), x_prev(0.0f), y_prev(0.0f)
+                            bb(0.5f), sustain(0.3f), f_hp(300.0f), t(0.0f), x_prev(0.0f), y_prev(0.0f),
+                            choke_(1.0f), choke_mul_(1.0f)
                             {};
     ~FmCymbalModel (void) override {};
 
@@ -36,4 +38,9 @@ private:
     float prev_mod[NUM_PAIRS] = {};
     float t;
     float x_prev, y_prev;
+
+    // Note-off choke: 1.0 while held, ramps to 0 after Release() so the
+    // sustaining tail (sustain > 0) can fall silent instead of ringing on.
+    float choke_;
+    float choke_mul_;
 };

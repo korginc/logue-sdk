@@ -13,10 +13,20 @@ void FmCymbalModel::Init() {
         prev_mod[i] = 0.0f;
     }
     x_prev = y_prev = 0.0f;
+    choke_ = 1.0f;
+    choke_mul_ = 1.0f;
 }
 
 void FmCymbalModel::Trigger() {
     Init();
+    choke_ = 1.0f;
+    choke_mul_ = 1.0f;  // 1.0 = not releasing
+}
+
+void FmCymbalModel::Release() {
+    // Start a fast (~60 ms) fade. Only meaningful when sustain > 0, where the
+    // amp envelope otherwise floors at `sustain` and never reaches silence.
+    choke_mul_ = expf(-INV_SAMPLE_RATE / 0.06f);
 }
 
 float FmCymbalModel::Process() {
@@ -84,7 +94,8 @@ float FmCymbalModel::Process() {
     y_prev = y;
 
     t += dt;
-    return y;
+    choke_ *= choke_mul_;  // 1.0 until Release(), then fades to 0
+    return y * choke_;
 }
 
 
