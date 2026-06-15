@@ -296,10 +296,23 @@ public:
         // amplitude^(-0.5) = 2:1 compression
         // => env^(-0.25)
         // --------------------------------------------------------------------
-        float32x4_t enc_gain = pow_neon(env, vdupq_n_f32(-0.25f));   // smoother than vrsqrteq_f32(env)
-        enc_gain = vmulq_f32(vrsqrtsq_f32(vmulq_f32(env, enc_gain), enc_gain), enc_gain);
-        // Clamp encode gain: prevents 1000x boost during silence → loud transient onset.
-        // 3.0x ≈ +9.5 dB max NR action; less than typical dbx Type II spec.
+        // --------------------------------------------------------------------
+        // Fast Pure Vectorized 2:1 dbx compression calculation (env^-0.25)
+        // --------------------------------------------------------------------
+        // Step A: Approximate env^(-0.5)
+        float32x4_t y0 = vrsqrteq_f32(env);
+        // Refine with 1 step of Newton-Raphson for precise amplitude tracking
+        y0 = vmulq_f32(y0, vrsqrtsq_f32(vmulq_f32(env, y0), y0));
+
+        // Step B: y0 is now highly precise env^(-0.5).
+        // To get env^(-0.25), we calculate sqrt(y0) = y0 * rsqrt(y0)
+        float32x4_t rsqrt_y0 = vrsqrteq_f32(y0);
+        rsqrt_y0 = vmulq_f32(rsqrt_y0, vrsqrtsq_f32(vmulq_f32(y0, rsqrt_y0), rsqrt_y0));
+
+        // enc_gain = env^(-0.5) * env^(0.25) = env^(-0.25)
+        float32x4_t enc_gain = vmulq_f32(y0, rsqrt_y0);
+
+        // Clamp encode gain to prevent transient bursts
         enc_gain = vminq_f32(enc_gain, vdupq_n_f32((dbx_mode_ == k_encode_only) ? 1.5f : 3.0f));
         // Synchronized decode gain = 1/enc_gain.  Computing it here (from the
         // same enc_gain used to boost the signal) guarantees enc × dec = 1.0
@@ -359,11 +372,12 @@ public:
         const float wow_depth_base     = 5.0f + tape_age_ * 25.0f;
         const float flutter_depth_base = 0.8f + tape_age_ * 2.0f;
 
-        float l4[NEON_LANES], r4[NEON_LANES];
-        vst1q_f32(l4, sig_l);
-        vst1q_f32(r4, sig_r);
+        float32x4_t out_l, out_r;
 
         for (int s = 0; s < NEON_LANES; ++s) {
+            const float l_sample = vgetq_lane_f32(sig_l, s);
+            const float r_sample = vgetq_lane_f32(sig_r, s);
+
             const float lfo_val     = fastersinfullf(wf_lfo_phase_);
             const float flutter_val = fastersinfullf(wf_flutter_phase_);
             wf_lfo_phase_         += wf_phase_inc_;
@@ -376,22 +390,30 @@ public:
             const int32_t i_off       = (int32_t)rd_off;
             const float   fr          = rd_off - (float)i_off;
 
-            wf_delay_l_[wf_write_pos_] = l4[s];
-            wf_delay_r_[wf_write_pos_] = r4[s];
+            wf_delay_l_[wf_write_pos_] = l_sample;
+            wf_delay_r_[wf_write_pos_] = r_sample;
 
             // Core indices for 4-point interpolation
-            uint32_t m1 = (wf_write_pos_ - i_off + WF_BUFFER_SIZE) & WF_BUFFER_MASK; // Central point 1
-            uint32_t m2 = (m1 - 1u) & WF_BUFFER_MASK;                                // Central point 2
-            uint32_t m0 = (m1 + 1u) & WF_BUFFER_MASK;                                // Left guard point
-            uint32_t m3 = (m2 - 1u) & WF_BUFFER_MASK;                                // Right guard point
+            uint32_t m1 = (wf_write_pos_ - i_off + WF_BUFFER_SIZE) & WF_BUFFER_MASK;
+            uint32_t m2 = (m1 - 1u) & WF_BUFFER_MASK;
+            uint32_t m0 = (m1 + 1u) & WF_BUFFER_MASK;
+            uint32_t m3 = (m2 - 1u) & WF_BUFFER_MASK;
 
-            l4[s] = hermite4_scalar(wf_delay_l_[m0], wf_delay_l_[m1], wf_delay_l_[m2], wf_delay_l_[m3], fr);
-            r4[s] = hermite4_scalar(wf_delay_r_[m0], wf_delay_r_[m1], wf_delay_r_[m2], wf_delay_r_[m3], fr);
+            float res_l = hermite4_scalar(wf_delay_l_[m0], wf_delay_l_[m1], wf_delay_l_[m2], wf_delay_l_[m3], fr);
+            float res_r = hermite4_scalar(wf_delay_r_[m0], wf_delay_r_[m1], wf_delay_r_[m2], wf_delay_r_[m3], fr);
+
+            if (s == 0) {
+                out_l = vdupq_n_f32(res_l);
+                out_r = vdupq_n_f32(res_r);
+            } else {
+                out_l = vsetq_lane_f32(res_l, out_l, s);
+                out_r = vsetq_lane_f32(res_r, out_r, s);
+            }
 
             wf_write_pos_ = (wf_write_pos_ + 1u) & WF_BUFFER_MASK;
         }
-        sig_l = vld1q_f32(l4);
-        sig_r = vld1q_f32(r4);
+        sig_l = out_l;
+        sig_r = out_r;
     }
 
     fast_inline void crosstalk(float32x4_t &sig_l, float32x4_t &sig_r) {
@@ -403,61 +425,52 @@ public:
     }
 
     fast_inline void vinyl_dust(float32x4_t &sig_l, float32x4_t &sig_r) {
-        // 1. Generate independent white noise sources (Vectorized, fast)
-        float32x4_t white_l = vsubq_f32(vmulq_n_f32(prng_rand_float(), 2.0f),
-                                        vdupq_n_f32(1.0f));
-        float32x4_t white_r = vsubq_f32(vmulq_n_f32(prng_rand_float(), 2.0f),
-                                        vdupq_n_f32(1.0f));
+        // 1. Generate independent white noise sources
+        float32x4_t white_l = vsubq_f32(vmulq_n_f32(prng_rand_float(), 2.0f), vdupq_n_f32(1.0f));
+        float32x4_t white_r = vsubq_f32(vmulq_n_f32(prng_rand_float(), 2.0f), vdupq_n_f32(1.0f));
 
-        // 2. Generate random values for triggers and amplitudes
-        float32x4_t rand_trigger = prng_rand_float();
+        // 2. Generate random pools
+        float32x4_t rand_trigger  = prng_rand_float();
         float32x4_t rand_amp_pool = prng_rand_float();
+        float32x4_t rand_big_trig = prng_rand_float();
 
-        float r_trig[NEON_LANES], r_amp[NEON_LANES];
-        vst1q_f32(r_trig, rand_trigger);
-        vst1q_f32(r_amp, rand_amp_pool);
+        float32x4_t v_pop_env, v_big_pop_env;
 
-        // Random pool for big pops
-        float r_big_trig[NEON_LANES];
-        vst1q_f32(r_big_trig, prng_rand_float());
-
-        float env_array[NEON_LANES];
-        float big_env_array[NEON_LANES];
-
-        // Run a short 4-step sequential loop so the envelope decays sample-by-sample,
-        // letting a pop smoothly coat all subsequent time lanes!
+        // Run sequential time-lane loop safely via registers
         for (int i = 0; i < NEON_LANES; ++i) {
+            float trig      = vgetq_lane_f32(rand_trigger, i);
+            float amp       = vgetq_lane_f32(rand_amp_pool, i);
+            float big_trig  = vgetq_lane_f32(rand_big_trig, i);
+
             // Small Crackle
-            if (r_trig[i] > vinyl_pop_threshold_) {
-                // Slightly boosted amplitude range (0.15f to 0.45f) for beautiful analog presence
-                float amplitude = 0.15f + r_amp[i] * 0.30f;
+            if (trig > vinyl_pop_threshold_) {
+                float amplitude = 0.15f + amp * 0.30f;
                 if (amplitude > pop_env_scalar_) {
                     pop_env_scalar_ = amplitude;
                 }
             }
             // Big Occasional Pop
-            if (r_big_trig[i] > vinyl_big_pop_threshold_) {
-              float big_amp = 0.4f + r_amp[i] * 0.5f;
-              if (big_amp > big_pop_env_scalar_)
-                big_pop_env_scalar_ = big_amp;
+            if (big_trig > vinyl_big_pop_threshold_) {
+                float big_amp = 0.4f + amp * 0.5f;
+                if (big_amp > big_pop_env_scalar_)
+                    big_pop_env_scalar_ = big_amp;
             }
 
-            env_array[i] = pop_env_scalar_;
-            big_env_array[i] = big_pop_env_scalar_;
-            // Natural sequential sample-rate decay
-            pop_env_scalar_ *= pop_env_decay_;
+            if (i == 0) {
+                v_pop_env     = vdupq_n_f32(pop_env_scalar_);
+                v_big_pop_env = vdupq_n_f32(big_pop_env_scalar_);
+            } else {
+                v_pop_env     = vsetq_lane_f32(pop_env_scalar_, v_pop_env, i);
+                v_big_pop_env = vsetq_lane_f32(big_pop_env_scalar_, v_big_pop_env, i);
+            }
+
+            pop_env_scalar_     *= pop_env_decay_;
             big_pop_env_scalar_ *= big_pop_env_decay_;
         }
 
-        // Load back into a vector for parallel processing
-        float32x4_t v_pop_env = vld1q_f32(env_array);
-        float32x4_t v_big_pop_env = vld1q_f32(big_env_array);
-
         // 3. Shape transient & Apply envelope
-        float32x4_t crackle_l = vaddq_f32(vmulq_n_f32(white_l, 0.82f),
-                                          vmulq_n_f32(previous_noise_l_, 0.18f));
-        float32x4_t crackle_r = vaddq_f32(vmulq_n_f32(white_r, 0.82f),
-                                          vmulq_n_f32(previous_noise_r_, 0.18f));
+        float32x4_t crackle_l = vaddq_f32(vmulq_n_f32(white_l, 0.82f), vmulq_n_f32(previous_noise_l_, 0.18f));
+        float32x4_t crackle_r = vaddq_f32(vmulq_n_f32(white_r, 0.82f), vmulq_n_f32(previous_noise_r_, 0.18f));
 
         previous_noise_l_ = white_l;
         previous_noise_r_ = white_r;
@@ -476,7 +489,6 @@ public:
 
         // 5. Mix into output path
         const float dust_level = 0.06f + tape_age_ * 0.08f;
-
         sig_l = vmlaq_n_f32(sig_l, crackle_l, dust_level);
         sig_r = vmlaq_n_f32(sig_r, crackle_r, dust_level);
     }
