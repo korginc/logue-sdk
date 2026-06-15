@@ -190,47 +190,32 @@ fast_inline void distressor_set_ratio(distressor_t* d, uint8_t mode) {
 // inaudible at typical post-compression levels.  These use NEON fast_div_neon
 // to produce clean harmonic content bounded within ±1 (DIST3) / ~±1.5 (DIST2).
 // TODO evalute is DIST2 ±1.5 is too much due the hard clipper at end of processing
-fast_inline float32x4_t generate_harmonics(distressor_t* d,
-                                           float32x4_t in,
-                                           uint8_t mode) {
+fast_inline float32x4_t generate_harmonics(distressor_t* d, float32x4_t in, uint8_t mode) {
     (void)d;
     float32x4_t pos, neg, sat_pos, sat_neg;
 
-    switch (mode) {
-        case DIST_MODE_DIST2: {
-            // Asymmetric saturator → even harmonics (tube warmth).
-            // Positive clips softly (asymptote 2), negative clips harder (asymptote 0.5).
-            // Ratio at x=±1: +0.67 / −0.33 → strong 2nd harmonic character.
-            pos = vmaxq_f32(in, vdupq_n_f32(0.0f));
-            neg = vminq_f32(in, vdupq_n_f32(0.0f));
-            sat_pos = fast_div_neon(pos,
-                          vaddq_f32(vdupq_n_f32(1.0f),
-                                         vmulq_f32(pos, vdupq_n_f32(0.5f))));
-            sat_neg = fast_div_neon(neg,
-                          vaddq_f32(vdupq_n_f32(1.0f),
-                                         vmulq_f32(vabsq_f32(neg), vdupq_n_f32(2.0f))));
-            return vaddq_f32(sat_pos, sat_neg);
-        }
-
-        case DIST_MODE_DIST3: {
-            // Symmetric saturator → odd harmonics only (tape warmth).
-            // y = x / (1 + |x|) — bounded ±1, zero-phase, purely odd harmonics.
-            return fast_div_neon(in, vaddq_f32(vdupq_n_f32(1.0f), vabsq_f32(in)));
-        }
-
-        case DIST_MODE_BOTH: {
-            // Mild asymmetry on positive, symmetric on negative → both even and odd.
-            pos = vmaxq_f32(in, vdupq_n_f32(0.0f));
-            neg = vminq_f32(in, vdupq_n_f32(0.0f));
-            sat_pos = fast_div_neon(pos,
-                          vaddq_f32(vdupq_n_f32(1.0f), vmulq_f32(pos, vdupq_n_f32(0.8f))));
-            sat_neg = fast_div_neon(neg,
-                          vaddq_f32(vdupq_n_f32(1.0f), vabsq_f32(neg)));
-            return vaddq_f32(sat_pos, sat_neg);
-        }
-
-        default:
-            return in;
+    if (mode == DIST_MODE_DIST2) {
+        // Asymmetric saturator → even harmonics (tube warmth).
+        // Positive clips softly (asymptote 2), negative clips harder (asymptote 0.5).
+        // Ratio at x=±1: +0.67 / −0.33 → strong 2nd harmonic character.
+        pos = vmaxq_f32(in, vdupq_n_f32(0.0f));
+        neg = vminq_f32(in, vdupq_n_f32(0.0f));
+        sat_pos = fast_div_neon(pos, vaddq_f32(vdupq_n_f32(1.0f), vmulq_f32(pos, vdupq_n_f32(0.5f))));
+        sat_neg = fast_div_neon(neg, vaddq_f32(vdupq_n_f32(1.0f), vmulq_f32(vabsq_f32(neg), vdupq_n_f32(2.0f))));
+        return vaddq_f32(sat_pos, sat_neg);
+    }
+    else if (mode == DIST_MODE_DIST3) {
+        // Symmetric saturator → odd harmonics only (tape warmth).
+        // y = x / (1 + |x|) — bounded ±1, zero-phase, purely odd harmonics.
+        return fast_div_neon(in, vaddq_f32(vdupq_n_f32(1.0f), vabsq_f32(in)));
+    }
+    else { // DIST_MODE_BOTH
+        // Mild asymmetry on positive, symmetric on negative → both even and odd.
+        pos = vmaxq_f32(in, vdupq_n_f32(0.0f));
+        neg = vminq_f32(in, vdupq_n_f32(0.0f));
+        sat_pos = fast_div_neon(pos, vaddq_f32(vdupq_n_f32(1.0f), vmulq_f32(pos, vdupq_n_f32(0.8f))));
+        sat_neg = fast_div_neon(neg, vaddq_f32(vdupq_n_f32(1.0f), vabsq_f32(neg)));
+        return vaddq_f32(sat_pos, sat_neg);
     }
 }
 

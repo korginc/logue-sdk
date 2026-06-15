@@ -64,6 +64,13 @@ enum parameters
 class MasterFX {
 public:
     /*===========================================================================*/
+    /* Constants */
+    /*===========================================================================*/
+    constexpr float32x4_t v_zero = vdupq_n_f32(0.0f);
+    constexpr float32x4_t v_one  = vdupq_n_f32(1.0f);
+    constexpr float32x4_t v_minus_one = vdupq_n_f32(-1.0f);
+    constexpr float32x4_t v_db_conv   = vdupq_n_f32(0.11512925f);
+    /*===========================================================================*/
     /* Lifecycle Methods */
     /*===========================================================================*/
 
@@ -158,11 +165,196 @@ public:
     /* DSP Process Loop - NEON Optimized with Safe Bounds */
     /*===========================================================================*/
 
-    fast_inline void Process(const float* in, float* out, size_t frames) {
-        const float* __restrict in_p = in;
-        float* __restrict out_p = out;
-        size_t frames_remaining = frames;
+    fast_inline void process_4_blocks_comp_normal(const float* in_p, float* out_p, float &state
+                                                  float32x4_t v_thresh, float32x4_t v_slope,
+                                                  float32x4_t v_atten, float32x4_t v_gain_lim) {
+        float32x4_t main_l, main_r, sc_l, sc_r;
 
+        if (has_sidechain_) {
+            float32x4x4_t interleaved = vld4q_f32(in_p);
+            main_l = interleaved.val[0]; main_r = interleaved.val[1];
+            sc_l   = interleaved.val[2]; sc_r   = interleaved.val[3];
+            in_p += 16;
+        } else {
+            float32x4x2_t stereo = vld2q_f32(in_p);
+            main_l = stereo.val[0]; main_r = stereo.val[1];
+            sc_l   = main_l; sc_r   = main_r;
+            in_p += 8;
+        }
+
+        float32x4_t sidechain = (has_sidechain_ && use_external_sc_) ? vaddq_f32(sc_l, sc_r) : vaddq_f32(main_l, main_r);
+        sidechain = sidechain_hpf_process(&sc_hpf_, sidechain);
+
+        float32x4_t env = envelope_detect(&envelope_, sidechain);
+        float32x4_t env_db = linear_to_db(env);
+
+        // --- Inline optimized Standard Process ---
+        float32x4_t target_gain_db = vminq_f32(v_gain_lim, vmaxq_f32(v_atten, vmulq_f32(vsubq_f32(env_db, v_thresh), v_slope)));
+
+        // Extract lanes directly from register without memory roundtrip
+        float t0 = vgetq_lane_f32(target_gain_db, 0);
+        float t1 = vgetq_lane_f32(target_gain_db, 1);
+        float t2 = vgetq_lane_f32(target_gain_db, 2);
+        float t3 = vgetq_lane_f32(target_gain_db, 3);
+
+        // Execute single-pole IIR tracking safely using register operations
+        state += ((fabsf(t0) > fabsf(state)) ? attack_coeff_ : release_coeff_) * (t0 - state); float s0 = state;
+        state += ((fabsf(t1) > fabsf(state)) ? attack_coeff_ : release_coeff_) * (t1 - state); float s1 = state;
+        state += ((fabsf(t2) > fabsf(state)) ? attack_coeff_ : release_coeff_) * (t2 - state); float s2 = state;
+        state += ((fabsf(t3) > fabsf(state)) ? attack_coeff_ : release_coeff_) * (t3 - state); float s3 = state;
+
+        // Rebuild vector register directly
+        float32x4_t smoothed_gain_db = vdupq_n_f32(0.0f);
+        smoothed_gain_db = vsetq_lane_f32(s0, smoothed_gain_db, 0);
+        smoothed_gain_db = vsetq_lane_f32(s1, smoothed_gain_db, 1);
+        smoothed_gain_db = vsetq_lane_f32(s2, smoothed_gain_db, 2);
+        smoothed_gain_db = vsetq_lane_f32(s3, smoothed_gain_db, 3);
+
+        float32x4_t gain_lin = neon_expq_f32(vmulq_f32(smoothed_gain_db, v_db_conv));
+        float32x4_t processed_l = vmulq_f32(main_l, gain_lin);
+        float32x4_t processed_r = vmulq_f32(main_r, gain_lin);
+
+        if (drive_ > 0.01f) {
+            float32x4x2_t driven = overlord_process(&overlord_, processed_l, processed_r, samplerate_);
+            processed_l = driven.val[0]; processed_r = driven.val[1];
+        }
+
+        // Mix and limit stage
+        float32x4x2_t mixed;
+        mixed.val[0] = vmaxq_f32(v_minus_one, vminq_f32(v_one, vaddq_f32(vmulq_f32(main_l, dry_gain), vmulq_f32(processed_l, combined_wet_gain))));
+        mixed.val[1] = vmaxq_f32(v_minus_one, vminq_f32(v_one, vaddq_f32(vmulq_f32(main_r, dry_gain), vmulq_f32(processed_r, combined_wet_gain))));
+
+        vst2q_f32(out_p, mixed);
+        out_p += 8;
+    }
+
+    fast_inline float process_4_blocks_distressor(const float* in_p, float* out_p
+                                                 float32x4_t combined_wet_gain,
+                                                 float32x4_t dry_gain,
+                                                 float ratio_mul,
+                                                 float32x4_t v_ratio_mul,
+                                                 float32x4_t v_dist_thresh,
+                                                 bool is_nuke) {
+        float32x4_t main_l, main_r, sc_l, sc_r;
+        float d_state = vgetq_lane_f32(distressor_.harmonic_state, 3);
+        uint8_t d_mode = distressor_.dist_mode;
+
+        if (has_sidechain_) {
+            float32x4x4_t interleaved = vld4q_f32(in_p);
+            main_l = interleaved.val[0]; main_r = interleaved.val[1];
+            sc_l   = interleaved.val[2]; sc_r   = interleaved.val[3];
+            in_p += 16;
+        } else {
+            float32x4x2_t stereo = vld2q_f32(in_p);
+            main_l = stereo.val[0]; main_r = stereo.val[1];
+            sc_l   = main_l; sc_r   = main_r;
+            in_p += 8;
+        }
+
+        float32x4_t env;
+        if (distressor_.detector_mode & DETECT_LINK) {
+            float32x4_t raw_l = (has_sidechain_ && use_external_sc_) ? sc_l : main_l;
+            float32x4_t raw_r = (has_sidechain_ && use_external_sc_) ? sc_r : main_r;
+            env = distressor_detect_stereo(&distressor_, raw_l, raw_r, samplerate_);
+        } else {
+            float32x4_t sidechain = (has_sidechain_ && use_external_sc_) ? vaddq_f32(sc_l, sc_r) : vaddq_f32(main_l, main_r);
+            env = distressor_detect(&distressor_, sidechain, samplerate_);
+        }
+
+        float32x4_t env_db = linear_to_db(env);
+        float32x4_t excess = vmaxq_f32(vsubq_f32(env_db, v_dist_thresh), v_zero);
+        float32x4_t target_gain_db = is_nuke ? vnegq_f32(excess) : vnegq_f32(vmulq_f32(excess, v_ratio_mul));
+
+        // Corrected Distressor Single-Pole Tracking Logic (Direct Lanes)
+        float dt0 = vgetq_lane_f32(target_gain_db, 0);
+        float dt1 = vgetq_lane_f32(target_gain_db, 1);
+        float dt2 = vgetq_lane_f32(target_gain_db, 2);
+        float dt3 = vgetq_lane_f32(target_gain_db, 3);
+
+        float dc0 = (dt0 < d_state) ? attack_coeff_ : distressor_.opto_coeff;
+        d_state = dt0 * (1.0f - dc0) + d_state * dc0; float ds0 = d_state;
+        float dc1 = (dt1 < d_state) ? attack_coeff_ : distressor_.opto_coeff;
+        d_state = dt1 * (1.0f - dc1) + d_state * dc1; float ds1 = d_state;
+        float dc2 = (dt2 < d_state) ? attack_coeff_ : distressor_.opto_coeff;
+        d_state = dt2 * (1.0f - dc2) + d_state * dc2; float ds2 = d_state;
+        float dc3 = (dt3 < d_state) ? attack_coeff_ : distressor_.opto_coeff;
+        d_state = dt3 * (1.0f - dc3) + d_state * dc3; float ds3 = d_state;
+
+        float32x4_t smoothed_gain_db = vdupq_n_f32(0.0f);
+        smoothed_gain_db = vsetq_lane_f32(ds0, smoothed_gain_db, 0);
+        smoothed_gain_db = vsetq_lane_f32(ds1, smoothed_gain_db, 1);
+        smoothed_gain_db = vsetq_lane_f32(ds2, smoothed_gain_db, 2);
+        smoothed_gain_db = vsetq_lane_f32(ds3, smoothed_gain_db, 3);
+
+        float32x4_t gain_lin = neon_expq_f32(vmulq_f32(smoothed_gain_db, v_dist_db_conv));
+        float32x4_t comp_l = vmulq_f32(main_l, gain_lin);
+        float32x4_t comp_r = vmulq_f32(main_r, gain_lin);
+
+        // Dynamic branch evaluation collapsed using hoisted flags
+        if (d_mode >= DRIVE_MODE_SOFT_CLIP && d_mode <= DRIVE_MODE_SUBOCTAVE) {
+            float32x4_t drv = vdupq_n_f32(drive_ * 100.0f);
+            float32x4x2_t folded = wavefolder_process(&wavefolder_, comp_l, comp_r, drv);
+            comp_l = folded.val[0]; comp_r = folded.val[1];
+        } else if (d_mode >= DIST_MODE_DIST2 && d_mode <= DIST_MODE_BOTH) {
+            float32x4_t drv = vdupq_n_f32(1.0f + drive_ * 39.0f);
+            comp_l = generate_harmonics(&distressor_, vmulq_f32(comp_l, drv), d_mode);
+            comp_r = generate_harmonics(&distressor_, vmulq_f32(comp_r, drv), d_mode);
+        }
+
+        float32x4x2_t eq_out = overlord_apply_eq(&overlord_, comp_l, comp_r, samplerate_);
+
+        float32x4x2_t mixed;
+        mixed.val[0] = vmaxq_f32(v_minus_one,
+                                 vminq_f32(v_one,
+                                           vaddq_f32(vmulq_f32(main_l, dry_gain),
+                                                     vmulq_f32(processed_l, combined_wet_gain))));
+        mixed.val[1] = vmaxq_f32(v_minus_one,
+                                 vminq_f32(v_one,
+                                           vaddq_f32(vmulq_f32(main_r, dry_gain),
+                                                     vmulq_f32(processed_r, combined_wet_gain))));
+
+        vst2q_f32(out_p, mixed);
+        out_p += 8;
+        return d_state;
+    }
+
+    fast_inline void process_4_blocks_multiband(const float* in_p, float* out_p
+                                                 float32x4_t combined_wet_gain,
+                                                 float32x4_t dry_gain) {
+        float32x4_t main_l, main_r;
+        if (has_sidechain_) {
+            float32x4x4_t interleaved = vld4q_f32(in_p);
+            main_l = interleaved.val[0]; main_r = interleaved.val[1];
+            in_p += 16;
+        } else {
+            float32x4x2_t stereo = vld2q_f32(in_p);
+            main_l = stereo.val[0]; main_r = stereo.val[1];
+            in_p += 8;
+        }
+
+        float32x4_t processed_l, processed_r;
+        multiband_process(&multiband_, main_l, main_r, &processed_l, &processed_r);
+
+        if (drive_ > 0.01f) {
+            float32x4x2_t driven = overlord_process(&overlord_, processed_l, processed_r, samplerate_);
+            processed_l = driven.val[0]; processed_r = driven.val[1];
+        }
+
+        float32x4x2_t mixed;
+        mixed.val[0] = vmaxq_f32(v_minus_one,
+                                 vminq_f32(v_one,
+                                           vaddq_f32(vmulq_f32(main_l, dry_gain),
+                                                     vmulq_f32(processed_l, combined_wet_gain))));
+        mixed.val[1] = vmaxq_f32(v_minus_one,
+                                 vminq_f32(v_one,
+                                           vaddq_f32(vmulq_f32(main_r, dry_gain),
+                                                     vmulq_f32(processed_r, combined_wet_gain))));
+
+        vst2q_f32(out_p, mixed);
+        out_p += 8;
+    }
+
+    fast_inline void Process(const float* in, float* out, size_t frames) {
         // Pre-calculate mix and makeup balance
         float32x4_t wet_gain = vdupq_n_f32(mix_);
         float32x4_t dry_gain = vdupq_n_f32(1.0f - mix_);
@@ -171,57 +363,66 @@ public:
         float combined_wet_gain_s = mix_ * makeup_lin_scalar;
         float dry_gain_s = 1.0f - mix_;
 
-        // =================================================================
-        // Process complete blocks of 4 samples
-        // =================================================================
-        while (frames_remaining >= 4) {
-            // Load 4 stereo frames — 2-channel or 4-channel (sidechain) layout
-            float32x4_t main_l, main_r, sc_l, sc_r;
-            if (has_sidechain_) {
-                // 4-channel: [L0,R0,SL0,SR0, L1,R1,SL1,SR1, ...] = 16 floats
-                float32x4x4_t interleaved = vld4q_f32(in_p);
-                main_l = interleaved.val[0];
-                main_r = interleaved.val[1];
-                sc_l   = interleaved.val[2];
-                sc_r   = interleaved.val[3];
-                in_p += 16;
-            } else {
-                // 2-channel: [L0,R0, L1,R1, L2,R2, L3,R3] = 8 floats
-                float32x4x2_t stereo = vld2q_f32(in_p);
-                main_l = stereo.val[0];
-                main_r = stereo.val[1];
-                sc_l   = main_l;
-                sc_r   = main_r;
-                in_p += 8;
+        // Pre-broadcast static parameters to eliminate vdupq overhead in loops
+        float32x4_t v_thresh = vdupq_n_f32(thresh_db_);
+        float32x4_t v_slope = vdupq_n_f32(function_slope_);
+        float32x4_t v_atten = vdupq_n_f32(atten_limit_db_);
+        float32x4_t v_gain_lim = vdupq_n_f32(gain_limit_db_);
+
+        const float* __restrict in_p = in;
+        float* __restrict out_p = out;
+        size_t frames_remaining = frames;
+
+        // Hoist branches outside of the processing loops
+        switch (comp_mode_) {
+            case COMP_MODE_STANDARD: {
+                // Fetch internal loop state out of the vector and pin to a core register
+                float state = vgetq_lane_f32(gain_history_, 3);
+
+                while (frames_remaining >= 4) {
+                    process_4_blocks_comp_normal(in_p, out_p, state, v_thresh, v_slope, v_atten, v_gain_lim);
+                    frames_remaining -= 4;
+                }
+                // Save finalized register state back to member variable
+                gain_history_ = vsetq_lane_f32(state, vdupq_n_f32(0.0f), 3);
+                break;
             }
 
-            // Save dry signal for mixing
-            float32x4_t dry_l = main_l;
-            float32x4_t dry_r = main_r;
+            case COMP_MODE_DISTRESSOR: {
+                float32x4_t v_sat_drive = vdupq_n_f32(drive_ * 100.0f;);
+                float32x4_t v_harm_drive = vdupq_n_f32(1.0f + drive_ * 39.0f);
+                // Pre-resolve ratio multiplier to eliminate internal switch cascades
+                float ratio_mul = 0.0f;
+                bool is_nuke = (distressor_.ratio_mode == DIST_RATIO_NUKE);
+                switch (distressor_.ratio_mode) {
+                    case DIST_RATIO_2_1:  ratio_mul = 0.5f; break;
+                    case DIST_RATIO_3_1:  ratio_mul = 0.667f; break;
+                    case DIST_RATIO_4_1:  ratio_mul = 0.75f; break;
+                    case DIST_RATIO_6_1:  ratio_mul = 0.833f; break;
+                    case DIST_RATIO_10_1: ratio_mul = 0.9f; break;
+                    case DIST_RATIO_20_1: ratio_mul = 0.95f; break;
+                    default:              ratio_mul = 0.0f; break;
+                }
 
-            // Process 4 samples
-            float32x4x2_t processed = process_block(main_l, main_r, sc_l, sc_r);
-
-            // Mix stage: Apply makeup gain to processed (wet) signal only
-            float32x4x2_t mixed;
-            mixed.val[0] = vaddq_f32(vmulq_f32(dry_l, dry_gain),
-                                     vmulq_f32(processed.val[0], combined_wet_gain));
-            mixed.val[1] = vaddq_f32(vmulq_f32(dry_r, dry_gain),
-                                     vmulq_f32(processed.val[1], combined_wet_gain));
-
-            // Output limiter: hard clip to [-1, 1] — transparent below clipping level.
-            {
-                const float32x4_t one  = vdupq_n_f32( 1.0f);
-                const float32x4_t mone = vdupq_n_f32(-1.0f);
-                mixed.val[0] = vmaxq_f32(mone, vminq_f32(one, mixed.val[0]));
-                mixed.val[1] = vmaxq_f32(mone, vminq_f32(one, mixed.val[1]));
+                float32x4_t v_ratio_mul = vdupq_n_f32(ratio_mul);
+                float32x4_t v_dist_thresh = vdupq_n_f32(thresh_db_);
+                float d_state;
+                while (frames_remaining >= 4) {
+                    d_state = process_4_blocks_distressor(in_p, out_p, combined_wet_gain, dry_gain,
+                                                          ratio_mul, v_ratio_mul, v_dist_thresh, is_nuke);
+                    frames_remaining -= 4;
+                }
+                distressor_.harmonic_state = vsetq_lane_f32(d_state, vdupq_n_f32(0.0f), 3);
+                break;
             }
 
-            // Store results
-            vst2q_f32(out_p, mixed);
-
-            out_p += 8;
-            frames_remaining -= 4;
+            case COMP_MODE_MULTIBAND: {
+                while (frames_remaining >= 4) {
+                    process_4_blocks_multiband(in_p, out_p);
+                    frames_remaining -= 4;
+                }
+                break;
+            }
         }
 
         // =================================================================
@@ -239,8 +440,7 @@ public:
                 in_p += 2;
             }
 
-            float dry_l = main_l;
-            float dry_r = main_r;
+            float dry_l = main_l; float dry_r = main_r;
 
             float32x4x2_t processed = process_block(
                 vdupq_n_f32(main_l), vdupq_n_f32(main_r),
@@ -249,12 +449,10 @@ public:
             float out_l_s = dry_l * dry_gain_s + vgetq_lane_f32(processed.val[0], 0) * combined_wet_gain_s;
             float out_r_s = dry_r * dry_gain_s + vgetq_lane_f32(processed.val[1], 0) * combined_wet_gain_s;
 
-            // Output limiter (scalar path)
             out_p[0] = fmaxf(-1.0f, fminf(1.0f, out_l_s));
             out_p[1] = fmaxf(-1.0f, fminf(1.0f, out_r_s));
 
-            out_p += 2;
-            frames_remaining--;
+            out_p += 2; frames_remaining--;
         }
     }
 
