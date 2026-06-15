@@ -585,55 +585,136 @@ public:
 
     void applyResonantFilterModulated(float32x4_t* signals, int numChannels, float fcMod) {
         if (filterMode == kFilterNoise) return;
-        // Compute modulated frequency but do NOT write back to baseFc.
-        // The old code did `baseFc = fc` here, which permanently accumulated the LFO
-        // offset on every call (12000 times/second), drifting baseFc to sampleRate*0.45
-        // where the bandpass filter becomes a Nyquist-frequency resonator and blows up.
+
         float fc = fmaxf(20.0f, fminf(sampleRate * 0.45f, baseFc + fcMod));
         updateFilterCoeffsAt(fc);
 
-        // ---------------------------------------------------------
-        // PROPER SCALAR IIR BIQUAD PROCESSING (same as before, but using current coefficients)
-        // ---------------------------------------------------------
-        for (int ch = 0; ch < numChannels; ch++) {
+        if (numChannels == 8) {
+            float32x4_t bA0 = vdupq_n_f32(biquadA0);
+            float32x4_t bA1 = vdupq_n_f32(biquadA1);
+            float32x4_t bA2 = vdupq_n_f32(biquadA2);
+            float32x4_t bB1 = vdupq_n_f32(biquadB1);
+            float32x4_t bB2 = vdupq_n_f32(biquadB2);
 
-          // 1. Unpack the 4 consecutive samples from the NEON vector
-          float in_samps[NEON_LANES];
-          vst1q_f32(in_samps, signals[ch]);
+            float32x4_t state1_lo = vld1q_f32(&filterState1[0]);
+            float32x4_t state1_hi = vld1q_f32(&filterState1[4]);
+            float32x4_t state2_lo = vld1q_f32(&filterState2[0]);
+            float32x4_t state2_hi = vld1q_f32(&filterState2[4]);
 
-          float out_samps[NEON_LANES];
+            float32x4x2_t p01 = vtrnq_f32(signals[0], signals[1]);
+            float32x4x2_t p23 = vtrnq_f32(signals[2], signals[3]);
+            float32x4x2_t p45 = vtrnq_f32(signals[4], signals[5]);
+            float32x4x2_t p67 = vtrnq_f32(signals[6], signals[7]);
 
-          // 2. Process sequentially to maintain the IIR feedback loop
-          for (int s = 0; s < NEON_LANES; s++) {
-            float in_val = in_samps[s];
+            float32x4_t t0_lo = vcombine_f32(vget_low_f32(p01.val[0]), vget_low_f32(p23.val[0]));
+            float32x4_t t1_lo = vcombine_f32(vget_low_f32(p01.val[1]), vget_low_f32(p23.val[1]));
+            float32x4_t t2_lo = vcombine_f32(vget_high_f32(p01.val[0]), vget_high_f32(p23.val[0]));
+            float32x4_t t3_lo = vcombine_f32(vget_high_f32(p01.val[1]), vget_high_f32(p23.val[1]));
 
-            // Direct Form II Transposed Biquad Math
-            float out_val = (in_val * biquadA0) + filterState1[ch];
+            float32x4_t t0_hi = vcombine_f32(vget_low_f32(p45.val[0]), vget_low_f32(p67.val[0]));
+            float32x4_t t1_hi = vcombine_f32(vget_low_f32(p45.val[1]), vget_low_f32(p67.val[1]));
+            float32x4_t t2_hi = vcombine_f32(vget_high_f32(p45.val[0]), vget_high_f32(p67.val[0]));
+            float32x4_t t3_hi = vcombine_f32(vget_high_f32(p45.val[1]), vget_high_f32(p67.val[1]));
 
-            // Update history states immediately for the next sample
-            filterState1[ch] = (in_val * biquadA1) - (out_val * biquadB1) + filterState2[ch];
-            filterState2[ch] = (in_val * biquadA2) - (out_val * biquadB2);
+            // --- SAMPLE 0 ---
+            float32x4_t out0_lo = vmlaq_f32(state1_lo, t0_lo, bA0);
+            float32x4_t out0_hi = vmlaq_f32(state1_hi, t0_hi, bA0);
+            state1_lo = vmlsq_f32(vmlaq_f32(state2_lo, t0_lo, bA1), out0_lo, bB1);
+            state1_hi = vmlsq_f32(vmlaq_f32(state2_hi, t0_hi, bA1), out0_hi, bB1);
+            state2_lo = vmlsq_f32(vmulq_f32(t0_lo, bA2), out0_lo, bB2);
+            state2_hi = vmlsq_f32(vmulq_f32(t0_hi, bA2), out0_hi, bB2);
 
-            // kFilterCrystal (esotico): the bandpass alone attenuates by ~20 dB
-            // (peak gain ≈ alpha/(1+alpha) ≈ 0.04), making the reverb tail inaudible.
-            // Blend additively: passband stays at full level + resonant colour at fc.
-            // All other modes replace the signal (LPF/HPF shape the tail spectrum).
-            if (filterMode == kFilterCrystal)
-                out_samps[s] = in_val * 0.7f + out_val * 0.3f; // Reduced from 6.0 to prevent screeching
-            else if (filterMode == kFilterMetal)
-                // METAL: Bandpass resonance for Labirinto
-                // Convex blend: dry signal + unity-gain resonant ring. At the
-                // resonant frequency |0.82 + 0.18| = 1.0 (band preserved, emphasized
-                // vs neighbours); off-resonance stays <= ~0.7. Peak gain <= 1.0 so
-                // the FDN loop cannot self-oscillate.
-                out_samps[s] = in_val * 0.82f + out_val * 0.18f;
-            else
-                // valid also for kFilterMetal Micro-BoostPeaking EQ
-                out_samps[s] = out_val;
-          }
+            // --- SAMPLE 1 ---
+            float32x4_t out1_lo = vmlaq_f32(state1_lo, t1_lo, bA0);
+            float32x4_t out1_hi = vmlaq_f32(state1_hi, t1_hi, bA0);
+            state1_lo = vmlsq_f32(vmlaq_f32(state2_lo, t1_lo, bA1), out1_lo, bB1);
+            state1_hi = vmlsq_f32(vmlaq_f32(state2_hi, t1_hi, bA1), out1_hi, bB1);
+            state2_lo = vmlsq_f32(vmulq_f32(t1_lo, bA2), out1_lo, bB2);
+            state2_hi = vmlsq_f32(vmulq_f32(t1_hi, bA2), out1_hi, bB2);
 
-          // 3. Repack back into the NEON vector to continue the delay network
-          signals[ch] = vld1q_f32(out_samps);
+            // --- SAMPLE 2 ---
+            float32x4_t out2_lo = vmlaq_f32(state1_lo, t2_lo, bA0);
+            float32x4_t out2_hi = vmlaq_f32(state1_hi, t2_hi, bA0);
+            state1_lo = vmlsq_f32(vmlaq_f32(state2_lo, t2_lo, bA1), out2_lo, bB1);
+            state1_hi = vmlsq_f32(vmlaq_f32(state2_hi, t2_hi, bA1), out2_hi, bB1);
+            state2_lo = vmlsq_f32(vmulq_f32(t2_lo, bA2), out2_lo, bB2);
+            state2_hi = vmlsq_f32(vmulq_f32(t2_hi, bA2), out2_hi, bB2);
+
+            // --- SAMPLE 3 ---
+            float32x4_t out3_lo = vmlaq_f32(state1_lo, t3_lo, bA0);
+            float32x4_t out3_hi = vmlaq_f32(state1_hi, t3_hi, bA0);
+            state1_lo = vmlsq_f32(vmlaq_f32(state2_lo, t3_lo, bA1), out3_lo, bB1);
+            state1_hi = vmlsq_f32(vmlaq_f32(state2_hi, t3_hi, bA1), out3_hi, bB1);
+            state2_lo = vmlsq_f32(vmulq_f32(t3_lo, bA2), out3_lo, bB2);
+            state2_hi = vmlsq_f32(vmulq_f32(t3_hi, bA2), out3_hi, bB2);
+
+            // Modulated mode blend logic (Handling Crystal & Metal presets)
+            if (filterMode == kFilterCrystal) {
+                t0_lo = vmlaq_n_f32(vmulq_n_f32(t0_lo, 0.7f), out0_lo, 0.3f);
+                t0_hi = vmlaq_n_f32(vmulq_n_f32(t0_hi, 0.7f), out0_hi, 0.3f);
+                t1_lo = vmlaq_n_f32(vmulq_n_f32(t1_lo, 0.7f), out1_lo, 0.3f);
+                t1_hi = vmlaq_n_f32(vmulq_n_f32(t1_hi, 0.7f), out1_hi, 0.3f);
+                t2_lo = vmlaq_n_f32(vmulq_n_f32(t2_lo, 0.7f), out2_lo, 0.3f);
+                t2_hi = vmlaq_n_f32(vmulq_n_f32(t2_hi, 0.7f), out2_hi, 0.3f);
+                t3_lo = vmlaq_n_f32(vmulq_n_f32(t3_lo, 0.7f), out3_lo, 0.3f);
+                t3_hi = vmlaq_n_f32(vmulq_n_f32(t3_hi, 0.7f), out3_hi, 0.3f);
+            } else if (filterMode == kFilterMetal) {
+                t0_lo = vmlaq_n_f32(vmulq_n_f32(t0_lo, 0.82f), out0_lo, 0.18f);
+                t0_hi = vmlaq_n_f32(vmulq_n_f32(t0_hi, 0.82f), out0_hi, 0.18f);
+                t1_lo = vmlaq_n_f32(vmulq_n_f32(t1_lo, 0.82f), out1_lo, 0.18f);
+                t1_hi = vmlaq_n_f32(vmulq_n_f32(t1_hi, 0.82f), out1_hi, 0.18f);
+                t2_lo = vmlaq_n_f32(vmulq_n_f32(t2_lo, 0.82f), out2_lo, 0.18f);
+                t2_hi = vmlaq_n_f32(vmulq_n_f32(t2_hi, 0.82f), out2_hi, 0.18f);
+                t3_lo = vmlaq_n_f32(vmulq_n_f32(t3_lo, 0.82f), out3_lo, 0.18f);
+                t3_hi = vmlaq_n_f32(vmulq_n_f32(t3_hi, 0.82f), out3_hi, 0.18f);
+            } else {
+                t0_lo = out0_lo; t0_hi = out0_hi;
+                t1_lo = out1_lo; t1_hi = out1_hi;
+                t2_lo = out2_lo; t2_hi = out2_hi;
+                t3_lo = out3_lo; t3_hi = out3_hi;
+            }
+
+            float32x4x2_t r01 = vtrnq_f32(t0_lo, t1_lo);
+            float32x4x2_t r23 = vtrnq_f32(t2_lo, t3_lo);
+            float32x4x2_t r45 = vtrnq_f32(t0_hi, t1_hi);
+            float32x4x2_t r67 = vtrnq_f32(t2_hi, t3_hi);
+
+            signals[0] = vcombine_f32(vget_low_f32(r01.val[0]), vget_low_f32(r23.val[0]));
+            signals[1] = vcombine_f32(vget_low_f32(r01.val[1]), vget_low_f32(r23.val[1]));
+            signals[2] = vcombine_f32(vget_high_f32(r01.val[0]), vget_high_f32(r23.val[0]));
+            signals[3] = vcombine_f32(vget_high_f32(r01.val[1]), vget_high_f32(r23.val[1]));
+
+            signals[4] = vcombine_f32(vget_low_f32(r45.val[0]), vget_low_f32(r67.val[0]));
+            signals[5] = vcombine_f32(vget_low_f32(r45.val[1]), vget_low_f32(r67.val[1]));
+            signals[6] = vcombine_f32(vget_high_f32(r45.val[0]), vget_high_f32(r67.val[0]));
+            signals[7] = vcombine_f32(vget_high_f32(r45.val[1]), vget_high_f32(r67.val[1]));
+
+            vst1q_f32(&filterState1[0], state1_lo);
+            vst1q_f32(&filterState1[4], state1_hi);
+            vst1q_f32(&filterState2[0], state2_lo);
+            vst1q_f32(&filterState2[4], state2_hi);
+        } else {
+            // Fallback safety path
+            for (int ch = 0; ch < numChannels; ch++) {
+                float in_samps[NEON_LANES];
+                vst1q_f32(in_samps, signals[ch]);
+                float out_samps[NEON_LANES];
+
+                for (int s = 0; s < NEON_LANES; s++) {
+                    float in_val = in_samps[s];
+                    float out_val = (in_val * biquadA0) + filterState1[ch];
+                    filterState1[ch] = (in_val * biquadA1) - (out_val * biquadB1) + filterState2[ch];
+                    filterState2[ch] = (in_val * biquadA2) - (out_val * biquadB2);
+
+                    if (filterMode == kFilterCrystal)
+                        out_samps[s] = in_val * 0.7f + out_val * 0.3f;
+                    else if (filterMode == kFilterMetal)
+                        out_samps[s] = in_val * 0.82f + out_val * 0.18f;
+                    else
+                        out_samps[s] = out_val;
+                }
+                signals[ch] = vld1q_f32(out_samps);
+            }
         }
     }
 
@@ -655,33 +736,133 @@ public:
     }
 
     void applyResonantFilter(float32x4_t* signals, int numChannels) {
-        if (filterMode == kFilterNoise) return; // noise is added elsewhere
+        if (filterMode == kFilterNoise) return;
 
-        for (int ch = 0; ch < numChannels; ch++) {
-            // 1. Unpack the NEON vector
-            float in_samps[4];
-            vst1q_f32(in_samps, signals[ch]);
-            float out_samps[4];
+        // Optimize the standard 8-channel path
+        if (numChannels == 8) {
+            // 1. Broadcast scalar coefficients to NEON vectors
+            float32x4_t bA0 = vdupq_n_f32(biquadA0);
+            float32x4_t bA1 = vdupq_n_f32(biquadA1);
+            float32x4_t bA2 = vdupq_n_f32(biquadA2);
+            float32x4_t bB1 = vdupq_n_f32(biquadB1);
+            float32x4_t bB2 = vdupq_n_f32(biquadB2);
 
-            // 2. Process sequentially to maintain the IIR feedback loop
-            for (int s = 0; s < 4; s++) {
-                float in_val = in_samps[s];
+            // 2. Load aligned filter history states directly into vectors
+            float32x4_t state1_lo = vld1q_f32(&filterState1[0]);
+            float32x4_t state1_hi = vld1q_f32(&filterState1[4]);
+            float32x4_t state2_lo = vld1q_f32(&filterState2[0]);
+            float32x4_t state2_hi = vld1q_f32(&filterState2[4]);
 
-                // Direct Form II Transposed Biquad
-                float out_val = (in_val * biquadA0) + filterState1[ch];
+            // 3. Register-level Transpose: Channel-Major to Time-Major
+            // Interleave rows
+            float32x4x2_t p01 = vtrnq_f32(signals[0], signals[1]);
+            float32x4x2_t p23 = vtrnq_f32(signals[2], signals[3]);
+            float32x4x2_t p45 = vtrnq_f32(signals[4], signals[5]);
+            float32x4x2_t p67 = vtrnq_f32(signals[6], signals[7]);
 
-                // Update states for the NEXT sample using the CORRECT output feedback
-                filterState1[ch] = (in_val * biquadA1) - (out_val * biquadB1) + filterState2[ch];
-                filterState2[ch] = (in_val * biquadA2) - (out_val * biquadB2);
+            // Group into time steps (Low channels 0-3, High channels 4-7)
+            float32x4_t t0_lo = vcombine_f32(vget_low_f32(p01.val[0]), vget_low_f32(p23.val[0]));
+            float32x4_t t1_lo = vcombine_f32(vget_low_f32(p01.val[1]), vget_low_f32(p23.val[1]));
+            float32x4_t t2_lo = vcombine_f32(vget_high_f32(p01.val[0]), vget_high_f32(p23.val[0]));
+            float32x4_t t3_lo = vcombine_f32(vget_high_f32(p01.val[1]), vget_high_f32(p23.val[1]));
 
-                if (filterMode == kFilterCrystal)
-                    out_samps[s] = in_val * 0.7f + out_val * 0.3f; // moved from 6.0 to prevent screeching
-                else
-                    out_samps[s] = out_val;
+            float32x4_t t0_hi = vcombine_f32(vget_low_f32(p45.val[0]), vget_low_f32(p67.val[0]));
+            float32x4_t t1_hi = vcombine_f32(vget_low_f32(p45.val[1]), vget_low_f32(p67.val[1]));
+            float32x4_t t2_hi = vcombine_f32(vget_high_f32(p45.val[0]), vget_high_f32(p67.val[0]));
+            float32x4_t t3_hi = vcombine_f32(vget_high_f32(p45.val[1]), vget_high_f32(p67.val[1]));
+
+            // 4. Sequential Time-Step Loops (Vectorized across all 8 channels simultaneously)
+
+            // --- SAMPLE 0 ---
+            float32x4_t out0_lo = vmlaq_f32(state1_lo, t0_lo, bA0);
+            float32x4_t out0_hi = vmlaq_f32(state1_hi, t0_hi, bA0);
+            state1_lo = vmlsq_f32(vmlaq_f32(state2_lo, t0_lo, bA1), out0_lo, bB1);
+            state1_hi = vmlsq_f32(vmlaq_f32(state2_hi, t0_hi, bA1), out0_hi, bB1);
+            state2_lo = vmlsq_f32(vmulq_f32(t0_lo, bA2), out0_lo, bB2);
+            state2_hi = vmlsq_f32(vmulq_f32(t0_hi, bA2), out0_hi, bB2);
+
+            // --- SAMPLE 1 ---
+            float32x4_t out1_lo = vmlaq_f32(state1_lo, t1_lo, bA0);
+            float32x4_t out1_hi = vmlaq_f32(state1_hi, t1_hi, bA0);
+            state1_lo = vmlsq_f32(vmlaq_f32(state2_lo, t1_lo, bA1), out1_lo, bB1);
+            state1_hi = vmlsq_f32(vmlaq_f32(state2_hi, t1_hi, bA1), out1_hi, bB1);
+            state2_lo = vmlsq_f32(vmulq_f32(t1_lo, bA2), out1_lo, bB2);
+            state2_hi = vmlsq_f32(vmulq_f32(t1_hi, bA2), out1_hi, bB2);
+
+            // --- SAMPLE 2 ---
+            float32x4_t out2_lo = vmlaq_f32(state1_lo, t2_lo, bA0);
+            float32x4_t out2_hi = vmlaq_f32(state1_hi, t2_hi, bA0);
+            state1_lo = vmlsq_f32(vmlaq_f32(state2_lo, t2_lo, bA1), out2_lo, bB1);
+            state1_hi = vmlsq_f32(vmlaq_f32(state2_hi, t2_hi, bA1), out2_hi, bB1);
+            state2_lo = vmlsq_f32(vmulq_f32(t2_lo, bA2), out2_lo, bB2);
+            state2_hi = vmlsq_f32(vmulq_f32(t2_hi, bA2), out2_hi, bB2);
+
+            // --- SAMPLE 3 ---
+            float32x4_t out3_lo = vmlaq_f32(state1_lo, t3_lo, bA0);
+            float32x4_t out3_hi = vmlaq_f32(state1_hi, t3_hi, bA0);
+            state1_lo = vmlsq_f32(vmlaq_f32(state2_lo, t3_lo, bA1), out3_lo, bB1);
+            state1_hi = vmlsq_f32(vmlaq_f32(state2_hi, t3_hi, bA1), out3_hi, bB1);
+            state2_lo = vmlsq_f32(vmulq_f32(t3_lo, bA2), out3_lo, bB2);
+            state2_hi = vmlsq_f32(vmulq_f32(t3_hi, bA2), out3_hi, bB2);
+
+            // 5. Apply Reverb Wet Blend logic directly to vectors
+            if (filterMode == kFilterCrystal) {
+                t0_lo = vmlaq_n_f32(vmulq_n_f32(t0_lo, 0.7f), out0_lo, 0.3f);
+                t0_hi = vmlaq_n_f32(vmulq_n_f32(t0_hi, 0.7f), out0_hi, 0.3f);
+                t1_lo = vmlaq_n_f32(vmulq_n_f32(t1_lo, 0.7f), out1_lo, 0.3f);
+                t1_hi = vmlaq_n_f32(vmulq_n_f32(t1_hi, 0.7f), out1_hi, 0.3f);
+                t2_lo = vmlaq_n_f32(vmulq_n_f32(t2_lo, 0.7f), out2_lo, 0.3f);
+                t2_hi = vmlaq_n_f32(vmulq_n_f32(t2_hi, 0.7f), out2_hi, 0.3f);
+                t3_lo = vmlaq_n_f32(vmulq_n_f32(t3_lo, 0.7f), out3_lo, 0.3f);
+                t3_hi = vmlaq_n_f32(vmulq_n_f32(t3_hi, 0.7f), out3_hi, 0.3f);
+            } else {
+                t0_lo = out0_lo; t0_hi = out0_hi;
+                t1_lo = out1_lo; t1_hi = out1_hi;
+                t2_lo = out2_lo; t2_hi = out2_hi;
+                t3_lo = out3_lo; t3_hi = out3_hi;
             }
 
-            // 3. Repack back into NEON vector
-            signals[ch] = vld1q_f32(out_samps);
+            // 6. Register-level Inverse Transpose: Time-Major back to Channel-Major
+            float32x4x2_t r01 = vtrnq_f32(t0_lo, t1_lo);
+            float32x4x2_t r23 = vtrnq_f32(t2_lo, t3_lo);
+            float32x4x2_t r45 = vtrnq_f32(t0_hi, t1_hi);
+            float32x4x2_t r67 = vtrnq_f32(t2_hi, t3_hi);
+
+            signals[0] = vcombine_f32(vget_low_f32(r01.val[0]), vget_low_f32(r23.val[0]));
+            signals[1] = vcombine_f32(vget_low_f32(r01.val[1]), vget_low_f32(r23.val[1]));
+            signals[2] = vcombine_f32(vget_high_f32(r01.val[0]), vget_high_f32(r23.val[0]));
+            signals[3] = vcombine_f32(vget_high_f32(r01.val[1]), vget_high_f32(r23.val[1]));
+
+            signals[4] = vcombine_f32(vget_low_f32(r45.val[0]), vget_low_f32(r67.val[0]));
+            signals[5] = vcombine_f32(vget_low_f32(r45.val[1]), vget_low_f32(r67.val[1]));
+            signals[6] = vcombine_f32(vget_high_f32(r45.val[0]), vget_high_f32(r67.val[0]));
+            signals[7] = vcombine_f32(vget_high_f32(r45.val[1]), vget_high_f32(r67.val[1]));
+
+            // 7. Store updated states back to memory
+            vst1q_f32(&filterState1[0], state1_lo);
+            vst1q_f32(&filterState1[4], state1_hi);
+            vst1q_f32(&filterState2[0], state2_lo);
+            vst1q_f32(&filterState2[4], state2_hi);
+        } else {
+            // Fallback safety path if numChannels is ever modified dynamically
+            for (int ch = 0; ch < numChannels; ch++) {
+                float in_samps[4];
+                vst1q_f32(in_samps, signals[ch]);
+                float out_samps[4];
+
+                for (int s = 0; s < 4; s++) {
+                    float in_val = in_samps[s];
+                    float out_val = (in_val * biquadA0) + filterState1[ch];
+                    filterState1[ch] = (in_val * biquadA1) - (out_val * biquadB1) + filterState2[ch];
+                    filterState2[ch] = (in_val * biquadA2) - (out_val * biquadB2);
+
+                    if (filterMode == kFilterCrystal)
+                        out_samps[s] = in_val * 0.7f + out_val * 0.3f;
+                    else
+                        out_samps[s] = out_val;
+                }
+                signals[ch] = vld1q_f32(out_samps);
+            }
         }
     }
 
