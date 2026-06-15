@@ -932,7 +932,7 @@ private:
 
     // =========================================================================
     // Filter coefficient calculators (Audio EQ Cookbook)
-    // Called only on parameter change — sinf/cosf/powf are fine here.
+    // Called only on parameter change — fastersinfullf/fastercosfullf/powf are fine here.
     // =========================================================================
     void UpdateCoefficients() {
         const float low_hz  = raw_params_[k_param_eq_low_hz]   * 10.0f;
@@ -971,10 +971,10 @@ private:
     }
 
     void calc_peaking(biquad_coeffs_t* c, float hz, float db, float q) {
-        const float A    = powf(10.0f, db / 40.0f);
+        const float A    = powf(10.0f, db * 0.025f);
         const float w0   = 2.0f * M_PI * hz * inverse_samplerate_;
-        const float cosw = cosf(w0);
-        const float alpha = sinf(w0) / (2.0f * q);
+        const float cosw = fastercosfullf(w0);
+        const float alpha = fastersinfullf(w0) / (2.0f * q);
         const float inv_a0 = A / (A + alpha);   // was 1.0f / (1.0f + alpha / A);
         c->b0 =  (1.0f + alpha * A) * inv_a0;
         c->b1 = (-2.0f * cosw)      * inv_a0;
@@ -984,9 +984,9 @@ private:
     }
 
     void calc_high_shelf(biquad_coeffs_t* c, float hz, float db) {
-        const float A    = powf(10.0f, db / 40.0f);
+        const float A    = powf(10.0f, db * 0.025f);
         const float w0   = 2.0f * M_PI * hz * inverse_samplerate_;
-        const float cosw = cosf(w0), sinw = sinf(w0);
+        const float cosw = fastercosfullf(w0), sinw = fastersinfullf(w0);
         const float alpha =
             (sinw * 0.5f) *
             fasterSqrt((A + 1.0f / A) *
@@ -1003,7 +1003,7 @@ private:
 
     void calc_low_pass(biquad_coeffs_t* c, float hz, float q) {
         const float w0   = 2.0f * M_PI * hz * inverse_samplerate_;
-        const float cosw = cosf(w0), sinw = sinf(w0);
+        const float cosw = fastercosfullf(w0), sinw = fastersinfullf(w0);
         const float alpha  = sinw / (2.0f * q);
         const float inv_a0 = 1.0f / (1.0f + alpha);
         c->b0 = (1.0f - cosw) * 0.5f * inv_a0;
@@ -1015,7 +1015,7 @@ private:
 
     void calc_high_pass(biquad_coeffs_t* c, float hz, float q) {
         const float w0   = 2.0f * M_PI * hz * inverse_samplerate_;
-        const float cosw = cosf(w0), sinw = sinf(w0);
+        const float cosw = fastercosfullf(w0), sinw = fastersinfullf(w0);
         const float alpha  = sinw / (2.0f * q);
         const float inv_a0 = 1.0f / (1.0f + alpha);
         c->b0 =  (1.0f + cosw) * 0.5f * inv_a0;
