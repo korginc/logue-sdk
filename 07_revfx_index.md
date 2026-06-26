@@ -32,3 +32,5 @@ _Note: The reverb effect section can contain effects that perform other function
 | [Albedo](https://www.sinevibes.com/korgalbedo/) | Sinevibes | Granular cloud reverb | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [Hollow](https://www.sinevibes.com/korghollow/) | Sinevibes | FDN based vast space reverb | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [Luminance](https://www.sinevibes.com/korgluminance/) | Sinevibes | FDN based shimmer reverb | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
+| [LuceAlNeon](https://github.com/fedemone/logue-sdk) | Federico Gennari | five different reverbs to be blend | drum | free |
+| [NeonLabirinto](https://github.com/fedemone/logue-sdk) | Federico Gennari | maze of sounds reverb | drum | free |
