@@ -25,4 +25,6 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [loguePADS](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Sample-based synths set | drum | free |
 | [Riffline](https://payhip.com/b/aidtV) | FrostMod Audio | 4 voice polyphonic supersaw synthesizer | drum | donation |
 | [Acidbass](https://payhip.com/b/lr6Nk) | FrostMod Audio |  monophonic acid bass synthesizer | drum | donation |
+| [VINCE](https://derselenit.gumroad.com/l/qvunak) | derselenit |  Kawai 100F inspired synth | drum | donation |
+| [FLINT2](https://derselenit.gumroad.com/l/etwemi) | derselenit |  Moog Prodigy 1979 inspired synth | drum | donation |
 | Nano | Sinevibes |             | drum | built-in |
