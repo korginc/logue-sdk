@@ -44,3 +44,4 @@
  | 0x4d72474a ('MrGJ') | [Glenn Jones](https://github.com/mrglennjones) |
  | 0x72677276 ('rgrv') | [Gerard Braad](https://music.gbraad.nl/logue/) |
  | 0x4541524C ('EARL') | [Earl of FX](https://github.com/earlofFX) |
+ | 0x73726373 ('srcs') | [alternate sources](https://github.com/alternatesources) |
