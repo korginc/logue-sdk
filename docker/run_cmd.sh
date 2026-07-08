@@ -123,5 +123,9 @@ if [ -z "${CMD}" ]; then
     echo "[Err] No command specified: '${CMD}'" 1>&2
     exit 2
 fi
+DOCKER_OPTS=()
+if [ -t 0 ]; then
+    DOCKER_OPTS+=("-it")
+fi
 
-docker run --rm -v "${PLATFORM_PATH}:/workspace" -h logue-sdk -it ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}
+docker run --rm -v "${PLATFORM_PATH}:/workspace" -h logue-sdk "${DOCKER_OPTS[@]}" ${IMAGE_NAME}:${IMAGE_VERSION} /app/cmd_entry ${CMD}
