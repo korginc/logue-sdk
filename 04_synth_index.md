@@ -27,4 +27,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Acidbass](https://payhip.com/b/lr6Nk) | FrostMod Audio |  monophonic acid bass synthesizer | drum | donation |
 | [VINCE](https://derselenit.gumroad.com/l/qvunak) | derselenit |  Kawai 100F inspired synth | drum | donation |
 | [FLINT2](https://derselenit.gumroad.com/l/etwemi) | derselenit |  Moog Prodigy 1979 inspired synth | drum | donation |
+| [ScrutaAstri](https://github.com/fedemone/logue-sdk) | Federico Gennari | Drone synth inspired by moffenzeef's Stargazer | drum | free |
+| [EffeMD](https://github.com/fedemone/logue-sdk) | Federico Gennari | FM percussion inspired by Elektron Machinedrum | drum | free |
+| [EffeESP32](https://github.com/fedemone/logue-sdk) | Federico Gennari | port of Evgeny "Copych" Aslovskiy's ESP32-S3 FM Drum Synth FM engine | drum | free |
 | Nano | Sinevibes |             | drum | built-in |

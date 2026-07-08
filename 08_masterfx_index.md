@@ -12,4 +12,6 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 
 | Name | Developer | Description | Platforms | |
 | [Gator 2](https://github.com/dukesrg/logue-sdk/releases) | Oleg Burdaev | Kaossilator-style gate arpeggiator | drum | free |
+| [Omnipress](https://github.com/fedemone/logue-sdk) | Federico Gennari | master compressor inspired by eventide omnipressor + distortion + multiband | drum | free |
+| [Portacassette](https://github.com/fedemone/logue-sdk) | Federico Gennari | master compressor inspired by old tascam cassette recorders | drum | free |
 

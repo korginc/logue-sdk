@@ -43,3 +43,4 @@ _Note: ディレイエフェクトセクションには, ディレイ以外の�
 | [Isomer](https://www.sinevibes.com/korgisomer/ ) | Sinevibes | Tempo synced ensemble delay | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | 有料 |
 | [Rerun](https://www.sinevibes.com/korgrerun/) | Sinevibes | Self-randomizing audio repeater | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | 有料 |
 | [Integer](https://www.sinevibes.com/korginteger/) | Sinevibes | Digital-analog buffer delay | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | 有料 |
+| [Tribale](https://github.com/fedemone/logue-sdk) | Federico Gennari | chorus-like delay for faking multiple drumming | drum | free |
