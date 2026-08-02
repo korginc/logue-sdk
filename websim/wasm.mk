@@ -63,8 +63,7 @@ endif
 
 # Build-only: compile the DSP to wasm and stage the page + assets in WASMDIR,
 # WITHOUT launching a server. `make wasm` adds the emrun launch on top; the root
-# Makefile's `websim-all` reuses this with a per-project WASMDIR to co-serve many
-# units from one tree (see WEBSIM.md).
+# Makefile's `build-all` uses this as a compile-only CI smoke (see WEBSIM.md).
 wasm-build:
 	@echo Building WebAssembly audio processor
 	@mkdir -p $(WASMDIR)

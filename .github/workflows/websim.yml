@@ -1,0 +1,44 @@
+name: websim
+
+# Headless smoke for the web simulator: compile every wasm-capable unit and
+# render the render-capable ones, asserting finite audio. No browser needed.
+# See WEBSIM.md (§ Headless audio checks) and docs/plans/WEBSIM_FOLLOWUP_PLAN.md §E.
+
+on:
+  push:
+    paths:
+      - 'platform/**'
+      - 'websim/**'
+      - 'Makefile'
+      - '.github/workflows/websim.yml'
+  pull_request:
+    paths:
+      - 'platform/**'
+      - 'websim/**'
+      - 'Makefile'
+      - '.github/workflows/websim.yml'
+  workflow_dispatch:
+
+jobs:
+  websim:
+    runs-on: ubuntu-latest
+    env:
+      # Pinned Emscripten. Minimum required: 3.1.x+ (SIMDe arm_neon.h for
+      # drumlogue) and recent enough to reject -I.../emscripten/system/include.
+      EMSDK_VERSION: 4.0.16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install & activate Emscripten ${{ env.EMSDK_VERSION }}
+        working-directory: tools/emsdk
+        run: |
+          ./emsdk install "${EMSDK_VERSION}"
+          ./emsdk activate "${EMSDK_VERSION}"
+
+      - name: Build every wasm unit (compile/link smoke)
+        run: make build-all
+
+      - name: Render-capable units produce finite audio
+        run: make render-all
