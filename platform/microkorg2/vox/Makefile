@@ -436,3 +436,17 @@ CLEAN_RULE_HOOK:
 # Include the dependency files, should be the last of the makefile
 #
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
+
+##############################################################################
+# WebAssembly (websim) build — shared fragment, see WEBSIM.md
+#
+SANDBOXDIR        ?= $(realpath $(PROJECT_ROOT)/../../../websim)
+WEBSIM_SHELL      := osc.html
+WEBSIM_INCFLAGS   := -I. -I$(COMMON_INC_PATH) -I$(PLATFORM_COMMON_PATH) -I$(SANDBOXDIR)/dsp/microkorg2
+WEBSIM_UNITSRC    := wasm.cc header.c
+WEBSIM_DSP        := $(wildcard $(SANDBOXDIR)/dsp/*.c) $(wildcard $(SANDBOXDIR)/dsp/*.cpp) \
+                     $(wildcard $(SANDBOXDIR)/dsp/microkorg2/*.c) $(wildcard $(SANDBOXDIR)/dsp/microkorg2/*.cpp)
+# vox calls NEON intrinsics directly; force-include the struct-shape SIMD shim
+# ahead of the unit's own headers (see WEBSIM_FOLLOWUP_PLAN.md §A).
+WEBSIM_EMCC_EXTRA := -include $(SANDBOXDIR)/dsp/microkorg2/mk2_simd_compat.h
+include $(SANDBOXDIR)/wasm.mk

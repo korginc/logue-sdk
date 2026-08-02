@@ -436,3 +436,17 @@ CLEAN_RULE_HOOK:
 # Include the dependency files, should be the last of the makefile
 #
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
+
+##############################################################################
+# WebAssembly (websim) build — shared fragment, see WEBSIM.md
+#
+SANDBOXDIR      ?= $(realpath $(PROJECT_ROOT)/../../../websim)
+WEBSIM_SHELL    := osc.html
+WEBSIM_INCFLAGS := -I. -I$(COMMON_INC_PATH) -I$(PLATFORM_COMMON_PATH) -I$(SANDBOXDIR)/dsp/microkorg2
+# Note: unit.cc (the C-callback ABI layer) is intentionally omitted — wasm.cc is
+# its websim replacement, and microKORG2's unit_osc.h defines non-inline helper
+# functions that would otherwise be defined twice (duplicate-symbol link errors).
+WEBSIM_UNITSRC  := wasm.cc header.c
+WEBSIM_DSP      := $(wildcard $(SANDBOXDIR)/dsp/*.c) $(wildcard $(SANDBOXDIR)/dsp/*.cpp) \
+                   $(wildcard $(SANDBOXDIR)/dsp/microkorg2/*.c) $(wildcard $(SANDBOXDIR)/dsp/microkorg2/*.cpp)
+include $(SANDBOXDIR)/wasm.mk
