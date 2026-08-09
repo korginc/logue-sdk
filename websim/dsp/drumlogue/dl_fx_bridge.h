@@ -11,7 +11,7 @@
 // masterfx) and render interleaved stereo via Process(in, out, frames). The
 // bridge feeds the fx.html input source (duplicated to fill the required input
 // width) and de-interleaves to planar stereo. Build with -msimd128 (SIMDe).
-// See WEBSIM_EXPANSION_PLAN.md §5.
+//
 //
 // reference: https://emscripten.org/docs/api_reference/wasm_audio_worklets.html
 

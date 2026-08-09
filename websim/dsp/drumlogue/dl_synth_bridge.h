@@ -11,7 +11,7 @@
 // driven by NoteOn/NoteOff + GateOn/GateOff. The bridge feeds the keyboard to
 // both (covering pitched and gate-only drums), runs a 2-channel output worklet,
 // and de-interleaves to planar stereo. Build with -msimd128 (SIMDe maps the
-// unit's arm_neon.h intrinsics to wasm SIMD). See WEBSIM_EXPANSION_PLAN.md §5.
+// unit's arm_neon.h intrinsics to wasm SIMD).
 //
 // reference: https://emscripten.org/docs/api_reference/wasm_audio_worklets.html
 

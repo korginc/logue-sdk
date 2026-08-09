@@ -11,7 +11,7 @@
 // We stay entirely on KORG's struct representation; the few NEON intrinsics that
 // units call directly are provided by mk2_simd_compat.h.
 //
-// See docs/plans/WEBSIM_FOLLOWUP_PLAN.md §A.
+//
 #ifndef WEBSIM_MK2_ARM_NEON_SHADOW_H_
 #define WEBSIM_MK2_ARM_NEON_SHADOW_H_
 #include "mk2_simd_compat.h"

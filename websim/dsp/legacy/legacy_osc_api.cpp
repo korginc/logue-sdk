@@ -5,8 +5,7 @@
  * as inline forwarders to underscore-prefixed ROM symbols (_osc_white, etc.).
  * On hardware those live in firmware ROM; here we provide host equivalents,
  * analogous to the gen-2 websim/dsp/osc_api.cpp. The wavetable note tables
- * (wt_*_notes) come from the shared websim/dsp/wavetable_lut.c. See
- * WEBSIM_EXPANSION_PLAN.md §6.2.
+ * (wt_*_notes) come from the shared websim/dsp/wavetable_lut.c.
  */
 
 #include <climits>

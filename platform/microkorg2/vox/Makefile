@@ -447,6 +447,6 @@ WEBSIM_UNITSRC    := wasm.cc header.c
 WEBSIM_DSP        := $(wildcard $(SANDBOXDIR)/dsp/*.c) $(wildcard $(SANDBOXDIR)/dsp/*.cpp) \
                      $(wildcard $(SANDBOXDIR)/dsp/microkorg2/*.c) $(wildcard $(SANDBOXDIR)/dsp/microkorg2/*.cpp)
 # vox calls NEON intrinsics directly; force-include the struct-shape SIMD shim
-# ahead of the unit's own headers (see WEBSIM_FOLLOWUP_PLAN.md §A).
+# ahead of the unit's own headers.
 WEBSIM_EMCC_EXTRA := -include $(SANDBOXDIR)/dsp/microkorg2/mk2_simd_compat.h
 include $(SANDBOXDIR)/wasm.mk

@@ -12,8 +12,7 @@
 //
 // The bridge exposes the two always-present 10-bit fx knobs (TIME, DEPTH) as
 // sliders, drives OSC_*-style _hook_init/_hook_param, feeds the fx.html input
-// through _hook_process, and de-interleaves to planar stereo. See
-// WEBSIM_FOLLOWUP_PLAN.md §C.1.
+// through _hook_process, and de-interleaves to planar stereo.
 //
 // reference: https://emscripten.org/docs/api_reference/wasm_audio_worklets.html
 

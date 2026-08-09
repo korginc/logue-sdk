@@ -14,7 +14,7 @@
 // The bridge synthesises slider metadata from that table (gen-1 has no
 // unit_header), appends the two 10-bit SHAPE / SHIFT-SHAPE knobs, drives
 // OSC_INIT / OSC_CYCLE / OSC_PARAM / OSC_NOTEON / OSC_NOTEOFF and converts the
-// q31 output to float for Web Audio. See WEBSIM_EXPANSION_PLAN.md §6.
+// q31 output to float for Web Audio.
 //
 // reference: https://emscripten.org/docs/api_reference/wasm_audio_worklets.html
 

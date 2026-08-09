@@ -5,7 +5,6 @@ Gen-1 oscillators have no unit_header, so the websim legacy bridge needs slider
 metadata for the custom params. Rather than hand-maintain a WEBSIM_LEGACY_PARAM_LIST
 macro in each wasm.cc (which must mirror manifest.json by hand), this emits that
 macro straight from manifest.json so any gen-1 unit works without editing C.
-See WEBSIM_FOLLOWUP_PLAN.md §C.2.
 
   gen_legacy_params.py <manifest.json> <out.h>
 

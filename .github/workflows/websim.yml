@@ -2,7 +2,7 @@ name: websim
 
 # Headless smoke for the web simulator: compile every wasm-capable unit and
 # render the render-capable ones, asserting finite audio. No browser needed.
-# See WEBSIM.md (§ Headless audio checks) and docs/plans/WEBSIM_FOLLOWUP_PLAN.md §E.
+# See WEBSIM.md (§ Headless audio checks)
 
 on:
   push:

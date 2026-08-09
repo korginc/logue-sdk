@@ -4,8 +4,8 @@
  * The gen-1 oscillator runtime (prologue / minilogue xd / NTS-1 mkI) reaches
  * CMSIS Cortex-M4 intrinsics through inc/utils/cortexm4.h -> "arm_math.h", which
  * does not exist for the wasm target. This shim provides plain-C equivalents of
- * the handful of intrinsics the gen-1 fixed-point helpers actually use (see
- * WEBSIM_EXPANSION_PLAN.md §6.2). It is found ahead of the (absent) CMSIS header
+ * the handful of intrinsics the gen-1 fixed-point helpers actually use. It is
+ * found ahead of the (absent) CMSIS header
  * via -I websim/dsp/legacy.
  *
  * Note: the q7_t/q15_t/q31_t/q63_t typedefs are intentionally NOT defined here —

@@ -19,7 +19,7 @@
 // defines the directly-used intrinsics as scalar .val[] operations. Gap 2 is
 // closed by the sibling websim/dsp/microkorg2/arm_neon.h, which shadows SIMDe.
 //
-// See docs/plans/WEBSIM_FOLLOWUP_PLAN.md §A.
+//
 #ifndef WEBSIM_MK2_SIMD_COMPAT_H_
 #define WEBSIM_MK2_SIMD_COMPAT_H_
 

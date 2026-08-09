@@ -9,7 +9,7 @@
 // It binds directly to the DSP class' Init(desc)/Process(out,frames)/
 // setParameter/getParameterValue methods and emulates the runtime osc context
 // the unit reads its pitch from. v1 is single-voice (voiceLimit = 1, pitch[0]
-// from the keyboard, outputStride = 1) — see WEBSIM_EXPANSION_PLAN.md.
+// from the keyboard, outputStride = 1).
 //
 // reference: https://emscripten.org/docs/api_reference/wasm_audio_worklets.html
 
@@ -43,7 +43,7 @@ constexpr int WEB_AUDIO_FRAME_SIZE = 128;
 // Poly drives one microKORG2 "x4" voice group: per-voice pitch from a round-robin
 // allocator, output interleaved [v0..v3] per sample (outputStride = 4), downmixed
 // to mono over the currently-held voices. 4 is the natural value (a single x4
-// group with GetBufferOffset == bufferOffset); see WEBSIM_FOLLOWUP_PLAN.md §D.
+// group with GetBufferOffset == bufferOffset).
 #ifndef MK2_OSC_VOICES
 #define MK2_OSC_VOICES 1
 #endif
@@ -56,7 +56,7 @@ constexpr int WEB_AUDIO_FRAME_SIZE = 128;
 // Web Audio quantum is 128, larger than kMk2BufferSize (64), so the x4 (poly)
 // path would overrun mOscBuffer (4*128 > 4*64) and corrupt adjacent state. Render
 // in <= kMk2BufferSize-sample sub-blocks for poly; mono fits 128 in one call so
-// keep it unchanged. See WEBSIM_FOLLOWUP_PLAN.md §D.
+// keep it unchanged.
 #if MK2_OSC_VOICES > 1
 constexpr int MK2_OSC_BLOCK = kMk2BufferSize;
 #else
@@ -431,7 +431,7 @@ int main()
 // audio correctness headlessly. See WEBSIM.md §B.
 //   argv: [out.wav] [note(s)=60] [blocks=375 (~1s @48k/128)]
 //   In poly builds (MK2_OSC_VOICES>1) the note arg may be a comma-separated
-//   chord, e.g. "57,60,64" — one voice per note. See WEBSIM_FOLLOWUP_PLAN.md §D.
+//   chord, e.g. "57,60,64" — one voice per note.
 int main(int argc, char **argv)
 {
   const char *out = (argc > 1) ? argv[1] : "render.wav";

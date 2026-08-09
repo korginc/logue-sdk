@@ -8,8 +8,7 @@
 //
 // This provides a small synthetic bank so those units run and make sound in the
 // sim. The content is generated procedurally (no file decoding / FS needed),
-// which keeps it deterministic for the offline render checks. See
-// WEBSIM_FOLLOWUP_PLAN.md §C.4.
+// which keeps it deterministic for the offline render checks.
 #ifndef WEBSIM_DL_SAMPLE_BANK_H_
 #define WEBSIM_DL_SAMPLE_BANK_H_
 

@@ -1,8 +1,8 @@
 // Minimal WAV writer for the websim offline render harness.
 //
 // Writes 32-bit IEEE-float PCM (WAVE format tag 3), which is lossless and read
-// directly by scipy.io.wavfile / numpy for the golden spot-checks (see
-// WEBSIM_FOLLOWUP_PLAN.md §B). Header-only; used by the render bridges.
+// directly by scipy.io.wavfile / numpy for the golden spot-checks.
+// Header-only; used by the render bridges.
 #ifndef WEBSIM_WAV_WRITER_H_
 #define WEBSIM_WAV_WRITER_H_
 

@@ -9,7 +9,7 @@
 // microKORG2 effects require stereo (2-in / 2-out) geometry and an sdram_alloc
 // hook, so this bridge differs from the osc bridge: it feeds the fx.html input
 // (interleaved stereo) through Process(in, out, frames) and provides a host
-// SDRAM allocator. See WEBSIM_EXPANSION_PLAN.md §4.7.
+// SDRAM allocator.
 //
 // reference: https://emscripten.org/docs/api_reference/wasm_audio_worklets.html
 

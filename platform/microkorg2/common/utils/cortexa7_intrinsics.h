@@ -6,7 +6,7 @@
 // saturating semantics. SEL depends on the APSR.GE flags set by a preceding SIMD
 // instruction, which cannot be reproduced standalone, so it returns its first
 // operand (the same compromise as the gen-1 __SEL shim in
-// websim/dsp/legacy/arm_math.h). See WEBSIM_FOLLOWUP_PLAN.md §A.
+// websim/dsp/legacy/arm_math.h).
 
 static inline int16_t __websim_sat16(int32_t v) {
     return (int16_t)(v > 32767 ? 32767 : (v < -32768 ? -32768 : v));

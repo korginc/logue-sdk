@@ -448,6 +448,6 @@ WEBSIM_DSP        := $(wildcard $(SANDBOXDIR)/dsp/*.c) $(wildcard $(SANDBOXDIR)/
                      $(wildcard $(SANDBOXDIR)/dsp/microkorg2/*.c) $(wildcard $(SANDBOXDIR)/dsp/microkorg2/*.cpp)
 # These units pull <arm_neon.h> (directly or transitively); the SIMD shim +
 # shadow arm_neon.h on the include path keep them on KORG's struct SIMD path
-# (see WEBSIM_FOLLOWUP_PLAN.md §A).
+#.
 WEBSIM_EMCC_EXTRA := -include $(SANDBOXDIR)/dsp/microkorg2/mk2_simd_compat.h
 include $(SANDBOXDIR)/wasm.mk

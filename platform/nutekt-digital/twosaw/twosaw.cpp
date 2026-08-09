@@ -3,7 +3,7 @@
  *
  * A worked, self-contained example used to demonstrate the websim gen-1 osc
  * harness with a non-`waves` unit whose slider metadata comes from manifest.json
- * (see WEBSIM.md §C.2 / WEBSIM_FOLLOWUP_PLAN.md §C.3). It needs no firmware ROM
+ * (see WEBSIM.md §C.2). It needs no firmware ROM
  * helpers — phase accumulators + naive saws only — so it builds for both the
  * hardware and the sim. Two custom params (Detune, Mix) plus the SHAPE knob.
  */
