@@ -128,3 +128,4 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Riffosc](https://payhip.com/b/VGsDh) | Frostmod Audio | Dual supersaw oscillator | microkorg2 | donation |
 | [C0mp4ct](https://payhip.com/b/zXEHp) | Frostmod Audio | 4 voice polyphonic synthesizer | nts-1 mkii | paid |
 | [Lirah-1](https://danielmajid.gumroad.com/l/lirah-1) | Daniel Majid | FM synth inspired by the Soma Lyra-8 | nts-1 mkii | donation |
+| [FM4OSC](https://payhip.com/b/0VJ82) | Frostmod Audio | 4 Operator FM Oscillator | microkorg2 | paid |
