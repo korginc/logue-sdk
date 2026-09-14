@@ -26,6 +26,7 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Cain CZ](https://cain-synthesizer.com/cain-cz-2) | Cain Synthesizers | Phase distortion oscillator inspired by the Casio Cosmo synthesizer | pro, xd, nts-1 | donation |
 | [Cain CZ2](https://cain-synthesizer.com/cain-cz2) | Cain Synthesizers | Vastly advanced version of Cain CZ | pro, xd, nts-1 | donation |
 | [Human](https://cain-synthesizer.com/human) | Cain Synthesizers | A vowel oscillator | pro, xd, nts-1 | donation |
+| [KNGWSIN](https://github.com/IanP06/kngw_sin) | ryuji kanagawa | Sine oscillator with continuous harmonic multiplier, sub-oscillator and self-feedback PM | nts-1 | free |
 | [KRYSTAL](https://cain-synthesizer.com/krystal) | Cain Synthesizers | Shatter model oscillator | pro, xd, nts-1 | donation |
 | [WTF](https://cain-synthesizer.com/wtf) | Cain Synthesizers | A strange name for an oscillator, but as soon as you try it out that will most probably be what’s on your mind | pro, xd, nts-1 | donation |
 | [WTF II](https://cain-synthesizer.com/wtf-II) | Cain Synthesizers | Scary, alien, babling oscillator | pro, xd, nts-1 | donation |
