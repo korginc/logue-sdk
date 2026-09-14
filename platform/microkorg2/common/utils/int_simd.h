@@ -564,15 +564,15 @@
    } while (0);
  #define s32x4_str(ptr, v)     \
    do {                        \
-     *(int32x4_t *)(ptr) = (v) \
+     *(int32x4_t *)(ptr) = (v); \
    } while (0);
  #define s32x2x2_str(ptr, v)     \
    do {                          \
-     *(int32x2x2_t *)(ptr) = (v) \
+     *(int32x2x2_t *)(ptr) = (v); \
    } while (0);
  #define s32x4x2_str(ptr, v)     \
    do {                          \
-     *(int32x4x2_t *)(ptr) = (v) \
+     *(int32x4x2_t *)(ptr) = (v); \
    } while (0);
  #define s32x2x2_str2(ptr, v)          \
    do {                                \
@@ -605,15 +605,15 @@
    } while (0);
  #define u32x4_str(ptr, v)      \
    do {                         \
-     *(uint32x4_t *)(ptr) = (v) \
+     *(uint32x4_t *)(ptr) = (v); \
    } while (0);
  #define u32x2x2_str(ptr, v)      \
    do {                           \
-     *(uint32x2x2_t *)(ptr) = (v) \
+     *(uint32x2x2_t *)(ptr) = (v); \
    } while (0);
  #define u32x4x2_str(ptr, v)      \
    do {                           \
-     *(uint32x4x2_t *)(ptr) = (v) \
+     *(uint32x4x2_t *)(ptr) = (v); \
    } while (0);
  #define u32x2x2_str2(ptr, v)           \
    do {                                 \
@@ -1821,7 +1821,7 @@
  #if defined(NEON_SIMD_INT)
    return vmin_s32(max, vmax_s32(min, x));
  #else
-   const int2x2_t tmp = {{(x.val[0] > max.val[0]) ? max.val[0] : (x.val[0] < min.val[0]) ? min.val[0] : x.val[0],
+   const int32x2_t tmp = {{(x.val[0] > max.val[0]) ? max.val[0] : (x.val[0] < min.val[0]) ? min.val[0] : x.val[0],
                           (x.val[1] > max.val[1]) ? max.val[1] : (x.val[1] < min.val[1]) ? min.val[1] : x.val[1]}};
    return tmp;
  #endif

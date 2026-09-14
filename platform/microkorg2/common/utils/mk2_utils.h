@@ -19,7 +19,11 @@
 enum { kMk2LocalityNone = 0, kMk2LocalityL2, kMk2LocalityL1 };
 fast_inline void PrefetchMemory(void * memory, bool isRead = true, int locality = kMk2LocalityL1)
 {
+#ifdef __EMSCRIPTEN__
+  (void)memory; (void)isRead; (void)locality; // wasm/clang: prefetch needs constant args
+#else
   __builtin_prefetch(memory, isRead, locality);
+#endif
 }
 
 int32_t * GetCurrentVoiceMaxData(void * data)
