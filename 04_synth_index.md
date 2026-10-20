@@ -30,4 +30,5 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [ScrutaAstri](https://github.com/fedemone/logue-sdk) | Federico Gennari | Drone synth inspired by moffenzeef's Stargazer | drum | free |
 | [EffeMD](https://github.com/fedemone/logue-sdk) | Federico Gennari | FM percussion inspired by Elektron Machinedrum | drum | free |
 | [EffeESP32](https://github.com/fedemone/logue-sdk) | Federico Gennari | port of Evgeny "Copych" Aslovskiy's ESP32-S3 FM Drum Synth FM engine | drum | free |
+| [Lirah-4](https://danielmajid.gumroad.com/l/pctfx) | Daniel Majid | 4-voice polyphonic drone synth inspired by the Soma Laboratory Lyra 4 | drum | donation |
 | Nano | Sinevibes |             | drum | built-in |
