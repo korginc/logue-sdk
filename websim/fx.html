@@ -8,10 +8,79 @@
   <link rel="icon" type="image/x-icon" href="images/favicon.ico">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #0e0f13; --panel: #1a1c22; --panel-2: #22252e; --border: #2e323c;
+      --text: #e8e9ec; --muted: #9aa0ab; --accent: #f3e939; --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
+      margin: 0; padding: 16px; overflow: auto;
       font-family: 'Space Grotesk', sans-serif;
       -webkit-font-smoothing: subpixel-antialiased;
+      background: radial-gradient(1200px 700px at 15% -10%, #171a21, var(--bg));
+      color: var(--text);
     }
+    .app { min-height: calc(100vh - 32px); display: grid; grid-template-rows: auto 1fr; gap: 14px; }
+
+    .topbar {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 16px;
+      padding: 12px 18px; border: 1px solid var(--border); border-radius: var(--radius);
+      background: linear-gradient(180deg, var(--panel-2), var(--panel));
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: .5px; }
+    .brand small { color: var(--muted); font-weight: 400; text-transform: uppercase; letter-spacing: 1.5px; font-size: 12px; }
+    .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+    .topbar .spacer { flex: 1; }
+    .control { display: flex; align-items: center; gap: 8px; }
+    .control label { color: var(--muted); font-size: 13px; }
+    .readout { color: var(--accent); font-variant-numeric: tabular-nums; min-width: 38px; font-size: 13px; }
+
+    .grid {
+      display: grid; gap: 14px; min-height: 0; align-content: start;
+      grid-template-columns: minmax(540px, 1fr) minmax(540px, 1fr);
+      grid-template-rows: auto auto;
+      grid-template-areas: "osc scope" "sample params";
+    }
+
+    .panel {
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 14px 16px; display: flex; flex-direction: column;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .28);
+      min-height: 120px;
+    }
+    .panel > h2 {
+      margin: 0 0 12px; font-size: 13px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 10px;
+    }
+    .panel > h2::before { content: ""; width: 5px; height: 14px; border-radius: 3px; background: var(--accent); }
+    .panel .body { flex: 1; min-height: 0; overflow: auto; }
+    .tip { color: var(--muted); font-size: 12px; margin: 0 0 12px; }
+    .row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+
+    button {
+      font-family: inherit; font-size: 13px; color: var(--text); background: var(--panel-2);
+      border: 1px solid var(--border); border-radius: 8px; padding: 7px 14px; cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    button:hover { border-color: var(--accent); color: var(--accent); }
+    button.active { border-color: var(--accent); color: var(--bg); background: var(--accent); font-weight: 700; }
+    button.active:hover { color: var(--bg); }
+    select {
+      font-family: inherit; font-size: 13px; color: var(--text); background: var(--panel-2);
+      border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px;
+    }
+    input[type=range] { accent-color: var(--accent); }
+
+    .scope { display: flex; flex-direction: column; gap: 10px; }
+    #TimeDomain, #FrequencyDomain { max-width: 100%; background: #fff; border-radius: 8px; display: block; }
+    #keyboard { margin-top: 4px; }
+
+    #Samples label { color: var(--muted); font-size: 12px; }
+    #Samples audio { width: 100%; margin: 4px 0 12px; }
+
+    #Parameters > div { display: flex; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(255, 255, 255, .04); }
+    #Parameters label { color: var(--muted); }
   </style>
   <script>
     // list all sample files in the samples folder
@@ -40,43 +109,67 @@
 </head>
 
 <body>
-  <!-- add buttons and sliders here -->
-  <button id="TogglePlaybackButton">Toggle playback</button>
-  <h2>Master Volume</h2>
-  <input type="range" min=0 max=1 value=0.5 step=0.01 id="VolumeSlider">
-  <span id="VolumeLabel"></span>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><span class="dot"></span> logue-sdk <small>effect</small></div>
+      <div class="spacer"></div>
+      <div class="control">
+        <button id="TogglePlaybackButton">Toggle Playback</button>
+      </div>
+      <div class="control">
+        <label for="VolumeSlider">Master</label>
+        <input type="range" min=0 max=1 value=0.5 step=0.01 id="VolumeSlider">
+        <span id="VolumeLabel" class="readout"></span>
+      </div>
+      <div class="control">
+        <label for="BpmSlider">BPM</label>
+        <input type="range" min=30 max=240 value=120 step=0.1 id="BpmSlider">
+        <span id="BpmLabel" class="readout"></span>
+      </div>
+    </header>
 
-  <h2>BPM</h2>
-  <!-- <p>Tips: use fx_get_bpmf() to access this value. </p> -->
-  <input type="range" min=30 max=240 value=120 step=0.1 id="BpmSlider">
-  <span id="BpmLabel"></span>
+    <main class="grid">
+      <section class="panel" style="grid-area: osc;">
+        <h2>Oscillator</h2>
+        <p class="tip">Play with your QWERTY keyboard &middot; Z / X switch octave</p>
+        <div class="row">
+          <select id="OscillatorType">
+            <option value="sawtooth">Sawtooth</option>
+            <option value="square">Square</option>
+            <option value="triangle">Triangle</option>
+            <option value="sine">Sine</option>
+            <option value="noise">Noise</option>
+          </select>
+          <button id="OscLatchButton">Latch Off</button>
+        </div>
+        <div class="body">
+          <div id="keyboard"></div>
+        </div>
+      </section>
 
-  <h2>Oscillator</h2>
-  <p>Tips: play with a QWERTY keyboard, Z and X to switch octave </p>
-  <select id="OscillatorType">
-    <option value="sawtooth">Sawtooth</option>
-    <option value="square">Square</option>
-    <option value="triangle">Triangle</option>
-    <option value="sine">Sine</option>
-    <option value="noise">Noise</option>
-  </select>
-  <button id="OscLatchButton">Latch Off</button>
-  <div id="keyboard"></div>
+      <section class="panel" style="grid-area: scope;">
+        <h2>Scope</h2>
+        <div class="body scope">
+          <canvas id="TimeDomain" width="512" height="128"></canvas>
+          <canvas id="FrequencyDomain" width="512" height="128"></canvas>
+        </div>
+      </section>
 
-  <h2>Sample</h2>
-  <div id="Samples"></div>
-  <!-- <select id="SampleChooser"></select>
-  <button id="PlaySampleButton">Play</button> -->
-  <!-- <audio controls id='Sample'>
-    <source src="samples/guitar_g_chord.wav">
-  </audio> -->
+      <section class="panel" style="grid-area: sample;">
+        <h2>Sample Input</h2>
+        <div class="body">
+          <div id="Samples"></div>
+        </div>
+      </section>
 
-  <h2>Scope</h2>
-  <canvas id="TimeDomain" width="512" height="128"></canvas><br />
-  <canvas id="FrequencyDomain" width="512" height="128"></canvas>
-
-  <h2>Parameters</h2>
-  <div id="Parameters"></div>
+      <section class="panel" style="grid-area: params;">
+        <h2>Parameters</h2>
+        <div class="body">
+          <div id="Parameters"></div>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <script>
     // Expose function globally so EM_ASM can call it
@@ -153,15 +246,38 @@
         source.connect(wasmProcessor);
       }
 
-      // resume/stop button
+      // Playback toggle — enabled by default and shown selected while running.
+      // AudioContext.resume() is gated behind a user gesture, so we show the
+      // "on" state optimistically, try to resume now, and also resume on the
+      // first interaction; the button then mirrors context.state. The on/off
+      // choice is remembered in sessionStorage (per tab) so a reload keeps it.
       let togglePlaybackButton = document.getElementById("TogglePlaybackButton");
+      const PLAYBACK_KEY = "websim.playbackOn";
+      function wantsPlayback() {
+        try { return sessionStorage.getItem(PLAYBACK_KEY) !== "false"; } // default on
+        catch (e) { return true; }
+      }
+      function rememberPlayback(on) {
+        try { sessionStorage.setItem(PLAYBACK_KEY, on ? "true" : "false"); } catch (e) {}
+      }
+      function setPlaybackButton(on) {
+        togglePlaybackButton.classList.toggle("active", on);
+        togglePlaybackButton.textContent = on ? "Playback On" : "Playback Off";
+        togglePlaybackButton.setAttribute("aria-pressed", on ? "true" : "false");
+      }
+      context.addEventListener("statechange", () => setPlaybackButton(context.state === "running"));
       togglePlaybackButton.onclick = () => {
-        if (context.state !== "running") {
-          context.resume();
-        } else {
-          context.suspend();
-        }
+        if (context.state !== "running") { rememberPlayback(true); context.resume(); }
+        else { rememberPlayback(false); context.suspend(); }
       };
+      function resumePlaybackOnGesture() {
+        if (wantsPlayback() && context.state !== "running") context.resume().catch(() => {});
+      }
+      window.addEventListener("pointerdown", resumePlaybackOnGesture, { once: true });
+      window.addEventListener("keydown", resumePlaybackOnGesture, { once: true });
+      const startPlaybackOn = wantsPlayback();
+      setPlaybackButton(startPlaybackOn);                    // restore last choice (default on)
+      if (startPlaybackOn) context.resume().catch(() => {}); // start now if the browser allows it
 
       // main volume
       let volumeSlider = document.getElementById("VolumeSlider");

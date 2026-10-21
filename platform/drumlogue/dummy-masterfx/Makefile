@@ -433,3 +433,14 @@ CLEAN_RULE_HOOK:
 # Include the dependency files, should be the last of the makefile
 #
 -include $(shell mkdir .dep 2>/dev/null) $(wildcard .dep/*)
+
+##############################################################################
+# WebAssembly (websim) build — drumlogue (stereo fx, NEON via SIMDe)
+#
+SANDBOXDIR      ?= $(realpath $(PROJECT_ROOT)/../../../websim)
+WEBSIM_SHELL    := fx.html
+WEBSIM_EMCC_EXTRA := -msimd128
+WEBSIM_INCFLAGS := -I. -I$(COMMON_INC_PATH) -I$(SANDBOXDIR)/dsp/drumlogue
+WEBSIM_UNITSRC  := wasm.cc header.c
+WEBSIM_DSP      := $(wildcard $(SANDBOXDIR)/dsp/drumlogue/*.c) $(wildcard $(SANDBOXDIR)/dsp/drumlogue/*.cpp)
+include $(SANDBOXDIR)/wasm.mk

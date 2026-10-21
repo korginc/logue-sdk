@@ -1,0 +1,16 @@
+
+k_fx_api_version = 0x0807b000;
+k_fx_api_platform = 0x0807b004;
+sqrtm2log_lut_f = 0x0807b100;
+tanpi_lut_f = 0x0807b504;
+log_lut_f = 0x0807b908;
+bitres_lut_f = 0x0807bd0c;
+wt_sine_lut_f = 0x0807bf10;
+schetzen_lut_f = 0x0807c114;
+cubicsat_lut_f = 0x0807c318;
+pow2_lut_f = 0x0807c51c;
+_fx_mcu_hash = 0x0807c920;
+_fx_rand = 0x0807c92c;
+_fx_white = 0x0807c964;
+_fx_get_bpm = 0x0807ca88;
+_fx_get_bpmf = 0x0807ca8c;

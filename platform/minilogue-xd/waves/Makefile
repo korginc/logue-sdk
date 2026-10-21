@@ -224,3 +224,21 @@ install: $(BUILDDIR)/$(PKGARCH)
 	@mv $(BUILDDIR)/$(PKGARCH) $(INSTALLDIR)/$(PKGARCH)
 	@echo Done
 	@echo
+
+##############################################################################
+# WebAssembly (websim) build — gen-1 legacy harness, see WEBSIM.md
+#
+PROJECT_ROOT    ?= $(PROJECTDIR)/
+SANDBOXDIR      ?= $(realpath $(PLATFORMDIR)/../../websim)
+WEBSIM_SHELL    := osc.html
+WEBSIM_INCFLAGS := -I. -I$(PLATFORMDIR)/inc -I$(PLATFORMDIR)/inc/utils -I$(PLATFORMDIR)/inc/dsp -I$(SANDBOXDIR)/dsp/legacy
+WEBSIM_UNITSRC  := wasm.cc $(UCXXSRC) $(UCSRC)
+# Shared ROM data/LUTs minus the gen-2 osc_api.cpp/fx_api.cpp (gen-1 defines the
+# osc API inline and needs the underscore-prefixed ROM symbols instead), plus the
+# gen-1 ROM stand-ins (legacy_osc_api.cpp).
+WEBSIM_DSP      := $(filter-out %/osc_api.cpp %/fx_api.cpp, \
+                     $(wildcard $(SANDBOXDIR)/dsp/*.c) $(wildcard $(SANDBOXDIR)/dsp/*.cpp)) \
+                   $(wildcard $(SANDBOXDIR)/dsp/legacy/*.cpp)
+# Generate the slider param table from manifest.json (websim_legacy_params.h).
+WEBSIM_LEGACY_MANIFEST := $(PROJECTDIR)/manifest.json
+include $(SANDBOXDIR)/legacy.mk
