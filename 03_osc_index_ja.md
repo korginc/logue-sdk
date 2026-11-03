@@ -126,5 +126,8 @@ _Note: 追加,訂正，リンク切れについては logue-sdk@korg.co.jp ま�
 | [FunFM](https://github.com/mrf-r/FunFM-logue) | Eugene Chernyh | 2 alias supressed FM operators with variable waveshape | pro, xd, nts-1 | 無料 |
 | [Acidbass Mini](https://payhip.com/b/2oNU4) | Frostmod Audio | monophonic acid bass synthesizer | nts-1 mkii | 寄付 |
 | [Riffosc](https://payhip.com/b/VGsDh) | Frostmod Audio | Dual supersaw oscillator | microkorg2 | 寄付 |
+| [Tide](https://reefsynth.gumroad.com/l/tide-oscillator?layout=profile) | ReefSynth.com | West-coast fold oscillator | pro, xd, nts-1 | 有料 |
+| [Coast](https://reefsynth.gumroad.com/l/coast-oscillator?layout=profile) | ReefSynth.com | Pulsar oscillator (saw, sine and square) | pro, xd, nts-1 | 有料 |
+| [Ocean](https://reefsynth.gumroad.com/l/ocean-oscillator?layout=profile) | ReefSynth.com | Smooth polyphonic oscillator | pro, xd, nts-1 | 有料 |
 | [C0mp4ct](https://payhip.com/b/zXEHp) | Frostmod Audio | 4 voice polyphonic synthesizer | nts-1 mkii | 有料 |
 | [FM4OSC](https://payhip.com/b/0VJ82) | Frostmod Audio | 4 Operator FM Oscillator | microkorg2 | 寄付 |
