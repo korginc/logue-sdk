@@ -126,6 +126,9 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [VOSIM](https://tyrannosaurus.ru/posts/2020-03-10-logue-vosim.html) | Tyrannosaurus | Werner Kaegi voice simulation | pro, xd, nts-1 | donation |
 | [FunFM](https://github.com/mrf-r/FunFM-logue) | Eugene Chernyh | 2 alias supressed FM operators with variable waveshape | pro, xd, nts-1 | free |
 | [Acidbass Mini](https://payhip.com/b/2oNU4) | Frostmod Audio | monophonic acid bass synthesizer | nts-1 mkii | donation |
+| [Coast](https://reefsynth.com/products/coast-oscillator) | Jordan Service | Pulsar oscillator (saw, sine and square) | pro, xd, nts-1 | paid |
+| [Ocean](https://reefsynth.com/products/ocean-oscillator) | Jordan Service | Smooth polyphonic oscillator | pro, xd, nts-1 | paid |
+| [Tide](https://reefsynth.com/products/tide-oscillator) | Jordan Service | West-coast fold oscillator | pro, xd, nts-1 | paid |
 | [Riffosc](https://payhip.com/b/VGsDh) | Frostmod Audio | Dual supersaw oscillator | microkorg2 | donation |
 | [C0mp4ct](https://payhip.com/b/zXEHp) | Frostmod Audio | 4 voice polyphonic synthesizer | nts-1 mkii | paid |
 | [Lirah-1](https://danielmajid.gumroad.com/l/lirah-1) | Daniel Majid | FM synth inspired by the Soma Lyra-8 | nts-1 mkii | donation |
