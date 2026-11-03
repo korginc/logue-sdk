@@ -50,3 +50,14 @@ _Note: Additions, corrections, broken links? Let us know at logue-sdk@korg.co.jp
 | [Stator](https://www.sinevibes.com/korgstator/) | Sinevibes | Tape wobble simulator | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [autopan](https://github.com/tmlbl/autopan) | Tim Lebel | Basic autopan effect | pro, xd, nts-1 | free |
 | [Riffgate](https://payhip.com/b/S5qnP) | Frostmod Audio | Trance gate/stutter ModFX | microkorg2 | donation |
+| [Astra](https://reefsynth.gumroad.com/l/astra?layout=profile) | ReefSynth.com | Unison and deep pulse FX (includes Astra Lite and Astra Super) | pro, xd, nts-1 | paid |
+| [Pulsar](https://reefsynth.gumroad.com/l/pulsar?layout=profile) | ReefSynth.com | Formant pulse FX | pro, xd, nts-1 | paid |
+| [PWM](https://reefsynth.gumroad.com/l/pwm?layout=profile) | ReefSynth.com | Pulse width FX | pro, xd, nts-1 | paid |
+| [Carve](https://reefsynth.gumroad.com/l/carve?layout=profile) | ReefSynth.com | Tone shaper and drive FX | pro, xd, nts-1 | paid |
+| [Titan](https://reefsynth.gumroad.com/l/titan?layout=profile) | ReefSynth.com | Multi-voicing saturation FX | pro, xd, nts-1 | paid |
+| [Rhea](https://reefsynth.gumroad.com/l/rhea?layout=profile) | ReefSynth.com | Saturation FX for bright patches (includes Rhea Lite) | pro, xd, nts-1 | paid |
+| [Thorns](https://reefsynth.gumroad.com/l/thorns?layout=profile) | ReefSynth.com | Comb folder FX | pro, xd, nts-1 | free |
+| [Loom](https://reefsynth.gumroad.com/l/loom?layout=profile) | ReefSynth.com | Cycle looper FX | pro, xd, nts-1 | free |
+| [Halo](https://reefsynth.gumroad.com/l/halo?layout=profile) | ReefSynth.com | Wavefolder FX | pro, xd, nts-1 | free |
+| [Lattice](https://reefsynth.gumroad.com/l/lattice?layout=profile) | ReefSynth.com | Lo-fi crunch FX | pro, xd, nts-1 | free |
+| [Saturn](https://reefsynth.gumroad.com/l/saturn?layout=profile) | ReefSynth.com | Deluge saturation FX | pro, xd, nts-1 | paid |
