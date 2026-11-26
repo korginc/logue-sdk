@@ -45,3 +45,4 @@ _Note: The delay effect section can contain effects that perform other functions
 | [Integer](https://www.sinevibes.com/korginteger/) | Sinevibes | Digital-analog buffer delay | pro, xd, nts-1, nts-1 mkII, nts-3, microkorg2 | paid |
 | [TapeFX Collection](https://www.jabunaudio.com/news/introducing-the-tapefx-collection-6-live-tape-slowstop-effects-for-the-korg-nutekt-nts-1-digital-synth-kit-free-download-or-donation) | JabunAudio | 6 LIVE Tape Slow/Stop Effects with various options | nts-1 | Free/donation |
 | [Tribale](https://github.com/fedemone/logue-sdk) | Federico Gennari | chorus-like delay for faking multiple drumming | drum | free |
+| [Bees](https://payhip.com/b/Izlp9) | Daniel Majid | Port of Mutable Instruments Beads | nts-1 mkII | paid |
